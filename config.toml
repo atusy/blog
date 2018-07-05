@@ -1,4 +1,4 @@
-baseurl = "/"
+baseurl = "/blog"
 publishDir = "docs"
 hasCJKLanguage = true
 languageCode = "ja-jp"
