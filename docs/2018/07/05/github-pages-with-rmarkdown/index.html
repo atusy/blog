@@ -6,8 +6,8 @@
 <meta name="generator" content="Hugo 0.42.2" />
 
 
-<title>Lorem Ipsum - A Hugo website</title>
-<meta property="og:title" content="Lorem Ipsum - A Hugo website">
+<title>GitHub pages with Rmarkdown - A Hugo website</title>
+<meta property="og:title" content="GitHub pages with Rmarkdown - A Hugo website">
 
 
 
@@ -57,14 +57,26 @@
     <span class="article-duration">1 min read</span>
     
 
-    <h1 class="article-title">Lorem Ipsum</h1>
+    <h1 class="article-title">GitHub pages with Rmarkdown</h1>
 
     
-    <span class="article-date">2015/01/01</span>
+    <span class="article-date">2018/07/05</span>
     
 
     <div class="article-content">
-      <p><strong>Lorem ipsum</strong> dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore <em>magna aliqua</em>. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+      <p>遅蒔きながら、Rのblogdownパッケージを使ってblogを始めてみた。</p>
+<p><a href="https://qiita.com/masato_t/items/7bbfa74f8de0dc06c91c">“Rとblogdownでかんたんにgithub.io上にブログを使ってみよう！！”</a></p>
+<p>を参考にしたのだが、何点かハマったところがあったのでメモ。</p>
+<ul>
+<li><code>baseurl = &quot;/&quot;</code></li>
+<li>トップページが404の時はもう一度pushしてみる</li>
+<li>記事の規定拡張子はoptionで指定
+<ul>
+<li><code>option(blogdown.ext = '.Rmd')</code></li>
+<li>参考URLにある <code>option(blogdown.Rmd = TRUE)</code> は過去のもの?</li>
+<li>現在は標準で既定値が.Rmdなので気にしなくてよさそう</li>
+</ul></li>
+</ul>
 
     </div>
   </article>
