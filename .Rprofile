@@ -18,7 +18,9 @@ if("RSTUDIO" %in% names(Sys.getenv())) {
     'pipeR',
     'purrr',
     'stringr',
-    'tidyr'
+    'tidyr',
+    'blogdown',
+    'knitr'
   )
   
   if(!all(required %in% installed))
