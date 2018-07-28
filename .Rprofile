@@ -37,7 +37,8 @@ if("RSTUDIO" %in% names(Sys.getenv())) {
       required,
       'mytools',
       NULL
-    )
+    ),
+    blogdown.ext = '.Rmd'
   )
   
   rm(installed, required)

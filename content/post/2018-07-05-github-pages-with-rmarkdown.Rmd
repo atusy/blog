@@ -18,6 +18,6 @@ tags: [blogdown]
 - 記事の規定拡張子はoptionで指定
     - `option(blogdown.ext = '.Rmd')`
     - 参考URLにある `option(blogdown.Rmd = TRUE)` は過去のもの?
-    - 現在は標準で既定値が.Rmdなので気にしなくてよさそう
+
     
     
