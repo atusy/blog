@@ -44,4 +44,3 @@ if("RSTUDIO" %in% names(Sys.getenv())) {
   rm(installed, required)
   
 }
-

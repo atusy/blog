@@ -6,10 +6,19 @@
     <description>Recent content on A Hugo website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Mon, 09 Jul 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 28 Jul 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>blogdownでMathJaxを利用する</title>
+      <link>/2018/07/28/how2mathjax/</link>
+      <pubDate>Sat, 28 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/07/28/how2mathjax/</guid>
+      <description>MathJaxとは？ MathJaxを利用すると、\(\TeX\) 記法を用いて数式を表現できる。 ブロックにするには $$ \latex $$ と入力すると \[ \LaTeX \] とな</description>
+    </item>
     
     <item>
       <title>xetexでunicode文字</title>
@@ -44,7 +53,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/1/01/01/</guid>
-      <description>xelatexでunicode文字 code{white-space: pre;} pre:not([class]) { background-color: white; } if (window.hljs) { hljs.configure({languages: []}); hljs.initHighlightingOnLoad(); if (document.readyState &amp;&amp; document.readyState === &#34;complete&#34;) { window.setTimeout(function() { hljs.initHighlighting(); }, 0); } } h1 { font-size: 34px; } h1.title { font-size: 38px; } h2 { font-size: 30px; } h3 { font-size: 24px; } h4 { font-size: 18px; } h5</description>
+      <description>xetexでunicode文字 code{white-space: pre;} pre:not([class]) { background-color: white; } if (window.hljs) { hljs.configure({languages: []}); hljs.initHighlightingOnLoad(); if (document.readyState &amp;&amp; document.readyState === &#34;complete&#34;) { window.setTimeout(function() { hljs.initHighlighting(); }, 0); } } h1 { font-size: 34px; } h1.title { font-size: 38px; } h2 { font-size: 30px; } h3 { font-size: 24px; } h4 { font-size: 18px; } h5 { font-size:</description>
     </item>
     
   </channel>
