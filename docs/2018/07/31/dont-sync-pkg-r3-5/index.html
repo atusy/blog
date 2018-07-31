@@ -6,8 +6,8 @@
 <meta name="generator" content="Hugo 0.41" />
 
 
-<title>xetexでunicode文字 - A Hugo website</title>
-<meta property="og:title" content="xetexでunicode文字 - A Hugo website">
+<title>R3.5系ではファイル同期ソフトでパッケージを同期しないように - A Hugo website</title>
+<meta property="og:title" content="R3.5系ではファイル同期ソフトでパッケージを同期しないように - A Hugo website">
 
 
 
@@ -16,11 +16,6 @@
 
 
 
-
-
-
-
-<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
 
 
 
@@ -62,45 +57,20 @@
     <span class="article-duration">1 min read</span>
     
 
-    <h1 class="article-title">xetexでunicode文字</h1>
+    <h1 class="article-title">R3.5系ではファイル同期ソフトでパッケージを同期しないように</h1>
 
     
-    <span class="article-date">2018/07/09</span>
+    <span class="article-date">2018/07/31</span>
     
 
     <div class="article-content">
-      <p>$\LaTeX{}$ で μ や α など特殊文字を直打ちすると、
-□になってしまうことがしばしば。</p>
-
-<p>XeTeXを使っている場合は、</p>
-
-<p><code>\setmainfont{IPAMincho}</code></p>
-
-<p>など、ユニコードに対応したフォントを使うように指定する。</p>
-
-<p>Rmarkdownユーザーの場合、下記の様にyamlを記述すればよい。</p>
-
-<pre><code class="language-yaml">---
-output:
-  pdf_document:
-    latex_engine: xelatex
-header-includes:
-- \usepackage{zxjatype}
-- \usepackage[ipa]{zxjafont}
-- \setmainfont{IPAMincho}
----
-</code></pre>
-
-<p>ちなみに、現在使っている <code>header-includes</code> は</p>
-
-<pre><code class="language-yaml">header-includes:
-- \usepackage{bookmark}
-- \usepackage{zxjatype}
-- \usepackage[ipa]{zxjafont}
-- \usepackage[font={scriptsize}]{caption}
-- \renewcommand{\thetable}{\arabic{section}.\arabic{table}}
-- \setmainfont{IPAMincho}
-</code></pre>
+      <p>タイトル通り、R3.5系ではファイル同期ソフトでパッケージを同期しないようにしましょう。</p>
+<p>同期しておくとある環境にインストールしたパッケージを他の環境でもすぐさま利用できて便利だったのですが……。</p>
+<p>これは、R.3.5.0からパッケージをバイトコンパイルしてインストールするようになったことが原因です。</p>
+<p>おかげでパッケージはシステムに最適化され、高速に動きます (3.4系までと比べて)。</p>
+<p>代わりに、複数のPCでインストール済みRパッケージを同期すると、</p>
+<p>`‘pkg’ was installed by an R version with different internals’</p>
+<p>というエラーを発してしまいます X(</p>
 
     </div>
   </article>
@@ -123,18 +93,6 @@ header-includes:
 
     </div>
     
-
-
-
-<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
-
-
-
-<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
-<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
-<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
-
-
 
     <script type="text/x-mathjax-config">
   MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });

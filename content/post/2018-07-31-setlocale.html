@@ -1,0 +1,58 @@
+---
+title: blogdownを使う時はlocaleに注意
+author: ~
+date: '2018-08-01'
+slug: setlocale
+categories: [R]
+tags: [R, blogdown] 
+---
+
+
+
+<div id="blogdown" class="section level1">
+<h1>blogdown記事の公開日について</h1>
+<p>blogdownで作成する記事は、以下のように公開日をyamlで指定します。<br />
+<code>blogdown::new_post()</code> を用いると、記事作成日がそのまま公開日として入力されるため、あまり意識することはないかもしれません。</p>
+<pre class="yaml"><code>---
+date: 2018-08-01
+---</code></pre>
+<p><code>---</code> の間には他にも <code>title</code> や <code>author</code> などのメタデータを入力できます。</p>
+<p>記事の更新の度に公開日を改めたい場合は、</p>
+<pre class="yaml"><code>---
+data: 2018-08-01
+---</code></pre>
+<p>としておいてもいいでしょう。</p>
+<p>また、ここで未来の日付けを入力しておくと、 <code>serve_site()</code> によるローカルプレビューでは記事が見えるものの、 <code>build_site()</code> しても記事はただちに公開されません。<br />
+公開日以降に <code>build_site()</code> すると、公開できるようになります。</p>
+</div>
+<div class="section level1">
+<h1>なぜか今日の投稿が未来へ</h1>
+<p>公開日をうまく活用するとblogライフが捗りますね。<br />
+しかし、誤ると……。</p>
+<p>自分の場合、記事を投稿してもbuildされない悪夢にうなされました。<br />
+しかし後日挑戦すると、過去の記事はbuildされ、新記事はbuildされない。<br />
+なぜだ……と。<br />
+公開日は <code>new_post()</code> による自動設定から変えていないのに……。</p>
+<div id="-" class="section level2">
+<h2>解決 (ロケールを設定)</h2>
+<p>自分の場合、Linux Mintを英語環境で動かしていたので、その辺りにカラクリがあるのではと検討をつけました。</p>
+<p>.Rprofileに</p>
+<pre class="r"><code>Sys.setlocale(locale = &#39;ja_JP.UTF-8&#39;)</code></pre>
+<p>を追記とすることで正常に記事が処理されるように!!</p>
+<p>ちなみに、localeを変えても <code>date()</code> の返り値は変わりません。 blogdownのナゾ挙動に触れてしまいました。</p>
+<div id="locale--date" class="section level3">
+<h3>規定のlocale で <code>date()</code></h3>
+<pre class="r"><code>Sys.setlocale()</code></pre>
+<pre><code>## [1] &quot;LC_CTYPE=en_US.UTF-8;LC_NUMERIC=C;LC_TIME=en_US.UTF-8;LC_COLLATE=en_US.UTF-8;LC_MONETARY=en_US.UTF-8;LC_MESSAGES=en_US.UTF-8;LC_PAPER=en_US.UTF-8;LC_NAME=C;LC_ADDRESS=C;LC_TELEPHONE=C;LC_MEASUREMENT=en_US.UTF-8;LC_IDENTIFICATION=C&quot;</code></pre>
+<pre class="r"><code>date()</code></pre>
+<pre><code>## [1] &quot;Wed Aug  1 00:16:33 2018&quot;</code></pre>
+</div>
+<div id="locale--date" class="section level3">
+<h3>日本のlocale で <code>date()</code></h3>
+<pre class="r"><code>Sys.setlocale(locale = &#39;ja_JP.UTF-8&#39;)</code></pre>
+<pre><code>## [1] &quot;LC_CTYPE=ja_JP.UTF-8;LC_NUMERIC=C;LC_TIME=ja_JP.UTF-8;LC_COLLATE=ja_JP.UTF-8;LC_MONETARY=ja_JP.UTF-8;LC_MESSAGES=en_US.UTF-8;LC_PAPER=en_US.UTF-8;LC_NAME=C;LC_ADDRESS=C;LC_TELEPHONE=C;LC_MEASUREMENT=en_US.UTF-8;LC_IDENTIFICATION=C&quot;</code></pre>
+<pre class="r"><code>date()</code></pre>
+<pre><code>## [1] &quot;Wed Aug  1 00:16:33 2018&quot;</code></pre>
+</div>
+</div>
+</div>

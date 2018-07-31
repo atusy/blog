@@ -6,10 +6,19 @@
     <description>Recent content in Posts on A Hugo website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Sat, 28 Jul 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 31 Jul 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>R3.5系ではファイル同期ソフトでパッケージを同期しないように</title>
+      <link>/2018/07/31/dont-sync-pkg-r3-5/</link>
+      <pubDate>Tue, 31 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/07/31/dont-sync-pkg-r3-5/</guid>
+      <description>タイトル通り、R3.5系ではファイル同期ソフトでパッケージを同期しないようにしましょう。 同期しておくとある環境にインストールしたパッケージを</description>
+    </item>
     
     <item>
       <title>blogdownでMathJaxを利用する</title>
