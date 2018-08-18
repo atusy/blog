@@ -1,0 +1,72 @@
+---
+title: パラメータ付きRmdを試す
+author: ~
+date: '2018-08-17'
+slug: rmd-parameterized
+categories: [R]
+tags: [Rmd]
+params:
+  i: 1
+  d: 1.5
+  c: aaa bbb
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+パラメータ付きRmdが便利そうだと思ったのでメモと実験
+
+# パラメータ付きRmdとは
+
+YAMLヘッダーの `params` で作成される変数のリストを用いたRmd
+
+うまく使えばYAMLヘッダーさえ弄ればOKな半自動レポーティングの助けになると思われる。
+
+詳細は、こちら
+https://bookdown.org/yihui/rmarkdown/params-knit.html
+
+リンク先にはパラメータ入力用GUIを用いる方法も紹介されている。
+
+# 使い方
+
+`変数名:値` という記法で以下のように書け、型の推測もしてくれる。
+
+
+```yaml
+---
+params:
+  i: 1
+  d: 1.5
+  c: aaa bbb
+---
+```
+
+本記事はRmdを用いており、上記と同様の `params` を指定しているので、中身が上手くパースされているか確かめてみよう。
+
+```{r}
+str(params)
+```
+
+GOOD!
+
+# 注意点
+
+Rmdでは、例えば記事作成日の自動入力などを行うためYAMLヘッダー中でRコード (インラインコード)を評価させることが可能だ。
+
+```{r, eval = FALSE}
+---
+date: `r Sys.Date()`
+---
+```
+
+しかし `params` は例外らしくエラーが出る。
+
+```yaml
+params:
+  x: `r Sys.Date()`
+```
+
+> Error in yaml::yaml.load(yaml, handlers = knit_params_handlers(evaluate = evaluate)) : 
+  Scanner error: while scanning for the next token at line 11, column 8 found character that cannot start any token at line 11, column 8
