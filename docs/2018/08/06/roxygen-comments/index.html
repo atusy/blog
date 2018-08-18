@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.42.2" />
+
+
+<title>roxygen-comments - A Hugo website</title>
+<meta property="og:title" content="roxygen-comments - A Hugo website">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="../../../../css/fonts.css" media="all">
+<link rel="stylesheet" href="../../../../css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="../../../../" class="nav-logo">
+    <img src="../../../../images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="../../../../about/">About</a></li>
+    
+    <li><a href="https://github.com/atusy">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/Atsushi776">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">1 min read</span>
+    
+
+    <h1 class="article-title">roxygen-comments</h1>
+
+    
+    <span class="article-date">2018/08/06</span>
+    
+
+    <div class="article-content">
+      <pre><code>#&#39; タイトル．`help(package = mypackage)` で表示される説明文
+#&#39;
+#&#39; 概要．簡潔に．
+#&#39;
+#&#39; 詳細．任意．しばしば長文．
+#&#39;
+#&#39; @param 引数 引数の説明
+#&#39; @return 返り値の説明
+#&#39; @examples
+#&#39; 関数の使い方を実行可能なRコードで記述．
+#&#39; 適宜改行．
+#&#39; R CMD CHECK で確認される．
+#&#39; @aliases 関数名を変更した時に古い関数名を記載
+#&#39; @name
+#&#39; @export
+#&#39; @rdname
+#&#39; @description
+#&#39; @details</code></pre>
+<ul>
+<li><code>@param</code>
+<ul>
+<li>引数の目的，型などについて説明．</li>
+<li>大文字で始めピリオドで終わる．</li>
+<li>複数の引数に同じ説明をつけたい時はカンマで区切る (例: <code>#' @param x,y numeric vectors</code>)． カンマ前後にスペースは使わない．</li>
+</ul></li>
+</ul>
+<p>markdownの文法を使いたい場合は <code>DESCRIPTION</code> に</p>
+<pre><code>Roxygen: list(markdown = TRUE)</code></pre>
+<p>を追記</p>
+<pre class="r"><code>f&lt;-data_frame(id=c(1:4), name=c(&quot;ringo&quot;, &quot;itigo&quot;, &quot;banana&quot;, &quot;kiui&quot;), rank=c(1,2,2,1))
+p&lt;-data_frame(rank=c(1,2,3), price=c(220,440,880))</code></pre>
+<pre class="r"><code>left_join(f, p)</code></pre>
+<pre><code>## Joining, by = &quot;rank&quot;</code></pre>
+<pre><code>## # A tibble: 4 x 4
+##      id name    rank price
+##   &lt;int&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt;
+## 1     1 ringo      1   220
+## 2     2 itigo      2   440
+## 3     3 banana     2   440
+## 4     4 kiui       1   220</code></pre>
+<pre class="r"><code>dplyr::left_join(f, p, by = &#39;rank&#39;)</code></pre>
+<pre><code>## # A tibble: 4 x 4
+##      id name    rank price
+##   &lt;int&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt;
+## 1     1 ringo      1   220
+## 2     2 itigo      2   440
+## 3     3 banana     2   440
+## 4     4 kiui       1   220</code></pre>
+<pre class="r"><code>f$price &lt;- p$price[f$rank]</code></pre>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="../../../../index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="../../../../images/hugo-logo.png" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script async
+src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+  </body>
+</html>
+

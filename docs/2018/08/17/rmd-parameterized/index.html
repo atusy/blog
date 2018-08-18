@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.42.2" />
+
+
+<title>パラメータ付きRmdを試す - A Hugo website</title>
+<meta property="og:title" content="パラメータ付きRmdを試す - A Hugo website">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="../../../../css/fonts.css" media="all">
+<link rel="stylesheet" href="../../../../css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="../../../../" class="nav-logo">
+    <img src="../../../../images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="../../../../about/">About</a></li>
+    
+    <li><a href="https://github.com/atusy">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/Atsushi776">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">1 min read</span>
+    
+
+    <h1 class="article-title">パラメータ付きRmdを試す</h1>
+
+    
+    <span class="article-date">2018/08/17</span>
+    
+
+    <div class="article-content">
+      <p>パラメータ付きRmdが便利そうだと思ったのでメモと実験</p>
+<div id="rmd" class="section level1">
+<h1>パラメータ付きRmdとは</h1>
+<p>YAMLヘッダーの <code>params</code> で作成される変数のリストを用いたRmd</p>
+<p>うまく使えばYAMLヘッダーさえ弄ればOKな半自動レポーティングの助けになると思われる。</p>
+<p>詳細は、こちら <a href="https://bookdown.org/yihui/rmarkdown/params-knit.html" class="uri">https://bookdown.org/yihui/rmarkdown/params-knit.html</a></p>
+<p>リンク先にはパラメータ入力用GUIを用いる方法も紹介されている。</p>
+</div>
+<div class="section level1">
+<h1>使い方</h1>
+<p><code>変数名:値</code> という記法で以下のように書け、型の推測もしてくれる。</p>
+<pre class="yaml"><code>---
+params:
+  i: 1
+  d: 1.5
+  c: aaa bbb
+---</code></pre>
+<p>本記事はRmdを用いており、上記と同様の <code>params</code> を指定しているので、中身が上手くパースされているか確かめてみよう。</p>
+<pre class="r"><code>str(params)</code></pre>
+<pre><code>## List of 3
+##  $ i: int 1
+##  $ d: num 1.5
+##  $ c: chr &quot;aaa bbb&quot;</code></pre>
+<p>GOOD!</p>
+</div>
+<div class="section level1">
+<h1>注意点</h1>
+<p>Rmdでは、例えば記事作成日の自動入力などを行うためYAMLヘッダー中でRコード (インラインコード)を評価させることが可能だ。</p>
+<pre class="r"><code>---
+date: `r Sys.Date()`
+---</code></pre>
+<p>しかし <code>params</code> は例外らしくエラーが出る。</p>
+<pre class="yaml"><code>params:
+  x: 2018-08-18</code></pre>
+<blockquote>
+<p>Error in yaml::yaml.load(yaml, handlers = knit_params_handlers(evaluate = evaluate)) : Scanner error: while scanning for the next token at line 11, column 8 found character that cannot start any token at line 11, column 8</p>
+</blockquote>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="../../../../index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="../../../../images/hugo-logo.png" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script async
+src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+  </body>
+</html>
+
