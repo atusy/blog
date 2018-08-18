@@ -1,0 +1,61 @@
+---
+title: roxygen-comments
+author: ~
+date: '2018-08-06'
+slug: roxygen-comments
+categories: [R]
+tags: [R, roxygen2]
+draft: yes
+---
+
+
+
+<pre><code>#&#39; タイトル．`help(package = mypackage)` で表示される説明文
+#&#39;
+#&#39; 概要．簡潔に．
+#&#39;
+#&#39; 詳細．任意．しばしば長文．
+#&#39;
+#&#39; @param 引数 引数の説明
+#&#39; @return 返り値の説明
+#&#39; @examples
+#&#39; 関数の使い方を実行可能なRコードで記述．
+#&#39; 適宜改行．
+#&#39; R CMD CHECK で確認される．
+#&#39; @aliases 関数名を変更した時に古い関数名を記載
+#&#39; @name
+#&#39; @export
+#&#39; @rdname
+#&#39; @description
+#&#39; @details</code></pre>
+<ul>
+<li><code>@param</code>
+<ul>
+<li>引数の目的，型などについて説明．</li>
+<li>大文字で始めピリオドで終わる．</li>
+<li>複数の引数に同じ説明をつけたい時はカンマで区切る (例: <code>#' @param x,y numeric vectors</code>)． カンマ前後にスペースは使わない．</li>
+</ul></li>
+</ul>
+<p>markdownの文法を使いたい場合は <code>DESCRIPTION</code> に</p>
+<pre><code>Roxygen: list(markdown = TRUE)</code></pre>
+<p>を追記</p>
+<pre class="r"><code>f&lt;-data_frame(id=c(1:4), name=c(&quot;ringo&quot;, &quot;itigo&quot;, &quot;banana&quot;, &quot;kiui&quot;), rank=c(1,2,2,1))
+p&lt;-data_frame(rank=c(1,2,3), price=c(220,440,880))</code></pre>
+<pre class="r"><code>left_join(f, p)</code></pre>
+<pre><code>## Joining, by = &quot;rank&quot;</code></pre>
+<pre><code>## # A tibble: 4 x 4
+##      id name    rank price
+##   &lt;int&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt;
+## 1     1 ringo      1   220
+## 2     2 itigo      2   440
+## 3     3 banana     2   440
+## 4     4 kiui       1   220</code></pre>
+<pre class="r"><code>dplyr::left_join(f, p, by = &#39;rank&#39;)</code></pre>
+<pre><code>## # A tibble: 4 x 4
+##      id name    rank price
+##   &lt;int&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt;
+## 1     1 ringo      1   220
+## 2     2 itigo      2   440
+## 3     3 banana     2   440
+## 4     4 kiui       1   220</code></pre>
+<pre class="r"><code>f$price &lt;- p$price[f$rank]</code></pre>

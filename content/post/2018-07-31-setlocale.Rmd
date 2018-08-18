@@ -1,10 +1,11 @@
 ---
 title: blogdownを使う時はlocaleに注意
 author: ~
-date: '2018-08-01'
+date: '2018-07-31'
 slug: setlocale
 categories: [R]
 tags: [R, blogdown] 
+draft: true
 ---
 
 # blogdown記事の公開日について
@@ -72,5 +73,9 @@ date()
 ```{r}
 Sys.setlocale(locale = 'ja_JP.UTF-8')
 date()
+```
+
+```{r}
+sessionInfo()
 ```
 
