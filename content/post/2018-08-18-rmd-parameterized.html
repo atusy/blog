@@ -45,8 +45,8 @@ params:
 date: `r Sys.Date()`
 ---</code></pre>
 <p>しかし <code>params</code> は例外らしくエラーが出る。</p>
-<pre class="yaml"><code>params:
-  x: 2018-08-18</code></pre>
+<pre class="r"><code>params:
+  x: `r Sys.Date()`</code></pre>
 <blockquote>
 <p>Error in yaml::yaml.load(yaml, handlers = knit_params_handlers(evaluate = evaluate)) : Scanner error: while scanning for the next token at line 11, column 8 found character that cannot start any token at line 11, column 8</p>
 </blockquote>
