@@ -63,7 +63,7 @@ date: `r Sys.Date()`
 
 しかし `params` は例外らしくエラーが出る。
 
-```yaml
+```{r eval = FALSE}
 params:
   x: `r Sys.Date()`
 ```
