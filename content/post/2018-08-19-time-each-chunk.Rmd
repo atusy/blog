@@ -1,0 +1,60 @@
+---
+title: Rmdでchunkの実行時間を毎回計測する
+author: ~
+date: '2018-08-18'
+slug: time-each-chunk
+categories: [R]
+tags: [Rmd, knitr, knit_hooks]
+---
+
+Jupyter Notebookでは、コードブロック冒頭で `%%timeit` と唱えると、ブロックの評価に要した時間を表示できる。  
+https://jakevdp.github.io/PythonDataScienceHandbook/01.07-timing-and-profiling.html
+
+これをRmdでもできないかなー？ と思って `knit_hooks()` を利用してみた。
+`knit_hooks()` の使い方の詳細は[こちら](https://github.com/yihui/knitr-examples/blob/master/045-chunk-hook.md)。
+
+# 実装
+
+hook用の関数の引数として `before` と `envir` を用意しておく。
+
+`before` は論理値でhookをchunk実行前に呼び出しているか (`before == TRUE`)、後に呼び出しているか (`before == FALSE`) を教えてくれる。
+
+`envir` はhookが呼び出された環境を教えてくれる。  
+時間を計測するには、chunk実行前の時刻を保存しておき、実行後の時刻から差し引く。  
+その保存先に、hookが呼び出された環境を指定する。  
+環境ってなんぞって人は、kohskeさんの記事「[Rの）環境問題について その1](https://qiita.com/kohske/items/325bdf48f4f4885a86f1)」やHadleyの[Adv. R](http://adv-r.had.co.nz/)を参照。
+
+- `before == TRUE` なら、 `envir` に適当な変数名で現在の時刻を記録
+- `before == FALSE` なら、 現在時刻から `envir`に記録された時刻を差し引く
+- 差し引いた値を **文字列** として返す (さもなくば表示されないっぽい)
+
+
+```{r}
+library(knitr)
+knit_hooks$set(
+  time = function(before, envir) {
+    if(before) {
+      envir$.elapsed <- proc.time()['elapsed']
+    } else {
+      paste(proc.time()['elapsed'] - envir$.elapsed, 'sec.')
+    }
+  }
+)
+```
+
+
+```{r, time = TRUE}
+head(iris)
+```
+
+できた!
+
+# 発展させたい
+
+hookを利用して、`knit` 時に (!) チャンクの評価に要した時間を計測することに成功した。  
+しかし、この方法では、RStudio上でチャンクを実行した時は経過時間を表示しない。  
+ここでも表示されると嬉しいな。  
+ちなみに、R Notebookでは、.nb.htmlでは経過時間が記録されているので積極的にPreviewするとよい。
+
+
+
