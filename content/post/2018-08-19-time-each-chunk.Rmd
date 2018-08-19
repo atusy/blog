@@ -33,10 +33,11 @@ hook用の関数の引数として `before` と `envir` を用意しておく。
 library(knitr)
 knit_hooks$set(
   time = function(before, envir) {
+    t <- proc.time()['elapsed']
     if(before) {
-      envir$.elapsed <- proc.time()['elapsed']
+      envir$.elapsed <- t
     } else {
-      paste(proc.time()['elapsed'] - envir$.elapsed, 'sec.')
+      paste(t - envir$.elapsed, 'sec.')
     }
   }
 )
