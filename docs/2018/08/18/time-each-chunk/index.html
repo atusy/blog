@@ -88,10 +88,11 @@
 <pre class="r"><code>library(knitr)
 knit_hooks$set(
   time = function(before, envir) {
+    t &lt;- proc.time()[&#39;elapsed&#39;]
     if(before) {
-      envir$.elapsed &lt;- proc.time()[&#39;elapsed&#39;]
+      envir$.elapsed &lt;- t
     } else {
-      paste(proc.time()[&#39;elapsed&#39;] - envir$.elapsed, &#39;sec.&#39;)
+      paste(t - envir$.elapsed, &#39;sec.&#39;)
     }
   }
 )</code></pre>
@@ -106,7 +107,7 @@ knit_hooks$set(
 ## 4          4.6         3.1          1.5         0.2  setosa
 ## 5          5.0         3.6          1.4         0.2  setosa
 ## 6          5.4         3.9          1.7         0.4  setosa</code></pre>
-<p>0.227 sec.</p>
+<p>0.232 sec.</p>
 <p>できた!</p>
 </div>
 <div id="tips" class="section level1">
