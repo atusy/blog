@@ -38,7 +38,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
     MathJaxVersion = "2.7.1"
 
     [params.logo]
-    url = "https://pbs.twimg.com/profile_images/737129240/P7502.jpg"
+    url = "atusy.jpg"
     width = 50
     height = 50
     alt = "Logo"
