@@ -6,10 +6,19 @@
     <description>Recent content in Rmd on A Hugo website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Fri, 17 Aug 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 18 Aug 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/rmd/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Rmdでchunkの実行時間を毎回計測する</title>
+      <link>/2018/08/18/time-each-chunk/</link>
+      <pubDate>Sat, 18 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/08/18/time-each-chunk/</guid>
+      <description>Jupyter Notebookでは、コードブロック冒頭で %%timeit と唱えると、ブロックの評価に要した時間を表示できる。 https://jakevdp.github.io/PythonDataScienceHandbook/01.07-timing-and-profiling.html これをRmdでもできないかなー？ と思って</description>
+    </item>
     
     <item>
       <title>パラメータ付きRmdを試す</title>

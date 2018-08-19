@@ -3,22 +3,17 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/2018/08/18/time-each-chunk/</loc>
+    <lastmod>2018-08-18T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/2018/08/17/rmd-parameterized/</loc>
     <lastmod>2018-08-17T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/2018/08/06/roxygen-comments/</loc>
-    <lastmod>2018-08-06T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/2018/07/31/dont-sync-pkg-r3-5/</loc>
-    <lastmod>2018-07-31T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/2018/07/31/setlocale/</loc>
     <lastmod>2018-07-31T00:00:00+00:00</lastmod>
   </url>
   
@@ -47,13 +42,13 @@
   
   <url>
     <loc>/</loc>
-    <lastmod>2018-08-17T00:00:00+00:00</lastmod>
+    <lastmod>2018-08-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/blogdown/</loc>
-    <lastmod>2018-07-31T00:00:00+00:00</lastmod>
+    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -66,6 +61,18 @@
   <url>
     <loc>/categories/</loc>
     <lastmod>2018-07-28T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/knit_hooks/</loc>
+    <lastmod>2018-08-18T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/knitr/</loc>
+    <lastmod>2018-08-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -95,19 +102,19 @@
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2018-08-17T00:00:00+00:00</lastmod>
+    <lastmod>2018-08-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/r/</loc>
-    <lastmod>2018-08-06T00:00:00+00:00</lastmod>
+    <lastmod>2018-07-31T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/categories/r/</loc>
-    <lastmod>2018-08-17T00:00:00+00:00</lastmod>
+    <lastmod>2018-08-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -119,19 +126,13 @@
   
   <url>
     <loc>/tags/rmd/</loc>
-    <lastmod>2018-08-17T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/roxygen2/</loc>
-    <lastmod>2018-08-06T00:00:00+00:00</lastmod>
+    <lastmod>2018-08-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/</loc>
-    <lastmod>2018-07-31T00:00:00+00:00</lastmod>
+    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

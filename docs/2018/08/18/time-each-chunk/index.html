@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.41" />
+
+
+<title>Rmdでchunkの実行時間を毎回計測する - A Hugo website</title>
+<meta property="og:title" content="Rmdでchunkの実行時間を毎回計測する - A Hugo website">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="../../../../css/fonts.css" media="all">
+<link rel="stylesheet" href="../../../../css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="../../../../" class="nav-logo">
+    <img src="../../../../images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="../../../../about/">About</a></li>
+    
+    <li><a href="https://github.com/atusy">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/Atsushi776">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">2 min read</span>
+    
+
+    <h1 class="article-title">Rmdでchunkの実行時間を毎回計測する</h1>
+
+    
+    <span class="article-date">2018/08/18</span>
+    
+
+    <div class="article-content">
+      <p>Jupyter Notebookでは、コードブロック冒頭で <code>%%timeit</code> と唱えると、ブロックの評価に要した時間を表示できる。<br />
+<a href="https://jakevdp.github.io/PythonDataScienceHandbook/01.07-timing-and-profiling.html" class="uri">https://jakevdp.github.io/PythonDataScienceHandbook/01.07-timing-and-profiling.html</a></p>
+<p>これをRmdでもできないかなー？ と思って <code>knit_hooks()</code> を利用してみた。 <code>knit_hooks()</code> の使い方の詳細は<a href="https://github.com/yihui/knitr-examples/blob/master/045-chunk-hook.md">こちら</a>。</p>
+<div class="section level1">
+<h1>実装</h1>
+<p>hook用の関数の引数として <code>before</code> と <code>envir</code> を用意しておく。</p>
+<p><code>before</code> は論理値でhookをchunk実行前に呼び出しているか (<code>before == TRUE</code>)、後に呼び出しているか (<code>before == FALSE</code>) を教えてくれる。</p>
+<p><code>envir</code> はhookが呼び出された環境を教えてくれる。<br />
+時間を計測するには、chunk実行前の時刻を保存しておき、実行後の時刻から差し引く。<br />
+その保存先に、hookが呼び出された環境を指定する。<br />
+環境ってなんぞって人は、kohskeさんの記事「<a href="https://qiita.com/kohske/items/325bdf48f4f4885a86f1">Rの）環境問題について その1</a>」やHadleyの<a href="http://adv-r.had.co.nz/">Adv. R</a>を参照。</p>
+<ul>
+<li><code>before == TRUE</code> なら、 <code>envir</code> に適当な変数名で現在の時刻を記録</li>
+<li><code>before == FALSE</code> なら、 現在時刻から <code>envir</code>に記録された時刻を差し引く</li>
+<li>差し引いた値を <strong>文字列</strong> として返す (さもなくば表示されないっぽい)</li>
+</ul>
+<pre class="r"><code>library(knitr)
+knit_hooks$set(
+  time = function(before, envir) {
+    if(before) {
+      envir$.elapsed &lt;- proc.time()[&#39;elapsed&#39;]
+    } else {
+      paste(proc.time()[&#39;elapsed&#39;] - envir$.elapsed, &#39;sec.&#39;)
+    }
+  }
+)</code></pre>
+</div>
+<div class="section level1">
+<h1>テスト</h1>
+<pre class="r"><code>head(iris)</code></pre>
+<pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1          5.1         3.5          1.4         0.2  setosa
+## 2          4.9         3.0          1.4         0.2  setosa
+## 3          4.7         3.2          1.3         0.2  setosa
+## 4          4.6         3.1          1.5         0.2  setosa
+## 5          5.0         3.6          1.4         0.2  setosa
+## 6          5.4         3.9          1.7         0.4  setosa</code></pre>
+<p>0.227 sec.</p>
+<p>できた!</p>
+</div>
+<div class="section level1">
+<h1>発展させたい</h1>
+<p>hookを利用して、<code>knit</code> 時に (!) チャンクの評価に要した時間を計測することに成功した。<br />
+しかし、この方法では、RStudio上でチャンクを実行した時は経過時間を表示しない。<br />
+ここでも表示されると嬉しいな。<br />
+ちなみに、R Notebookでは、.nb.htmlでは経過時間が記録されているので積極的にPreviewするとよい。</p>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="../../../../index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="../../../../images/hugo-logo.png" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script async
+src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+  </body>
+</html>
+
