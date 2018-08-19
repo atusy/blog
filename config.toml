@@ -13,8 +13,11 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
     post = "/:year/:month/:day/:slug/"
 
 [[menu.main]]
-    name = "About"
-    url = "/about/"
+    name = "Category"
+    url = "/categories/"
+[[menu.main]]
+    name = "Tags"
+    url = "/tags/"
 [[menu.main]]
     name = "GitHub"
     url = "https://github.com/atusy"
@@ -35,7 +38,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
     MathJaxVersion = "2.7.1"
 
     [params.logo]
-    url = "logo.png"
+    url = "https://pbs.twimg.com/profile_images/737129240/P7502.jpg"
     width = 50
     height = 50
     alt = "Logo"
