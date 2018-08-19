@@ -106,13 +106,18 @@ knit_hooks$set(
 ## 4          4.6         3.1          1.5         0.2  setosa
 ## 5          5.0         3.6          1.4         0.2  setosa
 ## 6          5.4         3.9          1.7         0.4  setosa</code></pre>
-<p>0.375 sec.</p>
+<p>0.227 sec.</p>
 <p>できた!</p>
+</div>
+<div id="tips" class="section level1">
+<h1>Tips</h1>
+<p>時間を測りたくない場合はchunk optionで <code>time = FALSE</code>。</p>
+<p>特定のchunkのみを測りたい場合は setup chunkで <code>knitr::opts_chunk$set(time = TRUE)</code> とし、特定のchunkでのみchunk optionに <code>time = TRUE</code> を指定する。</p>
 </div>
 <div class="section level1">
 <h1>発展させたい</h1>
-<p>hookを利用して、<code>knit</code> 時に (!) チャンクの評価に要した時間を計測することに成功した。<br />
-しかし、この方法では、RStudio上でチャンクを実行した時は経過時間を表示しない。<br />
+<p>hookを利用して、<code>knit</code> 時に (!) チャンクの評価に要した時間を表示させることに成功した。<br />
+しかしこの方法では、RStudioのエディタには経過時間を表示できない。<br />
 ここでも表示されると嬉しいな。<br />
 ちなみに、R Notebookでは、.nb.htmlでは経過時間が記録されているので積極的にPreviewするとよい。</p>
 </div>
