@@ -1,5 +1,5 @@
 ---
-title: Rmdでchunkの実行時間を毎回計測する
+title: Rmdでchunkごとの実行時間を計測
 author: ~
 date: '2018-08-18'
 slug: time-each-chunk
