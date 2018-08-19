@@ -6,10 +6,19 @@
     <description>Recent content in Blogdown on A Hugo website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Sat, 28 Jul 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 31 Jul 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/blogdown/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>blogdownを使う時はlocaleに注意</title>
+      <link>/2018/07/31/setlocale/</link>
+      <pubDate>Tue, 31 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/07/31/setlocale/</guid>
+      <description>blogdown記事の公開日について blogdownで作成する記事は、以下のように公開日をyamlで指定します。 blogdown::new_post() を用いると、記事作成日がそ</description>
+    </item>
     
     <item>
       <title>blogdownでMathJaxを利用する</title>
