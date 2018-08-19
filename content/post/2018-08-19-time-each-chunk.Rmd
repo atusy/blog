@@ -50,10 +50,16 @@ head(iris)
 
 できた!
 
+# Tips
+
+時間を測りたくない場合はchunk optionで `time = FALSE`。
+
+特定のchunkのみを測りたい場合は setup chunkで `knitr::opts_chunk$set(time = TRUE)` とし、特定のchunkでのみchunk optionに `time = TRUE` を指定する。
+
 # 発展させたい
 
-hookを利用して、`knit` 時に (!) チャンクの評価に要した時間を計測することに成功した。  
-しかし、この方法では、RStudio上でチャンクを実行した時は経過時間を表示しない。  
+hookを利用して、`knit` 時に (!) チャンクの評価に要した時間を表示させることに成功した。  
+しかしこの方法では、RStudioのエディタには経過時間を表示できない。  
 ここでも表示されると嬉しいな。  
 ちなみに、R Notebookでは、.nb.htmlでは経過時間が記録されているので積極的にPreviewするとよい。
 
