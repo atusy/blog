@@ -1,0 +1,77 @@
+---
+title: 欠損値の発生過程の類別
+author: ~
+date: '2018-08-25'
+slug: missing-value-type
+categories: [stats]
+tags: [stats, missing value, R, ggplot2]
+---
+
+
+
+<p>先日、欠損値の発生過程の例を図示してTweetしたところ、思ったより反響がよかったので、図をブラシュアップの上、記事に残すことにした。</p>
+<p>俄仕込みなので、間違いがあったらTwitterで指摘して下さい。</p>
+<blockquote class="twitter-tweet" data-lang="en">
+<p lang="ja" dir="ltr">
+欠損値の発生過程を理解したと思われる。xが欠損値を含みうる時、<br>完全: 欠損なし<br>MCAR (Missing Completely At Random): xの欠損は完全にランダム<br>MAR (Missing At Random): xの欠損はx以外の値(yの値)に依存<br>MNAR (Missing Not At Random): xの欠損はxの値に依存<br>MNARはxの分布を歪めるため厄介。 <a href="https://t.co/8VF7ogJLTE">pic.twitter.com/8VF7ogJLTE</a>
+</p>
+— Atsushi (Atusy) (<span class="citation">@Atsushi776</span>) <a href="https://twitter.com/Atsushi776/status/1033000742863261696?ref_src=twsrc%5Etfw">August 24, 2018</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>欠損値の発生過程は大きく3種あるとされる。</p>
+<ul>
+<li><strong>MCAR</strong>; <strong>M</strong>issing <strong>C</strong>ompletely <strong>A</strong>t <strong>R</strong>andom
+<ul>
+<li>ある変数の欠損は、完全にランダム</li>
+</ul></li>
+<li><strong>MAR</strong>; <strong>M</strong>issing <strong>A</strong>t <strong>R</strong>andom
+<ul>
+<li>ある変数の欠損は、他の変数の測定値に依存してランダム</li>
+</ul></li>
+<li><strong>MNAR</strong>; <strong>M</strong>issing <strong>N</strong>ot <strong>A</strong>t <strong>r</strong>andom
+<ul>
+<li>ある変数の欠損は、ランダムではなく、自身の真値に依存</li>
+</ul></li>
+</ul>
+<p>理解においてはMCAR, MAR, MNARの字面をあまり追い過ぎないのがキモだと思う。 「ある変数」を「データ」と記載する例も見かけるが、前者の方が個人的には分かりよい。 また、ランダムという言葉に惑わされがちだが、ここでのランダムはモデルとしてランダムか、ではなく、観測者にとってランダムに見えるか、くらいの気持ちでいた方がいい。</p>
+<p>それでは欠損したデータを人工的に作って図にしてみよう。</p>
+<p><img src="/post/2018-08-24-missing-value-type_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p>xとyが平均0、分散1の正規分布に従う変数で、xの一部が欠損しうるとする。</p>
+<p>そのとき、x-yの散布図に</p>
+<ul>
+<li>xが観測できた場合を赤点</li>
+<li>xが欠損した点を灰点</li>
+</ul>
+<p>としてプロットした。</p>
+<p>4つの図はそれぞれ</p>
+<ul>
+<li>欠損なし: xの欠損がない場合
+<ul>
+<li>1000点全てを観測</li>
+</ul></li>
+<li>MCAR: xの欠損が完全にランダムな場合
+<ul>
+<li>1000点中300点を一様に欠損</li>
+</ul></li>
+<li>MAR: xの欠損がyの値に依存する場合
+<ul>
+<li>y &gt; 0 ならば欠損しうる<br />
+(正しくは1000点のy中、yの値が上位500位以内の中から300点を一様に欠損)</li>
+</ul></li>
+<li>MNAR: xの欠損がxの値に依存する場合
+<ul>
+<li>x &gt; 0 ならば欠損しうる (正しくは1000点のx中、xの値が上位500位以内の中から300点を一様に欠損)</li>
+</ul></li>
+</ul>
+<p>散布図の上部に描かれた線は</p>
+<ul>
+<li>赤線: 観測されたxのカーネル密度分布</li>
+<li>黒破線: xを全て観測できた時のxのカーネル密度分布</li>
+</ul>
+<p>尚、1000点用意したデータのうち、欠損した点の数はMCAR, MAR, MNARいずれの場合も300点ずつである。</p>
+<p>面白いのはMCARの場合でもMARの場合でもxの分布にはほとんど影響なく、yを見ない限り両者は識別不能であることだ。 一方でMNARではxの分布が大きく歪むので、解析結果にバイアスが発生しやすいことに注意する必要がある。</p>
+<p>ところで、MNARなxの欠損は x &gt; 0 の時のみ起きると条件付けているものの、 x &gt; 0 なデータの中からはランダムに選ばれている。 Not At Randomというのは見かけ上の問題に過ぎない。 勿論、x &gt; 0 を全損させれば、Not At Randomにもできる (ランダムに全損したと解釈することもできるが!)。</p>
+<p>同様にMARな欠損を今回はランダムに選んだが、例えばy &gt; 0な点を全損させてはどうだろうか。</p>
+<p><img src="/post/2018-08-24-missing-value-type_files/figure-html/unnamed-chunk-2-1.png" width="240" /></p>
+<p>乱数を用いていないという意味ではランダムではないが、MARには違いない。 yを見ず、xにだけ注目すれば「あたかも」xはランダムに欠損している。</p>
+<p>当記事で作成した図のソースコードは<a href="https://github.com/atusy/blog/tree/master/content/post/2018-08-24/missing-value-type.Rmd">こちら</a>。</p>

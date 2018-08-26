@@ -6,10 +6,28 @@
     <description>Recent content in Posts on A Hugo website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Sat, 18 Aug 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 25 Aug 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>欠損値の発生過程の類別</title>
+      <link>/2018/08/25/missing-value-type/</link>
+      <pubDate>Sat, 25 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/08/25/missing-value-type/</guid>
+      <description>先日、欠損値の発生過程の例を図示してTweetしたところ、思ったより反響がよかったので、図をブラシュアップの上、記事に残すことにした。 俄仕込</description>
+    </item>
+    
+    <item>
+      <title>Docker情報まとめ</title>
+      <link>/2018/08/20/docker-memo/</link>
+      <pubDate>Mon, 20 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/08/20/docker-memo/</guid>
+      <description>ユーザーをdockerグループにいれると、スーパーユーザーにならずとも docker compose できる。 https://qiita.com/DQNEO/items/da5df074c48b012152ee</description>
+    </item>
     
     <item>
       <title>Rmdでchunkごとの実行時間を計測</title>
@@ -30,12 +48,30 @@
     </item>
     
     <item>
+      <title>roxygen-comments</title>
+      <link>/2018/08/06/roxygen-comments/</link>
+      <pubDate>Mon, 06 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/08/06/roxygen-comments/</guid>
+      <description>#&amp;#39; タイトル．`help(package = mypackage)` で表示される説明文 #&amp;#39; #&amp;#39; 概要．簡潔に． #&amp;#39; #&amp;#39; 詳細．任意．しばしば長文． #&amp;#39; #&amp;#39; @param 引数 引数の説明 #&amp;#39; @return 返り値の</description>
+    </item>
+    
+    <item>
       <title>R3.5系ではファイル同期ソフトでパッケージを同期しないように</title>
       <link>/2018/07/31/dont-sync-pkg-r3-5/</link>
       <pubDate>Tue, 31 Jul 2018 00:00:00 +0000</pubDate>
       
       <guid>/2018/07/31/dont-sync-pkg-r3-5/</guid>
       <description>タイトル通り、R3.5系ではファイル同期ソフトでパッケージを同期しないようにしましょう。 同期しておくとある環境にインストールしたパッケージを</description>
+    </item>
+    
+    <item>
+      <title>blogdownを使う時はlocaleに注意</title>
+      <link>/2018/07/31/setlocale/</link>
+      <pubDate>Tue, 31 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/07/31/setlocale/</guid>
+      <description>blogdown記事の公開日について blogdownで作成する記事は、以下のように公開日をyamlで指定します。 blogdown::new_post() を用いると、記事作成日がそ</description>
     </item>
     
     <item>
