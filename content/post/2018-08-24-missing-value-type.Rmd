@@ -1,0 +1,173 @@
+---
+title: 欠損値の発生過程の類別
+author: ~
+date: '2018-08-24'
+slug: missing-value-type
+categories: [stats]
+tags: [stats, missing value, R, ggplot2]
+draft: yes
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+先日、欠損値の発生過程の例を図示してTweetしたところ、思ったより反響がよかったので、図をブラシュアップの上、記事に残すことにした。
+
+俄仕込みなので、間違いがあったらTwitterで指摘して下さい。
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="ja" dir="ltr">欠損値の発生過程を理解したと思われる。xが欠損値を含みうる時、<br>完全: 欠損なし<br>MCAR (Missing Completely At Random): xの欠損は完全にランダム<br>MAR (Missing At Random): xの欠損はx以外の値(yの値)に依存<br>MNAR (Missing Not At Random): xの欠損はxの値に依存<br>MNARはxの分布を歪めるため厄介。 <a href="https://t.co/8VF7ogJLTE">pic.twitter.com/8VF7ogJLTE</a></p>&mdash; Atsushi (Atusy) (@Atsushi776) <a href="https://twitter.com/Atsushi776/status/1033000742863261696?ref_src=twsrc%5Etfw">August 24, 2018</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+欠損値の発生過程は大きく3種あるとされる。
+
+- **MCAR**; **M**issing **C**ompletely **A**t **R**andom
+    - ある変数の欠損は、完全にランダム
+- **MAR**; **M**issing **A**t **R**andom
+    - ある変数の欠損は、他の変数の測定値に依存してランダム
+- **MNAR**; **M**issing **N**ot **A**t **r**andom
+    - ある変数の欠損は、ランダムではなく、自身の真値に依存
+
+理解においてはMCAR, MAR, MNARの字面をあまり追い過ぎないのがキモだと思う。
+「ある変数」を「データ」と記載する例も見かけるが、前者の方が個人的には分かりよい。
+また、ランダムという言葉に惑わされがちだが、ここでのランダムはモデルとしてランダムか、ではなく、観測者にとってランダムに見えるか、くらいの気持ちでいた方がいい。
+
+それでは欠損したデータを人工的に作って図にしてみよう。
+
+```{r, fig.width = 7, fig.height = 2.8, echo = FALSE}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+n <- 1e3 # number of points
+
+set.seed(1) # set seed
+
+d <- data.frame( # original complete data
+  x = rnorm(n),
+  y = rnorm(n)
+) %>%
+  arrange(y) %>% # mutate boolean columns all, mcar, mar, mnar indicating which row is missing in each cases
+  mutate(
+    欠損なし = TRUE, # no x are missing
+    MCAR = sample(rep(c(FALSE, TRUE), times = c(n * .3, n * .7))), # missing values in x occur completely at random
+    MAR = c(rep(TRUE, n * .5), sample(rep(c(FALSE, TRUE), times = c(n * .3, n * .2)))) # missing values in x occur random where y > 0
+  ) %>%
+  arrange(x) %>%
+  mutate(
+    MNAR = c(rep(TRUE, n * .5), sample(rep(c(FALSE, TRUE), times = c(n * .3, n * .2)))), # missing values in x occur at random where x > 0
+    original = FALSE # lets say they are not original data
+  ) %>%
+  bind_rows( # add 
+    mutate(., original = TRUE) # rbind data who are said to be original
+  ) %>%
+  gather(type, observed, -x, -y, -original) %>% # be tidy for ggplot
+  filter(original | observed) %>% # filter values which should be missing from non-original data
+  mutate(type = forcats::fct_relevel(type, c('欠損なし', 'MCAR', 'MAR', 'MNAR'))) # relevel type for ggplot
+
+d_marginal <- d %>% # marginal distribution of x
+  group_by(type, original) %>%
+  summarize(density = list(density(x))) %>%
+  ungroup %>%
+  mutate(
+    density = density %>%
+      map(`[`, c('x', 'y')) %>%
+      map(as.data.frame)
+  ) %>%
+  unnest %>%
+  mutate(y = y / max(y) + 4.1)
+
+d %>%
+  filter((!original & observed) | (original & !observed)) %>% # filter needless values
+  ggplot(aes(x, y)) +
+  annotate('rect', xmin = -Inf, xmax = Inf, ymin = 4, ymax = Inf, fill = 'white') +
+  geom_point(aes(fill = observed), shape = 21, size = .8, color = "#00000000") +
+  geom_path(aes(color = original, lty = original), data = d_marginal) +
+  facet_grid(. ~ type) +
+  scale_color_manual(values = c("TRUE" = 'black', "FALSE" = '#AA0000')) +
+  scale_fill_manual(values = c("TRUE" = '#AA0000', "FALSE" = 'gray60')) +
+  scale_x_continuous(breaks = seq(-4, 4, 2)) +
+  scale_y_continuous(breaks = seq(-4, 4, 2)) +
+  theme(legend.position = 'none') +
+  coord_fixed() +
+  NULL
+  
+
+```
+
+
+
+xとyが平均0、分散1の正規分布に従う変数で、xの一部が欠損しうるとする。
+
+そのとき、x-yの散布図に
+
+- xが観測できた場合を赤点
+- xが欠損した点を灰点
+
+としてプロットした。
+
+4つの図はそれぞれ
+
+- 欠損なし: xの欠損がない場合
+- MCAR: xの欠損が完全にランダムな場合
+- MAR: xの欠損がyの値に依存する場合
+    - y > 0 ならば欠損しうる  
+      (正しくは1000点のy中、yの値が上位500位以内の場合)
+- MNAR: xの欠損がxの値に依存する場合
+    - x > 0 ならば欠損しうる
+      (正しくは1000点のx中、xの値が上位500位以内の場合)
+
+散布図の上部に描かれた線は
+
+- 赤線: 観測されたxのカーネル密度分布
+- 黒破線: xを全て観測できた時のxのカーネル密度分布
+
+尚、1000点用意したデータのうち、欠損した点の数はMCAR, MAR, MNARいずれの場合も300点ずつである。
+
+面白いのはMCARの場合でもMARの場合でもxの分布にはほとんど影響なく、yを見ない限り両者は識別不能であることだ。
+一方でMNARではxの分布が大きく歪むので、解析結果にバイアスが発生しやすいことに注意する必要がある。
+
+ところで、MNARなxの欠損は x > 0 の時のみ起きると条件付けているものの、 x > 0 なデータの中からはランダムに選ばれている。
+Not At Randomというのは見かけ上の問題に過ぎない。
+勿論、x > 0 を全損させれば、Not At Randomにもできる (ランダムに全損したと解釈することもできるが!)。
+
+同様にMARな欠損を今回はランダムに選んだが、例えばy > 0な点を全損させてはどうだろうか。
+
+
+```{r, fig.width = 2.5, fig.height = 2.8}
+d_mar <- d %>%
+  filter(type == 'MAR') %>%
+  mutate(observed = y < 0)
+d_mar_marginal <- d_mar %>%
+  group_by(type, original) %>%
+  summarize(density = list(density(x))) %>%
+  ungroup %>%
+  mutate(
+    density = density %>%
+      map(`[`, c('x', 'y')) %>%
+      map(as.data.frame)
+  ) %>%
+  unnest %>%
+  mutate(y = y / max(y) + 4.1)
+d_mar %>%
+  filter((!original & observed) | (original & !observed)) %>% # filter needless values
+  ggplot(aes(x, y)) +
+  annotate('rect', xmin = -Inf, xmax = Inf, ymin = 4, ymax = Inf, fill = 'white') +
+  geom_point(aes(fill = observed), shape = 21, size = .8, color = "#00000000") +
+  geom_path(aes(color = original, lty = original), data = d_mar_marginal) +
+  facet_grid(. ~ type) +
+  scale_color_manual(values = c("TRUE" = 'black', "FALSE" = '#AA0000')) +
+  scale_fill_manual(values = c("TRUE" = '#AA0000', "FALSE" = 'gray60')) +
+  scale_x_continuous(breaks = seq(-4, 4, 2)) +
+  scale_y_continuous(breaks = seq(-4, 4, 2)) +
+  theme(legend.position = 'none') +
+  coord_fixed() +
+  NULL
+```
+
+乱数を用いていないという意味ではランダムではないが、MARには違いない。
+yを見ず、xにだけ注目すれば「あたかも」xはランダムに欠損している。
+
+
+当記事で作成した図のソースコードは[こちら](https://github.com/atusy/blog/tree/master/content/post/2018-08-24/missing-value-type.Rmd)。
