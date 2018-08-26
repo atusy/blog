@@ -1,11 +1,10 @@
 ---
 title: 欠損値の発生過程の類別
 author: ~
-date: '2018-08-24'
+date: '2018-08-25'
 slug: missing-value-type
 categories: [stats]
 tags: [stats, missing value, R, ggplot2]
-draft: yes
 ---
 
 ```{r setup, include = FALSE}
