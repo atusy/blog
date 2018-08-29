@@ -1,0 +1,63 @@
+---
+title: roxygen2タグまとめ
+author: ~
+date: '2018-08-28'
+slug: roxygen2matome
+categories: [R]
+tags: [package, Roxygen2, Rd]
+---
+
+```{r include = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+Roxygen2のタグについての情報が複数箇所に分散していて調べるのが大変なのでまとめた。
+
+超訳 + 超要約 しているので、おかしなところがあれば [Issues](https://github.com/atusy/blog/issues) や [Twitter](https://github.com/atusy/blog/issues) で指摘して頂くか、 [PR](https://github.com/atusy/blog/pulls) して欲しい。
+
+Roxygen2を用いると、パッケージ内で定義した関数やデータセット、クラスなどについてのドキュメントや、他パッケージとの依存関係をソースコード内に連続して記述できる。
+
+古くは開発者が適宜作成していたRdファイルがソースコード内のRoxygen2コメントに基いて動的に生成されるため、ユーザーが扱うファイルを限定でき、更に実装とドキュメント化を並行できると良いことづくめだ。
+
+気付きがあれば随時更新していきたい。
+
+# まとめ
+
+- `Roxygen2タグ` はRStudioの入力補完機能で出現したもの (`r paste0('Roxygen2 v', packageVersion('roxygen2'))`)
+- `Rdコマンド` は `Roxygen2タグ` に対応するものがあれば記載
+- `主な使い方` は 超訳 + 超要約 が凄いので、メモ程度に思ってもらって `Roxygen2タグ` や `Rdコマンド` のリンク先を参考して欲しい。
+
+```{r}
+x <- fread('../../tbl/roxygen2_rd.csv')
+x %>%
+  mutate_at(c('roxygen2', 'rd'), str_replace, pattern = '^', replacement = '`') %>%
+  mutate_at(c('roxygen2', 'rd'), str_replace, pattern = '$', replacement = '`') %>%
+  mutate_at(c('roxygen2', 'rd'), str_replace, pattern = '``', replacement = ' ') %>%
+  transmute(
+    `Roxygen2タグ` = ifelse(url_roxygen2 == '', roxygen2, paste0('[', roxygen2, '](', url_roxygen2, ')')),
+    `Rdコマンド` = ifelse(url_rd == '', rd, paste0('[', rd, '](', url_rd , ')')),
+    `主な使い方` = description
+  ) %>%
+  kable(format = 'markdown')
+```
+
+
+# Tips
+
+- [Rdコマンドは上述のもの以外にもいっぱいあり、Markupに用いるものもあるので是非確認してみて欲しい](https://cran.r-project.org/doc/manuals/R-exts.html)
+- [関数などのimportやドキュメントの参照は他のパッケージも相手にできる](https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html)
+
+# References
+
+```{r}
+x %>% 
+  select(starts_with('url')) %>%
+  unlist(use.names = FALSE) %>%
+  str_replace('#.*', '') %>%
+  unique %>%
+  sort %>%
+  setdiff('') %>%
+  as.matrix %>%
+  kable(col.names = '')
+```
+
