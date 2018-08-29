@@ -77,7 +77,7 @@
     <item>
       <title>Package</title>
       <link>/tags/package/</link>
-      <pubDate>Tue, 31 Jul 2018 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 28 Aug 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/package/</guid>
       <description></description>
@@ -89,6 +89,15 @@
       <pubDate>Sat, 25 Aug 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/r/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Rd</title>
+      <link>/tags/rd/</link>
+      <pubDate>Tue, 28 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/rd/</guid>
       <description></description>
     </item>
     
@@ -107,6 +116,15 @@
       <pubDate>Sat, 18 Aug 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/rmd/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Roxygen2</title>
+      <link>/tags/roxygen2/</link>
+      <pubDate>Tue, 28 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/roxygen2/</guid>
       <description></description>
     </item>
     
