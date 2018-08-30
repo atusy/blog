@@ -3,8 +3,8 @@ roxygen2,rd,description,url_roxygen2,url_rd
 @author,\author,"著者を `名前, \email{hoge@example.com, \url{example.com}}` の形で記述。emailやurlは省略可。",http://kbroman.org/pkg_primer/pages/docs.html,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cauthor
 @concepts,\concept,`help.search()` 用のキーワード,,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cconcept
 @describeIn,,オブジェクトのために新たにRdファイルを作らず、指定したドキュメントを参照する。追加した記述があれば該当ファイルに追記される。,http://r-pkgs.had.co.nz/man.html#multiple-man,
-@description,\description,概要。暗示的には2段落目が `@description` として扱われる。,http://r-pkgs.had.co.nz/man.html#fn1,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cdescription
-@details,\details,詳細。暗示的には3段落目が `@details` として扱われる。,,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cdetails
+@description,\description,概要。タグを用いず、2段落目を `@description` として扱うことも可能 ([後述](#title-description-details))。,http://r-pkgs.had.co.nz/man.html#fn1,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cdescription
+@details,\details,概要。タグを用いず、3段落目を `@details` として扱うことも可能 ([後述](#title-description-details))。,,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cdetails
 @docType,\doctype,`package` `data` `methods` `class` についてのドキュメントを作る時に該当するものを指定。 packageの場合、 `@name` にドキュメント名を指定する。,https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html,https://cran.r-project.org/doc/manuals/R-exts.html#Documenting-data-sets
 @evalRd,,Roxygen2 6.1.0の新機能。パッケージで定義した関数の実行結果を挿入する,https://github.com/klutometis/roxygen/blob/master/NEWS.md#new-features,
 @example,,用例を記した外部ファイルを指定する,http://r-pkgs.had.co.nz/man.html#man-functions,
@@ -43,6 +43,6 @@ roxygen2,rd,description,url_roxygen2,url_rd
 @source,\source,S4メソッド作成時に、原典を記載。2番目以降は `@reference` へ。,https://cran.r-project.org/doc/manuals/R-exts.html#Rd-format,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005csource
 @template,,`man-roxygen` ディレクトリ中に存在するRoxygenコメントのみからなるRファイルの中身を挿入する。,https://github.com/yihui/roxygen2/blob/master/vignettes/rd.Rmd,
 @templateVar,,テンプレートファイル中で用い、 `@templateVar name value` の形で変数を定義。テンプレート利用時には `<%= name %>` として該当する変数を読み込める。,https://github.com/yihui/roxygen2/blob/master/vignettes/rd.Rmd,
-@title,\title,オブジェクトのタイトルを記載。オブジェクトのヘルプの冒頭と、パッケージのヘルプを一覧した時に、オブジェクト名の隣に表示される文字列。暗示的には1段落目がtitleとして扱われる。,http://r-pkgs.had.co.nz/man.html#fn1,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005ctitle
+@title,\title,オブジェクトのタイトルを記載。オブジェクトのヘルプの冒頭と、パッケージのヘルプを一覧した時に、オブジェクト名の隣に表示される文字列。タグを用いず、1段落目を `@title` として扱うことも可能 ([後述](#title-description-details))。,http://r-pkgs.had.co.nz/man.html#fn1,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005ctitle
 @usage,\usage,基本的に不要。オブジェクトの使い方を記述。 `@param` など必要事項を記載していると `@usage` がなくても `\usage` が動的に生成される。,,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cusage
 @useDynLib,,他のパッケージからコンパイル済みのコードを利用する。,https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html,

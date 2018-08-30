@@ -88,7 +88,7 @@ Rdコマンド
 <a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cdescription"><code>\description</code></a>
 </td>
 <td style="text-align:left;">
-概要。暗示的には2段落目が <code>@description</code> として扱われる。
+概要。タグを用いず、2段落目を <code>@description</code> として扱うことも可能 (<a href="#title-description-details">後述</a>)。
 </td>
 </tr>
 <tr>
@@ -99,7 +99,7 @@ Rdコマンド
 <a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cdetails"><code>\details</code></a>
 </td>
 <td style="text-align:left;">
-詳細。暗示的には3段落目が <code>@details</code> として扱われる。
+概要。タグを用いず、3段落目を <code>@details</code> として扱うことも可能 (<a href="#title-description-details">後述</a>)。
 </td>
 </tr>
 <tr>
@@ -503,7 +503,7 @@ S4メソッド作成時に、原典を記載。2番目以降は <code>@reference
 <a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005ctitle"><code>\title</code></a>
 </td>
 <td style="text-align:left;">
-オブジェクトのタイトルを記載。オブジェクトのヘルプの冒頭と、パッケージのヘルプを一覧した時に、オブジェクト名の隣に表示される文字列。暗示的には1段落目がtitleとして扱われる。
+オブジェクトのタイトルを記載。オブジェクトのヘルプの冒頭と、パッケージのヘルプを一覧した時に、オブジェクト名の隣に表示される文字列。タグを用いず、1段落目を <code>@title</code> として扱うことも可能 (<a href="#title-description-details">後述</a>)。
 </td>
 </tr>
 <tr>
@@ -529,6 +529,19 @@ S4メソッド作成時に、原典を記載。2番目以降は <code>@reference
 </tr>
 </tbody>
 </table>
+<div id="title-description-details" class="section level2">
+<h2><code>@title</code> <code>@description</code> <code>@details</code> について</h2>
+<p>これらの基本的な使い方は</p>
+<pre class="r"><code>#&#39; @title タイトル
+#&#39; @description 概要
+#&#39; @details 詳細</code></pre>
+<p>といった具合だが、以下のようにタグを用いずに記述する手法もある。</p>
+<pre class="r"><code>#&#39; タイトルは一段落目に。
+#&#39;
+#&#39; 概要は二段落目に。タイトルから一行あける。
+#&#39;
+#&#39; 詳細は三段落目に。概要から一行あける。</code></pre>
+</div>
 </div>
 <div id="tips" class="section level1">
 <h1>Tips</h1>
@@ -614,6 +627,16 @@ S4メソッド作成時に、原典を記載。2番目以降は <code>@reference
 <h1>変更履歴</h1>
 <div id="section" class="section level2">
 <h2>2018-08-30 12:49</h2>
-<p><code>@section</code> の使い方を更新 表のレイアウト崩れを修正</p>
+<ul>
+<li><code>@section</code> の使い方を更新</li>
+<li>表のレイアウト崩れを修正</li>
+</ul>
+</div>
+<div id="section-1" class="section level2">
+<h2>2018-08-30 13:46</h2>
+<ul>
+<li>暗示的という言葉は分かりにくいのでタグを用いないという表現に修正</li>
+<li><a href="#title-description-details"><code>@title</code> <code>@description</code> <code>@details</code> について</a> 追記</li>
+</ul>
 </div>
 </div>

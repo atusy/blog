@@ -20,14 +20,5 @@
       <description>Roxygen2のタグについての情報が複数箇所に分散していて調べるのが大変なのでまとめた。 超訳 + 超要約 しているので、おかしなところがあれば Issues</description>
     </item>
     
-    <item>
-      <title>roxygen-comments</title>
-      <link>/2018/08/06/roxygen-comments/</link>
-      <pubDate>Mon, 06 Aug 2018 00:00:00 +0000</pubDate>
-      
-      <guid>/2018/08/06/roxygen-comments/</guid>
-      <description>#&amp;#39; タイトル．`help(package = mypackage)` で表示される説明文 #&amp;#39; #&amp;#39; 概要．簡潔に． #&amp;#39; #&amp;#39; 詳細．任意．しばしば長文． #&amp;#39; #&amp;#39; @param 引数 引数の説明 #&amp;#39; @return 返り値の</description>
-    </item>
-    
   </channel>
 </rss>

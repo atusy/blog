@@ -13,11 +13,6 @@
   </url>
   
   <url>
-    <loc>/2018/08/20/docker-memo/</loc>
-    <lastmod>2018-08-20T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/2018/08/18/time-each-chunk/</loc>
     <lastmod>2018-08-18T00:00:00+00:00</lastmod>
   </url>
@@ -25,11 +20,6 @@
   <url>
     <loc>/2018/08/17/rmd-parameterized/</loc>
     <lastmod>2018-08-17T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/2018/08/06/roxygen-comments/</loc>
-    <lastmod>2018-08-06T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -67,13 +57,13 @@
   </url>
   
   <url>
-    <loc>/categories/blogdown/</loc>
+    <loc>/tags/blogdown/</loc>
     <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/blogdown/</loc>
+    <loc>/categories/blogdown/</loc>
     <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
@@ -81,18 +71,6 @@
   <url>
     <loc>/categories/</loc>
     <lastmod>2018-07-28T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/docker/</loc>
-    <lastmod>2018-08-20T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/docker/</loc>
-    <lastmod>2018-08-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -115,26 +93,20 @@
   </url>
   
   <url>
-    <loc>/categories/latex/</loc>
-    <lastmod>2018-07-09T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/tags/latex/</loc>
     <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/mathjax/</loc>
-    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
+    <loc>/categories/latex/</loc>
+    <lastmod>2018-07-09T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/memo/</loc>
-    <lastmod>2018-08-20T00:00:00+00:00</lastmod>
+    <loc>/tags/mathjax/</loc>
+    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -157,14 +129,14 @@
   </url>
   
   <url>
-    <loc>/categories/r/</loc>
-    <lastmod>2018-08-28T00:00:00+00:00</lastmod>
+    <loc>/tags/r/</loc>
+    <lastmod>2018-08-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/r/</loc>
-    <lastmod>2018-08-25T00:00:00+00:00</lastmod>
+    <loc>/categories/r/</loc>
+    <lastmod>2018-08-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -193,13 +165,13 @@
   </url>
   
   <url>
-    <loc>/categories/stats/</loc>
+    <loc>/tags/stats/</loc>
     <lastmod>2018-08-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/stats/</loc>
+    <loc>/categories/stats/</loc>
     <lastmod>2018-08-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
