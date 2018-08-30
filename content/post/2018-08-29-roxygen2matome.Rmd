@@ -38,7 +38,8 @@ x %>%
     `Rdコマンド` = ifelse(url_rd == '', rd, paste0('[', rd, '](', url_rd , ')')),
     `主な使い方` = description
   ) %>%
-  kable(format = 'markdown')
+  kable(format = 'html') %>%
+  kableExtra::kable_styling(bootstrap_options = 'striped')
 ```
 
 
