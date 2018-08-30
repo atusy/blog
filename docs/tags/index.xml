@@ -21,6 +21,15 @@
     </item>
     
     <item>
+      <title>Docker</title>
+      <link>/tags/docker/</link>
+      <pubDate>Mon, 20 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/docker/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Ggplot2</title>
       <link>/tags/ggplot2/</link>
       <pubDate>Sat, 25 Aug 2018 00:00:00 +0000</pubDate>
@@ -62,6 +71,15 @@
       <pubDate>Sat, 28 Jul 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/mathjax/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Memo</title>
+      <link>/tags/memo/</link>
+      <pubDate>Mon, 20 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/memo/</guid>
       <description></description>
     </item>
     

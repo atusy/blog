@@ -30,6 +30,15 @@
     </item>
     
     <item>
+      <title>Docker情報まとめ</title>
+      <link>/2018/08/20/docker-memo/</link>
+      <pubDate>Mon, 20 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/08/20/docker-memo/</guid>
+      <description>ユーザーをdockerグループにいれると、スーパーユーザーにならずとも docker compose できる。 https://qiita.com/DQNEO/items/da5df074c48b012152ee</description>
+    </item>
+    
+    <item>
       <title>Rmdでchunkごとの実行時間を計測</title>
       <link>/2018/08/18/time-each-chunk/</link>
       <pubDate>Sat, 18 Aug 2018 00:00:00 +0000</pubDate>
@@ -45,6 +54,15 @@
       
       <guid>/2018/08/17/rmd-parameterized/</guid>
       <description>パラメータ付きRmdが便利そうだと思ったのでメモと実験 パラメータ付きRmdとは YAMLヘッダーの params で作成される変数のリストを用いたRmd うま</description>
+    </item>
+    
+    <item>
+      <title>roxygen-comments</title>
+      <link>/2018/08/06/roxygen-comments/</link>
+      <pubDate>Mon, 06 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/08/06/roxygen-comments/</guid>
+      <description>#&amp;#39; タイトル．`help(package = mypackage)` で表示される説明文 #&amp;#39; #&amp;#39; 概要．簡潔に． #&amp;#39; #&amp;#39; 詳細．任意．しばしば長文． #&amp;#39; #&amp;#39; @param 引数 引数の説明 #&amp;#39; @return 返り値の</description>
     </item>
     
     <item>
