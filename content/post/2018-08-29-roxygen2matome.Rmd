@@ -27,7 +27,7 @@ Roxygen2を用いると、パッケージ内で定義した関数やデータセ
 - `Rdコマンド` は `Roxygen2タグ` に対応するものがあれば記載
 - `主な使い方` は 超訳 + 超要約 が凄いので、メモ程度に思ってもらって `Roxygen2タグ` や `Rdコマンド` のリンク先を参考して欲しい。
 
-```{r}
+```{r matome}
 x <- fread('../../tbl/roxygen2_rd.csv')
 x %>%
   mutate_at(c('roxygen2', 'rd'), str_replace, pattern = '^', replacement = '`') %>%
