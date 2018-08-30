@@ -3,43 +3,96 @@ relativeurls = true
 publishDir = "docs"
 hasCJKLanguage = true
 languageCode = "ja-jp"
-title = "A Hugo website"
-theme = "hugo-lithium"
+title = "Atusy's blog"
+theme = "hugo-bootstrap"
 googleAnalytics = ""
 disqusShortname = ""
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
+defaultContentLanguage = "en"
+
+# Pagination
+paginate = 3
+paginatePath = "page"
+
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+
+[languages.en]
+  languageName = "English"
+
+  # Replace the default footer message with a localized message
+  # copyright = "Hugo template made with ❤ by Xzya"
+
+  [[languages.en.menu.main]]
+    url = "/"
+    name = "Home"
+    weight = 1
+  [[languages.en.menu.main]]
+    url = "/about/"
+    name = "About"
+    weight = 2
+  [[languages.en.menu.main]]
+    url = "/contact/"
+    name = "Contact"
+    weight = 3
+
+[languages.es]
+  languageName = "Español"
+
+  [[languages.es.menu.main]]
+    url = "/es/"
+    name = "Casa"
+    weight = 1
+  [[languages.es.menu.main]]
+    url = "/about/"
+    name = "Acerca de"
+    weight = 2
+  [[languages.es.menu.main]]
+    url = "/contact/"
+    name = "Contacto"
+    weight = 3
+
+[languages.de]
+  languageName = "Deutsch"
+
+  [[languages.de.menu.main]]
+    url = "/de/"
+    name = "Start"
+    weight = 1
+  [[languages.de.menu.main]]
+    url = "/about/"
+    name = "Über uns"
+    weight = 2
+  [[languages.de.menu.main]]
+    url = "/contact/"
+    name = "Kontakt"
+    weight = 3
+
+# Links format
 
 [permalinks]
-    post = "/:year/:month/:day/:slug/"
-
-[[menu.main]]
-    name = "Category"
-    url = "/categories/"
-[[menu.main]]
-    name = "Tags"
-    url = "/tags/"
-[[menu.main]]
-    name = "GitHub"
-    url = "https://github.com/atusy"
-[[menu.main]]
-    name = "Twitter"
-    url = "https://twitter.com/Atsushi776"
+  post = "/:year/:month/:title/"
 
 [params]
-    description = "Atusy's blog"
+  # Main sections (currently used for the recent posts in the sidebar)
+  mainSections = ["post"]
 
-    # options for highlight.js (version, additional languages, and theme)
-    highlightjsVersion = "9.11.0"
-    highlightjsCDN = "//cdn.bootcss.com"
-    highlightjsLang = ["r", "yaml"]
-    highlightjsTheme = "github"
+  # Default author
+  author = "John Doe"
 
-    MathJaxCDN = "//cdn.bootcss.com"
-    MathJaxVersion = "2.7.1"
+  # Date format (default: Jan 2, 2006)
+  # date_format = "Jan 2, 2006"
 
-    [params.logo]
-    url = "atusy.jpg"
-    width = 50
-    height = 50
-    alt = "Logo"
+  # Display post summaries instead of content in list templates (default: true)
+  # truncate = false
 
+  [params.sidebar]
+    # Whether to show the recent posts or not (default: true)
+    # showRecent = false
+
+    # Whether to show the taxonomies or not (default: true)
+    # showTaxonomy = false
+
+    # How many posts to show on the sidebar (Default: 5)
+    # num_recent_posts = 5
