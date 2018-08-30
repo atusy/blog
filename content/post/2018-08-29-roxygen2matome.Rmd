@@ -42,6 +42,27 @@ x %>%
   kableExtra::kable_styling(bootstrap_options = 'striped')
 ```
 
+## `@title` `@description` `@details` について {#title-description-details}
+
+これらの基本的な使い方は
+
+```r
+#' @title タイトル
+#' @description 概要
+#' @details 詳細
+```
+
+といった具合だが、以下のようにタグを用いずに記述する手法もある。
+
+```r
+#' タイトルは一段落目に。
+#'
+#' 概要は二段落目に。タイトルから一行あける。
+#'
+#' 詳細は三段落目に。概要から一行あける。
+```
+
+
 
 # Tips
 
@@ -66,5 +87,10 @@ x %>%
 
 ## 2018-08-30 12:49
 
-`@section` の使い方を更新 
-表のレイアウト崩れを修正
+- `@section` の使い方を更新 
+- 表のレイアウト崩れを修正
+
+## 2018-08-30 13:46
+
+- 暗示的という言葉は分かりにくいのでタグを用いないという表現に修正
+- [`@title` `@description` `@details` について](#title-description-details) 追記
