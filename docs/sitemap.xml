@@ -57,13 +57,13 @@
   </url>
   
   <url>
-    <loc>/categories/blogdown/</loc>
+    <loc>/tags/blogdown/</loc>
     <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/blogdown/</loc>
+    <loc>/categories/blogdown/</loc>
     <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
@@ -93,14 +93,14 @@
   </url>
   
   <url>
-    <loc>/categories/latex/</loc>
-    <lastmod>2018-07-09T00:00:00+00:00</lastmod>
+    <loc>/tags/latex/</loc>
+    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/latex/</loc>
-    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
+    <loc>/categories/latex/</loc>
+    <lastmod>2018-07-09T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -129,14 +129,14 @@
   </url>
   
   <url>
-    <loc>/categories/r/</loc>
-    <lastmod>2018-08-28T00:00:00+00:00</lastmod>
+    <loc>/tags/r/</loc>
+    <lastmod>2018-08-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/r/</loc>
-    <lastmod>2018-08-25T00:00:00+00:00</lastmod>
+    <loc>/categories/r/</loc>
+    <lastmod>2018-08-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -165,13 +165,13 @@
   </url>
   
   <url>
-    <loc>/categories/stats/</loc>
+    <loc>/tags/stats/</loc>
     <lastmod>2018-08-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/stats/</loc>
+    <loc>/categories/stats/</loc>
     <lastmod>2018-08-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
