@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Blogdown on A Hugo website</title>
+    <title>Blogdown on Atusy&#39;s blog</title>
     <link>/categories/blogdown/</link>
-    <description>Recent content in Blogdown on A Hugo website</description>
+    <description>Recent content in Blogdown on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Sat, 28 Jul 2018 00:00:00 +0000</lastBuildDate>
@@ -13,10 +13,10 @@
     
     <item>
       <title>blogdownでMathJaxを利用する</title>
-      <link>/2018/07/28/how2mathjax/</link>
+      <link>/2018/07/blogdown%E3%81%A7mathjax%E3%82%92%E5%88%A9%E7%94%A8%E3%81%99%E3%82%8B/</link>
       <pubDate>Sat, 28 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/07/28/how2mathjax/</guid>
+      <guid>/2018/07/blogdown%E3%81%A7mathjax%E3%82%92%E5%88%A9%E7%94%A8%E3%81%99%E3%82%8B/</guid>
       <description>MathJaxとは？ MathJaxを利用すると、\(\TeX\) 記法を用いて数式を表現できる。 ブロックにするには $$ \latex $$ と入力すると \[ \LaTeX \] とな</description>
     </item>
     

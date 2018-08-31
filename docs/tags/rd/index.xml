@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Rd on A Hugo website</title>
+    <title>Rd on Atusy&#39;s blog</title>
     <link>/tags/rd/</link>
-    <description>Recent content in Rd on A Hugo website</description>
+    <description>Recent content in Rd on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Tue, 28 Aug 2018 00:00:00 +0000</lastBuildDate>
@@ -13,10 +13,10 @@
     
     <item>
       <title>roxygen2タグまとめ</title>
-      <link>/2018/08/28/roxygen2matome/</link>
+      <link>/2018/08/roxygen2%E3%82%BF%E3%82%B0%E3%81%BE%E3%81%A8%E3%82%81/</link>
       <pubDate>Tue, 28 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/08/28/roxygen2matome/</guid>
+      <guid>/2018/08/roxygen2%E3%82%BF%E3%82%B0%E3%81%BE%E3%81%A8%E3%82%81/</guid>
       <description>Roxygen2のタグについての情報が複数箇所に分散していて調べるのが大変なのでまとめた。 超訳 + 超要約 しているので、おかしなところがあれば Issues</description>
     </item>
     

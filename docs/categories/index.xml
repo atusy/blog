@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Categories on A Hugo website</title>
+    <title>Categories on Atusy&#39;s blog</title>
     <link>/categories/</link>
-    <description>Recent content in Categories on A Hugo website</description>
+    <description>Recent content in Categories on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Sat, 28 Jul 2018 00:00:00 +0000</lastBuildDate>
@@ -17,6 +17,15 @@
       <pubDate>Sat, 28 Jul 2018 00:00:00 +0000</pubDate>
       
       <guid>/categories/blogdown/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Docker</title>
+      <link>/categories/docker/</link>
+      <pubDate>Mon, 20 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/docker/</guid>
       <description></description>
     </item>
     

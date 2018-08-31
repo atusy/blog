@@ -1,0 +1,937 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta property="og:title" content="roxygen2タグまとめ" />
+<meta property="og:description" content="Roxygen2のタグについての情報が複数箇所に分散していて調べるのが大変なのでまとめた。 超訳 &#43; 超要約 しているので、おかしなところがあれば Issues" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/2018/08/roxygen2%E3%82%BF%E3%82%B0%E3%81%BE%E3%81%A8%E3%82%81/" />
+
+
+
+<meta property="article:published_time" content="2018-08-28T00:00:00&#43;00:00"/>
+
+<meta property="article:modified_time" content="2018-08-28T00:00:00&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="roxygen2タグまとめ"/>
+<meta name="twitter:description" content="Roxygen2のタグについての情報が複数箇所に分散していて調べるのが大変なのでまとめた。 超訳 &#43; 超要約 しているので、おかしなところがあれば Issues"/>
+
+
+
+    <link rel="canonical" href="../../../2018/08/roxygen2%E3%82%BF%E3%82%B0%E3%81%BE%E3%81%A8%E3%82%81/">
+
+    <title>
+      
+        roxygen2タグまとめ | Atusy&#39;s blog
+      
+    </title>
+
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+
+    <link href="../../../css/style.css" rel="stylesheet">
+
+    
+
+    
+
+    
+  </head>
+  <body>
+    
+      <header class="blog-header">
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+        <a class="navbar-brand" href="../../../">
+            <img src="../../../images/atusy.jpg" width="50" height="50" class="d-inline-block align-top" alt="">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+            <ul class="navbar-nav">
+                
+                
+                <li class="nav-item ">
+                    
+                        <a class="nav-link" href="https://github.com/atusy">GitHub</a>
+                    
+                </li>
+                
+                <li class="nav-item ">
+                    
+                        <a class="nav-link" href="https://twitter.com/Atsushi776">Twitter</a>
+                    
+                </li>
+                
+            </ul>
+            
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Language
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                        
+                            <a class="dropdown-item" href="../../../">Japanese</a>
+                        
+                            <a class="dropdown-item" href="../../../en/">English</a>
+                        
+                    </div>
+                </li>
+            </ul>
+            
+        </div>
+    </nav>
+</header>
+    
+
+    
+    <div class="container">
+      <div class="row">
+        <div class="col-12 col-lg-8 blog-main">
+
+          
+
+<header>
+    <h2 class="blog-post-title">
+        <a class="text-dark" href="../../../2018/08/roxygen2%E3%82%BF%E3%82%B0%E3%81%BE%E3%81%A8%E3%82%81/">roxygen2タグまとめ</a>
+    </h2>
+    
+
+
+<div class="blog-post-date text-secondary">
+    
+        2018-8-28
+    
+    
+        by <span rel="author">Atusy</span>
+    
+</div>
+
+    
+<div class="blog-post-tags text-secondary">
+    <strong>タグ:</strong>
+    
+        <a class="badge badge-primary" href="../../../tags/package">package</a>
+    
+        <a class="badge badge-primary" href="../../../tags/roxygen2">Roxygen2</a>
+    
+        <a class="badge badge-primary" href="../../../tags/rd">Rd</a>
+    
+</div>
+
+    
+<div class="blog-post-categories text-secondary">
+    <strong>カテゴリ:</strong>
+    
+        <a class="badge badge-primary" href="../../../categories/r">R</a>
+    
+</div>
+
+    <hr>
+</header>
+<article class="blog-post">
+    <script src="../../../rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<p>Roxygen2のタグについての情報が複数箇所に分散していて調べるのが大変なのでまとめた。</p>
+<p>超訳 + 超要約 しているので、おかしなところがあれば <a href="https://github.com/atusy/blog/issues">Issues</a> や <a href="https://github.com/atusy/blog/issues">Twitter</a> で指摘して頂くか、 <a href="https://github.com/atusy/blog/pulls">PR</a> して欲しい。</p>
+<p>Roxygen2を用いると、パッケージ内で定義した関数やデータセット、クラスなどについてのドキュメントや、他パッケージとの依存関係をソースコード内に連続して記述できる。</p>
+<p>古くは開発者が適宜作成していたRdファイルがソースコード内のRoxygen2コメントに基いて動的に生成されるため、ユーザーが扱うファイルを限定でき、更に実装とドキュメント化を並行できると良いことづくめだ。</p>
+<p>気付きがあれば随時更新していきたい。</p>
+<div class="section level1">
+<h1>まとめ</h1>
+<ul>
+<li><code>Roxygen2タグ</code> はRStudioの入力補完機能で出現したもの (Roxygen2 v6.1.0)</li>
+<li><code>Rdコマンド</code> は <code>Roxygen2タグ</code> に対応するものがあれば記載</li>
+<li><code>主な使い方</code> は 超訳 + 超要約 が凄いので、メモ程度に思ってもらって <code>Roxygen2タグ</code> や <code>Rdコマンド</code> のリンク先を参考して欲しい。</li>
+</ul>
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Roxygen2タグ
+</th>
+<th style="text-align:left;">
+Rdコマンド
+</th>
+<th style="text-align:left;">
+主な使い方
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="http://r-pkgs.had.co.nz/man.html"><code>@aliases</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005calias"><code>\alias</code></a>
+</td>
+<td style="text-align:left;">
+<code>?オブジェクト名</code> と同じドキュメントに <code>?指定した文字列</code> でアクセスできるようにする。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="http://kbroman.org/pkg_primer/pages/docs.html"><code>@author</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cauthor"><code>\author</code></a>
+</td>
+<td style="text-align:left;">
+著者を <code>名前, \email{hoge@example.com, \url{example.com}}</code> の形で記述。emailやurlは省略可。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<code>@concepts</code>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cconcept"><code>\concept</code></a>
+</td>
+<td style="text-align:left;">
+<code>help.search()</code> 用のキーワード
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="http://r-pkgs.had.co.nz/man.html#multiple-man"><code>@describeIn</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+オブジェクトのために新たにRdファイルを作らず、指定したドキュメントを参照する。追加した記述があれば該当ファイルに追記される。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="http://r-pkgs.had.co.nz/man.html#fn1"><code>@description</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cdescription"><code>\description</code></a>
+</td>
+<td style="text-align:left;">
+概要。タグを用いず、2段落目を <code>@description</code> として扱うことも可能 (<a href="#title-description-details">後述</a>)。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<code>@details</code>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cdetails"><code>\details</code></a>
+</td>
+<td style="text-align:left;">
+概要。タグを用いず、3段落目を <code>@details</code> として扱うことも可能 (<a href="#title-description-details">後述</a>)。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html"><code>@docType</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#Documenting-data-sets"><code>\doctype</code></a>
+</td>
+<td style="text-align:left;">
+<code>package</code> <code>data</code> <code>methods</code> <code>class</code> についてのドキュメントを作る時に該当するものを指定。 packageの場合、 <code>@name</code> にドキュメント名を指定する。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://github.com/klutometis/roxygen/blob/master/NEWS.md#new-features"><code>@evalRd</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+Roxygen2 6.1.0の新機能。パッケージで定義した関数の実行結果を挿入する
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="http://r-pkgs.had.co.nz/man.html#man-functions"><code>@example</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+用例を記した外部ファイルを指定する
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="http://r-pkgs.had.co.nz/man.html#man-functions"><code>@examples</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cexamples"><code>\examples</code></a>
+</td>
+<td style="text-align:left;">
+用例を <code>#’</code> で始まる次行以降に記す
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html"><code>@export</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+タグの有無でオブジェクトをユーザーが直接扱えるか決める。タグが有ると <code>pkg::name</code> の形でもアクセス可できる。ない場合は <code>pkg:::name</code> としてアクセス。S3やS4のクラスに対するインスタンスの作成可否も決められる。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html"><code>@exportClass</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+S4クラスの拡張やインスタンスの生成をコントロールするために <code>@export</code> と使い分ける。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html"><code>@exportMethod</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+S4クラスの拡張やインスタンスの生成をコントロールするために <code>@export</code> と使い分ける。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html"><code>@family</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+互いに参照すべきドキュメントに対して <code>family名</code> を与えておくことで、動的に <code>@seealso</code> を生成する。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://stackoverflow.com/questions/25613238/document-reference-class-and-its-methods-with-roxygen2"><code>@field</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+Reference Classの <code>fields</code> 要素について記述
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<code>@format</code>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cformat"><code>\format</code></a>
+</td>
+<td style="text-align:left;">
+データセットの様式 (ベクトル、マトリクス、データフレームなど) を記述。 リストやデータフレームの場合は各要素についても説明した方がいい。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html"><code>@import</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+指定したパッケージからexportされているオブジェクトを全て、作成中のパッケージから利用できるようにする。衝突を避けるため使わないが吉。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html"><code>@importClassesFrom</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+他パッケージのS4クラスを利用。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html"><code>@importFrom</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+指定したパッケージからexportされているオブジェクトを選択的に利用。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html"><code>@importMethodsFrom</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+他パッケージのS4クラスのメソッドを利用
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="http://r-pkgs.had.co.nz/man.html#man-classes"><code>@include</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+.Rファイルの名前をスペース区切りで指定すると、該当ファイルを読み込んだ後に、 <code>@include</code> 以降を読む。ファイル冒頭で <code>NULL</code> に対して用いるのが便利。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html"><code>@inherit</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+<code>@inherit ドキュメント名</code> で指定したドキュメントから <code>@params</code> <code>@return</code> <code>@references</code> <code>@description</code> <code>@detaills</code> <code>@sections</code> の内容を転載。 <code>@inherit ドキュメント名 return</code> などとして部分的に転載することも可能。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://blog.rstudio.com/2017/02/01/roxygen2-6-0-0/"><code>@inheritDotParams</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+<code>...</code> のドキュメント作成に利用。 <code>@inheritParams</code> と違い関数に該当しない引数でも転載できる。 <code>@inheritDotParams f</code> で関数fの全ての引数を、 <code>a b e:h</code> と続けることで引数 <code>a</code> と <code>b</code> に加え <code>e</code> から <code>h</code> までを、 <code>-c</code> と続けることで<code>c</code> 以外の引数を転載できる。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html"><code>@inheritParams</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+記載すべき <code>@param</code> の内、未記載の引数をが指定したドキュメントで説明されている場合、転載する。相続権があるのは子まで。孫は不可。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html"><code>@inheritSection</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+<code>@inheritSection ドキュメント名 セクション名</code> の形で他のドキュメントのセクションを転載する。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="http://r-pkgs.had.co.nz/man.html"><code>@keywords</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005ckeyword"><code>\keyword</code></a>
+</td>
+<td style="text-align:left;">
+<code>RshowDoc(&quot;&quot;KEYWORDS&quot;&quot;)</code> で一覧できるkeywordを指定。その他のkeywordっぽいものは <code>@concepts</code> で指定する方がいい。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/markdown.html"><code>@md</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+Gloibalにmarkdownが有効化されてない時に、あるチャンク内でのみ有効化したい時に使用
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="http://r-pkgs.had.co.nz/man.html#man-classes"><code>@method</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cmethod"><code>\method</code></a>
+</td>
+<td style="text-align:left;">
+基本的に不要。 <code>@mehod generic class</code> の形でS3メソッドディスパッチを表現できるが、指定せずともroxygen2側で解決してくれる。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="http://r-pkgs.had.co.nz/man.html#dry2"><code>@name</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cname"><code>\name</code></a>
+</td>
+<td style="text-align:left;">
+複数のオブジェクトで共有するドキュメントの名前やパッケージ用のドキュメントの名前を指定。前者の場合 <code>NULL</code> に対して作成し、他のオブジェクトから <code>@rdname</code> や <code>@describeIn</code> を用いて参照する。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/markdown.html"><code>@noMd</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+Globalにmarkdownが有効化されている時に、あるチャンク内でのみ無効化したい時に使用
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="http://style.tidyverse.org/documentation.html#internal-functions"><code>@noRd</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+タグをつけるとRdファイルが生成されなくなる。exportしない関数 (internal function) 向けに。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<code>@note</code>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cnote"><code>\note</code></a>
+</td>
+<td style="text-align:left;">
+<code>@description</code> に記すほどではない情報。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html"><code>@param</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005carguments"><code>\arguments</code></a>
+</td>
+<td style="text-align:left;">
+<code>@param 引数 説明</code> の形で引数の説明を記述。スペースなしのコンマ区切りで複数の引数に同じ説明を与えられる。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://blog.rstudio.com/2015/10/29/roxygen2-5-0-0/"><code>@rawNamespace</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+raw textを <code>NAMESPACE</code> に追加
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://blog.rstudio.com/2015/10/29/roxygen2-5-0-0/"><code>@rawRd</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+raw textをRdファイルに追加
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="http://r-pkgs.had.co.nz/man.html#dry2"><code>@rdname</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+オブジェクトのために新たにRdファイルを作らず、指定したドキュメントを参照する。追加した記述があれば該当ファイルに追記される。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="http://kbroman.org/pkg_primer/pages/docs.html"><code>@references</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005creferences"><code>\reference</code></a>
+</td>
+<td style="text-align:left;">
+参考資料を文字列や <code>\url{}</code> を用いて記述。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="http://r-pkgs.had.co.nz/man.html#man-functions"><code>@return</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cvalue"><code>\value</code></a>
+</td>
+<td style="text-align:left;">
+関数の返り値を記述する。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="http://r-pkgs.had.co.nz/man.html#man-workflow-2"><code>@section</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005csection"></a>
+</td>
+<td style="text-align:left;">
+任意のセクションを追加する。書式は <code>@section タイトル: 内容</code> で、タイトルの後に <code>:</code> が必要。 <code>:</code> タイトルは改行してはならない。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="http://r-pkgs.had.co.nz/man.html#man-workflow-2"><code>@seealso</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cseealso"><code>\seealso</code></a>
+</td>
+<td style="text-align:left;">
+他のドキュメントやウェブサイトへのリンクを貼る。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="http://r-pkgs.had.co.nz/man.html#man-classes"><code>@slot</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+S4クラスの <code>slot</code> の説明を記述。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#Rd-format"><code>@source</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005csource"><code>\source</code></a>
+</td>
+<td style="text-align:left;">
+S4メソッド作成時に、原典を記載。2番目以降は <code>@reference</code> へ。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://github.com/yihui/roxygen2/blob/master/vignettes/rd.Rmd"><code>@template</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+<code>man-roxygen</code> ディレクトリ中に存在するRoxygenコメントのみからなるRファイルの中身を挿入する。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://github.com/yihui/roxygen2/blob/master/vignettes/rd.Rmd"><code>@templateVar</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+テンプレートファイル中で用い、 <code>@templateVar name value</code> の形で変数を定義。テンプレート利用時には <code>&amp;lt;%= name %&amp;gt;</code> として該当する変数を読み込める。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="http://r-pkgs.had.co.nz/man.html#fn1"><code>@title</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005ctitle"><code>\title</code></a>
+</td>
+<td style="text-align:left;">
+オブジェクトのタイトルを記載。オブジェクトのヘルプの冒頭と、パッケージのヘルプを一覧した時に、オブジェクト名の隣に表示される文字列。タグを用いず、1段落目を <code>@title</code> として扱うことも可能 (<a href="#title-description-details">後述</a>)。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<code>@usage</code>
+</td>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cusage"><code>\usage</code></a>
+</td>
+<td style="text-align:left;">
+基本的に不要。オブジェクトの使い方を記述。 <code>@param</code> など必要事項を記載していると <code>@usage</code> がなくても <code>\usage</code> が動的に生成される。
+</td>
+</tr>
+<tr>
+<td style="text-align:left;white-space: nowrap">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html"><code>@useDynLib</code></a>
+</td>
+<td style="text-align:left;white-space: nowrap">
+</td>
+<td style="text-align:left;">
+他のパッケージからコンパイル済みのコードを利用する。
+</td>
+</tr>
+</tbody>
+</table>
+<div id="title-description-details" class="section level2">
+<h2><code>@title</code> <code>@description</code> <code>@details</code> について</h2>
+<p>これらの基本的な使い方は</p>
+<pre class="r"><code>#&#39; @title タイトル
+#&#39; @description 概要
+#&#39; @details 詳細</code></pre>
+<p>といった具合だが、以下のようにタグを用いずに記述する手法もある。</p>
+<pre class="r"><code>#&#39; タイトルは一段落目に。
+#&#39;
+#&#39; 概要は二段落目に。タイトルから一行あける。
+#&#39;
+#&#39; 詳細は三段落目に。概要から一行あける。</code></pre>
+</div>
+</div>
+<div id="tips" class="section level1">
+<h1>Tips</h1>
+<ul>
+<li><a href="https://cran.r-project.org/doc/manuals/R-exts.html">Rdコマンドは上述のもの以外にもいっぱいあり、Markupに用いるものもあるので是非確認してみて欲しい</a></li>
+<li><a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html">関数などのimportやドキュメントの参照は他のパッケージも相手にできる</a></li>
+</ul>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="http://kbroman.org/pkg_primer/pages/docs.html" class="uri">http://kbroman.org/pkg_primer/pages/docs.html</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="http://r-pkgs.had.co.nz/man.html" class="uri">http://r-pkgs.had.co.nz/man.html</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://blog.rstudio.com/2015/10/29/roxygen2-5-0-0/" class="uri">https://blog.rstudio.com/2015/10/29/roxygen2-5-0-0/</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://blog.rstudio.com/2017/02/01/roxygen2-6-0-0/" class="uri">https://blog.rstudio.com/2017/02/01/roxygen2-6-0-0/</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html" class="uri">https://cran.r-project.org/doc/manuals/R-exts.html</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/markdown.html" class="uri">https://cran.r-project.org/web/packages/roxygen2/vignettes/markdown.html</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html" class="uri">https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html" class="uri">https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/klutometis/roxygen/blob/master/NEWS.md" class="uri">https://github.com/klutometis/roxygen/blob/master/NEWS.md</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/yihui/roxygen2/blob/master/vignettes/rd.Rmd" class="uri">https://github.com/yihui/roxygen2/blob/master/vignettes/rd.Rmd</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://stackoverflow.com/questions/25613238/document-reference-class-and-its-methods-with-roxygen2" class="uri">https://stackoverflow.com/questions/25613238/document-reference-class-and-its-methods-with-roxygen2</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="http://style.tidyverse.org/documentation.html" class="uri">http://style.tidyverse.org/documentation.html</a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level1">
+<h1>変更履歴</h1>
+<div id="section" class="section level2">
+<h2>2018-08-30 12:49</h2>
+<ul>
+<li><code>@section</code> の使い方を更新</li>
+<li>表のレイアウト崩れを修正</li>
+</ul>
+</div>
+<div id="section-1" class="section level2">
+<h2>2018-08-30 13:46</h2>
+<ul>
+<li>暗示的という言葉は分かりにくいのでタグを用いないという表現に修正</li>
+<li><a href="#title-description-details"><code>@title</code> <code>@description</code> <code>@details</code> について</a> 追記</li>
+</ul>
+</div>
+<div id="section-2" class="section level2">
+<h2>2018-08-31 09:40</h2>
+<ul>
+<li>Bootstrapを採用し、表を見やすくした</li>
+</ul>
+</div>
+</div>
+
+
+    
+
+    
+
+    <h4>See also</h4>
+    <ul>
+        
+            <li><a href="../../../2018/07/r3.5%E7%B3%BB%E3%81%A7%E3%81%AF%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E5%90%8C%E6%9C%9F%E3%82%BD%E3%83%95%E3%83%88%E3%81%A7%E3%83%91%E3%83%83%E3%82%B1%E3%83%BC%E3%82%B8%E3%82%92%E5%90%8C%E6%9C%9F%E3%81%97%E3%81%AA%E3%81%84%E3%82%88%E3%81%86%E3%81%AB/">R3.5系ではファイル同期ソフトでパッケージを同期しないように</a></li>
+        
+    </ul>
+
+
+</article>
+
+
+
+        </div>
+
+        <aside class="col-12 col-lg-3 ml-auto blog-sidebar">
+    
+        
+
+
+<section>
+    <h4>New</h4>
+    <ol class="list-unstyled">
+        
+        <li>
+            <a href="../../../2018/08/roxygen2%E3%82%BF%E3%82%B0%E3%81%BE%E3%81%A8%E3%82%81/">roxygen2タグまとめ</a>
+        </li>
+        
+        <li>
+            <a href="../../../2018/08/%E6%AC%A0%E6%90%8D%E5%80%A4%E3%81%AE%E7%99%BA%E7%94%9F%E9%81%8E%E7%A8%8B%E3%81%AE%E9%A1%9E%E5%88%A5/">欠損値の発生過程の類別</a>
+        </li>
+        
+        <li>
+            <a href="../../../2018/08/docker%E6%83%85%E5%A0%B1%E3%81%BE%E3%81%A8%E3%82%81/">Docker情報まとめ</a>
+        </li>
+        
+        <li>
+            <a href="../../../2018/08/rmd%E3%81%A7chunk%E3%81%94%E3%81%A8%E3%81%AE%E5%AE%9F%E8%A1%8C%E6%99%82%E9%96%93%E3%82%92%E8%A8%88%E6%B8%AC/">Rmdでchunkごとの実行時間を計測</a>
+        </li>
+        
+        <li>
+            <a href="../../../2018/08/%E3%83%91%E3%83%A9%E3%83%A1%E3%83%BC%E3%82%BF%E4%BB%98%E3%81%8Drmd%E3%82%92%E8%A9%A6%E3%81%99/">パラメータ付きRmdを試す</a>
+        </li>
+        
+    </ol>
+</section>
+
+    
+    
+        <section>
+    
+        
+        <h4>カテゴリ</h4>
+        <p>
+            
+            <a class="badge badge-primary" href="../../../categories/blogdown">blogdown</a>
+            
+            <a class="badge badge-primary" href="../../../categories/docker">docker</a>
+            
+            <a class="badge badge-primary" href="../../../categories/latex">latex</a>
+            
+            <a class="badge badge-primary" href="../../../categories/r">r</a>
+            
+            <a class="badge badge-primary" href="../../../categories/stats">stats</a>
+            
+        </p>
+        
+    
+        
+        <h4>タグ</h4>
+        <p>
+            
+            <a class="badge badge-primary" href="../../../tags/blogdown">blogdown</a>
+            
+            <a class="badge badge-primary" href="../../../tags/docker">docker</a>
+            
+            <a class="badge badge-primary" href="../../../tags/ggplot2">ggplot2</a>
+            
+            <a class="badge badge-primary" href="../../../tags/knit_hooks">knit_hooks</a>
+            
+            <a class="badge badge-primary" href="../../../tags/knitr">knitr</a>
+            
+            <a class="badge badge-primary" href="../../../tags/latex">latex</a>
+            
+            <a class="badge badge-primary" href="../../../tags/mathjax">mathjax</a>
+            
+            <a class="badge badge-primary" href="../../../tags/memo">memo</a>
+            
+            <a class="badge badge-primary" href="../../../tags/missing-value">missing-value</a>
+            
+            <a class="badge badge-primary" href="../../../tags/package">package</a>
+            
+            <a class="badge badge-primary" href="../../../tags/r">r</a>
+            
+            <a class="badge badge-primary" href="../../../tags/rd">rd</a>
+            
+            <a class="badge badge-primary" href="../../../tags/rmarkdown">rmarkdown</a>
+            
+            <a class="badge badge-primary" href="../../../tags/rmd">rmd</a>
+            
+            <a class="badge badge-primary" href="../../../tags/roxygen2">roxygen2</a>
+            
+            <a class="badge badge-primary" href="../../../tags/stats">stats</a>
+            
+            <a class="badge badge-primary" href="../../../tags/unicode">unicode</a>
+            
+        </p>
+        
+    
+</section>
+    
+</aside>
+
+      </div>
+    </div>
+    
+
+    
+      
+
+
+
+<footer class="blog-footer w-100">
+    <nav class="navbar navbar-light bg-light">
+        <p class="w-100 text-center"></p>
+        <p class="w-100 text-center"><a href="#">Home</a></p>
+    </nav>
+</footer>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script async
+src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+    
+
+    
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+  </body>
+</html>

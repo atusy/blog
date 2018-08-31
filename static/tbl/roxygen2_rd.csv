@@ -1,0 +1,48 @@
+roxygen2,rd,description,url_roxygen2,url_rd
+@aliases,\alias,`?オブジェクト名` と同じドキュメントに `?指定した文字列` でアクセスできるようにする。,http://r-pkgs.had.co.nz/man.html,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005calias
+@author,\author,"著者を `名前, \email{hoge@example.com, \url{example.com}}` の形で記述。emailやurlは省略可。",http://kbroman.org/pkg_primer/pages/docs.html,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cauthor
+@concepts,\concept,`help.search()` 用のキーワード,,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cconcept
+@describeIn,,オブジェクトのために新たにRdファイルを作らず、指定したドキュメントを参照する。追加した記述があれば該当ファイルに追記される。,http://r-pkgs.had.co.nz/man.html#multiple-man,
+@description,\description,概要。タグを用いず、2段落目を `@description` として扱うことも可能 ([後述](#title-description-details))。,http://r-pkgs.had.co.nz/man.html#fn1,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cdescription
+@details,\details,概要。タグを用いず、3段落目を `@details` として扱うことも可能 ([後述](#title-description-details))。,,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cdetails
+@docType,\doctype,`package` `data` `methods` `class` についてのドキュメントを作る時に該当するものを指定。 packageの場合、 `@name` にドキュメント名を指定する。,https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html,https://cran.r-project.org/doc/manuals/R-exts.html#Documenting-data-sets
+@evalRd,,Roxygen2 6.1.0の新機能。パッケージで定義した関数の実行結果を挿入する,https://github.com/klutometis/roxygen/blob/master/NEWS.md#new-features,
+@example,,用例を記した外部ファイルを指定する,http://r-pkgs.had.co.nz/man.html#man-functions,
+@examples,\examples,用例を `#’ ` で始まる次行以降に記す,http://r-pkgs.had.co.nz/man.html#man-functions,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cexamples
+@export,,タグの有無でオブジェクトをユーザーが直接扱えるか決める。タグが有ると `pkg::name` の形でもアクセス可できる。ない場合は `pkg:::name` としてアクセス。S3やS4のクラスに対するインスタンスの作成可否も決められる。,https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html,
+@exportClass,,S4クラスの拡張やインスタンスの生成をコントロールするために `@export` と使い分ける。,https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html,
+@exportMethod,,S4クラスの拡張やインスタンスの生成をコントロールするために `@export` と使い分ける。,https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html,
+@family,,互いに参照すべきドキュメントに対して `family名` を与えておくことで、動的に `@seealso` を生成する。,https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html,
+@field,,Reference Classの `fields` 要素について記述,https://stackoverflow.com/questions/25613238/document-reference-class-and-its-methods-with-roxygen2,
+@format,\format,データセットの様式 (ベクトル、マトリクス、データフレームなど) を記述。 リストやデータフレームの場合は各要素についても説明した方がいい。,,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cformat
+@import,,指定したパッケージからexportされているオブジェクトを全て、作成中のパッケージから利用できるようにする。衝突を避けるため使わないが吉。,https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html,
+@importClassesFrom,,他パッケージのS4クラスを利用。,https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html,
+@importFrom,,指定したパッケージからexportされているオブジェクトを選択的に利用。,https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html,
+@importMethodsFrom,,他パッケージのS4クラスのメソッドを利用,https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html,
+@include,,.Rファイルの名前をスペース区切りで指定すると、該当ファイルを読み込んだ後に、 `@include` 以降を読む。ファイル冒頭で `NULL` に対して用いるのが便利。,http://r-pkgs.had.co.nz/man.html#man-classes,
+@inherit,,`@inherit ドキュメント名` で指定したドキュメントから `@params` `@return` `@references` `@description` `@detaills` `@sections` の内容を転載。 `@inherit ドキュメント名 return` などとして部分的に転載することも可能。,https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html,
+@inheritDotParams,,`...` のドキュメント作成に利用。 `@inheritParams` と違い関数に該当しない引数でも転載できる。 `@inheritDotParams f` で関数fの全ての引数を、 `a b e:h` と続けることで引数 `a` と `b` に加え `e` から `h` までを、 `-c` と続けることで`c` 以外の引数を転載できる。,https://blog.rstudio.com/2017/02/01/roxygen2-6-0-0/,
+@inheritParams,,記載すべき `@param` の内、未記載の引数をが指定したドキュメントで説明されている場合、転載する。相続権があるのは子まで。孫は不可。,https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html,
+@inheritSection,,`@inheritSection ドキュメント名 セクション名` の形で他のドキュメントのセクションを転載する。,https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html,
+@keywords,\keyword,"`RshowDoc(""KEYWORDS"")` で一覧できるkeywordを指定。その他のkeywordっぽいものは `@concepts` で指定する方がいい。",http://r-pkgs.had.co.nz/man.html,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005ckeyword
+@md,,Gloibalにmarkdownが有効化されてない時に、あるチャンク内でのみ有効化したい時に使用,https://cran.r-project.org/web/packages/roxygen2/vignettes/markdown.html,
+@method,\method,基本的に不要。 `@mehod generic class` の形でS3メソッドディスパッチを表現できるが、指定せずともroxygen2側で解決してくれる。,http://r-pkgs.had.co.nz/man.html#man-classes,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cmethod
+@name,\name,複数のオブジェクトで共有するドキュメントの名前やパッケージ用のドキュメントの名前を指定。前者の場合 `NULL` に対して作成し、他のオブジェクトから `@rdname` や `@describeIn` を用いて参照する。,http://r-pkgs.had.co.nz/man.html#dry2,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cname
+@noMd,,Globalにmarkdownが有効化されている時に、あるチャンク内でのみ無効化したい時に使用,https://cran.r-project.org/web/packages/roxygen2/vignettes/markdown.html,
+@noRd,,タグをつけるとRdファイルが生成されなくなる。exportしない関数 (internal function) 向けに。,http://style.tidyverse.org/documentation.html#internal-functions,
+@note,\note,`@description` に記すほどではない情報。,,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cnote
+@param,\arguments,`@param 引数 説明` の形で引数の説明を記述。スペースなしのコンマ区切りで複数の引数に同じ説明を与えられる。,https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005carguments
+@rawNamespace,,raw textを `NAMESPACE` に追加,https://blog.rstudio.com/2015/10/29/roxygen2-5-0-0/,
+@rawRd,,raw textをRdファイルに追加,https://blog.rstudio.com/2015/10/29/roxygen2-5-0-0/,
+@rdname,,オブジェクトのために新たにRdファイルを作らず、指定したドキュメントを参照する。追加した記述があれば該当ファイルに追記される。,http://r-pkgs.had.co.nz/man.html#dry2,
+@references,\reference,参考資料を文字列や `\url{}` を用いて記述。,http://kbroman.org/pkg_primer/pages/docs.html,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005creferences
+@return,\value,関数の返り値を記述する。,http://r-pkgs.had.co.nz/man.html#man-functions,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cvalue
+@section,,任意のセクションを追加する。書式は  `@section タイトル: 内容` で、タイトルの後に `:` が必要。 `:` タイトルは改行してはならない。,http://r-pkgs.had.co.nz/man.html#man-workflow-2,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005csection
+@seealso,\seealso,他のドキュメントやウェブサイトへのリンクを貼る。,http://r-pkgs.had.co.nz/man.html#man-workflow-2,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cseealso
+@slot,,S4クラスの `slot` の説明を記述。,http://r-pkgs.had.co.nz/man.html#man-classes,
+@source,\source,S4メソッド作成時に、原典を記載。2番目以降は `@reference` へ。,https://cran.r-project.org/doc/manuals/R-exts.html#Rd-format,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005csource
+@template,,`man-roxygen` ディレクトリ中に存在するRoxygenコメントのみからなるRファイルの中身を挿入する。,https://github.com/yihui/roxygen2/blob/master/vignettes/rd.Rmd,
+@templateVar,,テンプレートファイル中で用い、 `@templateVar name value` の形で変数を定義。テンプレート利用時には `<%= name %>` として該当する変数を読み込める。,https://github.com/yihui/roxygen2/blob/master/vignettes/rd.Rmd,
+@title,\title,オブジェクトのタイトルを記載。オブジェクトのヘルプの冒頭と、パッケージのヘルプを一覧した時に、オブジェクト名の隣に表示される文字列。タグを用いず、1段落目を `@title` として扱うことも可能 ([後述](#title-description-details))。,http://r-pkgs.had.co.nz/man.html#fn1,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005ctitle
+@usage,\usage,基本的に不要。オブジェクトの使い方を記述。 `@param` など必要事項を記載していると `@usage` がなくても `\usage` が動的に生成される。,,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cusage
+@useDynLib,,他のパッケージからコンパイル済みのコードを利用する。,https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html,

@@ -3,43 +3,76 @@ relativeurls = true
 publishDir = "docs"
 hasCJKLanguage = true
 languageCode = "ja-jp"
-title = "A Hugo website"
-theme = "hugo-lithium"
+title = "Atusy's blog"
+theme = "hugo-bootstrap"
 googleAnalytics = ""
 disqusShortname = ""
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
+defaultContentLanguage = "ja"
+
+# Pagination
+paginate = 7
+paginatePath = "page"
+
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+
+[languages.ja]
+  languageName = "Japanese"
+
+  # Replace the default footer message with a localized message
+  # copyright = "Hugo template made with ❤ by Xzya"
+
+  [[languages.ja.menu.main]]
+    url = "https://github.com/atusy"
+    name = "GitHub"
+    weight = 1
+  [[languages.ja.menu.main]]
+    url = "https://twitter.com/Atsushi776"
+    name = "Twitter"
+    weight = 2
+    
+[languages.en]
+  languageName = "English"
+
+  # Replace the default footer message with a localized message
+  # copyright = "Hugo template made with ❤ by Xzya"
+
+  [[languages.en.menu.main]]
+    url = "https://github.com/atusy"
+    name = "GitHub"
+    weight = 1
+  [[languages.en.menu.main]]
+    url = "https://twitter.com/Atsushi776"
+    name = "Twitter"
+    weight = 2
+
+# Links format
 
 [permalinks]
-    post = "/:year/:month/:day/:slug/"
-
-[[menu.main]]
-    name = "Category"
-    url = "/categories/"
-[[menu.main]]
-    name = "Tags"
-    url = "/tags/"
-[[menu.main]]
-    name = "GitHub"
-    url = "https://github.com/atusy"
-[[menu.main]]
-    name = "Twitter"
-    url = "https://twitter.com/Atsushi776"
+  post = "/:year/:month/:title/"
 
 [params]
-    description = "Atusy's blog"
+  # Main sections (currently used for the recent posts in the sidebar)
+  mainSections = ["post"]
 
-    # options for highlight.js (version, additional languages, and theme)
-    highlightjsVersion = "9.11.0"
-    highlightjsCDN = "//cdn.bootcss.com"
-    highlightjsLang = ["r", "yaml"]
-    highlightjsTheme = "github"
+  # Default author
+  author = "Atusy"
 
-    MathJaxCDN = "//cdn.bootcss.com"
-    MathJaxVersion = "2.7.1"
+  # Date format (default: Jan 2, 2006)
+  date_format = "2006-1-2"
 
-    [params.logo]
-    url = "atusy.jpg"
-    width = 50
-    height = 50
-    alt = "Logo"
+  # Display post summaries instead of content in list templates (default: true)
+  # truncate = false
+
+  [params.sidebar]
+    # Whether to show the recent posts or not (default: true)
+    # showRecent = false
+
+    # Whether to show the taxonomies or not (default: true)
+    # showTaxonomy = false
+
+    # How many posts to show on the sidebar (Default: 5)
+    # num_recent_posts = 5
 

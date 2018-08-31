@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Ggplot2 on A Hugo website</title>
+    <title>Ggplot2 on Atusy&#39;s blog</title>
     <link>/tags/ggplot2/</link>
-    <description>Recent content in Ggplot2 on A Hugo website</description>
+    <description>Recent content in Ggplot2 on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Sat, 25 Aug 2018 00:00:00 +0000</lastBuildDate>
@@ -13,10 +13,10 @@
     
     <item>
       <title>欠損値の発生過程の類別</title>
-      <link>/2018/08/25/missing-value-type/</link>
+      <link>/2018/08/%E6%AC%A0%E6%90%8D%E5%80%A4%E3%81%AE%E7%99%BA%E7%94%9F%E9%81%8E%E7%A8%8B%E3%81%AE%E9%A1%9E%E5%88%A5/</link>
       <pubDate>Sat, 25 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/08/25/missing-value-type/</guid>
+      <guid>/2018/08/%E6%AC%A0%E6%90%8D%E5%80%A4%E3%81%AE%E7%99%BA%E7%94%9F%E9%81%8E%E7%A8%8B%E3%81%AE%E9%A1%9E%E5%88%A5/</guid>
       <description>先日、欠損値の発生過程の例を図示してTweetしたところ、思ったより反響がよかったので、図をブラシュアップの上、記事に残すことにした。 俄仕込</description>
     </item>
     

@@ -1,0 +1,17 @@
+{{ $thanks := i18n "thanks" | safeHTML }}
+
+{{ $copyright := default $thanks .Site.Copyright }}
+
+<footer class="blog-footer w-100">
+    <nav class="navbar navbar-light bg-light">
+        <p class="w-100 text-center">{{ $copyright }}</p>
+        <p class="w-100 text-center"><a href="#">{{ i18n "backToTop" }}</a></p>
+    </nav>
+</footer>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script async
+src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Rmarkdown on A Hugo website</title>
+    <title>Rmarkdown on Atusy&#39;s blog</title>
     <link>/tags/rmarkdown/</link>
-    <description>Recent content in Rmarkdown on A Hugo website</description>
+    <description>Recent content in Rmarkdown on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Mon, 09 Jul 2018 00:00:00 +0000</lastBuildDate>
@@ -13,10 +13,10 @@
     
     <item>
       <title>xetexでunicode文字</title>
-      <link>/2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/</link>
+      <link>/2018/07/xetex%E3%81%A7unicode%E6%96%87%E5%AD%97/</link>
       <pubDate>Mon, 09 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/</guid>
+      <guid>/2018/07/xetex%E3%81%A7unicode%E6%96%87%E5%AD%97/</guid>
       <description>$\LaTeX{}$ で μ や α など特殊文字を直打ちすると、 □になってしまうことがしばしば。 XeTeXを使っている場合は、 \setmainfont{IPAMincho} など、ユニコードに対応したフォントを使</description>
     </item>
     
