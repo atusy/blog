@@ -25,7 +25,7 @@ roxygen2,rd,description,url_roxygen2,url_rd
 @inheritParams,,記載すべき `@param` の内、未記載の引数をが指定したドキュメントで説明されている場合、転載する。相続権があるのは子まで。孫は不可。,https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html,
 @inheritSection,,`@inheritSection ドキュメント名 セクション名` の形で他のドキュメントのセクションを転載する。,https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html,
 @keywords,\keyword,"`RshowDoc(""KEYWORDS"")` で一覧できるkeywordを指定。その他のkeywordっぽいものは `@concepts` で指定する方がいい。",http://r-pkgs.had.co.nz/man.html,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005ckeyword
-@md,,Gloibalにmarkdownが有効化されてない時に、あるチャンク内でのみ有効化したい時に使用,https://cran.r-project.org/web/packages/roxygen2/vignettes/markdown.html,
+@md,,Globalにmarkdownが有効化されてない時に、あるチャンク内でのみ有効化したい時に使用,https://cran.r-project.org/web/packages/roxygen2/vignettes/markdown.html,
 @method,\method,基本的に不要。 `@mehod generic class` の形でS3メソッドディスパッチを表現できるが、指定せずともroxygen2側で解決してくれる。,http://r-pkgs.had.co.nz/man.html#man-classes,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cmethod
 @name,\name,複数のオブジェクトで共有するドキュメントの名前やパッケージ用のドキュメントの名前を指定。前者の場合 `NULL` に対して作成し、他のオブジェクトから `@rdname` や `@describeIn` を用いて参照する。,http://r-pkgs.had.co.nz/man.html#dry2,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cname
 @noMd,,Globalにmarkdownが有効化されている時に、あるチャンク内でのみ無効化したい時に使用,https://cran.r-project.org/web/packages/roxygen2/vignettes/markdown.html,
