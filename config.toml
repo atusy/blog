@@ -8,16 +8,31 @@ theme = "hugo-bootstrap"
 googleAnalytics = ""
 disqusShortname = ""
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
-defaultContentLanguage = "en"
+defaultContentLanguage = "ja"
 
 # Pagination
-paginate = 3
+paginate = 7
 paginatePath = "page"
 
 [taxonomies]
   tag = "tags"
   category = "categories"
 
+[languages.ja]
+  languageName = "Japanese"
+
+  # Replace the default footer message with a localized message
+  # copyright = "Hugo template made with ❤ by Xzya"
+
+  [[languages.ja.menu.main]]
+    url = "https://github.com/atusy"
+    name = "GitHub"
+    weight = 1
+  [[languages.ja.menu.main]]
+    url = "https://twitter.com/Atsushi776"
+    name = "Twitter"
+    weight = 2
+    
 [languages.en]
   languageName = "English"
 
@@ -25,49 +40,13 @@ paginatePath = "page"
   # copyright = "Hugo template made with ❤ by Xzya"
 
   [[languages.en.menu.main]]
-    url = "/"
-    name = "Home"
+    url = "https://github.com/atusy"
+    name = "GitHub"
     weight = 1
   [[languages.en.menu.main]]
-    url = "/about/"
-    name = "About"
+    url = "https://twitter.com/Atsushi776"
+    name = "Twitter"
     weight = 2
-  [[languages.en.menu.main]]
-    url = "/contact/"
-    name = "Contact"
-    weight = 3
-
-[languages.es]
-  languageName = "Español"
-
-  [[languages.es.menu.main]]
-    url = "/es/"
-    name = "Casa"
-    weight = 1
-  [[languages.es.menu.main]]
-    url = "/about/"
-    name = "Acerca de"
-    weight = 2
-  [[languages.es.menu.main]]
-    url = "/contact/"
-    name = "Contacto"
-    weight = 3
-
-[languages.de]
-  languageName = "Deutsch"
-
-  [[languages.de.menu.main]]
-    url = "/de/"
-    name = "Start"
-    weight = 1
-  [[languages.de.menu.main]]
-    url = "/about/"
-    name = "Über uns"
-    weight = 2
-  [[languages.de.menu.main]]
-    url = "/contact/"
-    name = "Kontakt"
-    weight = 3
 
 # Links format
 
@@ -79,10 +58,10 @@ paginatePath = "page"
   mainSections = ["post"]
 
   # Default author
-  author = "John Doe"
+  author = "Atusy"
 
   # Date format (default: Jan 2, 2006)
-  # date_format = "Jan 2, 2006"
+  date_format = "2006-1-2"
 
   # Display post summaries instead of content in list templates (default: true)
   # truncate = false
@@ -96,3 +75,4 @@ paginatePath = "page"
 
     # How many posts to show on the sidebar (Default: 5)
     # num_recent_posts = 5
+
