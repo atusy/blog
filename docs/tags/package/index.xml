@@ -13,19 +13,19 @@
     
     <item>
       <title>roxygen2タグまとめ</title>
-      <link>/2018/08/roxygen2%E3%82%BF%E3%82%B0%E3%81%BE%E3%81%A8%E3%82%81/</link>
+      <link>/2018/08/28/roxygen2matome/</link>
       <pubDate>Tue, 28 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/08/roxygen2%E3%82%BF%E3%82%B0%E3%81%BE%E3%81%A8%E3%82%81/</guid>
+      <guid>/2018/08/28/roxygen2matome/</guid>
       <description>Roxygen2のタグについての情報が複数箇所に分散していて調べるのが大変なのでまとめた。 超訳 + 超要約 しているので、おかしなところがあれば Issues</description>
     </item>
     
     <item>
       <title>R3.5系ではファイル同期ソフトでパッケージを同期しないように</title>
-      <link>/2018/07/r3.5%E7%B3%BB%E3%81%A7%E3%81%AF%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E5%90%8C%E6%9C%9F%E3%82%BD%E3%83%95%E3%83%88%E3%81%A7%E3%83%91%E3%83%83%E3%82%B1%E3%83%BC%E3%82%B8%E3%82%92%E5%90%8C%E6%9C%9F%E3%81%97%E3%81%AA%E3%81%84%E3%82%88%E3%81%86%E3%81%AB/</link>
+      <link>/2018/07/31/dont-sync-pkg-r3-5/</link>
       <pubDate>Tue, 31 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/07/r3.5%E7%B3%BB%E3%81%A7%E3%81%AF%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E5%90%8C%E6%9C%9F%E3%82%BD%E3%83%95%E3%83%88%E3%81%A7%E3%83%91%E3%83%83%E3%82%B1%E3%83%BC%E3%82%B8%E3%82%92%E5%90%8C%E6%9C%9F%E3%81%97%E3%81%AA%E3%81%84%E3%82%88%E3%81%86%E3%81%AB/</guid>
+      <guid>/2018/07/31/dont-sync-pkg-r3-5/</guid>
       <description>タイトル通り、R3.5系ではファイル同期ソフトでパッケージを同期しないようにしましょう。 同期しておくとある環境にインストールしたパッケージを</description>
     </item>
     

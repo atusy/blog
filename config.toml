@@ -51,7 +51,7 @@ paginatePath = "page"
 # Links format
 
 [permalinks]
-  post = "/:year/:month/:title/"
+    post = "/:year/:month/:day/:slug/"
 
 [params]
   # Main sections (currently used for the recent posts in the sidebar)

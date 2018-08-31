@@ -13,28 +13,28 @@
     
     <item>
       <title>Rmdでchunkごとの実行時間を計測</title>
-      <link>/2018/08/rmd%E3%81%A7chunk%E3%81%94%E3%81%A8%E3%81%AE%E5%AE%9F%E8%A1%8C%E6%99%82%E9%96%93%E3%82%92%E8%A8%88%E6%B8%AC/</link>
+      <link>/2018/08/18/time-each-chunk/</link>
       <pubDate>Sat, 18 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/08/rmd%E3%81%A7chunk%E3%81%94%E3%81%A8%E3%81%AE%E5%AE%9F%E8%A1%8C%E6%99%82%E9%96%93%E3%82%92%E8%A8%88%E6%B8%AC/</guid>
+      <guid>/2018/08/18/time-each-chunk/</guid>
       <description>Jupyter Notebookでは、コードブロック冒頭で %%timeit と唱えると、ブロックの評価に要した時間を表示できる。 https://jakevdp.github.io/PythonDataScienceHandbook/01.07-timing-and-profiling.html これをRmdでもできないかなー？ と思って</description>
     </item>
     
     <item>
       <title>パラメータ付きRmdを試す</title>
-      <link>/2018/08/%E3%83%91%E3%83%A9%E3%83%A1%E3%83%BC%E3%82%BF%E4%BB%98%E3%81%8Drmd%E3%82%92%E8%A9%A6%E3%81%99/</link>
+      <link>/2018/08/17/rmd-parameterized/</link>
       <pubDate>Fri, 17 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/08/%E3%83%91%E3%83%A9%E3%83%A1%E3%83%BC%E3%82%BF%E4%BB%98%E3%81%8Drmd%E3%82%92%E8%A9%A6%E3%81%99/</guid>
+      <guid>/2018/08/17/rmd-parameterized/</guid>
       <description>パラメータ付きRmdが便利そうだと思ったのでメモと実験 パラメータ付きRmdとは YAMLヘッダーの params で作成される変数のリストを用いたRmd うま</description>
     </item>
     
     <item>
       <title>xetexでunicode文字</title>
-      <link>/2018/07/xetex%E3%81%A7unicode%E6%96%87%E5%AD%97/</link>
+      <link>/2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/</link>
       <pubDate>Mon, 09 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/07/xetex%E3%81%A7unicode%E6%96%87%E5%AD%97/</guid>
+      <guid>/2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/</guid>
       <description>$\LaTeX{}$ で μ や α など特殊文字を直打ちすると、 □になってしまうことがしばしば。 XeTeXを使っている場合は、 \setmainfont{IPAMincho} など、ユニコードに対応したフォントを使</description>
     </item>
     
