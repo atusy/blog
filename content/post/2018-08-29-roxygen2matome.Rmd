@@ -7,8 +7,9 @@ categories: [R]
 tags: [package, Roxygen2, Rd]
 ---
 
-```{r include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+needs::needs(data.table, dplyr, knitr, kableExtra)
 ```
 
 Roxygen2のタグについての情報が複数箇所に分散していて調べるのが大変なのでまとめた。
@@ -28,7 +29,7 @@ Roxygen2を用いると、パッケージ内で定義した関数やデータセ
 - `主な使い方` は 超訳 + 超要約 が凄いので、メモ程度に思ってもらって `Roxygen2タグ` や `Rdコマンド` のリンク先を参考して欲しい。
 
 ```{r matome}
-x <- fread('../../tbl/roxygen2_rd.csv')
+x <- fread('../../static/tbl/roxygen2_rd.csv')
 x %>%
   mutate_at(c('roxygen2', 'rd'), str_replace, pattern = '^', replacement = '`') %>%
   mutate_at(c('roxygen2', 'rd'), str_replace, pattern = '$', replacement = '`') %>%
@@ -39,7 +40,8 @@ x %>%
     `主な使い方` = description
   ) %>%
   kable(format = 'html') %>%
-  kableExtra::kable_styling(bootstrap_options = 'striped')
+  kable_styling(bootstrap_options = 'striped') %>%
+  column_spec(1:2, extra_css = 'white-space: nowrap')
 ```
 
 ## `@title` `@description` `@details` について {#title-description-details}
@@ -94,3 +96,7 @@ x %>%
 
 - 暗示的という言葉は分かりにくいのでタグを用いないという表現に修正
 - [`@title` `@description` `@details` について](#title-description-details) 追記
+
+## 2018-08-31 09:40
+
+- Bootstrapを採用し、表を見やすくした
