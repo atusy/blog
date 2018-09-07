@@ -7,8 +7,9 @@ title = "Atusy's blog"
 theme = "hugo-bootstrap"
 googleAnalytics = ""
 disqusShortname = ""
-ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
+ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$", "drafts$"]
 defaultContentLanguage = "ja"
+buildDrafts = false
 
 # Pagination
 paginate = 7
