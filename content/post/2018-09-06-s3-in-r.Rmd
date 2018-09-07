@@ -1,0 +1,58 @@
+---
+title: S3クラスを使う時の注意点
+author: ~
+date: '2018-09-06'
+slug: s3-in-r
+categories: [R]
+tags: [S3]
+draft: yes
+---
+
+# メソッドを読んだ行で `return` される
+
+`UseMethod()` した行で `return` されるが `NextMethod()` した行では `return` されない
+
+```{r}
+f <- function(x, ...) {
+  UseMethod('f')
+  cat('UseMethod is called\n')
+}
+
+f.integer <- function(x, ...) {
+  cat('Method for integer\n')
+  x
+}
+
+f.hoge <- function(x, ...) {
+  cat('Method for hoge\n')
+  NextMethod('f')
+  cat('NextMethod is called within f.hoge\n\n')
+}
+```
+
+# `integer` クラスの場合
+
+```{r}
+f(1L)
+```
+
+`integer` 用のメソッドが呼ばれた
+
+# `class = c('hoge', 'integer')` の場合
+
+```{r}
+f(structure(1L, class = c('hoge', 'integer')))
+```
+
+`NextMethod` として、 `f.integer` が呼び出された。
+しかし返り値は `1` ではなく `NULL`。
+
+# 引数の既定値は引き継がれない
+
+```{r, eval = FALSE}
+g <- function(x = 1L) UseMethod('g')
+g.default <- function(x) x
+g()
+```
+
+> Error in g.default() : argument "x" is missing, with no default

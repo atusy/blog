@@ -4,7 +4,7 @@ author: ~
 date: '2018-07-31'
 slug: dont-sync-pkg-r3-5
 categories: [R]
-tags: [R, package]
+tags: [package]
 ---
 
 タイトル通り、R3.5系ではファイル同期ソフトでパッケージを同期しないようにしましょう。  

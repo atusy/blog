@@ -4,7 +4,7 @@ author: ~
 date: '2018-08-18'
 slug: time-each-chunk
 categories: [R]
-tags: [Rmd, knitr, knit_hooks]
+tags: [Rmd, knitr]
 ---
 
 Jupyter Notebookでは、コードブロック冒頭で `%%timeit` と唱えると、ブロックの評価に要した時間を表示できる。  
