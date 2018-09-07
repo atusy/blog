@@ -5,8 +5,8 @@
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-<meta property="og:title" content="blogdownでMathJaxを利用する" />
-<meta property="og:description" content="MathJaxとは？ MathJaxを利用すると、\(\TeX\) 記法を用いて数式を表現できる。 ブロックにするには $$ \latex $$ と入力すると \[ \LaTeX \] とな" />
+<meta property="og:title" content="blogdownでMathJax" />
+<meta property="og:description" content="MathJaxとは？ MathJaxを利用すると、$\TeX$ 記法を用いて数式を表現できる。 ブロックにするには $$\latex$$ と入力すると $$ \LaTeX $$ となる。 イン" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="/2018/07/28/how2mathjax/" />
 
@@ -27,8 +27,8 @@
 
 
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="blogdownでMathJaxを利用する"/>
-<meta name="twitter:description" content="MathJaxとは？ MathJaxを利用すると、\(\TeX\) 記法を用いて数式を表現できる。 ブロックにするには $$ \latex $$ と入力すると \[ \LaTeX \] とな"/>
+<meta name="twitter:title" content="blogdownでMathJax"/>
+<meta name="twitter:description" content="MathJaxとは？ MathJaxを利用すると、$\TeX$ 記法を用いて数式を表現できる。 ブロックにするには $$\latex$$ と入力すると $$ \LaTeX $$ となる。 イン"/>
 
 
 
@@ -36,7 +36,7 @@
 
     <title>
       
-        blogdownでMathJaxを利用する | Atusy&#39;s blog
+        blogdownでMathJax | Atusy&#39;s blog
       
     </title>
 
@@ -110,7 +110,7 @@
 
 <header>
     <h2 class="blog-post-title">
-        <a class="text-dark" href="../../../../2018/07/28/how2mathjax/">blogdownでMathJaxを利用する</a>
+        <a class="text-dark" href="../../../../2018/07/28/how2mathjax/">blogdownでMathJax</a>
     </h2>
     
 
@@ -128,8 +128,6 @@
 <div class="blog-post-tags text-secondary">
     <strong>タグ:</strong>
     
-        <a class="badge badge-primary" href="../../../../tags/r">r</a>
-    
         <a class="badge badge-primary" href="../../../../tags/blogdown">blogdown</a>
     
         <a class="badge badge-primary" href="../../../../tags/mathjax">mathjax</a>
@@ -142,58 +140,75 @@
 <div class="blog-post-categories text-secondary">
     <strong>カテゴリ:</strong>
     
-        <a class="badge badge-primary" href="../../../../categories/blogdown">blogdown</a>
+        <a class="badge badge-primary" href="../../../../categories/r">R</a>
     
 </div>
 
     <hr>
 </header>
 <article class="blog-post">
-    <div id="mathjax" class="section level1">
-<h1>MathJaxとは？</h1>
-<p>MathJaxを利用すると、<span class="math inline">\(\TeX\)</span> 記法を用いて数式を表現できる。</p>
+    
+
+<h1 id="mathjaxとは">MathJaxとは？</h1>
+
+<p>MathJaxを利用すると、$\TeX$ 記法を用いて数式を表現できる。</p>
+
 <p>ブロックにするには</p>
-<pre class="tex"><code>$$
-\latex
-$$</code></pre>
+<div class="highlight"><pre class="chroma"><code class="language-tex" data-lang="tex"><span class="sb">$$</span><span class="nb">
+</span><span class="nb"></span><span class="nv">\latex</span><span class="nb">
+</span><span class="nb"></span><span class="s">$$</span></code></pre></div>
 <p>と入力すると</p>
-<p><span class="math display">\[
+
+<p>$$
 \LaTeX
-\]</span></p>
+$$</p>
+
 <p>となる。</p>
-<p>インラインでも <code>$\LaTeX$</code> とすると、 <span class="math inline">\(\LaTeX\)</span> となる。</p>
-<p>ブロックでは <code>$$</code> から成る2行の間に、 インラインでは同じ行の <code>$</code> 2字の間に <span class="math inline">\(TeX\)</span> 記法を用いることがポイントだ。</p>
-</div>
-<div id="blogdownmathjax" class="section level1">
-<h1>blogdownではインラインでMathJaxが使えない……？</h1>
+
+<p>インラインでも <code>$\LaTeX$</code> とすると、 $\LaTeX$ となる。</p>
+
+<p>ブロックでは <code>$$</code> から成る2行の間に、 インラインでは同じ行の <code>$</code> 2字の間に $TeX$ 記法を用いることがポイントだ。</p>
+
+<h1 id="blogdownではインラインでmathjaxが使えない">blogdownではインラインでMathJaxが使えない……？</h1>
+
 <p>しかし、blogdownのデフォルトテーマ (Hugo Lithium) ではインラインの数式を表現できなかった。</p>
+
 <p><code>mathjax blogdown</code> で検索して、</p>
+
 <ul>
 <li><a href="https://bookdown.org/yihui/blogdown/templates.html">Yi Hui によるドキュメント</a> や、</li>
 <li><a href="https://qiita.com/kazutan/items/fd76b54587e1787eb201">ぞうさんの記事 ( blogdownで数式がうまく表示されない場合の対処)</a></li>
 </ul>
+
 <p>を参考にするも効果なし。</p>
+
 <p>結局 <code>mathjax 使い方</code> で検索して、</p>
+
 <ul>
 <li><a href="http://genkuroki.web.fc2.com/">くろきげんさんの記事(MathJaxの使い方)</a></li>
 </ul>
+
 <p>も参考にしたところ、インラインで使うにはちょっとコードに工夫がいるらしいことが判明。</p>
-</div>
-<div class="section level1">
-<h1>解決方法</h1>
+
+<h1 id="解決方法">解決方法</h1>
+
 <p><code>./themes/hugo-lithium/layouts/partials/footer_mathjax.html</code></p>
+
 <p>を下記に書き換える。</p>
-<pre class="html"><code>&lt;script type=&quot;text/x-mathjax-config&quot;&gt;
-  MathJax.Hub.Config({ tex2jax: { inlineMath: [[&#39;$&#39;,&#39;$&#39;], [&quot;\\(&quot;,&quot;\\)&quot;]] } });
-&lt;/script&gt;
-&lt;script async
-src=&quot;//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML&quot;&gt;
-&lt;/script&gt;</code></pre>
+<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;text/x-mathjax-config&#34;</span><span class="p">&gt;</span>
+  <span class="nx">MathJax</span><span class="p">.</span><span class="nx">Hub</span><span class="p">.</span><span class="nx">Config</span><span class="p">({</span> <span class="nx">tex2jax</span><span class="o">:</span> <span class="p">{</span> <span class="nx">inlineMath</span><span class="o">:</span> <span class="p">[[</span><span class="s1">&#39;$&#39;</span><span class="p">,</span><span class="s1">&#39;$&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&#34;\\(&#34;</span><span class="p">,</span><span class="s2">&#34;\\)&#34;</span><span class="p">]]</span> <span class="p">}</span> <span class="p">});</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">async</span>
+<span class="na">src</span><span class="o">=</span><span class="s">&#34;//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML&#34;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span></code></pre></div>
 <p>1-3行目はがインラインでmathjaxを動かすために必要なコード。</p>
-<p>4-6行目は利用MするathJaxのバージョンを指定する部分。 くろき氏の記事では2.7.0だったがYi Hui氏の記事では2.7.1だったので、後者にしてみた。</p>
+
+<p>4-6行目は利用MするathJaxのバージョンを指定する部分。
+くろき氏の記事では2.7.0だったがYi Hui氏の記事では2.7.1だったので、後者にしてみた。</p>
+
 <p>くろき氏のコードでは最終行が下記になっているが、なくても動くっぽい？</p>
+
 <p><code>&lt;meta http-equiv=&quot;X-UA-Compatible&quot; CONTENT=&quot;IE=EmulateIE7&quot; /&gt;</code></p>
-</div>
 
 
     
@@ -202,8 +217,6 @@ src=&quot;//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML&quo
 
     <h4>See also</h4>
     <ul>
-        
-            <li><a href="../../../../2018/07/28/how2mathjax/">blogdownでMathJax</a></li>
         
             <li><a href="../../../../2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/">xetexでunicode文字</a></li>
         
@@ -258,8 +271,6 @@ src=&quot;//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML&quo
         <h4>カテゴリ</h4>
         <p>
             
-            <a class="badge badge-primary" href="../../../../categories/blogdown">blogdown</a>
-            
             <a class="badge badge-primary" href="../../../../categories/docker">docker</a>
             
             <a class="badge badge-primary" href="../../../../categories/latex">latex</a>
@@ -276,8 +287,6 @@ src=&quot;//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML&quo
         <p>
             
             <a class="badge badge-primary" href="../../../../tags/blogdown">blogdown</a>
-            
-            <a class="badge badge-primary" href="../../../../tags/docker">docker</a>
             
             <a class="badge badge-primary" href="../../../../tags/ggplot2">ggplot2</a>
             

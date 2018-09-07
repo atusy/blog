@@ -20,14 +20,5 @@
       <description>MathJaxとは？ MathJaxを利用すると、$\TeX$ 記法を用いて数式を表現できる。 ブロックにするには $$\latex$$ と入力すると $$ \LaTeX $$ となる。 イン</description>
     </item>
     
-    <item>
-      <title>blogdownでMathJaxを利用する</title>
-      <link>/2018/07/28/how2mathjax/</link>
-      <pubDate>Sat, 28 Jul 2018 00:00:00 +0000</pubDate>
-      
-      <guid>/2018/07/28/how2mathjax/</guid>
-      <description>MathJaxとは？ MathJaxを利用すると、\(\TeX\) 記法を用いて数式を表現できる。 ブロックにするには $$ \latex $$ と入力すると \[ \LaTeX \] とな</description>
-    </item>
-    
   </channel>
 </rss>

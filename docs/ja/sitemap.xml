@@ -43,11 +43,6 @@
   </url>
   
   <url>
-    <loc>/2018/07/28/how2mathjax/</loc>
-    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/</loc>
     <lastmod>2018-07-09T00:00:00+00:00</lastmod>
   </url>
@@ -55,6 +50,10 @@
   <url>
     <loc>/2018/07/05/github-pages-with-rmarkdown/</loc>
     <lastmod>2018-07-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/1/01/01/</loc>
   </url>
   
   <url>
@@ -78,12 +77,6 @@
   </url>
   
   <url>
-    <loc>/categories/blogdown/</loc>
-    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/tags/blogdown/</loc>
     <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -91,7 +84,6 @@
   
   <url>
     <loc>/categories/</loc>
-    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -107,12 +99,6 @@
   
   <url>
     <loc>/categories/docker/</loc>
-    <lastmod>2018-08-20T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/docker/</loc>
     <lastmod>2018-08-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>

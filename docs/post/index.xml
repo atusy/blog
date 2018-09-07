@@ -84,15 +84,6 @@
     </item>
     
     <item>
-      <title>blogdownでMathJaxを利用する</title>
-      <link>/2018/07/28/how2mathjax/</link>
-      <pubDate>Sat, 28 Jul 2018 00:00:00 +0000</pubDate>
-      
-      <guid>/2018/07/28/how2mathjax/</guid>
-      <description>MathJaxとは？ MathJaxを利用すると、\(\TeX\) 記法を用いて数式を表現できる。 ブロックにするには $$ \latex $$ と入力すると \[ \LaTeX \] とな</description>
-    </item>
-    
-    <item>
       <title>xetexでunicode文字</title>
       <link>/2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/</link>
       <pubDate>Mon, 09 Jul 2018 00:00:00 +0000</pubDate>
@@ -117,6 +108,15 @@
       
       <guid>/1/01/01/</guid>
       <description>xetexでunicode文字 code{white-space: pre;} pre:not([class]) { background-color: white; } if (window.hljs) { hljs.configure({languages: []}); hljs.initHighlightingOnLoad(); if (document.readyState &amp;&amp; document.readyState === &#34;complete&#34;) { window.setTimeout(function() { hljs.initHighlighting(); }, 0); } } h1 { font-size: 34px; } h1.title { font-size: 38px; } h2 { font-size: 30px; } h3 { font-size: 24px; } h4 { font-size: 18px; } h5 { font-size:</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>/1/01/01/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/1/01/01/</guid>
+      <description>blogdownでMathJax code{white-space: pre;} pre:not([class]) { background-color: white; } if (window.hljs) { hljs.configure({languages: []}); hljs.initHighlightingOnLoad(); if (document.readyState &amp;&amp; document.readyState === &#34;complete&#34;) { window.setTimeout(function() { hljs.initHighlighting(); }, 0); } } h1 { font-size: 34px; } h1.title { font-size: 38px; } h2 { font-size: 30px; } h3 { font-size: 24px; } h4 { font-size: 18px; } h5 {</description>
     </item>
     
   </channel>
