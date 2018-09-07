@@ -38,7 +38,7 @@ roxygen2,rd,description,url_roxygen2,url_rd
 @references,\reference,参考資料を文字列や `\url{}` を用いて記述。,http://kbroman.org/pkg_primer/pages/docs.html,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005creferences
 @return,\value,関数の返り値を記述する。,http://r-pkgs.had.co.nz/man.html#man-functions,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cvalue
 @section,,任意のセクションを追加する。書式は  `@section タイトル: 内容` で、タイトルの後に `:` が必要。 `:` タイトルは改行してはならない。,http://r-pkgs.had.co.nz/man.html#man-workflow-2,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005csection
-@seealso,\seealso,他のドキュメントやウェブサイトへのリンクを貼る。,http://r-pkgs.had.co.nz/man.html#man-workflow-2,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cseealso
+@seealso,\seealso,他のドキュメントやウェブサイトへのリンクを貼る。他の関数へは `@seealso [function()]` 。,http://r-pkgs.had.co.nz/man.html#man-workflow-2,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cseealso
 @slot,,S4クラスの `slot` の説明を記述。,http://r-pkgs.had.co.nz/man.html#man-classes,
 @source,\source,S4メソッド作成時に、原典を記載。2番目以降は `@reference` へ。,https://cran.r-project.org/doc/manuals/R-exts.html#Rd-format,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005csource
 @template,,`man-roxygen` ディレクトリ中に存在するRoxygenコメントのみからなるRファイルの中身を挿入する。,https://github.com/yihui/roxygen2/blob/master/vignettes/rd.Rmd,

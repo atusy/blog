@@ -3,6 +3,16 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/2018/09/06/s3-in-r/</loc>
+    <lastmod>2018-09-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/2018/09/06/roxygen2-order/</loc>
+    <lastmod>2018-09-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/2018/08/28/roxygen2matome/</loc>
     <lastmod>2018-08-28T00:00:00+00:00</lastmod>
   </url>
@@ -10,6 +20,11 @@
   <url>
     <loc>/2018/08/25/missing-value-type/</loc>
     <lastmod>2018-08-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/2018/08/20/docker-memo/</loc>
+    <lastmod>2018-08-20T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -25,6 +40,16 @@
   <url>
     <loc>/2018/07/31/dont-sync-pkg-r3-5/</loc>
     <lastmod>2018-07-31T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/2018/07/31/dont-sync-pkg-r3-5/</loc>
+    <lastmod>2018-07-31T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/2018/07/28/how2mathjax/</loc>
+    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -48,7 +73,7 @@
   
   <url>
     <loc>/</loc>
-    <lastmod>2018-08-28T00:00:00+00:00</lastmod>
+    <lastmod>2018-09-06T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -91,14 +116,20 @@
   </url>
   
   <url>
-    <loc>/tags/ggplot2/</loc>
-    <lastmod>2018-08-25T00:00:00+00:00</lastmod>
+    <loc>/tags/docker/</loc>
+    <lastmod>2018-08-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/knit_hooks/</loc>
-    <lastmod>2018-08-18T00:00:00+00:00</lastmod>
+    <loc>/categories/docker/</loc>
+    <lastmod>2018-08-20T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/ggplot2/</loc>
+    <lastmod>2018-08-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -127,6 +158,12 @@
   </url>
   
   <url>
+    <loc>/tags/memo/</loc>
+    <lastmod>2018-08-20T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/tags/missing-value/</loc>
     <lastmod>2018-08-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -140,31 +177,25 @@
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2018-08-28T00:00:00+00:00</lastmod>
+    <lastmod>2018-09-06T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/r/</loc>
-    <lastmod>2018-08-25T00:00:00+00:00</lastmod>
+    <lastmod>2018-07-31T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/categories/r/</loc>
-    <lastmod>2018-08-28T00:00:00+00:00</lastmod>
+    <lastmod>2018-09-06T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/rd/</loc>
     <lastmod>2018-08-28T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/rmarkdown/</loc>
-    <lastmod>2018-07-09T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -181,8 +212,8 @@
   </url>
   
   <url>
-    <loc>/tags/stats/</loc>
-    <lastmod>2018-08-25T00:00:00+00:00</lastmod>
+    <loc>/tags/s3/</loc>
+    <lastmod>2018-09-06T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

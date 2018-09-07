@@ -49,7 +49,8 @@
 
     
 
-    
+    <link rel="stylesheet" href="../../../../css/chroma-styles.css">
+
   </head>
   <body>
     
@@ -129,9 +130,7 @@
     
         <a class="badge badge-primary" href="../../../../tags/latex">latex</a>
     
-        <a class="badge badge-primary" href="../../../../tags/rmd">rmd</a>
-    
-        <a class="badge badge-primary" href="../../../../tags/rmarkdown">rmarkdown</a>
+        <a class="badge badge-primary" href="../../../../tags/rmd">Rmd</a>
     
         <a class="badge badge-primary" href="../../../../tags/unicode">unicode</a>
     
@@ -158,29 +157,23 @@
 <p>など、ユニコードに対応したフォントを使うように指定する。</p>
 
 <p>Rmarkdownユーザーの場合、下記の様にyamlを記述すればよい。</p>
-
-<pre><code class="language-yaml">---
-output:
-  pdf_document:
-    latex_engine: xelatex
-header-includes:
-- \usepackage{zxjatype}
-- \usepackage[ipa]{zxjafont}
-- \setmainfont{IPAMincho}
----
-</code></pre>
-
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml">---<span class="w">
+</span><span class="w"></span>output<span class="p">:</span><span class="w">
+</span><span class="w">  </span>pdf_document<span class="p">:</span><span class="w">
+</span><span class="w">    </span>latex_engine<span class="p">:</span><span class="w"> </span>xelatex<span class="w">
+</span><span class="w"></span>header-includes<span class="p">:</span><span class="w">
+</span><span class="w"></span>-<span class="w"> </span>\usepackage{zxjatype}<span class="w">
+</span><span class="w"></span>-<span class="w"> </span>\usepackage<span class="p">[</span>ipa<span class="p">]</span>{zxjafont}<span class="w">
+</span><span class="w"></span>-<span class="w"> </span>\setmainfont{IPAMincho}<span class="w">
+</span><span class="w"></span>---</code></pre></div>
 <p>ちなみに、現在使っている <code>header-includes</code> は</p>
-
-<pre><code class="language-yaml">header-includes:
-- \usepackage{bookmark}
-- \usepackage{zxjatype}
-- \usepackage[ipa]{zxjafont}
-- \usepackage[font={scriptsize}]{caption}
-- \renewcommand{\thetable}{\arabic{section}.\arabic{table}}
-- \setmainfont{IPAMincho}
-</code></pre>
-
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml">header-includes<span class="p">:</span><span class="w">
+</span><span class="w"></span>-<span class="w"> </span>\usepackage{bookmark}<span class="w">
+</span><span class="w"></span>-<span class="w"> </span>\usepackage{zxjatype}<span class="w">
+</span><span class="w"></span>-<span class="w"> </span>\usepackage<span class="p">[</span>ipa<span class="p">]</span>{zxjafont}<span class="w">
+</span><span class="w"></span>-<span class="w"> </span>\usepackage<span class="p">[</span>font={scriptsize}<span class="p">]</span>{caption}<span class="w">
+</span><span class="w"></span>-<span class="w"> </span>\renewcommand{\thetable}{\arabic{section}.\arabic{table}}<span class="w">
+</span><span class="w"></span>-<span class="w"> </span>\setmainfont{IPAMincho}</code></pre></div>
 
     
 
@@ -203,6 +196,14 @@ header-includes:
     <ol class="list-unstyled">
         
         <li>
+            <a href="../../../../2018/09/06/s3-in-r/">S3クラスを使う時の注意点</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/09/06/roxygen2-order/">roxygen2-order</a>
+        </li>
+        
+        <li>
             <a href="../../../../2018/08/28/roxygen2matome/">roxygen2タグまとめ</a>
         </li>
         
@@ -211,15 +212,7 @@ header-includes:
         </li>
         
         <li>
-            <a href="../../../../2018/08/18/time-each-chunk/">Rmdでchunkごとの実行時間を計測</a>
-        </li>
-        
-        <li>
-            <a href="../../../../2018/08/17/rmd-parameterized/">パラメータ付きRmdを試す</a>
-        </li>
-        
-        <li>
-            <a href="../../../../2018/07/31/dont-sync-pkg-r3-5/">R3.5系ではファイル同期ソフトでパッケージを同期しないように</a>
+            <a href="../../../../2018/08/20/docker-memo/">Docker情報まとめ</a>
         </li>
         
     </ol>
@@ -234,6 +227,8 @@ header-includes:
         <p>
             
             <a class="badge badge-primary" href="../../../../categories/blogdown">blogdown</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/docker">docker</a>
             
             <a class="badge badge-primary" href="../../../../categories/latex">latex</a>
             
@@ -250,15 +245,17 @@ header-includes:
             
             <a class="badge badge-primary" href="../../../../tags/blogdown">blogdown</a>
             
-            <a class="badge badge-primary" href="../../../../tags/ggplot2">ggplot2</a>
+            <a class="badge badge-primary" href="../../../../tags/docker">docker</a>
             
-            <a class="badge badge-primary" href="../../../../tags/knit_hooks">knit_hooks</a>
+            <a class="badge badge-primary" href="../../../../tags/ggplot2">ggplot2</a>
             
             <a class="badge badge-primary" href="../../../../tags/knitr">knitr</a>
             
             <a class="badge badge-primary" href="../../../../tags/latex">latex</a>
             
             <a class="badge badge-primary" href="../../../../tags/mathjax">mathjax</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/memo">memo</a>
             
             <a class="badge badge-primary" href="../../../../tags/missing-value">missing-value</a>
             
@@ -268,13 +265,11 @@ header-includes:
             
             <a class="badge badge-primary" href="../../../../tags/rd">rd</a>
             
-            <a class="badge badge-primary" href="../../../../tags/rmarkdown">rmarkdown</a>
-            
             <a class="badge badge-primary" href="../../../../tags/rmd">rmd</a>
             
             <a class="badge badge-primary" href="../../../../tags/roxygen2">roxygen2</a>
             
-            <a class="badge badge-primary" href="../../../../tags/stats">stats</a>
+            <a class="badge badge-primary" href="../../../../tags/s3">s3</a>
             
             <a class="badge badge-primary" href="../../../../tags/unicode">unicode</a>
             

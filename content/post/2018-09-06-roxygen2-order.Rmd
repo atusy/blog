@@ -1,0 +1,44 @@
+---
+title: roxygen2-order
+author: ~
+date: '2018-09-06'
+slug: roxygen2-order
+categories: []
+tags: []
+---
+
+```{r}
+#' @title
+#' 
+#' @description
+#' 
+#' @inherit
+#' 
+#' @inheritParams
+#' @inheritDotParams
+#' @params
+#'
+#' @details
+#' 
+#' @note
+#'
+#' @return
+#' 
+#' @inheritSection
+#' @section
+#' 
+#' @references
+#' 
+#' @seealso
+#' 
+#' @examples
+#' 
+#' @aliases
+#' @rdname
+#' 
+#' @import
+#' @importFrom
+#' @export
+#' @noRd
+```
+

@@ -6,10 +6,28 @@
     <description>Recent content in Posts on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Tue, 28 Aug 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 06 Sep 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>S3クラスを使う時の注意点</title>
+      <link>/2018/09/06/s3-in-r/</link>
+      <pubDate>Thu, 06 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/09/06/s3-in-r/</guid>
+      <description>メソッドを読んだ行で return される UseMethod() した行で return されるが NextMethod() した行では return されない f &amp;lt;- function(x, ...) { UseMethod(&amp;#39;f&amp;#39;) cat(&amp;#39;UseMethod is called\n&amp;#39;) } f.integer &amp;lt;- function(x, ...) { cat(&amp;#39;Method for integer\n&amp;#39;) x } f.hoge &amp;lt;- function(x, ...) { cat(&amp;#39;Method for hoge\n&amp;#39;) NextMethod(&amp;#39;f&amp;#39;) cat(&amp;#39;NextMethod is called within f.hoge\n\n&amp;#39;) }</description>
+    </item>
+    
+    <item>
+      <title>roxygen2-order</title>
+      <link>/2018/09/06/roxygen2-order/</link>
+      <pubDate>Thu, 06 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/09/06/roxygen2-order/</guid>
+      <description>#&amp;#39; @title #&amp;#39; #&amp;#39; @description #&amp;#39; #&amp;#39; @inherit #&amp;#39; #&amp;#39; @inheritParams #&amp;#39; @inheritDotParams #&amp;#39; @params #&amp;#39; #&amp;#39; @details #&amp;#39; #&amp;#39; @note #&amp;#39; #&amp;#39; @return #&amp;#39; #&amp;#39; @inheritSection #&amp;#39; @section #&amp;#39; #&amp;#39; @references #&amp;#39; #&amp;#39; @seealso #&amp;#39; #&amp;#39; @examples #&amp;#39; #&amp;#39; @aliases #&amp;#39; @rdname #&amp;#39; #&amp;#39; @import #&amp;#39; @importFrom #&amp;#39; @export #&amp;#39; @noRd </description>
+    </item>
     
     <item>
       <title>roxygen2タグまとめ</title>
@@ -27,6 +45,15 @@
       
       <guid>/2018/08/25/missing-value-type/</guid>
       <description>先日、欠損値の発生過程の例を図示してTweetしたところ、思ったより反響がよかったので、図をブラシュアップの上、記事に残すことにした。 俄仕込</description>
+    </item>
+    
+    <item>
+      <title>Docker情報まとめ</title>
+      <link>/2018/08/20/docker-memo/</link>
+      <pubDate>Mon, 20 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/08/20/docker-memo/</guid>
+      <description>ユーザーをdockerグループにいれると、スーパーユーザーにならずとも docker compose できる。 https://qiita.com/DQNEO/items/da5df074c48b012152ee</description>
     </item>
     
     <item>
@@ -54,6 +81,24 @@
       
       <guid>/2018/07/31/dont-sync-pkg-r3-5/</guid>
       <description>タイトル通り、R3.5系ではファイル同期ソフトでパッケージを同期しないようにしましょう。 同期しておくとある環境にインストールしたパッケージを</description>
+    </item>
+    
+    <item>
+      <title>R3.5系ではファイル同期ソフトでパッケージを同期しないように</title>
+      <link>/2018/07/31/dont-sync-pkg-r3-5/</link>
+      <pubDate>Tue, 31 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/07/31/dont-sync-pkg-r3-5/</guid>
+      <description>タイトル通り、R3.5系ではファイル同期ソフトでパッケージを同期しないようにしましょう。 同期しておくとある環境にインストールしたパッケージを</description>
+    </item>
+    
+    <item>
+      <title>blogdownでMathJax</title>
+      <link>/2018/07/28/how2mathjax/</link>
+      <pubDate>Sat, 28 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/07/28/how2mathjax/</guid>
+      <description>MathJaxとは？ MathJaxを利用すると、$\TeX$ 記法を用いて数式を表現できる。 ブロックにするには $$\latex$$ と入力すると $$ \LaTeX $$ となる。 イン</description>
     </item>
     
     <item>

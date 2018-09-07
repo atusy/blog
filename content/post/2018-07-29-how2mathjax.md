@@ -1,10 +1,10 @@
 ---
-title: blogdownでMathJaxを利用する
+title: blogdownでMathJax
 author: ~
 date: '2018-07-28'
 slug: how2mathjax
-categories: [blogdown]
-tags: [r, blogdown, mathjax, latex]
+categories: [R]
+tags: [blogdown, mathjax, latex]
 ---
 
 # MathJaxとは？

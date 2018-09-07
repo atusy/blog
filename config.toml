@@ -14,6 +14,9 @@ defaultContentLanguage = "ja"
 paginate = 7
 paginatePath = "page"
 
+pygmentsUseClasses = true
+pygmentsCodeFences = true
+
 [taxonomies]
   tag = "tags"
   category = "categories"

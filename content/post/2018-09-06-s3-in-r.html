@@ -1,0 +1,55 @@
+---
+title: S3クラスを使う時の注意点
+author: ~
+date: '2018-09-06'
+slug: s3-in-r
+categories: [R]
+tags: [S3]
+draft: yes
+---
+
+
+
+<div id="-return-" class="section level1">
+<h1>メソッドを読んだ行で <code>return</code> される</h1>
+<p><code>UseMethod()</code> した行で <code>return</code> されるが <code>NextMethod()</code> した行では <code>return</code> されない</p>
+<pre class="r"><code>f &lt;- function(x, ...) {
+  UseMethod(&#39;f&#39;)
+  cat(&#39;UseMethod is called\n&#39;)
+}
+
+f.integer &lt;- function(x, ...) {
+  cat(&#39;Method for integer\n&#39;)
+  x
+}
+
+f.hoge &lt;- function(x, ...) {
+  cat(&#39;Method for hoge\n&#39;)
+  NextMethod(&#39;f&#39;)
+  cat(&#39;NextMethod is called within f.hoge\n\n&#39;)
+}</code></pre>
+</div>
+<div id="integer-" class="section level1">
+<h1><code>integer</code> クラスの場合</h1>
+<pre class="r"><code>f(1L)</code></pre>
+<pre><code>## Method for integer</code></pre>
+<pre><code>## [1] 1</code></pre>
+<p><code>integer</code> 用のメソッドが呼ばれた</p>
+</div>
+<div id="class-choge-integer-" class="section level1">
+<h1><code>class = c('hoge', 'integer')</code> の場合</h1>
+<pre class="r"><code>f(structure(1L, class = c(&#39;hoge&#39;, &#39;integer&#39;)))</code></pre>
+<pre><code>## Method for hoge
+## Method for integer
+## NextMethod is called within f.hoge</code></pre>
+<p><code>NextMethod</code> として、 <code>f.integer</code> が呼び出された。 しかし返り値は <code>1</code> ではなく <code>NULL</code>。</p>
+</div>
+<div class="section level1">
+<h1>引数の既定値は引き継がれない</h1>
+<pre class="r"><code>g &lt;- function(x = 1L) UseMethod(&#39;g&#39;)
+g.default &lt;- function(x) x
+g()</code></pre>
+<blockquote>
+<p>Error in g.default() : argument “x” is missing, with no default</p>
+</blockquote>
+</div>
