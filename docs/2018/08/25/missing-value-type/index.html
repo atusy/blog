@@ -8,23 +8,8 @@
 <meta property="og:title" content="欠損値の発生過程の類別" />
 <meta property="og:description" content="先日、欠損値の発生過程の例を図示してTweetしたところ、思ったより反響がよかったので、図をブラシュアップの上、記事に残すことにした。 俄仕込" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/2018/08/25/missing-value-type/" />
-
-
-
-<meta property="article:published_time" content="2018-08-25T00:00:00&#43;00:00"/>
-
+<meta property="og:url" content="/2018/08/25/missing-value-type/" /><meta property="article:published_time" content="2018-08-25T00:00:00&#43;00:00"/>
 <meta property="article:modified_time" content="2018-08-25T00:00:00&#43;00:00"/>
-
-
-
-
-
-
-
-
-
-
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="欠損値の発生過程の類別"/>
@@ -169,7 +154,9 @@
 <li>ある変数の欠損は、ランダムではなく、自身の真値に依存</li>
 </ul></li>
 </ul>
-<p>理解においてはMCAR, MAR, MNARの字面をあまり追い過ぎないのがキモだと思う。 「ある変数」を「データ」と記載する例も見かけるが、前者の方が個人的には分かりよい。 また、ランダムという言葉に惑わされがちだが、ここでのランダムはモデルとしてランダムか、ではなく、観測者にとってランダムに見えるか、くらいの気持ちでいた方がいい。</p>
+<p>理解においてはMCAR, MAR, MNARの字面をあまり追い過ぎないのがキモだと思う。
+「ある変数」を「データ」と記載する例も見かけるが、前者の方が個人的には分かりよい。
+また、ランダムという言葉に惑わされがちだが、ここでのランダムはモデルとしてランダムか、ではなく、観測者にとってランダムに見えるか、くらいの気持ちでいた方がいい。</p>
 <p>それでは欠損したデータを人工的に作って図にしてみよう。</p>
 <p><img src="../../../../post/2018-08-24-missing-value-type_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
 <p>xとyが平均0、分散1の正規分布に従う変数で、xの一部が欠損しうるとする。</p>
@@ -196,7 +183,8 @@
 </ul></li>
 <li>MNAR: xの欠損がxの値に依存する場合
 <ul>
-<li>x &gt; 0 ならば欠損しうる (正しくは1000点のx中、xの値が上位500位以内の中から300点を一様に欠損)</li>
+<li>x &gt; 0 ならば欠損しうる
+(正しくは1000点のx中、xの値が上位500位以内の中から300点を一様に欠損)</li>
 </ul></li>
 </ul>
 <p>散布図の上部に描かれた線は</p>
@@ -205,11 +193,15 @@
 <li>黒破線: xを全て観測できた時のxのカーネル密度分布</li>
 </ul>
 <p>尚、1000点用意したデータのうち、欠損した点の数はMCAR, MAR, MNARいずれの場合も300点ずつである。</p>
-<p>面白いのはMCARの場合でもMARの場合でもxの分布にはほとんど影響なく、yを見ない限り両者は識別不能であることだ。 一方でMNARではxの分布が大きく歪むので、解析結果にバイアスが発生しやすいことに注意する必要がある。</p>
-<p>ところで、MNARなxの欠損は x &gt; 0 の時のみ起きると条件付けているものの、 x &gt; 0 なデータの中からはランダムに選ばれている。 Not At Randomというのは見かけ上の問題に過ぎない。 勿論、x &gt; 0 を全損させれば、Not At Randomにもできる (ランダムに全損したと解釈することもできるが!)。</p>
+<p>面白いのはMCARの場合でもMARの場合でもxの分布にはほとんど影響なく、yを見ない限り両者は識別不能であることだ。
+一方でMNARではxの分布が大きく歪むので、解析結果にバイアスが発生しやすいことに注意する必要がある。</p>
+<p>ところで、MNARなxの欠損は x &gt; 0 の時のみ起きると条件付けているものの、 x &gt; 0 なデータの中からはランダムに選ばれている。
+Not At Randomというのは見かけ上の問題に過ぎない。
+勿論、x &gt; 0 を全損させれば、Not At Randomにもできる (ランダムに全損したと解釈することもできるが!)。</p>
 <p>同様にMARな欠損を今回はランダムに選んだが、例えばy &gt; 0な点を全損させてはどうだろうか。</p>
 <p><img src="../../../../post/2018-08-24-missing-value-type_files/figure-html/unnamed-chunk-2-1.png" width="240" /></p>
-<p>乱数を用いていないという意味ではランダムではないが、MARには違いない。 yを見ず、xにだけ注目すれば「あたかも」xはランダムに欠損している。</p>
+<p>乱数を用いていないという意味ではランダムではないが、MARには違いない。
+yを見ず、xにだけ注目すれば「あたかも」xはランダムに欠損している。</p>
 <p>当記事で作成した図のソースコードは<a href="https://github.com/atusy/blog/blob/master/content/post/2018-08-24-missing-value-type.Rmd">こちら</a>。</p>
 
 
@@ -234,15 +226,15 @@
     <ol class="list-unstyled">
         
         <li>
+            <a href="../../../../2018/10/11/hello-antergosmd/">Antergos導入</a>
+        </li>
+        
+        <li>
             <a href="../../../../2018/08/28/roxygen2matome/">roxygen2タグまとめ</a>
         </li>
         
         <li>
             <a href="../../../../2018/08/25/missing-value-type/">欠損値の発生過程の類別</a>
-        </li>
-        
-        <li>
-            <a href="../../../../2018/08/20/docker-memo/">Docker情報まとめ</a>
         </li>
         
         <li>
@@ -264,7 +256,7 @@
         <h4>カテゴリ</h4>
         <p>
             
-            <a class="badge badge-primary" href="../../../../categories/docker">docker</a>
+            <a class="badge badge-primary" href="../../../../categories/arch">arch</a>
             
             <a class="badge badge-primary" href="../../../../categories/latex">latex</a>
             
@@ -287,9 +279,9 @@
             
             <a class="badge badge-primary" href="../../../../tags/latex">latex</a>
             
-            <a class="badge badge-primary" href="../../../../tags/mathjax">mathjax</a>
+            <a class="badge badge-primary" href="../../../../tags/linux">linux</a>
             
-            <a class="badge badge-primary" href="../../../../tags/memo">memo</a>
+            <a class="badge badge-primary" href="../../../../tags/mathjax">mathjax</a>
             
             <a class="badge badge-primary" href="../../../../tags/missing-value">missing-value</a>
             

@@ -6,16 +6,17 @@
     <description>Recent content in Categories on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
+    <lastBuildDate>Thu, 11 Oct 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>Docker</title>
-      <link>/categories/docker/</link>
-      <pubDate>Mon, 20 Aug 2018 00:00:00 +0000</pubDate>
+      <title>Arch</title>
+      <link>/categories/arch/</link>
+      <pubDate>Thu, 11 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>/categories/docker/</guid>
+      <guid>/categories/arch/</guid>
       <description></description>
     </item>
     

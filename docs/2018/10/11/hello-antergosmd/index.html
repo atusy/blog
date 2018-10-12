@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta property="og:title" content="Antergos導入" />
+<meta property="og:description" content="自宅用PCにAntergosを導入しました． ppaを足すも.debや.tar.gzを落とすもなんかかったるくなってAURが楽しそうなArch" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/2018/10/11/hello-antergosmd/" /><meta property="article:published_time" content="2018-10-11T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2018-10-11T00:00:00&#43;00:00"/>
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Antergos導入"/>
+<meta name="twitter:description" content="自宅用PCにAntergosを導入しました． ppaを足すも.debや.tar.gzを落とすもなんかかったるくなってAURが楽しそうなArch"/>
+
+
+
+    <link rel="canonical" href="../../../../2018/10/11/hello-antergosmd/">
+
+    <title>
+      
+        Antergos導入 | Atusy&#39;s blog
+      
+    </title>
+
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+
+    <link href="../../../../css/style.css" rel="stylesheet">
+
+    
+
+    
+
+    <link rel="stylesheet" href="../../../../css/chroma-styles.css">
+
+  </head>
+  <body>
+    
+      <header class="blog-header">
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+        <a class="navbar-brand" href="../../../../">
+            <img src="../../../../images/atusy.jpg" width="50" height="50" class="d-inline-block align-top" alt="">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+            <ul class="navbar-nav">
+                
+                
+                <li class="nav-item ">
+                    
+                        <a class="nav-link" href="https://github.com/atusy">GitHub</a>
+                    
+                </li>
+                
+                <li class="nav-item ">
+                    
+                        <a class="nav-link" href="https://twitter.com/Atsushi776">Twitter</a>
+                    
+                </li>
+                
+            </ul>
+            
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Language
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                        
+                            <a class="dropdown-item" href="../../../../">Japanese</a>
+                        
+                            <a class="dropdown-item" href="../../../../en/">English</a>
+                        
+                    </div>
+                </li>
+            </ul>
+            
+        </div>
+    </nav>
+</header>
+    
+
+    
+    <div class="container">
+      <div class="row">
+        <div class="col-12 col-lg-8 blog-main">
+
+          
+
+<header>
+    <h2 class="blog-post-title">
+        <a class="text-dark" href="../../../../2018/10/11/hello-antergosmd/">Antergos導入</a>
+    </h2>
+    
+
+
+<div class="blog-post-date text-secondary">
+    
+        2018-10-11
+    
+    
+        by <span rel="author">Atusy</span>
+    
+</div>
+
+    
+<div class="blog-post-tags text-secondary">
+    <strong>タグ:</strong>
+    
+        <a class="badge badge-primary" href="../../../../tags/linux">Linux</a>
+    
+</div>
+
+    
+<div class="blog-post-categories text-secondary">
+    <strong>カテゴリ:</strong>
+    
+        <a class="badge badge-primary" href="../../../../categories/arch">Arch</a>
+    
+</div>
+
+    <hr>
+</header>
+<article class="blog-post">
+    
+
+<p>自宅用PCにAntergosを導入しました．</p>
+
+<p>ppaを足すも.debや.tar.gzを落とすもなんかかったるくなってAURが楽しそうなArchlinux系列を試すことにしました．</p>
+
+<p>Antergosにした理由は，デスクトップ環境として慣れ親しんだCinnamonを簡単に導入できるからです．</p>
+
+<p>導入は公式の提供する手順通りに進めれば簡単です．</p>
+
+<p>以下は日本語入力環境をセットアップするまでの備忘録です．</p>
+
+<h1 id="osインストール">OSインストール</h1>
+
+<p>localeにはen_us.utf-8を選び，初期に追加インストールできるパッケージとして，Bluetooth, Firefox, LibreOffice, Printing Support, ssh, ufwを追加しました．</p>
+
+<h1 id="keyboard設定">Keyboard設定</h1>
+
+<p>Caps LockをCtrl化</p>
+
+<h1 id="guakeの導入">guakeの導入</h1>
+
+<p>どこでもterminalですね．</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo pacman -S guake</code></pre></div>
+<p>でインストール</p>
+
+<p><code>Guake properties</code> から，</p>
+
+<ul>
+<li>Startup時のPopup通知無効化</li>
+<li>ログイン時に自動起動</li>
+<li>サイズを横50%，縦70%程度</li>
+<li>位置を画面左側</li>
+</ul>
+
+<p>に設定しました．</p>
+
+<h1 id="日本語環境導入">日本語環境導入</h1>
+
+<p>日本語フォントと日本語入力環境を導入します(<a href="https://qiita.com/l7u7ch/items/f88cda88ab95176e870f">参考</a>)</p>
+
+<p>私はCinnamonとfcitx-skkを使うので，上記参考リンクとは若干手順が違います．</p>
+
+<p>フォントにはとりあえずipafontを入れますが，ここはお好みで．</p>
+
+<h2 id="パッケージ導入-スタートアップスクリプト作成">パッケージ導入 + スタートアップスクリプト作成</h2>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo pacman -S otf-ipafont fcitx fcitx-configtool fcitx-gtk2 fcitx-gtk3 fcitx-qt4 fcitx-qt5 fcitx-skk skk-jisyo
+<span class="nb">echo</span> <span class="s2">&#34;export GTK_IM_MODULE=fcitx&#34;</span> &gt; ~/.xprofile
+<span class="nb">echo</span> <span class="s2">&#34;export QT_IM_MODULE=fcitx&#34;</span> &gt;&gt; ~/.xprofile
+<span class="nb">echo</span> <span class="s2">&#34;export XMODIFIERS=@im=fcitx&#34;</span> &gt;&gt; ~/.xprofile</code></pre></div>
+<h2 id="システムとfirefoxのフォントを設定">システムとFirefoxのフォントを設定</h2>
+
+<ul>
+<li><code>System Settings</code> -&gt; <code>Fonts</code> -&gt; Monospace font以外をIPAPGothic Regularに．</li>
+<li><code>Firefox</code> -&gt; <code>prereference</code> -&gt; <code>Fonts &amp; Colors</code> -&gt; <code>Default font</code> を IPAPGothic Regularに．</li>
+</ul>
+
+<h2 id="fcitxの設定">fcitxの設定</h2>
+
+<ul>
+<li>再ログイン</li>
+<li><code>System Tray</code>上の<code>fcitx</code>を右クリック-&gt; <code>configure</code></li>
+<li><code>Input Method</code>右下の<code>+</code> -&gt; <code>Only Show Current Language</code>のチェックを外す -&gt; <code>skk</code>を選択 -&gt; <code>OK</code></li>
+<li><code>Input Method</code>の<code>Keyboard - English (US)</code>を選択-&gt;右下の<code>-</code>を押す</li>
+<li><code>Input Method</code>に追加された<code>skk</code>をダブルクリック
+
+<ul>
+<li>Punctuation Style: Latin</li>
+<li>Initial Input Mode: Direct Input</li>
+<li>Page Size: 7</li>
+<li>Return-key does not insert new line on commit: off</li>
+<li>Candidate: Vertical</li>
+<li>Number candidate of &hellip;: 2</li>
+<li>Show Annotation: on</li>
+<li>Keys to Select&hellip;: Qwerty Center Row (a,s,d,&hellip;)</li>
+<li>Dictionary and Rules
+
+<ul>
+<li>Rule: AZIK_en</li>
+</ul></li>
+</ul></li>
+<li><code>System Tray</code>上の<code>fcitx</code>を右クリック-&gt; <code>Restart</code>
+<br /></li>
+</ul>
+
+<p>ルールのAZIK_enはAZIKを改変したものです．</p>
+
+
+    
+
+    
+
+
+</article>
+
+
+
+        </div>
+
+        <aside class="col-12 col-lg-3 ml-auto blog-sidebar">
+    
+        
+
+
+<section>
+    <h4>New</h4>
+    <ol class="list-unstyled">
+        
+        <li>
+            <a href="../../../../2018/10/11/hello-antergosmd/">Antergos導入</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/08/28/roxygen2matome/">roxygen2タグまとめ</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/08/25/missing-value-type/">欠損値の発生過程の類別</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/08/18/time-each-chunk/">Rmdでchunkごとの実行時間を計測</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/08/17/rmd-parameterized/">パラメータ付きRmdを試す</a>
+        </li>
+        
+    </ol>
+</section>
+
+    
+    
+        <section>
+    
+        
+        <h4>カテゴリ</h4>
+        <p>
+            
+            <a class="badge badge-primary" href="../../../../categories/arch">arch</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/latex">latex</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/r">r</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/stats">stats</a>
+            
+        </p>
+        
+    
+        
+        <h4>タグ</h4>
+        <p>
+            
+            <a class="badge badge-primary" href="../../../../tags/blogdown">blogdown</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/ggplot2">ggplot2</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/knitr">knitr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/latex">latex</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/linux">linux</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/mathjax">mathjax</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/missing-value">missing-value</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/package">package</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/r">r</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/rd">rd</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/rmd">rmd</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/roxygen2">roxygen2</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/unicode">unicode</a>
+            
+        </p>
+        
+    
+</section>
+    
+</aside>
+
+      </div>
+    </div>
+    
+
+    
+      
+
+
+
+<footer class="blog-footer w-100">
+    <nav class="navbar navbar-light bg-light">
+        <p class="w-100 text-center"></p>
+        <p class="w-100 text-center"><a href="#">Home</a></p>
+    </nav>
+</footer>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script async
+src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+    
+
+    
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+  </body>
+</html>

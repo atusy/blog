@@ -18,7 +18,8 @@ params:
 <h1>パラメータ付きRmdとは</h1>
 <p>YAMLヘッダーの <code>params</code> で作成される変数のリストを用いたRmd</p>
 <p>うまく使えばYAMLヘッダーさえ弄ればOKな半自動レポーティングの助けになると思われる。</p>
-<p>詳細は、こちら <a href="https://bookdown.org/yihui/rmarkdown/params-knit.html" class="uri">https://bookdown.org/yihui/rmarkdown/params-knit.html</a></p>
+<p>詳細は、こちら
+<a href="https://bookdown.org/yihui/rmarkdown/params-knit.html" class="uri">https://bookdown.org/yihui/rmarkdown/params-knit.html</a></p>
 <p>リンク先にはパラメータ入力用GUIを用いる方法も紹介されている。</p>
 </div>
 <div class="section level1">
@@ -48,6 +49,7 @@ date: `r Sys.Date()`
 <pre class="r"><code>params:
   x: `r Sys.Date()`</code></pre>
 <blockquote>
-<p>Error in yaml::yaml.load(yaml, handlers = knit_params_handlers(evaluate = evaluate)) : Scanner error: while scanning for the next token at line 11, column 8 found character that cannot start any token at line 11, column 8</p>
+<p>Error in yaml::yaml.load(yaml, handlers = knit_params_handlers(evaluate = evaluate)) :
+Scanner error: while scanning for the next token at line 11, column 8 found character that cannot start any token at line 11, column 8</p>
 </blockquote>
 </div>
