@@ -1,0 +1,116 @@
+---
+title: ggplotのリストの表示を高速化する
+author: ~
+date: '2018-10-16'
+slug: accelerate-list-of-ggplot
+categories: []
+tags: []
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+library(ggplot2)
+library(microbenchmark)
+library(pforeach) # devtools::install_github('hoxo-m/pforeach')
+library(purrr)
+library(pipeR)
+```
+
+大きなデータを用いたggplotのリストや，大量のggplotのリストを高速に描写するための関数 `print_gglist` を作りました．
+
+```r
+devtools::install_github('atusy/ggAtusy')
+```
+
+で遊べます．
+
+# はじめに
+
+ggplot2パッケージで作成したプロット (ggplotオブジェクト) はprintされる段になって，プロットに必要な計算を行っている．
+
+つまり
+
+```{r}
+# library(ggplot2)
+g <- ggplot(iris, aes(Sepal.Length)) + geom_histogram()
+```
+
+の段階では，irisのSepal.Lengthについて，ヒストグラムをプロットすることを記述しているだけで，ヒストグラム作成に必要なビン幅や，ビンごとの頻度までは計算していない．
+
+```{r, message = FALSE}
+g
+```
+
+として，gを図に出力する時になって始めて必要な計算が行われる．
+
+このため，ggplotオブジェクトのリストをprintする際には，一つずつ，内部で計算することになる．
+最後の最後のprint (グラフィックデバイスへの表示) は順次やるしかないが，計算部分は事前に並列処理させた方がいいのではないか．
+
+# 実装
+
+先の例のように，コンソールに単に `g` と入力した時は暗黙に `print(g)` している．
+`print` 関数は与えられた変数のクラスに従って最適なメソッドを呼び出している．
+ggplotオブジェクトに適切なメソッドは `ggplot2:::print.ggplot` だ．
+
+```{r}
+ggplot2:::print.ggplot
+```
+
+上記の`ggplot2:::print.ggplot` の実装を参考に，計算部分を並列化し，表示を順次行うようにしたものが以下のコード．
+
+```{r}
+#library(pforeach) # install by devtools::install_github('hoxo-m/pforeach')
+# library(grid)
+# library(purrr)
+print_gglist <- function(x, ...) {
+  pforeach(x = x, ..., .combine = c)({ # 計算を並列
+    list(ggplot_gtable(ggplot_build(x)))
+  }) %>%
+    walk(function(x) { # 順次出力
+        grid.newpage()
+        grid.draw(x)
+      })
+}
+```
+
+# テスト
+
+```{r, fig.keep = 'all', fig.show = 'hold', fig.dim = c(2, 2)}
+print_gglist(list(g, g))
+```
+
+
+# ベンチマーク
+
+先程のgを60個含むリストを出力するために必要な時間を計測する．
+
+```{r, eval = FALSE, include = FALSE, fig.show = 'hide'}
+g_list <- rep(list(g), 60)
+bench <- microbenchmark(
+  'single thread' = walk(g_list, print),
+  'multi thread' = print_gglist(g_list, .cores = 3),
+  times = 1
+)
+saveRDS(bench, '../../static/RDS/accelerate-list-of-ggplot-benchmark.RDS')
+```
+
+
+```{r, eval = FALSE}
+# library(microbenchmark)
+g_list <- rep(list(g), 60)
+
+autoplot(microbenchmark(
+  'single thread' = walk(g_list, print),
+  'multi thread' = print_gglist(g_list, .cores = 3),
+  times = 10L
+))
+```
+
+```{r, echo = FALSE}
+readRDS('../../static/RDS/accelerate-list-of-ggplot-benchmark.RDS')
+```
+
+1周しかしていないが，高速化できていそうだ．
+
+# Enjoy!
+
