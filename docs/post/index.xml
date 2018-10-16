@@ -6,10 +6,19 @@
     <description>Recent content in Posts on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Thu, 11 Oct 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 16 Oct 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>ggplotのリストの表示を高速化する</title>
+      <link>/2018/10/16/accelerate-list-of-ggplot/</link>
+      <pubDate>Tue, 16 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/10/16/accelerate-list-of-ggplot/</guid>
+      <description>大きなデータを用いたggplotのリストや，大量のggplotのリストを高速に描写するための関数 print_gglist を作りました． devtools::install_github(&amp;#39;atusy/ggAtusy&amp;#39;) で遊べます． はじめに ggp</description>
+    </item>
     
     <item>
       <title>Antergos導入</title>
