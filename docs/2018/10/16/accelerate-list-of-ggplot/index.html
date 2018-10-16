@@ -157,7 +157,7 @@ ggplotオブジェクトに適切なメソッドは <code>ggplot2:::print.ggplot
 ##     }
 ##     invisible(x)
 ## }
-## &lt;bytecode: 0x5586386cb730&gt;
+## &lt;bytecode: 0x556504c79880&gt;
 ## &lt;environment: namespace:ggplot2&gt;</code></pre>
 <p>上記の<code>ggplot2:::print.ggplot</code> の実装を参考に，計算部分を並列化し，表示を順次行うようにしたものが以下のコード．</p>
 <pre class="r"><code>#library(pforeach) # install by devtools::install_github(&#39;hoxo-m/pforeach&#39;)
@@ -184,11 +184,11 @@ print_gglist &lt;- function(x, ...) {
 <pre class="r"><code># library(microbenchmark)
 g_list &lt;- rep(list(g), 60)
 
-autoplot(microbenchmark(
+microbenchmark(
   &#39;single thread&#39; = walk(g_list, print),
   &#39;multi thread&#39; = print_gglist(g_list, .cores = 3),
   times = 10L
-))</code></pre>
+)</code></pre>
 <pre><code>## Unit: seconds
 ##           expr      min       lq     mean   median       uq      max neval
 ##  single thread 75.86952 75.86952 75.86952 75.86952 75.86952 75.86952     1

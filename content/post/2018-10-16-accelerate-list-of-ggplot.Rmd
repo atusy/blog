@@ -95,15 +95,15 @@ saveRDS(bench, '../../static/RDS/accelerate-list-of-ggplot-benchmark.RDS')
 ```
 
 
-```{r, eval = FALSE}
+```r
 # library(microbenchmark)
 g_list <- rep(list(g), 60)
 
-autoplot(microbenchmark(
+microbenchmark(
   'single thread' = walk(g_list, print),
   'multi thread' = print_gglist(g_list, .cores = 3),
   times = 10L
-))
+)
 ```
 
 ```{r, echo = FALSE}
