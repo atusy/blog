@@ -6,10 +6,19 @@
     <description>Recent content in R on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Tue, 28 Aug 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 21 Oct 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>TokyoR 73 行ってきました</title>
+      <link>/2018/10/21/tokyor73/</link>
+      <pubDate>Sun, 21 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/10/21/tokyor73/</guid>
+      <description>2018年10月20日はJuliaなんちゃらやらなんやらと沢山の勉強会が同時開催された日だったらしいですね。 私はTokyoR 73を選んで「g</description>
+    </item>
     
     <item>
       <title>roxygen2タグまとめ</title>

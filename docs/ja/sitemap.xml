@@ -3,6 +3,16 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/2018/10/21/tokyor73/</loc>
+    <lastmod>2018-10-21T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/2018/10/17/bridal-music/</loc>
+    <lastmod>2018-10-17T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/2018/10/16/accelerate-list-of-ggplot/</loc>
     <lastmod>2018-10-16T00:00:00+00:00</lastmod>
   </url>
@@ -66,6 +76,14 @@
   </url>
   
   <url>
+    <loc>/1/01/01/</loc>
+  </url>
+  
+  <url>
+    <loc>/1/01/01/</loc>
+  </url>
+  
+  <url>
     <loc>/categories/arch/</loc>
     <lastmod>2018-10-11T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -73,7 +91,7 @@
   
   <url>
     <loc>/</loc>
-    <lastmod>2018-10-16T00:00:00+00:00</lastmod>
+    <lastmod>2018-10-21T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -159,7 +177,7 @@
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2018-10-16T00:00:00+00:00</lastmod>
+    <lastmod>2018-10-21T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -171,7 +189,7 @@
   
   <url>
     <loc>/categories/r/</loc>
-    <lastmod>2018-08-28T00:00:00+00:00</lastmod>
+    <lastmod>2018-10-21T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -213,6 +231,12 @@
                 hreflang="ja"
                 href="/tags/"
                 />
+  </url>
+  
+  <url>
+    <loc>/tags/tokyor/</loc>
+    <lastmod>2018-10-21T00:00:00+00:00</lastmod>
+    <priority>0</priority>
   </url>
   
   <url>

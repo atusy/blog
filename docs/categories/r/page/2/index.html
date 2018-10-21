@@ -5,23 +5,23 @@
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-<meta property="og:title" content="ggplotのリストの表示を高速化する" />
-<meta property="og:description" content="大きなデータを用いたggplotのリストや，大量のggplotのリストを高速に描写するための関数 print_gglist を作りました． devtools::install_github(&#39;atusy/ggAtusy&#39;) で遊べます． はじめに ggp" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="/2018/10/16/accelerate-list-of-ggplot/" /><meta property="article:published_time" content="2018-10-16T00:00:00&#43;00:00"/>
-<meta property="article:modified_time" content="2018-10-16T00:00:00&#43;00:00"/>
+<meta property="og:title" content="R" />
+<meta property="og:description" content="" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="/categories/r/" />
+<meta property="og:updated_time" content="2018-07-05T00:00:00&#43;00:00"/>
 
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="ggplotのリストの表示を高速化する"/>
-<meta name="twitter:description" content="大きなデータを用いたggplotのリストや，大量のggplotのリストを高速に描写するための関数 print_gglist を作りました． devtools::install_github(&#39;atusy/ggAtusy&#39;) で遊べます． はじめに ggp"/>
+<meta name="twitter:title" content="R"/>
+<meta name="twitter:description" content=""/>
 
 
 
-    <link rel="canonical" href="../../../../2018/10/16/accelerate-list-of-ggplot/">
+    <link rel="canonical" href="../../../../categories/r/">
 
     <title>
       
-        ggplotのリストの表示を高速化する | Atusy&#39;s blog
+        R | Atusy&#39;s blog
       
     </title>
 
@@ -30,6 +30,8 @@
 
     <link href="../../../../css/style.css" rel="stylesheet">
 
+    
+    <link href="../../../../categories/r/index.xml" rel="alternate" type="application/rss+xml" title="Atusy&#39;s blog" />
     
 
     
@@ -93,119 +95,109 @@
 
           
 
-<header>
-    <h2 class="blog-post-title">
-        <a class="text-dark" href="../../../../2018/10/16/accelerate-list-of-ggplot/">ggplotのリストの表示を高速化する</a>
-    </h2>
+
+
+
+
+
     
+        <article class="blog-post">
+    <header>
+        <h2 class="blog-post-title">
+            <a class="text-dark" href="../../../../2018/07/05/github-pages-with-rmarkdown/">GitHub pages with Rmarkdown</a>
+        </h2>
+        
 
 
 <div class="blog-post-date text-secondary">
     
-        2018-10-16
+        2018-7-5
     
     
-        by <span rel="author">Atusy</span>
+        by <span rel="author">atusy</span>
     
 </div>
 
+        
+<div class="blog-post-tags text-secondary">
+    <strong>タグ:</strong>
     
+        <a class="badge badge-primary" href="../../../../tags/blogdown">blogdown</a>
     
-    <hr>
-</header>
-<article class="blog-post">
-    <p>大きなデータを用いたggplotのリストや，大量のggplotのリストを高速に描写するための関数 <code>print_gglist</code> を作りました．</p>
-<pre class="r"><code>devtools::install_github(&#39;atusy/ggAtusy&#39;)</code></pre>
-<p>で遊べます．</p>
-<div class="section level1">
-<h1>はじめに</h1>
-<p>ggplot2パッケージで作成したプロット (ggplotオブジェクト) はprintされる段になって，プロットに必要な計算を行っている．</p>
-<p>つまり</p>
-<pre class="r"><code># library(ggplot2)
-g &lt;- ggplot(iris, aes(Sepal.Length)) + geom_histogram()</code></pre>
-<p>の段階では，irisのSepal.Lengthについて，ヒストグラムをプロットすることを記述しているだけで，ヒストグラム作成に必要なビン幅や，ビンごとの頻度までは計算していない．</p>
-<pre class="r"><code>g</code></pre>
-<p><img src="../../../../post/2018-10-16-accelerate-list-of-ggplot_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
-<p>として，gを図に出力する時になって始めて必要な計算が行われる．</p>
-<p>このため，ggplotオブジェクトのリストをprintする際には，一つずつ，内部で計算することになる．
-最後の最後のprint (グラフィックデバイスへの表示) は順次やるしかないが，計算部分は事前に並列処理させた方がいいのではないか．</p>
-</div>
-<div class="section level1">
-<h1>実装</h1>
-<p>先の例のように，コンソールに単に <code>g</code> と入力した時は暗黙に <code>print(g)</code> している．
-<code>print</code> 関数は与えられた変数のクラスに従って最適なメソッドを呼び出している．
-ggplotオブジェクトに適切なメソッドは <code>ggplot2:::print.ggplot</code> だ．</p>
-<pre class="r"><code>ggplot2:::print.ggplot</code></pre>
-<pre><code>## function (x, newpage = is.null(vp), vp = NULL, ...) 
-## {
-##     set_last_plot(x)
-##     if (newpage) 
-##         grid.newpage()
-##     grDevices::recordGraphics(requireNamespace(&quot;ggplot2&quot;, quietly = TRUE), 
-##         list(), getNamespace(&quot;ggplot2&quot;))
-##     data &lt;- ggplot_build(x)
-##     gtable &lt;- ggplot_gtable(data)
-##     if (is.null(vp)) {
-##         grid.draw(gtable)
-##     }
-##     else {
-##         if (is.character(vp)) 
-##             seekViewport(vp)
-##         else pushViewport(vp)
-##         grid.draw(gtable)
-##         upViewport()
-##     }
-##     invisible(x)
-## }
-## &lt;bytecode: 0x5600b4f87880&gt;
-## &lt;environment: namespace:ggplot2&gt;</code></pre>
-<p>上記の<code>ggplot2:::print.ggplot</code> の実装を参考に，計算部分を並列化し，表示を順次行うようにしたものが以下のコード．</p>
-<pre class="r"><code>#library(pforeach) # install by devtools::install_github(&#39;hoxo-m/pforeach&#39;)
-# library(grid)
-# library(purrr)
-print_gglist &lt;- function(x, ...) {
-  pforeach(x = x, ..., .combine = c)({ # 計算を並列
-    list(ggplot_gtable(ggplot_build(x)))
-  }) %&gt;%
-    walk(function(x) { # 順次出力
-        grid.newpage()
-        grid.draw(x)
-      })
-}</code></pre>
-</div>
-<div class="section level1">
-<h1>テスト</h1>
-<pre class="r"><code>print_gglist(list(g, g))</code></pre>
-<p><img src="../../../../post/2018-10-16-accelerate-list-of-ggplot_files/figure-html/unnamed-chunk-5-1.png" width="192" /><img src="../../../../post/2018-10-16-accelerate-list-of-ggplot_files/figure-html/unnamed-chunk-5-2.png" width="192" /></p>
-</div>
-<div class="section level1">
-<h1>ベンチマーク</h1>
-<p>先程のgを60個含むリストを出力するために必要な時間を計測する．</p>
-<pre class="r"><code># library(microbenchmark)
-g_list &lt;- rep(list(g), 60)
-
-microbenchmark(
-  &#39;single thread&#39; = walk(g_list, print),
-  &#39;multi thread&#39; = print_gglist(g_list, .cores = 3),
-  times = 10L
-)</code></pre>
-<pre><code>## Unit: seconds
-##           expr      min       lq     mean   median       uq      max neval
-##  single thread 75.86952 75.86952 75.86952 75.86952 75.86952 75.86952     1
-##   multi thread 45.18542 45.18542 45.18542 45.18542 45.18542 45.18542     1</code></pre>
-<p>1周しかしていないが，高速化できていそうだ．</p>
-</div>
-<div id="enjoy" class="section level1">
-<h1>Enjoy!</h1>
 </div>
 
-
+        
+<div class="blog-post-categories text-secondary">
+    <strong>カテゴリ:</strong>
     
-
+        <a class="badge badge-primary" href="../../../../categories/r">R</a>
     
+</div>
 
-
+    </header>
+    遅蒔きながら、Rのblogdownパッケージを使ってblogを始めてみた。 “Rとblogdownでかんたんにgithub.io上にブログを使
+    
+    <p></p>
+    <a href="../../../../2018/07/05/github-pages-with-rmarkdown/">読む →</a>
+    
 </article>
+
+
+    
+
+
+
+
+
+<nav class="blog-pagination">
+    <ul class="pagination justify-content-center">
+        
+        <li class="page-item">
+            <a class="page-link" href="../../../../categories/r/" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
+        </li>
+        
+        <li class="page-item ">
+            <a class="page-link" href="../../../../categories/r/" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+        </li>
+        
+        
+            
+            
+            
+            
+                
+                
+            
+            
+                <li class="page-item ">
+                    <a class="page-link" href="../../../../categories/r/">1</a>
+                </li>
+            
+        
+            
+            
+            
+            
+                
+                
+            
+            
+                <li class="page-item active">
+                    <a class="page-link" href="../../../../categories/r/page/2/">2</a>
+                </li>
+            
+        
+        <li class="page-item disabled">
+            <a class="page-link" href="" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+        </li>
+        
+            <li class="page-item">
+                <a class="page-link" href="../../../../categories/r/page/2/" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+            </li>
+        
+    </ul>
+</nav>
+
 
 
 
