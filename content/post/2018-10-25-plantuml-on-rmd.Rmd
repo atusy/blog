@@ -1,5 +1,5 @@
 ---
-title: plantuml-on-Rmd
+title: R Markdown で PlantUML
 author: ~
 date: '2018-10-25'
 slug: plantuml-on-rmd
@@ -42,6 +42,8 @@ pacman -S jre10-openjdk graphviz
 ```
 
 # 試す
+
+http://plantuml.com/ に載っている図を色々試してみた．
 
 Use Case図，Ditaa図， AsciiMathやJLaTeXMathを使った数式以外は使えるみたいだ．
 
