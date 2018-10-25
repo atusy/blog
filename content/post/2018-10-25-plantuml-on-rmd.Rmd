@@ -7,7 +7,7 @@ categories: [R]
 tags: [R MarkdownでWord文書を作ろう, PlantUML]
 ---
 
-```{r setup}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(cache = TRUE)
 pacman::p_load_gh('rkrug/plantuml')
 ```
