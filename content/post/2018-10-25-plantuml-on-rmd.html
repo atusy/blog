@@ -1,0 +1,294 @@
+---
+title: plantuml-on-Rmd
+author: ~
+date: '2018-10-25'
+slug: plantuml-on-rmd
+categories: [R]
+tags: [R MarkdownでWord文書を作ろう, PlantUML]
+---
+
+
+
+<pre class="r"><code>knitr::opts_chunk$set(cache = TRUE)
+pacman::p_load_gh(&#39;rkrug/plantuml&#39;)</code></pre>
+<p><span class="citation">@niszet0</span> さんの “R MarkdownでWord文書を作ろう” を摘み食いしてます (以下RmdでWord本)．
+ちゃんとしたいずれレビューはいずれするとして，気付いたところを少しずつメモしていきたい．</p>
+<p>さて，同書は，PlantUMLという非常に簡便な記述でシーケンス図などを書けるフレームワークに触れているが，
+色々辛そう．
+もうちょっと簡単にできる方法はないかな，と思ったら <a href="https://github.com/rkrug/plantuml"><code>rkrug/plantuml</code></a> パッケージを見つけたのでメモ．</p>
+<p>pandocにplantumlを扱わせる方法もあるようなので，使い勝手のよいものを選べばいいと思う．</p>
+<div class="section level1">
+<h1>導入</h1>
+<p>導入には他パッケージや，PlantUML jar fileのアップデートなどいくつかステップを踏む必要がある．</p>
+<pre class="r"><code>library(devtools) # GitHub上のパッケージをインストールするためのパッケージ
+install_github(&quot;rforge/grimport/pkg/grImport&quot;) # CRAN版のgrimportはworking directory中にtemp dirを作った後掃除してくれないらしい
+devtools::install_github(&quot;rkrug/plantuml&quot;) # plantumlパッケージのインストール
+library(plantuml) # plangumlパッケージのロード
+updatePlantumlJar() # PlantUMLのjarファイルを最新版にする</code></pre>
+<p>Archlinuxな当方では，これらに加えて， <code>openjdk</code> と <code>graphviz</code> を入れておく必要があった．
+というかRmdでWord本でも，java環境は必要，図によってgraphvizも必要と言及されていますね．</p>
+<pre class="sh"><code>pacman -S jre10-openjdk graphviz</code></pre>
+</div>
+<div class="section level1">
+<h1>試す</h1>
+<p>Use Case図，Ditaa図， AsciiMathやJLaTeXMathを使った数式以外は使えるみたいだ．</p>
+<p><code>vector = FALSE</code> によりpngファイルを中間ファイルにしたり，<code>file</code>引数で出力をファイルに保存することも可能．</p>
+<div id="sequence" class="section level2">
+<h2>Sequence</h2>
+<pre class="r"><code>plot(plantuml(&#39;
+actor Foo1
+boundary Foo2
+control Foo3
+entity Foo4
+database Foo5
+collections Foo6
+Foo1 -&gt; Foo2 : To boundary
+Foo1 -&gt; Foo3 : To control
+Foo1 -&gt; Foo4 : To entity
+Foo1 -&gt; Foo5 : To database
+Foo1 -&gt; Foo6 : To collections
+&#39;))</code></pre>
+<p><img src="/post/2018-10-25-plantuml-on-rmd_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+</div>
+<div id="use-case" class="section level2">
+<h2>Use Case</h2>
+<pre class="r"><code>plot(plantuml(&#39;
+User -&gt; (Start)
+User --&gt; (Use the application) : A small label
+
+:Main Admin: ---&gt; (Use the application) : This is\nyet another\nlabel
+&#39;))</code></pre>
+<blockquote>
+<p>Error in polypath(trans(pathX, pathY), rule = switch(<a href="mailto:p@rule" class="email">p@rule</a>, nonzero = “winding”, : unable to allocate memory (in GPath)</p>
+</blockquote>
+</div>
+<div id="class" class="section level2">
+<h2>Class</h2>
+<pre class="r"><code>plot(plantuml(&#39;
+Class01 &lt;|-- Class02
+Class03 *-- Class04
+Class05 o-- Class06
+Class07 .. Class08
+Class09 -- Class10
+&#39;))</code></pre>
+<p><img src="/post/2018-10-25-plantuml-on-rmd_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>
+<div id="activity" class="section level2">
+<h2>Activity</h2>
+<pre class="r"><code>plot(plantuml(&#39;
+start
+
+if (multiprocessor?) then (yes)
+  fork
+    :Treatment 1;
+  fork again
+    :Treatment 2;
+  end fork
+else (monoproc)
+  :Treatment 1;
+  :Treatment 2;
+endif
+&#39;))</code></pre>
+<p><img src="/post/2018-10-25-plantuml-on-rmd_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p><code>vector = FALSE</code> で中間結果がpngに
+<code>file = hoge.png</code> でファイルに出力</p>
+<pre class="r"><code>x &lt;- list(
+  a = 1:10,
+  b = letters[1:4],
+  c = data.frame(
+    x = 1:10,
+    y = c(TRUE, FALSE)
+  )
+)
+plot(
+  as.plantuml(x)
+)</code></pre>
+<p><img src="/post/2018-10-25-plantuml-on-rmd_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+</div>
+<div id="component" class="section level2">
+<h2>Component</h2>
+<pre class="r"><code>plot(plantuml(&#39;
+package &quot;Some Group&quot; {
+  HTTP - [First Component]
+  [Another Component]
+}
+ 
+node &quot;Other Groups&quot; {
+  FTP - [Second Component]
+  [First Component] --&gt; FTP
+} 
+
+cloud {
+  [Example 1]
+}
+
+
+database &quot;MySql&quot; {
+  folder &quot;This is my folder&quot; {
+    [Folder 3]
+  }
+  frame &quot;Foo&quot; {
+    [Frame 4]
+  }
+}
+
+
+[Another Component] --&gt; [Example 1]
+[Example 1] --&gt; [Folder 3]
+[Folder 3] --&gt; [Frame 4]
+&#39;))</code></pre>
+<p><img src="/post/2018-10-25-plantuml-on-rmd_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="state" class="section level2">
+<h2>State</h2>
+<pre class="r"><code>plot(plantuml(&#39;
+scale 350 width
+[*] --&gt; NotShooting
+
+state NotShooting {
+  [*] --&gt; Idle
+  Idle --&gt; Configuring : EvConfig
+  Configuring --&gt; Idle : EvConfig
+}
+
+state Configuring {
+  [*] --&gt; NewValueSelection
+  NewValueSelection --&gt; NewValuePreview : EvNewValue
+  NewValuePreview --&gt; NewValueSelection : EvNewValueRejected
+  NewValuePreview --&gt; NewValueSelection : EvNewValueSaved
+  
+  state NewValuePreview {
+     State1 -&gt; State2
+  }
+  
+}
+&#39;))</code></pre>
+<p><img src="/post/2018-10-25-plantuml-on-rmd_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+<div id="object" class="section level2">
+<h2>Object</h2>
+<pre class="r"><code>plot(plantuml(&#39;
+object Object01
+object Object02
+object Object03
+object Object04
+object Object05
+object Object06
+object Object07
+object Object08
+
+Object01 &lt;|-- Object02
+Object03 *-- Object04
+Object05 o-- &quot;4&quot; Object06
+Object07 .. Object08 : some labels
+&#39;))</code></pre>
+<p><img src="/post/2018-10-25-plantuml-on-rmd_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+</div>
+<div id="deployment" class="section level2">
+<h2>Deployment</h2>
+<pre class="r"><code>plot(plantuml(&#39;
+actor actor
+agent agent
+artifact artifact
+boundary boundary
+card card
+cloud cloud
+component component
+control control
+database database
+entity entity
+file file
+folder folder
+frame frame
+interface  interface
+node node
+package package
+queue queue
+stack stack
+rectangle rectangle
+storage storage
+usecase usecase
+&#39;))</code></pre>
+<p><img src="/post/2018-10-25-plantuml-on-rmd_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+</div>
+<div id="salt" class="section level2">
+<h2>Salt</h2>
+<pre class="r"><code>plot(plantuml(&#39;
+salt
+{
+  Just plain text
+  [This is my button]
+  ()  Unchecked radio
+  (X) Checked radio
+  []  Unchecked box
+  [X] Checked box
+  &quot;Enter text here   &quot;
+  ^This is a droplist^
+}
+&#39;))</code></pre>
+<p><img src="/post/2018-10-25-plantuml-on-rmd_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+</div>
+<div id="archimate" class="section level2">
+<h2>Archimate</h2>
+<pre class="r"><code>plot(plantuml(&#39;
+!define Junction_Or circle #black
+!define Junction_And circle #whitesmoke
+
+Junction_And JunctionAnd
+Junction_Or JunctionOr
+
+archimate #Technology &quot;VPN Server&quot; as vpnServerA &lt;&lt;technology-device&gt;&gt;
+
+rectangle GO #lightgreen
+rectangle STOP #red
+rectangle WAIT #orange
+GO -up-&gt; JunctionOr
+STOP -up-&gt; JunctionOr
+STOP -down-&gt; JunctionAnd
+WAIT -down-&gt; JunctionAnd
+&#39;))</code></pre>
+<p><img src="/post/2018-10-25-plantuml-on-rmd_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+</div>
+<div id="ditaa" class="section level2">
+<h2>Ditaa</h2>
+<pre class="r"><code>plot(plantuml(&#39;
++--------+   +-------+    +-------+
+|        +---+ ditaa +--&gt; |       |
+|  Text  |   +-------+    |diagram|
+|Document|   |!magic!|    |       |
+|     {d}|   |       |    |       |
++---+----+   +-------+    +-------+
+    :                         ^
+    |       Lots of work      |
+    +-------------------------+
+&#39;))</code></pre>
+<blockquote>
+<p>Error in polypath(trans(pathX, pathY), rule = switch(<a href="mailto:p@rule" class="email">p@rule</a>, nonzero = “winding”, : unable to allocate memory (in GPath)</p>
+</blockquote>
+</div>
+<div id="gantt" class="section level2">
+<h2>Gantt</h2>
+<pre class="r"><code>plot(plantuml(&quot;
+[Prototype design] lasts 13 days and is colored in Lavender/LightBlue
+[Test prototype] lasts 9 days and is colored in Coral/Green and starts 3 days after [Prototype design]&#39;s end
+[Write tests] lasts 5 days and ends at [Prototype design]&#39;s end
+[Hire tests writers] lasts 6 days and ends at [Write tests]&#39;s start
+[Init and write tests report] is colored in Coral/Green
+[Init and write tests report] starts 1 day before [Test prototype]&#39;s start and ends at [Test prototype]&#39;s end
+&quot;))</code></pre>
+<p><img src="/post/2018-10-25-plantuml-on-rmd_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+</div>
+<div class="section level2">
+<h2>数式……</h2>
+<pre class="r"><code>plot(plantuml(&#39;
+:&lt;math&gt;int_0^1f(x)dx&lt;/math&gt;;
+:&lt;math&gt;x^2+y_1+z_12^34&lt;/math&gt;;
+note right
+Try also
+&lt;math&gt;d/dxf(x)=lim_(h-&gt;0)(f(x+h)-f(x))/h&lt;/math&gt;
+&lt;latex&gt;P(y|\\mathbf{x}) \\mbox{ or } f(\\mathbf{x})+\\epsilon&lt;/latex&gt;
+end note
+&#39;))</code></pre>
+<p><img src="/post/2018-10-25-plantuml-on-rmd_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+</div>
+</div>
