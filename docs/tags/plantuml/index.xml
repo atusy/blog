@@ -17,7 +17,7 @@
       <pubDate>Thu, 25 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>/2018/10/25/plantuml-on-rmd/</guid>
-      <description>knitr::opts_chunk$set(cache = TRUE) pacman::p_load_gh(&amp;#39;rkrug/plantuml&amp;#39;) @niszet0 さんの “R MarkdownでWord文書を作ろう” を摘み食いしてます (以下RmdでWord本)． ちゃんとしたいずれレビューはいずれ</description>
+      <description>@niszet0 さんの “R MarkdownでWord文書を作ろう” を摘み食いしてます (以下RmdでWord本)． ちゃんとしたいずれレビューはいずれするとし</description>
     </item>
     
   </channel>
