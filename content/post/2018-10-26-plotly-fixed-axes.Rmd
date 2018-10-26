@@ -1,0 +1,99 @@
+---
+title: Plotlyで軸比を1:1に固定する
+author: ~
+date: '2018-10-26'
+slug: plotly-fixed-axes
+categories: [R]
+tags: [plotly]
+---
+
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(cache = TRUE)
+library(plotly)
+library(ggplot2)
+```
+
+今迄Plotly.jsを使いたい時は、元の図を `ggplot2` パッケージで作成し、 `plotly::ggplotly()` で変換していた。
+しかし、どうもパフォーマンスが悪い気がするので、Plotlyネイティブに書いてみようと思った。
+
+直近ではヒートマップをなんとかしたく、軸比を1:1にする方法を調べたのでメモ。
+
+# デフォルト
+
+`volcano` データセットをヒートマップする例は、 Plotlyでも [紹介されている](https://plot.ly/r/heatmaps/) 。
+このデータセットは、行列型で、各値が $10m \times 10m$ 範囲の標高を示す。
+従って、ヒートマップで標高を表現するならば、軸比を1:1にすべきだが、例では以下の通り、ヒートマップすることに終始し、軸比の面倒までは見ていない。
+
+```{r, message = FALSE}
+library(plotly)
+p <- plot_ly(z = volcano, type = 'heatmap') 
+p
+```
+
+# 1:1にする
+
+方法は [こちら](https://plot.ly/r/axes/#fixedratio-axes) に記載されているのだが、如何せん色々な比率の図を一辺に吐き出すコードなため見通しが悪い。
+どうやら、以下のようにすれば、y軸の目盛をx軸の目盛に合わせてくれるらしい。
+
+```{r}
+layout(p, yaxis = list(scaleanchor = "x"))
+```
+
+# ベンチマーク
+
+`ggplotly` を使う場合のパフォーマンスの低さがネックだったので、比較してみるとしよう。
+
+まず、行列型のvolcanoをggplotでも使えるdata frameにしておく
+
+```{r}
+library(dplyr)
+library(tidyr)
+volcano_df <- volcano %>%
+  as.data.frame %>%
+  mutate(y = seq(n())) %>%
+  gather(x, z, -y) %>%
+  group_by(y) %>%
+  mutate(x = seq(n()))
+```
+
+## ggplotly用のコード
+
+```{r, message = FALSE}
+library(ggplot2)
+g <- function() {
+  ggplotly(
+    ggplot(volcano_df, aes(x, y, fill = z)) +
+      geom_tile() +
+      coord_fixed()
+  )
+}
+g()
+```
+
+## plot_ly用のコード
+
+```{r}
+p <- function() {
+  plot_ly(x = volcano_df[['x']], y = volcano_df[['y']], z = volcano_df[['z']], type = 'heatmap') %>%
+    layout(yaxis = list(scaleanchor = "x"))
+}
+p()
+```
+
+## 結果
+
+```{r, fig.show='hide'}
+library(microbenchmark)
+bench <- microbenchmark(
+  ggplotly = g(), plot_ly = p()
+)
+bench
+```
+
+```{r}
+plot(bench)
+```
+
+圧倒的ですな。
+
