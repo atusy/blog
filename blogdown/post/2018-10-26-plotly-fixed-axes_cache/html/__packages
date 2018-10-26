@@ -1,0 +1,14 @@
+base
+data.table
+dplyr
+ggplot2
+pipeR
+purrr
+stringr
+tidyr
+blogdown
+knitr
+mytools
+plotly
+bindrcpp
+microbenchmark

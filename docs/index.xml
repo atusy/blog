@@ -6,10 +6,19 @@
     <description>Recent content on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Thu, 25 Oct 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 26 Oct 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Plotlyで軸比を1:1に固定する</title>
+      <link>/2018/10/26/plotly-fixed-axes/</link>
+      <pubDate>Fri, 26 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/10/26/plotly-fixed-axes/</guid>
+      <description>今迄Plotly.jsを使いたい時は、元の図を ggplot2 パッケージで作成し、 plotly::ggplotly() で変換していた。 しかし、どうもパフォーマンスが悪い気がするので、Plo</description>
+    </item>
     
     <item>
       <title>R Markdown で PlantUML</title>

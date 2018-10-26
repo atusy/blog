@@ -8,8 +8,23 @@
 <meta property="og:title" content="ggplotのリストの表示を高速化する" />
 <meta property="og:description" content="大きなデータを用いたggplotのリストや，大量のggplotのリストを高速に描写するための関数 print_gglist を作りました． devtools::install_github(&#39;atusy/ggAtusy&#39;) で遊べます． はじめに ggp" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/2018/10/16/accelerate-list-of-ggplot/" /><meta property="article:published_time" content="2018-10-16T00:00:00&#43;00:00"/>
+<meta property="og:url" content="/2018/10/16/accelerate-list-of-ggplot/" />
+
+
+
+<meta property="article:published_time" content="2018-10-16T00:00:00&#43;00:00"/>
+
 <meta property="article:modified_time" content="2018-10-16T00:00:00&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="ggplotのリストの表示を高速化する"/>
@@ -157,7 +172,7 @@ ggplotオブジェクトに適切なメソッドは <code>ggplot2:::print.ggplot
 ##     }
 ##     invisible(x)
 ## }
-## &lt;bytecode: 0x56317aeea390&gt;
+## &lt;bytecode: 0x5cab7b8&gt;
 ## &lt;environment: namespace:ggplot2&gt;</code></pre>
 <p>上記の<code>ggplot2:::print.ggplot</code> の実装を参考に，計算部分を並列化し，表示を順次行うようにしたものが以下のコード．</p>
 <pre class="r"><code>#library(pforeach) # install by devtools::install_github(&#39;hoxo-m/pforeach&#39;)
@@ -221,6 +236,10 @@ microbenchmark(
     <ol class="list-unstyled">
         
         <li>
+            <a href="../../../../2018/10/26/plotly-fixed-axes/">Plotlyで軸比を1:1に固定する</a>
+        </li>
+        
+        <li>
             <a href="../../../../2018/10/25/plantuml-on-rmd/">R Markdown で PlantUML</a>
         </li>
         
@@ -234,10 +253,6 @@ microbenchmark(
         
         <li>
             <a href="../../../../2018/10/16/accelerate-list-of-ggplot/">ggplotのリストの表示を高速化する</a>
-        </li>
-        
-        <li>
-            <a href="../../../../2018/10/11/hello-antergosmd/">Antergos導入</a>
         </li>
         
     </ol>
@@ -285,6 +300,8 @@ microbenchmark(
             <a class="badge badge-primary" href="../../../../tags/package">package</a>
             
             <a class="badge badge-primary" href="../../../../tags/plantuml">plantuml</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/plotly">plotly</a>
             
             <a class="badge badge-primary" href="../../../../tags/r">r</a>
             

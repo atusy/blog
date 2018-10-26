@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Plotly on Atusy&#39;s blog</title>
+    <link>/tags/plotly/</link>
+    <description>Recent content in Plotly on Atusy&#39;s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja-jp</language>
+    <lastBuildDate>Fri, 26 Oct 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/plotly/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Plotlyで軸比を1:1に固定する</title>
+      <link>/2018/10/26/plotly-fixed-axes/</link>
+      <pubDate>Fri, 26 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/10/26/plotly-fixed-axes/</guid>
+      <description>今迄Plotly.jsを使いたい時は、元の図を ggplot2 パッケージで作成し、 plotly::ggplotly() で変換していた。 しかし、どうもパフォーマンスが悪い気がするので、Plo</description>
+    </item>
+    
+  </channel>
+</rss>
