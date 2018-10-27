@@ -1,0 +1,30 @@
+---
+title: | 
+  RmarkdwonのYAMLフロントマターで  
+  titleとかauthorとか改行する
+author: ~
+date: '2018-10-27'
+slug: linbreaks-in-yaml-front-matter-of-rmd
+categories: []
+tags: []
+---
+
+
+
+<p><span class="citation">@niszet0</span> さん著「R MarkdownでWord文書を作ろう」を読んでます (以下RmdでWord本)。<br />
+Rmdを扱った商業誌にも、同書ほど、RmdファイルのYAMLフロントマターの書式を丁寧に書いている本はないのではないだろうか。
+使えれば良いというスタンスだったのもあって、YAMLのフロースタイルとか、始めて学びました。
+しかし、これだけ詳しく書いてあるのに改行のことに触れられていないな、とふと。</p>
+<p>本記事のタイトル「RmarkdwonのYAMLフロントマターでtitleとかauthorとか改行する」も改行していますね。</p>
+<p>これ、どうやってやるか、最初悩む人が多いのではないでしょうか。</p>
+<p>単純には、 <code>html_document</code> なら <code>&lt;br&gt;</code> を、<code>pdf_document</code> なら <code>\n</code> を仕込めばいいのですが、統一的な方法や、特に <code>word_document</code> に通用する方法を知りたい人は多いはず。</p>
+<p>で、とりあえずググるわけですが、</p>
+<ul>
+<li><a href="https://www.task-notes.com/entry/20150922/1442890800" class="uri">https://www.task-notes.com/entry/20150922/1442890800</a></li>
+<li><a href="http://d.hatena.ne.jp/shunsuk/20090822/1250937310" class="uri">http://d.hatena.ne.jp/shunsuk/20090822/1250937310</a></li>
+</ul>
+<p>など、情報はあるものの、どうもこれでは改行されない。</p>
+<p>色々試した結果、</p>
+<pre class="yaml"><code>---
+
+---</code></pre>
