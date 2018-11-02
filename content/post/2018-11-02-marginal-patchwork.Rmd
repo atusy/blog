@@ -1,0 +1,56 @@
+---
+title: ggplot2とpatchworkで周辺分布
+author: ~
+date: '2018-11-02'
+slug: marginal-patchwork
+categories: [R]
+tags: [ggplot2, patchwork]
+---
+
+```{r setup, include = FALSE}
+library(ggplot2)
+library(patchwork)
+```
+
+patchworkパッケージを使えばあんな図やこんな図が簡単に，と思い馳せた人も多いのではなかろうか．
+
+中でも周辺分布を自由に綺麗に，と思ったのは私だけではないはず．
+
+しかし，以下のように散布図とその周辺分布を作成し，並べると，イケてない図が仕上がる．
+
+```{r}
+library(ggplot2)
+library(patchwork)
+xy <- ggplot(mtcars, aes(wt, mpg)) + geom_point()
+x <- ggplot(mtcars, aes(wt)) + geom_histogram(bins = 30)
+y <- ggplot(mtcars, aes(mpg)) + geom_histogram(bins = 30) + coord_flip()
+(x | plot_spacer()) / (xy | y)
+```
+
+実は， `wrap_plots()` を使うと，イイ線までいく．
+
+```{r}
+wrap_plots(x, plot_spacer(), xy, y, nrow = 2)
+```
+
+しかし，よく見ると，図の大きさが揃っているからそれっぽいだけで，散布図とx軸の周辺分布のx軸範囲が異なっている．
+
+そこで，その2つの図の `xlim` を揃えてやると……!
+
+```{r}
+xlimits <- coord_cartesian(xlim = c(1, 6)) # xlim() はNG
+wrap_plots(x + xlimits, plot_spacer(), xy + xlimits, y, nrow = 2)
+```
+
+できたあ!!
+
+ポイントは 
+
+- `xlim()` ではなく， `coord_cartesian()` を使うこと
+- `|` , `/` ではなく，`wrap_plots()` を使うこと
+
+の2つ．
+
+どうも `xlim()` を使うと，指定した範囲でビン幅を計算し直してしまうっぽい．
+
+そして，2項演算子と `wrap_plots()` ではマージンの扱い方が違うようだ．
