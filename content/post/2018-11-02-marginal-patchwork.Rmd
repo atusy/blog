@@ -56,3 +56,21 @@ wrap_plots(x + xlimits, plot_spacer(), xy + xlimits, y, nrow = 2)
 どうも `xlim()` を使うと，指定した範囲でビン幅を計算し直してしまうっぽい．
 
 そして，2項演算子と `wrap_plots()` ではマージンの扱い方が違うようだ．
+
+
+
+# 追記
+
+よくよくよく，見ると，y軸の周辺分布も軸が揃っていなかった．
+というわけで，最終形は以下のように．
+やや面倒ですな．
+
+```{r, message = FALSE}
+wrap_plots(
+  x + coord_cartesian(xlim = c(1, 6)), 
+  plot_spacer(), 
+  xy + coord_cartesian(xlim = c(1, 6), ylim = c(10, 35)), 
+  y + coord_flip(xlim = c(10, 35)), 
+  nrow = 2
+)
+```

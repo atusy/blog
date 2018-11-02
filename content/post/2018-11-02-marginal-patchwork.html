@@ -37,3 +37,17 @@ wrap_plots(x + xlimits, plot_spacer(), xy + xlimits, y, nrow = 2)</code></pre>
 <p>の2つ．</p>
 <p>どうも <code>xlim()</code> を使うと，指定した範囲でビン幅を計算し直してしまうっぽい．</p>
 <p>そして，2項演算子と <code>wrap_plots()</code> ではマージンの扱い方が違うようだ．</p>
+<div class="section level1">
+<h1>追記</h1>
+<p>よくよくよく，見ると，y軸の周辺分布も軸が揃っていなかった．
+というわけで，最終形は以下のように．
+やや面倒ですな．</p>
+<pre class="r"><code>wrap_plots(
+  x + coord_cartesian(xlim = c(1, 6)), 
+  plot_spacer(), 
+  xy + coord_cartesian(xlim = c(1, 6), ylim = c(10, 35)), 
+  y + coord_flip(xlim = c(10, 35)), 
+  nrow = 2
+)</code></pre>
+<p><img src="/post/2018-11-02-marginal-patchwork_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>
