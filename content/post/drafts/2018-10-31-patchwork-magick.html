@@ -1,0 +1,48 @@
+---
+title: patchwork-magick
+author: ~
+date: '2018-10-31'
+slug: patchwork-magick
+categories: []
+tags: []
+---
+
+
+
+<pre class="r"><code>library(pacman)
+p_load(ggplot2, magick)
+p_load_gh(&#39;thomasp85/patchwork&#39;)
+images &lt;- list(logo = logo, wizard = wizard, rose = rose, granite = granite)</code></pre>
+<div id="section" class="section level1">
+<h1></h1>
+</div>
+<div id="image_ggplot-" class="section level1">
+<h1><code>image_ggplot()</code> のコード</h1>
+<pre class="r"><code>image_ggplot</code></pre>
+<pre><code>## function (image) 
+## {
+##     rasterdata &lt;- image_raster(image)
+##     ggplot2::ggplot(rasterdata) + ggplot2::geom_raster(ggplot2::aes_(~x, 
+##         ~y, fill = ~col)) + ggplot2::coord_fixed(expand = FALSE) + 
+##         ggplot2::scale_y_reverse() + ggplot2::scale_fill_identity() + 
+##         ggplot2::theme_void()
+## }
+## &lt;bytecode: 0x564210112958&gt;
+## &lt;environment: namespace:magick&gt;</code></pre>
+<p><code>coord_fixed()</code> してくれているので安心ですね．</p>
+<pre class="r"><code>images %&gt;%
+  lapply(image_info) %&gt;%
+  bind_rows(.id = &#39;name&#39;)</code></pre>
+<pre><code>## # A tibble: 4 x 8
+##   name    format width height colorspace matte filesize density
+##   &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt;  &lt;int&gt; &lt;chr&gt;      &lt;lgl&gt;    &lt;int&gt; &lt;chr&gt;  
+## 1 logo    GIF      640    480 sRGB       FALSE    28576 +72x+72
+## 2 wizard  GIF      480    640 sRGB       FALSE    99674 +72x+72
+## 3 rose    PNM       70     46 sRGB       FALSE     9673 +72x+72
+## 4 granite GIF      128    128 sRGB       FALSE     7037 +72x+72</code></pre>
+<pre class="r"><code>images %&gt;%
+  lapply(image_ggplot) %&gt;%
+  wrap_plots() +
+  plot_annotation(tag_levels = &#39;a&#39;)</code></pre>
+<p><img src="/post/drafts/2018-10-31-patchwork-magick_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>

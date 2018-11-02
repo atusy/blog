@@ -6,10 +6,19 @@
     <description>Recent content on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Sat, 27 Oct 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 02 Nov 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>ggplot2とpatchworkで周辺分布</title>
+      <link>/2018/11/02/marginal-patchwork/</link>
+      <pubDate>Fri, 02 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/11/02/marginal-patchwork/</guid>
+      <description>patchworkパッケージを使えばあんな図やこんな図が簡単に，と思い馳せた人も多いのではなかろうか． 中でも周辺分布を自由に綺麗に，と思った</description>
+    </item>
     
     <item>
       <title>RmarkdwonのYAMLフロントマターで  
@@ -108,6 +117,15 @@ titleとかauthorとか改行する
     </item>
     
     <item>
+      <title>Docker情報まとめ</title>
+      <link>/2018/08/20/docker-memo/</link>
+      <pubDate>Mon, 20 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/08/20/docker-memo/</guid>
+      <description>ユーザーをdockerグループにいれると、スーパーユーザーにならずとも docker compose できる。 https://qiita.com/DQNEO/items/da5df074c48b012152ee</description>
+    </item>
+    
+    <item>
       <title>Rmdでchunkごとの実行時間を計測</title>
       <link>/2018/08/18/time-each-chunk/</link>
       <pubDate>Sat, 18 Aug 2018 00:00:00 +0000</pubDate>
@@ -185,7 +203,7 @@ titleとかauthorとか改行する
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/1/01/01/</guid>
-      <description>blogdownでMathJax code{white-space: pre;} pre:not([class]) { background-color: white; } if (window.hljs) { hljs.configure({languages: []}); hljs.initHighlightingOnLoad(); if (document.readyState &amp;&amp; document.readyState === &#34;complete&#34;) { window.setTimeout(function() { hljs.initHighlighting(); }, 0); } } h1 { font-size: 34px; } h1.title { font-size: 38px; } h2 { font-size: 30px; } h3 { font-size: 24px; } h4 { font-size: 18px; } h5 {</description>
+      <description>MathJaxとは？ blogdownではインラインでMathJaxが使えない……？ 解決方法 MathJaxとは？ MathJaxを利用すると、\</description>
     </item>
     
     <item>
