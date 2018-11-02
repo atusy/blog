@@ -1,1 +1,1 @@
-source('../../.Rprofile')
+here::here('.Rprofile')
