@@ -5,6 +5,16 @@
   <url>
     <loc>/2018/11/02/marginal-patchwork/</loc>
     <lastmod>2018-11-02T00:00:00+00:00</lastmod>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="/en/2018/11/02/marginal-patchwork/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="ja"
+                href="/2018/11/02/marginal-patchwork/"
+                />
   </url>
   
   <url>
@@ -163,6 +173,16 @@
     <loc>/tags/ggplot2/</loc>
     <lastmod>2018-11-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="/en/tags/ggplot2/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="ja"
+                href="/tags/ggplot2/"
+                />
   </url>
   
   <url>
@@ -172,14 +192,14 @@
   </url>
   
   <url>
-    <loc>/categories/latex/</loc>
-    <lastmod>2018-07-09T00:00:00+00:00</lastmod>
+    <loc>/tags/latex/</loc>
+    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/latex/</loc>
-    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
+    <loc>/categories/latex/</loc>
+    <lastmod>2018-07-09T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -223,6 +243,16 @@
     <loc>/tags/patchwork/</loc>
     <lastmod>2018-11-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="/en/tags/patchwork/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="ja"
+                href="/tags/patchwork/"
+                />
   </url>
   
   <url>
@@ -241,18 +271,38 @@
     <loc>/post/</loc>
     <lastmod>2018-11-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/r/</loc>
-    <lastmod>2018-11-02T00:00:00+00:00</lastmod>
-    <priority>0</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="/en/post/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="ja"
+                href="/post/"
+                />
   </url>
   
   <url>
     <loc>/tags/r/</loc>
     <lastmod>2018-07-31T00:00:00+00:00</lastmod>
     <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/categories/r/</loc>
+    <lastmod>2018-11-02T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="/en/categories/r/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="ja"
+                href="/categories/r/"
+                />
   </url>
   
   <url>

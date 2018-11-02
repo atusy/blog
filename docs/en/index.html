@@ -10,6 +10,7 @@
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="/en/" />
+<meta property="og:updated_time" content="2018-11-02T00:00:00&#43;00:00"/>
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Atusy&#39;s blog"/>
@@ -100,6 +101,58 @@
 
 
 
+    
+        <article class="blog-post">
+    <header>
+        <h2 class="blog-post-title">
+            <a class="text-dark" href="../en/2018/11/02/marginal-patchwork/">Marginal distributions with ggplot2 and patchwork</a>
+        </h2>
+        
+
+
+<div class="blog-post-date text-secondary">
+    
+        2018-11-2
+    
+    
+        by <span rel="author">Atusy</span>
+    
+</div>
+
+        
+<div class="blog-post-tags text-secondary">
+    <strong>Tags:</strong>
+    
+        <a class="badge badge-primary" href="../en/tags/ggplot2">ggplot2</a>
+    
+        <a class="badge badge-primary" href="../en/tags/patchwork">patchwork</a>
+    
+</div>
+
+        
+<div class="blog-post-categories text-secondary">
+    <strong>Categories:</strong>
+    
+        <a class="badge badge-primary" href="../en/categories/r">R</a>
+    
+</div>
+
+    </header>
+    patchwork packages is a great tool to assemble ggplot2 object.
+I made a Japanese slide to introduce patchwork package in Tokyo R meeting.
+Here, I tried to produce marginal plots, but failed because I was using plot arithmetics (| and /).
+library(ggplot2) library(patchwork) xy &lt;- ggplot(mtcars, aes(wt, mpg)) + geom_point() x &lt;- ggplot(mtcars, aes(wt)) + geom_histogram(bins = 30) y &lt;- ggplot(mtcars, aes(mpg)) + geom_histogram(bins = 30) + coord_flip() (x | plot_spacer()) / (xy | y) I just found that wrap_plots() helps.
+    
+    <p></p>
+    <a href="../en/2018/11/02/marginal-patchwork/">Read More →</a>
+    
+</article>
+
+
+    
+
+
+
 
 
 
@@ -112,12 +165,43 @@
         
 
 
+<section>
+    <h4>Recent Posts</h4>
+    <ol class="list-unstyled">
+        
+        <li>
+            <a href="../en/2018/11/02/marginal-patchwork/">Marginal distributions with ggplot2 and patchwork</a>
+        </li>
+        
+        <li>
+            <a href="../en/post/">Posts</a>
+        </li>
+        
+    </ol>
+</section>
+
     
     
         <section>
     
         
+        <h4>Categories</h4>
+        <p>
+            
+            <a class="badge badge-primary" href="../en/categories/r">r</a>
+            
+        </p>
+        
     
+        
+        <h4>Tags</h4>
+        <p>
+            
+            <a class="badge badge-primary" href="../en/tags/ggplot2">ggplot2</a>
+            
+            <a class="badge badge-primary" href="../en/tags/patchwork">patchwork</a>
+            
+        </p>
         
     
 </section>

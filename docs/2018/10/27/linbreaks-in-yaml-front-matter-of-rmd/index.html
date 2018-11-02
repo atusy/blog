@@ -6,18 +6,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
 <meta property="og:title" content="RmarkdwonのYAMLフロントマターで  
-titleとかauthorとか改行する
+titleとか  
+authorとか  
+改行する
 " />
-<meta property="og:description" content="@niszet0 さん著「R MarkdownでWord文書を作ろう」を読んでます (以下RmdでWord本)。 Rmdを扱った商業誌にも、同書ほど、Rmdファイ" />
+<meta property="og:description" content="@niszet0 さん著「R MarkdownでWord文書を作ろう」を読んでます。 Rmdを扱った商業誌にも、同書ほどRmdファイルのYAMLフロントマターの" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/" /><meta property="article:published_time" content="2018-10-27T00:00:00&#43;00:00"/>
 <meta property="article:modified_time" content="2018-10-27T00:00:00&#43;00:00"/>
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="RmarkdwonのYAMLフロントマターで  
-titleとかauthorとか改行する
+titleとか  
+authorとか  
+改行する
 "/>
-<meta name="twitter:description" content="@niszet0 さん著「R MarkdownでWord文書を作ろう」を読んでます (以下RmdでWord本)。 Rmdを扱った商業誌にも、同書ほど、Rmdファイ"/>
+<meta name="twitter:description" content="@niszet0 さん著「R MarkdownでWord文書を作ろう」を読んでます。 Rmdを扱った商業誌にも、同書ほどRmdファイルのYAMLフロントマターの"/>
 
 
 
@@ -26,7 +30,9 @@ titleとかauthorとか改行する
     <title>
       
         RmarkdwonのYAMLフロントマターで  
-titleとかauthorとか改行する
+titleとか  
+authorとか  
+改行する
  | Atusy&#39;s blog
       
     </title>
@@ -102,7 +108,9 @@ titleとかauthorとか改行する
 <header>
     <h2 class="blog-post-title">
         <a class="text-dark" href="../../../../2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/">RmarkdwonのYAMLフロントマターで<br />
-titleとかauthorとか改行する</a>
+titleとか<br />
+authorとか<br />
+改行する</a>
     </h2>
     
 
@@ -117,32 +125,102 @@ titleとかauthorとか改行する</a>
 </div>
 
     
+<div class="blog-post-tags text-secondary">
+    <strong>タグ:</strong>
     
+        <a class="badge badge-primary" href="../../../../tags/rmd">Rmd</a>
+    
+        <a class="badge badge-primary" href="../../../../tags/yaml">YAML</a>
+    
+        <a class="badge badge-primary" href="../../../../tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86">R MarkdownでWord文書を作ろう</a>
+    
+</div>
+
+    
+<div class="blog-post-categories text-secondary">
+    <strong>カテゴリ:</strong>
+    
+        <a class="badge badge-primary" href="../../../../categories/r">R</a>
+    
+</div>
+
     <hr>
 </header>
 <article class="blog-post">
-    <p><span class="citation">@niszet0</span> さん著「R MarkdownでWord文書を作ろう」を読んでます (以下RmdでWord本)。<br />
-Rmdを扱った商業誌にも、同書ほど、RmdファイルのYAMLフロントマターの書式を丁寧に書いている本はないのではないだろうか。
+    <p>@niszet0 さん著「R MarkdownでWord文書を作ろう」を読んでます。
+Rmdを扱った商業誌にも、同書ほどRmdファイルのYAMLフロントマターの書式を丁寧に書いている本はないのではないだろうか。
 使えれば良いというスタンスだったのもあって、YAMLのフロースタイルとか、始めて学びました。
 しかし、これだけ詳しく書いてあるのに改行のことに触れられていないな、とふと。</p>
+
 <p>本記事のタイトル「RmarkdwonのYAMLフロントマターでtitleとかauthorとか改行する」も改行していますね。</p>
+
 <p>これ、どうやってやるか、最初悩む人が多いのではないでしょうか。</p>
-<p>単純には、 <code>html_document</code> なら <code>&lt;br&gt;</code> を、<code>pdf_document</code> なら <code>\n</code> を仕込めばいいのですが、統一的な方法や、特に <code>word_document</code> に通用する方法を知りたい人は多いはず。</p>
+
+<p>単純には、 <code>html_document</code> なら <code>&lt;br&gt;</code> を、<code>pdf_document</code> なら <code>\n</code> を仕込めばいいのですが、
+統一的な方法や、特に <code>word_document</code> に通用する方法を知りたい人は多いはず。</p>
+
 <p>で、とりあえずググるわけですが、</p>
+
 <ul>
-<li><a href="https://www.task-notes.com/entry/20150922/1442890800" class="uri">https://www.task-notes.com/entry/20150922/1442890800</a></li>
-<li><a href="http://d.hatena.ne.jp/shunsuk/20090822/1250937310" class="uri">http://d.hatena.ne.jp/shunsuk/20090822/1250937310</a></li>
+<li><a href="https://www.task-notes.com/entry/20150922/1442890800">https://www.task-notes.com/entry/20150922/1442890800</a></li>
+<li><a href="http://d.hatena.ne.jp/shunsuk/20090822/1250937310">http://d.hatena.ne.jp/shunsuk/20090822/1250937310</a></li>
 </ul>
+
 <p>など、情報はあるものの、どうもこれでは改行されない。</p>
+
 <p>色々試した結果、</p>
-<pre class="yaml"><code>---
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml">---<span class="w">
+</span><span class="w"></span>title<span class="p">:</span><span class="w"> </span><span class="sd">|
+</span><span class="sd">  RmarkdwonのYAMLフロントマターで  
+</span><span class="sd">  titleとかauthorとか改行するには  
+</span><span class="sd">  スペース2つ入れてから、改行して  
+</span><span class="sd">  文章を続ける</span><span class="w">
+</span><span class="w"></span>---</code></pre></div>
+<p>といった具合に <code>:</code> の後にスペースを空けて <code>|</code> を入力。
+改行+インデントして、改行したい場所でスペースを二つ「」入れればいいということが分かりました。</p>
 
----</code></pre>
+<p>もう一つ、改行しているかどうかが分かりやすい方法として</p>
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml">---<span class="w">
+</span><span class="w"></span>title<span class="p">:</span><span class="w"> </span><span class="sd">|
+</span><span class="sd">  | RmarkdwonのYAMLフロントマターで  
+</span><span class="sd">  | titleとかauthorとか改行するには  
+</span><span class="sd">  | スペース2つ入れてから、改行して  
+</span><span class="sd">  | 文章を続ける</span><span class="w">
+</span><span class="w"></span>---</code></pre></div>
+<p>といった具合に <code>|</code> を使いまくる方法があります。</p>
+
+<p><code>html_document</code> や <code>pdf_document</code> では、これを使っていました。
+しかしこの方法だと、<code>word_document</code> ではタイトルが表示されなくなり、
+<code>blogdown</code> では</p>
+
+<blockquote>
+<p>| RmarkdwonのYAMLフロントマターで| titleとかauthorとか改行する</p>
+</blockquote>
+
+<p>という残念なタイトルができあがることを知りました。</p>
+
+<p>Enjoy!!</p>
+
+<p>ところでさっき気付いたのですが、 <code>md</code> ファイルだとシンタックスハイライトが働いて、 <code>Rmd</code> だと働かない……。
+なぜ……。</p>
 
 
     
 
     
+
+    <h4>See also</h4>
+    <ul>
+        
+            <li><a href="../../../../2018/10/25/plantuml-on-rmd/">R Markdown で PlantUML</a></li>
+        
+            <li><a href="../../../../2018/08/18/time-each-chunk/">Rmdでchunkごとの実行時間を計測</a></li>
+        
+            <li><a href="../../../../2018/08/17/rmd-parameterized/">パラメータ付きRmdを試す</a></li>
+        
+            <li><a href="../../../../2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/">xetexでunicode文字</a></li>
+        
+    </ul>
 
 
 </article>

@@ -163,7 +163,8 @@ wrap_plots(x + xlimits, plot_spacer(), xy + xlimits, y, nrow = 2)</code></pre>
 <p>よくよくよく，見ると，y軸の周辺分布も軸が揃っていなかった．
 というわけで，最終形は以下のように．
 やや面倒ですな．</p>
-<pre class="r"><code>wrap_plots(
+<pre class="r"><code>xlimits &lt;- coord_cartesian(xlim = c(1, 6)) # xlim() はNG
+wrap_plots(
   x + coord_cartesian(xlim = c(1, 6)), 
   plot_spacer(), 
   xy + coord_cartesian(xlim = c(1, 6), ylim = c(10, 35)), 
@@ -171,9 +172,31 @@ wrap_plots(x + xlimits, plot_spacer(), xy + xlimits, y, nrow = 2)</code></pre>
   nrow = 2
 )</code></pre>
 <p><img src="../../../../post/2018-11-02-marginal-patchwork_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>また， <code>theme()</code> や <code>wrap_plots(widths =, heights =)</code>を調整すると，かなり頑張った見た目にできる．</p>
+<pre class="r"><code>theme_marginal_x &lt;- theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank())
+theme_marginal_y &lt;- theme(axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+wrap_plots(
+  x + coord_cartesian(xlim = c(1, 6)) + theme_marginal_x, 
+  plot_spacer(), 
+  xy + coord_cartesian(xlim = c(1, 6), ylim = c(10, 35)), 
+  y + coord_flip(xlim = c(10, 35)) + theme_marginal_y, 
+  nrow = 2,
+  widths = c(1, 0.5),
+  heights = c(0.5, 1)
+)</code></pre>
+<p><img src="../../../../post/2018-11-02-marginal-patchwork_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 </div>
 
 
+    
+      <h4>Translations</h4>
+      <ul>
+        
+        <li>
+          <a href="../../../../en/2018/11/02/marginal-patchwork/">en: Marginal distributions with ggplot2 and patchwork</a>
+        </li>
+        
+      </ul>
     
 
     

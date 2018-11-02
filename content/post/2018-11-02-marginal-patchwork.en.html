@@ -1,0 +1,47 @@
+---
+title: Marginal distributions with ggplot2 and patchwork
+author: ~
+date: '2018-11-02'
+slug: marginal-patchwork
+categories: [R]
+tags: [ggplot2, patchwork]
+---
+
+
+
+<p>patchwork packages is a great tool to assemble ggplot2 object.</p>
+<p>I made a Japanese <a href="https://atusy.github.io/presentation/tokyor073/tokyor073-multi-ggplot2.html?raw#/patchwork-">slide</a> to introduce patchwork package in Tokyo R meeting.</p>
+<p>Here, I tried to produce marginal plots, but failed because I was using plot arithmetics (<code>|</code> and <code>/</code>).</p>
+<pre class="r"><code>library(ggplot2)
+library(patchwork)
+xy &lt;- ggplot(mtcars, aes(wt, mpg)) + geom_point()
+x &lt;- ggplot(mtcars, aes(wt)) + geom_histogram(bins = 30)
+y &lt;- ggplot(mtcars, aes(mpg)) + geom_histogram(bins = 30) + coord_flip()
+(x | plot_spacer()) / (xy | y)</code></pre>
+<p><img src="/post/2018-11-02-marginal-patchwork.en_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p>I just found that <code>wrap_plots()</code> helps.</p>
+<pre class="r"><code>wrap_plots(x, plot_spacer(), xy, y, nrow = 2)</code></pre>
+<p><img src="/post/2018-11-02-marginal-patchwork.en_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>However, plots need to share <code>xlim</code> and <code>ylim</code> using <code>coord_cartesian()</code> and <code>coord_flip()</code>.</p>
+<p><code>xlim()</code>, <code>ylim()</code>, are not good choice because they may change binwidths of histograms.</p>
+<pre class="r"><code>wrap_plots(
+  x + coord_cartesian(xlim = c(1, 6)), 
+  plot_spacer(), 
+  xy + coord_cartesian(xlim = c(1, 6), ylim = c(10, 35)), 
+  y + coord_flip(xlim = c(10, 35)), 
+  nrow = 2
+)</code></pre>
+<p><img src="/post/2018-11-02-marginal-patchwork.en_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>Adjusting <code>theme()</code> and <code>wrap_plots(widths =, heights =)</code> will make much more beautiful marginal plots.</p>
+<pre class="r"><code>theme_marginal_x &lt;- theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank())
+theme_marginal_y &lt;- theme(axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+wrap_plots(
+  x + coord_cartesian(xlim = c(1, 6)) + theme_marginal_x, 
+  plot_spacer(), 
+  xy + coord_cartesian(xlim = c(1, 6), ylim = c(10, 35)), 
+  y + coord_flip(xlim = c(10, 35)) + theme_marginal_y, 
+  nrow = 2,
+  widths = c(1, 0.5),
+  heights = c(0.5, 1)
+)</code></pre>
+<p><img src="/post/2018-11-02-marginal-patchwork.en_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
