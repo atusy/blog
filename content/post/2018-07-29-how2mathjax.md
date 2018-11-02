@@ -1,4 +1,7 @@
 ---
+output:
+  blogdown::html_page:
+    toc: true
 title: blogdownでMathJax
 author: ~
 date: '2018-07-28'
@@ -50,7 +53,7 @@ $$
 
 も参考にしたところ、インラインで使うにはちょっとコードに工夫がいるらしいことが判明。
 
-# 解決方法
+# 解決方法 {#solution}
 
 `./themes/hugo-lithium/layouts/partials/footer_mathjax.html`
 
