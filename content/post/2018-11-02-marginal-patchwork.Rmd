@@ -14,6 +14,8 @@ library(patchwork)
 
 patchworkパッケージを使えばあんな図やこんな図が簡単に，と思い馳せた人も多いのではなかろうか．
 
+参考: [TokyoR 73での発表スライド](https://atusy.github.io/presentation/tokyor073/tokyor073-multi-ggplot2.html?raw#/patchwork-)
+
 中でも周辺分布を自由に綺麗に，と思ったのは私だけではないはず．
 
 しかし，以下のように散布図とその周辺分布を作成し，並べると，イケてない図が仕上がる．
