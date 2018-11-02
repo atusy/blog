@@ -1,0 +1,42 @@
+---
+title: patchwork-magick
+author: ~
+date: '2018-10-31'
+slug: patchwork-magick
+categories: []
+tags: []
+---
+
+```{r}
+library(pacman)
+p_load(ggplot2, magick)
+p_load_gh('thomasp85/patchwork')
+images <- list(logo = logo, wizard = wizard, rose = rose, granite = granite)
+```
+
+# 
+
+# `image_ggplot()` のコード
+
+```{r}
+image_ggplot
+```
+
+`coord_fixed()` してくれているので安心ですね．
+
+```{r}
+images %>%
+  lapply(image_info) %>%
+  bind_rows(.id = 'name')
+```
+
+
+
+
+```{r}
+images %>%
+  lapply(image_ggplot) %>%
+  wrap_plots() +
+  plot_annotation(tag_levels = 'a')
+```
+
