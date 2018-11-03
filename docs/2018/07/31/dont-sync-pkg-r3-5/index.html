@@ -113,8 +113,6 @@
 <div class="blog-post-tags text-secondary">
     <strong>タグ:</strong>
     
-        <a class="badge badge-primary" href="../../../../tags/r">R</a>
-    
         <a class="badge badge-primary" href="../../../../tags/package">package</a>
     
 </div>
@@ -131,11 +129,17 @@
 </header>
 <article class="blog-post">
     <p>タイトル通り、R3.5系ではファイル同期ソフトでパッケージを同期しないようにしましょう。</p>
+
 <p>同期しておくとある環境にインストールしたパッケージを他の環境でもすぐさま利用できて便利だったのですが……。</p>
+
 <p>これは、R.3.5.0からパッケージをバイトコンパイルしてインストールするようになったことが原因です。</p>
+
 <p>おかげでパッケージはシステムに最適化され、高速に動きます (3.4系までと比べて)。</p>
+
 <p>代わりに、複数のPCでインストール済みRパッケージを同期すると、</p>
-<p>`‘pkg’ was installed by an R version with different internals’</p>
+
+<p>`&lsquo;pkg&rsquo; was installed by an R version with different internals&rsquo;</p>
+
 <p>というエラーを発してしまいます X(</p>
 
 
@@ -167,6 +171,10 @@
     <ol class="list-unstyled">
         
         <li>
+            <a href="../../../../2018/11/03/accelarate-patchwork/">patchworkの表示を高速化したかった……</a>
+        </li>
+        
+        <li>
             <a href="../../../../2018/11/02/marginal-patchwork/">ggplot2とpatchworkで周辺分布</a>
         </li>
         
@@ -184,10 +192,6 @@ titleとかauthorとか改行する</a>
         
         <li>
             <a href="../../../../2018/10/26/plotly-fixed-axes/">Plotlyで軸比を1:1に固定する</a>
-        </li>
-        
-        <li>
-            <a href="../../../../2018/10/25/plantuml-on-rmd/">R Markdown で PlantUML</a>
         </li>
         
     </ol>

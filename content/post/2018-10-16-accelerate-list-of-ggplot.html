@@ -52,7 +52,7 @@ ggplotオブジェクトに適切なメソッドは <code>ggplot2:::print.ggplot
 ##     }
 ##     invisible(x)
 ## }
-## &lt;bytecode: 0x4cd6be0&gt;
+## &lt;bytecode: 0x556f2fad2a80&gt;
 ## &lt;environment: namespace:ggplot2&gt;</code></pre>
 <p>上記の<code>ggplot2:::print.ggplot</code> の実装を参考に，計算部分を並列化し，表示を順次行うようにしたものが以下のコード．</p>
 <pre class="r"><code>#library(pforeach) # install by devtools::install_github(&#39;hoxo-m/pforeach&#39;)
@@ -79,16 +79,19 @@ print_gglist &lt;- function(x, ...) {
 <pre class="r"><code># library(microbenchmark)
 g_list &lt;- rep(list(g), 60)
 
-microbenchmark(
+bench &lt;- microbenchmark(
   &#39;single thread&#39; = walk(g_list, print),
   &#39;multi thread&#39; = print_gglist(g_list, .cores = 3),
   times = 10L
-)</code></pre>
+)
+bench
+plot(bench)</code></pre>
 <pre><code>## Unit: seconds
 ##           expr      min       lq     mean   median       uq      max neval
-##  single thread 75.86952 75.86952 75.86952 75.86952 75.86952 75.86952     1
-##   multi thread 45.18542 45.18542 45.18542 45.18542 45.18542 45.18542     1</code></pre>
-<p>1周しかしていないが，高速化できていそうだ．</p>
+##  single thread 15.90173 16.58560 18.08624 18.48958 19.16229 21.97050   100
+##   multi thread 12.17476 12.75376 13.86049 13.96567 14.64058 20.18083   100</code></pre>
+<p><img src="/post/2018-10-16-accelerate-list-of-ggplot_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>思ったほどの威力はないが，多少の高速化はできたようだ．</p>
 </div>
 <div id="enjoy" class="section level1">
 <h1>Enjoy!</h1>

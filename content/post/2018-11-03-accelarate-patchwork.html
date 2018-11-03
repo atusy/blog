@@ -1,0 +1,71 @@
+---
+title: patchworkの表示を高速化したかった……
+author: ~
+date: '2018-11-03'
+slug: accelarate-patchwork
+categories: [R]
+tags: [ggplot2, patchwork]
+---
+
+
+
+<p>失敗の記録．</p>
+<div class="section level1">
+<h1>目的</h1>
+<p><a href="https://atusy.github.io/blog/2018/10/16/accelerate-list-of-ggplot/">ggplotのリストの表示を高速化する</a>で紹介した通り，
+ggplotオブジェクトはprintされる段になって，プロットに必要な計算を行っているため，大量のggplotを行うならば，計算部分を並列化し，表示を順次行うのが効率的だ．
+patchworkを使ってggplotオブジェクトを並べる時も同様では……？ と思い，実験したが，何故かそうはならなかった．</p>
+</div>
+<div id="patchworkwrap_plots-gtable" class="section level1">
+<h1><code>patchwork::wrap_plots</code> はgtableオブジェクトをサポート</h1>
+<p>これを確認しないことには，並列化しようがない．</p>
+<pre class="r"><code>library(tidyverse)
+library(patchwork)
+g &lt;- ggplot_gtable(ggplot_build(qplot(1,1)))
+wrap_plots(g, g)</code></pre>
+<p><img src="/post/2018-11-03-accelarate-patchwork_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p>大丈夫そうだ．</p>
+</div>
+<div id="ggplot" class="section level1">
+<h1>大量のggplotを用意</h1>
+<pre class="r"><code>N &lt;- 100 %&gt;%
+  seq %&gt;%
+  as.character %&gt;%
+  purrr::set_names()
+g &lt;- ggplot(iris, aes(Sepal.Length)) + geom_histogram(bins = 30)
+g_list &lt;- lapply(N, function(n) g + ggtitle(n))</code></pre>
+</div>
+<div id="ggplotgtable" class="section level1">
+<h1>ggplotオブジェクトのリストを並列してgtableオブジェクト化する関数を定義</h1>
+<p>並列化にはhoxo_m印のpforeachを使う．
+定義する関数の引数 <code>g</code> にはggplotのリストを， <code>...</code> には <code>pforeach()</code> に与える引数を入力する．</p>
+<pre class="r"><code>pbuild &lt;- function(g, ...) {
+  pforeach::pforeach(g = g, ...)({
+    list(ggplot_gtable(ggplot_build(g)))
+  })
+}</code></pre>
+</div>
+<div class="section level1">
+<h1>実験</h1>
+<pre class="r"><code>g_list %&gt;% head %&gt;% pbuild(.inorder = TRUE) %&gt;% wrap_plots</code></pre>
+<p><img src="/post/2018-11-03-accelarate-patchwork_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>GOOD!</p>
+</div>
+<div class="section level1">
+<h1>ベンチマーク</h1>
+<pre class="r"><code>res &lt;- microbenchmark::microbenchmark(
+  single = {g_list %&gt;% wrap_plots},
+  multi = {g_list %&gt;% pbuild(.inorder = TRUE) %&gt;% wrap_plots}
+)
+res
+plot(res)</code></pre>
+<pre><code>## Unit: milliseconds
+##    expr         min          lq        mean      median          uq
+##  single    27.29114    35.44322    41.86775    40.93278    47.54466
+##   multi 10261.73180 11969.03695 12471.06743 12341.71124 12789.48628
+##          max neval
+##     67.23753   100
+##  16764.60573   100</code></pre>
+<p><img src="/post/2018-11-03-accelarate-patchwork_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>どうしてこうなった!!</p>
+</div>
