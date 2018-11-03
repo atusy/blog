@@ -206,7 +206,11 @@ CRAN版を使う場合は <code>as.character</code> すると，GitHub版の <co
 <pre><code>##                  $\\alpha$ 
 ## &quot;paste(&#39;&#39;,&#39;&#39;,alpha,,,,&#39;&#39;)&quot;</code></pre>
 <p>実際には上記の通り，エスケープを使うかどうかがちょっと違いますが，ちゃんと機能します．</p>
-<pre class="r"><code>ggplot(d, aes(x = x, y = x, label = label)) +
+<pre class="r"><code>d &lt;- data.frame(
+  x = seq(3),
+  label = as.character(TeX(c(&#39;$\\alpha$&#39;, &#39;$\\beta$&#39;, &#39;$\\gamma$&#39;), output = &#39;expression&#39;))
+)
+ggplot(d, aes(x = x, y = x, label = label)) +
   geom_text(parse = TRUE) +
   theme_void()</code></pre>
 <p><img src="../../../../post/2018-11-03-tex-in-ggplot2_files/figure-html/unnamed-chunk-6-1.png" width="384" /></p>

@@ -95,6 +95,10 @@ TeX('$\\alpha$', output = 'character')
 実際には上記の通り，エスケープを使うかどうかがちょっと違いますが，ちゃんと機能します．
 
 ```{r, fig.height=1.5}
+d <- data.frame(
+  x = seq(3),
+  label = as.character(TeX(c('$\\alpha$', '$\\beta$', '$\\gamma$'), output = 'expression'))
+)
 ggplot(d, aes(x = x, y = x, label = label)) +
   geom_text(parse = TRUE) +
   theme_void()
