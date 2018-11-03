@@ -88,8 +88,7 @@ print_gglist(list(g, g))
 g_list <- rep(list(g), 60)
 bench <- microbenchmark(
   'single thread' = walk(g_list, print),
-  'multi thread' = print_gglist(g_list, .cores = 3),
-  times = 1
+  'multi thread' = print_gglist(g_list, .cores = 3)
 )
 saveRDS(bench, '../../static/RDS/accelerate-list-of-ggplot-benchmark.RDS')
 ```
@@ -99,18 +98,22 @@ saveRDS(bench, '../../static/RDS/accelerate-list-of-ggplot-benchmark.RDS')
 # library(microbenchmark)
 g_list <- rep(list(g), 60)
 
-microbenchmark(
+bench <- microbenchmark(
   'single thread' = walk(g_list, print),
   'multi thread' = print_gglist(g_list, .cores = 3),
   times = 10L
 )
+bench
+plot(bench)
 ```
 
 ```{r, echo = FALSE}
-readRDS('../../static/RDS/accelerate-list-of-ggplot-benchmark.RDS')
+bench <- readRDS('../../static/RDS/accelerate-list-of-ggplot-benchmark.RDS')
+bench
+plot(bench)
 ```
 
-1周しかしていないが，高速化できていそうだ．
+思ったほどの威力はないが，多少の高速化はできたようだ．
 
 # Enjoy!
 

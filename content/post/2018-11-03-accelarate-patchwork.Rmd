@@ -1,0 +1,97 @@
+---
+title: patchworkの表示を高速化したかった……
+author: ~
+date: '2018-11-03'
+slug: accelarate-patchwork
+categories: [R]
+tags: [ggplot2, patchwork]
+---
+
+```{r setup, include = FALSE}
+library(tidyverse)
+library(patchwork)
+library(microbenchmark)
+knitr::opts_chunk$set(cache = TRUE, message = FALSE, warning = FALSE)
+```
+
+
+失敗の記録．
+
+# 目的
+
+[ggplotのリストの表示を高速化する](https://atusy.github.io/blog/2018/10/16/accelerate-list-of-ggplot/)で紹介した通り，
+ggplotオブジェクトはprintされる段になって，プロットに必要な計算を行っているため，大量のggplotを行うならば，計算部分を並列化し，表示を順次行うのが効率的だ．
+patchworkを使ってggplotオブジェクトを並べる時も同様では……？ と思い，実験したが，何故かそうはならなかった．
+
+# `patchwork::wrap_plots` はgtableオブジェクトをサポート
+
+これを確認しないことには，並列化しようがない．
+
+```{r, fig.keep='last'}
+library(tidyverse)
+library(patchwork)
+g <- ggplot_gtable(ggplot_build(qplot(1,1)))
+wrap_plots(g, g)
+```
+
+大丈夫そうだ．
+
+# 大量のggplotを用意
+
+```{r}
+N <- 100 %>%
+  seq %>%
+  as.character %>%
+  purrr::set_names()
+g <- ggplot(iris, aes(Sepal.Length)) + geom_histogram(bins = 30)
+g_list <- lapply(N, function(n) g + ggtitle(n))
+```
+
+# ggplotオブジェクトのリストを並列してgtableオブジェクト化する関数を定義
+
+並列化にはhoxo_m印のpforeachを使う．
+定義する関数の引数 `g` にはggplotのリストを， `...` には `pforeach()` に与える引数を入力する．
+
+```{r}
+pbuild <- function(g, ...) {
+  pforeach::pforeach(g = g, ...)({
+    list(ggplot_gtable(ggplot_build(g)))
+  })
+}
+```
+
+# 実験
+
+```{r, message = FALSE}
+g_list %>% head %>% pbuild(.inorder = TRUE) %>% wrap_plots
+```
+
+GOOD!
+
+# ベンチマーク
+
+```{r, echo = FALSE, eval = FALSE, fig.show = 'hide', warning=FALSE}
+res <- microbenchmark::microbenchmark(
+  single = {g_list %>% wrap_plots},
+  multi = {g_list %>% pbuild(.inorder = TRUE) %>% wrap_plots}
+)
+saveRDS(res, here::here('static/RDS/accelarate-patchwork.RDS'))
+```
+
+```{r, eval = FALSE}
+res <- microbenchmark::microbenchmark(
+  single = {g_list %>% wrap_plots},
+  multi = {g_list %>% pbuild(.inorder = TRUE) %>% wrap_plots}
+)
+res
+plot(res)
+```
+
+```{r, echo = FALSE}
+res <- readRDS(here::here('static/RDS/accelarate-patchwork.RDS'))
+res
+plot(res)
+```
+
+
+どうしてこうなった!!
