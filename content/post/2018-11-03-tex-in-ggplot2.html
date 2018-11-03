@@ -1,0 +1,105 @@
+---
+title: ggplot2で$TeX$を利用する
+author: ~
+date: '2018-11-03'
+slug: tex-in-ggplot2
+categories: [R]
+tags: [ggplot2, latex2exp, TeX]
+output:
+  blogdown::html_page:
+    toc: yes
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#intro">はじめに</a><ul>
+<li><a href="#install">インストール</a></li>
+</ul></li>
+<li><a href="#try">使ってみる</a><ul>
+<li><a href="#title">タイトルなどで <span class="math inline">\(TeX\)</span></a></li>
+<li><a href="#geom"><code>geom_text</code> で <span class="math inline">\(TeX\)</span></a></li>
+<li><a href="#facet"><code>facet_wrap</code> や <code>facet_grid</code> で <span class="math inline">\(TeX\)</span></a></li>
+</ul></li>
+<li><a href="#enjoy">Enjoy!</a></li>
+</ul>
+</div>
+
+<div id="intro" class="section level1">
+<h1>はじめに</h1>
+<p><code>ggplot2</code> で <span class="math inline">\(TeX\)</span> 記法が使えると嬉しいですよね．
+一応，そういう人たちのための入口としては <code>expression</code> だとか <code>bquote</code> だとかがあるんですが，ここでは紹介しません．
+いえ，毎度使い方を忘れてしまい，紹介できないというのが正しいです．</p>
+<p>そんな私に <code>latex2tex</code> パッケージ．
+<code>TeX()</code> により， <span class="math inline">\(TeX\)</span> 記法の文字列をRの <code>expression</code> に変換してくれます．
+覚えることが少なくシンプルになっていいですね．
+皆さんも是非．</p>
+<pre class="r"><code>library(latex2exp)
+TeX(&#39;\\LaTeX&#39;)</code></pre>
+<pre><code>## expression(`\LaTeX` = paste(&quot;&quot;, L^{
+##     phantom()[phantom()[phantom()[scriptstyle(A)]]]
+## } * T[textstyle(E)] * X))</code></pre>
+<div id="install" class="section level2">
+<h2>インストール</h2>
+<p>CRANにもありますが，後述の通りバグが放置されているのでGitHub版を薦めます．</p>
+<pre class="r"><code>devtools::install_github(&#39;stefano-meschiari/latex2exp&#39;)</code></pre>
+</div>
+</div>
+<div id="try" class="section level1">
+<h1>使ってみる</h1>
+<div id="title" class="section level2">
+<h2>タイトルなどで <span class="math inline">\(TeX\)</span></h2>
+<p><code>labs()</code> や <code>ggtitle()</code> ， <code>xlab()</code> ， <code>ylab()</code> では以下のように <code>TeX()</code> がとても活躍します．</p>
+<pre class="r"><code>library(tidyverse)
+library(latex2exp)
+d &lt;- data.frame(x = seq(0, 10), y = dpois(x = seq(0, 10), lambda = 3))
+ggplot(d, aes(x = x, y = y)) + 
+  geom_point() +
+  geom_line() +
+  labs(
+    title = TeX(&#39;$P(X = k; \\lambda = 3) = \\frac{\\lambda^k e^{-\\lambda}}{k!}$&#39;),
+    y = TeX(&#39;$P(X = k; \\lambda = 3)$&#39;),
+    x = TeX(&#39;$k$&#39;)
+  )</code></pre>
+<p><img src="/post/2018-11-03-tex-in-ggplot2_files/figure-html/unnamed-chunk-2-1.png" width="384" /></p>
+</div>
+<div id="geom" class="section level2">
+<h2><code>geom_text</code> で <span class="math inline">\(TeX\)</span></h2>
+<p>この場合，<code>geom_text(aes(label = ))</code> がcharacter型ベクトルしか受け付けないので注意が必要です．</p>
+<p>github版の <code>TeX()</code> には <code>output = 'character'</code> というオプションがあるのでこれを利用しましょう．</p>
+<p>その上で，<code>geom_text(parse = TRUE)</code> します．</p>
+<pre class="r"><code>d &lt;- data.frame(
+  x = seq(3),
+  label = TeX(c(&#39;$\\alpha$&#39;, &#39;$\\beta$&#39;, &#39;$\\gamma$&#39;), output = &#39;character&#39;)
+)
+ggplot(d, aes(x = x, y = x, label = label)) +
+  geom_text(parse = TRUE) +
+  theme_void()</code></pre>
+<p><img src="/post/2018-11-03-tex-in-ggplot2_files/figure-html/unnamed-chunk-3-1.png" width="384" /></p>
+<p>そもそも，data frameが <code>expression</code> を受け付けないので， <code>output = 'expression'</code> ではどうしようもないのも確か．</p>
+<p>CRAN版では <code>output = 'text'</code> というものが用意されていますが，返り値は <code>expression</code> のままなので注意 (バグ？)．
+CRAN版を使う場合は <code>as.character</code> すると，GitHub版の <code>output = 'character'</code> 相当になります．</p>
+<pre class="r"><code>as.character(TeX(&#39;$\\alpha$&#39;, output = &#39;expression&#39;))</code></pre>
+<pre><code>## [1] &quot;paste(\&quot;\&quot;, \&quot;\&quot;, alpha, , , , \&quot;\&quot;)&quot;</code></pre>
+<pre class="r"><code>TeX(&#39;$\\alpha$&#39;, output = &#39;character&#39;)</code></pre>
+<pre><code>##                  $\\alpha$ 
+## &quot;paste(&#39;&#39;,&#39;&#39;,alpha,,,,&#39;&#39;)&quot;</code></pre>
+<p>実際には上記の通り，エスケープを使うかどうかがちょっと違いますが，ちゃんと機能します．</p>
+<pre class="r"><code>ggplot(d, aes(x = x, y = x, label = label)) +
+  geom_text(parse = TRUE) +
+  theme_void()</code></pre>
+<p><img src="/post/2018-11-03-tex-in-ggplot2_files/figure-html/unnamed-chunk-6-1.png" width="384" /></p>
+</div>
+<div id="facet" class="section level2">
+<h2><code>facet_wrap</code> や <code>facet_grid</code> で <span class="math inline">\(TeX\)</span></h2>
+<p><code>facet</code> の strip でも勿論 <span class="math inline">\(TeX\)</span> できます．
+この場合は，<code>facet_wrap</code> や <code>facet_grid</code> のオプションで， <code>labeller = label_parsed</code> します．</p>
+<pre class="r"><code>ggplot(d, aes(x, x)) +
+  geom_point() +
+  facet_wrap(~ label, labeller = label_parsed)</code></pre>
+<p><img src="/post/2018-11-03-tex-in-ggplot2_files/figure-html/unnamed-chunk-7-1.png" width="384" /></p>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>

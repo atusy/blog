@@ -12,6 +12,15 @@
     
     
     <item>
+      <title>ggplot2で$TeX$を利用する</title>
+      <link>/2018/11/03/tex-in-ggplot2/</link>
+      <pubDate>Sat, 03 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/11/03/tex-in-ggplot2/</guid>
+      <description>はじめに インストール 使ってみる タイトルなどで \(TeX\) geom_text で \(TeX\) facet_wrap や facet_grid で \(TeX\) Enjoy! はじめに ggplot2 で \(TeX\) 記法が使えると嬉しいですよね． 一応，そういう人たちのための入口</description>
+    </item>
+    
+    <item>
       <title>patchworkの表示を高速化したかった……</title>
       <link>/2018/11/03/accelarate-patchwork/</link>
       <pubDate>Sat, 03 Nov 2018 00:00:00 +0000</pubDate>

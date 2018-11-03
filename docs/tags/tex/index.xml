@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tex on Atusy&#39;s blog</title>
+    <link>/tags/tex/</link>
+    <description>Recent content in Tex on Atusy&#39;s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja-jp</language>
+    <lastBuildDate>Sat, 03 Nov 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/tex/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>ggplot2で$TeX$を利用する</title>
+      <link>/2018/11/03/tex-in-ggplot2/</link>
+      <pubDate>Sat, 03 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/11/03/tex-in-ggplot2/</guid>
+      <description>はじめに インストール 使ってみる タイトルなどで \(TeX\) geom_text で \(TeX\) facet_wrap や facet_grid で \(TeX\) Enjoy! はじめに ggplot2 で \(TeX\) 記法が使えると嬉しいですよね． 一応，そういう人たちのための入口</description>
+    </item>
+    
+  </channel>
+</rss>
