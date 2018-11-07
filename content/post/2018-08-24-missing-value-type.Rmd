@@ -140,6 +140,7 @@ Not At Randomというのは見かけ上の問題に過ぎない。
 
 ```{r, fig.width = 2.5, fig.height = 2.8}
 d_mar <- d %>%
+  mutate_at('type', as.character) %>%
   filter(type == 'MAR') %>%
   mutate(observed = y < 0)
 d_mar_marginal <- d_mar %>%
