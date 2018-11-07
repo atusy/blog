@@ -9,7 +9,7 @@ tags: []
 
 ```{r}
 library(pacman)
-p_load(ggplot2, magick)
+p_load(ggplot2, magick, tidyr, dplyr)
 p_load_gh('thomasp85/patchwork')
 images <- list(logo = logo, wizard = wizard, rose = rose, granite = granite)
 ```

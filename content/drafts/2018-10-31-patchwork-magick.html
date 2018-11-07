@@ -10,7 +10,7 @@ tags: []
 
 
 <pre class="r"><code>library(pacman)
-p_load(ggplot2, magick)
+p_load(ggplot2, magick, tidyr, dplyr)
 p_load_gh(&#39;thomasp85/patchwork&#39;)
 images &lt;- list(logo = logo, wizard = wizard, rose = rose, granite = granite)</code></pre>
 <div id="section" class="section level1">
@@ -27,7 +27,7 @@ images &lt;- list(logo = logo, wizard = wizard, rose = rose, granite = granite)<
 ##         ggplot2::scale_y_reverse() + ggplot2::scale_fill_identity() + 
 ##         ggplot2::theme_void()
 ## }
-## &lt;bytecode: 0x560e1bd22b48&gt;
+## &lt;bytecode: 0x5651177b94c0&gt;
 ## &lt;environment: namespace:magick&gt;</code></pre>
 <p><code>coord_fixed()</code> してくれているので安心ですね．</p>
 <pre class="r"><code>images %&gt;%
@@ -44,5 +44,5 @@ images &lt;- list(logo = logo, wizard = wizard, rose = rose, granite = granite)<
   lapply(image_ggplot) %&gt;%
   wrap_plots() +
   plot_annotation(tag_levels = &#39;a&#39;)</code></pre>
-<p><img src="/post/drafts/2018-10-31-patchwork-magick_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p><img src="/drafts/2018-10-31-patchwork-magick_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 </div>
