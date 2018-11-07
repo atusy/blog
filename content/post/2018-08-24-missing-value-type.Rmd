@@ -9,6 +9,7 @@ tags: [missing value, ggplot2]
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+pacman::p_load(dplyr, tidyr, ggplot2, purrr, stringr)
 needs::prioritize(dplyr)
 ```
 

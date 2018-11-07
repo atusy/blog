@@ -9,7 +9,7 @@ tags: [package, Roxygen2, Rd]
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-needs::needs(data.table, dplyr, knitr, kableExtra)
+pacman::p_load(data.table, dplyr, knitr, kableExtra, stringr)
 ```
 
 Roxygen2のタグについての情報が複数箇所に分散していて調べるのが大変なのでまとめた。
