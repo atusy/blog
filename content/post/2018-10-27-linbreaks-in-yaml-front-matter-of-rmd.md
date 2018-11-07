@@ -63,7 +63,7 @@ title: |
 しかしこの方法だと、`word_document` ではタイトルが表示されなくなり、
 `blogdown` では
 
-> | RmarkdwonのYAMLフロントマターで| titleとかauthorとか改行する
+> | RmarkdwonのYAMLフロントマターで| titleとか| authorとか| 改行する
 
 という残念なタイトルができあがることを知りました。
 

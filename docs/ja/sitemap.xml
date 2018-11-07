@@ -38,11 +38,6 @@
   </url>
   
   <url>
-    <loc>/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</loc>
-    <lastmod>2018-10-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/2018/10/26/plotly-fixed-axes/</loc>
     <lastmod>2018-10-26T00:00:00+00:00</lastmod>
   </url>
@@ -83,6 +78,11 @@
   </url>
   
   <url>
+    <loc>/2018/08/20/docker-memo/</loc>
+    <lastmod>2018-08-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/2018/08/18/time-each-chunk/</loc>
     <lastmod>2018-08-18T00:00:00+00:00</lastmod>
   </url>
@@ -115,6 +115,10 @@
   <url>
     <loc>/2018/07/05/github-pages-with-rmarkdown/</loc>
     <lastmod>2018-07-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/1/01/01/</loc>
   </url>
   
   <url>
@@ -190,6 +194,12 @@
   </url>
   
   <url>
+    <loc>/categories/docker/</loc>
+    <lastmod>2018-08-20T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/tags/ggplot2/</loc>
     <lastmod>2018-11-03T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -212,14 +222,14 @@
   </url>
   
   <url>
-    <loc>/tags/latex/</loc>
-    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
+    <loc>/categories/latex/</loc>
+    <lastmod>2018-07-09T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/categories/latex/</loc>
-    <lastmod>2018-07-09T00:00:00+00:00</lastmod>
+    <loc>/tags/latex/</loc>
+    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -238,6 +248,12 @@
   <url>
     <loc>/tags/mathjax/</loc>
     <lastmod>2018-07-28T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/memo/</loc>
+    <lastmod>2018-08-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -304,12 +320,6 @@
   </url>
   
   <url>
-    <loc>/tags/r/</loc>
-    <lastmod>2018-07-31T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/categories/r/</loc>
     <lastmod>2018-11-06T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -323,6 +333,12 @@
                 hreflang="ja"
                 href="/categories/r/"
                 />
+  </url>
+  
+  <url>
+    <loc>/tags/r/</loc>
+    <lastmod>2018-07-31T00:00:00+00:00</lastmod>
+    <priority>0</priority>
   </url>
   
   <url>
