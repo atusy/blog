@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta property="og:title" content="R起動時に不足パッケージを導入しつつ読み込む" />
+<meta property="og:description" content=".Rprofileを使って いつも使うパッケージはR起動時に読み込む 例えば， tidyverse を読み込みたいなら， options(defaultPackages = c(getOption(&#39;defaultPackages&#39;), &#39;tidyverse&#39;)) とする． library ではなく options を利用することで" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/2018/11/06/defaultpackages-rprofile/" /><meta property="article:published_time" content="2018-11-06T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2018-11-06T00:00:00&#43;00:00"/>
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="R起動時に不足パッケージを導入しつつ読み込む"/>
+<meta name="twitter:description" content=".Rprofileを使って いつも使うパッケージはR起動時に読み込む 例えば， tidyverse を読み込みたいなら， options(defaultPackages = c(getOption(&#39;defaultPackages&#39;), &#39;tidyverse&#39;)) とする． library ではなく options を利用することで"/>
+
+
+
+    <link rel="canonical" href="../../../../2018/11/06/defaultpackages-rprofile/">
+
+    <title>
+      
+        R起動時に不足パッケージを導入しつつ読み込む | Atusy&#39;s blog
+      
+    </title>
+
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+
+    <link href="../../../../css/style.css" rel="stylesheet">
+
+    
+
+    
+
+    <link rel="stylesheet" href="../../../../css/chroma-styles.css">
+
+  </head>
+  <body>
+    
+      <header class="blog-header">
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+        <a class="navbar-brand" href="../../../../">
+            <img src="../../../../images/atusy.jpg" width="50" height="50" class="d-inline-block align-top" alt="">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+            <ul class="navbar-nav">
+                
+                
+                <li class="nav-item ">
+                    
+                        <a class="nav-link" href="https://github.com/atusy">GitHub</a>
+                    
+                </li>
+                
+                <li class="nav-item ">
+                    
+                        <a class="nav-link" href="https://twitter.com/Atsushi776">Twitter</a>
+                    
+                </li>
+                
+            </ul>
+            
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Language
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                        
+                            <a class="dropdown-item" href="../../../../">Japanese</a>
+                        
+                            <a class="dropdown-item" href="../../../../en/">English</a>
+                        
+                    </div>
+                </li>
+            </ul>
+            
+        </div>
+    </nav>
+</header>
+    
+
+    
+    <div class="container">
+      <div class="row">
+        <div class="col-12 col-lg-8 blog-main">
+
+          
+
+<header>
+    <h2 class="blog-post-title">
+        <a class="text-dark" href="../../../../2018/11/06/defaultpackages-rprofile/">R起動時に不足パッケージを導入しつつ読み込む</a>
+    </h2>
+    
+
+
+<div class="blog-post-date text-secondary">
+    
+        2018-11-6
+    
+    
+        by <span rel="author">Atusy</span>
+    
+</div>
+
+    
+<div class="blog-post-tags text-secondary">
+    <strong>タグ:</strong>
+    
+        <a class="badge badge-primary" href="../../../../tags/.rprofile">.Rprofile</a>
+    
+        <a class="badge badge-primary" href="../../../../tags/callr">callr</a>
+    
+</div>
+
+    
+<div class="blog-post-categories text-secondary">
+    <strong>カテゴリ:</strong>
+    
+        <a class="badge badge-primary" href="../../../../categories/r">R</a>
+    
+</div>
+
+    <hr>
+</header>
+<article class="blog-post">
+    
+
+<h1 id="rprofileを使って">.Rprofileを使って</h1>
+
+<h2 id="いつも使うパッケージはr起動時に読み込む">いつも使うパッケージはR起動時に読み込む</h2>
+
+<p>例えば， <code>tidyverse</code> を読み込みたいなら，</p>
+<div class="highlight"><pre class="chroma"><code class="language-r" data-lang="r"><span class="kp">options</span><span class="p">(</span>defaultPackages <span class="o">=</span> <span class="kt">c</span><span class="p">(</span><span class="kp">getOption</span><span class="p">(</span><span class="s">&#39;defaultPackages&#39;</span><span class="p">),</span> <span class="s">&#39;tidyverse&#39;</span><span class="p">))</span></code></pre></div>
+<p>とする．</p>
+
+<p><code>library</code> ではなく <code>options</code> を利用することで，<code>filter()</code> で <code>dplyr::filter()</code> を呼ぶつもりが <code>stats::filter()</code> を呼んでしまうような事故を防げる．</p>
+
+<h2 id="不足パッケージをインストールしたい">不足パッケージをインストールしたい</h2>
+
+<p>これは一筋縄ではいかず，私は <code>callr::r()</code> を使うことで解決した．</p>
+<div class="highlight"><pre class="chroma"><code class="language-r" data-lang="r">pkg_installed <span class="o">&lt;-</span> <span class="kp">rownames</span><span class="p">(</span>installed.packages<span class="p">())</span> <span class="c1"># インストール済みパッケージの列挙</span>
+pkg_required <span class="o">&lt;-</span> <span class="s">&#39;tidyverse&#39;</span> <span class="c1"># 欲しいパッケージの列挙</span>
+pkg_missing <span class="o">&lt;-</span> <span class="kp">setdiff</span><span class="p">(</span>pkg_required<span class="p">,</span> pkg_installed<span class="p">)</span> <span class="c1"># 不足パッケージの列挙</span>
+
+<span class="kr">if</span><span class="p">(</span><span class="kp">length</span><span class="p">(</span>pkg_missing<span class="p">)</span> <span class="o">&gt;</span> <span class="m">0</span><span class="p">)</span> <span class="c1"># 不足パッケージのインストール</span>
+  callr<span class="o">::</span>r<span class="p">(</span>
+    func <span class="o">=</span> <span class="kr">function</span><span class="p">(</span>pkg<span class="p">)</span> utils<span class="o">::</span>install.packages<span class="p">(</span>pkg<span class="p">),</span> <span class="c1"># 実行したい関数</span>
+    args <span class="o">=</span> <span class="kt">list</span><span class="p">(</span>pkg <span class="o">=</span> pkg_required<span class="p">),</span> <span class="c1"># 関数に与える引数のリスト</span>
+    repos <span class="o">=</span> <span class="kt">c</span><span class="p">(</span>CRAN <span class="o">=</span> <span class="s">&#34;https://cran.ism.ac.jp/&#34;</span><span class="p">),</span> <span class="c1"># レポジトリの設定</span>
+    user_profile <span class="o">=</span> <span class="kc">FALSE</span><span class="p">,</span> <span class="c1"># .Rprofile を読み込まないよう設定</span>
+    system_profile <span class="o">=</span> <span class="kc">FALSE</span> <span class="c1"># .Rprofile.site を読み込まないよう設定</span>
+  <span class="p">)</span></code></pre></div>
+<p><code>callr::r()</code> は <code>do.call</code> のプロセス分離版と思えばいい．
+第一引数 <code>func</code> に実行したい関数，第二引数 <code>args</code> に <code>func</code> に与える引数をリストで与える．
+プロセスが異なる都合上，レポジトリを設定したり，<code>.Rprofile</code> や <code>.Rprofile.site</code> を読み込むか否かを設定できる．
+<code>.Rprofile</code> や <code>.Rprofile.site</code> は，以前はデフォルトで読み込んでいたが，今は読み込まないらしい．
+確実を期して <code>user_profile = FALSE</code> , <code>system_profile = FALSE</code> として明示的に読み込みを防ごう．
+特に <code>.Rprofile</code> を読み込み直されると，パッケージインストール前に <code>.Rprofile</code> を読み込み直すことを繰り返してしまう．</p>
+
+<p>ちなみに <code>callr</code> を使わず， <code>install.packages()</code> するとパッケージインストール前に <code>.Rprofile</code> を読み込み直すため無限地獄に落ちる．</p>
+
+<p>GitHubパッケージも似た要領で <code>devtools::install_packages</code> を組み合わせればOK．</p>
+
+<h2 id="必要なパッケージを適宜インストールしつつ読み込みたい">必要なパッケージを適宜インストールしつつ読み込みたい</h2>
+
+<p>以上の内容を組み合わせると，大体こんな流れになる．
+<code>callr</code> だけは手動でインストールしなければならない．</p>
+
+<p><img src="../../../../images/Rprofile-defaultPackages-uml.png" alt="" /></p>
+
+<!--
+@startuml
+start
+:CRANレポジトリを設定;
+:インストール済みのパッケージを列挙;
+if (callrは導入済みか) then (no)
+  :.Rprofile読み込み中止;
+  stop
+else (yes)
+  :必要なパッケージを列挙;
+  :不足パッケージを導入 (callr::r_vanilla内);
+  :デフォルトパッケージを設定;
+  :変数を掃除;
+  :.Rprofile読み込み完了;
+end
+@enduml
+-->
+
+<p>以上を踏まえた上で，</p>
+
+<ul>
+<li>CRANパッケージに加え，GitHubパッケージに対応
+
+<ul>
+<li><code>devtools::install_github</code> を必要とするので
+必要なCRANパッケージに <code>devtools</code> または，
+<code>devtools</code> に依存するパッケージを指定しておく．
+今回は <code>pacman</code> を入れた．</li>
+<li>下記コードではGitHub版パッケージがCRAN版に優先されるので注意．</li>
+</ul></li>
+<li>プロジェクトルートに <code>.Rprofile</code> がなければコピー
+
+<ul>
+<li>プロジェクトの再現性確保のため</li>
+</ul></li>
+</ul>
+
+<p>という設定を加えたものが以下．</p>
+<div class="highlight"><pre class="chroma"><code class="language-r" data-lang="r"><span class="c1"># Copy .Rprofile to project root</span>
+<span class="kr">if</span><span class="p">(</span><span class="o">!</span><span class="kp">file.exists</span><span class="p">(</span><span class="s">&#39;.Rprofile&#39;</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="kp">dir</span><span class="p">(</span>pattern <span class="o">=</span> <span class="s">&#39;\\.Rproj$&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="m">0</span><span class="p">)</span>
+  <span class="kp">file.copy</span><span class="p">(</span><span class="s">&#39;~/R/.Rprofile&#39;</span><span class="p">,</span> <span class="s">&#39;.Rprofile&#39;</span><span class="p">)</span>
+
+<span class="c1"># Tokyo as default CRAN mirror</span>
+<span class="kp">options</span><span class="p">(</span>repos <span class="o">=</span> <span class="kt">c</span><span class="p">(</span>CRAN <span class="o">=</span> <span class="s">&#34;https://cran.ism.ac.jp/&#34;</span><span class="p">))</span>
+
+<span class="c1"># Pkg</span>
+
+<span class="c1">## Installed packages</span>
+installed <span class="o">&lt;-</span> <span class="kp">rownames</span><span class="p">(</span>utils<span class="o">::</span>installed.packages<span class="p">())</span>
+
+<span class="c1">## Stop if callr not installed</span>
+<span class="kr">if</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="s">&#39;callr&#39;</span> <span class="o">%in%</span> installed<span class="p">))</span> <span class="kp">stop</span><span class="p">(</span><span class="s">&#39;Install callr to load .Rprofile&#39;</span><span class="p">)</span> 
+
+<span class="c1">## Required packages on CRAN and GitHub</span>
+
+cran <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span>
+  <span class="s">&#39;data.table&#39;</span><span class="p">,</span>
+  <span class="s">&#39;dplyr&#39;</span><span class="p">,</span>
+  <span class="s">&#39;ggplot2&#39;</span><span class="p">,</span>
+  <span class="s">&#39;here&#39;</span><span class="p">,</span>
+  <span class="s">&#39;pacman&#39;</span><span class="p">,</span>
+  <span class="s">&#39;pipeR&#39;</span><span class="p">,</span>
+  <span class="s">&#39;purrr&#39;</span><span class="p">,</span>
+  <span class="s">&#39;stringr&#39;</span><span class="p">,</span>
+  <span class="s">&#39;tidyr&#39;</span>
+<span class="p">)</span>
+
+gh <span class="o">&lt;-</span> <span class="kt">c</span><span class="p">(</span><span class="s">&#39;atusy/mytools&#39;</span><span class="p">)</span>
+gh2 <span class="o">&lt;-</span> <span class="kp">gsub</span><span class="p">(</span><span class="s">&#39;.*/&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> gh<span class="p">)</span>
+
+<span class="c1">## Which required packages are not installed?</span>
+
+cran_missing <span class="o">&lt;-</span> <span class="kp">setdiff</span><span class="p">(</span><span class="kt">c</span><span class="p">(</span><span class="s">&#39;devtools&#39;</span><span class="p">,</span> cran<span class="p">),</span> installed<span class="p">)</span>
+gh_missing <span class="o">&lt;-</span> gh<span class="p">[</span><span class="o">!</span><span class="p">(</span>gh2 <span class="o">%in%</span> installed<span class="p">)]</span>
+
+<span class="c1">## Install missing packages</span>
+
+callr<span class="o">::</span>r<span class="p">(</span>
+  <span class="kr">function</span><span class="p">(</span>cran<span class="p">,</span> gh<span class="p">)</span> <span class="p">{</span>
+    <span class="kr">if</span><span class="p">(</span><span class="kp">length</span><span class="p">(</span>cran<span class="p">)</span> <span class="o">&gt;</span> <span class="m">0</span><span class="p">)</span> utils<span class="o">::</span>install.packages<span class="p">(</span>cran<span class="p">)</span>
+    <span class="kr">if</span><span class="p">(</span><span class="kp">length</span><span class="p">(</span>gh<span class="p">)</span> <span class="o">&gt;</span> <span class="m">0</span><span class="p">)</span> devtools<span class="o">::</span>install_github<span class="p">(</span>gh<span class="p">)</span>
+    <span class="kp">invisible</span><span class="p">(</span><span class="kc">NULL</span><span class="p">)</span>
+  <span class="p">},</span>
+  args <span class="o">=</span> <span class="kt">list</span><span class="p">(</span>cran <span class="o">=</span> cran_missing<span class="p">,</span> gh <span class="o">=</span> gh_missing<span class="p">),</span>
+  repos <span class="o">=</span> <span class="kp">getOption</span><span class="p">(</span><span class="s">&#39;repos&#39;</span><span class="p">),</span>
+  user_profile <span class="o">=</span> <span class="kc">FALSE</span>
+<span class="p">)</span>
+
+<span class="c1">## Set default packages</span>
+<span class="kp">options</span><span class="p">(</span>defaultPackages <span class="o">=</span>
+  <span class="kt">c</span><span class="p">(</span><span class="kp">getOption</span><span class="p">(</span><span class="s">&#39;defaultPackages&#39;</span><span class="p">),</span> cran<span class="p">,</span> gh2<span class="p">)</span>
+
+<span class="c1"># Remove values</span>
+
+<span class="kp">rm</span><span class="p">(</span>installed<span class="p">,</span> cran<span class="p">,</span> gh<span class="p">,</span> gh2<span class="p">)</span></code></pre></div>
+
+    
+
+    
+
+
+</article>
+
+
+
+        </div>
+
+        <aside class="col-12 col-lg-3 ml-auto blog-sidebar">
+    
+        
+
+
+<section>
+    <h4>New</h4>
+    <ol class="list-unstyled">
+        
+        <li>
+            <a href="../../../../2018/11/06/defaultpackages-rprofile/">R起動時に不足パッケージを導入しつつ読み込む</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/11/03/tex-in-ggplot2/">ggplot2で$TeX$を利用する</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/11/03/accelarate-patchwork/">patchworkの表示を高速化したかった……</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/11/02/marginal-patchwork/">ggplot2とpatchworkで周辺分布</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/">RmarkdwonのYAMLフロントマターで<br />
+titleとか<br />
+authorとか<br />
+改行する</a>
+        </li>
+        
+    </ol>
+</section>
+
+    
+    
+        <section>
+    
+        
+        <h4>カテゴリ</h4>
+        <p>
+            
+            <a class="badge badge-primary" href="../../../../categories/arch">arch</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/latex">latex</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/music">music</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/r">r</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/stats">stats</a>
+            
+        </p>
+        
+    
+        
+        <h4>タグ</h4>
+        <p>
+            
+            <a class="badge badge-primary" href="../../../../tags/.rprofile">.rprofile</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/blogdown">blogdown</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/callr">callr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/ggplot2">ggplot2</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/knitr">knitr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/latex">latex</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/latex2exp">latex2exp</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/linux">linux</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/mathjax">mathjax</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/missing-value">missing-value</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/package">package</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/patchwork">patchwork</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/plantuml">plantuml</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/plotly">plotly</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/r">r</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86">r-markdownでword文書を作ろう</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/rd">rd</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/rmd">rmd</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/roxygen2">roxygen2</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/tex">tex</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/tokyor">tokyor</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/unicode">unicode</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/yaml">yaml</a>
+            
+        </p>
+        
+    
+</section>
+    
+</aside>
+
+      </div>
+    </div>
+    
+
+    
+      
+
+
+
+<footer class="blog-footer w-100">
+    <nav class="navbar navbar-light bg-light">
+        <p class="w-100 text-center"></p>
+        <p class="w-100 text-center"><a href="#">Home</a></p>
+    </nav>
+</footer>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script async
+src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+    
+
+    
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+  </body>
+</html>
