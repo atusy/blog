@@ -35,14 +35,16 @@ gh_missing <- gh[!(gh2 %in% installed)]
 
 ## Install missing packages
 
-callr::r_vanilla(
+callr::r(
   function(cran, gh) {
     if(length(cran) > 0) utils::install.packages(cran)
     if(length(gh) > 0) devtools::install_github(gh)
     invisible(NULL)
   },
   args = list(cran = cran_missing, gh = gh_missing),
-  repos = getOption('repos')
+  repos = getOption('repos'),
+  system_profile = FALSE,
+  user_profile = FALSE
 )
 
 # Done if interactive mode on RStudio
