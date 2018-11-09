@@ -1,0 +1,112 @@
+---
+title: geom_histogramのビン幅を動的に決定する
+author: ~
+date: '2018-11-09'
+slug: binwdith-for-geom-histogram
+categories: [R]
+tags: [ggplot2]
+output:
+  blogdown::html_page:
+    toc: yes
+---
+
+```{r setup, include = FALSE}
+library(pacman)
+p_load(ggplot2, grDevices)
+p_load_gh('thomasp85/patchwork')
+```
+
+# TL; DR
+
+`geom_histogram(binwidth = )` はデータを受け取ってビン幅を返す関数を受け付けるよ。
+
+# ggplot2のヒストグラムはビン数30が既定 {#default}
+
+なぜ……。
+調整するには `bins` でビン数を変えるか、 `binwidth` でビン幅を変える。
+両方指定すると `binwidth` が優先される。
+
+```{r, fig.height = 3}
+library(ggplot2)
+ggplot(diamonds, aes(price)) + geom_histogram()
+```
+
+参考: https://stats.biopapyrus.jp/r/ggplot/geom_histogram.html
+
+# ビン幅を動的に決めたい {#autobw}
+
+という話は随分前にQiitaでもした。
+事前に頻度分布を集計した結果をデータフレームとして `ggplot()` に与えるというもの。
+
+https://qiita.com/Atsushi776/items/f71a6f011118031f6e0a
+
+`facet` した変数ごとにbin幅を変える方法の決定版は今でもこれだと思う。
+
+`facet` した変数ごとにbin幅を変える必要がなければ、@hoxo_m氏から頂いたコメントも有用。
+こちらでは、`stat_bin(breaks = )` を利用する。
+ただし、同じデータに二度参照せねばならず、もう一歩といった感がある。
+
+```{r, fig.height = 3}
+ggplot(diamonds, aes(x = price)) + 
+  stat_bin(breaks = hist(diamonds$price, plot = FALSE)$breaks)
+```
+
+
+## `geom_histogram(binwidth = )` に関数を指定 {#autobw-by-function}
+
+じゃあどうするのという話なのだが、`geom_histogram(binwidth = )` は関数を受け付けることを利用するといい。
+
+x軸に指定した値を元にビン幅を返す関数を好きに定義しよう。
+
+以下は平方根選択した例。
+
+```{r, fig.height = 3}
+library(ggplot2)
+ggplot(diamonds, aes(price)) + 
+  geom_histogram(binwidth = function(x) ceiling((max(x) - min(x)) / sqrt(length(x))))
+```
+
+### ビン幅を決める関数を定義 {#define}
+
+世の中には平方根選択以外にも色々なビン幅の決め方があります。
+個人的な推しはScottの選択ですね。
+
+実装にはWikipediaの
+[ヒストグラム#ビンの個数と幅](https://ja.wikipedia.org/wiki/%E3%83%92%E3%82%B9%E3%83%88%E3%82%B0%E3%83%A9%E3%83%A0#%E3%83%93%E3%83%B3%E3%81%AE%E5%80%8B%E6%95%B0%E3%81%A8%E5%B9%85)
+あたりを参考にしてもいいですが、
+Scottの選択などによるビン数を求める関数であれば、
+grDevicesパッケージに定義されています。
+
+`hist()` のビン数も、grDevicesパッケージを利用して決めているので、
+`geom_histogram()` でも利用しない手はないでしょう。
+
+- Sturgesの選択: `nclass.Sturges()`
+- Scottの選択: `nclass.scott()`
+- Freedman-Diaconisの選択: `nclass.FD()`
+
+以下のように、ビン数をビン幅に直す関数を定義しておきます。
+
+```{r}
+library(grDevices)
+bw = function(x, f) ceiling((max(x) - min(x)) / f(x))
+FD = function(x) bw(x, nclass.FD)
+scott = function(x) bw(x, nclass.scott)
+sturges = function(x) bw(x, nclass.Sturges)
+```
+
+### テスト
+
+```{r}
+library(ggplot2)
+g <- ggplot(diamonds, aes(price)) + 
+  coord_cartesian(xlim=c(0, 2e4), ylim = c(0, 2e4))
+g_FD <- g + geom_histogram(binwidth = FD) + ggtitle('FD')
+g_Sc <- g + geom_histogram(binwidth = scott) + ggtitle('Scott')
+g_St <- g + geom_histogram(binwidth = sturges) + ggtitle('Sturges')
+```
+
+```{r, echo = FALSE, fig.height = 3}
+g_FD | g_Sc | g_St
+```
+
+# Enjoy!
