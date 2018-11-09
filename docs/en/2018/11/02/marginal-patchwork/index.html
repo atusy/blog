@@ -11,8 +11,23 @@ I made a Japanese slide to introduce patchwork package in Tokyo R meeting.
 Here, I tried to produce marginal plots, but failed because I was using plot arithmetics (| and /).
 library(ggplot2) library(patchwork) xy &lt;- ggplot(mtcars, aes(wt, mpg)) &#43; geom_point() x &lt;- ggplot(mtcars, aes(wt)) &#43; geom_histogram(bins = 30) y &lt;- ggplot(mtcars, aes(mpg)) &#43; geom_histogram(bins = 30) &#43; coord_flip() (x | plot_spacer()) / (xy | y) I just found that wrap_plots() helps." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="/en/2018/11/02/marginal-patchwork/" /><meta property="article:published_time" content="2018-11-02T00:00:00&#43;00:00"/>
+<meta property="og:url" content="/en/2018/11/02/marginal-patchwork/" />
+
+
+
+<meta property="article:published_time" content="2018-11-02T00:00:00&#43;00:00"/>
+
 <meta property="article:modified_time" content="2018-11-02T00:00:00&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Marginal distributions with ggplot2 and patchwork"/>

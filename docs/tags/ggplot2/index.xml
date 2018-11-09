@@ -6,10 +6,19 @@
     <description>Recent content in Ggplot2 on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Sat, 03 Nov 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 09 Nov 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/ggplot2/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>geom_histogramのビン幅を動的に決定する</title>
+      <link>/2018/11/09/binwdith-for-geom-histogram/</link>
+      <pubDate>Fri, 09 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/11/09/binwdith-for-geom-histogram/</guid>
+      <description>TL; DR ggplot2のヒストグラムはビン数30が既定 ビン幅を動的に決めたい geom_histogram(binwidth = ) に関数を指定 ビン幅を決める関数を定義 テスト Enjoy! TL; DR geom_histogram(binwidth = ) はデータ</description>
+    </item>
     
     <item>
       <title>ggplot2で$TeX$を利用する</title>

@@ -29,5 +29,14 @@
       <description>遅蒔きながら、Rのblogdownパッケージを使ってblogを始めてみた。 “Rとblogdownでかんたんにgithub.io上にブログを使</description>
     </item>
     
+    <item>
+      <title>GitHub pages with Rmarkdown</title>
+      <link>/2018/07/05/github-pages-with-rmarkdown/</link>
+      <pubDate>Thu, 05 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/07/05/github-pages-with-rmarkdown/</guid>
+      <description>遅蒔きながら、Rのblogdownパッケージを使ってblogを始めてみた。 &amp;ldquo;Rとblogdownでかんたんにgithub.io上</description>
+    </item>
+    
   </channel>
 </rss>
