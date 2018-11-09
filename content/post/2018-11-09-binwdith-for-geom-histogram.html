@@ -1,3 +1,15 @@
+---
+title: geom_histogramのビン幅を動的に決定する
+author: ~
+date: '2018-11-09'
+slug: binwdith-for-geom-histogram
+categories: [R]
+tags: [ggplot2]
+output:
+  blogdown::html_page:
+    toc: yes
+---
+
 
 <div id="TOC">
 <ul>
@@ -25,7 +37,7 @@
 <pre class="r"><code>library(ggplot2)
 ggplot(diamonds, aes(price)) + geom_histogram()</code></pre>
 <pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<p><img src="2018-11-09-binwdith-for-geom-histogram_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p><img src="/post/2018-11-09-binwdith-for-geom-histogram_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
 <p>参考: <a href="https://stats.biopapyrus.jp/r/ggplot/geom_histogram.html" class="uri">https://stats.biopapyrus.jp/r/ggplot/geom_histogram.html</a></p>
 </div>
 <div id="autobw" class="section level1">
@@ -39,7 +51,7 @@ ggplot(diamonds, aes(price)) + geom_histogram()</code></pre>
 ただし、同じデータに二度参照せねばならず、もう一歩といった感がある。</p>
 <pre class="r"><code>ggplot(diamonds, aes(x = price)) + 
   stat_bin(breaks = hist(diamonds$price, plot = FALSE)$breaks)</code></pre>
-<p><img src="2018-11-09-binwdith-for-geom-histogram_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><img src="/post/2018-11-09-binwdith-for-geom-histogram_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <div id="autobw-by-function" class="section level2">
 <h2><code>geom_histogram(binwidth = )</code> に関数を指定</h2>
 <p>じゃあどうするのという話なのだが、<code>geom_histogram(binwidth = )</code> は関数を受け付けることを利用するといい。</p>
@@ -48,7 +60,7 @@ ggplot(diamonds, aes(price)) + geom_histogram()</code></pre>
 <pre class="r"><code>library(ggplot2)
 ggplot(diamonds, aes(price)) + 
   geom_histogram(binwidth = function(x) ceiling((max(x) - min(x)) / sqrt(length(x))))</code></pre>
-<p><img src="2018-11-09-binwdith-for-geom-histogram_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><img src="/post/2018-11-09-binwdith-for-geom-histogram_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <div id="define" class="section level3">
 <h3>ビン幅を決める関数を定義</h3>
 <p>世の中には平方根選択以外にも色々なビン幅の決め方があります。
@@ -80,7 +92,7 @@ g &lt;- ggplot(diamonds, aes(price)) +
 g_FD &lt;- g + geom_histogram(binwidth = FD) + ggtitle(&#39;FD&#39;)
 g_Sc &lt;- g + geom_histogram(binwidth = scott) + ggtitle(&#39;Scott&#39;)
 g_St &lt;- g + geom_histogram(binwidth = sturges) + ggtitle(&#39;Sturges&#39;)</code></pre>
-<p><img src="2018-11-09-binwdith-for-geom-histogram_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><img src="/post/2018-11-09-binwdith-for-geom-histogram_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 </div>
 </div>
 </div>
