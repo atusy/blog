@@ -58,7 +58,7 @@ if(interactive() && "RSTUDIO" %in% names(Sys.getenv())) {
   ## Set default packages
   options(
     defaultPackages = c(getOption('defaultPackages'), cran, gh2),
-    blogdown.ext = 'Rmd'
+    blogdown.ext = '.Rmd'
   )
 }
 
