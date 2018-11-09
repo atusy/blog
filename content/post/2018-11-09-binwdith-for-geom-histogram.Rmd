@@ -94,7 +94,7 @@ scott = function(x) bw(x, nclass.scott)
 sturges = function(x) bw(x, nclass.Sturges)
 ```
 
-### テスト
+### テスト {#test}
 
 ```{r}
 library(ggplot2)
