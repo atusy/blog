@@ -3,11 +3,29 @@ title: ggplot2のレジェンド位置を調整
 author: ~
 date: '2018-11-10'
 slug: ggplot2-legend-pos-n-just
-categories: []
-tags: []
+categories: [R]
+tags: [ggplot2]
+output:
+  blogdown::html_page:
+    toc: yes
 ---
 
 
+<div id="TOC">
+<ul>
+<li><a href="#ggplot2">ggplot2のレジェンド位置を変えるには</a></li>
+<li><a href="#try">Let’s try!</a><ul>
+<li><a href="#pkg">パッケージ</a></li>
+<li><a href="#base">基本となる図を用意</a></li>
+<li><a href="#num">レジェンド位置を数値で指定する</a></li>
+<li><a href="#char">レジェンド位置を文字列で指定する</a><ul>
+<li><a href="#legend.position"><code>legend.position</code></a></li>
+<li><a href="#legend.justification"><code>legend.justification</code></a></li>
+</ul></li>
+</ul></li>
+<li><a href="#enjoy">Enjoy!</a></li>
+</ul>
+</div>
 
 <div id="ggplot2" class="section level1">
 <h1>ggplot2のレジェンド位置を変えるには</h1>
@@ -19,9 +37,9 @@ tags: []
 <p><code>legend.justification</code> を長さ2の数値ベクトルないし<code>&quot;center&quot;</code> の文字列で与えれば</p>
 <p>いいわけだが，早見表が欲しい．</p>
 </div>
-<div id="lets-try" class="section level1">
+<div id="try" class="section level1">
 <h1>Let’s try!</h1>
-<div class="section level2">
+<div id="pkg" class="section level2">
 <h2>パッケージ</h2>
 <p>tidyverseからはggplot2の他にdplyr, purrrを使う．
 また，図を並べるためにはpatchworkを使う．</p>
@@ -31,12 +49,11 @@ tags: []
 <pre class="r"><code>library(tidyverse)
 library(patchwork)</code></pre>
 </div>
-<div class="section level2">
+<div id="base" class="section level2">
 <h2>基本となる図を用意</h2>
 <p>できるだけシンプルにするため，</p>
 <ul>
-<li>レジェンドは赤い長方形のみ<br />
-</li>
+<li>レジェンドは赤い長方形のみ</li>
 <li>プロットする点は非表示</li>
 <li>軸目盛も非表示</li>
 </ul>
@@ -63,7 +80,7 @@ g</code></pre>
 <p><img src="/post/2018-11-10-ggplot2-legend-pos-n-just_files/figure-html/unnamed-chunk-1-1.png" width="288" /></p>
 </div>
 <div id="num" class="section level2">
-<h2>数値で指定する</h2>
+<h2>レジェンド位置を数値で指定する</h2>
 <p>legend.positionとlegend.justificationを0から1の範囲で変えてみる．</p>
 <p>実用的なのは左上から右下までの対角線上の4つかな．</p>
 <p>0から1以外の範囲を取ることも可能だが，表示領域外に飛び出すこともしばしばなので，扱い難い．</p>
@@ -87,7 +104,7 @@ g</code></pre>
 <p>ggplotではレイヤーのリストを足すことができるのも，凝ったことしたい時に覚えておくといいTipですね．</p>
 </div>
 <div id="char" class="section level2">
-<h2>文字列で指定する</h2>
+<h2>レジェンド位置を文字列で指定する</h2>
 <div id="legend.position" class="section level3">
 <h3><code>legend.position</code></h3>
 <p>には文字列で <code>&quot;none&quot;</code> , <code>&quot;left&quot;</code> , <code>&quot;right&quot;</code> , <code>&quot;bottom&quot;</code> , <code>&quot;top&quot;</code> を指定できる．</p>
