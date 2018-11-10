@@ -1,0 +1,122 @@
+---
+title: ggplot2のレジェンド位置を調整
+author: ~
+date: '2018-11-10'
+slug: ggplot2-legend-pos-n-just
+categories: []
+tags: []
+---
+
+
+
+<div id="ggplot2" class="section level1">
+<h1>ggplot2のレジェンド位置を変えるには</h1>
+<p>Cookbookの
+<a href="http://www.cookbook-r.com/Graphs/Legends_(ggplot2)/#changing-the-position-of-the-legend">Changing the position of the legend</a>
+が参考になる．</p>
+<p>要は <code>theme()</code> を使って</p>
+<p><code>legend.position</code> を長さ2の数値ベクトルないし<code>&quot;none&quot;</code> , <code>&quot;left&quot;</code> , <code>&quot;right&quot;</code> , <code>&quot;bottom&quot;</code> , <code>&quot;top&quot;</code> の文字列で与え，</p>
+<p><code>legend.justification</code> を長さ2の数値ベクトルないし<code>&quot;center&quot;</code> の文字列で与えれば</p>
+<p>いいわけだが，早見表が欲しい．</p>
+</div>
+<div id="lets-try" class="section level1">
+<h1>Let’s try!</h1>
+<div class="section level2">
+<h2>パッケージ</h2>
+<p>tidyverseからはggplot2の他にdplyr, purrrを使う．
+また，図を並べるためにはpatchworkを使う．</p>
+<p>patchworkについては私のTokyo R 73での
+<a href="https://atusy.github.io/presentation/tokyor073/tokyor073-multi-ggplot2.html?raw#/patchwork-">発表スライド</a>
+を参考にしてほしい．</p>
+<pre class="r"><code>library(tidyverse)
+library(patchwork)</code></pre>
+</div>
+<div class="section level2">
+<h2>基本となる図を用意</h2>
+<p>できるだけシンプルにするため，</p>
+<ul>
+<li>レジェンドは赤い長方形のみ<br />
+</li>
+<li>プロットする点は非表示</li>
+<li>軸目盛も非表示</li>
+</ul>
+<p>にした．</p>
+<p>更に，後々の見栄えの都合で</p>
+<ul>
+<li>x軸を上にする</li>
+<li>第二x軸，第二y軸を作り，タイトルを空白の二行にする</li>
+</ul>
+<p>といった変更を加えている．</p>
+<pre class="r"><code>g &lt;- ggplot(data.frame(x=1), aes(x, x, color = &#39;a&#39;)) + 
+  geom_point(alpha = 0) + 
+  theme(
+    legend.background = element_rect(fill = &#39;red&#39;),
+    legend.key = element_blank(),
+    legend.text = element_blank(),
+    legend.title = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text = element_blank()
+  ) +
+  scale_x_continuous(position = &#39;top&#39;, sec.axis = sec_axis(~., name = &#39;\n&#39;)) +
+  scale_y_continuous(sec.axis = sec_axis(~., name = &#39;\n&#39;))
+g</code></pre>
+<p><img src="/post/2018-11-10-ggplot2-legend-pos-n-just_files/figure-html/unnamed-chunk-1-1.png" width="288" /></p>
+</div>
+<div id="num" class="section level2">
+<h2>数値で指定する</h2>
+<p>legend.positionとlegend.justificationを0から1の範囲で変えてみる．</p>
+<p>実用的なのは左上から右下までの対角線上の4つかな．</p>
+<p>0から1以外の範囲を取ることも可能だが，表示領域外に飛び出すこともしばしばなので，扱い難い．</p>
+<pre class="r"><code>expand.grid(p1 = c(0, 1), p2 = c(0, 1), j1 = c(0, 1), j2 = c(0, 1)) %&gt;%
+  mutate(r = rep(1:4, each = 4), c = rep(1:4, 4)) %&gt;%
+  pmap(
+    function(p1, p2, j1, j2, r, c) {
+      list(
+        theme(legend.position = c(p1, p2), legend.justification = c(j1, j2)),
+        labs(
+          x = `if`(r != 1, &#39;&#39;, paste0(&#39;legend.position = \nc(&#39;, p1, &#39;, &#39;, p2, &#39;)&#39;)),
+          y = `if`(c != 1, &#39;&#39;, paste0(&#39;legend.justification = \nc(&#39;, j1, &#39;, &#39;, j2, &#39;)&#39;))
+        )
+      )
+    }
+  ) %&gt;%
+  map(~ g + .x) %&gt;%
+  wrap_plots(nrow = 4) </code></pre>
+<p><img src="/post/2018-11-10-ggplot2-legend-pos-n-just_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><code>expand.grid</code> と <code>purrr::pmap</code> の組み合わせが大活躍．</p>
+<p>ggplotではレイヤーのリストを足すことができるのも，凝ったことしたい時に覚えておくといいTipですね．</p>
+</div>
+<div id="char" class="section level2">
+<h2>文字列で指定する</h2>
+<div id="legend.position" class="section level3">
+<h3><code>legend.position</code></h3>
+<p>には文字列で <code>&quot;none&quot;</code> , <code>&quot;left&quot;</code> , <code>&quot;right&quot;</code> , <code>&quot;bottom&quot;</code> , <code>&quot;top&quot;</code> を指定できる．</p>
+<p>各軸の文字列とレジェンドが重ならないようにうまく配置してくれる．</p>
+<p>レジェンドが見えないところへ飛んでいくこともない．</p>
+<pre class="r"><code>c(&quot;none&quot;, &quot;left&quot;, &quot;right&quot;, &quot;bottom&quot;, &quot;top&quot;) %&gt;%
+  map(~ g + theme(legend.position = .x) + ggtitle(.x)) %&gt;%
+  map(`+`, list(
+    scale_x_continuous(name = &quot;1st x&quot;, sec.axis = sec_axis(~., name = &quot;2nd x&quot;)),
+    scale_y_continuous(name = &quot;1st y&quot;, sec.axis = sec_axis(~., name = &quot;2nd y&quot;)),
+    theme(plot.title = element_text(color = &quot;red&quot;))
+  )) %&gt;%
+  append(list(plot_spacer()), 1) %&gt;%
+  wrap_plots(nrow = 3)</code></pre>
+<p><img src="/post/2018-11-10-ggplot2-legend-pos-n-just_files/figure-html/unnamed-chunk-3-1.png" width="576" /></p>
+<p><code>purrr::map</code> で図を沢山作りつつ， <code>append</code> を使って空白の図 ( <code>patchwork::plot_spacer()</code> )を挿入するのがキモ．</p>
+<p>数値で相当するpositionを再現する方法は知らない．</p>
+</div>
+<div id="legend.justification" class="section level3">
+<h3><code>legend.justification</code></h3>
+<p>には文字列で <code>&quot;center&quot;</code> を与えることができ，<code>legend.justification = c(0.5, 0.5)</code> に相当する．</p>
+<pre class="r"><code>g + theme(legend.position = c(1, 1), legend.justification = &quot;center&quot;) + labs(x = &quot;center&quot;, y = &quot;&quot;) |
+g + theme(legend.position = c(1, 1), legend.justification = c(0.5, 0.5)) + labs(x = &quot;c(0.5, 0.5)&quot;, y = &quot;&quot;)</code></pre>
+<p><img src="/post/2018-11-10-ggplot2-legend-pos-n-just_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Rでは演算子の優先順位として <code>+</code> &gt; <code>|</code> なので，こんなこともできてしまう．</p>
+</div>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+<p>patchwork，便利……!</p>
+</div>
