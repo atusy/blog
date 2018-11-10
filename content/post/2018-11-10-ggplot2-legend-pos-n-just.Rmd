@@ -3,12 +3,16 @@ title: ggplot2のレジェンド位置を調整
 author: ~
 date: '2018-11-10'
 slug: ggplot2-legend-pos-n-just
-categories: []
-tags: []
+categories: [R]
+tags: [ggplot2]
+output:
+  blogdown::html_page:
+    toc: yes
 ---
 
 
 ```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE)
 library(dplyr)
 library(ggplot2)
 library(patchwork)
@@ -29,9 +33,9 @@ Cookbookの
 
 いいわけだが，早見表が欲しい．
 
-# Let's try!
+# Let's try! {#try}
 
-## パッケージ
+## パッケージ {#pkg}
 
 tidyverseからはggplot2の他にdplyr, purrrを使う．
 また，図を並べるためにはpatchworkを使う．
@@ -45,11 +49,11 @@ library(tidyverse)
 library(patchwork)
 ```
 
-## 基本となる図を用意
+## 基本となる図を用意 {#base}
 
 できるだけシンプルにするため，
 
-- レジェンドは赤い長方形のみ\
+- レジェンドは赤い長方形のみ
 - プロットする点は非表示
 - 軸目盛も非表示
 
@@ -78,7 +82,7 @@ g <- ggplot(data.frame(x=1), aes(x, x, color = 'a')) +
 g
 ```
 
-## 数値で指定する {#num}
+## レジェンド位置を数値で指定する {#num}
 
 legend.positionとlegend.justificationを0から1の範囲で変えてみる．
 
@@ -108,7 +112,7 @@ expand.grid(p1 = c(0, 1), p2 = c(0, 1), j1 = c(0, 1), j2 = c(0, 1)) %>%
 
 ggplotではレイヤーのリストを足すことができるのも，凝ったことしたい時に覚えておくといいTipですね．
 
-## 文字列で指定する {#char}
+## レジェンド位置を文字列で指定する {#char}
 
 ### `legend.position`
 
