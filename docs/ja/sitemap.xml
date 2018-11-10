@@ -226,14 +226,14 @@
   </url>
   
   <url>
-    <loc>/tags/latex/</loc>
-    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
+    <loc>/categories/latex/</loc>
+    <lastmod>2018-07-09T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/categories/latex/</loc>
-    <lastmod>2018-07-09T00:00:00+00:00</lastmod>
+    <loc>/tags/latex/</loc>
+    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -318,12 +318,6 @@
   </url>
   
   <url>
-    <loc>/tags/r/</loc>
-    <lastmod>2018-07-31T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/categories/r/</loc>
     <lastmod>2018-11-10T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -337,6 +331,12 @@
                 hreflang="ja"
                 href="/categories/r/"
                 />
+  </url>
+  
+  <url>
+    <loc>/tags/r/</loc>
+    <lastmod>2018-07-31T00:00:00+00:00</lastmod>
+    <priority>0</priority>
   </url>
   
   <url>
