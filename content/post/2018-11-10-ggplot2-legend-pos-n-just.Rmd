@@ -131,7 +131,8 @@ c("none", "left", "right", "bottom", "top") %>%
     theme(plot.title = element_text(color = "red"))
   )) %>%
   append(list(plot_spacer()), 1) %>%
-  wrap_plots(nrow = 3)
+  wrap_plots(nrow = 3) +
+  plot_annotation('legend.position =')
 ```
 
 `purrr::map` で図を沢山作りつつ， `append` を使って空白の図 ( `patchwork::plot_spacer()` )を挿入するのがキモ．
@@ -143,11 +144,14 @@ c("none", "left", "right", "bottom", "top") %>%
 には文字列で `"center"` を与えることができ，`legend.justification = c(0.5, 0.5)` に相当する．
 
 ```{r, fig.height = 3}
-g + theme(legend.position = c(1, 1), legend.justification = "center") + labs(x = "center", y = "") |
-g + theme(legend.position = c(1, 1), legend.justification = c(0.5, 0.5)) + labs(x = "c(0.5, 0.5)", y = "")
+wrap_plots(
+  g + theme(legend.position = c(1, 1), legend.justification = "center") + labs(x = "center", y = ""),
+  g + theme(legend.position = c(1, 1), legend.justification = c(0.5, 0.5)) + labs(x = "c(0.5, 0.5)", y = ""),
+  nrow = 1
+) +
+  plot_annotation("legend.justification = ", caption = "legend.position = c(1, 1)")
 ```
 
-Rでは演算子の優先順位として `+` > `|` なので，こんなこともできてしまう．
 
 # Enjoy!
 
