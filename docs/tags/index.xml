@@ -48,6 +48,15 @@
     </item>
     
     <item>
+      <title>Glue</title>
+      <link>/tags/glue/</link>
+      <pubDate>Sun, 11 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/glue/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Knitr</title>
       <link>/tags/knitr/</link>
       <pubDate>Sat, 18 Aug 2018 00:00:00 +0000</pubDate>
@@ -167,7 +176,7 @@
     <item>
       <title>Rmd</title>
       <link>/tags/rmd/</link>
-      <pubDate>Sat, 27 Oct 2018 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 11 Nov 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/rmd/</guid>
       <description></description>
