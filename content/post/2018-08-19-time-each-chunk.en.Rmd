@@ -1,0 +1,98 @@
+---
+title: Benchmark chunks in Rmd
+author: ~
+date: '2018-08-18'
+slug: time-each-chunk
+categories: [R]
+tags: [Rmd, knitr]
+output:
+  blogdown::html_page:
+    toc: yes
+---
+
+```{r setup, include = FALSE}
+library(pacman)
+p_load_gh("rkrug/plantuml")
+p_load(knitr)
+```
+
+
+In order to benchmark chunks, 
+I implemented a 
+[hook](https://yihui.name/knitr/hooks/)
+for Rmd's chunk which works as if Jupyter Notebook's 
+[`%%timeit`](https://jakevdp.github.io/PythonDataScienceHandbook/01.07-timing-and-profiling.html)
+command.
+
+# Implementation
+
+A simple benchmark is done by saving `proc.time()` before running code and subtract the value from new `proc.time()` after code runs.
+
+```{r}
+t <- proc.time()['elapsed']
+invisible(runif(100))
+proc.time()['elapsed'] - t
+```
+
+However, hooks are functions, and 
+bodies of functions are evaluated in different environments every time.
+
+```{r}
+f <- function() environment()
+c(f(), f())
+```
+
+Thus, an implementing hook function has to know environment to save `proc.time()`, and to call the saved `proc.time()`.
+
+Fortunately, the hook with `envir` argument enables it because `envir` captures an environment in which a code chunk is evaluated.
+
+In addition, the hook needs to know if they are called before or after a code chunk, which is possible by using `before` argument.
+
+Finally, the hook is implemented as below.
+
+```{r}
+library(knitr)
+knit_hooks$set(
+  time = function(before, envir) {
+    t <- proc.time()['elapsed']
+    if(before) {
+      envir$.elapsed <- t
+    } else {
+      paste(signif(t - envir$.elapsed), 'sec.')
+    }
+  }
+)
+```
+
+Use this hook by setting `time = TRUE` as a chunk option.
+
+FYI, returning value must be a character to be printed, and 
+`signif()` is used to focus on significant digits.
+
+# Test
+
+```{r, include = FALSE}
+x1 <- "```{r, time = TRUE}"
+x2 <- "head(x)"
+x3 <- "```"
+```
+
+    `r x1`
+    `r x2`
+    `r x3`
+
+
+```{r, time = TRUE, echo = FALSE}
+head(iris)
+```
+
+Great!
+
+# Question
+
+Is there any way to see benchmark result right after evaluating chunks in RStudio's editor?
+I see the results after knitting.
+
+# Tip
+
+If you are using R Notebook, just preview it and you can see benchmark results.

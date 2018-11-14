@@ -18,6 +18,21 @@
   </url>
   
   <url>
+    <loc>/en/2018/08/18/time-each-chunk/</loc>
+    <lastmod>2018-08-18T00:00:00+00:00</lastmod>
+    <xhtml:link
+                rel="alternate"
+                hreflang="ja"
+                href="/2018/08/18/time-each-chunk/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="/en/2018/08/18/time-each-chunk/"
+                />
+  </url>
+  
+  <url>
     <loc>/en/</loc>
     <lastmod>2018-11-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -61,6 +76,22 @@
                 rel="alternate"
                 hreflang="en"
                 href="/en/tags/ggplot2/"
+                />
+  </url>
+  
+  <url>
+    <loc>/en/tags/knitr/</loc>
+    <lastmod>2018-08-18T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="ja"
+                href="/tags/knitr/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="/en/tags/knitr/"
                 />
   </url>
   
@@ -109,6 +140,22 @@
                 rel="alternate"
                 hreflang="en"
                 href="/en/categories/r/"
+                />
+  </url>
+  
+  <url>
+    <loc>/en/tags/rmd/</loc>
+    <lastmod>2018-08-18T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="ja"
+                href="/tags/rmd/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="/en/tags/rmd/"
                 />
   </url>
   
