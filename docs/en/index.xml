@@ -23,5 +23,16 @@ Here, I tried to produce marginal plots, but failed because I was using plot ari
 library(ggplot2) library(patchwork) xy &amp;lt;- ggplot(mtcars, aes(wt, mpg)) + geom_point() x &amp;lt;- ggplot(mtcars, aes(wt)) + geom_histogram(bins = 30) y &amp;lt;- ggplot(mtcars, aes(mpg)) + geom_histogram(bins = 30) + coord_flip() (x | plot_spacer()) / (xy | y) I just found that wrap_plots() helps.</description>
     </item>
     
+    <item>
+      <title>Benchmark chunks in Rmd</title>
+      <link>/en/2018/08/18/time-each-chunk/</link>
+      <pubDate>Sat, 18 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/en/2018/08/18/time-each-chunk/</guid>
+      <description>Implementation Test Question Tip   In order to benchmark chunks, I implemented a hook for Rmd’s chunk which works as if Jupyter Notebook’s %%timeit command.
+Implementation A simple benchmark is done by saving proc.time() before running code and subtract the value from new proc.time() after code runs.
+t &amp;lt;- proc.time()[&amp;#39;elapsed&amp;#39;] invisible(runif(100)) proc.time()[&amp;#39;elapsed&amp;#39;] - t ## elapsed ## 0.003 However, hooks are functions, and bodies of functions are evaluated in different environments every time.</description>
+    </item>
+    
   </channel>
 </rss>

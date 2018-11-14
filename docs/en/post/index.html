@@ -75,9 +75,9 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                         
-                            <a class="dropdown-item" href="../../">Japanese</a>
-                        
                             <a class="dropdown-item" href="../../en/">English</a>
+                        
+                            <a class="dropdown-item" href="../../">Japanese</a>
                         
                     </div>
                 </li>
@@ -152,6 +152,57 @@ library(ggplot2) library(patchwork) xy &lt;- ggplot(mtcars, aes(wt, mpg)) + geom
 
 
 
+    
+        <article class="blog-post">
+    <header>
+        <h2 class="blog-post-title">
+            <a class="text-dark" href="../../en/2018/08/18/time-each-chunk/">Benchmark chunks in Rmd</a>
+        </h2>
+        
+
+
+<div class="blog-post-date text-secondary">
+    
+        2018-8-18
+    
+    
+        by <span rel="author">Atusy</span>
+    
+</div>
+
+        
+<div class="blog-post-tags text-secondary">
+    <strong>Tags:</strong>
+    
+        <a class="badge badge-primary" href="../../en/tags/rmd">Rmd</a>
+    
+        <a class="badge badge-primary" href="../../en/tags/knitr">knitr</a>
+    
+</div>
+
+        
+<div class="blog-post-categories text-secondary">
+    <strong>Categories:</strong>
+    
+        <a class="badge badge-primary" href="../../en/categories/r">R</a>
+    
+</div>
+
+    </header>
+    Implementation Test Question Tip   In order to benchmark chunks, I implemented a hook for Rmd’s chunk which works as if Jupyter Notebook’s %%timeit command.
+Implementation A simple benchmark is done by saving proc.time() before running code and subtract the value from new proc.time() after code runs.
+t &lt;- proc.time()[&#39;elapsed&#39;] invisible(runif(100)) proc.time()[&#39;elapsed&#39;] - t ## elapsed ## 0.003 However, hooks are functions, and bodies of functions are evaluated in different environments every time.
+    
+    <p></p>
+    <a href="../../en/2018/08/18/time-each-chunk/">Read More →</a>
+    
+</article>
+
+
+    
+
+
+
 
 
 
@@ -170,6 +221,10 @@ library(ggplot2) library(patchwork) xy &lt;- ggplot(mtcars, aes(wt, mpg)) + geom
         
         <li>
             <a href="../../en/2018/11/02/marginal-patchwork/">Marginal distributions with ggplot2 and patchwork</a>
+        </li>
+        
+        <li>
+            <a href="../../en/2018/08/18/time-each-chunk/">Benchmark chunks in Rmd</a>
         </li>
         
         <li>
@@ -198,7 +253,11 @@ library(ggplot2) library(patchwork) xy &lt;- ggplot(mtcars, aes(wt, mpg)) + geom
             
             <a class="badge badge-primary" href="../../en/tags/ggplot2">ggplot2</a>
             
+            <a class="badge badge-primary" href="../../en/tags/knitr">knitr</a>
+            
             <a class="badge badge-primary" href="../../en/tags/patchwork">patchwork</a>
+            
+            <a class="badge badge-primary" href="../../en/tags/rmd">rmd</a>
             
         </p>
         
