@@ -5,6 +5,9 @@ date: '2018-08-28'
 slug: roxygen2matome
 categories: [R]
 tags: [package, Roxygen2, Rd]
+output:
+  blogdown::html_page:
+    toc: yes
 ---
 
 ```{r setup, include = FALSE}
@@ -22,7 +25,7 @@ Roxygen2を用いると、パッケージ内で定義した関数やデータセ
 
 気付きがあれば随時更新していきたい。
 
-# まとめ
+# まとめ {#matome}
 
 - `Roxygen2タグ` はRStudioの入力補完機能で出現したもの (`r paste0('Roxygen2 v', packageVersion('roxygen2'))`)
 - `Rdコマンド` は `Roxygen2タグ` に対応するものがあれば記載
@@ -44,7 +47,10 @@ x %>%
   column_spec(1:2, extra_css = 'white-space: nowrap')
 ```
 
-## `@title` `@description` `@details` について {#title-description-details}
+
+# Tips
+
+## `@title`、`@description`、`@details` について {#title-description-details}
 
 これらの基本的な使い方は
 
@@ -64,9 +70,25 @@ x %>%
 #' 詳細は三段落目に。概要から一行あける。
 ```
 
+## `@importFrom`、`@seealso` について {#simple-form}
 
+```r
+#' @importFrom pkgA funA
+#' @importFrom pkgA funB
+#' @importFrom pkgB funA
+#' @seealso hoge
+#' @seealso fuga
+```
 
-# Tips
+は、以下のように単純化できる。
+
+```r
+#' @importFrom pkgA funA funB
+#' @importFrom pkgB funA
+#' @seealso hoge fuga
+```
+
+## その他 {#and-more}
 
 - [Rdコマンドは上述のもの以外にもいっぱいあり、Markupに用いるものもあるので是非確認してみて欲しい](https://cran.r-project.org/doc/manuals/R-exts.html)
 - [関数などのimportやドキュメントの参照は他のパッケージも相手にできる](https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html)
@@ -85,22 +107,26 @@ x %>%
   kable(col.names = '')
 ```
 
-# 変更履歴
+# 変更履歴 {#changelog}
 
-## 2018-08-30 12:49
-
-- `@section` の使い方を更新 
-- 表のレイアウト崩れを修正
-
-## 2018-08-30 13:46
-
-- 暗示的という言葉は分かりにくいのでタグを用いないという表現に修正
-- [`@title` `@description` `@details` について](#title-description-details) 追記
-
-## 2018-08-31 09:40
-
-- Bootstrapを採用し、表を見やすくした
-
-## 2018-09-07 14:04
-
-- `@seealso` で関数のヘルプへのリンクの貼り方を説明。
+- 2018-08-30 12:49
+    - `@section` の使い方を更新 
+    - 表のレイアウト崩れを修正
+- 2018-08-30 13:46
+    - 暗示的という言葉は分かりにくいので
+      タグを用いないという表現に修正
+    - [`@title` `@description` `@details` について](#title-description-details) 
+      追記
+- 2018-08-31 09:40
+    - Bootstrapを採用し、表を見やすくした
+- 2018-09-07 14:04
+    - `@seealso` で関数のヘルプへのリンクの貼り方を説明。
+- 2018-11-17 10:59
+    - Tipsに `@importFrom` 、 `@seealso` を簡単に書ける方法を
+      [追加](#simple-form)
+    - [`@title` `@description` `@details` について](#title-description-details) 
+      をTipsに移動
+    - 既存のTipsにその他の見出しをつけた
+    - 目次の追加
+        - 変更履歴が細かく目次に載らないよう、
+          見出しをやめ、アイテム化
