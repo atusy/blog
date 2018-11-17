@@ -120,7 +120,7 @@ authorとか
       <pubDate>Tue, 28 Aug 2018 00:00:00 +0000</pubDate>
       
       <guid>/2018/08/28/roxygen2matome/</guid>
-      <description>Roxygen2のタグについての情報が複数箇所に分散していて調べるのが大変なのでまとめた。 超訳 + 超要約 しているので、おかしなところがあれば Issues</description>
+      <description>まとめ Tips @title、@description、@details について @importFrom、@seealso について その他 References 変更履歴 Ro</description>
     </item>
     
     <item>

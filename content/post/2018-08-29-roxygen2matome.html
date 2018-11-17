@@ -5,17 +5,32 @@ date: '2018-08-28'
 slug: roxygen2matome
 categories: [R]
 tags: [package, Roxygen2, Rd]
+output:
+  blogdown::html_page:
+    toc: yes
 ---
 
 <script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
 
+<div id="TOC">
+<ul>
+<li><a href="#matome">まとめ</a></li>
+<li><a href="#tips">Tips</a><ul>
+<li><a href="#title-description-details"><code>@title</code>、<code>@description</code>、<code>@details</code> について</a></li>
+<li><a href="#simple-form"><code>@importFrom</code>、<code>@seealso</code> について</a></li>
+<li><a href="#and-more">その他</a></li>
+</ul></li>
+<li><a href="#references">References</a></li>
+<li><a href="#changelog">変更履歴</a></li>
+</ul>
+</div>
 
 <p>Roxygen2のタグについての情報が複数箇所に分散していて調べるのが大変なのでまとめた。</p>
 <p>超訳 + 超要約 しているので、おかしなところがあれば <a href="https://github.com/atusy/blog/issues">Issues</a> や <a href="https://github.com/atusy/blog/issues">Twitter</a> で指摘して頂くか、 <a href="https://github.com/atusy/blog/pulls">PR</a> して欲しい。</p>
 <p>Roxygen2を用いると、パッケージ内で定義した関数やデータセット、クラスなどについてのドキュメントや、他パッケージとの依存関係をソースコード内に連続して記述できる。</p>
 <p>古くは開発者が適宜作成していたRdファイルがソースコード内のRoxygen2コメントに基いて動的に生成されるため、ユーザーが扱うファイルを限定でき、更に実装とドキュメント化を並行できると良いことづくめだ。</p>
 <p>気付きがあれば随時更新していきたい。</p>
-<div class="section level1">
+<div id="matome" class="section level1">
 <h1>まとめ</h1>
 <ul>
 <li><code>Roxygen2タグ</code> はRStudioの入力補完機能で出現したもの (Roxygen2 v6.1.0)</li>
@@ -529,8 +544,11 @@ S4メソッド作成時に、原典を記載。2番目以降は <code>@reference
 </tr>
 </tbody>
 </table>
+</div>
+<div id="tips" class="section level1">
+<h1>Tips</h1>
 <div id="title-description-details" class="section level2">
-<h2><code>@title</code> <code>@description</code> <code>@details</code> について</h2>
+<h2><code>@title</code>、<code>@description</code>、<code>@details</code> について</h2>
 <p>これらの基本的な使い方は</p>
 <pre class="r"><code>#&#39; @title タイトル
 #&#39; @description 概要
@@ -542,13 +560,25 @@ S4メソッド作成時に、原典を記載。2番目以降は <code>@reference
 #&#39;
 #&#39; 詳細は三段落目に。概要から一行あける。</code></pre>
 </div>
+<div id="simple-form" class="section level2">
+<h2><code>@importFrom</code>、<code>@seealso</code> について</h2>
+<pre class="r"><code>#&#39; @importFrom pkgA funA
+#&#39; @importFrom pkgA funB
+#&#39; @importFrom pkgB funA
+#&#39; @seealso hoge
+#&#39; @seealso fuga</code></pre>
+<p>は、以下のように単純化できる。</p>
+<pre class="r"><code>#&#39; @importFrom pkgA funA funB
+#&#39; @importFrom pkgB funA
+#&#39; @seealso hoge fuga</code></pre>
 </div>
-<div id="tips" class="section level1">
-<h1>Tips</h1>
+<div id="and-more" class="section level2">
+<h2>その他</h2>
 <ul>
 <li><a href="https://cran.r-project.org/doc/manuals/R-exts.html">Rdコマンドは上述のもの以外にもいっぱいあり、Markupに用いるものもあるので是非確認してみて欲しい</a></li>
 <li><a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html">関数などのimportやドキュメントの参照は他のパッケージも相手にできる</a></li>
 </ul>
+</div>
 </div>
 <div id="references" class="section level1">
 <h1>References</h1>
@@ -568,11 +598,6 @@ S4メソッド作成時に、原典を記載。2番目以降は <code>@reference
 <tr>
 <td style="text-align:left;">
 <a href="http://r-pkgs.had.co.nz/man.html" class="uri">http://r-pkgs.had.co.nz/man.html</a>
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-<a href="http://style.tidyverse.org/documentation.html" class="uri">http://style.tidyverse.org/documentation.html</a>
 </td>
 </tr>
 <tr>
@@ -620,35 +645,49 @@ S4メソッド作成時に、原典を記載。2番目以降は <code>@reference
 <a href="https://stackoverflow.com/questions/25613238/document-reference-class-and-its-methods-with-roxygen2" class="uri">https://stackoverflow.com/questions/25613238/document-reference-class-and-its-methods-with-roxygen2</a>
 </td>
 </tr>
+<tr>
+<td style="text-align:left;">
+<a href="http://style.tidyverse.org/documentation.html" class="uri">http://style.tidyverse.org/documentation.html</a>
+</td>
+</tr>
 </tbody>
 </table>
 </div>
-<div class="section level1">
+<div id="changelog" class="section level1">
 <h1>変更履歴</h1>
-<div id="section" class="section level2">
-<h2>2018-08-30 12:49</h2>
+<ul>
+<li>2018-08-30 12:49
 <ul>
 <li><code>@section</code> の使い方を更新</li>
 <li>表のレイアウト崩れを修正</li>
-</ul>
-</div>
-<div id="section-1" class="section level2">
-<h2>2018-08-30 13:46</h2>
+</ul></li>
+<li>2018-08-30 13:46
 <ul>
-<li>暗示的という言葉は分かりにくいのでタグを用いないという表現に修正</li>
-<li><a href="#title-description-details"><code>@title</code> <code>@description</code> <code>@details</code> について</a> 追記</li>
-</ul>
-</div>
-<div id="section-2" class="section level2">
-<h2>2018-08-31 09:40</h2>
+<li>暗示的という言葉は分かりにくいので
+タグを用いないという表現に修正</li>
+<li><a href="#title-description-details"><code>@title</code> <code>@description</code> <code>@details</code> について</a>
+追記</li>
+</ul></li>
+<li>2018-08-31 09:40
 <ul>
 <li>Bootstrapを採用し、表を見やすくした</li>
-</ul>
-</div>
-<div id="section-3" class="section level2">
-<h2>2018-09-07 14:04</h2>
+</ul></li>
+<li>2018-09-07 14:04
 <ul>
 <li><code>@seealso</code> で関数のヘルプへのリンクの貼り方を説明。</li>
+</ul></li>
+<li>2018-11-17 10:59
+<ul>
+<li>Tipsに <code>@importFrom</code> 、 <code>@seealso</code> を簡単に書ける方法を
+<a href="#simple-form">追加</a></li>
+<li><a href="#title-description-details"><code>@title</code> <code>@description</code> <code>@details</code> について</a>
+をTipsに移動</li>
+<li>既存のTipsにその他の見出しをつけた</li>
+<li>目次の追加
+<ul>
+<li>変更履歴が細かく目次に載らないよう、
+見出しをやめ、アイテム化</li>
+</ul></li>
+</ul></li>
 </ul>
-</div>
 </div>
