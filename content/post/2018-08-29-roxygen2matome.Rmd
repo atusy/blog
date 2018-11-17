@@ -34,12 +34,22 @@ Roxygen2を用いると、パッケージ内で定義した関数やデータセ
 ```{r matome}
 x <- fread('../../static/tbl/roxygen2_rd.csv')
 x %>%
-  mutate_at(c('roxygen2', 'rd'), str_replace, pattern = '^', replacement = '`') %>%
-  mutate_at(c('roxygen2', 'rd'), str_replace, pattern = '$', replacement = '`') %>%
-  mutate_at(c('roxygen2', 'rd'), str_replace, pattern = '``', replacement = ' ') %>%
+  mutate_at(
+    c('roxygen2', 'rd'), 
+    str_replace_all, 
+    c('^' = '`', '$' = '`', '``' = ' ')
+  ) %>%
   transmute(
-    `Roxygen2タグ` = ifelse(url_roxygen2 == '', roxygen2, paste0('[', roxygen2, '](', url_roxygen2, ')')),
-    `Rdコマンド` = ifelse(url_rd == '', rd, paste0('[', rd, '](', url_rd , ')')),
+    `Roxygen2タグ` = ifelse(
+      url_roxygen2 == '', 
+      roxygen2, 
+      paste0('[', roxygen2, '](', url_roxygen2, ')')
+    ),
+    `Rdコマンド` = ifelse(
+      url_rd == '', 
+      rd, 
+      paste0('[', rd, '](', url_rd , ')')
+    ),
     `主な使い方` = description
   ) %>%
   kable(format = 'html') %>%
