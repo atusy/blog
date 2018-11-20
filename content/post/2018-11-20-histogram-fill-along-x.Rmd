@@ -1,0 +1,158 @@
+---
+title: ヒストグラムのビンの色をx軸に応じて変える
+author: ~
+date: '2018-11-20'
+slug: histogram-fill-along-x
+categories: [R]
+tags: [ggplot2]
+output:
+  blogdown::html_page:
+    toc: yes
+---
+
+```{r setup}
+library(pacman)
+p_load_gh("thomasp85/patchwork")
+p_load(ggplot2, tibble)
+```
+
+
+```{r volcano, include = FALSE}
+volcano_df <- data.frame(
+  z = c(volcano),
+  expand.grid(
+    y = seq(nrow(volcano), 1),
+    x = seq(ncol(volcano))
+  )
+)
+```
+
+```{r heatmap, include = FALSE}
+ggheat <- ggplot(volcano_df, aes(x, y, fill = z)) +
+  geom_raster() +
+  scale_fill_viridis_c() +
+  coord_fixed()
+ggheat
+```
+
+
+```{r histogram, include = FALSE, message = FALSE}
+gghist <- ggplot(volcano_df, aes(z)) +
+  geom_histogram(aes(fill = stat(x))) +
+  scale_fill_viridis_c()
+gghist
+```
+
+# tl; dr {#tldr}
+
+`geom_histogram(aes(fill = stat(x)))` すればいい。
+
+# ヒストグラムをヒートマップの凡例 + αにしたい
+
+から、ヒストグラムのビンの色をx軸に応じて変えたいと思った。
+
+具体的には下みたいなの。
+
+```{r goal, message = FALSE, echo = FALSE}
+wrap_plots(
+  ggheat + guides(fill = "none"), 
+  gghist + guides(fill = "none"), 
+  widths = c(1, .5)
+)
+```
+
+使ったデータセットは `volcano` です (Maunga Whau Volcano)。
+
+# 試行錯誤の歴史 {#trials}
+
+## データ整形 {#tidy}
+
+`volcano` は `matrix` なので、座標付きのデータフレームに整形する。
+
+`expand.grid` に与える引数の順序と (`y`, `x`)、 
+`y` が降順で `x` が昇順なところがポイント。
+
+```{r volcano-echo, ref.label = "volcano", eval = FALSE}
+
+```
+
+## ヒストグラム {#hist}
+
+### `fill = x` ではダメ {#fill-x-no}
+
+```{r histogram0, message = FALSE, fig.height = 2}
+library(ggplot2)
+gghist0 <- ggplot(volcano_df, aes(z)) +
+  geom_histogram(aes(fill = x)) +
+  scale_fill_viridis_c()
+gghist0
+```
+
+`geom_histogram` において、
+`fill` はグループごとの色分けに使うものだがら、
+というのが雑な理解。
+
+連続値を与えると無視されてしまう仕様っぽいけど、
+ソースのどこらへんかまでは追えていない。
+
+アヤメの種類のような離散値ならOK (下図)。
+
+```{r histogram-iris, message = FALSE, fig.height = 2}
+ggplot(iris, aes(Sepal.Length)) +
+  geom_histogram(aes(fill = Species))
+```
+
+
+### `fill = stat(x)` ならOK {#fill-stat-x-yes}
+
+```{r ref.label = "histogram", message = FALSE, fig.height = 2}
+
+```
+
+`stat` を使うと、
+ヒストグラムを描写するための計算結果に応じた
+審美的属性に用いる変数の選択ができる。
+
+主に何が使えるかは、ヘルプの "Computed variables" の項に載っている。
+
+`geom_histogram` の場合は
+
+Computed variables | 説明
+:-------| :----
+density | 密度 (頻度 / サンプルサイズ)
+count   | 計数
+scaled  | `density` の最大値を1に変換したもの
+ndensity| `scaled` に同じ。
+
+実際には `x` など、`ggplot_build` した時に出てくるデータフレームの変数ならなんでもよさそう。
+
+
+```{r ggplot_build, message = FALSE}
+str(ggplot_build(gghist)$data[[1]])
+```
+
+
+
+# ソース {#src}
+
+以下は冒頭に出した図を描写するためのソースコード。
+
+```{r, ref.label="setup", eval = FALSE}
+
+```
+
+```{r ref.label = "volcano", eval = FALSE}
+
+```
+
+```{r ref.label = "heatmap", message = FALSE}
+
+```
+
+```{r ref.label = "histogram", message = FALSE, fig.height = 2}
+
+```
+
+```{r ref.label = "goal", message = FALSE}
+
+```
