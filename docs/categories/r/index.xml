@@ -17,7 +17,7 @@
       <pubDate>Tue, 20 Nov 2018 00:00:00 +0000</pubDate>
       
       <guid>/2018/11/20/histogram-fill-along-x/</guid>
-      <description>tl; dr ヒストグラムをヒートマップの凡例 + αにしたい 試行錯誤の歴史 データ整形 ヒストグラム fill = x ではダメ fill = stat(x) ならOK ソース library(pacman) p_load_gh(&amp;quot;thomasp85/patchwork&amp;quot;) p_load(ggplot2, tibble) tl; dr geom_histogram(aes(fill = stat(x))) すれ</description>
+      <description>tl; dr ヒストグラムをヒートマップの凡例 + αにしたい 試行錯誤の歴史 データ整形 ヒストグラム fill = x ではダメ fill = stat(x) ならOK ソース 追記 library(pacman) p_load_gh(&amp;quot;thomasp85/patchwork&amp;quot;) p_load(ggplot2, tibble) tl; dr geom_histogram(aes(fill = stat(x)))</description>
     </item>
     
     <item>

@@ -23,6 +23,7 @@ output:
 </ul></li>
 </ul></li>
 <li><a href="#src">ソース</a></li>
+<li><a href="#add">追記</a></li>
 </ul>
 </div>
 
@@ -166,4 +167,18 @@ gghist</code></pre>
   widths = c(1, .5)
 )</code></pre>
 <p><img src="/post/2018-11-20-histogram-fill-along-x_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="add" class="section level1">
+<h1>追記</h1>
+<p>軸の入れ替えや、場所替えをすると、よりそれっぽく、かっこよくなるかも？</p>
+<p>周辺分布と紛らわしいかな？</p>
+<pre class="r"><code>wrap_plots(
+  ggheat + coord_fixed(expand = FALSE), 
+  gghist + 
+    scale_x_continuous(name = &quot;z&quot;, position=&quot;top&quot;) +
+    coord_flip(expand = FALSE), 
+  widths = c(1, .5)
+) * 
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<p><img src="/post/2018-11-20-histogram-fill-along-x_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 </div>

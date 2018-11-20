@@ -131,8 +131,6 @@ ndensity| `scaled` に同じ。
 str(ggplot_build(gghist)$data[[1]])
 ```
 
-
-
 # ソース {#src}
 
 以下は冒頭に出した図を描写するためのソースコード。
@@ -155,4 +153,21 @@ str(ggplot_build(gghist)$data[[1]])
 
 ```{r ref.label = "goal", message = FALSE}
 
+```
+
+# 追記 {#add}
+
+軸の入れ替えや、場所替えをすると、よりそれっぽく、かっこよくなるかも？
+
+周辺分布と紛らわしいかな？
+
+```{r, message = FALSE}
+wrap_plots(
+  ggheat + coord_fixed(expand = FALSE), 
+  gghist + 
+    scale_x_continuous(name = "z", position="top") +
+    coord_flip(expand = FALSE), 
+  widths = c(1, .5)
+) * 
+  theme(legend.position = "none")
 ```
