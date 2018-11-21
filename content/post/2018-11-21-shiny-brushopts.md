@@ -20,7 +20,7 @@ Shinyでplotly.jsを使わずにインタラクティブな図を作れるのか
 どうやら、 `brushOpts` なるものを使えば、 `plot` (`ggplot2` を含む)
 の拡大ができるようなので試してみました。
 
-![](/images/shiny-brushOpts.png)
+![](/images/shiny-brushOpts.gif)
 
 - 選択した領域を拡大
 - 選択した領域を移動
