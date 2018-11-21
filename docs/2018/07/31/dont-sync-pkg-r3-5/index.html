@@ -128,8 +128,6 @@
 <div class="blog-post-tags text-secondary">
     <strong>タグ:</strong>
     
-        <a class="badge badge-primary" href="../../../../tags/r">R</a>
-    
         <a class="badge badge-primary" href="../../../../tags/package">package</a>
     
 </div>
@@ -146,11 +144,17 @@
 </header>
 <article class="blog-post">
     <p>タイトル通り、R3.5系ではファイル同期ソフトでパッケージを同期しないようにしましょう。</p>
+
 <p>同期しておくとある環境にインストールしたパッケージを他の環境でもすぐさま利用できて便利だったのですが……。</p>
+
 <p>これは、R.3.5.0からパッケージをバイトコンパイルしてインストールするようになったことが原因です。</p>
+
 <p>おかげでパッケージはシステムに最適化され、高速に動きます (3.4系までと比べて)。</p>
+
 <p>代わりに、複数のPCでインストール済みRパッケージを同期すると、</p>
-<p>`‘pkg’ was installed by an R version with different internals’</p>
+
+<p>`&lsquo;pkg&rsquo; was installed by an R version with different internals&rsquo;</p>
+
 <p>というエラーを発してしまいます X(</p>
 
 
@@ -182,6 +186,10 @@
     <ol class="list-unstyled">
         
         <li>
+            <a href="../../../../2018/11/21/shiny-brushopts/">Shinyでggplot2の選択領域を拡大 (brushOpts)</a>
+        </li>
+        
+        <li>
             <a href="../../../../2018/11/20/histogram-fill-along-x/">ヒストグラムのビンの色をx軸に応じて変える</a>
         </li>
         
@@ -195,10 +203,6 @@
         
         <li>
             <a href="../../../../2018/11/10/ggplot2-legend-pos-n-just/">ggplot2のレジェンド位置を調整</a>
-        </li>
-        
-        <li>
-            <a href="../../../../2018/11/09/binwdith-for-geom-histogram/">geom_histogramのビン幅を動的に決定する</a>
         </li>
         
     </ol>
@@ -270,6 +274,8 @@
             <a class="badge badge-primary" href="../../../../tags/rmd">rmd</a>
             
             <a class="badge badge-primary" href="../../../../tags/roxygen2">roxygen2</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/shiny">shiny</a>
             
             <a class="badge badge-primary" href="../../../../tags/tex">tex</a>
             

@@ -1,0 +1,28 @@
+
+
+<p>Shinyでplotly.jsを使わずにインタラクティブな図を作れるのかなと思ったら、</p>
+<p>「Shiny 100本ノック」の</p>
+<p><a href="http://www.randpy.tokyo/entry/shiny_26">【Shiny小技】グラフをダブルクリックすると情報が取得できる、dblclickOptsの紹介</a></p>
+<p>を見つけました。</p>
+<p>どうやら、 <code>brushOpts</code> なるものを使えば、 <code>plot</code> (<code>ggplot2</code> を含む)
+の拡大ができるようなので試してみました。</p>
+<p><img src="/images/shiny-brushOpts.png" /></p>
+<p>```{r ui}
+library(shiny)
+library(ggplot2)</p>
+<p>u &lt;- shinyUI(fluidPage(
+plotOutput(
+“plot”,
+brush = brushOpts(id = “brush”)
+)
+))</p>
+<p>s &lt;- shinyServer(function(input, output) {
+output<span class="math inline">\(plot &lt;- renderPlot({  qplot(Sepal.Length, Sepal.Width, data = iris) +  coord_cartesian(  xlim = unlist(input\)</span>brush[c(“xmin”, “xmax”)]),
+ylim = unlist(input$brush[c(“ymin”, “ymax”)])
+)
+})</p>
+<p>output<span class="math inline">\(plot_dbl_click_info &lt;- renderPrint({  cat(&quot;ドラッグしたエリアの情報:\n&quot;)  str(input\)</span>brush)
+})
+})</p>
+<p>runApp(list(server = s, ui = u))
+```</p>
