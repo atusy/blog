@@ -6,7 +6,15 @@
 <p>を見つけました。</p>
 <p>どうやら、 <code>brushOpts</code> なるものを使えば、 <code>plot</code> (<code>ggplot2</code> を含む)
 の拡大ができるようなので試してみました。</p>
-<p><img src="/images/shiny-brushOpts.png" /></p>
+<p><img src="/images/shiny-brushOpts.gif" /></p>
+<ul>
+<li>選択した領域を拡大</li>
+<li>選択した領域を移動</li>
+<li>選択した領域外をクリックすることで元のサイズに戻る</li>
+</ul>
+<p>といったことができるようです。</p>
+<p><code>dblclickOpts</code> と組み合わせると、
+拡大した領域内で点をダブルクリックして点の情報を取り出すことも可能みたいです。</p>
 <p>```{r ui}
 library(shiny)
 library(ggplot2)</p>
@@ -20,8 +28,6 @@ brush = brushOpts(id = “brush”)
 output<span class="math inline">\(plot &lt;- renderPlot({  qplot(Sepal.Length, Sepal.Width, data = iris) +  coord_cartesian(  xlim = unlist(input\)</span>brush[c(“xmin”, “xmax”)]),
 ylim = unlist(input$brush[c(“ymin”, “ymax”)])
 )
-})</p>
-<p>output<span class="math inline">\(plot_dbl_click_info &lt;- renderPrint({  cat(&quot;ドラッグしたエリアの情報:\n&quot;)  str(input\)</span>brush)
 })
 })</p>
 <p>runApp(list(server = s, ui = u))

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ja">
   <head>
-	<meta name="generator" content="Hugo 0.42.2" />
+	<meta name="generator" content="Hugo 0.51" />
     <meta charset="utf-8">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -10,19 +10,6 @@
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="/" />
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Atusy&#39;s blog"/>
@@ -88,9 +75,9 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                         
-                            <a class="dropdown-item" href="../../">Japanese</a>
-                        
                             <a class="dropdown-item" href="../../en/">English</a>
+                        
+                            <a class="dropdown-item" href="../../">Japanese</a>
                         
                     </div>
                 </li>
@@ -132,7 +119,21 @@
         
         
     </header>
-    MathJaxとは？ blogdownではインラインでMathJaxが使えない……？ 解決方法 MathJaxとは？ MathJaxを利用すると、\
+    MathJaxとは？ blogdownではインラインでMathJaxが使えない……？ 解決方法   MathJaxとは？ MathJaxを利用すると、\(\TeX\) 記法を用いて数式を表現できる。
+ブロックにするには
+$$ \latex $$ と入力すると
+\[ \LaTeX \]
+となる。
+インラインでも $\LaTeX$ とすると、 \(\LaTeX\) となる。
+ブロックでは $$ から成る2行の間に、 インラインでは同じ行の $ 2字の間に \(TeX\) 記法を用いることがポイントだ。
+ blogdownではインラインでMathJaxが使えない……？ しかし、blogdownのデフォルトテーマ (Hugo Lithium) ではインラインの数式を表現できなかった。
+mathjax blogdown で検索して、
+ Yi Hui によるドキュメント や、 ぞうさんの記事 ( blogdownで数式がうまく表示されない場合の対処)  を参考にするも効果なし。
+結局 mathjax 使い方 で検索して、
+ くろきげんさんの記事(MathJaxの使い方)  も参考にしたところ、インラインで使うにはちょっとコードに工夫がいるらしいことが判明。
+ 解決方法 ./themes/hugo-lithium/layouts/partials/footer_mathjax.html
+を下記に書き換える。
+&lt;script type=&quot;text/x-mathjax-config&quot;&gt; MathJax.Hub.Config({ tex2jax: { inlineMath: [[&#39;$&#39;,&#39;$&#39;], [&quot;\\(&quot;,&quot;\\)&quot;]] } }); &lt;/script&gt; &lt;script async src=&quot;//cdn.
     
     <p></p>
     <a href="../../1/01/01/">読む →</a>
@@ -163,7 +164,7 @@
         
         
     </header>
-    TokyoR 73 行ってきました /*! jQuery v1.11.3 | (c) 2005, 2015 jQuery Foundation, Inc. | jquery.org/license */ !function(a,b){"object"==typeof module&&"object"==typeof module.exports?module.exports=a.document?b(a,!0):function(a){if(!a.document)throw new Error("jQuery requires a window with a document");return b(a)}:b(a)}("undefined"!=typeof window?window:this,function(a,b){var c=[],d=c.slice,e=c.concat,f=c.push,g=c.indexOf,h={},i=h.toString,j=h.hasOwnProperty,k={},l="1.11.3",m=function(a,b){return new m.fn.init(a,b)},n=/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,o=/^-ms-/,p=/-([\da-z])/gi,q=function(a,b){return b.toUpperCase()};m.fn=m.prototype={jquery:l,constructor:m,selector:"",length:0,toArray:function(){return d.call(this)},get:function(a){return null!=a?0a?this[a+this.length]:this[a]:d.call(this)},pushStack:function(a){var b=m.merge(this.constructor(),a);return b.prevObject=this,b.context=this.context,b},each:function(a,b){return m.each(this,a,b)},map:function(a){return this.pushStack(m.map(this,function(b,c){return a.call(b,c,b)}))},slice:function(){return this.pushStack(d.apply(this,arguments))},first:function(){return this.eq(0)},last:function(){return this.eq(-1)},eq:function(a){var b=this.length,c=+a+(0a?b:0);return this.pushStack(c=0&&bc?[this[c]]:[])},end:function(){return this.prevObject||this.constructor(null)},push:f,sort:c.sort,splice:c.splice},m.extend=m.fn.extend=function(){var a,b,c,d,e,f,g=arguments[0]||{},h=1,i=arguments.length,j=!1;for("boolean"==typeof g&&(j=g,g=arguments[h]||{},h++),"object"==typeof g||m.isFunction(g)||(g={}),h===i&&(g=this,h--);ih;h++)if(null!=(e=arguments[h]))for(d in e)a=g[d],c=e[d],g!==c&&(j&&c&&(m.isPlainObject(c)||(b=m.isArray(c)))?(b?(b=!1,f=a&&m.isArray(a)?a:[]):f=a&&m.isPlainObject(a)?a:{},g[d]=m.extend(j,f,c)):void 0!==c&&(g[d]=c));return g},m.extend({expando:"jQuery"+(l+Math.random()).replace(/\D/g,""),isReady:!0,error:function(a){throw new Error(a)},noop:function(){},isFunction:function(a){return"function"===m.type(a)},isArray:Array.isArray||function(a){return"array"===m.type(a)},isWindow:function(a){return null!=a&&a==a.window},isNumeric:function(a){return!m.isArray(a)&&a-parseFloat(a)+1=0},isEmptyObject:function(a){var b;for(b in a)return!1;return!0},isPlainObject:function(a){var b;if(!a||"object"!==m.type(a)||a.nodeType||m.isWindow(a))return!1;try{if(a.constructor&&!j.call(a,"constructor")&&!j.call(a.constructor.prototype,"isPrototypeOf"))return!1}catch(c){return!1}if(k.ownLast)for(b in a)return j.call(a,b);for(b in
+    TokyoR 73 行ってきました /*! jQuery v1.11.3 | (c) 2005, 2015 jQuery Foundation, Inc. | jquery.org/license */ !function(a,b){"object"==typeof module&&"object"==typeof module.exports?module.exports=a.document?b(a,!0):function(a){if(!a.document)throw new Error("jQuery requires a window with a document");return b(a)}:b(a)}("undefined"!=typeof window?window:this,function(a,b){var c=[],d=c.slice,e=c.concat,f=c.push,g=c.indexOf,h={},i=h.toString,j=h.hasOwnProperty,k={},l="1.11.3",m=function(a,b){return new m.fn.init(a,b)},n=/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,o=/^-ms-/,p=/-([\da-z])/gi,q=function(a,b){return b.toUpperCase()};m.fn=m.prototype={jquery:l,constructor:m,selector:"",length:0,toArray:function(){return d.call(this)},get:function(a){return null!=a?0a?this[a+this.length]:this[a]:d.call(this)},pushStack:function(a){var b=m.merge(this.constructor(),a);return b.prevObject=this,b.context=this.context,b},each:function(a,b){return m.each(this,a,b)},map:function(a){return this.pushStack(m.map(this,function(b,c){return a.call(b,c,b)}))},slice:function(){return this.pushStack(d.apply(this,arguments))},first:function(){return this.eq(0)},last:function(){return this.eq(-1)},eq:function(a){var b=this.length,c=+a+(0a?b:0);return this.pushStack(c=0&&bc?[this[c]]:[])},end:function(){return this.prevObject||this.constructor(null)},push:f,sort:c.sort,splice:c.splice},m.extend=m.fn.extend=function(){var a,b,c,d,e,f,g=arguments[0]||{},h=1,i=arguments.length,j=!1;for("boolean"==typeof g&&(j=g,g=arguments[h]||{},h++),"object"==typeof g||m.isFunction(g)||(g={}),h===i&&(g=this,h--);ih;h++)if(null!=(e=arguments[h]))for(d in e)a=g[d],c=e[d],g!==c&&(j&&c&&(m.isPlainObject(c)||(b=m.isArray(c)))?(b?(b=!1,f=a&&m.isArray(a)?a:[]):f=a&&m.isPlainObject(a)?a:{},g[d]=m.extend(j,f,c)):void 0!==c&&(g[d]=c));return g},m.extend({expando:"jQuery"+(l+Math.random()).replace(/\D/g,""),isReady:!0,error:function(a){throw new Error(a)},noop:function(){},isFunction:function(a){return"function"===m.type(a)},isArray:Array.isArray||function(a){return"array"===m.type(a)},isWindow:function(a){return null!=a&&a==a.window},isNumeric:function(a){return!m.isArray(a)&&a-parseFloat(a)+1=0},isEmptyObject:function(a){var b;for(b in a)return!1;return!0},isPlainObject:function(a){var b;if(!a||"object"!==m.type(a)||a.nodeType||m.isWindow(a))return!1;try{if(a.constructor&&!j.call(a,"constructor")&&!j.call(a.constructor.prototype,"isPrototypeOf"))return!1}catch(c){return!1}if(k.ownLast)for(b in a)return j.call(a,b);for(b in a);return void 0===b||j.call(a,b)},type:function(a){return null==a?a+"":"object"==typeof a||"function"==typeof a?
     
     <p></p>
     <a href="../../1/01/01/">読む →</a>
@@ -194,7 +195,7 @@
         
         
     </header>
-    RmarkdwonのYAMLフロントマターで titleとか authorとか 改行する /*! jQuery v1.11.3 | (c) 2005, 2015 jQuery Foundation, Inc. | jquery.org/license */ !function(a,b){"object"==typeof module&&"object"==typeof module.exports?module.exports=a.document?b(a,!0):function(a){if(!a.document)throw new Error("jQuery requires a window with a document");return b(a)}:b(a)}("undefined"!=typeof window?window:this,function(a,b){var c=[],d=c.slice,e=c.concat,f=c.push,g=c.indexOf,h={},i=h.toString,j=h.hasOwnProperty,k={},l="1.11.3",m=function(a,b){return new m.fn.init(a,b)},n=/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,o=/^-ms-/,p=/-([\da-z])/gi,q=function(a,b){return
+    RmarkdwonのYAMLフロントマターで titleとか authorとか 改行する /*! jQuery v1.11.3 | (c) 2005, 2015 jQuery Foundation, Inc. | jquery.org/license */ !function(a,b){"object"==typeof module&&"object"==typeof module.exports?module.exports=a.document?b(a,!0):function(a){if(!a.document)throw new Error("jQuery requires a window with a document");return b(a)}:b(a)}("undefined"!=typeof window?window:this,function(a,b){var c=[],d=c.slice,e=c.concat,f=c.push,g=c.indexOf,h={},i=h.toString,j=h.hasOwnProperty,k={},l="1.11.3",m=function(a,b){return new m.fn.init(a,b)},n=/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,o=/^-ms-/,p=/-([\da-z])/gi,q=function(a,b){return b.toUpperCase()};m.fn=m.prototype={jquery:l,constructor:m,selector:"",length:0,toArray:function(){return d.call(this)},get:function(a){return null!=a?0a?this[a+this.length]:this[a]:d.call(this)},pushStack:function(a){var b=m.merge(this.constructor(),a);return b.prevObject=this,b.context=this.context,b},each:function(a,b){return m.each(this,a,b)},map:function(a){return this.pushStack(m.map(this,function(b,c){return a.call(b,c,b)}))},slice:function(){return this.pushStack(d.apply(this,arguments))},first:function(){return this.eq(0)},last:function(){return this.eq(-1)},eq:function(a){var b=this.length,c=+a+(0a?b:0);return this.pushStack(c=0&&bc?[this[c]]:[])},end:function(){return this.prevObject||this.constructor(null)},push:f,sort:c.sort,splice:c.splice},m.extend=m.fn.extend=function(){var a,b,c,d,e,f,g=arguments[0]||{},h=1,i=arguments.length,j=!1;for("boolean"==typeof g&&(j=g,g=arguments[h]||{},h++),"object"==typeof g||m.isFunction(g)||(g={}),h===i&&(g=this,h--);ih;h++)if(null!=(e=arguments[h]))for(d in e)a=g[d],c=e[d],g!==c&&(j&&c&&(m.isPlainObject(c)||(b=m.isArray(c)))?(b?(b=!1,f=a&&m.isArray(a)?a:[]):f=a&&m.isPlainObject(a)?a:{},g[d]=m.extend(j,f,c)):void 0!==c&&(g[d]=c));return g},m.extend({expando:"jQuery"+(l+Math.random()).replace(/\D/g,""),isReady:!0,error:function(a){throw new Error(a)},noop:function(){},isFunction:function(a){return"function"===m.type(a)},isArray:Array.isArray||function(a){return"array"===m.type(a)},isWindow:function(a){return null!=a&&a==a.window},isNumeric:function(a){return!m.isArray(a)&&a-parseFloat(a)+1=0},isEmptyObject:function(a){var b;for(b in a)return!1;return!0},isPlainObject:function(a){var b;if(!a||"object"!==m.type(a)||a.nodeType||m.isWindow(a))return!1;try{if(a.constructor&&!j.call(a,"constructor")&&!j.call(a.constructor.prototype,"isPrototypeOf"))return!1}catch(c){return!1}if(k.ownLast)for(b in a)return j.call(a,b);for(b in a);return void 0===b||j.call(a,b)},type:function(a){return null==a?a+"":"object"==typeof a||"
     
     <p></p>
     <a href="../../1/01/01/">読む →</a>
@@ -225,10 +226,7 @@
         
         
     </header>
-    いつも使うパッケージはR起動時に読み込みたい .Rprofile を使ったよくある手口 フローチャート いつも使うパッケージはR起動時に読み込みたい .Rprofile を使ったよくあ
-    
-    <p></p>
-    <a href="../../1/01/01/">読む →</a>
+      いつも使うパッケージはR起動時に読み込みたい .Rprofile を使ったよくある手口 フローチャート    いつも使うパッケージはR起動時に読み込みたい .Rprofile を使ったよくある手口 library(tidyverse)  フローチャート   
     
 </article>
 
@@ -256,10 +254,16 @@
         
         
     </header>
-    インストール方法 使い方 主な変更点 Enjoy!! felp 0.1.3 を 公開 しました． ようやく実用レベルになったかと思います． 関数のソースとヘルプを同時に見たい人のためのパ
-    
-    <p></p>
-    <a href="../../1/01/01/">読む →</a>
+      インストール方法 使い方 主な変更点 Enjoy!!   felp 0.1.3 を 公開 しました．
+ようやく実用レベルになったかと思います．
+関数のソースとヘルプを同時に見たい人のためのパッケージです．
+ソースの読解が捗りますね!
+インストール方法 devtools::install_github(&quot;atusy/felp&quot;)  使い方 ?print や print?. と打つだけ．
+prettycode がソースの色付けもしてくれます．
+関数名?ドット という形式をサポートすることで， コーディング中に，ヘルプが欲しくなっても行頭に戻る必要がなくなりました．
+また，特定の関数のパッケージを参照したい人は ?utils::help や utils::help?. といった具合に :: や ::: を使います．
+?iris といった具合に関数以外のものを参照した場合は utils::`?` として働くよう互換性にも留意しました．
+ 主な変更点  ? を使った記法の追加． print.function の廃止．  RStudioとの相性が悪すぎるので……．    Enjoy!!  
     
 </article>
 
@@ -287,10 +291,17 @@
         
         
     </header>
-    Shinyでplotly.jsを使わずにインタラクティブな図を作れるのかなと思ったら、 「Shiny 100本ノック」の 【Shiny小技】グラフ
-    
-    <p></p>
-    <a href="../../1/01/01/">読む →</a>
+    Shinyでplotly.jsを使わずにインタラクティブな図を作れるのかなと思ったら、
+「Shiny 100本ノック」の
+【Shiny小技】グラフをダブルクリックすると情報が取得できる、dblclickOptsの紹介
+を見つけました。
+どうやら、 brushOpts なるものを使えば、 plot (ggplot2 を含む) の拡大ができるようなので試してみました。
+ 選択した領域を拡大 選択した領域を移動 選択した領域外をクリックすることで元のサイズに戻る  といったことができるようです。
+dblclickOpts と組み合わせると、 拡大した領域内で点をダブルクリックして点の情報を取り出すことも可能みたいです。
+```{r ui} library(shiny) library(ggplot2)
+u &lt;- shinyUI(fluidPage( plotOutput( “plot”, brush = brushOpts(id = “brush”) ) ))
+s &lt;- shinyServer(function(input, output) { output\(plot &lt;- renderPlot({ qplot(Sepal.Length, Sepal.Width, data = iris) + coord_cartesian( xlim = unlist(input\)brush[c(“xmin”, “xmax”)]), ylim = unlist(input$brush[c(“ymin”, “ymax”)]) ) }) })
+runApp(list(server = s, ui = u)) ```
     
 </article>
 
