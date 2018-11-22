@@ -29,7 +29,7 @@ devtools::install_github("atusy/ggplot2", ref = "scale_range_accept_na")
 ```
 
 
-# 問題
+# 問題 {#problem}
 
 `xlim(0, NA)` みたいに， `coord_cartesian(limits = c(0, NA))` とすると，エラーを吐く．
 
@@ -50,9 +50,9 @@ g + coord_cartesian(xlim = c(2, NA))
 
 エラー源である，`zero_range`利用部分の修正は他の機能に影響しかねないので避けた．
 
-# 実装
+# 実装 {#implementation}
 
-## オリジナル
+## オリジナル {#original}
 
 ```{r}
 scale_range <- function(scale, limits = NULL, expand = TRUE) {
@@ -71,7 +71,7 @@ scale_range <- function(scale, limits = NULL, expand = TRUE) {
 利用しているscaleに応じた`transform` (常用対数変換や平方根変換) を行ったものの `range` (範囲) をとる．
 
 
-## 修正版
+## 修正版 {#fix}
 
 ```{r}
 scale_range <- function(scale, limits = NULL, expand = TRUE) {
@@ -90,7 +90,7 @@ scale_range <- function(scale, limits = NULL, expand = TRUE) {
 
 limitsの長さが2の時は，`NA`をデータの範囲に置き換えるようにした．
 
-# 実験
+# 実験 {#test}
 
 まず，新しい `scale_range` をggplot2の名前空間に上書きする．
 
@@ -113,13 +113,13 @@ g + xlim(2, NA)
 ```
 
 
-## 他のcoord_系列も問題なさそう
+## 他のcoord_系列も問題なさそう {#fine}
 
 ```{r, fig.dim=c(2,2)}
 g + coord_fixed(xlim = c(0, NA))
 g + coord_flip(xlim = c(0, NA))
 ```
 
-# 感想
+# 感想 {#note}
 
 coord_系もscale_系やxlimなどに合わせて，xlim/ylimの値を長さ2の連続値に制限すべきだと思うのだけれど，なんでそうしないのだろう？

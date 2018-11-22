@@ -130,13 +130,13 @@
 <article class="blog-post">
     <div id="TOC">
 <ul>
-<li><a>問題</a></li>
-<li><a>実装</a><ul>
-<li><a>オリジナル</a></li>
-<li><a>修正版</a></li>
+<li><a href="#problem">問題</a></li>
+<li><a href="#implementation">実装</a><ul>
+<li><a href="#original">オリジナル</a></li>
+<li><a href="#fix">修正版</a></li>
 </ul></li>
-<li><a>実験</a><ul>
-<li><a href="#coord_">他のcoord_系列も問題なさそう</a></li>
+<li><a href="#test">実験</a><ul>
+<li><a href="#fine">他のcoord_系列も問題なさそう</a></li>
 </ul></li>
 <li><a>感想</a></li>
 </ul>
@@ -148,7 +148,7 @@
 本来はscale_*_continuousやxlimに合わせて長さ2までに制限すべきだと思う</p>
 <p>試験的ながら，パッケージとして試したい方は</p>
 <pre class="r"><code>devtools::install_github(&quot;atusy/ggplot2&quot;, ref = &quot;scale_range_accept_na&quot;)</code></pre>
-<div class="section level1">
+<div id="problem" class="section level1">
 <h1>問題</h1>
 <p><code>xlim(0, NA)</code> みたいに， <code>coord_cartesian(limits = c(0, NA))</code> とすると，エラーを吐く．</p>
 <pre class="r"><code>g &lt;- qplot(wt, mpg, data = mtcars, geom = c(&quot;point&quot;, &quot;smooth&quot;))
@@ -164,9 +164,9 @@ g</code></pre>
 の処理を直せばいいと分かった．</p>
 <p>エラー源である，<code>zero_range</code>利用部分の修正は他の機能に影響しかねないので避けた．</p>
 </div>
-<div class="section level1">
+<div id="implementation" class="section level1">
 <h1>実装</h1>
-<div class="section level2">
+<div id="original" class="section level2">
 <h2>オリジナル</h2>
 <pre class="r"><code>scale_range &lt;- function(scale, limits = NULL, expand = TRUE) {
   expansion &lt;- if (expand) expand_default(scale) else c(0, 0)
@@ -181,7 +181,7 @@ g</code></pre>
 <p><code>limits</code> として，<code>xlim</code>ないし<code>ylim</code>を受け取り，
 利用しているscaleに応じた<code>transform</code> (常用対数変換や平方根変換) を行ったものの <code>range</code> (範囲) をとる．</p>
 </div>
-<div class="section level2">
+<div id="fix" class="section level2">
 <h2>修正版</h2>
 <pre class="r"><code>scale_range &lt;- function(scale, limits = NULL, expand = TRUE) {
   expansion &lt;- if (expand) ggplot2:::expand_default(scale) else c(0, 0)
@@ -198,7 +198,7 @@ g</code></pre>
 <p>limitsの長さが2の時は，<code>NA</code>をデータの範囲に置き換えるようにした．</p>
 </div>
 </div>
-<div class="section level1">
+<div id="test" class="section level1">
 <h1>実験</h1>
 <p>まず，新しい <code>scale_range</code> をggplot2の名前空間に上書きする．</p>
 <pre class="r"><code>assignInNamespace(&quot;scale_range&quot;, scale_range, getNamespace(&quot;ggplot2&quot;))</code></pre>
@@ -213,7 +213,7 @@ g</code></pre>
 <pre><code>## Warning: Removed 4 rows containing non-finite values (stat_smooth).</code></pre>
 <pre><code>## Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
 <p><img src="../../../../post/2018-11-22-strange-coord-functions-ggplot2_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
-<div id="coord_" class="section level2">
+<div id="fine" class="section level2">
 <h2>他のcoord_系列も問題なさそう</h2>
 <pre class="r"><code>g + coord_fixed(xlim = c(0, NA))</code></pre>
 <pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
