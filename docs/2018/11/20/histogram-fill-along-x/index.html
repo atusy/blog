@@ -6,14 +6,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
 <meta property="og:title" content="ヒストグラムのビンの色をx軸に応じて変える" />
-<meta property="og:description" content="tl; dr ヒストグラムをヒートマップの凡例 &#43; αにしたい 試行錯誤の歴史 データ整形 ヒストグラム fill = x ではダメ fill = stat(x) ならOK ソース 追記 library(pacman) p_load_gh(&quot;thomasp85/patchwork&quot;) p_load(ggplot2, tibble) tl; dr geom_histogram(aes(fill = stat(x)))" />
+<meta property="og:description" content="ヒストグラムをヒートマップの凡例 &#43; αにしたい 試行錯誤の歴史 データ整形 ヒストグラム fill = x ではダメ fill = stat(x) ならOK ソース 追記 tl; dr geom_histogram(aes(fill = stat(x))) すればいい。" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="/2018/11/20/histogram-fill-along-x/" /><meta property="article:published_time" content="2018-11-20T00:00:00&#43;00:00"/>
 <meta property="article:modified_time" content="2018-11-20T00:00:00&#43;00:00"/>
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="ヒストグラムのビンの色をx軸に応じて変える"/>
-<meta name="twitter:description" content="tl; dr ヒストグラムをヒートマップの凡例 &#43; αにしたい 試行錯誤の歴史 データ整形 ヒストグラム fill = x ではダメ fill = stat(x) ならOK ソース 追記 library(pacman) p_load_gh(&quot;thomasp85/patchwork&quot;) p_load(ggplot2, tibble) tl; dr geom_histogram(aes(fill = stat(x)))"/>
+<meta name="twitter:description" content="ヒストグラムをヒートマップの凡例 &#43; αにしたい 試行錯誤の歴史 データ整形 ヒストグラム fill = x ではダメ fill = stat(x) ならOK ソース 追記 tl; dr geom_histogram(aes(fill = stat(x))) すればいい。"/>
 
 
 
@@ -128,11 +128,8 @@
     <hr>
 </header>
 <article class="blog-post">
-    
-
-<div id="TOC">
+    <div id="TOC">
 <ul>
-<li><a href="#tldr">tl; dr</a></li>
 <li><a href="#-">ヒストグラムをヒートマップの凡例 + αにしたい</a></li>
 <li><a href="#trials">試行錯誤の歴史</a><ul>
 <li><a href="#tidy">データ整形</a></li>
@@ -146,11 +143,8 @@
 </ul>
 </div>
 
-<pre class="r"><code>library(pacman)
-p_load_gh(&quot;thomasp85/patchwork&quot;)
-p_load(ggplot2, tibble)</code></pre>
-<div id="tldr" class="section level1">
-<h1>tl; dr</h1>
+<div id="tldr" class="section level4">
+<h4>tl; dr</h4>
 <p><code>geom_histogram(aes(fill = stat(x)))</code> すればいい。</p>
 </div>
 <div id="-" class="section level1">
@@ -339,6 +333,14 @@ gghist</code></pre>
     <ol class="list-unstyled">
         
         <li>
+            <a href="../../../../2018/11/22/strange-coord-functions-ggplot2/"><code>ggplot2::coord_cartesian(xlim = c(0, NA))</code> できるようにしてみた</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/11/21/mod-css-margin/">CSSでヘッダの行間を調整してみた</a>
+        </li>
+        
+        <li>
             <a href="../../../../2018/11/21/shiny-brushopts/">Shinyでggplot2の選択領域を拡大 (brushOpts)</a>
         </li>
         
@@ -348,14 +350,6 @@ gghist</code></pre>
         
         <li>
             <a href="../../../../2018/11/18/felp-0-1-3/">felp 0.1.3</a>
-        </li>
-        
-        <li>
-            <a href="../../../../2018/11/11/glue-for-fig-cap-in-rmd/">Rmdのfig.capを図を生成するチャンク内にglueで書く</a>
-        </li>
-        
-        <li>
-            <a href="../../../../2018/11/10/ggplot2-legend-pos-n-just/">ggplot2のレジェンド位置を調整</a>
         </li>
         
     </ol>
@@ -370,6 +364,8 @@ gghist</code></pre>
         <p>
             
             <a class="badge badge-primary" href="../../../../categories/arch">arch</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/css">css</a>
             
             <a class="badge badge-primary" href="../../../../categories/latex">latex</a>
             

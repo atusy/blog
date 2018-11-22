@@ -6,10 +6,19 @@
     <description>Recent content in R on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Wed, 21 Nov 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 22 Nov 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>`ggplot2::coord_cartesian(xlim = c(0, NA))` できるようにしてみた</title>
+      <link>/2018/11/22/strange-coord-functions-ggplot2/</link>
+      <pubDate>Thu, 22 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/11/22/strange-coord-functions-ggplot2/</guid>
+      <description>問題 実装 オリジナル 修正版 実験 他のcoord_系列も問題なさそう 感想 PRに向けての試験的な実装． https://github.com/atusy/ggplot2/commit/26c1b7a478585889947d265d691e375e399637c3 なぜかxlimやylimに長さ3以上の連続値</description>
+    </item>
     
     <item>
       <title>Shinyでggplot2の選択領域を拡大 (brushOpts)</title>
@@ -26,7 +35,7 @@
       <pubDate>Tue, 20 Nov 2018 00:00:00 +0000</pubDate>
       
       <guid>/2018/11/20/histogram-fill-along-x/</guid>
-      <description>tl; dr ヒストグラムをヒートマップの凡例 + αにしたい 試行錯誤の歴史 データ整形 ヒストグラム fill = x ではダメ fill = stat(x) ならOK ソース 追記 library(pacman) p_load_gh(&amp;quot;thomasp85/patchwork&amp;quot;) p_load(ggplot2, tibble) tl; dr geom_histogram(aes(fill = stat(x)))</description>
+      <description>ヒストグラムをヒートマップの凡例 + αにしたい 試行錯誤の歴史 データ整形 ヒストグラム fill = x ではダメ fill = stat(x) ならOK ソース 追記 tl; dr geom_histogram(aes(fill = stat(x))) すればいい。</description>
     </item>
     
     <item>

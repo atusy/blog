@@ -10,7 +10,7 @@ output:
     toc: yes
 ---
 
-```{r setup}
+```{r setup, include = FALSE}
 library(pacman)
 p_load_gh("thomasp85/patchwork")
 p_load(ggplot2, tibble)
@@ -43,7 +43,7 @@ gghist <- ggplot(volcano_df, aes(z)) +
 gghist
 ```
 
-# tl; dr {#tldr}
+#### tl; dr {#tldr}
 
 `geom_histogram(aes(fill = stat(x)))` すればいい。
 

@@ -1,0 +1,112 @@
+---
+title: "`ggplot2::coord_cartesian(xlim = c(0, NA))` できるようにしてみた"
+author: ~
+date: '2018-11-22'
+slug: strange-coord-functions-ggplot2
+categories: [R]
+tags: [ggplot2]
+output:
+  blogdown::html_page:
+    toc: yes
+---
+
+
+<div id="TOC">
+<ul>
+<li><a>問題</a></li>
+<li><a>実装</a><ul>
+<li><a>オリジナル</a></li>
+<li><a>修正版</a></li>
+</ul></li>
+<li><a>実験</a><ul>
+<li><a href="#coord_">他のcoord_系列も問題なさそう</a></li>
+</ul></li>
+<li><a>感想</a></li>
+</ul>
+</div>
+
+<p>PRに向けての試験的な実装．</p>
+<p><a href="https://github.com/atusy/ggplot2/commit/26c1b7a478585889947d265d691e375e399637c3" class="uri">https://github.com/atusy/ggplot2/commit/26c1b7a478585889947d265d691e375e399637c3</a></p>
+<p>なぜかxlimやylimに長さ3以上の連続値を取れてしまうので，
+本来はscale_*_continuousやxlimに合わせて長さ2までに制限すべきだと思う</p>
+<p>試験的ながら，パッケージとして試したい方は</p>
+<pre class="r"><code>devtools::install_github(&quot;atusy/ggplot2&quot;, ref = &quot;scale_range_accept_na&quot;)</code></pre>
+<div class="section level1">
+<h1>問題</h1>
+<p><code>xlim(0, NA)</code> みたいに， <code>coord_cartesian(limits = c(0, NA))</code> とすると，エラーを吐く．</p>
+<pre class="r"><code>g &lt;- qplot(wt, mpg, data = mtcars, geom = c(&quot;point&quot;, &quot;smooth&quot;))
+g</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="/post/2018-11-22-strange-coord-functions-ggplot2_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<pre class="r"><code>g + coord_cartesian(xlim = c(2, NA))</code></pre>
+<blockquote>
+<p>Error in if (zero_range(range)) zero_width else diff(range) : missing value where TRUE/FALSE needed</p>
+</blockquote>
+<p>これが嫌でソースを確認したところ，
+<a href="https://github.com/tidyverse/ggplot2/blob/6057d7f1983e80a62eebb2133ef47f3cc950cb3e/R/coord-cartesian-.r#L119"><code>scale_range</code></a>
+の処理を直せばいいと分かった．</p>
+<p>エラー源である，<code>zero_range</code>利用部分の修正は他の機能に影響しかねないので避けた．</p>
+</div>
+<div class="section level1">
+<h1>実装</h1>
+<div class="section level2">
+<h2>オリジナル</h2>
+<pre class="r"><code>scale_range &lt;- function(scale, limits = NULL, expand = TRUE) {
+  expansion &lt;- if (expand) expand_default(scale) else c(0, 0)
+
+  if (is.null(limits)) {
+    scale$dimension(expansion)
+  } else {
+    range &lt;- range(scale$transform(limits))
+    expand_range(range, expansion[1], expansion[2])
+  }
+}</code></pre>
+<p><code>limits</code> として，<code>xlim</code>ないし<code>ylim</code>を受け取り，
+利用しているscaleに応じた<code>transform</code> (常用対数変換や平方根変換) を行ったものの <code>range</code> (範囲) をとる．</p>
+</div>
+<div class="section level2">
+<h2>修正版</h2>
+<pre class="r"><code>scale_range &lt;- function(scale, limits = NULL, expand = TRUE) {
+  expansion &lt;- if (expand) ggplot2:::expand_default(scale) else c(0, 0)
+
+  if(is.null(limits)) return(scale$dimension(expansion))
+
+  if(length(limits) == 2) {
+    limits &lt;- ifelse(is.na(limits), scale$dimension(c(0, 0)), limits)
+  }
+
+  range &lt;- range(scale$transform(limits))
+  scales::expand_range(range, expansion[1], expansion[2])
+}</code></pre>
+<p>limitsの長さが2の時は，<code>NA</code>をデータの範囲に置き換えるようにした．</p>
+</div>
+</div>
+<div class="section level1">
+<h1>実験</h1>
+<p>まず，新しい <code>scale_range</code> をggplot2の名前空間に上書きする．</p>
+<pre class="r"><code>assignInNamespace(&quot;scale_range&quot;, scale_range, getNamespace(&quot;ggplot2&quot;))</code></pre>
+<p>そして試す</p>
+<pre class="r"><code>g + coord_cartesian(xlim = c(2, NA))</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="/post/2018-11-22-strange-coord-functions-ggplot2_files/figure-html/try-err-1.png" width="672" /></p>
+<p><code>xlim</code> を使った場合，以下のように除去された点の存在を教えてくれる．</p>
+<p>また，点を除去した後に回帰曲線を引くので，点を除去せずに回帰曲線を引く <code>coord_cartesian</code> とは根本的に結果が違う．</p>
+<pre class="r"><code>g + xlim(2, NA)</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<pre><code>## Warning: Removed 4 rows containing non-finite values (stat_smooth).</code></pre>
+<pre><code>## Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
+<p><img src="/post/2018-11-22-strange-coord-functions-ggplot2_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<div id="coord_" class="section level2">
+<h2>他のcoord_系列も問題なさそう</h2>
+<pre class="r"><code>g + coord_fixed(xlim = c(0, NA))</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="/post/2018-11-22-strange-coord-functions-ggplot2_files/figure-html/unnamed-chunk-6-1.png" width="192" /></p>
+<pre class="r"><code>g + coord_flip(xlim = c(0, NA))</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="/post/2018-11-22-strange-coord-functions-ggplot2_files/figure-html/unnamed-chunk-6-2.png" width="192" /></p>
+</div>
+</div>
+<div class="section level1">
+<h1>感想</h1>
+<p>coord_系もscale_系やxlimなどに合わせて，xlim/ylimの値を長さ2の連続値に制限すべきだと思うのだけれど，なんでそうしないのだろう？</p>
+</div>

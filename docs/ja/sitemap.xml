@@ -3,6 +3,16 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/2018/11/22/strange-coord-functions-ggplot2/</loc>
+    <lastmod>2018-11-22T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/2018/11/21/mod-css-margin/</loc>
+    <lastmod>2018-11-21T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/2018/11/21/shiny-brushopts/</loc>
     <lastmod>2018-11-21T00:00:00+00:00</lastmod>
   </url>
@@ -199,7 +209,7 @@
   
   <url>
     <loc>/</loc>
-    <lastmod>2018-11-21T00:00:00+00:00</lastmod>
+    <lastmod>2018-11-22T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -242,6 +252,12 @@
   </url>
   
   <url>
+    <loc>/categories/css/</loc>
+    <lastmod>2018-11-21T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/tags/felp/</loc>
     <lastmod>2018-11-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -249,7 +265,7 @@
   
   <url>
     <loc>/tags/ggplot2/</loc>
-    <lastmod>2018-11-20T00:00:00+00:00</lastmod>
+    <lastmod>2018-11-22T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -286,14 +302,14 @@
   </url>
   
   <url>
-    <loc>/categories/latex/</loc>
-    <lastmod>2018-07-09T00:00:00+00:00</lastmod>
+    <loc>/tags/latex/</loc>
+    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/latex/</loc>
-    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
+    <loc>/categories/latex/</loc>
+    <lastmod>2018-07-09T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -363,7 +379,7 @@
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2018-11-21T00:00:00+00:00</lastmod>
+    <lastmod>2018-11-22T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -378,8 +394,14 @@
   </url>
   
   <url>
+    <loc>/tags/r/</loc>
+    <lastmod>2018-07-31T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/categories/r/</loc>
-    <lastmod>2018-11-21T00:00:00+00:00</lastmod>
+    <lastmod>2018-11-22T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -391,12 +413,6 @@
                 hreflang="ja"
                 href="/categories/r/"
                 />
-  </url>
-  
-  <url>
-    <loc>/tags/r/</loc>
-    <lastmod>2018-07-31T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>

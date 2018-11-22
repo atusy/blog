@@ -13,7 +13,6 @@ output:
 
 <div id="TOC">
 <ul>
-<li><a href="#tldr">tl; dr</a></li>
 <li><a href="#-">ヒストグラムをヒートマップの凡例 + αにしたい</a></li>
 <li><a href="#trials">試行錯誤の歴史</a><ul>
 <li><a href="#tidy">データ整形</a></li>
@@ -27,11 +26,8 @@ output:
 </ul>
 </div>
 
-<pre class="r"><code>library(pacman)
-p_load_gh(&quot;thomasp85/patchwork&quot;)
-p_load(ggplot2, tibble)</code></pre>
-<div id="tldr" class="section level1">
-<h1>tl; dr</h1>
+<div id="tldr" class="section level4">
+<h4>tl; dr</h4>
 <p><code>geom_histogram(aes(fill = stat(x)))</code> すればいい。</p>
 </div>
 <div id="-" class="section level1">
