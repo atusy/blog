@@ -17,9 +17,8 @@ Rmdでこんなに完成したWordドキュメントを作れるんだ……! �
 RmdでWordを考えておられる方は勇気付けられるこ間違いなしです．
 
 
-> 集荷ｷﾀ━━━━(ﾟ∀ﾟ)━━━━!! ということで、半月くらいで買えるようになるはず…(不備がなければ\
-> 送料はかかってしまうので、早くほしい、送料なしでほしい方は再販nightで僕と握手…（どちらも本体800円でごぜーますよ \
-> [@niszet0](https://twitter.com/niszet0/status/1065839595298803712)
+<blockquote class="twitter-tweet" data-lang="en"><p lang="ja" dir="ltr">集荷ｷﾀ━━━━(ﾟ∀ﾟ)━━━━!!<br>ということで、半月くらいで買えるようになるはず…(不備がなければ<br>送料はかかってしまうので、早くほしい、送料なしでほしい方は再販nightで僕と握手…（どちらも本体800円でごぜーますよ</p>&mdash; niszet📚技術書典5 い04でした (@niszet0) <a href="https://twitter.com/niszet0/status/1065839595298803712?ref_src=twsrc%5Etfw">November 23, 2018</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 ![](/images/rmd-de-word.jpg)
 
