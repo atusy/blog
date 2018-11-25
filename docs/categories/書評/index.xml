@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>書評 on Atusy&#39;s blog</title>
+    <link>/categories/%E6%9B%B8%E8%A9%95/</link>
+    <description>Recent content in 書評 on Atusy&#39;s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja-jp</language>
+    <lastBuildDate>Sun, 25 Nov 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/categories/%E6%9B%B8%E8%A9%95/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>rmd-de-word</title>
+      <link>/2018/11/25/rmd-de-word/</link>
+      <pubDate>Sun, 25 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/11/25/rmd-de-word/</guid>
+      <description>集荷ｷﾀ━━━━(ﾟ∀ﾟ)━━━━!! ということで、半月くらいで買えるようになるはず…(不備がなければ 送料はかかってしまうので、早くほしい、</description>
+    </item>
+    
+  </channel>
+</rss>

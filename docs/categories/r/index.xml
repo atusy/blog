@@ -6,10 +6,19 @@
     <description>Recent content in R on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Thu, 22 Nov 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 25 Nov 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>書評 「R MarkdownでWord文書を作ろう」</title>
+      <link>/2018/11/25/rmd-de-word/</link>
+      <pubDate>Sun, 25 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/11/25/rmd-de-word/</guid>
+      <description>RmdでWord本の再販が間近に迫っていますね．これは献本頂いた時にしたレビューの約束を果たす時!! Rmdでこんなに完成したWordドキュメ</description>
+    </item>
     
     <item>
       <title>`ggplot2::coord_cartesian(xlim = c(0, NA))` できるようにしてみた</title>

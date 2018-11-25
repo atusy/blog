@@ -6,10 +6,19 @@
     <description>Recent content on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Thu, 22 Nov 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 25 Nov 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>書評 「R MarkdownでWord文書を作ろう」</title>
+      <link>/2018/11/25/rmd-de-word/</link>
+      <pubDate>Sun, 25 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/11/25/rmd-de-word/</guid>
+      <description>RmdでWord本の再販が間近に迫っていますね．これは献本頂いた時にしたレビューの約束を果たす時!! Rmdでこんなに完成したWordドキュメ</description>
+    </item>
     
     <item>
       <title>`ggplot2::coord_cartesian(xlim = c(0, NA))` できるようにしてみた</title>
@@ -337,6 +346,15 @@ authorとか
       
       <guid>/1/01/01/</guid>
       <description>Shinyでplotly.jsを使わずにインタラクティブな図を作れるのかなと思ったら、 「Shiny 100本ノック」の 【Shiny小技】グラフ</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>/1/01/01/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/1/01/01/</guid>
+      <description>こんな人にオススメ RmdでWord本の再販が間近に迫っていますね．これは献本頂いた時にしたレビューの約束を果たす時!! Rmdでこんなに完成し</description>
     </item>
     
   </channel>
