@@ -1,0 +1,79 @@
+---
+title: viridisの色数
+author: ~
+date: '2018-11-25'
+slug: size-of-viridis-color-palette
+categories: [R]
+tags: [viridis]
+---
+
+```{r setup, include = FALSE}
+pacman::p_load(ggplot2, magrittr, scales)
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
+```
+
+[viridis](https://bids.github.io/colormap/) や [cividis](https://github.com/marcosci/cividis) は、色の変化が知覚的に一様となるよう調整された、連続的なカラースケール。
+白黒印刷するとグレースケールになるので、プリンタにも優しい。
+
+viridis は論文がなさそうだが、 cividis は論文にもなっているようだ (https://arxiv.org/ftp/arxiv/papers/1712/1712.01662.pdf)。
+
+これらはカラフルらしいのだが、見た目としてカラフルなだけではなく、
+階調としてもカラフルなのか気になったので調べることにした。
+
+# viridisってカラフル？ {#colourful}
+
+少なくとも見た目にはカラフルだ．
+
+```{r pal-viri, fig.height = 0.3, fig.width = 7}
+library(ggplot2)
+qplot(x=0:255, y = 1, fill = 0:255, geom = "raster", show.legend = FALSE) +
+  scale_fill_viridis_c() +
+  theme_void() +
+  theme(plot.margin = unit(rep(-9, 4), "mm"))
+```
+
+```{r src-pal-viri, ref.label = "pal-viri", eval = FALSE, echo = TRUE}
+
+```
+
+# 何色あるんだろう？ {#how-many}
+
+viridisは色の変化が知覚的に一様 (perceptually uniform) であるよう、
+CIELAB空間で色を変化させている。
+多分、色空間を真面目に調べれば、CIELAB空間上のviridisをRGBに直した時、
+最大何色利用できるかは数理的に決定できる。
+
+しかし、めんどくさいので、とりあえずシミュレーションしてみた。
+
+1 - 255 階調までは色の数も 1:1 に単調増加。
+以降は振動しつつ、650色程度で飽和するようだ。
+
+```{r n-viri}
+library(scales)
+library(ggplot2)
+library(magrittr)
+
+# viridisを作るための基本色を用意
+v <- viridis_pal(1,0,1,1,"D")(6)
+
+n <- seq(1:5e3)
+
+# 0から1をn当分し、それぞれの値に対応するviridisを
+# gradient_n_palを用いて用意する。
+# 生成された色の数をuniqueとlengthを使って数える。
+# これをnを変えながら行う。
+colors <- lapply(n, function(n) seq(0, 1, length = n)) %>%
+  lapply(gradient_n_pal(v)) %>%
+  lapply(unique) %>%
+  sapply(length) 
+
+# プロット
+ggplot(data.frame(n, colors), aes(n, colors)) +
+  geom_abline(slope = 1, intercept = 0, color = "red", lty = "dashed") +
+  geom_line()
+```
+
+```{r src-n-viri, ref.label = "n-viri", eval = FALSE, echo = TRUE}
+
+```
+
