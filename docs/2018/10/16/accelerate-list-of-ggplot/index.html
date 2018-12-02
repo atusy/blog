@@ -73,9 +73,9 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                         
-                            <a class="dropdown-item" href="../../../../">Japanese</a>
-                        
                             <a class="dropdown-item" href="../../../../en/">English</a>
+                        
+                            <a class="dropdown-item" href="../../../../">Japanese</a>
                         
                     </div>
                 </li>
@@ -157,7 +157,7 @@ ggplotオブジェクトに適切なメソッドは <code>ggplot2:::print.ggplot
 ##     }
 ##     invisible(x)
 ## }
-## &lt;bytecode: 0x55612d63ea28&gt;
+## &lt;bytecode: 0x55e3f8b27378&gt;
 ## &lt;environment: namespace:ggplot2&gt;</code></pre>
 <p>上記の<code>ggplot2:::print.ggplot</code> の実装を参考に，計算部分を並列化し，表示を順次行うようにしたものが以下のコード．</p>
 <pre class="r"><code>#library(pforeach) # install by devtools::install_github(&#39;hoxo-m/pforeach&#39;)
@@ -194,7 +194,10 @@ plot(bench)</code></pre>
 <pre><code>## Unit: seconds
 ##           expr      min       lq     mean   median       uq      max neval
 ##  single thread 15.90173 16.58560 18.08624 18.48958 19.16229 21.97050   100
-##   multi thread 12.17476 12.75376 13.86049 13.96567 14.64058 20.18083   100</code></pre>
+##   multi thread 12.17476 12.75376 13.86049 13.96567 14.64058 20.18083   100
+##  cld
+##    b
+##   a</code></pre>
 <p><img src="../../../../post/2018-10-16-accelerate-list-of-ggplot_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <p>思ったほどの威力はないが，多少の高速化はできたようだ．</p>
 </div>

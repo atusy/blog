@@ -46,7 +46,7 @@ ggplot(diamonds, aes(price)) + geom_histogram()</code></pre>
 事前に頻度分布を集計した結果をデータフレームとして <code>ggplot()</code> に与えるというもの。</p>
 <p><a href="https://qiita.com/Atsushi776/items/f71a6f011118031f6e0a" class="uri">https://qiita.com/Atsushi776/items/f71a6f011118031f6e0a</a></p>
 <p><code>facet</code> した変数ごとにbin幅を変える方法の決定版は今でもこれだと思う。</p>
-<p><code>facet</code> した変数ごとにbin幅を変える必要がなければ、<span class="citation">@hoxo_m氏から頂いたコメントも有用</span>。
+<p><code>facet</code> した変数ごとにbin幅を変える必要がなければ、@hoxo_m氏から頂いたコメントも有用。
 こちらでは、<code>stat_bin(breaks = )</code> を利用する。
 ただし、同じデータに二度参照せねばならず、もう一歩といった感がある。</p>
 <pre class="r"><code>ggplot(diamonds, aes(x = price)) + 
