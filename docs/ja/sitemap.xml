@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/2018/12/02/japanr2018-joined/</loc>
+    <lastmod>2018-12-02T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/2018/11/25/size-of-viridis-color-palette/</loc>
     <lastmod>2018-11-25T00:00:00+00:00</lastmod>
   </url>
@@ -223,7 +228,7 @@
   
   <url>
     <loc>/</loc>
-    <lastmod>2018-11-25T00:00:00+00:00</lastmod>
+    <lastmod>2018-12-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -296,6 +301,12 @@
   <url>
     <loc>/tags/glue/</loc>
     <lastmod>2018-11-11T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/japanr/</loc>
+    <lastmod>2018-12-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -393,7 +404,7 @@
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2018-11-25T00:00:00+00:00</lastmod>
+    <lastmod>2018-12-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -415,7 +426,7 @@
   
   <url>
     <loc>/categories/r/</loc>
-    <lastmod>2018-11-25T00:00:00+00:00</lastmod>
+    <lastmod>2018-12-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"

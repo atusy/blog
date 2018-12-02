@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta property="og:title" content="Japan.R 2018 感想
+" />
+<meta property="og:description" content="Japan.R 2018 に参加しました 発表の感想 Long Talk R によるシステム開発入門 by @kos59125 R Markdown テンプレートの作り方 by @kazutan GUI で簡単！モダンなデータ解析 by @efprime_jp Shiny 完全に理解した by @Med_KU" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/2018/12/02/japanr2018-joined/" /><meta property="article:published_time" content="2018-12-02T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2018-12-02T00:00:00&#43;00:00"/>
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Japan.R 2018 感想
+"/>
+<meta name="twitter:description" content="Japan.R 2018 に参加しました 発表の感想 Long Talk R によるシステム開発入門 by @kos59125 R Markdown テンプレートの作り方 by @kazutan GUI で簡単！モダンなデータ解析 by @efprime_jp Shiny 完全に理解した by @Med_KU"/>
+
+
+
+    <link rel="canonical" href="../../../../2018/12/02/japanr2018-joined/">
+
+    <title>
+      
+        Japan.R 2018 感想
+ | Atusy&#39;s blog
+      
+    </title>
+
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+
+    <link href="../../../../css/style.css" rel="stylesheet">
+
+    
+
+    
+
+    <link rel="stylesheet" href="../../../../css/chroma-styles.css">
+
+  </head>
+  <body>
+    
+      <header class="blog-header">
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+        <a class="navbar-brand" href="../../../../">
+            <img src="../../../../images/atusy.jpg" width="50" height="50" class="d-inline-block align-top" alt="">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+            <ul class="navbar-nav">
+                
+                
+                <li class="nav-item ">
+                    
+                        <a class="nav-link" href="https://github.com/atusy">GitHub</a>
+                    
+                </li>
+                
+                <li class="nav-item ">
+                    
+                        <a class="nav-link" href="https://twitter.com/Atsushi776">Twitter</a>
+                    
+                </li>
+                
+            </ul>
+            
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Language
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                        
+                            <a class="dropdown-item" href="../../../../">Japanese</a>
+                        
+                            <a class="dropdown-item" href="../../../../en/">English</a>
+                        
+                    </div>
+                </li>
+            </ul>
+            
+        </div>
+    </nav>
+</header>
+    
+
+    
+    <div class="container">
+      <div class="row">
+        <div class="col-12 col-lg-8 blog-main">
+
+          
+
+<header>
+    <h2 class="blog-post-title">
+        <a class="text-dark" href="../../../../2018/12/02/japanr2018-joined/">Japan.R 2018 感想</a>
+    </h2>
+    
+
+
+<div class="blog-post-date text-secondary">
+    
+        2018-12-2
+    
+    
+        by <span rel="author">Atusy</span>
+    
+</div>
+
+    
+<div class="blog-post-tags text-secondary">
+    <strong>タグ:</strong>
+    
+        <a class="badge badge-primary" href="../../../../tags/japanr">japanr</a>
+    
+</div>
+
+    
+<div class="blog-post-categories text-secondary">
+    <strong>カテゴリ:</strong>
+    
+        <a class="badge badge-primary" href="../../../../categories/r">R</a>
+    
+</div>
+
+    <hr>
+</header>
+<article class="blog-post">
+    <div id="TOC">
+<ul>
+<li><a href="#japanr2018">Japan.R 2018 に参加しました</a></li>
+<li><a href="#presentations">発表の感想</a><ul>
+<li><a href="#long">Long Talk</a><ul>
+<li><a href="#kos59125">R によるシステム開発入門 by <span class="citation">@kos59125</span></a></li>
+<li><a href="#kazutan">R Markdown テンプレートの作り方 by <span class="citation">@kazutan</span></a></li>
+<li><a href="#efprime-jp">GUI で簡単！モダンなデータ解析 by <span class="citation">@efprime_jp</span></a></li>
+<li><a href="#Med-KU">Shiny 完全に理解した by <span class="citation">@Med_KU</span></a></li>
+</ul></li>
+<li><a href="#lightning">Lightning Talk</a><ul>
+<li><a href="#gepuro">gepuro task views 2nd by <span class="citation">@gepuro</span></a></li>
+<li><a href="#ohta">条件付き相互作用の分析 by 太田博三</a></li>
+<li><a href="#yakibeh">DID 分析の説明 by やぎべゑ</a></li>
+<li><a href="#housecat442">contextual パッケージでバンディットアルゴリズムの検証 by <span class="citation">@housecat442</span></a></li>
+<li><a href="#Kinoshita">スポーツチームでの R 活用の可能性 (ラグビーでの例を通して) by Koichi Kinoshita</a></li>
+<li><a href="#doradora09">分析屋が福岡に移住して２年経った話 by <span class="citation">@doradora09</span></a></li>
+<li><a href="#hiratake55">SagemakeR by <span class="citation">@hiratake55</span></a></li>
+<li><a href="#kaneko">Rによる分位点処置効果推定の話 by Yusuke Kaneko</a></li>
+<li><a href="#kankore">なんかやる（高速化周りかも） by かんこれ</a></li>
+<li><a href="#hana-orin">アラサーエンジニア シティボーイ化計画 - 都会のお得物件を統計的に探してみる - by <span class="citation">@hana_orin</span></a></li>
+<li><a href="#heavywatal">Rcpp パッケージで外部 C++ ライブラリを使う by <span class="citation">@heavywatal</span></a></li>
+<li><a href="#chengvt">digdag で R をバッチり回す by <span class="citation">@chengvt</span></a></li>
+<li><a href="#igjit">R で書く R コンパイラ by <span class="citation">@igjit</span></a></li>
+<li><a href="#nakamichi">（仮）深層学習か画像認識で何かやります by nakamichi</a></li>
+<li><a href="#atusy">関数魔改造講座 (formals編) by atusy</a></li>
+<li><a href="#shrrt">Player Rating with R by shrrt</a></li>
+<li><a href="#kawashima">量子化学 (フラグメント分子軌道法) でも R したい(薬) 川嶋裕介</a></li>
+<li><a href="#tanaka-marimo">ぼくの町の不安定 by tanaka_marimo</a></li>
+<li><a href="#ito-yan">この IR のグラフがすごい! 上場企業2018 <span class="citation">@ito_yan</span></a></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+
+<div id="japanr2018" class="section level1">
+<h1>Japan.R 2018 に参加しました</h1>
+<p>今回も多種多様でハイレベルな発表でしたね。
+個人的には自称 BeginneR 達の躍進が嬉しかったです。
+短期間に <code>ggplot2</code> パッケージや <code>leaflet</code> パッケージを使えるようになって LT してくれる、
+これはコミュニティの情報共有の目醒ましい成果だと思います。</p>
+<p>LTでは「
+<a href="https://atusy.github.io/presentation/japanr2018/formals-for-black-magicians.html#/">関数魔改造講座 (formals編)</a>
+」を発表しました。
+英題は “Formals for black magicians”。
+皆さんの心に残る発表ができましたね！！ (迫真)
+ただ、時間切れもいいところだったのが残念であります。
+関数の引数を弄るとどんな面白いことができるか、もっと話したかった。
+記事にするか続編 LT するか……。
+▽n
+色んな方とお会いできてよかったです。
+皆さんともっとお話ししたかったですね。
+また機会を見つけて東京にやって来るつもりです。
+そのときはかまってあげてください。</p>
+<p><span class="citation">@gepuro</span> 氏による Youtube と Togetter のリンク貼っときます。</p>
+<ul>
+<li>Youtube: <a href="https://youtu.be/sXXXsb1MNMk" class="uri">https://youtu.be/sXXXsb1MNMk</a></li>
+<li>Togetter: <a href="https://togetter.com/li/1294419" class="uri">https://togetter.com/li/1294419</a></li>
+</ul>
+</div>
+<div id="presentations" class="section level1">
+<h1>発表の感想</h1>
+<p>感想といいつつ、脱線して自分の興味語ってるところ多いです。</p>
+<div id="long" class="section level2">
+<h2>Long Talk</h2>
+<div id="kos59125" class="section level3">
+<h3>R によるシステム開発入門 by <span class="citation">@kos59125</span></h3>
+<p>R はシステム開発には向いていないなんていうのは、
+他言語ユーザのマウントとの至言を頂きました。</p>
+<p>システム開発辛いから他の言語勉強しなきゃなんて卑下してはいけませんね！！</p>
+<p>また一つ、R 沼の底を探せという天啓を得た気がします (ぇ</p>
+<p>Web UI を提供する <code>shiny</code> パッケージを始め、
+バッチ処理方法の例ででてきた digdag とか、
+Web API を提供するための <code>plumber</code> パッケージとか、
+この話で出てきた内容が後々の発表で紹介されてて、
+偶然ながら (？) 良いイントロになりましたね。</p>
+<p>天啓を得ただけではなく、多くの人が R でシステム開発にどんどん取り組んでいるということに気付かされました。</p>
+<p>あとは、 littler 試してみようと思う。
+ユタニさんが過去に<a href="https://notchained.hatenablog.com/entry/2015/02/01/112657">紹介</a> していますね。
+これは <code class="sh">R CMD BATCH</code> よりも起動が速いらしい。
+これも既に紹介してる人がいる
+<a href="https://stats.biopapyrus.jp/r/devel/commandline.html">bioinfomatics: Rバッチモード</a> 。</p>
+</div>
+<div id="kazutan" class="section level3">
+<h3>R Markdown テンプレートの作り方 by <span class="citation">@kazutan</span></h3>
+<p>言わずと知れた
+<a href="https://github.com/kazutan/zousan"><code>zousan::zousan_document()</code></a>
+の作者ですね。</p>
+<p>テンプレート作成は pandoc との戦い……深い。</p>
+<p>限られた尺の中、 R おじさん編は省略されました。</p>
+<p><a href="https://qiita.com/advent-calendar/2018/rlang">R アドカレ</a>
+4日目に完全版を記事にしていただけるそうなので、期待！</p>
+<p>個人的には RStudio で <code>File &gt; New File &gt; R Markdown...</code> すると
+サンプルコード入れてくるのがうっとうしいのと、似たよなチャンクオプション毎度使うのとで、
+なんとかした分野。</p>
+<p>ただ、テンプレートは増えると探しにくいので、 <code>blogdown</code> パッケージの <code class="r">new_post()</code> みたいに、
+コマンドでテンプレートからファイルを作成するところまでやりたです。</p>
+<p>とりあえず <code>new_nb()</code> と <code>new_rmd()</code> みたいな関数定義しようかな。</p>
+</div>
+<div id="efprime-jp" class="section level3">
+<h3>GUI で簡単！モダンなデータ解析 by <span class="citation">@efprime_jp</span></h3>
+<p><a href="https://r.analyticflow.com/ja/">R AnalyticFlow</a>
+という Java で動く R の IDE 的な何かの紹介。</p>
+<blockquote>
+<p>データ分析のプロセスをフローチャート形式で整理。視覚化されたプロセスはマウス操作で誰でも簡単に、かつ正確に再現することができます。</p>
+</blockquote>
+<p>というのがウリ。
+ソースを解析して、不足パッケージがあればインストールの提案をしてくれるなど、 R を普段使いしない人とソースを共有するのにうってつけなシステム。</p>
+<p>なぜかアジア圏で人気で、multibyte 文字に強いせいからかもしれないとのこと。</p>
+<p>いや、ほんと RStudio の multibyte の扱いには辟易しますよね。
+私は RStudio Server を使うことで、日本語をまともに扱えるブラウザなら大丈夫な状態です。
+ただ、 Firefox で動かすとカーソル位置がずれるのが悩み。
+Chrome や Edge をクライアントにしています。</p>
+<p>それはそうと、R AnalyticFlow の目下の悩みは、 <code>glmnet</code> パッケージなどの定番パッケージが R 標準パッケージにならないことだそう。
+個人的には
+<a href="https://pkgdown.r-lib.org/">pkgdown</a>
+で <code>RAnalyticFlow</code> メタパッケージを作り、
+R AnalyticFlow 起動の際に自動インストールする仕掛けを作ったらいいんじゃないかなーと思う。
+これなら、追加したいパッケージが現れてもソフトウェア本体を更新せず、メタパッケージだけ更新すればいい。
+というわけで Twitter 上で提案してみたけどどうなるかなあ？</p>
+</div>
+<div id="Med-KU" class="section level3">
+<h3>Shiny 完全に理解した by <span class="citation">@Med_KU</span></h3>
+<p>メッド・ケーユーさんの発表。
+メドクさんだと思ってた。</p>
+<p><code>shiny</code> に留まらず、 <code>htmlwidgets</code> や <code>googleVis</code> も含め、対話的に R を利用する方法を紹介頂きました。</p>
+<p><code>htmlwidgets</code> の代表格は今回も紹介されていた <code>pltoly</code> でしょうか。
+しかし、 <code>ggplot2</code> ユーザーなら、 <code>ggplotly()</code> で <code>ggplot2</code> な図を一発で対話的なものに変換でき学習コストが最小限です。
+探索的なデータ分析をする時には是非、覚えておくと良いツールです。</p>
+<p><code>googleVis</code> は名前を聞いたことがある程度だったのですが、かなり色んなことができるみたいです。
+拡張性は低いかもしれませんが、色んな図を描ける模様。</p>
+<p><code>htmlwidgets</code> のギャラリーをあまり眺めてこなかったので、要チェックだなと思いました (<a href="http://gallery.htmlwidgets.org/" class="uri">http://gallery.htmlwidgets.org/</a>)。</p>
+<p>今後のRに <code>shiny</code> は必要不可欠な存在として君臨し続けると思いますが、
+ある程度は <code>R AnalyticFlow</code> + <code>plotly</code> or <code>googleVis</code> で済ませてしまえるんじゃないかなあと話を聞いてて思いました。
+システム開発まではいかない、その場限りのデータ探索や、中間成果の共有のために <code>shiny</code> してられませんからね。</p>
+</div>
+</div>
+<div id="lightning" class="section level2">
+<h2>Lightning Talk</h2>
+<div id="gepuro" class="section level3">
+<h3>gepuro task views 2nd by <span class="citation">@gepuro</span></h3>
+<p><a href="https://www.slideshare.net/gepuro/gepuro-task-views-v20-japanr-2018" class="uri">https://www.slideshare.net/gepuro/gepuro-task-views-v20-japanr-2018</a></p>
+<p>Japan.R 運営代表によるLT。</p>
+<p>トライアスロンの成果報告にて去年は機材の重要性を、今年は練習の重要性を訴えました。</p>
+<p>それから gerupo task views という GitHub 上にある R パッケージをクローリングして一覧するプロジェクトの今後について語って頂きました。</p>
+<p>オープンソース化して、精度改善とか保守とかみんなでできるといいよね。</p>
+</div>
+<div id="ohta" class="section level3">
+<h3>条件付き相互作用の分析 by 太田博三</h3>
+<p>おなかいたくてといれこもってました。
+きけてません。
+ごめんなさい。</p>
+</div>
+<div id="yakibeh" class="section level3">
+<h3>DID 分析の説明 by やぎべゑ</h3>
+<p>就活で説明不要と思ってたら説明求められてしどろもどろしちゃった DID 分析について、
+なぜか Japan.R で説明してくれたお話。</p>
+<p>できなかったことをできるようになったけど、もう機会がない、無念、で終わると、ひょんな機会が生じた時に困るかもしれない。</p>
+<p>アウトプットの機会を虎視眈々と狙って纏めておくと、本番で困りませんね。</p>
+<p>ステキ！</p>
+<p>Twitter 上では DID 分析に馴染み深い人たちからのテンション上がったツィートが散見されました。</p>
+<p>処置群を無作為抽出できない時に選択バイアスの効果を取り除けるらしい。</p>
+<p>地質学でも使えるところあるかなー。</p>
+</div>
+<div id="housecat442" class="section level3">
+<h3>contextual パッケージでバンディットアルゴリズムの検証 by <span class="citation">@housecat442</span></h3>
+<p>商品を絞りつつ、売上の期待値を最大化する選択をするための手法、でよかったっけ？
+単純に売り上げの良いものを順にピックするのではなく、ある商品に興味のある消費者が他にどんな商品に興味持っているかを加味してくれるみたい。</p>
+<p>例示がよくて、 A/B テストとの違いが明瞭だったように思う。</p>
+<p>しかし、同じように説明できないどころか、手法の内容が正しかったかすら怪しい無能な私。</p>
+</div>
+<div id="Kinoshita" class="section level3">
+<h3>スポーツチームでの R 活用の可能性 (ラグビーでの例を通して) by Koichi Kinoshita</h3>
+<p>優しく殺されたい BeginneR による発表。</p>
+<p>優しく (褒め) 殺せばいいのでしょうか？</p>
+<p>データを解釈するには平均のような要約した数字だけじゃなくて、
+分布を見るのも大事だという、
+忘れられがちなところに注目していて、
+皆さん好印象だったように思います。</p>
+<p>今あるデータからどこまで言えるのか、を常に考えてらっしゃったところも非常に良かった。</p>
+<p>是非、世界一のスポーツデータアナリストになって欲しいですね！！</p>
+</div>
+<div id="doradora09" class="section level3">
+<h3>分析屋が福岡に移住して２年経った話 by <span class="citation">@doradora09</span></h3>
+<p>福岡で勉強会やろうぜって話と酒飲もうぜって話。</p>
+<p>私も地方勉強会やってみたいなあ。もくもく会もいい。</p>
+<p>地方は発表者集めるのが大変らしいし、いたら発表してもらって残りの時間はもくもくタイムとか……？</p>
+<p>九州に出張する機会があれば立ち寄ってみたいなあ。</p>
+</div>
+<div id="hiratake55" class="section level3">
+<h3>SagemakeR by <span class="citation">@hiratake55</span></h3>
+<p>AWS サービスの1つである Sagemaker で R が使えるということでその紹介。</p>
+<ol style="list-style-type: decimal">
+<li>Jupyter Notebook でのモデル開発</li>
+<li>GPUやマルチインスタンスによる学習</li>
+<li>デプロイ</li>
+</ol>
+<p>をステップワイズに簡単にできるようにしてくれるらしい。</p>
+<p>ほんまかうそか、 Jupyter は Julia Python R の略らしいので、 R も使えるのは道理ですね。</p>
+<p>R を使う場合は <code>plumber</code> パッケージで Web API を提供すればいいらしい。</p>
+</div>
+<div id="kaneko" class="section level3">
+<h3>Rによる分位点処置効果推定の話 by Yusuke Kaneko</h3>
+<p>なんかハイレベルな話をまくしたててらして、
+「よぅ舌回らはんなー」
+と思っている内に発表が終わりそうでした。</p>
+<p>処置の効果は、処置前の性能に比例しちゃうんじゃないの？
+じゃあどうやって効果と処置前の性能の関係を見出せばいいの？
+分位点処置効果推定使って、例えば下四分位点と上四分位点を処置を受けた群と受けていない群で比較すればいいよね。
+という話……であってたっけ？</p>
+<p>例えば職業訓練による収入の増加は、訓練前の収入に比例してしまうんじゃないかという話になった時、
+各群の下四分位点の差は小さいけど上四分位点の差が大きければ、その通りと言えそうって話かな？</p>
+<p>後半ついてけてないですが。</p>
+<p>四分位点だけ比べるなんてことせず、パーセンタイルを1ポイントずつとか細かく区切って比べたら面白そうと思った。
+平均や分散のスケーリングとはまた一風異なった、分布によらないロバストな比較に使えるんじゃないかな、と。</p>
+<p>で、 <code>Matching</code> パッケージの <code>lalonde</code> データセットを使って試してみた。
+すると，以下の解釈ができそうと判った。</p>
+<ul>
+<li>職業訓練による収入の増加は、訓練前の収入に比例している。</li>
+<li>職業訓練の結果、就職できた人達が <span class="math inline">\(x = 0\)</span> 上に並んでいる。
+<ul>
+<li>この訓練で就職できる人できない人が現れる理由を可視化するには、
+収入以外の就業状況に依存しない性能で同様の図を作ればいい。</li>
+</ul></li>
+</ul>
+<p><img src="../../../../post/2018-12-02-japanr2018-joined_files/figure-html/qte-1.png" width="672" /></p>
+<pre class="r"><code>data(&quot;lalonde&quot;, package = &quot;Matching&quot;) # install.packages(&quot;Matching&quot;)
+
+library(pacman)
+p_load(dplyr, ggplot2, purrr, tidyr)
+p_load_gh(&quot;thomasp85/patchwork&quot;)
+
+g &lt;- lalonde %&gt;%
+  select(re78, treat) %&gt;%
+  nest(-treat) %&gt;%
+  mutate(
+    quantiles = list(seq(0, 1, .02)),
+    treat_q = map2(data, quantiles, ~ quantile(.x$re78, .y))
+  ) %&gt;%
+  select(-data) %&gt;%
+  unnest %&gt;%
+  spread(treat, treat_q) %&gt;%
+  mutate(diff = `1` - `0`) %&gt;%
+  ggplot(aes(x = `0`, y = `1`, colour = quantiles)) +
+  geom_abline(slope = 1, intercept = 0, colour = &quot;white&quot;) +
+  geom_point() +
+  scale_colour_viridis_c(name = &quot;パーセンタイル&quot;) +
+  theme_dark() +
+  theme(
+    legend.position = &quot;bottom&quot;
+  ) +
+  labs(x = &quot;処置なし&quot;, y = &quot;処置あり&quot;) 
+
+wrap_plots(
+  g + 
+    coord_fixed(xlim = c(0, 60e3), ylim = c(0, 60e3)) + 
+    ggtitle(&quot;a. 全データ&quot;),
+  g + 
+    coord_fixed(xlim = c(0, 22e3), ylim = c(0, 22e3)) + 
+    ggtitle(&quot;b. 拡大&quot;)
+)</code></pre>
+</div>
+<div id="kankore" class="section level3">
+<h3>なんかやる（高速化周りかも） by かんこれ</h3>
+<p>欠席。</p>
+</div>
+<div id="hana-orin" class="section level3">
+<h3>アラサーエンジニア シティボーイ化計画 - 都会のお得物件を統計的に探してみる - by <span class="citation">@hana_orin</span></h3>
+<p>生かされたい BeginneR による発表。</p>
+<p>直前の人が欠席で心の準備できてなかったそうですが、全然、それを感じさせませんでした。
+私も同じパターンになりましたが、あれは心にキますね。</p>
+<p>イマドキの BeginneR って <code>ggplot2</code> パッケージとか <code>leaflet</code> パッケージとか綽々と使うのな！</p>
+<p>フィールドワークもしてて凄い……。</p>
+<p>ちょっと前の BeginneR も <code>ggplot2</code> パッケージ使ってたし、 BeginneR が恐れずモダンな R を実践できるのは
+R ユーザーコミュニティによる日頃の情報共有のおかげだなあとしみじみ。</p>
+<p>そんなこんなで感銘してしまって、内容についての感想があまり出てこないのが恥ずかしい。すみません</p>
+<p>Twitter ではみんな暖かい評価で、あんなことやこんなことすると面白いんじゃないかと語ってましたね。</p>
+</div>
+<div id="heavywatal" class="section level3">
+<h3>Rcpp パッケージで外部 C++ ライブラリを使う by <span class="citation">@heavywatal</span></h3>
+<p><code>tidyvese</code> パッケージ ヘルプサイトの持ち主こと、へびわたさんの発表。
+いや、 <code>tidyvese</code> パッケージに限らず、備忘録と呼ぶことが畏れ多い纏まった情報を提供されているので、訪れたことのない人は是非、見て見て下さい。</p>
+<p><a href="https://heavywatal.github.io/" class="uri">https://heavywatal.github.io/</a></p>
+<p><code>Rcpp</code> パッケージなんか怖くて手を出していないので、ほげーって思いながら見てた。</p>
+<p>ただ、冒頭のベンチマークの結果はびっくりしましたね。
+もしあれがコンパイル時間込みの話であれば、是非使いたいと思います。</p>
+<p>まずは自分でベンチマークしてみよう。</p>
+</div>
+<div id="chengvt" class="section level3">
+<h3>digdag で R をバッチり回す by <span class="citation">@chengvt</span></h3>
+<p><a href="https://speakerdeck.com/chengvt/japan-dot-r-2018-lt" class="uri">https://speakerdeck.com/chengvt/japan-dot-r-2018-lt</a></p>
+<p>Long talk でざっと解説された R でシステム開発する方法の一つ、 digdag を使った定期バッチ処理の話。
+私はバッチ処理が必要になったことがないのですが、便利なツールを知っておけてよかった。
+必要な時にキーワードが分からないとググりようもないです。
+要不要問わず、耳学問しておけるのが、こういう会の魅力ですね。</p>
+</div>
+<div id="igjit" class="section level3">
+<h3>R で書く R コンパイラ by <span class="citation">@igjit</span></h3>
+<p><a href="https://igjit.github.io/slides/2018/12/nrc/#/" class="uri">https://igjit.github.io/slides/2018/12/nrc/#/</a></p>
+<p>パイプ演算子自作で R メタプログラミング入門された方が、 R で Lisp インタプリタを書いた次に、 R で R のコンパイラを書いてしまった話。</p>
+<p>変態トークを聴きたい変態勢にとって、直後の私の発表も含め、良いデザートだったようですね。</p>
+<p>そうじゃない人たちからは、 <span class="citation">@igjit</span> さんと私の話が LT 後半でよかったとのこと。
+冒頭だったら魂消て後の発表を聴く体力を失いかねないところ、このタイミングだったので、あと4本、と気力を出して聴けたとか。</p>
+</div>
+<div id="nakamichi" class="section level3">
+<h3>（仮）深層学習か画像認識で何かやります by nakamichi</h3>
+<p>欠席。次が自分の番で油断してました。
+発表直前にスライドのURL投下しようと思ってたので、慌ててやったらコピーできておらず、直前にコピーした別のURLを投下してしまった。</p>
+</div>
+<div id="atusy" class="section level3">
+<h3>関数魔改造講座 (formals編) by atusy</h3>
+<p>私の発表。
+時間不足で応用例を示せず、なんで <code class="r">formals</code> を弄るといいのか、説明できなかった。</p>
+<p>ウケ狙いで魔改造に焦点を置きました。
+おかげで、なんでこんなことできるようになったのか懇親会で数度聞かれましたね。
+勿論、最初から魔改造したくて身につけた技術ではないのですが、その辺りについてはまたどこかで。</p>
+</div>
+<div id="shrrt" class="section level3">
+<h3>Player Rating with R by shrrt</h3>
+<p>この間の Tokyo.R 73 でもそうだったんですが、自分の発表の直後ってなんだか自分の発表を色々振り替えってしまって頭に入ってこない……。
+申し訳ないです。</p>
+</div>
+<div id="kawashima" class="section level3">
+<h3>量子化学 (フラグメント分子軌道法) でも R したい(薬) 川嶋裕介</h3>
+<p>同上。
+後半から復活してたんですが、既についていける話じゃなくなっていた。
+ごめんなさい。</p>
+</div>
+<div id="tanaka-marimo" class="section level3">
+<h3>ぼくの町の不安定 by tanaka_marimo</h3>
+<p>復活したけど、お腹が空いて力が出なくなってました。</p>
+<p>みんなが認める高度な掴みでした。</p>
+<p>ロジスティクモデルに対してシンプルなロバスト拡張を行ってのけるのすごい。
+是非、コードを共有して欲しいですね。</p>
+</div>
+<div id="ito-yan" class="section level3">
+<h3>この IR のグラフがすごい! 上場企業2018 <span class="citation">@ito_yan</span></h3>
+<p>クソグラフ・オブ・ザ・イヤー。
+初 Japan.R 勢なので知らなかったのですが、毎年恒例っぽい。
+良い可視化の例を見るだけでは、なぜ良いものになっているのか気付きにくい。
+こういう解説付けてもらえる機会があると良い可視化で意識すべきポイントを抑えられるようになっていいですね。</p>
+<p>それはさておいて、とにかくおもろい。</p>
+</div>
+</div>
+</div>
+
+
+    
+
+    
+
+
+</article>
+
+
+
+        </div>
+
+        <aside class="col-12 col-lg-3 ml-auto blog-sidebar">
+    
+        
+
+
+<section>
+    <h4>New</h4>
+    <ol class="list-unstyled">
+        
+        <li>
+            <a href="../../../../2018/12/02/japanr2018-joined/">Japan.R 2018 感想</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/11/25/size-of-viridis-color-palette/">viridisの色数</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/11/25/rmd-de-word/">書評 「R MarkdownでWord文書を作ろう」</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/11/22/strange-coord-functions-ggplot2/"><code>ggplot2::coord_cartesian(xlim = c(0, NA))</code> できるようにしてみた</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/11/21/mod-css-margin/">CSSでヘッダの行間を調整してみた</a>
+        </li>
+        
+    </ol>
+</section>
+
+    
+    
+        <section>
+    
+        
+        <h4>カテゴリ</h4>
+        <p>
+            
+            <a class="badge badge-primary" href="../../../../categories/arch">arch</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/css">css</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/latex">latex</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/music">music</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/r">r</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/stats">stats</a>
+            
+        </p>
+        
+    
+        
+        <h4>タグ</h4>
+        <p>
+            
+            <a class="badge badge-primary" href="../../../../tags/.rprofile">.rprofile</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/blogdown">blogdown</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/callr">callr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/felp">felp</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/ggplot2">ggplot2</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/glue">glue</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/japanr">japanr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/knitr">knitr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/latex">latex</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/latex2exp">latex2exp</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/linux">linux</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/mathjax">mathjax</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/missing-value">missing-value</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/package">package</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/patchwork">patchwork</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/plantuml">plantuml</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/plotly">plotly</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/r">r</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86">r-markdownでword文書を作ろう</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/rd">rd</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/rmd">rmd</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/roxygen2">roxygen2</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/shiny">shiny</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/tex">tex</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/tokyor">tokyor</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/unicode">unicode</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/viridis">viridis</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/yaml">yaml</a>
+            
+        </p>
+        
+    
+</section>
+    
+</aside>
+
+      </div>
+    </div>
+    
+
+    
+      
+
+
+
+<footer class="blog-footer w-100">
+    <nav class="navbar navbar-light bg-light">
+        <p class="w-100 text-center"></p>
+        <p class="w-100 text-center"><a href="#">Home</a></p>
+    </nav>
+</footer>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script async
+src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+    
+
+    
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+  </body>
+</html>
