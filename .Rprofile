@@ -1,67 +1,59 @@
+# Required packages on CRAN and GitHub
+
+cran <- "blogdown"
+
+gh <- list(atusy = "atusyverse")
+
 # Tokyo as default CRAN mirror
-options(repos = c(CRAN = "https://cran.ism.ac.jp/"))
 
-# Pkg
+options(repos = c(CRAN = "https://cloud.r-project.org/"))
 
-## Installed packages
-installed <- rownames(utils::installed.packages())
+# Stop if callr not installed
 
-## Stop if callr not installed
+installed <- installed <- rownames(utils::installed.packages())
 if(!('callr' %in% installed)) stop('Install callr to load .Rprofile') 
 
-## Required packages on CRAN and GitHub
+# Install missing packages
 
-cran <- c(
-  'blogdown',
-  'knitr',
-  'data.table',
-  'dplyr',
-  'ggplot2',
-  'here',
-  'pacman',
-  'pipeR',
-  'purrr',
-  'stringr',
-  'tidyr'
-)
-
-gh <- c('atusy/mytools', 'atusy/ggAtusy')
-gh2 <- gsub('.*/', '', gh)
-
-## Which required packages are not installed?
-
-cran_missing <- setdiff(c('devtools', cran), installed)
-gh_missing <- gh[!(gh2 %in% installed)]
-
-## Install missing packages
-
-callr::r(
-  function(cran, gh) {
-    if(length(cran) > 0) utils::install.packages(cran)
-    if(length(gh) > 0) devtools::install_github(gh)
-    invisible(NULL)
+invisible(callr::r(
+  function(cran, gh, installed) {
+  	
+  	## CRAN
+  	cran <- setdiff(c('remotes', cran), installed)
+    if(length(cran) > 0) 
+      utils::install.packages(cran)
+    
+    ## GitHub
+    gh <- gh[!(unlist(gh, use.names = FALSE) %in% installed)]
+    if(length(gh) > 0) 
+      remotes::install_github(gh)
+      
+    pkg <- c(cran, gh)
+    if(length(pkg) > 0)
+      message("Installed: ", pkg)
+      
+    NULL
   },
-  args = list(cran = cran_missing, gh = gh_missing),
+  args = list(cran = cran, gh = gh, installed = installed),
   repos = getOption('repos'),
-  system_profile = FALSE,
   user_profile = FALSE
-)
+))
 
 # Done if interactive mode on RStudio
 
 if(interactive() && "RSTUDIO" %in% names(Sys.getenv())) {
   
   ## Copy .Rprofile to project root
-  if(!file.exists('.Rprofile') && dir(pattern = '\\.Rproj$') > 0)
-    file.copy('~/R/.Rprofile', '.Rprofile')
+  if(length(dir(pattern = '\\.Rproj$')) > 0)
+    invisible(file.copy('~/Documents/R/proj/dot-files/.Rprofile', '.Rprofile'))
   
   ## Set default packages
-  options(
-    defaultPackages = c(getOption('defaultPackages'), cran, gh2),
+  options(defaultPackages =
+    c(getOption('defaultPackages'), cran, unlist(gh, use.names = FALSE)),
     blogdown.ext = '.Rmd'
   )
 }
 
-# Remove values
+# Remove variables
 
-rm(installed, cran, gh, gh2)
+rm(cran, gh, installed)
