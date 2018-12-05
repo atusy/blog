@@ -9,7 +9,7 @@
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="/post/" />
-<meta property="og:updated_time" content="2018-11-18T00:00:00&#43;00:00"/>
+<meta property="og:updated_time" content="2018-11-20T00:00:00&#43;00:00"/>
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Posts"/>
@@ -75,9 +75,9 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                         
-                            <a class="dropdown-item" href="../../../en/">English</a>
-                        
                             <a class="dropdown-item" href="../../../">Japanese</a>
+                        
+                            <a class="dropdown-item" href="../../../en/">English</a>
                         
                     </div>
                 </li>
@@ -97,6 +97,53 @@
 
 
 
+
+
+
+    
+        <article class="blog-post">
+    <header>
+        <h2 class="blog-post-title">
+            <a class="text-dark" href="../../../2018/11/20/histogram-fill-along-x/">ヒストグラムのビンの色をx軸に応じて変える</a>
+        </h2>
+        
+
+
+<div class="blog-post-date text-secondary">
+    
+        2018-11-20
+    
+    
+        by <span rel="author">Atusy</span>
+    
+</div>
+
+        
+<div class="blog-post-tags text-secondary">
+    <strong>タグ:</strong>
+    
+        <a class="badge badge-primary" href="../../../tags/ggplot2">ggplot2</a>
+    
+</div>
+
+        
+<div class="blog-post-categories text-secondary">
+    <strong>カテゴリ:</strong>
+    
+        <a class="badge badge-primary" href="../../../categories/r">R</a>
+    
+</div>
+
+    </header>
+    ヒストグラムをヒートマップの凡例 + αにしたい 試行錯誤の歴史 データ整形 ヒストグラム fill = x ではダメ fill = stat(x) ならOK ソース 追記 tl; dr geom_histogram(aes(fill = stat(x))) すればいい。
+    
+    <p></p>
+    <a href="../../../2018/11/20/histogram-fill-along-x/">読む →</a>
+    
+</article>
+
+
+    
 
 
 
@@ -390,55 +437,6 @@
 
 
 
-    
-        <article class="blog-post">
-    <header>
-        <h2 class="blog-post-title">
-            <a class="text-dark" href="../../../2018/11/03/accelarate-patchwork/">patchworkの表示を高速化したかった……</a>
-        </h2>
-        
-
-
-<div class="blog-post-date text-secondary">
-    
-        2018-11-3
-    
-    
-        by <span rel="author">Atusy</span>
-    
-</div>
-
-        
-<div class="blog-post-tags text-secondary">
-    <strong>タグ:</strong>
-    
-        <a class="badge badge-primary" href="../../../tags/ggplot2">ggplot2</a>
-    
-        <a class="badge badge-primary" href="../../../tags/patchwork">patchwork</a>
-    
-</div>
-
-        
-<div class="blog-post-categories text-secondary">
-    <strong>カテゴリ:</strong>
-    
-        <a class="badge badge-primary" href="../../../categories/r">R</a>
-    
-</div>
-
-    </header>
-    失敗の記録． 目的 ggplotのリストの表示を高速化するで紹介した通り， ggplotオブジェクトはprintされる段になって，プロットに必要な
-    
-    <p></p>
-    <a href="../../../2018/11/03/accelarate-patchwork/">読む →</a>
-    
-</article>
-
-
-    
-
-
-
 
 
 <nav class="blog-pagination">
@@ -553,6 +551,10 @@
     <ol class="list-unstyled">
         
         <li>
+            <a href="../../../2018/12/05/accelerate-list-of-ggplot-with-furrr/">furrr パッケージで ggplot のリストの表示を高速化する</a>
+        </li>
+        
+        <li>
             <a href="../../../2018/12/02/japanr2018-joined/">Japan.R 2018 感想</a>
         </li>
         
@@ -566,10 +568,6 @@
         
         <li>
             <a href="../../../2018/11/22/strange-coord-functions-ggplot2/"><code>ggplot2::coord_cartesian(xlim = c(0, NA))</code> できるようにしてみた</a>
-        </li>
-        
-        <li>
-            <a href="../../../2018/11/21/mod-css-margin/">CSSでヘッダの行間を調整してみた</a>
         </li>
         
     </ol>
@@ -610,6 +608,8 @@
             
             <a class="badge badge-primary" href="../../../tags/felp">felp</a>
             
+            <a class="badge badge-primary" href="../../../tags/furrr">furrr</a>
+            
             <a class="badge badge-primary" href="../../../tags/ggplot2">ggplot2</a>
             
             <a class="badge badge-primary" href="../../../tags/glue">glue</a>
@@ -631,6 +631,8 @@
             <a class="badge badge-primary" href="../../../tags/package">package</a>
             
             <a class="badge badge-primary" href="../../../tags/patchwork">patchwork</a>
+            
+            <a class="badge badge-primary" href="../../../tags/pforeach">pforeach</a>
             
             <a class="badge badge-primary" href="../../../tags/plantuml">plantuml</a>
             

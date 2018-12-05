@@ -48,9 +48,18 @@
     </item>
     
     <item>
+      <title>Furrr</title>
+      <link>/tags/furrr/</link>
+      <pubDate>Wed, 05 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/furrr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Ggplot2</title>
       <link>/tags/ggplot2/</link>
-      <pubDate>Thu, 22 Nov 2018 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 05 Dec 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/ggplot2/</guid>
       <description></description>
@@ -143,6 +152,15 @@
       <pubDate>Sat, 03 Nov 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/patchwork/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Pforeach</title>
+      <link>/tags/pforeach/</link>
+      <pubDate>Tue, 16 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/pforeach/</guid>
       <description></description>
     </item>
     

@@ -6,10 +6,19 @@
     <description>Recent content in Ggplot2 on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Thu, 22 Nov 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 05 Dec 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/ggplot2/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>furrr パッケージで ggplot のリストの表示を高速化する</title>
+      <link>/2018/12/05/accelerate-list-of-ggplot-with-furrr/</link>
+      <pubDate>Wed, 05 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/12/05/accelerate-list-of-ggplot-with-furrr/</guid>
+      <description>はじめに 実装とテスト ベンチマーク 感想 はじめに 前に hoxo-m/pforeach パッケージを利用して， ggplot のリストを並列処理し，描写の高速化を行いました． しかし， hoxo-m/pforeach パッケー</description>
+    </item>
     
     <item>
       <title>`ggplot2::coord_cartesian(xlim = c(0, NA))` できるようにしてみた</title>
@@ -72,6 +81,15 @@
       
       <guid>/2018/11/02/marginal-patchwork/</guid>
       <description>patchworkパッケージを使えばあんな図やこんな図が簡単に，と思い馳せた人も多いのではなかろうか． 参考: TokyoR 73での発表スライド 中でも周辺</description>
+    </item>
+    
+    <item>
+      <title>ggplotのリストの表示を高速化する</title>
+      <link>/2018/10/16/accelerate-list-of-ggplot/</link>
+      <pubDate>Tue, 16 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/10/16/accelerate-list-of-ggplot/</guid>
+      <description>大きなデータを用いたggplotのリストや，大量のggplotのリストを高速に描写するための関数 print_gglist を作りました． devtools::install_github(&amp;#39;atusy/ggAtusy&amp;#39;) で遊べます． はじめに ggp</description>
     </item>
     
     <item>

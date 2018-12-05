@@ -3,8 +3,8 @@ title: ggplotのリストの表示を高速化する
 author: ~
 date: '2018-10-16'
 slug: accelerate-list-of-ggplot
-categories: []
-tags: []
+categories: [R]
+tags: [ggplot2, pforeach]
 ---
 
 ```{r setup, include = FALSE}

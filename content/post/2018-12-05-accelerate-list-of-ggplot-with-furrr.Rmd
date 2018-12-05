@@ -1,0 +1,87 @@
+---
+title: furrr パッケージで ggplot のリストの表示を高速化する
+author: ~
+date: '2018-12-05'
+slug: accelerate-list-of-ggplot-with-furrr
+categories: [R]
+tags: [ggplot2, furrr]
+output:
+  blogdown::html_page:
+    toc: yes
+---
+
+# はじめに {#intro}
+
+[前に](https://atusy.github.io/blog/2018/10/16/accelerate-list-of-ggplot/)
+`hoxo-m/pforeach` パッケージを利用して，
+`ggplot` のリストを並列処理し，描写の高速化を行いました．
+
+しかし， `hoxo-m/pforeach` パッケージの霊圧が消えてしまったので，
+`furrr` パッケージを試してみることにしました．
+
+https://github.com/DavisVaughan/furrr
+
+`furrr` パッケージは `purrr` パッケージと似た感覚で操作でき，
+事前に `plan(multiprocess)` としておくだけで並列化してくれる化け物．
+関数名も `future_map` など， `purrr` パッケージの関数名に `future_` という prefix がつくだけで覚えやすい．
+`plan(sequential)` すれば並列化を解除できます．
+
+`multiprocess` や `sequential` 以外にも様々な `strategy` が選べますが，
+詳しくは， `?future::plan` を見ましょう．
+
+```{r setup, include = FALSE}
+library(pacman)
+p_load(furrr, ggplot2, grid, here, magrittr, purrr, microbenchmark)
+```
+
+# 実装とテスト {#impl}
+
+前回 `pforeach::pforeach()` 関数を用いて実装した `print_gglist()` を
+`furrr::future_map()` を用いて再実装しました．
+`strategy` 引数と `...` 引数で `plan()` をコントロールできます．
+
+```{r test, fig.keep = 'all', fig.show = 'hold', fig.dim = c(2, 2)}
+library(pacman)
+p_load(furrr, ggplot2, grid, magrittr, purrr)
+
+print_gglist <- function(x, strategy = multiprocess, ...) {
+  current_plan <- plan()
+  plan(strategy, ...)
+  future_map(x, ~ ggplot_gtable(ggplot_build(.x))) %>%
+    walk(function(x) { # 順次出力
+        grid.newpage()
+        grid.draw(x)
+      })
+  plan(current_plan)
+  invisible(x)
+}
+
+g <- ggplot(iris, aes(Sepal.Length)) + geom_histogram()
+print_gglist(list(g, g))
+```
+
+
+
+# ベンチマーク {#bench}
+
+
+```{r bench, eval = FALSE, include = FALSE, fig.show = 'hide'}
+g_list <- rep(list(g), 10)
+bench <- microbenchmark::microbenchmark(
+  'single thread' = walk(g_list, print),
+  'multi thread' = print_gglist(g_list)
+)
+saveRDS(bench, here('static/RDS/accelerate-list-of-ggplot-benchmark-with-furrr.RDS'))
+```
+
+```{r bench-result, echo = FALSE}
+bench <- readRDS(here('static/RDS/accelerate-list-of-ggplot-benchmark-with-furrr.RDS'))
+bench
+plot(bench)
+```
+
+うまくいきましたね!!
+
+# 感想 {#note}
+
+`furrr` パッケージは簡単，便利!!
