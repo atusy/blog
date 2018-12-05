@@ -3,548 +3,548 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/12/05/accelerate-list-of-ggplot-with-furrr/</loc>
+    <loc>/2018/12/05/accelerate-list-of-ggplot-with-furrr/</loc>
     <lastmod>2018-12-05T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/12/02/japanr2018-joined/</loc>
+    <loc>/2018/12/02/japanr2018-joined/</loc>
     <lastmod>2018-12-02T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/11/25/size-of-viridis-color-palette/</loc>
+    <loc>/2018/11/25/size-of-viridis-color-palette/</loc>
     <lastmod>2018-11-25T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/11/25/rmd-de-word/</loc>
+    <loc>/2018/11/25/rmd-de-word/</loc>
     <lastmod>2018-11-25T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/11/22/strange-coord-functions-ggplot2/</loc>
+    <loc>/2018/11/22/strange-coord-functions-ggplot2/</loc>
     <lastmod>2018-11-22T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/11/21/mod-css-margin/</loc>
+    <loc>/2018/11/21/mod-css-margin/</loc>
     <lastmod>2018-11-21T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/11/21/shiny-brushopts/</loc>
+    <loc>/2018/11/21/shiny-brushopts/</loc>
     <lastmod>2018-11-21T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/11/20/histogram-fill-along-x/</loc>
+    <loc>/2018/11/20/histogram-fill-along-x/</loc>
     <lastmod>2018-11-20T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/11/18/felp-0-1-3/</loc>
+    <loc>/2018/11/18/felp-0-1-3/</loc>
     <lastmod>2018-11-18T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/11/11/glue-for-fig-cap-in-rmd/</loc>
+    <loc>/2018/11/11/glue-for-fig-cap-in-rmd/</loc>
     <lastmod>2018-11-11T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/11/10/ggplot2-legend-pos-n-just/</loc>
+    <loc>/2018/11/10/ggplot2-legend-pos-n-just/</loc>
     <lastmod>2018-11-10T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/11/09/binwdith-for-geom-histogram/</loc>
+    <loc>/2018/11/09/binwdith-for-geom-histogram/</loc>
     <lastmod>2018-11-09T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/11/06/defaultpackages-rprofile/</loc>
+    <loc>/2018/11/06/defaultpackages-rprofile/</loc>
     <lastmod>2018-11-06T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/11/03/tex-in-ggplot2/</loc>
+    <loc>/2018/11/03/tex-in-ggplot2/</loc>
     <lastmod>2018-11-03T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/11/03/accelarate-patchwork/</loc>
+    <loc>/2018/11/03/accelarate-patchwork/</loc>
     <lastmod>2018-11-03T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/11/02/marginal-patchwork/</loc>
+    <loc>/2018/11/02/marginal-patchwork/</loc>
     <lastmod>2018-11-02T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://atusy.github.io/blog/en/2018/11/02/marginal-patchwork/"
+                href="/en/2018/11/02/marginal-patchwork/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="https://atusy.github.io/blog/2018/11/02/marginal-patchwork/"
+                href="/2018/11/02/marginal-patchwork/"
                 />
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</loc>
+    <loc>/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</loc>
     <lastmod>2018-10-27T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/10/26/plotly-fixed-axes/</loc>
+    <loc>/2018/10/26/plotly-fixed-axes/</loc>
     <lastmod>2018-10-26T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/10/25/plantuml-on-rmd/</loc>
+    <loc>/2018/10/25/plantuml-on-rmd/</loc>
     <lastmod>2018-10-25T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/10/22/bridal-music/</loc>
+    <loc>/2018/10/22/bridal-music/</loc>
     <lastmod>2018-10-22T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/10/21/tokyor73/</loc>
+    <loc>/2018/10/21/tokyor73/</loc>
     <lastmod>2018-10-21T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/10/16/accelerate-list-of-ggplot/</loc>
+    <loc>/2018/10/16/accelerate-list-of-ggplot/</loc>
     <lastmod>2018-10-16T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/10/11/hello-antergosmd/</loc>
+    <loc>/2018/10/11/hello-antergosmd/</loc>
     <lastmod>2018-10-11T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/08/28/roxygen2matome/</loc>
+    <loc>/2018/08/28/roxygen2matome/</loc>
     <lastmod>2018-08-28T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/08/25/missing-value-type/</loc>
+    <loc>/2018/08/25/missing-value-type/</loc>
     <lastmod>2018-08-25T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/08/18/time-each-chunk/</loc>
+    <loc>/2018/08/18/time-each-chunk/</loc>
     <lastmod>2018-08-18T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://atusy.github.io/blog/en/2018/08/18/time-each-chunk/"
+                href="/en/2018/08/18/time-each-chunk/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="https://atusy.github.io/blog/2018/08/18/time-each-chunk/"
+                href="/2018/08/18/time-each-chunk/"
                 />
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/08/17/rmd-parameterized/</loc>
+    <loc>/2018/08/17/rmd-parameterized/</loc>
     <lastmod>2018-08-17T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/07/31/dont-sync-pkg-r3-5/</loc>
+    <loc>/2018/07/31/dont-sync-pkg-r3-5/</loc>
     <lastmod>2018-07-31T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/07/31/dont-sync-pkg-r3-5/</loc>
+    <loc>/2018/07/31/dont-sync-pkg-r3-5/</loc>
     <lastmod>2018-07-31T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/07/28/how2mathjax/</loc>
+    <loc>/2018/07/28/how2mathjax/</loc>
     <lastmod>2018-07-28T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/</loc>
+    <loc>/2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/</loc>
     <lastmod>2018-07-09T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/07/05/github-pages-with-rmarkdown/</loc>
+    <loc>/2018/07/05/github-pages-with-rmarkdown/</loc>
     <lastmod>2018-07-05T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/2018/07/05/github-pages-with-rmarkdown/</loc>
+    <loc>/2018/07/05/github-pages-with-rmarkdown/</loc>
     <lastmod>2018-07-05T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/1/01/01/</loc>
+    <loc>/1/01/01/</loc>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/1/01/01/</loc>
+    <loc>/1/01/01/</loc>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/1/01/01/</loc>
+    <loc>/1/01/01/</loc>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/1/01/01/</loc>
+    <loc>/1/01/01/</loc>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/1/01/01/</loc>
+    <loc>/1/01/01/</loc>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/1/01/01/</loc>
+    <loc>/1/01/01/</loc>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/1/01/01/</loc>
+    <loc>/1/01/01/</loc>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/1/01/01/</loc>
+    <loc>/1/01/01/</loc>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/.rprofile/</loc>
-    <lastmod>2018-11-06T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://atusy.github.io/blog/categories/arch/</loc>
+    <loc>/categories/arch/</loc>
     <lastmod>2018-10-11T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/</loc>
+    <loc>/</loc>
     <lastmod>2018-12-05T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://atusy.github.io/blog/en/"
+                href="/en/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="https://atusy.github.io/blog/"
+                href="/"
                 />
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/blogdown/</loc>
+    <loc>/tags/blogdown/</loc>
     <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/callr/</loc>
+    <loc>/tags/callr/</loc>
     <lastmod>2018-11-06T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/categories/</loc>
+    <loc>/categories/</loc>
     <lastmod>2018-10-11T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://atusy.github.io/blog/en/categories/"
+                href="/en/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="https://atusy.github.io/blog/categories/"
+                href="/categories/"
                 />
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/categories/css/</loc>
+    <loc>/categories/css/</loc>
     <lastmod>2018-11-21T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/felp/</loc>
+    <loc>/tags/felp/</loc>
     <lastmod>2018-11-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/furrr/</loc>
+    <loc>/tags/furrr/</loc>
     <lastmod>2018-12-05T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/ggplot2/</loc>
+    <loc>/tags/ggplot2/</loc>
     <lastmod>2018-12-05T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://atusy.github.io/blog/en/tags/ggplot2/"
+                href="/en/tags/ggplot2/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="https://atusy.github.io/blog/tags/ggplot2/"
+                href="/tags/ggplot2/"
                 />
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/glue/</loc>
+    <loc>/tags/glue/</loc>
     <lastmod>2018-11-11T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/japanr/</loc>
+    <loc>/tags/japanr/</loc>
     <lastmod>2018-12-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/knitr/</loc>
+    <loc>/tags/knitr/</loc>
     <lastmod>2018-08-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://atusy.github.io/blog/en/tags/knitr/"
+                href="/en/tags/knitr/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="https://atusy.github.io/blog/tags/knitr/"
+                href="/tags/knitr/"
                 />
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/latex/</loc>
+    <loc>/tags/latex/</loc>
     <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/categories/latex/</loc>
+    <loc>/categories/latex/</loc>
     <lastmod>2018-07-09T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/latex2exp/</loc>
+    <loc>/tags/latex2exp/</loc>
     <lastmod>2018-11-03T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/linux/</loc>
+    <loc>/tags/linux/</loc>
     <lastmod>2018-10-11T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/mathjax/</loc>
+    <loc>/tags/mathjax/</loc>
     <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/missing-value/</loc>
+    <loc>/tags/missing-value/</loc>
     <lastmod>2018-08-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/categories/music/</loc>
+    <loc>/categories/music/</loc>
     <lastmod>2018-10-22T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/package/</loc>
+    <loc>/tags/package/</loc>
     <lastmod>2018-08-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/patchwork/</loc>
+    <loc>/tags/patchwork/</loc>
     <lastmod>2018-11-03T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://atusy.github.io/blog/en/tags/patchwork/"
+                href="/en/tags/patchwork/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="https://atusy.github.io/blog/tags/patchwork/"
+                href="/tags/patchwork/"
                 />
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/pforeach/</loc>
+    <loc>/tags/pforeach/</loc>
     <lastmod>2018-10-16T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/plantuml/</loc>
+    <loc>/tags/plantuml/</loc>
     <lastmod>2018-10-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/plotly/</loc>
+    <loc>/tags/plotly/</loc>
     <lastmod>2018-10-26T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/post/</loc>
+    <loc>/post/</loc>
     <lastmod>2018-12-05T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://atusy.github.io/blog/en/post/"
+                href="/en/post/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="https://atusy.github.io/blog/post/"
+                href="/post/"
                 />
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/r/</loc>
+    <loc>/tags/r/</loc>
     <lastmod>2018-07-31T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/categories/r/</loc>
+    <loc>/categories/r/</loc>
     <lastmod>2018-12-05T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://atusy.github.io/blog/en/categories/r/"
+                href="/en/categories/r/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="https://atusy.github.io/blog/categories/r/"
+                href="/categories/r/"
                 />
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86/</loc>
+    <loc>/tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86/</loc>
     <lastmod>2018-11-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/rd/</loc>
+    <loc>/tags/rd/</loc>
     <lastmod>2018-08-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/rmd/</loc>
+    <loc>/tags/rmd/</loc>
     <lastmod>2018-11-11T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://atusy.github.io/blog/en/tags/rmd/"
+                href="/en/tags/rmd/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="https://atusy.github.io/blog/tags/rmd/"
+                href="/tags/rmd/"
                 />
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/roxygen2/</loc>
+    <loc>/tags/roxygen2/</loc>
     <lastmod>2018-08-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/shiny/</loc>
+    <loc>/tags/rprofile/</loc>
+    <lastmod>2018-11-06T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/shiny/</loc>
     <lastmod>2018-11-21T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/categories/stats/</loc>
+    <loc>/categories/stats/</loc>
     <lastmod>2018-08-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/</loc>
-    <lastmod>2018-11-06T00:00:00+00:00</lastmod>
+    <loc>/tags/</loc>
+    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://atusy.github.io/blog/en/tags/"
+                href="/en/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="https://atusy.github.io/blog/tags/"
+                href="/tags/"
                 />
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/tex/</loc>
+    <loc>/tags/tex/</loc>
     <lastmod>2018-11-03T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/tokyor/</loc>
+    <loc>/tags/tokyor/</loc>
     <lastmod>2018-10-21T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/unicode/</loc>
+    <loc>/tags/unicode/</loc>
     <lastmod>2018-07-09T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/viridis/</loc>
+    <loc>/tags/viridis/</loc>
     <lastmod>2018-11-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/blog/tags/yaml/</loc>
+    <loc>/tags/yaml/</loc>
     <lastmod>2018-10-27T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>

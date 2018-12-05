@@ -1,5 +1,5 @@
 baseurl = "https://atusy.github.io/blog/"
-relativeurls = false
+relativeurls = true
 publishDir = "docs"
 hasCJKLanguage = true
 languageCode = "ja-jp"

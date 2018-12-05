@@ -4,7 +4,7 @@ author: ~
 date: '2018-11-06'
 slug: defaultpackages-rprofile
 categories: [R]
-tags: [.Rprofile, callr]
+tags: [Rprofile, callr]
 output:
   blogdown::html_page: 
     toc: yes

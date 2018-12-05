@@ -2,148 +2,148 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>R on Atusy&#39;s blog</title>
-    <link>https://atusy.github.io/blog/categories/r/</link>
+    <link>/categories/r/</link>
     <description>Recent content in R on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Wed, 05 Dec 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://atusy.github.io/blog/categories/r/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>furrr パッケージで ggplot のリストの表示を高速化する</title>
-      <link>https://atusy.github.io/blog/2018/12/05/accelerate-list-of-ggplot-with-furrr/</link>
+      <link>/2018/12/05/accelerate-list-of-ggplot-with-furrr/</link>
       <pubDate>Wed, 05 Dec 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/12/05/accelerate-list-of-ggplot-with-furrr/</guid>
+      <guid>/2018/12/05/accelerate-list-of-ggplot-with-furrr/</guid>
       <description>はじめに 実装とテスト ベンチマーク 感想 はじめに 前に hoxo-m/pforeach パッケージを利用して， ggplot のリストを並列処理し，描写の高速化を行いました． しかし， hoxo-m/pforeach パッケー</description>
     </item>
     
     <item>
       <title>Japan.R 2018 感想
 </title>
-      <link>https://atusy.github.io/blog/2018/12/02/japanr2018-joined/</link>
+      <link>/2018/12/02/japanr2018-joined/</link>
       <pubDate>Sun, 02 Dec 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/12/02/japanr2018-joined/</guid>
+      <guid>/2018/12/02/japanr2018-joined/</guid>
       <description>Japan.R 2018 に参加しました 発表の感想 Long Talk R によるシステム開発入門 by @kos59125 R Markdown テンプレートの作り方 by @kazutan GUI で簡単！モダンなデータ解析 by @efprime_jp Shiny 完全に理解した by @Med_KU</description>
     </item>
     
     <item>
       <title>viridisの色数</title>
-      <link>https://atusy.github.io/blog/2018/11/25/size-of-viridis-color-palette/</link>
+      <link>/2018/11/25/size-of-viridis-color-palette/</link>
       <pubDate>Sun, 25 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/11/25/size-of-viridis-color-palette/</guid>
+      <guid>/2018/11/25/size-of-viridis-color-palette/</guid>
       <description>viridis や cividis は、色の変化が知覚的に一様となるよう調整された、連続的なカラースケール。 白黒印刷するとグレースケールになるので、プリンタにも優しい。 viridis</description>
     </item>
     
     <item>
       <title>書評 「R MarkdownでWord文書を作ろう」</title>
-      <link>https://atusy.github.io/blog/2018/11/25/rmd-de-word/</link>
+      <link>/2018/11/25/rmd-de-word/</link>
       <pubDate>Sun, 25 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/11/25/rmd-de-word/</guid>
+      <guid>/2018/11/25/rmd-de-word/</guid>
       <description>RmdでWord本の再販が間近に迫っていますね．これは献本頂いた時にしたレビューの約束を果たす時!! Rmdでこんなに完成したWordドキュメ</description>
     </item>
     
     <item>
       <title>`ggplot2::coord_cartesian(xlim = c(0, NA))` できるようにしてみた</title>
-      <link>https://atusy.github.io/blog/2018/11/22/strange-coord-functions-ggplot2/</link>
+      <link>/2018/11/22/strange-coord-functions-ggplot2/</link>
       <pubDate>Thu, 22 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/11/22/strange-coord-functions-ggplot2/</guid>
+      <guid>/2018/11/22/strange-coord-functions-ggplot2/</guid>
       <description>問題 実装 オリジナル 修正版 実験 他のcoord_系列も問題なさそう 感想 PRに向けての試験的な実装． https://github.com/atusy/ggplot2/commit/26c1b7a478585889947d265d691e375e399637c3 なぜかxlimやylimに長さ3以上の連続値</description>
     </item>
     
     <item>
       <title>Shinyでggplot2の選択領域を拡大 (brushOpts)</title>
-      <link>https://atusy.github.io/blog/2018/11/21/shiny-brushopts/</link>
+      <link>/2018/11/21/shiny-brushopts/</link>
       <pubDate>Wed, 21 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/11/21/shiny-brushopts/</guid>
+      <guid>/2018/11/21/shiny-brushopts/</guid>
       <description>Shinyでplotly.jsを使わずにインタラクティブな図を作れるのかなと思ったら、 「Shiny 100本ノック」の 【Shiny小技】グラフ</description>
     </item>
     
     <item>
       <title>ヒストグラムのビンの色をx軸に応じて変える</title>
-      <link>https://atusy.github.io/blog/2018/11/20/histogram-fill-along-x/</link>
+      <link>/2018/11/20/histogram-fill-along-x/</link>
       <pubDate>Tue, 20 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/11/20/histogram-fill-along-x/</guid>
+      <guid>/2018/11/20/histogram-fill-along-x/</guid>
       <description>ヒストグラムをヒートマップの凡例 + αにしたい 試行錯誤の歴史 データ整形 ヒストグラム fill = x ではダメ fill = stat(x) ならOK ソース 追記 tl; dr geom_histogram(aes(fill = stat(x))) すればいい。</description>
     </item>
     
     <item>
       <title>felp 0.1.3</title>
-      <link>https://atusy.github.io/blog/2018/11/18/felp-0-1-3/</link>
+      <link>/2018/11/18/felp-0-1-3/</link>
       <pubDate>Sun, 18 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/11/18/felp-0-1-3/</guid>
+      <guid>/2018/11/18/felp-0-1-3/</guid>
       <description>felp 0.1.3 を 公開 しました． ようやく実用レベルになったかと思います． 関数のソースとヘルプを同時に見たい人のためのパッケージです． ソースの読解が捗りま</description>
     </item>
     
     <item>
       <title>Rmdのfig.capを図を生成するチャンク内にglueで書く</title>
-      <link>https://atusy.github.io/blog/2018/11/11/glue-for-fig-cap-in-rmd/</link>
+      <link>/2018/11/11/glue-for-fig-cap-in-rmd/</link>
       <pubDate>Sun, 11 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/11/11/glue-for-fig-cap-in-rmd/</guid>
+      <guid>/2018/11/11/glue-for-fig-cap-in-rmd/</guid>
       <description>Rmdのchunkオプションである fig.cap の評価は，チャンクの評価が終わってからです． この性質を利用すると，チャンク内にキャプションと図を同居させ</description>
     </item>
     
     <item>
       <title>ggplot2のレジェンド位置を調整</title>
-      <link>https://atusy.github.io/blog/2018/11/10/ggplot2-legend-pos-n-just/</link>
+      <link>/2018/11/10/ggplot2-legend-pos-n-just/</link>
       <pubDate>Sat, 10 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/11/10/ggplot2-legend-pos-n-just/</guid>
+      <guid>/2018/11/10/ggplot2-legend-pos-n-just/</guid>
       <description>ggplot2のレジェンド位置を変えるには Let’s try! パッケージ 基本となる図を用意 レジェンド位置を数値で指定する レジェンド位置を文字列で指定</description>
     </item>
     
     <item>
       <title>geom_histogramのビン幅を動的に決定する</title>
-      <link>https://atusy.github.io/blog/2018/11/09/binwdith-for-geom-histogram/</link>
+      <link>/2018/11/09/binwdith-for-geom-histogram/</link>
       <pubDate>Fri, 09 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/11/09/binwdith-for-geom-histogram/</guid>
+      <guid>/2018/11/09/binwdith-for-geom-histogram/</guid>
       <description>TL; DR ggplot2のヒストグラムはビン数30が既定 ビン幅を動的に決めたい geom_histogram(binwidth = ) に関数を指定 ビン幅を決める関数を定義 テスト Enjoy! TL; DR geom_histogram(binwidth = ) はデータ</description>
     </item>
     
     <item>
       <title>R起動時に不足パッケージを導入しつつ読み込む</title>
-      <link>https://atusy.github.io/blog/2018/11/06/defaultpackages-rprofile/</link>
+      <link>/2018/11/06/defaultpackages-rprofile/</link>
       <pubDate>Tue, 06 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/11/06/defaultpackages-rprofile/</guid>
+      <guid>/2018/11/06/defaultpackages-rprofile/</guid>
       <description>.Rprofileを使って いつも使うパッケージはR起動時に読み込む 例えば， tidyverse を読み込みたいなら， options(defaultPackages = c(getOption(&amp;#39;defaultPackages&amp;#39;), &amp;#39;tidyverse&amp;#39;)) とする． library ではなく options を利用することで</description>
     </item>
     
     <item>
       <title>ggplot2で$TeX$を利用する</title>
-      <link>https://atusy.github.io/blog/2018/11/03/tex-in-ggplot2/</link>
+      <link>/2018/11/03/tex-in-ggplot2/</link>
       <pubDate>Sat, 03 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/11/03/tex-in-ggplot2/</guid>
+      <guid>/2018/11/03/tex-in-ggplot2/</guid>
       <description>はじめに インストール 使ってみる タイトルなどで \(TeX\) geom_text で \(TeX\) facet_wrap や facet_grid で \(TeX\) Enjoy! はじめに ggplot2 で \(TeX\) 記法が使えると嬉しいですよね． 一応，そういう人たちのための入口</description>
     </item>
     
     <item>
       <title>patchworkの表示を高速化したかった……</title>
-      <link>https://atusy.github.io/blog/2018/11/03/accelarate-patchwork/</link>
+      <link>/2018/11/03/accelarate-patchwork/</link>
       <pubDate>Sat, 03 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/11/03/accelarate-patchwork/</guid>
+      <guid>/2018/11/03/accelarate-patchwork/</guid>
       <description>失敗の記録． 目的 ggplotのリストの表示を高速化するで紹介した通り， ggplotオブジェクトはprintされる段になって，プロットに必要な</description>
     </item>
     
     <item>
       <title>ggplot2とpatchworkで周辺分布</title>
-      <link>https://atusy.github.io/blog/2018/11/02/marginal-patchwork/</link>
+      <link>/2018/11/02/marginal-patchwork/</link>
       <pubDate>Fri, 02 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/11/02/marginal-patchwork/</guid>
+      <guid>/2018/11/02/marginal-patchwork/</guid>
       <description>patchworkパッケージを使えばあんな図やこんな図が簡単に，と思い馳せた人も多いのではなかろうか． 参考: TokyoR 73での発表スライド 中でも周辺</description>
     </item>
     
@@ -153,118 +153,118 @@ titleとか
 authorとか  
 改行する
 </title>
-      <link>https://atusy.github.io/blog/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</link>
+      <link>/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</link>
       <pubDate>Sat, 27 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</guid>
+      <guid>/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</guid>
       <description>@niszet0 さん著「R MarkdownでWord文書を作ろう」を読んでます。 Rmdを扱った商業誌にも、同書ほどRmdファイルのYAMLフロントマターの</description>
     </item>
     
     <item>
       <title>Plotlyで軸比を1:1に固定する</title>
-      <link>https://atusy.github.io/blog/2018/10/26/plotly-fixed-axes/</link>
+      <link>/2018/10/26/plotly-fixed-axes/</link>
       <pubDate>Fri, 26 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/10/26/plotly-fixed-axes/</guid>
+      <guid>/2018/10/26/plotly-fixed-axes/</guid>
       <description>今迄Plotly.jsを使いたい時は、元の図を ggplot2 パッケージで作成し、 plotly::ggplotly() で変換していた。 しかし、どうもパフォーマンスが悪い気がするので、Plo</description>
     </item>
     
     <item>
       <title>R Markdown で PlantUML</title>
-      <link>https://atusy.github.io/blog/2018/10/25/plantuml-on-rmd/</link>
+      <link>/2018/10/25/plantuml-on-rmd/</link>
       <pubDate>Thu, 25 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/10/25/plantuml-on-rmd/</guid>
+      <guid>/2018/10/25/plantuml-on-rmd/</guid>
       <description>@niszet0 さんの “R MarkdownでWord文書を作ろう” を摘み食いしてます (以下RmdでWord本)． ちゃんとしたいずれレビューはいずれするとし</description>
     </item>
     
     <item>
       <title>TokyoR 73 行ってきました</title>
-      <link>https://atusy.github.io/blog/2018/10/21/tokyor73/</link>
+      <link>/2018/10/21/tokyor73/</link>
       <pubDate>Sun, 21 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/10/21/tokyor73/</guid>
+      <guid>/2018/10/21/tokyor73/</guid>
       <description>2018年10月20日はJuliaなんちゃらやらなんやらと沢山の勉強会が同時開催された日だったらしいですね。 私はTokyoR 73を選んで「g</description>
     </item>
     
     <item>
       <title>ggplotのリストの表示を高速化する</title>
-      <link>https://atusy.github.io/blog/2018/10/16/accelerate-list-of-ggplot/</link>
+      <link>/2018/10/16/accelerate-list-of-ggplot/</link>
       <pubDate>Tue, 16 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/10/16/accelerate-list-of-ggplot/</guid>
+      <guid>/2018/10/16/accelerate-list-of-ggplot/</guid>
       <description>大きなデータを用いたggplotのリストや，大量のggplotのリストを高速に描写するための関数 print_gglist を作りました． devtools::install_github(&amp;#39;atusy/ggAtusy&amp;#39;) で遊べます． はじめに ggp</description>
     </item>
     
     <item>
       <title>roxygen2タグまとめ</title>
-      <link>https://atusy.github.io/blog/2018/08/28/roxygen2matome/</link>
+      <link>/2018/08/28/roxygen2matome/</link>
       <pubDate>Tue, 28 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/08/28/roxygen2matome/</guid>
+      <guid>/2018/08/28/roxygen2matome/</guid>
       <description>まとめ Tips @title、@description、@details について @importFrom、@seealso について その他 References 変更履歴 Ro</description>
     </item>
     
     <item>
       <title>Rmdでchunkごとの実行時間を計測</title>
-      <link>https://atusy.github.io/blog/2018/08/18/time-each-chunk/</link>
+      <link>/2018/08/18/time-each-chunk/</link>
       <pubDate>Sat, 18 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/08/18/time-each-chunk/</guid>
+      <guid>/2018/08/18/time-each-chunk/</guid>
       <description>Jupyter Notebookでは、コードブロック冒頭で %%timeit と唱えると、ブロックの評価に要した時間を表示できる。 https://jakevdp.github.io/PythonDataScienceHandbook/01.07-timing-and-profiling.html これをRmdでもできないかなー？ と思って</description>
     </item>
     
     <item>
       <title>パラメータ付きRmdを試す</title>
-      <link>https://atusy.github.io/blog/2018/08/17/rmd-parameterized/</link>
+      <link>/2018/08/17/rmd-parameterized/</link>
       <pubDate>Fri, 17 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/08/17/rmd-parameterized/</guid>
+      <guid>/2018/08/17/rmd-parameterized/</guid>
       <description>パラメータ付きRmdが便利そうだと思ったのでメモと実験 パラメータ付きRmdとは YAMLヘッダーの params で作成される変数のリストを用いたRmd うま</description>
     </item>
     
     <item>
       <title>R3.5系ではファイル同期ソフトでパッケージを同期しないように</title>
-      <link>https://atusy.github.io/blog/2018/07/31/dont-sync-pkg-r3-5/</link>
+      <link>/2018/07/31/dont-sync-pkg-r3-5/</link>
       <pubDate>Tue, 31 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/07/31/dont-sync-pkg-r3-5/</guid>
+      <guid>/2018/07/31/dont-sync-pkg-r3-5/</guid>
       <description>タイトル通り、R3.5系ではファイル同期ソフトでパッケージを同期しないようにしましょう。 同期しておくとある環境にインストールしたパッケージを</description>
     </item>
     
     <item>
       <title>R3.5系ではファイル同期ソフトでパッケージを同期しないように</title>
-      <link>https://atusy.github.io/blog/2018/07/31/dont-sync-pkg-r3-5/</link>
+      <link>/2018/07/31/dont-sync-pkg-r3-5/</link>
       <pubDate>Tue, 31 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/07/31/dont-sync-pkg-r3-5/</guid>
+      <guid>/2018/07/31/dont-sync-pkg-r3-5/</guid>
       <description>タイトル通り、R3.5系ではファイル同期ソフトでパッケージを同期しないようにしましょう。 同期しておくとある環境にインストールしたパッケージを</description>
     </item>
     
     <item>
       <title>blogdownでMathJax</title>
-      <link>https://atusy.github.io/blog/2018/07/28/how2mathjax/</link>
+      <link>/2018/07/28/how2mathjax/</link>
       <pubDate>Sat, 28 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/07/28/how2mathjax/</guid>
+      <guid>/2018/07/28/how2mathjax/</guid>
       <description>MathJaxとは？ MathJaxを利用すると、$\TeX$ 記法を用いて数式を表現できる。 ブロックにするには $$\latex$$ と入力すると $$ \LaTeX $$ となる。 イン</description>
     </item>
     
     <item>
       <title>GitHub pages with Rmarkdown</title>
-      <link>https://atusy.github.io/blog/2018/07/05/github-pages-with-rmarkdown/</link>
+      <link>/2018/07/05/github-pages-with-rmarkdown/</link>
       <pubDate>Thu, 05 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/07/05/github-pages-with-rmarkdown/</guid>
+      <guid>/2018/07/05/github-pages-with-rmarkdown/</guid>
       <description>遅蒔きながら、Rのblogdownパッケージを使ってblogを始めてみた。 “Rとblogdownでかんたんにgithub.io上にブログを使</description>
     </item>
     
     <item>
       <title>GitHub pages with Rmarkdown</title>
-      <link>https://atusy.github.io/blog/2018/07/05/github-pages-with-rmarkdown/</link>
+      <link>/2018/07/05/github-pages-with-rmarkdown/</link>
       <pubDate>Thu, 05 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/07/05/github-pages-with-rmarkdown/</guid>
+      <guid>/2018/07/05/github-pages-with-rmarkdown/</guid>
       <description>遅蒔きながら、Rのblogdownパッケージを使ってblogを始めてみた。 &amp;ldquo;Rとblogdownでかんたんにgithub.io上</description>
     </item>
     

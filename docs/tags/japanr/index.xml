@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Japanr on Atusy&#39;s blog</title>
-    <link>https://atusy.github.io/blog/tags/japanr/</link>
+    <link>/tags/japanr/</link>
     <description>Recent content in Japanr on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Sun, 02 Dec 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://atusy.github.io/blog/tags/japanr/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/japanr/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Japan.R 2018 感想
 </title>
-      <link>https://atusy.github.io/blog/2018/12/02/japanr2018-joined/</link>
+      <link>/2018/12/02/japanr2018-joined/</link>
       <pubDate>Sun, 02 Dec 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/12/02/japanr2018-joined/</guid>
+      <guid>/2018/12/02/japanr2018-joined/</guid>
       <description>Japan.R 2018 に参加しました 発表の感想 Long Talk R によるシステム開発入門 by @kos59125 R Markdown テンプレートの作り方 by @kazutan GUI で簡単！モダンなデータ解析 by @efprime_jp Shiny 完全に理解した by @Med_KU</description>
     </item>
     

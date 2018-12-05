@@ -2,39 +2,39 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Package on Atusy&#39;s blog</title>
-    <link>https://atusy.github.io/blog/tags/package/</link>
+    <link>/tags/package/</link>
     <description>Recent content in Package on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Tue, 28 Aug 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://atusy.github.io/blog/tags/package/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/package/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>roxygen2タグまとめ</title>
-      <link>https://atusy.github.io/blog/2018/08/28/roxygen2matome/</link>
+      <link>/2018/08/28/roxygen2matome/</link>
       <pubDate>Tue, 28 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/08/28/roxygen2matome/</guid>
+      <guid>/2018/08/28/roxygen2matome/</guid>
       <description>まとめ Tips @title、@description、@details について @importFrom、@seealso について その他 References 変更履歴 Ro</description>
     </item>
     
     <item>
       <title>R3.5系ではファイル同期ソフトでパッケージを同期しないように</title>
-      <link>https://atusy.github.io/blog/2018/07/31/dont-sync-pkg-r3-5/</link>
+      <link>/2018/07/31/dont-sync-pkg-r3-5/</link>
       <pubDate>Tue, 31 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/07/31/dont-sync-pkg-r3-5/</guid>
+      <guid>/2018/07/31/dont-sync-pkg-r3-5/</guid>
       <description>タイトル通り、R3.5系ではファイル同期ソフトでパッケージを同期しないようにしましょう。 同期しておくとある環境にインストールしたパッケージを</description>
     </item>
     
     <item>
       <title>R3.5系ではファイル同期ソフトでパッケージを同期しないように</title>
-      <link>https://atusy.github.io/blog/2018/07/31/dont-sync-pkg-r3-5/</link>
+      <link>/2018/07/31/dont-sync-pkg-r3-5/</link>
       <pubDate>Tue, 31 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/07/31/dont-sync-pkg-r3-5/</guid>
+      <guid>/2018/07/31/dont-sync-pkg-r3-5/</guid>
       <description>タイトル通り、R3.5系ではファイル同期ソフトでパッケージを同期しないようにしましょう。 同期しておくとある環境にインストールしたパッケージを</description>
     </item>
     
