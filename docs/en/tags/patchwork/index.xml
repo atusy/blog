@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Patchwork on Atusy&#39;s blog</title>
-    <link>/en/tags/patchwork/</link>
+    <link>https://atusy.github.io/en/tags/patchwork/</link>
     <description>Recent content in Patchwork on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Fri, 02 Nov 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/en/tags/patchwork/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://atusy.github.io/en/tags/patchwork/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Marginal distributions with ggplot2 and patchwork</title>
-      <link>/en/2018/11/02/marginal-patchwork/</link>
+      <link>https://atusy.github.io/en/2018/11/02/marginal-patchwork/</link>
       <pubDate>Fri, 02 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/en/2018/11/02/marginal-patchwork/</guid>
+      <guid>https://atusy.github.io/en/2018/11/02/marginal-patchwork/</guid>
       <description>patchwork packages is a great tool to assemble ggplot2 object.
 I made a Japanese slide to introduce patchwork package in Tokyo R meeting.
 Here, I tried to produce marginal plots, but failed because I was using plot arithmetics (| and /).

@@ -2,48 +2,48 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Atusy&#39;s blog</title>
-    <link>/en/tags/</link>
+    <link>https://atusy.github.io/en/tags/</link>
     <description>Recent content in Tags on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Fri, 02 Nov 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/en/tags/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://atusy.github.io/en/tags/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Ggplot2</title>
-      <link>/en/tags/ggplot2/</link>
+      <link>https://atusy.github.io/en/tags/ggplot2/</link>
       <pubDate>Fri, 02 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/en/tags/ggplot2/</guid>
+      <guid>https://atusy.github.io/en/tags/ggplot2/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Knitr</title>
-      <link>/en/tags/knitr/</link>
+      <link>https://atusy.github.io/en/tags/knitr/</link>
       <pubDate>Sat, 18 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/en/tags/knitr/</guid>
+      <guid>https://atusy.github.io/en/tags/knitr/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Patchwork</title>
-      <link>/en/tags/patchwork/</link>
+      <link>https://atusy.github.io/en/tags/patchwork/</link>
       <pubDate>Fri, 02 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/en/tags/patchwork/</guid>
+      <guid>https://atusy.github.io/en/tags/patchwork/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Rmd</title>
-      <link>/en/tags/rmd/</link>
+      <link>https://atusy.github.io/en/tags/rmd/</link>
       <pubDate>Sat, 18 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/en/tags/rmd/</guid>
+      <guid>https://atusy.github.io/en/tags/rmd/</guid>
       <description></description>
     </item>
     

@@ -2,66 +2,66 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on Atusy&#39;s blog</title>
-    <link>/categories/</link>
+    <link>https://atusy.github.io/categories/</link>
     <description>Recent content in Categories on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Thu, 11 Oct 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://atusy.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Arch</title>
-      <link>/categories/arch/</link>
+      <link>https://atusy.github.io/categories/arch/</link>
       <pubDate>Thu, 11 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>/categories/arch/</guid>
+      <guid>https://atusy.github.io/categories/arch/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Css</title>
-      <link>/categories/css/</link>
+      <link>https://atusy.github.io/categories/css/</link>
       <pubDate>Wed, 21 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/categories/css/</guid>
+      <guid>https://atusy.github.io/categories/css/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Latex</title>
-      <link>/categories/latex/</link>
+      <link>https://atusy.github.io/categories/latex/</link>
       <pubDate>Mon, 09 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/categories/latex/</guid>
+      <guid>https://atusy.github.io/categories/latex/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Music</title>
-      <link>/categories/music/</link>
+      <link>https://atusy.github.io/categories/music/</link>
       <pubDate>Mon, 22 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>/categories/music/</guid>
+      <guid>https://atusy.github.io/categories/music/</guid>
       <description></description>
     </item>
     
     <item>
       <title>R</title>
-      <link>/categories/r/</link>
+      <link>https://atusy.github.io/categories/r/</link>
       <pubDate>Wed, 05 Dec 2018 00:00:00 +0000</pubDate>
       
-      <guid>/categories/r/</guid>
+      <guid>https://atusy.github.io/categories/r/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Stats</title>
-      <link>/categories/stats/</link>
+      <link>https://atusy.github.io/categories/stats/</link>
       <pubDate>Sat, 25 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/categories/stats/</guid>
+      <guid>https://atusy.github.io/categories/stats/</guid>
       <description></description>
     </item>
     

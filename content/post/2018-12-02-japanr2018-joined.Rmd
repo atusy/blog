@@ -25,16 +25,17 @@ LTでは「
 ただ、時間切れもいいところだったのが残念であります。
 関数の引数を弄るとどんな面白いことができるか、もっと話したかった。
 記事にするか続編 LT するか……。
-▽n
+
 色んな方とお会いできてよかったです。
 皆さんともっとお話ししたかったですね。
 また機会を見つけて東京にやって来るつもりです。
 そのときはかまってあげてください。
 
-@gepuro 氏による Youtube と Togetter のリンク貼っときます。
+@gepuro 氏による Youtube と Togetter と Connpass のリンク貼っときます。
 
 - Youtube: https://youtu.be/sXXXsb1MNMk
 - Togetter: https://togetter.com/li/1294419
+- Connpass: https://japanr.connpass.com/event/105802/
 
 # 発表の感想 {#presentations}
 
@@ -247,11 +248,12 @@ R を使う場合は `plumber` パッケージで Web API を提供すればい�
 	  収入以外の就業状況に依存しない性能で同様の図を作ればいい。
 
 ```{r qte, echo = FALSE}
-data("lalonde", package = "Matching") # install.packages("Matching")
-
 library(pacman)
+p_install(Matching, force = FALSE)
 p_load(dplyr, ggplot2, purrr, tidyr)
 p_load_gh("thomasp85/patchwork")
+
+data("lalonde", package = "Matching") # install.packages("Matching")
 
 g <- lalonde %>%
   select(re78, treat) %>%
@@ -313,6 +315,8 @@ Twitter ではみんな暖かい評価で、あんなことやこんなことす
 
 ### Rcpp パッケージで外部 C++ ライブラリを使う by @heavywatal {#heavywatal}
 
+https://heavywatal.github.io/slides/japanr2018/
+
 `tidyvese` パッケージ ヘルプサイトの持ち主こと、へびわたさんの発表。
 いや、 `tidyvese` パッケージに限らず、備忘録と呼ぶことが畏れ多い纏まった情報を提供されているので、訪れたことのない人は是非、見て見て下さい。
 
@@ -324,6 +328,13 @@ https://heavywatal.github.io/
 もしあれがコンパイル時間込みの話であれば、是非使いたいと思います。
 
 まずは自分でベンチマークしてみよう。
+
+#### ベンチマークしてみた
+
+<blockquote class="twitter-tweet" data-conversation="none" data-cards="hidden" data-partner="tweetdeck"><p lang="ja" dir="ltr">出直してきた．コンパイルはハイコストみたいです． <a href="https://t.co/QkbbMJ8WKY">pic.twitter.com/QkbbMJ8WKY</a></p>&mdash; atusy (@Atsushi776) <a href="https://twitter.com/Atsushi776/status/1069913771651457024?ref_src=twsrc%5Etfw">December 4, 2018</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+コンパイル時間は多少かかるので，やっぱり適材適所ですね．
 
 ### digdag で R をバッチり回す by @chengvt {#chengvt}
 
@@ -366,11 +377,15 @@ https://igjit.github.io/slides/2018/12/nrc/#/
 
 ### 量子化学 (フラグメント分子軌道法) でも R したい(薬) 川嶋裕介 {#kawashima}
 
+https://docs.google.com/presentation/d/1QSm7EDgNk7OeLWb266LZ57787v0tybirQ3Kr5A9cmHA/edit#slide=id.p
+
 同上。
 後半から復活してたんですが、既についていける話じゃなくなっていた。
 ごめんなさい。
 
 ### ぼくの町の不安定 by tanaka_marimo {#tanaka-marimo}
+
+https://speakerdeck.com/tanaka_marimo/bokufalseting-falsebu-an-ding
 
 復活したけど、お腹が空いて力が出なくなってました。
 
@@ -378,6 +393,10 @@ https://igjit.github.io/slides/2018/12/nrc/#/
 
 ロジスティクモデルに対してシンプルなロバスト拡張を行ってのけるのすごい。
 是非、コードを共有して欲しいですね。
+
+#### 共有して頂きました!!
+
+https://github.com/tanaka-marimo/japanr_2018
 
 ### この IR のグラフがすごい! 上場企業2018 @ito_yan {#ito-yan}
 
