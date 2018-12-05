@@ -34,15 +34,15 @@
 
     
 
-    <link rel="stylesheet" href="../../../../css/chroma-styles.css">
+    <link rel="stylesheet" href="/css/chroma-styles.css">
 
   </head>
   <body>
     
       <header class="blog-header">
     <nav class="navbar navbar-expand-md navbar-light bg-light">
-        <a class="navbar-brand" href="../../../../blog">
-            <img src="../../../../images/atusy.jpg" width="50" height="50" class="d-inline-block align-top" alt="">
+        <a class="navbar-brand" href="/blog">
+            <img src="/images/atusy.jpg" width="50" height="50" class="d-inline-block align-top" alt="">
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
             aria-label="Toggle navigation">
@@ -73,9 +73,9 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                         
-                            <a class="dropdown-item" href="https://atusy.github.io/blog/en/">English</a>
-                        
                             <a class="dropdown-item" href="https://atusy.github.io/blog/">Japanese</a>
+                        
+                            <a class="dropdown-item" href="https://atusy.github.io/blog/en/">English</a>
                         
                     </div>
                 </li>
@@ -95,7 +95,7 @@
 
 <header>
     <h2 class="blog-post-title">
-        <a class="text-dark" href="../../../../blog/2018/11/02/marginal-patchwork/">ggplot2とpatchworkで周辺分布</a>
+        <a class="text-dark" href="/blog/2018/11/02/marginal-patchwork/">ggplot2とpatchworkで周辺分布</a>
     </h2>
     
 
@@ -113,9 +113,9 @@
 <div class="blog-post-tags text-secondary">
     <strong>タグ:</strong>
     
-        <a class="badge badge-primary" href="../../../../blog/tags/ggplot2">ggplot2</a>
+        <a class="badge badge-primary" href="/blog/tags/ggplot2">ggplot2</a>
     
-        <a class="badge badge-primary" href="../../../../blog/tags/patchwork">patchwork</a>
+        <a class="badge badge-primary" href="/blog/tags/patchwork">patchwork</a>
     
 </div>
 
@@ -123,7 +123,7 @@
 <div class="blog-post-categories text-secondary">
     <strong>カテゴリ:</strong>
     
-        <a class="badge badge-primary" href="../../../../blog/categories/r">R</a>
+        <a class="badge badge-primary" href="/blog/categories/r">R</a>
     
 </div>
 
@@ -143,15 +143,15 @@ xy &lt;- ggplot(mtcars, aes(wt, mpg)) + geom_point()
 x &lt;- ggplot(mtcars, aes(wt)) + geom_histogram(bins = 30)
 y &lt;- ggplot(mtcars, aes(mpg)) + geom_histogram(bins = 30) + coord_flip()
 (x | plot_spacer()) / (xy | y)</code></pre>
-<p><img src="../../../../post/2018-11-02-marginal-patchwork_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p><img src="/post/2018-11-02-marginal-patchwork_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
 <p>実は， <code>wrap_plots()</code> を使うと，イイ線までいく．</p>
 <pre class="r"><code>wrap_plots(x, plot_spacer(), xy, y, nrow = 2)</code></pre>
-<p><img src="../../../../post/2018-11-02-marginal-patchwork_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><img src="/post/2018-11-02-marginal-patchwork_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p>しかし，よく見ると，図の大きさが揃っているからそれっぽいだけで，散布図とx軸の周辺分布のx軸範囲が異なっている．</p>
 <p>そこで，その2つの図の <code>xlim</code> を揃えてやると……!</p>
 <pre class="r"><code>xlimits &lt;- coord_cartesian(xlim = c(1, 6)) # xlim() はNG
 wrap_plots(x + xlimits, plot_spacer(), xy + xlimits, y, nrow = 2)</code></pre>
-<p><img src="../../../../post/2018-11-02-marginal-patchwork_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><img src="/post/2018-11-02-marginal-patchwork_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>できたあ!!</p>
 <p>ポイントは</p>
 <ul>
@@ -174,7 +174,7 @@ wrap_plots(
   y + coord_flip(xlim = c(10, 35)), 
   nrow = 2
 )</code></pre>
-<p><img src="../../../../post/2018-11-02-marginal-patchwork_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p><img src="/post/2018-11-02-marginal-patchwork_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <p>また， <code>theme()</code> や <code>wrap_plots(widths =, heights =)</code>を調整すると，かなり頑張った見た目にできる．</p>
 <pre class="r"><code>theme_marginal_x &lt;- theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank())
 theme_marginal_y &lt;- theme(axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
@@ -187,7 +187,7 @@ wrap_plots(
   widths = c(1, 0.5),
   heights = c(0.5, 1)
 )</code></pre>
-<p><img src="../../../../post/2018-11-02-marginal-patchwork_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><img src="/post/2018-11-02-marginal-patchwork_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 </div>
 
 
@@ -196,7 +196,7 @@ wrap_plots(
       <ul>
         
         <li>
-          <a href="../../../../blog/en/2018/11/02/marginal-patchwork/">en: Marginal distributions with ggplot2 and patchwork</a>
+          <a href="/blog/en/2018/11/02/marginal-patchwork/">en: Marginal distributions with ggplot2 and patchwork</a>
         </li>
         
       </ul>
@@ -207,9 +207,9 @@ wrap_plots(
     <h4>See also</h4>
     <ul>
         
-            <li><a href="../../../../blog/2018/10/16/accelerate-list-of-ggplot/">ggplotのリストの表示を高速化する</a></li>
+            <li><a href="/blog/2018/10/16/accelerate-list-of-ggplot/">ggplotのリストの表示を高速化する</a></li>
         
-            <li><a href="../../../../blog/2018/08/25/missing-value-type/">欠損値の発生過程の類別</a></li>
+            <li><a href="/blog/2018/08/25/missing-value-type/">欠損値の発生過程の類別</a></li>
         
     </ul>
 
@@ -230,23 +230,23 @@ wrap_plots(
     <ol class="list-unstyled">
         
         <li>
-            <a href="../../../../blog/2018/12/05/accelerate-list-of-ggplot-with-furrr/">furrr パッケージで ggplot のリストの表示を高速化する</a>
+            <a href="/blog/2018/12/05/accelerate-list-of-ggplot-with-furrr/">furrr パッケージで ggplot のリストの表示を高速化する</a>
         </li>
         
         <li>
-            <a href="../../../../blog/2018/12/02/japanr2018-joined/">Japan.R 2018 感想</a>
+            <a href="/blog/2018/12/02/japanr2018-joined/">Japan.R 2018 感想</a>
         </li>
         
         <li>
-            <a href="../../../../blog/2018/11/25/size-of-viridis-color-palette/">viridisの色数</a>
+            <a href="/blog/2018/11/25/size-of-viridis-color-palette/">viridisの色数</a>
         </li>
         
         <li>
-            <a href="../../../../blog/2018/11/25/rmd-de-word/">書評 「R MarkdownでWord文書を作ろう」</a>
+            <a href="/blog/2018/11/25/rmd-de-word/">書評 「R MarkdownでWord文書を作ろう」</a>
         </li>
         
         <li>
-            <a href="../../../../blog/2018/11/22/strange-coord-functions-ggplot2/"><code>ggplot2::coord_cartesian(xlim = c(0, NA))</code> できるようにしてみた</a>
+            <a href="/blog/2018/11/22/strange-coord-functions-ggplot2/"><code>ggplot2::coord_cartesian(xlim = c(0, NA))</code> できるようにしてみた</a>
         </li>
         
     </ol>
@@ -260,17 +260,17 @@ wrap_plots(
         <h4>カテゴリ</h4>
         <p>
             
-            <a class="badge badge-primary" href="../../../../blog/categories/arch">arch</a>
+            <a class="badge badge-primary" href="/blog/categories/arch">arch</a>
             
-            <a class="badge badge-primary" href="../../../../blog/categories/css">css</a>
+            <a class="badge badge-primary" href="/blog/categories/css">css</a>
             
-            <a class="badge badge-primary" href="../../../../blog/categories/latex">latex</a>
+            <a class="badge badge-primary" href="/blog/categories/latex">latex</a>
             
-            <a class="badge badge-primary" href="../../../../blog/categories/music">music</a>
+            <a class="badge badge-primary" href="/blog/categories/music">music</a>
             
-            <a class="badge badge-primary" href="../../../../blog/categories/r">r</a>
+            <a class="badge badge-primary" href="/blog/categories/r">r</a>
             
-            <a class="badge badge-primary" href="../../../../blog/categories/stats">stats</a>
+            <a class="badge badge-primary" href="/blog/categories/stats">stats</a>
             
         </p>
         
@@ -279,65 +279,65 @@ wrap_plots(
         <h4>タグ</h4>
         <p>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/.rprofile">.rprofile</a>
+            <a class="badge badge-primary" href="/blog/tags/.rprofile">.rprofile</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/blogdown">blogdown</a>
+            <a class="badge badge-primary" href="/blog/tags/blogdown">blogdown</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/callr">callr</a>
+            <a class="badge badge-primary" href="/blog/tags/callr">callr</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/felp">felp</a>
+            <a class="badge badge-primary" href="/blog/tags/felp">felp</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/furrr">furrr</a>
+            <a class="badge badge-primary" href="/blog/tags/furrr">furrr</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/ggplot2">ggplot2</a>
+            <a class="badge badge-primary" href="/blog/tags/ggplot2">ggplot2</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/glue">glue</a>
+            <a class="badge badge-primary" href="/blog/tags/glue">glue</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/japanr">japanr</a>
+            <a class="badge badge-primary" href="/blog/tags/japanr">japanr</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/knitr">knitr</a>
+            <a class="badge badge-primary" href="/blog/tags/knitr">knitr</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/latex">latex</a>
+            <a class="badge badge-primary" href="/blog/tags/latex">latex</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/latex2exp">latex2exp</a>
+            <a class="badge badge-primary" href="/blog/tags/latex2exp">latex2exp</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/linux">linux</a>
+            <a class="badge badge-primary" href="/blog/tags/linux">linux</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/mathjax">mathjax</a>
+            <a class="badge badge-primary" href="/blog/tags/mathjax">mathjax</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/missing-value">missing-value</a>
+            <a class="badge badge-primary" href="/blog/tags/missing-value">missing-value</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/package">package</a>
+            <a class="badge badge-primary" href="/blog/tags/package">package</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/patchwork">patchwork</a>
+            <a class="badge badge-primary" href="/blog/tags/patchwork">patchwork</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/pforeach">pforeach</a>
+            <a class="badge badge-primary" href="/blog/tags/pforeach">pforeach</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/plantuml">plantuml</a>
+            <a class="badge badge-primary" href="/blog/tags/plantuml">plantuml</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/plotly">plotly</a>
+            <a class="badge badge-primary" href="/blog/tags/plotly">plotly</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/r">r</a>
+            <a class="badge badge-primary" href="/blog/tags/r">r</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86">r-markdownでword文書を作ろう</a>
+            <a class="badge badge-primary" href="/blog/tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86">r-markdownでword文書を作ろう</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/rd">rd</a>
+            <a class="badge badge-primary" href="/blog/tags/rd">rd</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/rmd">rmd</a>
+            <a class="badge badge-primary" href="/blog/tags/rmd">rmd</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/roxygen2">roxygen2</a>
+            <a class="badge badge-primary" href="/blog/tags/roxygen2">roxygen2</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/shiny">shiny</a>
+            <a class="badge badge-primary" href="/blog/tags/shiny">shiny</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/tex">tex</a>
+            <a class="badge badge-primary" href="/blog/tags/tex">tex</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/tokyor">tokyor</a>
+            <a class="badge badge-primary" href="/blog/tags/tokyor">tokyor</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/unicode">unicode</a>
+            <a class="badge badge-primary" href="/blog/tags/unicode">unicode</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/viridis">viridis</a>
+            <a class="badge badge-primary" href="/blog/tags/viridis">viridis</a>
             
-            <a class="badge badge-primary" href="../../../../blog/tags/yaml">yaml</a>
+            <a class="badge badge-primary" href="/blog/tags/yaml">yaml</a>
             
         </p>
         

@@ -40,15 +40,15 @@ library(ggplot2) library(patchwork) xy &lt;- ggplot(mtcars, aes(wt, mpg)) &#43; 
 
     
 
-    <link rel="stylesheet" href="../../../../../css/chroma-styles.css">
+    <link rel="stylesheet" href="/css/chroma-styles.css">
 
   </head>
   <body>
     
       <header class="blog-header">
     <nav class="navbar navbar-expand-md navbar-light bg-light">
-        <a class="navbar-brand" href="../../../../../blog/en">
-            <img src="../../../../../images/atusy.jpg" width="50" height="50" class="d-inline-block align-top" alt="">
+        <a class="navbar-brand" href="/blog/en">
+            <img src="/images/atusy.jpg" width="50" height="50" class="d-inline-block align-top" alt="">
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
             aria-label="Toggle navigation">
@@ -79,9 +79,9 @@ library(ggplot2) library(patchwork) xy &lt;- ggplot(mtcars, aes(wt, mpg)) &#43; 
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                         
-                            <a class="dropdown-item" href="https://atusy.github.io/blog/en/">English</a>
-                        
                             <a class="dropdown-item" href="https://atusy.github.io/blog/">Japanese</a>
+                        
+                            <a class="dropdown-item" href="https://atusy.github.io/blog/en/">English</a>
                         
                     </div>
                 </li>
@@ -101,7 +101,7 @@ library(ggplot2) library(patchwork) xy &lt;- ggplot(mtcars, aes(wt, mpg)) &#43; 
 
 <header>
     <h2 class="blog-post-title">
-        <a class="text-dark" href="../../../../../blog/en/2018/11/02/marginal-patchwork/">Marginal distributions with ggplot2 and patchwork</a>
+        <a class="text-dark" href="/blog/en/2018/11/02/marginal-patchwork/">Marginal distributions with ggplot2 and patchwork</a>
     </h2>
     
 
@@ -119,9 +119,9 @@ library(ggplot2) library(patchwork) xy &lt;- ggplot(mtcars, aes(wt, mpg)) &#43; 
 <div class="blog-post-tags text-secondary">
     <strong>Tags:</strong>
     
-        <a class="badge badge-primary" href="../../../../../blog/en/tags/ggplot2">ggplot2</a>
+        <a class="badge badge-primary" href="/blog/en/tags/ggplot2">ggplot2</a>
     
-        <a class="badge badge-primary" href="../../../../../blog/en/tags/patchwork">patchwork</a>
+        <a class="badge badge-primary" href="/blog/en/tags/patchwork">patchwork</a>
     
 </div>
 
@@ -129,7 +129,7 @@ library(ggplot2) library(patchwork) xy &lt;- ggplot(mtcars, aes(wt, mpg)) &#43; 
 <div class="blog-post-categories text-secondary">
     <strong>Categories:</strong>
     
-        <a class="badge badge-primary" href="../../../../../blog/en/categories/r">R</a>
+        <a class="badge badge-primary" href="/blog/en/categories/r">R</a>
     
 </div>
 
@@ -148,10 +148,10 @@ xy &lt;- ggplot(mtcars, aes(wt, mpg)) + geom_point()
 x &lt;- ggplot(mtcars, aes(wt)) + geom_histogram(bins = 30)
 y &lt;- ggplot(mtcars, aes(mpg)) + geom_histogram(bins = 30) + coord_flip()
 (x | plot_spacer()) / (xy | y)</code></pre>
-<p><img src="../../../../../post/2018-11-02-marginal-patchwork.en_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p><img src="/post/2018-11-02-marginal-patchwork.en_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
 <p>I just found that <code>wrap_plots()</code> helps.</p>
 <pre class="r"><code>wrap_plots(x, plot_spacer(), xy, y, nrow = 2)</code></pre>
-<p><img src="../../../../../post/2018-11-02-marginal-patchwork.en_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><img src="/post/2018-11-02-marginal-patchwork.en_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p>However, plots need to share <code>xlim</code> and <code>ylim</code> using <code>coord_cartesian()</code> and <code>coord_flip()</code>.</p>
 <p><code>xlim()</code>, <code>ylim()</code>, are not good choice because they may change binwidths of histograms.</p>
 <pre class="r"><code>wrap_plots(
@@ -161,7 +161,7 @@ y &lt;- ggplot(mtcars, aes(mpg)) + geom_histogram(bins = 30) + coord_flip()
   y + coord_flip(xlim = c(10, 35)), 
   nrow = 2
 )</code></pre>
-<p><img src="../../../../../post/2018-11-02-marginal-patchwork.en_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><img src="/post/2018-11-02-marginal-patchwork.en_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>Adjusting <code>theme()</code> and <code>wrap_plots(widths =, heights =)</code> will make much more beautiful marginal plots.</p>
 <pre class="r"><code>theme_marginal_x &lt;- theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank())
 theme_marginal_y &lt;- theme(axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
@@ -174,7 +174,7 @@ wrap_plots(
   widths = c(1, 0.5),
   heights = c(0.5, 1)
 )</code></pre>
-<p><img src="../../../../../post/2018-11-02-marginal-patchwork.en_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p><img src="/post/2018-11-02-marginal-patchwork.en_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 
 
     
@@ -182,7 +182,7 @@ wrap_plots(
       <ul>
         
         <li>
-          <a href="../../../../../blog/2018/11/02/marginal-patchwork/">ja: ggplot2とpatchworkで周辺分布</a>
+          <a href="/blog/2018/11/02/marginal-patchwork/">ja: ggplot2とpatchworkで周辺分布</a>
         </li>
         
       </ul>
@@ -207,15 +207,15 @@ wrap_plots(
     <ol class="list-unstyled">
         
         <li>
-            <a href="../../../../../blog/en/2018/11/02/marginal-patchwork/">Marginal distributions with ggplot2 and patchwork</a>
+            <a href="/blog/en/2018/11/02/marginal-patchwork/">Marginal distributions with ggplot2 and patchwork</a>
         </li>
         
         <li>
-            <a href="../../../../../blog/en/2018/08/18/time-each-chunk/">Benchmark chunks in Rmd</a>
+            <a href="/blog/en/2018/08/18/time-each-chunk/">Benchmark chunks in Rmd</a>
         </li>
         
         <li>
-            <a href="../../../../../blog/en/post/">Posts</a>
+            <a href="/blog/en/post/">Posts</a>
         </li>
         
     </ol>
@@ -229,7 +229,7 @@ wrap_plots(
         <h4>Categories</h4>
         <p>
             
-            <a class="badge badge-primary" href="../../../../../blog/en/categories/r">r</a>
+            <a class="badge badge-primary" href="/blog/en/categories/r">r</a>
             
         </p>
         
@@ -238,13 +238,13 @@ wrap_plots(
         <h4>Tags</h4>
         <p>
             
-            <a class="badge badge-primary" href="../../../../../blog/en/tags/ggplot2">ggplot2</a>
+            <a class="badge badge-primary" href="/blog/en/tags/ggplot2">ggplot2</a>
             
-            <a class="badge badge-primary" href="../../../../../blog/en/tags/knitr">knitr</a>
+            <a class="badge badge-primary" href="/blog/en/tags/knitr">knitr</a>
             
-            <a class="badge badge-primary" href="../../../../../blog/en/tags/patchwork">patchwork</a>
+            <a class="badge badge-primary" href="/blog/en/tags/patchwork">patchwork</a>
             
-            <a class="badge badge-primary" href="../../../../../blog/en/tags/rmd">rmd</a>
+            <a class="badge badge-primary" href="/blog/en/tags/rmd">rmd</a>
             
         </p>
         
