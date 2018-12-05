@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Rmd on Atusy&#39;s blog</title>
-    <link>https://atusy.github.io/blog/tags/rmd/</link>
+    <link>/tags/rmd/</link>
     <description>Recent content in Rmd on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Sun, 11 Nov 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://atusy.github.io/blog/tags/rmd/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/rmd/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Rmdのfig.capを図を生成するチャンク内にglueで書く</title>
-      <link>https://atusy.github.io/blog/2018/11/11/glue-for-fig-cap-in-rmd/</link>
+      <link>/2018/11/11/glue-for-fig-cap-in-rmd/</link>
       <pubDate>Sun, 11 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/11/11/glue-for-fig-cap-in-rmd/</guid>
+      <guid>/2018/11/11/glue-for-fig-cap-in-rmd/</guid>
       <description>Rmdのchunkオプションである fig.cap の評価は，チャンクの評価が終わってからです． この性質を利用すると，チャンク内にキャプションと図を同居させ</description>
     </item>
     
@@ -26,46 +26,46 @@ titleとか
 authorとか  
 改行する
 </title>
-      <link>https://atusy.github.io/blog/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</link>
+      <link>/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</link>
       <pubDate>Sat, 27 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</guid>
+      <guid>/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</guid>
       <description>@niszet0 さん著「R MarkdownでWord文書を作ろう」を読んでます。 Rmdを扱った商業誌にも、同書ほどRmdファイルのYAMLフロントマターの</description>
     </item>
     
     <item>
       <title>R Markdown で PlantUML</title>
-      <link>https://atusy.github.io/blog/2018/10/25/plantuml-on-rmd/</link>
+      <link>/2018/10/25/plantuml-on-rmd/</link>
       <pubDate>Thu, 25 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/10/25/plantuml-on-rmd/</guid>
+      <guid>/2018/10/25/plantuml-on-rmd/</guid>
       <description>@niszet0 さんの “R MarkdownでWord文書を作ろう” を摘み食いしてます (以下RmdでWord本)． ちゃんとしたいずれレビューはいずれするとし</description>
     </item>
     
     <item>
       <title>Rmdでchunkごとの実行時間を計測</title>
-      <link>https://atusy.github.io/blog/2018/08/18/time-each-chunk/</link>
+      <link>/2018/08/18/time-each-chunk/</link>
       <pubDate>Sat, 18 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/08/18/time-each-chunk/</guid>
+      <guid>/2018/08/18/time-each-chunk/</guid>
       <description>Jupyter Notebookでは、コードブロック冒頭で %%timeit と唱えると、ブロックの評価に要した時間を表示できる。 https://jakevdp.github.io/PythonDataScienceHandbook/01.07-timing-and-profiling.html これをRmdでもできないかなー？ と思って</description>
     </item>
     
     <item>
       <title>パラメータ付きRmdを試す</title>
-      <link>https://atusy.github.io/blog/2018/08/17/rmd-parameterized/</link>
+      <link>/2018/08/17/rmd-parameterized/</link>
       <pubDate>Fri, 17 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/08/17/rmd-parameterized/</guid>
+      <guid>/2018/08/17/rmd-parameterized/</guid>
       <description>パラメータ付きRmdが便利そうだと思ったのでメモと実験 パラメータ付きRmdとは YAMLヘッダーの params で作成される変数のリストを用いたRmd うま</description>
     </item>
     
     <item>
       <title>xetexでunicode文字</title>
-      <link>https://atusy.github.io/blog/2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/</link>
+      <link>/2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/</link>
       <pubDate>Mon, 09 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/</guid>
+      <guid>/2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/</guid>
       <description>$\LaTeX{}$ で μ や α など特殊文字を直打ちすると、 □になってしまうことがしばしば。 XeTeXを使っている場合は、 \setmainfont{IPAMincho} など、ユニコードに対応したフォントを使</description>
     </item>
     

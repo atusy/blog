@@ -61,11 +61,14 @@ print_gglist(list(g, g))</code></pre>
 </div>
 <div id="bench" class="section level1">
 <h1>ベンチマーク</h1>
-<pre class="r"><code>g_list &lt;- rep(list(g), 10)
-bench &lt;- microbenchmark::microbenchmark(
+<pre class="r"><code>p_load(microbenchmark)
+g_list &lt;- rep(list(g), 10)
+bench &lt;- microbenchmark(
   &#39;single thread&#39; = walk(g_list, print),
   &#39;multi thread&#39; = print_gglist(g_list)
-)</code></pre>
+)
+bench
+plot(bench)</code></pre>
 <pre><code>## Unit: milliseconds
 ##           expr      min       lq     mean   median       uq      max neval
 ##  single thread 774.9664 846.9223 911.0551 896.0701 952.7812 1303.653   100

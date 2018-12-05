@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>R Markdownでword文書を作ろう on Atusy&#39;s blog</title>
-    <link>https://atusy.github.io/blog/tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86/</link>
+    <link>/tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86/</link>
     <description>Recent content in R Markdownでword文書を作ろう on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Sun, 25 Nov 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://atusy.github.io/blog/tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>書評 「R MarkdownでWord文書を作ろう」</title>
-      <link>https://atusy.github.io/blog/2018/11/25/rmd-de-word/</link>
+      <link>/2018/11/25/rmd-de-word/</link>
       <pubDate>Sun, 25 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/11/25/rmd-de-word/</guid>
+      <guid>/2018/11/25/rmd-de-word/</guid>
       <description>RmdでWord本の再販が間近に迫っていますね．これは献本頂いた時にしたレビューの約束を果たす時!! Rmdでこんなに完成したWordドキュメ</description>
     </item>
     
@@ -26,19 +26,19 @@ titleとか
 authorとか  
 改行する
 </title>
-      <link>https://atusy.github.io/blog/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</link>
+      <link>/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</link>
       <pubDate>Sat, 27 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</guid>
+      <guid>/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</guid>
       <description>@niszet0 さん著「R MarkdownでWord文書を作ろう」を読んでます。 Rmdを扱った商業誌にも、同書ほどRmdファイルのYAMLフロントマターの</description>
     </item>
     
     <item>
       <title>R Markdown で PlantUML</title>
-      <link>https://atusy.github.io/blog/2018/10/25/plantuml-on-rmd/</link>
+      <link>/2018/10/25/plantuml-on-rmd/</link>
       <pubDate>Thu, 25 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/blog/2018/10/25/plantuml-on-rmd/</guid>
+      <guid>/2018/10/25/plantuml-on-rmd/</guid>
       <description>@niszet0 さんの “R MarkdownでWord文書を作ろう” を摘み食いしてます (以下RmdでWord本)． ちゃんとしたいずれレビューはいずれするとし</description>
     </item>
     
