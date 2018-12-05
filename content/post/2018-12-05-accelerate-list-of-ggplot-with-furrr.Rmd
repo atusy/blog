@@ -74,6 +74,15 @@ bench <- microbenchmark::microbenchmark(
 saveRDS(bench, here('static/RDS/accelerate-list-of-ggplot-benchmark-with-furrr.RDS'))
 ```
 
+```{r bench-mock, eval = FALSE}
+g_list <- rep(list(g), 10)
+bench <- microbenchmark::microbenchmark(
+  'single thread' = walk(g_list, print),
+  'multi thread' = print_gglist(g_list)
+)
+```
+
+
 ```{r bench-result, echo = FALSE}
 bench <- readRDS(here('static/RDS/accelerate-list-of-ggplot-benchmark-with-furrr.RDS'))
 bench

@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tokyor on Atusy&#39;s blog</title>
-    <link>/tags/tokyor/</link>
+    <link>https://atusy.github.io/blog/tags/tokyor/</link>
     <description>Recent content in Tokyor on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Sun, 21 Oct 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/tokyor/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://atusy.github.io/blog/tags/tokyor/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>TokyoR 73 行ってきました</title>
-      <link>/2018/10/21/tokyor73/</link>
+      <link>https://atusy.github.io/blog/2018/10/21/tokyor73/</link>
       <pubDate>Sun, 21 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/10/21/tokyor73/</guid>
+      <guid>https://atusy.github.io/blog/2018/10/21/tokyor73/</guid>
       <description>2018年10月20日はJuliaなんちゃらやらなんやらと沢山の勉強会が同時開催された日だったらしいですね。 私はTokyoR 73を選んで「g</description>
     </item>
     

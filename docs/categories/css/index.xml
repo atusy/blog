@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Css on Atusy&#39;s blog</title>
-    <link>/categories/css/</link>
+    <link>https://atusy.github.io/blog/categories/css/</link>
     <description>Recent content in Css on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Wed, 21 Nov 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/categories/css/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://atusy.github.io/blog/categories/css/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>CSSでヘッダの行間を調整してみた</title>
-      <link>/2018/11/21/mod-css-margin/</link>
+      <link>https://atusy.github.io/blog/2018/11/21/mod-css-margin/</link>
       <pubDate>Wed, 21 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/11/21/mod-css-margin/</guid>
+      <guid>https://atusy.github.io/blog/2018/11/21/mod-css-margin/</guid>
       <description>h1 から h2 そして h3 までの余白が 詰め詰めで読み難かったので、修正しました。 以前はこんな感じで辛かった h2 h2の内容 h3 h3の内容 h2 h2の内容 h3 h3の</description>
     </item>
     

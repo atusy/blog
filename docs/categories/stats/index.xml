@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Stats on Atusy&#39;s blog</title>
-    <link>/categories/stats/</link>
+    <link>https://atusy.github.io/blog/categories/stats/</link>
     <description>Recent content in Stats on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Sat, 25 Aug 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/categories/stats/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://atusy.github.io/blog/categories/stats/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>欠損値の発生過程の類別</title>
-      <link>/2018/08/25/missing-value-type/</link>
+      <link>https://atusy.github.io/blog/2018/08/25/missing-value-type/</link>
       <pubDate>Sat, 25 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/08/25/missing-value-type/</guid>
+      <guid>https://atusy.github.io/blog/2018/08/25/missing-value-type/</guid>
       <description>先日、欠損値の発生過程の例を図示してTweetしたところ、思ったより反響がよかったので、図をブラシュアップの上、記事に残すことにした。 俄仕込</description>
     </item>
     
