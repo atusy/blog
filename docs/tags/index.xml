@@ -2,282 +2,282 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Atusy&#39;s blog</title>
-    <link>/tags/</link>
+    <link>https://atusy.github.io/blog/tags/</link>
     <description>Recent content in Tags on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Tue, 06 Nov 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://atusy.github.io/blog/tags/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>.Rprofile</title>
-      <link>/tags/.rprofile/</link>
+      <link>https://atusy.github.io/blog/tags/.rprofile/</link>
       <pubDate>Tue, 06 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/.rprofile/</guid>
+      <guid>https://atusy.github.io/blog/tags/.rprofile/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Blogdown</title>
-      <link>/tags/blogdown/</link>
+      <link>https://atusy.github.io/blog/tags/blogdown/</link>
       <pubDate>Sat, 28 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/blogdown/</guid>
+      <guid>https://atusy.github.io/blog/tags/blogdown/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Callr</title>
-      <link>/tags/callr/</link>
+      <link>https://atusy.github.io/blog/tags/callr/</link>
       <pubDate>Tue, 06 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/callr/</guid>
+      <guid>https://atusy.github.io/blog/tags/callr/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Felp</title>
-      <link>/tags/felp/</link>
+      <link>https://atusy.github.io/blog/tags/felp/</link>
       <pubDate>Sun, 18 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/felp/</guid>
+      <guid>https://atusy.github.io/blog/tags/felp/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Furrr</title>
-      <link>/tags/furrr/</link>
+      <link>https://atusy.github.io/blog/tags/furrr/</link>
       <pubDate>Wed, 05 Dec 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/furrr/</guid>
+      <guid>https://atusy.github.io/blog/tags/furrr/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Ggplot2</title>
-      <link>/tags/ggplot2/</link>
+      <link>https://atusy.github.io/blog/tags/ggplot2/</link>
       <pubDate>Wed, 05 Dec 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/ggplot2/</guid>
+      <guid>https://atusy.github.io/blog/tags/ggplot2/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Glue</title>
-      <link>/tags/glue/</link>
+      <link>https://atusy.github.io/blog/tags/glue/</link>
       <pubDate>Sun, 11 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/glue/</guid>
+      <guid>https://atusy.github.io/blog/tags/glue/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Japanr</title>
-      <link>/tags/japanr/</link>
+      <link>https://atusy.github.io/blog/tags/japanr/</link>
       <pubDate>Sun, 02 Dec 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/japanr/</guid>
+      <guid>https://atusy.github.io/blog/tags/japanr/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Knitr</title>
-      <link>/tags/knitr/</link>
+      <link>https://atusy.github.io/blog/tags/knitr/</link>
       <pubDate>Sat, 18 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/knitr/</guid>
+      <guid>https://atusy.github.io/blog/tags/knitr/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Latex</title>
-      <link>/tags/latex/</link>
+      <link>https://atusy.github.io/blog/tags/latex/</link>
       <pubDate>Sat, 28 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/latex/</guid>
+      <guid>https://atusy.github.io/blog/tags/latex/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Latex2exp</title>
-      <link>/tags/latex2exp/</link>
+      <link>https://atusy.github.io/blog/tags/latex2exp/</link>
       <pubDate>Sat, 03 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/latex2exp/</guid>
+      <guid>https://atusy.github.io/blog/tags/latex2exp/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Linux</title>
-      <link>/tags/linux/</link>
+      <link>https://atusy.github.io/blog/tags/linux/</link>
       <pubDate>Thu, 11 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/linux/</guid>
+      <guid>https://atusy.github.io/blog/tags/linux/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Mathjax</title>
-      <link>/tags/mathjax/</link>
+      <link>https://atusy.github.io/blog/tags/mathjax/</link>
       <pubDate>Sat, 28 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/mathjax/</guid>
+      <guid>https://atusy.github.io/blog/tags/mathjax/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Missing Value</title>
-      <link>/tags/missing-value/</link>
+      <link>https://atusy.github.io/blog/tags/missing-value/</link>
       <pubDate>Sat, 25 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/missing-value/</guid>
+      <guid>https://atusy.github.io/blog/tags/missing-value/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Package</title>
-      <link>/tags/package/</link>
+      <link>https://atusy.github.io/blog/tags/package/</link>
       <pubDate>Tue, 28 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/package/</guid>
+      <guid>https://atusy.github.io/blog/tags/package/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Patchwork</title>
-      <link>/tags/patchwork/</link>
+      <link>https://atusy.github.io/blog/tags/patchwork/</link>
       <pubDate>Sat, 03 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/patchwork/</guid>
+      <guid>https://atusy.github.io/blog/tags/patchwork/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Pforeach</title>
-      <link>/tags/pforeach/</link>
+      <link>https://atusy.github.io/blog/tags/pforeach/</link>
       <pubDate>Tue, 16 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/pforeach/</guid>
+      <guid>https://atusy.github.io/blog/tags/pforeach/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Plantuml</title>
-      <link>/tags/plantuml/</link>
+      <link>https://atusy.github.io/blog/tags/plantuml/</link>
       <pubDate>Thu, 25 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/plantuml/</guid>
+      <guid>https://atusy.github.io/blog/tags/plantuml/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Plotly</title>
-      <link>/tags/plotly/</link>
+      <link>https://atusy.github.io/blog/tags/plotly/</link>
       <pubDate>Fri, 26 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/plotly/</guid>
+      <guid>https://atusy.github.io/blog/tags/plotly/</guid>
       <description></description>
     </item>
     
     <item>
       <title>R</title>
-      <link>/tags/r/</link>
+      <link>https://atusy.github.io/blog/tags/r/</link>
       <pubDate>Tue, 31 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/r/</guid>
+      <guid>https://atusy.github.io/blog/tags/r/</guid>
       <description></description>
     </item>
     
     <item>
       <title>R Markdownでword文書を作ろう</title>
-      <link>/tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86/</link>
+      <link>https://atusy.github.io/blog/tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86/</link>
       <pubDate>Sun, 25 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86/</guid>
+      <guid>https://atusy.github.io/blog/tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Rd</title>
-      <link>/tags/rd/</link>
+      <link>https://atusy.github.io/blog/tags/rd/</link>
       <pubDate>Tue, 28 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/rd/</guid>
+      <guid>https://atusy.github.io/blog/tags/rd/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Rmd</title>
-      <link>/tags/rmd/</link>
+      <link>https://atusy.github.io/blog/tags/rmd/</link>
       <pubDate>Sun, 11 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/rmd/</guid>
+      <guid>https://atusy.github.io/blog/tags/rmd/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Roxygen2</title>
-      <link>/tags/roxygen2/</link>
+      <link>https://atusy.github.io/blog/tags/roxygen2/</link>
       <pubDate>Tue, 28 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/roxygen2/</guid>
+      <guid>https://atusy.github.io/blog/tags/roxygen2/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Shiny</title>
-      <link>/tags/shiny/</link>
+      <link>https://atusy.github.io/blog/tags/shiny/</link>
       <pubDate>Wed, 21 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/shiny/</guid>
+      <guid>https://atusy.github.io/blog/tags/shiny/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Tex</title>
-      <link>/tags/tex/</link>
+      <link>https://atusy.github.io/blog/tags/tex/</link>
       <pubDate>Sat, 03 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/tex/</guid>
+      <guid>https://atusy.github.io/blog/tags/tex/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Tokyor</title>
-      <link>/tags/tokyor/</link>
+      <link>https://atusy.github.io/blog/tags/tokyor/</link>
       <pubDate>Sun, 21 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/tokyor/</guid>
+      <guid>https://atusy.github.io/blog/tags/tokyor/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Unicode</title>
-      <link>/tags/unicode/</link>
+      <link>https://atusy.github.io/blog/tags/unicode/</link>
       <pubDate>Mon, 09 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/unicode/</guid>
+      <guid>https://atusy.github.io/blog/tags/unicode/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Viridis</title>
-      <link>/tags/viridis/</link>
+      <link>https://atusy.github.io/blog/tags/viridis/</link>
       <pubDate>Sun, 25 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/viridis/</guid>
+      <guid>https://atusy.github.io/blog/tags/viridis/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Yaml</title>
-      <link>/tags/yaml/</link>
+      <link>https://atusy.github.io/blog/tags/yaml/</link>
       <pubDate>Sat, 27 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>/tags/yaml/</guid>
+      <guid>https://atusy.github.io/blog/tags/yaml/</guid>
       <description></description>
     </item>
     

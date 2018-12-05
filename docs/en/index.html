@@ -9,7 +9,7 @@
 <meta property="og:title" content="Atusy&#39;s blog" />
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="/en/" />
+<meta property="og:url" content="https://atusy.github.io/blog/en/" />
 <meta property="og:updated_time" content="2018-11-02T00:00:00&#43;00:00"/>
 
 <meta name="twitter:card" content="summary"/>
@@ -18,7 +18,7 @@
 
 
 
-    <link rel="canonical" href="../en/">
+    <link rel="canonical" href="https://atusy.github.io/blog/en/">
 
     <title>
       
@@ -29,10 +29,10 @@
     
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
 
-    <link href="../css/style.css" rel="stylesheet">
+    <link href="https://atusy.github.io/blog/css/style.css" rel="stylesheet">
 
     
-    <link href="../en/index.xml" rel="alternate" type="application/rss+xml" title="Atusy&#39;s blog" />
+    <link href="https://atusy.github.io/blog/en/index.xml" rel="alternate" type="application/rss+xml" title="Atusy&#39;s blog" />
     
 
     
@@ -44,7 +44,7 @@
     
       <header class="blog-header">
     <nav class="navbar navbar-expand-md navbar-light bg-light">
-        <a class="navbar-brand" href="../en">
+        <a class="navbar-brand" href="../blog/en">
             <img src="../images/atusy.jpg" width="50" height="50" class="d-inline-block align-top" alt="">
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
@@ -76,9 +76,9 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                         
-                            <a class="dropdown-item" href="../">Japanese</a>
+                            <a class="dropdown-item" href="https://atusy.github.io/blog/en/">English</a>
                         
-                            <a class="dropdown-item" href="../en/">English</a>
+                            <a class="dropdown-item" href="https://atusy.github.io/blog/">Japanese</a>
                         
                     </div>
                 </li>
@@ -105,7 +105,7 @@
         <article class="blog-post">
     <header>
         <h2 class="blog-post-title">
-            <a class="text-dark" href="../en/2018/11/02/marginal-patchwork/">Marginal distributions with ggplot2 and patchwork</a>
+            <a class="text-dark" href="../blog/en/2018/11/02/marginal-patchwork/">Marginal distributions with ggplot2 and patchwork</a>
         </h2>
         
 
@@ -123,9 +123,9 @@
 <div class="blog-post-tags text-secondary">
     <strong>Tags:</strong>
     
-        <a class="badge badge-primary" href="../en/tags/ggplot2">ggplot2</a>
+        <a class="badge badge-primary" href="../blog/en/tags/ggplot2">ggplot2</a>
     
-        <a class="badge badge-primary" href="../en/tags/patchwork">patchwork</a>
+        <a class="badge badge-primary" href="../blog/en/tags/patchwork">patchwork</a>
     
 </div>
 
@@ -133,7 +133,7 @@
 <div class="blog-post-categories text-secondary">
     <strong>Categories:</strong>
     
-        <a class="badge badge-primary" href="../en/categories/r">R</a>
+        <a class="badge badge-primary" href="../blog/en/categories/r">R</a>
     
 </div>
 
@@ -144,7 +144,7 @@ Here, I tried to produce marginal plots, but failed because I was using plot ari
 library(ggplot2) library(patchwork) xy &lt;- ggplot(mtcars, aes(wt, mpg)) + geom_point() x &lt;- ggplot(mtcars, aes(wt)) + geom_histogram(bins = 30) y &lt;- ggplot(mtcars, aes(mpg)) + geom_histogram(bins = 30) + coord_flip() (x | plot_spacer()) / (xy | y) I just found that wrap_plots() helps.
     
     <p></p>
-    <a href="../en/2018/11/02/marginal-patchwork/">Read More →</a>
+    <a href="../blog/en/2018/11/02/marginal-patchwork/">Read More →</a>
     
 </article>
 
@@ -157,7 +157,7 @@ library(ggplot2) library(patchwork) xy &lt;- ggplot(mtcars, aes(wt, mpg)) + geom
         <article class="blog-post">
     <header>
         <h2 class="blog-post-title">
-            <a class="text-dark" href="../en/2018/08/18/time-each-chunk/">Benchmark chunks in Rmd</a>
+            <a class="text-dark" href="../blog/en/2018/08/18/time-each-chunk/">Benchmark chunks in Rmd</a>
         </h2>
         
 
@@ -175,9 +175,9 @@ library(ggplot2) library(patchwork) xy &lt;- ggplot(mtcars, aes(wt, mpg)) + geom
 <div class="blog-post-tags text-secondary">
     <strong>Tags:</strong>
     
-        <a class="badge badge-primary" href="../en/tags/rmd">Rmd</a>
+        <a class="badge badge-primary" href="../blog/en/tags/rmd">Rmd</a>
     
-        <a class="badge badge-primary" href="../en/tags/knitr">knitr</a>
+        <a class="badge badge-primary" href="../blog/en/tags/knitr">knitr</a>
     
 </div>
 
@@ -185,7 +185,7 @@ library(ggplot2) library(patchwork) xy &lt;- ggplot(mtcars, aes(wt, mpg)) + geom
 <div class="blog-post-categories text-secondary">
     <strong>Categories:</strong>
     
-        <a class="badge badge-primary" href="../en/categories/r">R</a>
+        <a class="badge badge-primary" href="../blog/en/categories/r">R</a>
     
 </div>
 
@@ -195,7 +195,7 @@ Implementation A simple benchmark is done by saving proc.time() before running c
 t &lt;- proc.time()[&#39;elapsed&#39;] invisible(runif(100)) proc.time()[&#39;elapsed&#39;] - t ## elapsed ## 0.003 However, hooks are functions, and bodies of functions are evaluated in different environments every time.
     
     <p></p>
-    <a href="../en/2018/08/18/time-each-chunk/">Read More →</a>
+    <a href="../blog/en/2018/08/18/time-each-chunk/">Read More →</a>
     
 </article>
 
@@ -221,15 +221,15 @@ t &lt;- proc.time()[&#39;elapsed&#39;] invisible(runif(100)) proc.time()[&#39;el
     <ol class="list-unstyled">
         
         <li>
-            <a href="../en/2018/11/02/marginal-patchwork/">Marginal distributions with ggplot2 and patchwork</a>
+            <a href="../blog/en/2018/11/02/marginal-patchwork/">Marginal distributions with ggplot2 and patchwork</a>
         </li>
         
         <li>
-            <a href="../en/2018/08/18/time-each-chunk/">Benchmark chunks in Rmd</a>
+            <a href="../blog/en/2018/08/18/time-each-chunk/">Benchmark chunks in Rmd</a>
         </li>
         
         <li>
-            <a href="../en/post/">Posts</a>
+            <a href="../blog/en/post/">Posts</a>
         </li>
         
     </ol>
@@ -243,7 +243,7 @@ t &lt;- proc.time()[&#39;elapsed&#39;] invisible(runif(100)) proc.time()[&#39;el
         <h4>Categories</h4>
         <p>
             
-            <a class="badge badge-primary" href="../en/categories/r">r</a>
+            <a class="badge badge-primary" href="../blog/en/categories/r">r</a>
             
         </p>
         
@@ -252,13 +252,13 @@ t &lt;- proc.time()[&#39;elapsed&#39;] invisible(runif(100)) proc.time()[&#39;el
         <h4>Tags</h4>
         <p>
             
-            <a class="badge badge-primary" href="../en/tags/ggplot2">ggplot2</a>
+            <a class="badge badge-primary" href="../blog/en/tags/ggplot2">ggplot2</a>
             
-            <a class="badge badge-primary" href="../en/tags/knitr">knitr</a>
+            <a class="badge badge-primary" href="../blog/en/tags/knitr">knitr</a>
             
-            <a class="badge badge-primary" href="../en/tags/patchwork">patchwork</a>
+            <a class="badge badge-primary" href="../blog/en/tags/patchwork">patchwork</a>
             
-            <a class="badge badge-primary" href="../en/tags/rmd">rmd</a>
+            <a class="badge badge-primary" href="../blog/en/tags/rmd">rmd</a>
             
         </p>
         

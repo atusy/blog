@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Plantuml on Atusy&#39;s blog</title>
-    <link>/tags/plantuml/</link>
+    <link>https://atusy.github.io/blog/tags/plantuml/</link>
     <description>Recent content in Plantuml on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Thu, 25 Oct 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/plantuml/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://atusy.github.io/blog/tags/plantuml/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>R Markdown で PlantUML</title>
-      <link>/2018/10/25/plantuml-on-rmd/</link>
+      <link>https://atusy.github.io/blog/2018/10/25/plantuml-on-rmd/</link>
       <pubDate>Thu, 25 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/10/25/plantuml-on-rmd/</guid>
+      <guid>https://atusy.github.io/blog/2018/10/25/plantuml-on-rmd/</guid>
       <description>@niszet0 さんの “R MarkdownでWord文書を作ろう” を摘み食いしてます (以下RmdでWord本)． ちゃんとしたいずれレビューはいずれするとし</description>
     </item>
     

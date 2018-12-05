@@ -2,30 +2,30 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Latex on Atusy&#39;s blog</title>
-    <link>/tags/latex/</link>
+    <link>https://atusy.github.io/blog/tags/latex/</link>
     <description>Recent content in Latex on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Sat, 28 Jul 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/latex/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://atusy.github.io/blog/tags/latex/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>blogdownでMathJax</title>
-      <link>/2018/07/28/how2mathjax/</link>
+      <link>https://atusy.github.io/blog/2018/07/28/how2mathjax/</link>
       <pubDate>Sat, 28 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/07/28/how2mathjax/</guid>
+      <guid>https://atusy.github.io/blog/2018/07/28/how2mathjax/</guid>
       <description>MathJaxとは？ MathJaxを利用すると、$\TeX$ 記法を用いて数式を表現できる。 ブロックにするには $$\latex$$ と入力すると $$ \LaTeX $$ となる。 イン</description>
     </item>
     
     <item>
       <title>xetexでunicode文字</title>
-      <link>/2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/</link>
+      <link>https://atusy.github.io/blog/2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/</link>
       <pubDate>Mon, 09 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/</guid>
+      <guid>https://atusy.github.io/blog/2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/</guid>
       <description>$\LaTeX{}$ で μ や α など特殊文字を直打ちすると、 □になってしまうことがしばしば。 XeTeXを使っている場合は、 \setmainfont{IPAMincho} など、ユニコードに対応したフォントを使</description>
     </item>
     
