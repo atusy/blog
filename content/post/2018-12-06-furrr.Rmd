@@ -1,0 +1,188 @@
+---
+title: furrr パッケージで R で簡単並列処理
+author: ~
+date: '2018-12-06'
+slug: furrr
+categories: [R]
+tags: [furrr]
+output:
+  blogdown::html_page:
+    toc: yes
+---
+
+```{r setup, include = FALSE}
+library(pacman)
+p_load(purrr, tibble, knitr)
+p_install(furrr, force = FALSE)
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+
+`furrr` パッケージを使うと 
+`purrr` パッケージのノリでモダンに並列処理ができるぞ!
+
+`purrr` パッケージを使ったことがない人は下記のリンクを参考して欲しい．
+
+- [そろそろ手を出すpurrr](https://speakerdeck.com/s_uryu/nekosky) by uribo 氏
+- [purrr — ループ処理やapply系関数の決定版
+](https://heavywatal.github.io/rstats/purrr.html) by Heavy Watal 氏
+- [Apply functions with purrr::CHEAT SHEET](https://www.rstudio.com/resources/cheatsheets/#purrr) by RStudio 社
+
+# インストール {#install-furrr}
+
+```{r install-furrr, eval = FALSE}
+# CRAN から
+install.packages("furrr")
+
+# GitHub から
+source("https://install-github.me/DavisVaughan/furrr")
+```
+
+# 読み込み {#library-furrr}
+
+```{r library-furrr}
+library(furrr)
+```
+
+`furrr` パッケージを利用するのに必要な
+`future` パッケージも同時に読み込まれます．
+
+# 使い方 {#howto}
+
+基本は `purrr` パッケージと同じ．
+関数名は `purrr` パッケージの関数名 (`map()`{.r} など) の前に `future_` をつける (i.e. `future_map`{.r})．
+
+事前に `plan()`{.r} 関数を実行すると `strategy` 引数 に応じて並列処理をするかなどを選んでおける点が大きく異なる．
+
+基本的にはシングルスレッドの `plan(sequential)`{.r} かマルチスレッドの `plan(multiprocess)`{.r} でいいと思う．
+複数のマシンで並列化するための `cluster` や `remote` もある．
+
+## シングルスレッド (strategy = sequential) {#single}
+
+```{r furrr-single}
+set.seed(1)
+future_map(1:3, rnorm)
+```
+
+```{r purrr}
+library(purrr)
+set.seed(1)
+map(1:3, rnorm)
+```
+
+同じ結果になりましたね!
+
+
+## マルチスレッド (strategy = multiprocess) {#multi}
+
+`plan(multiprocess)`{.r} にした上で `future_map` などを実行するだけ．
+
+試しに `Sys.sleep(.1)`{.r} してみると，
+`plan(sequential)`{.r} ではイテレータの数に比例した時間がかかるが， 
+`plan(multiprocess)`{.r} では単純にはイテレータの数に比例しない．
+
+```{r sys-sleep}
+plan(sequential)
+system.time(future_map(1:4, ~ Sys.sleep(.1)))
+
+plan(multiprocess)
+system.time(future_map(1:4, ~ Sys.sleep(.1)))
+```
+
+現在の `plan` は `plan()`{.r} により確認できる．
+
+```{r current-plan}
+plan()
+```
+
+一度設定した `plan` は新しいものを設定するまで継続する点に注意．
+
+```{r still-multiprocess}
+system.time(future_map(1:4, ~ Sys.sleep(.1)))
+system.time(future_map(1:4, ~ Sys.sleep(.1)))
+
+plan(sequential)
+system.time(future_map(1:4, ~ Sys.sleep(.1)))
+```
+
+### コア数を変更 {#cores}
+
+並列化する際に設定した
+`plan(multiprocess)`{.r}
+は
+`plan(multiprocess(workers = future::availableCores()))`{.r}
+に相当し，自動的に最大数のコアを利用する．
+
+従って， `plan(multiprocess(workers = 2))`{.r} などとすることで，コア数を変更できる．
+
+例えば
+`multiprocess(workers = 1)`{.r} の時は
+`multiprocess(workers = 2)`{.r}
+の時のおよそ2倍の時間が経過することが確認できる．
+
+```{r worker}
+plan(multiprocess(workers = 1))
+system.time(future_map(1:2, ~ Sys.sleep(.1)))
+plan(multiprocess(workers = 2))
+system.time(future_map(1:2, ~ Sys.sleep(.1)))
+```
+
+
+
+### 乱数を固定 {#seeds}
+
+`future_map()`{.r} 関数などには `.options` 引数があり，
+ここに `future_options()`{.r} 関数の実行結果を指定することで，
+挙動を弄れる．
+
+例えば乱数を固定したい場合は， `future_options()`{.r} 関数の `seed` 引数を弄る．
+
+```{r seed}
+future_map(1:3, rnorm, .options = future_options(seed = 1L))
+future_map(1:3, rnorm, .options = future_options(seed = 1L))
+```
+
+猶 `seed` 引数を整数値で指定する場合は，
+`seed = 1L` といった具合に整数であることを明示しなければならない．
+`seed = 1` は実数値を指定した扱いになりエラーを返す．
+[Isssue](https://github.com/DavisVaughan/furrr/issues/55#issue-378970569)
+が建っているので，整数に見える実数も許可される未来もあるかもしれない．
+
+#### set.seed では固定できない {#set-seed}
+
+```{r seed-wrong}
+set.seed(1)
+future_map(1:3, rnorm)
+set.seed(1)
+future_map(1:3, rnorm)
+```
+
+### プログレスバーを表示 {#progress}
+
+`future_map(..., .progress = TRUE)`{.r} すればいいらしいが……？
+当方の環境ではなぜか表示されない．
+
+> Note that these are still a bit experimental so feedback is welcome. 
+
+とのこと．
+
+`plan(sequantial)`{.r} の時は表示されないらしいが，
+[改善要望](https://github.com/DavisVaughan/furrr/issues/18)
+が出ている．
+
+また，
+[経過時間を表示したい](https://github.com/DavisVaughan/furrr/issues/48)
+など色々 feedback がされている模様．
+
+## 出力の型 {#output-type}
+
+`purrr` の派生なので， `_chr`, `_dfr` などの suffix をつけて型をコントロールすることも勿論できる．
+
+```{r}
+future_map_chr(1:3, ~ letters[.x])
+```
+
+```{r}
+future_map_dfr(1:3, ~ iris[.x * 50, ])
+```
+

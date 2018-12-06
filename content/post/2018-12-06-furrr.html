@@ -1,0 +1,217 @@
+---
+title: furrr パッケージで R で簡単並列処理
+author: ~
+date: '2018-12-06'
+slug: furrr
+categories: [R]
+tags: [furrr]
+output:
+  blogdown::html_page:
+    toc: yes
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#install-furrr">インストール</a></li>
+<li><a href="#library-furrr">読み込み</a></li>
+<li><a href="#howto">使い方</a><ul>
+<li><a href="#single">シングルスレッド (strategy = sequential)</a></li>
+<li><a href="#multi">マルチスレッド (strategy = multiprocess)</a><ul>
+<li><a href="#cores">コア数を変更</a></li>
+<li><a href="#seeds">乱数を固定</a></li>
+<li><a href="#progress">プログレスバーを表示</a></li>
+</ul></li>
+<li><a href="#output-type">出力の型</a></li>
+</ul></li>
+</ul>
+</div>
+
+<p><code>furrr</code> パッケージを使うと
+<code>purrr</code> パッケージのノリでモダンに並列処理ができるぞ!</p>
+<p><code>purrr</code> パッケージを使ったことがない人は下記のリンクを参考して欲しい．</p>
+<ul>
+<li><a href="https://speakerdeck.com/s_uryu/nekosky">そろそろ手を出すpurrr</a> by uribo 氏</li>
+<li><a href="https://heavywatal.github.io/rstats/purrr.html">purrr — ループ処理やapply系関数の決定版</a> by Heavy Watal 氏</li>
+<li><a href="https://www.rstudio.com/resources/cheatsheets/#purrr">Apply functions with purrr::CHEAT SHEET</a> by RStudio 社</li>
+</ul>
+<div id="install-furrr" class="section level1">
+<h1>インストール</h1>
+<pre class="r"><code># CRAN から
+install.packages(&quot;furrr&quot;)
+
+# GitHub から
+source(&quot;https://install-github.me/DavisVaughan/furrr&quot;)</code></pre>
+</div>
+<div id="library-furrr" class="section level1">
+<h1>読み込み</h1>
+<pre class="r"><code>library(furrr)</code></pre>
+<pre><code>## Loading required package: future</code></pre>
+<p><code>furrr</code> パッケージを利用するのに必要な
+<code>future</code> パッケージも同時に読み込まれます．</p>
+</div>
+<div id="howto" class="section level1">
+<h1>使い方</h1>
+<p>基本は <code>purrr</code> パッケージと同じ．
+関数名は <code>purrr</code> パッケージの関数名 (<code class="r">map()</code> など) の前に <code>future_</code> をつける (i.e. <code class="r">future_map</code>)．</p>
+<p>事前に <code class="r">plan()</code> 関数を実行すると <code>strategy</code> 引数 に応じて並列処理をするかなどを選んでおける点が大きく異なる．</p>
+<p>基本的にはシングルスレッドの <code class="r">plan(sequential)</code> かマルチスレッドの <code class="r">plan(multiprocess)</code> でいいと思う．
+複数のマシンで並列化するための <code>cluster</code> や <code>remote</code> もある．</p>
+<div id="single" class="section level2">
+<h2>シングルスレッド (strategy = sequential)</h2>
+<pre class="r"><code>set.seed(1)
+future_map(1:3, rnorm)</code></pre>
+<pre><code>## [[1]]
+## [1] -0.6264538
+## 
+## [[2]]
+## [1]  0.1836433 -0.8356286
+## 
+## [[3]]
+## [1]  1.5952808  0.3295078 -0.8204684</code></pre>
+<pre class="r"><code>library(purrr)
+set.seed(1)
+map(1:3, rnorm)</code></pre>
+<pre><code>## [[1]]
+## [1] -0.6264538
+## 
+## [[2]]
+## [1]  0.1836433 -0.8356286
+## 
+## [[3]]
+## [1]  1.5952808  0.3295078 -0.8204684</code></pre>
+<p>同じ結果になりましたね!</p>
+</div>
+<div id="multi" class="section level2">
+<h2>マルチスレッド (strategy = multiprocess)</h2>
+<p><code class="r">plan(multiprocess)</code> にした上で <code>future_map</code> などを実行するだけ．</p>
+<p>試しに <code class="r">Sys.sleep(.1)</code> してみると，
+<code class="r">plan(sequential)</code> ではイテレータの数に比例した時間がかかるが，
+<code class="r">plan(multiprocess)</code> では単純にはイテレータの数に比例しない．</p>
+<pre class="r"><code>plan(sequential)
+system.time(future_map(1:4, ~ Sys.sleep(.1)))</code></pre>
+<pre><code>##    user  system elapsed 
+##   0.010   0.000   0.411</code></pre>
+<pre class="r"><code>plan(multiprocess)
+system.time(future_map(1:4, ~ Sys.sleep(.1)))</code></pre>
+<pre><code>##    user  system elapsed 
+##   0.039   0.028   0.144</code></pre>
+<p>現在の <code>plan</code> は <code class="r">plan()</code> により確認できる．</p>
+<pre class="r"><code>plan()</code></pre>
+<pre><code>## multiprocess:
+## - args: function (expr, envir = parent.frame(), substitute = TRUE, lazy = FALSE, seed = NULL, globals = TRUE, workers = availableCores(), gc = FALSE, earlySignal = FALSE, label = NULL, ...)
+## - tweaked: FALSE
+## - call: plan(multiprocess)</code></pre>
+<p>一度設定した <code>plan</code> は新しいものを設定するまで継続する点に注意．</p>
+<pre class="r"><code>system.time(future_map(1:4, ~ Sys.sleep(.1)))</code></pre>
+<pre><code>##    user  system elapsed 
+##   0.031   0.017   0.134</code></pre>
+<pre class="r"><code>system.time(future_map(1:4, ~ Sys.sleep(.1)))</code></pre>
+<pre><code>##    user  system elapsed 
+##   0.029   0.021   0.135</code></pre>
+<pre class="r"><code>plan(sequential)
+system.time(future_map(1:4, ~ Sys.sleep(.1)))</code></pre>
+<pre><code>##    user  system elapsed 
+##   0.005   0.000   0.407</code></pre>
+<div id="cores" class="section level3">
+<h3>コア数を変更</h3>
+<p>並列化する際に設定した
+<code class="r">plan(multiprocess)</code>
+は
+<code class="r">plan(multiprocess(workers = future::availableCores()))</code>
+に相当し，自動的に最大数のコアを利用する．</p>
+<p>従って， <code class="r">plan(multiprocess(workers = 2))</code> などとすることで，コア数を変更できる．</p>
+<p>例えば
+<code class="r">multiprocess(workers = 1)</code> の時は
+<code class="r">multiprocess(workers = 2)</code>
+の時のおよそ2倍の時間が経過することが確認できる．</p>
+<pre class="r"><code>plan(multiprocess(workers = 1))
+system.time(future_map(1:2, ~ Sys.sleep(.1)))</code></pre>
+<pre><code>##    user  system elapsed 
+##   0.006   0.000   0.206</code></pre>
+<pre class="r"><code>plan(multiprocess(workers = 2))
+system.time(future_map(1:2, ~ Sys.sleep(.1)))</code></pre>
+<pre><code>##    user  system elapsed 
+##   0.008   0.016   0.120</code></pre>
+</div>
+<div id="seeds" class="section level3">
+<h3>乱数を固定</h3>
+<p><code class="r">future_map()</code> 関数などには <code>.options</code> 引数があり，
+ここに <code class="r">future_options()</code> 関数の実行結果を指定することで，
+挙動を弄れる．</p>
+<p>例えば乱数を固定したい場合は， <code class="r">future_options()</code> 関数の <code>seed</code> 引数を弄る．</p>
+<pre class="r"><code>future_map(1:3, rnorm, .options = future_options(seed = 1L))</code></pre>
+<pre><code>## [[1]]
+## [1] 1.377567
+## 
+## [[2]]
+## [1] -1.7371292 -0.2660342
+## 
+## [[3]]
+## [1] -0.1362109  1.8652161  0.9207303</code></pre>
+<pre class="r"><code>future_map(1:3, rnorm, .options = future_options(seed = 1L))</code></pre>
+<pre><code>## [[1]]
+## [1] 1.377567
+## 
+## [[2]]
+## [1] -1.7371292 -0.2660342
+## 
+## [[3]]
+## [1] -0.1362109  1.8652161  0.9207303</code></pre>
+<p>猶 <code>seed</code> 引数を整数値で指定する場合は，
+<code>seed = 1L</code> といった具合に整数であることを明示しなければならない．
+<code>seed = 1</code> は実数値を指定した扱いになりエラーを返す．
+<a href="https://github.com/DavisVaughan/furrr/issues/55#issue-378970569">Isssue</a>
+が建っているので，整数に見える実数も許可される未来もあるかもしれない．</p>
+<div id="set-seed" class="section level4">
+<h4>set.seed では固定できない</h4>
+<pre class="r"><code>set.seed(1)
+future_map(1:3, rnorm)</code></pre>
+<pre><code>## [[1]]
+## [1] 1.666263
+## 
+## [[2]]
+## [1] 0.3064038 1.6142811
+## 
+## [[3]]
+## [1] -0.11573003  0.01955436 -0.66327811</code></pre>
+<pre class="r"><code>set.seed(1)
+future_map(1:3, rnorm)</code></pre>
+<pre><code>## [[1]]
+## [1] -0.8358542
+## 
+## [[2]]
+## [1] 0.4818807 1.6501733
+## 
+## [[3]]
+## [1] -1.0208719  0.2089296  0.4123071</code></pre>
+</div>
+</div>
+<div id="progress" class="section level3">
+<h3>プログレスバーを表示</h3>
+<p><code class="r">future_map(..., .progress = TRUE)</code> すればいいらしいが……？
+当方の環境ではなぜか表示されない．</p>
+<blockquote>
+<p>Note that these are still a bit experimental so feedback is welcome.</p>
+</blockquote>
+<p>とのこと．</p>
+<p><code class="r">plan(sequantial)</code> の時は表示されないらしいが，
+<a href="https://github.com/DavisVaughan/furrr/issues/18">改善要望</a>
+が出ている．</p>
+<p>また，
+<a href="https://github.com/DavisVaughan/furrr/issues/48">経過時間を表示したい</a>
+など色々 feedback がされている模様．</p>
+</div>
+</div>
+<div id="output-type" class="section level2">
+<h2>出力の型</h2>
+<p><code>purrr</code> の派生なので， <code>_chr</code>, <code>_dfr</code> などの suffix をつけて型をコントロールすることも勿論できる．</p>
+<pre class="r"><code>future_map_chr(1:3, ~ letters[.x])</code></pre>
+<pre><code>## [1] &quot;a&quot; &quot;b&quot; &quot;c&quot;</code></pre>
+<pre class="r"><code>future_map_dfr(1:3, ~ iris[.x * 50, ])</code></pre>
+<pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width    Species
+## 1          5.0         3.3          1.4         0.2     setosa
+## 2          5.7         2.8          4.1         1.3 versicolor
+## 3          5.9         3.0          5.1         1.8  virginica</code></pre>
+</div>
+</div>
