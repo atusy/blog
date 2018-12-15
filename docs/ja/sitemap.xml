@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://atusy.github.io/2018/12/15/pacman/</loc>
+    <lastmod>2018-12-15T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://atusy.github.io/2018/12/06/furrr/</loc>
     <lastmod>2018-12-06T00:00:00+00:00</lastmod>
   </url>
@@ -232,7 +237,7 @@
   
   <url>
     <loc>https://atusy.github.io/</loc>
-    <lastmod>2018-12-06T00:00:00+00:00</lastmod>
+    <lastmod>2018-12-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -385,6 +390,12 @@
   </url>
   
   <url>
+    <loc>https://atusy.github.io/tags/pacman/</loc>
+    <lastmod>2018-12-15T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://atusy.github.io/tags/patchwork/</loc>
     <lastmod>2018-11-03T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -420,7 +431,7 @@
   
   <url>
     <loc>https://atusy.github.io/post/</loc>
-    <lastmod>2018-12-06T00:00:00+00:00</lastmod>
+    <lastmod>2018-12-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -442,7 +453,7 @@
   
   <url>
     <loc>https://atusy.github.io/categories/r/</loc>
-    <lastmod>2018-12-06T00:00:00+00:00</lastmod>
+    <lastmod>2018-12-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"

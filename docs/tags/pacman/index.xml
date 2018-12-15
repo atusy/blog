@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Pacman on Atusy&#39;s blog</title>
+    <link>https://atusy.github.io/tags/pacman/</link>
+    <description>Recent content in Pacman on Atusy&#39;s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja-jp</language>
+    <lastBuildDate>Sat, 15 Dec 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://atusy.github.io/tags/pacman/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>pacman パッケージで自動的にパッケージをインストール</title>
+      <link>https://atusy.github.io/2018/12/15/pacman/</link>
+      <pubDate>Sat, 15 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/12/15/pacman/</guid>
+      <description>pacman パッケージとは pacman パッケージの関数 インストール / 読み込みを行うもの その他便利関数10選 needs パッケージとの比較 pacman でも needs::prioritize したい？ 改善案 GitHub 上のパッケ</description>
+    </item>
+    
+  </channel>
+</rss>

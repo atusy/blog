@@ -1,0 +1,307 @@
+---
+title: pacman パッケージで自動的にパッケージをインストール
+author: ~
+date: '2018-12-15'
+slug: pacman
+categories: [R]
+tags: [pacman]
+output:
+  blogdown::html_page:
+    toc: yes
+---
+
+```{r setup, include = FALSE}
+pacman::p_load(pacman, tibble, magrittr, knitr, kableExtra, glue)
+```
+
+
+# pacman パッケージとは {#about-pacman}
+
+R におけるパッケージ管理ツール．[^gh-pacman]
+
+[^gh-pacman]: A package management tools for R https://github.com/trinker/pacman
+
+CRAN や GitHub 上に存在するパッケージを必要に応じてインストールしつつ読み込める，`p_load()`{.r} や `p_load_gh()`{.r} といった関数を持つことが最大の特徴．
+
+これにより，Tech ブログや共同作業などで人とコードを共有する時，相手は `pacman` パッケージさえインストールしておけばよくなる．
+
+また，カンマ区切りで複数のパッケージを同時にインストール / 読み込みできる．
+
+他にパッケージを削除する `p_del()` やアンロードする `p_unload()`，
+製作者情報の読み出す `p_author()` など，
+パッケージ管理ツールの名に相応しい機能の充実っぷり．
+
+Archlinux におけるパッケージ管理ツール `pacman` と同じ名前であるため， googlability が低い．
+検索時は「`pacman p_load`」といった具合にキーワードを組み合わせよう．
+
+# pacman パッケージの関数 {#pacman-funs}
+
+## インストール / 読み込みを行うもの
+
+```{r pacman-table, echo = FALSE}
+
+tribble(
+  ~ "pacman 関数",   
+      ~"レポジトリ",
+      ~"概要",
+  "`p_load`{.r}",    
+      "CRAN",
+      glue("
+        インストール + 読み込み．パッケージ名を `\"\"` で囲まず，カンマ区切りで複数指定できる．[^p-load]  
+        例: `p_load(dplyr, tidyr)`{{.r}}
+      "),
+  "`p_load_gh`{.r}", 
+      "GitHub",
+      glue('
+        インストール + 読み込み．
+        `"user/package"` といった具合に `""` で囲った文字列を指定する．  
+        例: `p_load_gh("tidyverse/dplyr", "tidyverse/tidyr")`{{.r}}
+      '),
+  "`p_load_current_gh`{.r}", 
+      "GitHub",
+      glue::glue("
+        最新のパッケージをインストール + 読み込み．  
+        使い方は `p_load_gh` と同様．
+        `user/pkg@tag` や `user/pkg@branch` 
+        といった記法で特定のバージョンやブランチを指定できる．
+        [^p-load-current-gh]
+      "),
+  "`p_install_version`{.r}", 
+      "CRAN", 
+      "バージョンを指定してインストール．読み込みはしない．",
+  "`p_temp`{.r}",    
+      "CRAN",
+      "現在のセッション用に一時的にインストール．",
+  "`p_update`{.r}",  
+      "CRAN",
+      "更新．対象パッケージを指定しない場合は全て更新する．"
+) %>%
+  kable %>%
+  kable_styling(bootstrap_options = 'striped') %>%
+  column_spec(1, extra_css = 'white-space: nowrap')
+```
+
+["Introduction to pacman"](https://cran.r-project.org/web/packages/pacman/vignettes/Introduction_to_pacman.html)
+の
+["Installing, Loading, Unloading, Updating, & Deleting"](https://cran.r-project.org/web/packages/pacman/vignettes/Introduction_to_pacman.html#loading)"
+で紹介されているものに説明を加えたり絞ったりした．
+
+`*_load` 系の関数は指定したパッケージが未インストールの場合のみインストールも行う．
+
+他にインストールのみで読み込み不要な場合には `p_install`{.r} や `p_install_gh`{.r} を使う．
+
+[^p-load]: 従来は
+
+    ```{.r}
+    install.packages(c("pkgA", "pkgB"))
+    library(pkgA)
+    library(pkgB)
+    ```
+    
+    としていたところが `pacman` パッケージでは
+    
+    ```{.r}
+    p_load(pkgA, pkgB)
+    ```
+    
+    の一撃で済む．
+
+[^p-load-current-gh]: `remotes::install_github()` を利用しており，同様の記法が利用できる．
+
+    ブランチなどの指定方法の詳細は `remotes` パッケージの
+    [Usage](https://github.com/r-lib/remotes/#usage)
+    を参照．
+    
+    `p_load_gh()`{.r} でも のようにバージョンやブランチを指定できる．
+    しかしインストール済みのパッケージである場合は，そちらを優先するため，
+    指定したブランチやバージョンを使う保証がない．
+    
+    `p_install_version_gh()`{.r} もあるが，覚えることが少なくて済むので， `@` を使った記法がオススメ．
+
+
+
+## その他便利関数10選 {#else}
+
+- `p_boot`{.r}
+    - `pacman` 自身の導入すら自動化するためのコマンド．
+      `if (!require("pacman")) install.packages("pacman"); library(pacman)`{.r}
+      をクリップボードにコピーしてくれる．
+      ファイルの頭にでも貼っておこう．
+      
+- `p_citation`{.r}
+    - 論文などに引用したい時の情報を取得． BibTex 用のエントリも返してくれる．
+
+- `p_data`{.r}
+    - パッケージが提供するデータセットの一覧をコンソールに表示． \
+      例: `p_data(datasets)`{.r}
+    - `data(package = "datasets")`{.r} と似ているが， 
+      こちらは新しいウィンドウを立ち上げる上に，
+      パッケージ名を `""` で囲む必要がある．
+
+- `p_del`{.r}
+    - パッケージを削除
+    - `p_delete`{.r} でもOK
+
+- `p_depends`{.r}
+    - パッケージが依存するパッケージを一覧
+    
+- `p_depends_reverse`{.r}
+    - パッケージに依存するパッケージを一覧
+
+- `p_help`{.r}
+    - `help(package = dplyr)`{.r} みたいなのを `p_help(dplyr)`
+
+- `p_info`{.r}
+    - パッケージの情報を取得．
+
+- `p_unlock`{.r}
+    - なんらかの事情でパッケージのインストールに失敗し， 
+      `00LOCK-package` というディレクトリが発生した時に利用する．
+      この種のディレクトリが残っていると，以下のようなエラーメッセージが出て
+      継続的にパッケージのインストールに失敗する．
+    
+        > ERROR: failed to lock directory ‘/home/atusy/R/x86_64-pc-linux-gnu-library/3.5’ for modifying \
+        Try removing ‘/home/atusy/R/x86_64-pc-linux-gnu-library/3.5/00LOCK-callr’
+
+- `p_vignette`{.r}
+    - パッケージの vignette の目次を Web ブラウザに表示．
+
+
+# needs パッケージとの比較 {#needs}
+
+`needs` パッケージもパッケージのインストール・読み込みを手軽にしてくれる．[^uri-needs]
+
+[^uri-needs]: 一つのコードファイル中での複数パッケージの読み込みを容易にする @uri on Qiita
+    https://qiita.com/uri/items/dd7c5cddbb6b0ae342c6 
+
+ただし， CRAN 上のパッケージのみを対象としていて，パッケージのアップデートや削除などの機能もない．
+
+`library(needs)`{.r} せずに `needs()`{.r} できる機能があるが，
+有効化する際，一度だけ R を管理者権限で実行する必要がある．
+`.Rprofile` で `library(pacman)`{.r} しておけば済む話かな．
+
+変数名の衝突時に優先するパッケージを指定する `needs::prioritize()`{.r} 
+は `pacman` パッケージにない便利機能かもしれない
+[(後述)](prioritize-on-pacman)．
+
+## pacman でも needs::prioritize したい？ {#prioritize-on-pacman}
+
+例えば `dplyr` パッケージを読み込んだ後に `MASS` パッケージが読み込むと，
+`dplyr::select()`{.r} のつもりで使った`select()`{.r} が
+`MASS::select()`{.r} だったなんてことがある．
+
+こんな時は
+
+```{.r}
+needs::prioritize(dplyr)
+```
+
+すると，
+`select == dplyr::select`{.r} になる．
+
+`pacman` パッケージには同様の機能がない．
+しかし，優先したいパッケージを読み込み直せば良いので以下の要領でいける．
+
+```{.r}
+p_unload(dplyr)
+p_load(dplyr)
+```
+
+どうしても同じ機能が欲しければ，以下のように関数を定義する．
+
+```{r p-prioritize}
+p_prioritize <- function(...) {
+  char <- as.character(match.call(expand.dots = FALSE)[[2]]) # 複数のパッケージを扱う
+  suppressMessages(p_unload(char = char)) # 優先したいパッケージをアンロード．ロードされていない時のメッセージは抑制する．
+  p_load(char = char) # 優先したいパッケージをロードし直す．
+}
+```
+
+`dplyr` -> `MASS` の順に読み込むと `select`{.r} 関数は `MASS` パッケージ由来のものが見える．
+
+```{r p-load}
+p_load(dplyr, MASS)
+environment(select)
+```
+
+新たに定義した `p_prioritize()`{.r} 関数を利用すると，
+`dplyr::select()`{.r} を優先させられるようになった．
+
+```{r test-p-prioritize, message = FALSE}
+p_prioritize(dplyr)
+environment(select)
+```
+
+猶，上述の実装では先に指定したパッケージほど優先する．
+
+後に指定したパッケージほど優先する方が良い場合は
+
+`as.character(match.call(expand.dots = FALSE)[[2]])`{.r}
+
+の部分を `rev()`{.r} すればいいので，
+
+`rev(as.character(match.call(expand.dots = FALSE)[[2]]))`{.r}
+
+とする．
+
+# 改善案 {#ideas}
+
+その内，挑戦して PR したい．
+
+## GitHub 上のパッケージも NSE で指定したい {#NSE-p-load-gh}
+
+
+```{.r}
+p_load_gh("rstudio/gt") # ではなく
+p_load_gh(rstudio/gt) # がいい
+```
+
+`match.call()`{.r} を使えばできるはず．
+
+```{r}
+(function(...) as.character(match.call(expand.dots = FALSE)[[2]]))(rstudio/gt)
+```
+
+## CRAN 上のパッケージも GitHub 上のパッケージも同じ関数で指定したい {#mix-cran-and-gh}
+
+```{.r}
+p_load(dplyr, tidyverse/tidyr)
+```
+
+としたら，
+
+`/` がなければ CRAN から，あれば GitHub からインストールすればいいと思う．
+
+多分やらないけど，
+`cran:dplyr` とか `gh:tidyverse/tidyr` みたいに `:` を使ってレポジトリを指定できるようにしてもいいかもしれない．
+`gl:` で `GitLab`，`bb:` で `BitBucket` みたいな．
+
+## CRAN 上のパッケージも `@` でバージョン指定したい {#p-load-at-ver}
+
+```{.r}
+p_load(dplyr@0.7.0)
+```
+
+したら
+
+```{.r}
+p_install_version(dplyr, "0.7.0")
+p_load(dplyr)
+```
+
+になる，みたいな．
+
+
+## GitHub 上のパッケージも一時的な利用をしたい {#p-temp-gh}
+
+`p_temp`{.r} の GitHub 版が欲しい．
+
+## 上記を合体させたい {#gattai}
+
+```{.r}
+p_load(dplyr@0.7.0, tidyverse/tidyr, temp = TRUE)
+```
+
+みたいな感じにできたら便利じゃないかな，という妄想．
+
+合体はロマン!!

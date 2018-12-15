@@ -130,9 +130,7 @@
     <hr>
 </header>
 <article class="blog-post">
-    
-
-<div id="TOC">
+    <div id="TOC">
 <ul>
 <li><a href="#intro">はじめに</a></li>
 <li><a href="#impl">実装とテスト</a></li>
@@ -193,7 +191,10 @@ plot(bench)</code></pre>
 <pre><code>## Unit: milliseconds
 ##           expr      min       lq     mean   median       uq      max neval
 ##  single thread 774.9664 846.9223 911.0551 896.0701 952.7812 1303.653   100
-##   multi thread 572.6841 610.1190 667.7990 643.0180 693.4269 1216.081   100</code></pre>
+##   multi thread 572.6841 610.1190 667.7990 643.0180 693.4269 1216.081   100
+##  cld
+##    b
+##   a</code></pre>
 <p><img src="../../../../post/2018-12-05-accelerate-list-of-ggplot-with-furrr_files/figure-html/bench-result-1.png" width="672" /></p>
 <p>うまくいきましたね!!</p>
 </div>
@@ -218,7 +219,7 @@ plot(bench)</code></pre>
         
             <li><a href="../../../../2018/11/09/binwdith-for-geom-histogram/">geom_histogramのビン幅を動的に決定する</a></li>
         
-            <li><a href="../../../../2018/11/03/accelarate-patchwork/">patchworkの表示を高速化したかった……</a></li>
+            <li><a href="../../../../2018/11/03/tex-in-ggplot2/">ggplot2で$TeX$を利用する</a></li>
         
     </ul>
 
@@ -239,6 +240,10 @@ plot(bench)</code></pre>
     <ol class="list-unstyled">
         
         <li>
+            <a href="../../../../2018/12/15/pacman/">pacman パッケージで自動的にパッケージをインストール</a>
+        </li>
+        
+        <li>
             <a href="../../../../2018/12/06/furrr/">furrr パッケージで R で簡単並列処理</a>
         </li>
         
@@ -252,10 +257,6 @@ plot(bench)</code></pre>
         
         <li>
             <a href="../../../../2018/11/25/size-of-viridis-color-palette/">viridisの色数</a>
-        </li>
-        
-        <li>
-            <a href="../../../../2018/11/25/rmd-de-word/">書評 「R MarkdownでWord文書を作ろう」</a>
         </li>
         
     </ol>
@@ -315,6 +316,8 @@ plot(bench)</code></pre>
             <a class="badge badge-primary" href="../../../../tags/missing-value">missing-value</a>
             
             <a class="badge badge-primary" href="../../../../tags/package">package</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/pacman">pacman</a>
             
             <a class="badge badge-primary" href="../../../../tags/patchwork">patchwork</a>
             
