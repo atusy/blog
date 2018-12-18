@@ -318,7 +318,7 @@ Reference Classの <code>fields</code> 要素について記述
 <a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005ckeyword"><code>\keyword</code></a>
 </td>
 <td style="text-align:left;">
-<code>RshowDoc(&quot;&quot;KEYWORDS&quot;&quot;)</code> で一覧できるkeywordを指定。その他のkeywordっぽいものは <code>@concepts</code> で指定する方がいい。
+<code>RshowDoc(""KEYWORDS"")</code> で一覧できるkeywordを指定。その他のkeywordっぽいものは <code>@concepts</code> で指定する方がいい。
 </td>
 </tr>
 <tr>
@@ -452,7 +452,7 @@ raw textをRdファイルに追加
 <a href="http://r-pkgs.had.co.nz/man.html#man-workflow-2"><code>@section</code></a>
 </td>
 <td style="text-align:left;white-space: nowrap">
-<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005csection"></a>
+<a href="https://cran.r-project.org/doc/manuals/R-exts.html#index-_005csection"><code>\section</code></a>
 </td>
 <td style="text-align:left;">
 任意のセクションを追加する。書式は <code>@section タイトル: 内容</code> で、タイトルの後に <code>:</code> が必要。 <code>:</code> タイトルは改行してはならない。
@@ -571,6 +571,15 @@ S4メソッド作成時に、原典を記載。2番目以降は <code>@reference
 <pre class="r"><code>#&#39; @importFrom pkgA funA funB
 #&#39; @importFrom pkgB funA
 #&#39; @seealso hoge fuga</code></pre>
+<p>更に、改行して見やすくすることもできる。
+項目が多い時に便利。</p>
+<pre class="r"><code>#&#39; @importFrom pkgA 
+#&#39;   funA 
+#&#39;   funB
+#&#39; @importFrom pkgB funA
+#&#39; @seealso 
+#&#39;   hoge
+#&#39;   fuga</code></pre>
 </div>
 <div id="and-more" class="section level2">
 <h2>その他</h2>

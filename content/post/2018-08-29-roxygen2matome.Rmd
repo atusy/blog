@@ -98,6 +98,19 @@ x %>%
 #' @seealso hoge fuga
 ```
 
+更に、改行して見やすくすることもできる。
+項目が多い時に便利。
+
+```r
+#' @importFrom pkgA 
+#'   funA 
+#'   funB
+#' @importFrom pkgB funA
+#' @seealso 
+#'   hoge
+#'   fuga
+```
+
 ## その他 {#and-more}
 
 - [Rdコマンドは上述のもの以外にもいっぱいあり、Markupに用いるものもあるので是非確認してみて欲しい](https://cran.r-project.org/doc/manuals/R-exts.html)
