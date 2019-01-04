@@ -74,6 +74,16 @@ res <- mark(
 ) 
 ```
 
+コードはユタニさんが `group_map` を紹介された[記事](https://notchained.hatenablog.com/entry/2018/12/09/160956)のものを利用しています．
+
+実行結果はこんな感じ
+
+```{r result-group-map, echo = FALSE}
+mtcars_grouped_by_cyl %>%
+  group_map(~ tidy(lm(mpg ~ disp, data = .x)))
+```
+
+
 ## 結果
 
 ### 表

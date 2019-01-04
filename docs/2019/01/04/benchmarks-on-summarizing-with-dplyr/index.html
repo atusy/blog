@@ -73,9 +73,9 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                         
-                            <a class="dropdown-item" href="https://atusy.github.io/en/">English</a>
-                        
                             <a class="dropdown-item" href="https://atusy.github.io/">Japanese</a>
+                        
+                            <a class="dropdown-item" href="https://atusy.github.io/en/">English</a>
                         
                     </div>
                 </li>
@@ -186,6 +186,18 @@ res &lt;- mark(
   min_time = Inf,
   max_iterations = 100L
 ) </code></pre>
+<p>コードはユタニさんが <code>group_map</code> を紹介された<a href="https://notchained.hatenablog.com/entry/2018/12/09/160956">記事</a>のものを利用しています．</p>
+<p>実行結果はこんな感じ</p>
+<pre><code>## # A tibble: 6 x 6
+## # Groups:   cyl [3]
+##     cyl term         estimate std.error statistic    p.value
+## * &lt;dbl&gt; &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;
+## 1     4 (Intercept)  40.9       3.59       11.4   0.00000120
+## 2     4 disp         -0.135     0.0332     -4.07  0.00278   
+## 3     6 (Intercept)  19.1       2.91        6.55  0.00124   
+## 4     6 disp          0.00361   0.0156      0.232 0.826     
+## 5     8 (Intercept)  22.0       3.35        6.59  0.0000259 
+## 6     8 disp         -0.0196    0.00932    -2.11  0.0568</code></pre>
 <div id="section" class="section level2">
 <h2>結果</h2>
 <div id="section-1" class="section level3">
