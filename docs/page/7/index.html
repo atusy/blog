@@ -119,6 +119,44 @@
         
         
     </header>
+    Shinyでplotly.jsを使わずにインタラクティブな図を作れるのかなと思ったら、
+「Shiny 100本ノック」の
+【Shiny小技】グラフをダブルクリックすると情報が取得できる、dblclickOptsの紹介
+を見つけました。
+どうやら、 brushOpts なるものを使えば、 plot (ggplot2 を含む) の拡大ができるようなので試してみました。
+ 選択した領域を拡大 選択した領域を移動 選択した領域外をクリックすることで元のサイズに戻る  といったことができるようです。
+dblclickOpts と組み合わせると、 拡大した領域内で点をダブルクリックして点の情報を取り出すことも可能みたいです。
+```{r ui} library(shiny) library(ggplot2)
+u &lt;- shinyUI(fluidPage( plotOutput( “plot”, brush = brushOpts(id = “brush”) ) ))
+s &lt;- shinyServer(function(input, output) { output\(plot &lt;- renderPlot({ qplot(Sepal.Length, Sepal.Width, data = iris) + coord_cartesian( xlim = unlist(input\)brush[c(“xmin”, “xmax”)]), ylim = unlist(input$brush[c(“ymin”, “ymax”)]) ) }) })
+runApp(list(server = s, ui = u)) ```
+    
+</article>
+
+
+    
+
+
+
+    
+        <article class="blog-post">
+    <header>
+        <h2 class="blog-post-title">
+            <a class="text-dark" href="../../1/01/01/"></a>
+        </h2>
+        
+
+
+<div class="blog-post-date text-secondary">
+    
+    
+        by <span rel="author">Atusy</span>
+    
+</div>
+
+        
+        
+    </header>
       こんな人にオススメ   RmdでWord本の再販が間近に迫っていますね．これは献本頂いた時にしたレビューの約束を果たす時!!
 Rmdでこんなに完成したWordドキュメントを作れるんだ……! と感動できるので是非．
 RmdでWordを考えておられる方は勇気付けられるこ間違いなしです．
@@ -262,6 +300,10 @@ RmdでWordを考えておられる方は勇気付けられるこ間違いなし�
     <ol class="list-unstyled">
         
         <li>
+            <a href="../../2019/01/04/benchmarks-on-summarizing-with-dplyr/">group_map などの data frame を要約する関数をベンチマーク (dplyr &gt; 0.8.x)</a>
+        </li>
+        
+        <li>
             <a href="../../2018/12/15/pacman/">pacman でパッケージのインストール・ロードを簡単にする</a>
         </li>
         
@@ -275,10 +317,6 @@ RmdでWordを考えておられる方は勇気付けられるこ間違いなし�
         
         <li>
             <a href="../../2018/12/02/japanr2018-joined/">Japan.R 2018 感想</a>
-        </li>
-        
-        <li>
-            <a href="../../2018/11/25/size-of-viridis-color-palette/">viridisの色数</a>
         </li>
         
     </ol>
@@ -314,6 +352,8 @@ RmdでWordを考えておられる方は勇気付けられるこ間違いなし�
             <a class="badge badge-primary" href="../../tags/blogdown">blogdown</a>
             
             <a class="badge badge-primary" href="../../tags/callr">callr</a>
+            
+            <a class="badge badge-primary" href="../../tags/dplyr">dplyr</a>
             
             <a class="badge badge-primary" href="../../tags/felp">felp</a>
             

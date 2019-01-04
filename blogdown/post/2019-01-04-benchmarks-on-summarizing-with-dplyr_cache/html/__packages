@@ -1,0 +1,12 @@
+base
+bench
+broom
+dplyr
+purrr
+tidyr
+ggplot2
+ggridges
+knitr
+gt
+forcats
+pacman

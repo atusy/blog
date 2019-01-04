@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta property="og:title" content="group_map などの data frame を要約する関数をベンチマーク (dplyr &gt; 0.8.x)" />
+<meta property="og:description" content="パッケージ読み込み ベンチマーク 結果 表 Ridgeline 図 箱ひげ図 感想と補足 Enjoy! tidyverse において，grouped data frame に対して grouping variables 以外の各列に関数を適用する方法は種々あ" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://atusy.github.io/2019/01/04/benchmarks-on-summarizing-with-dplyr/" /><meta property="article:published_time" content="2019-01-04T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2019-01-04T00:00:00&#43;00:00"/>
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="group_map などの data frame を要約する関数をベンチマーク (dplyr &gt; 0.8.x)"/>
+<meta name="twitter:description" content="パッケージ読み込み ベンチマーク 結果 表 Ridgeline 図 箱ひげ図 感想と補足 Enjoy! tidyverse において，grouped data frame に対して grouping variables 以外の各列に関数を適用する方法は種々あ"/>
+
+
+
+    <link rel="canonical" href="https://atusy.github.io/2019/01/04/benchmarks-on-summarizing-with-dplyr/">
+
+    <title>
+      
+        group_map などの data frame を要約する関数をベンチマーク (dplyr &gt; 0.8.x) | Atusy&#39;s blog
+      
+    </title>
+
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+
+    <link href="https://atusy.github.io/css/style.css" rel="stylesheet">
+
+    
+
+    
+
+    <link rel="stylesheet" href="../../../../css/chroma-styles.css">
+
+  </head>
+  <body>
+    
+      <header class="blog-header">
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+        <a class="navbar-brand" href="../../../../">
+            <img src="../../../../images/atusy.jpg" width="50" height="50" class="d-inline-block align-top" alt="">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+            <ul class="navbar-nav">
+                
+                
+                <li class="nav-item ">
+                    
+                        <a class="nav-link" href="https://github.com/atusy">GitHub</a>
+                    
+                </li>
+                
+                <li class="nav-item ">
+                    
+                        <a class="nav-link" href="https://twitter.com/Atsushi776">Twitter</a>
+                    
+                </li>
+                
+            </ul>
+            
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Language
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                        
+                            <a class="dropdown-item" href="https://atusy.github.io/en/">English</a>
+                        
+                            <a class="dropdown-item" href="https://atusy.github.io/">Japanese</a>
+                        
+                    </div>
+                </li>
+            </ul>
+            
+        </div>
+    </nav>
+</header>
+    
+
+    
+    <div class="container">
+      <div class="row">
+        <div class="col-12 col-lg-8 blog-main">
+
+          
+
+<header>
+    <h2 class="blog-post-title">
+        <a class="text-dark" href="../../../../2019/01/04/benchmarks-on-summarizing-with-dplyr/">group_map などの data frame を要約する関数をベンチマーク (dplyr &gt; 0.8.x)</a>
+    </h2>
+    
+
+
+<div class="blog-post-date text-secondary">
+    
+        2019-1-4
+    
+    
+        by <span rel="author">Atusy</span>
+    
+</div>
+
+    
+<div class="blog-post-tags text-secondary">
+    <strong>タグ:</strong>
+    
+        <a class="badge badge-primary" href="../../../../tags/dplyr">dplyr</a>
+    
+</div>
+
+    
+<div class="blog-post-categories text-secondary">
+    <strong>カテゴリ:</strong>
+    
+        <a class="badge badge-primary" href="../../../../categories/r">R</a>
+    
+</div>
+
+    <hr>
+</header>
+<article class="blog-post">
+    
+
+<div id="TOC">
+<ul>
+<li><a href="#pkg">パッケージ読み込み</a></li>
+<li><a href="#bench">ベンチマーク</a><ul>
+<li><a href="#section">結果</a><ul>
+<li><a href="#section-1">表</a></li>
+<li><a href="#ridgeline">Ridgeline 図</a></li>
+<li><a href="#boxplot">箱ひげ図</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#kanso">感想と補足</a></li>
+<li><a href="#enjoy">Enjoy!</a></li>
+</ul>
+</div>
+
+<p><code>tidyverse</code> において，grouped data frame に対して grouping variables
+以外の各列に関数を適用する方法は種々ある．</p>
+<ul>
+<li><code>summarize</code>: 関数の返り値が長さ1の時</li>
+<li><code>group_map</code>: 関数の返り値がデータフレームの時</li>
+<li><code>nest %&gt;% map</code>: 関数の返り値が複雑な時</li>
+</ul>
+<p>基本は上述の使い分けのようだが (<code class="r">help(dplyr::group_map)</code>)，
+一応， <code>summarize</code> も返り値を <code class="r">list()</code> してやると複雑な処理に対応できる
+(<a href="#bench">後述</a>)．</p>
+<p><code>summarize</code> と <code>nest %&gt;% ....</code> を比べた時に，<code>nest</code>
+が新しいオブジェクトを作るせいで遅くなりがちだと知り，
+<code>summarize</code> を偏重している<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>．
+しかし，dplyr 0.8.0 で <code>group_map</code> がくるし，<code>do</code> が deprecated になって久しいし，これらもひっくるめてベンチマークし直してみることにした．</p>
+<div id="pkg" class="section level1">
+<h1>パッケージ読み込み</h1>
+<pre class="r"><code>pacman::p_load(
+  bench, # ベンチマークするためのパッケージ
+  broom, dplyr, purrr, tidyr, # ベンチマークするコードで使うパッケージ
+  ggridges, knitr # ベンチマークした結果を可視化するためのパッケージ
+)</code></pre>
+</div>
+<div id="bench" class="section level1">
+<h1>ベンチマーク</h1>
+<pre class="r"><code>mtcars_grouped_by_cyl &lt;- mtcars %&gt;% group_by(cyl) # 共通する操作を予め実行
+
+res &lt;- mark(
+  &quot;group_map&quot; = mtcars_grouped_by_cyl %&gt;%
+    group_map(~ tidy(lm(mpg ~ disp, data = .x))),
+  &quot;nest-map-unnest&quot; = mtcars_grouped_by_cyl %&gt;%
+    nest() %&gt;%
+    mutate(data = map(data, ~ tidy(lm(mpg ~ disp, data = .)))) %&gt;%
+    unnest(),
+  &quot;summarize-unnest&quot; = mtcars_grouped_by_cyl %&gt;%
+    summarize(list(tidy(lm(mpg ~ disp)))) %&gt;%
+    unnest,
+  &quot;do&quot; = mtcars_grouped_by_cyl %&gt;%
+    do(tidy(lm(mpg ~ disp, data = .))),
+  min_time = Inf,
+  max_iterations = 100L
+) </code></pre>
+<div id="section" class="section level2">
+<h2>結果</h2>
+<div id="section-1" class="section level3">
+<h3>表</h3>
+<pre class="r"><code># summary(res) を順位で並べ替え+列選択
+res_summary &lt;- res %&gt;% 
+  summary() %&gt;%
+  arrange(mean) %&gt;%
+  select(expression, min, mean, median, max, n_itr)
+
+# 表に出力 (S3をうまく扱えないっぽいので文字列にしておく)
+gt(mutate_all(res_summary,as.character))</code></pre>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;
+}
+
+#qsqtkclenc .gt_table {
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #000000;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  /* table.background.color */
+  width: auto;
+  /* table.width */
+  border-top-style: solid;
+  /* table.border.top.style */
+  border-top-width: 2px;
+  /* table.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table.border.top.color */
+}
+
+#qsqtkclenc .gt_heading {
+  background-color: #FFFFFF;
+  /* heading.background.color */
+  border-bottom-color: #FFFFFF;
+}
+
+#qsqtkclenc .gt_title {
+  color: #000000;
+  font-size: 125%;
+  /* heading.title.font.size */
+  padding-top: 4px;
+  /* heading.top.padding */
+  padding-bottom: 1px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#qsqtkclenc .gt_subtitle {
+  color: #000000;
+  font-size: 85%;
+  /* heading.subtitle.font.size */
+  padding-top: 1px;
+  padding-bottom: 4px;
+  /* heading.bottom.padding */
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#qsqtkclenc .gt_bottom_border {
+  border-bottom-style: solid;
+  /* heading.border.bottom.style */
+  border-bottom-width: 2px;
+  /* heading.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* heading.border.bottom.color */
+}
+
+#qsqtkclenc .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#qsqtkclenc .gt_col_heading {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* column_labels.background.color */
+  font-size: 16px;
+  /* column_labels.font.size */
+  font-weight: initial;
+  /* column_labels.font.weight */
+  padding: 10px;
+  margin: 10px;
+}
+
+#qsqtkclenc .gt_sep_right {
+  border-right: 5px solid #FFFFFF;
+}
+
+#qsqtkclenc .gt_group_heading {
+  padding: 8px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#qsqtkclenc .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#qsqtkclenc .gt_striped tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#qsqtkclenc .gt_row {
+  padding: 10px;
+  /* row.padding */
+  margin: 10px;
+}
+
+#qsqtkclenc .gt_stub {
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #A8A8A8;
+  text-indent: 5px;
+}
+
+#qsqtkclenc .gt_stub.gt_row {
+  background-color: #FFFFFF;
+}
+
+#qsqtkclenc .gt_summary_row {
+  background-color: #FFFFFF;
+  /* summary_row.background.color */
+  padding: 6px;
+  /* summary_row.padding */
+  text-transform: inherit;
+  /* summary_row.text_transform */
+}
+
+#qsqtkclenc .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+}
+
+#qsqtkclenc .gt_table_body {
+  border-top-style: solid;
+  /* field.border.top.style */
+  border-top-width: 2px;
+  /* field.border.top.width */
+  border-top-color: #A8A8A8;
+  /* field.border.top.color */
+  border-bottom-style: solid;
+  /* field.border.bottom.style */
+  border-bottom-width: 2px;
+  /* field.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* field.border.bottom.color */
+}
+
+#qsqtkclenc .gt_footnote {
+  font-size: 90%;
+  /* footnote.font.size */
+  padding: 4px;
+  /* footnote.padding */
+}
+
+#qsqtkclenc .gt_sourcenote {
+  font-size: 90%;
+  /* sourcenote.font.size */
+  padding: 4px;
+  /* sourcenote.padding */
+}
+
+#qsqtkclenc .gt_center {
+  text-align: center;
+}
+
+#qsqtkclenc .gt_left {
+  text-align: left;
+}
+
+#qsqtkclenc .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#qsqtkclenc .gt_font_normal {
+  font-weight: normal;
+}
+
+#qsqtkclenc .gt_font_bold {
+  font-weight: bold;
+}
+
+#qsqtkclenc .gt_font_italic {
+  font-style: italic;
+}
+
+#qsqtkclenc .gt_super {
+  font-size: 65%;
+}
+
+#qsqtkclenc .gt_footnote_glyph {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="qsqtkclenc"><!--gt table start-->
+<table class='gt_table'>
+<tr>
+<th class='gt_col_heading gt_left' rowspan='1' colspan='1'>expression</th>
+<th class='gt_col_heading gt_left' rowspan='1' colspan='1'>min</th>
+<th class='gt_col_heading gt_left' rowspan='1' colspan='1'>mean</th>
+<th class='gt_col_heading gt_left' rowspan='1' colspan='1'>median</th>
+<th class='gt_col_heading gt_left' rowspan='1' colspan='1'>max</th>
+<th class='gt_col_heading gt_left' rowspan='1' colspan='1'>n_itr</th>
+</tr>
+<tbody class='gt_table_body gt_striped'>
+<tr>
+<td class='gt_row gt_left'>do              </td>
+<td class='gt_row gt_left'>4.21ms</td>
+<td class='gt_row gt_left'>4.41ms</td>
+<td class='gt_row gt_left'>4.33ms</td>
+<td class='gt_row gt_left'>6.16ms</td>
+<td class='gt_row gt_left'>87</td>
+</tr>
+<tr>
+<td class='gt_row gt_left'>group_map       </td>
+<td class='gt_row gt_left'>4.33ms</td>
+<td class='gt_row gt_left'>4.71ms</td>
+<td class='gt_row gt_left'>4.5ms </td>
+<td class='gt_row gt_left'>7.15ms</td>
+<td class='gt_row gt_left'>86</td>
+</tr>
+<tr>
+<td class='gt_row gt_left'>summarize-unnest</td>
+<td class='gt_row gt_left'>4.71ms</td>
+<td class='gt_row gt_left'>4.92ms</td>
+<td class='gt_row gt_left'>4.85ms</td>
+<td class='gt_row gt_left'>6.29ms</td>
+<td class='gt_row gt_left'>84</td>
+</tr>
+<tr>
+<td class='gt_row gt_left'>nest-map-unnest </td>
+<td class='gt_row gt_left'>6.26ms</td>
+<td class='gt_row gt_left'>6.57ms</td>
+<td class='gt_row gt_left'>6.48ms</td>
+<td class='gt_row gt_left'>8.45ms</td>
+<td class='gt_row gt_left'>79</td>
+</tr>
+</tbody>
+</table>
+<!--gt table end-->
+</div>
+</div>
+<div id="ridgeline" class="section level3">
+<h3>Ridgeline 図</h3>
+<pre class="r"><code># res の expression は factor型だが，水準の順序を表と同じにしておく
+res$expression &lt;- fct_relevel(res$expression, rev(res_summary$expression))
+
+# Ridgeline 図を出力
+plot(res, type = &quot;ridge&quot;) + labs(x = NULL, y = NULL)</code></pre>
+<pre><code>## Picking joint bandwidth of 0.00939</code></pre>
+<p><img src="../../../../post/2019-01-04-benchmarks-on-summarizing-with-dplyr_files/figure-html/fig-ridgeline-1.png" width="672" /></p>
+</div>
+<div id="boxplot" class="section level3">
+<h3>箱ひげ図</h3>
+<pre class="r"><code>plot(res, type = &quot;boxplot&quot;) + labs(x = NULL, y = NULL)</code></pre>
+<p><img src="../../../../post/2019-01-04-benchmarks-on-summarizing-with-dplyr_files/figure-html/fig-boxplot-1.png" width="672" /></p>
+</div>
+</div>
+</div>
+<div id="kanso" class="section level1">
+<h1>感想と補足</h1>
+<p>実は <code class="r">do()</code> が最速ということにビビらされていますが，
+<code class="r">group_map()</code> は高速な上にシンプルに書けるので便利そうですね．</p>
+<p>単純なデータの要約の場合は <code>summarize</code> を使う方が簡単に書けますし，動作も高速です．
+このあたりは臨機応変に．</p>
+<pre class="r"><code>iris %&gt;%
+  group_by(Species) %&gt;%
+  summarize_all(mean)</code></pre>
+<pre><code>## # A tibble: 3 x 5
+##   Species    Sepal.Length Sepal.Width Petal.Length Petal.Width
+##   &lt;fct&gt;             &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt;
+## 1 setosa             5.01        3.43         1.46       0.246
+## 2 versicolor         5.94        2.77         4.26       1.33 
+## 3 virginica          6.59        2.97         5.55       2.03</code></pre>
+<pre class="r"><code>plot(
+  mark(
+    &quot;group_map&quot; = iris %&gt;%
+      group_by(Species) %&gt;%
+      group_map(~ map_dfc(.x, mean)),
+    &quot;summarize&quot; = iris %&gt;%
+      group_by(Species) %&gt;%
+      summarize_all(mean)
+  ),
+  type = &quot;ridge&quot;
+) +
+  labs(x = NULL, y = NULL)</code></pre>
+<pre><code>## Picking joint bandwidth of 0.00324</code></pre>
+<p><img src="../../../../post/2019-01-04-benchmarks-on-summarizing-with-dplyr_files/figure-html/summarize-wins-when-simple-1.png" width="672" /></p>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1">ユタニさんとの会話<br />
+
+<blockquote class="twitter-tweet" data-lang="en">
+<p lang="ja" dir="ltr">
+nest()は新しいオブジェクトをつくるのがボトルネックなのかなと。ちなみに余談ですが、dplyrの中で使ってるmean()はたぶんbase::mean()じゃないのでちょっと速いという話もあります。
+</p>
+— Hiroaki Yutani (<span class="citation">@yutannihilation</span>) <a href="https://twitter.com/yutannihilation/status/1070987914635431936?ref_src=twsrc%5Etfw">December 7, 2018</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<a href="#fnref1" class="footnote-back">↩</a></li>
+</ol>
+</div>
+
+
+    
+
+    
+
+
+</article>
+
+
+
+        </div>
+
+        <aside class="col-12 col-lg-3 ml-auto blog-sidebar">
+    
+        
+
+
+<section>
+    <h4>New</h4>
+    <ol class="list-unstyled">
+        
+        <li>
+            <a href="../../../../2019/01/04/benchmarks-on-summarizing-with-dplyr/">group_map などの data frame を要約する関数をベンチマーク (dplyr &gt; 0.8.x)</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/12/15/pacman/">pacman でパッケージのインストール・ロードを簡単にする</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/12/06/furrr/">furrr パッケージで R で簡単並列処理</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/12/05/accelerate-list-of-ggplot-with-furrr/">furrr パッケージで ggplot のリストの表示を高速化する</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/12/02/japanr2018-joined/">Japan.R 2018 感想</a>
+        </li>
+        
+    </ol>
+</section>
+
+    
+    
+        <section>
+    
+        
+        <h4>カテゴリ</h4>
+        <p>
+            
+            <a class="badge badge-primary" href="../../../../categories/arch">arch</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/css">css</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/latex">latex</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/music">music</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/r">r</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/stats">stats</a>
+            
+        </p>
+        
+    
+        
+        <h4>タグ</h4>
+        <p>
+            
+            <a class="badge badge-primary" href="../../../../tags/blogdown">blogdown</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/callr">callr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/dplyr">dplyr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/felp">felp</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/furrr">furrr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/ggplot2">ggplot2</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/glue">glue</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/japanr">japanr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/knitr">knitr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/latex">latex</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/latex2exp">latex2exp</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/linux">linux</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/mathjax">mathjax</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/missing-value">missing-value</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/package">package</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/pacman">pacman</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/patchwork">patchwork</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/pforeach">pforeach</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/plantuml">plantuml</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/plotly">plotly</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/r">r</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86">r-markdownでword文書を作ろう</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/rd">rd</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/rmd">rmd</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/roxygen2">roxygen2</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/rprofile">rprofile</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/shiny">shiny</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/tex">tex</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/tokyor">tokyor</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/unicode">unicode</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/viridis">viridis</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/yaml">yaml</a>
+            
+        </p>
+        
+    
+</section>
+    
+</aside>
+
+      </div>
+    </div>
+    
+
+    
+      
+
+
+
+<footer class="blog-footer w-100">
+    <nav class="navbar navbar-light bg-light">
+        <p class="w-100 text-center"></p>
+        <p class="w-100 text-center"><a href="#">Home</a></p>
+    </nav>
+</footer>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script async
+src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+    
+
+    
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+  </body>
+</html>

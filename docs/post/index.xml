@@ -6,10 +6,19 @@
     <description>Recent content in Posts on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Sat, 15 Dec 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 04 Jan 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://atusy.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>group_map などの data frame を要約する関数をベンチマーク (dplyr &gt; 0.8.x)</title>
+      <link>https://atusy.github.io/2019/01/04/benchmarks-on-summarizing-with-dplyr/</link>
+      <pubDate>Fri, 04 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2019/01/04/benchmarks-on-summarizing-with-dplyr/</guid>
+      <description>パッケージ読み込み ベンチマーク 結果 表 Ridgeline 図 箱ひげ図 感想と補足 Enjoy! tidyverse において，grouped data frame に対して grouping variables 以外の各列に関数を適用する方法は種々あ</description>
+    </item>
     
     <item>
       <title>pacman でパッケージのインストール・ロードを簡単にする</title>

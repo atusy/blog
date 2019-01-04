@@ -1,0 +1,138 @@
+---
+title: group_map などの data frame を要約する関数をベンチマーク (dplyr > 0.8.x)
+author: ~
+date: '2019-01-04'
+slug: benchmarks-on-summarizing-with-dplyr
+categories: [R]
+tags: [dplyr]
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+```{r setup, include = FALSE}
+library(pacman)
+knitr::opts_chunk$set(fig.width = 7, fig.height = 3)
+p_load(
+  bench, # ベンチマークするためのパッケージ
+  broom, dplyr, purrr, tidyr, # ベンチマークするコードで使うパッケージ
+  ggplot2, ggridges, forcats # 可視化に利用
+)
+p_load_gh("rstudio/gt")
+```
+
+`tidyverse` において，grouped data frame に対して grouping variables 
+以外の各列に関数を適用する方法は種々ある．
+
+- `summarize`: 関数の返り値が長さ1の時
+- `group_map`: 関数の返り値がデータフレームの時
+- `nest %>% map`: 関数の返り値が複雑な時
+
+基本は上述の使い分けのようだが (`help(dplyr::group_map)`{.r})，
+一応， `summarize` も返り値を `list()`{.r} してやると複雑な処理に対応できる
+([後述](#bench))．
+
+`summarize` と `nest %>% ....` を比べた時に，`nest` 
+が新しいオブジェクトを作るせいで遅くなりがちだと知り，
+`summarize` を偏重している[^yutani]．
+しかし，dplyr 0.8.0 で `group_map` がくるし，`do` が deprecated になって久しいし，これらもひっくるめてベンチマークし直してみることにした．
+
+[^yutani]: ユタニさんとの会話  
+    <blockquote class="twitter-tweet" data-lang="en"><p lang="ja" dir="ltr">nest()は新しいオブジェクトをつくるのがボトルネックなのかなと。ちなみに余談ですが、dplyrの中で使ってるmean()はたぶんbase::mean()じゃないのでちょっと速いという話もあります。</p>&mdash; Hiroaki Yutani (@yutannihilation) <a href="https://twitter.com/yutannihilation/status/1070987914635431936?ref_src=twsrc%5Etfw">December 7, 2018</a></blockquote>
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+# パッケージ読み込み {#pkg}
+
+```{r, label}
+pacman::p_load(
+  bench, # ベンチマークするためのパッケージ
+  broom, dplyr, purrr, tidyr, # ベンチマークするコードで使うパッケージ
+  ggridges, knitr # ベンチマークした結果を可視化するためのパッケージ
+)
+```
+
+
+# ベンチマーク {#bench}
+
+```{r, cache = TRUE}
+mtcars_grouped_by_cyl <- mtcars %>% group_by(cyl) # 共通する操作を予め実行
+
+res <- mark(
+  "group_map" = mtcars_grouped_by_cyl %>%
+    group_map(~ tidy(lm(mpg ~ disp, data = .x))),
+  "nest-map-unnest" = mtcars_grouped_by_cyl %>%
+    nest() %>%
+    mutate(data = map(data, ~ tidy(lm(mpg ~ disp, data = .)))) %>%
+    unnest(),
+  "summarize-unnest" = mtcars_grouped_by_cyl %>%
+    summarize(list(tidy(lm(mpg ~ disp)))) %>%
+    unnest,
+  "do" = mtcars_grouped_by_cyl %>%
+    do(tidy(lm(mpg ~ disp, data = .))),
+  min_time = Inf,
+  max_iterations = 100L
+) 
+```
+
+## 結果
+
+### 表
+
+```{r}
+# summary(res) を順位で並べ替え+列選択
+res_summary <- res %>% 
+  summary() %>%
+  arrange(mean) %>%
+  select(expression, min, mean, median, max, n_itr)
+
+# 表に出力 (S3をうまく扱えないっぽいので文字列にしておく)
+gt(mutate_all(res_summary,as.character))
+```
+
+### Ridgeline 図 {#ridgeline}
+
+```{r fig-ridgeline}
+# res の expression は factor型だが，水準の順序を表と同じにしておく
+res$expression <- fct_relevel(res$expression, rev(res_summary$expression))
+
+# Ridgeline 図を出力
+plot(res, type = "ridge") + labs(x = NULL, y = NULL)
+```
+
+### 箱ひげ図 {#boxplot}
+
+```{r fig-boxplot}
+plot(res, type = "boxplot") + labs(x = NULL, y = NULL)
+```
+
+# 感想と補足 {#kanso}
+
+実は `do()`{.r} が最速ということにビビらされていますが，
+`group_map()`{.r} は高速な上にシンプルに書けるので便利そうですね．
+
+単純なデータの要約の場合は `summarize` を使う方が簡単に書けますし，動作も高速です．
+このあたりは臨機応変に．
+
+```{r simple-case}
+iris %>%
+  group_by(Species) %>%
+  summarize_all(mean)
+```
+
+
+```{r summarize-wins-when-simple, cache = TRUE}
+plot(
+  mark(
+    "group_map" = iris %>%
+      group_by(Species) %>%
+      group_map(~ map_dfc(.x, mean)),
+    "summarize" = iris %>%
+      group_by(Species) %>%
+      summarize_all(mean)
+  ),
+  type = "ridge"
+) +
+  labs(x = NULL, y = NULL)
+```
+
+# Enjoy!

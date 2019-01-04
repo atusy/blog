@@ -9,7 +9,7 @@
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://atusy.github.io/post/" />
-<meta property="og:updated_time" content="2018-11-21T00:00:00&#43;00:00"/>
+<meta property="og:updated_time" content="2018-11-22T00:00:00&#43;00:00"/>
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Posts"/>
@@ -97,6 +97,53 @@
 
 
 
+
+
+
+    
+        <article class="blog-post">
+    <header>
+        <h2 class="blog-post-title">
+            <a class="text-dark" href="../../../2018/11/22/strange-coord-functions-ggplot2/"><code>ggplot2::coord_cartesian(xlim = c(0, NA))</code> できるようにしてみた</a>
+        </h2>
+        
+
+
+<div class="blog-post-date text-secondary">
+    
+        2018-11-22
+    
+    
+        by <span rel="author">Atusy</span>
+    
+</div>
+
+        
+<div class="blog-post-tags text-secondary">
+    <strong>タグ:</strong>
+    
+        <a class="badge badge-primary" href="../../../tags/ggplot2">ggplot2</a>
+    
+</div>
+
+        
+<div class="blog-post-categories text-secondary">
+    <strong>カテゴリ:</strong>
+    
+        <a class="badge badge-primary" href="../../../categories/r">R</a>
+    
+</div>
+
+    </header>
+    問題 実装 オリジナル 修正版 実験 他のcoord_系列も問題なさそう 感想 PRに向けての試験的な実装． https://github.com/atusy/ggplot2/commit/26c1b7a478585889947d265d691e375e399637c3 なぜかxlimやylimに長さ3以上の連続値
+    
+    <p></p>
+    <a href="../../../2018/11/22/strange-coord-functions-ggplot2/">読む →</a>
+    
+</article>
+
+
+    
 
 
 
@@ -377,53 +424,6 @@
 
 
 
-    
-        <article class="blog-post">
-    <header>
-        <h2 class="blog-post-title">
-            <a class="text-dark" href="../../../2018/11/09/binwdith-for-geom-histogram/">geom_histogramのビン幅を動的に決定する</a>
-        </h2>
-        
-
-
-<div class="blog-post-date text-secondary">
-    
-        2018-11-9
-    
-    
-        by <span rel="author">Atusy</span>
-    
-</div>
-
-        
-<div class="blog-post-tags text-secondary">
-    <strong>タグ:</strong>
-    
-        <a class="badge badge-primary" href="../../../tags/ggplot2">ggplot2</a>
-    
-</div>
-
-        
-<div class="blog-post-categories text-secondary">
-    <strong>カテゴリ:</strong>
-    
-        <a class="badge badge-primary" href="../../../categories/r">R</a>
-    
-</div>
-
-    </header>
-    TL; DR ggplot2のヒストグラムはビン数30が既定 ビン幅を動的に決めたい geom_histogram(binwidth = ) に関数を指定 ビン幅を決める関数を定義 テスト Enjoy! TL; DR geom_histogram(binwidth = ) はデータ
-    
-    <p></p>
-    <a href="../../../2018/11/09/binwdith-for-geom-histogram/">読む →</a>
-    
-</article>
-
-
-    
-
-
-
 
 
 <nav class="blog-pagination">
@@ -547,6 +547,10 @@
     <ol class="list-unstyled">
         
         <li>
+            <a href="../../../2019/01/04/benchmarks-on-summarizing-with-dplyr/">group_map などの data frame を要約する関数をベンチマーク (dplyr &gt; 0.8.x)</a>
+        </li>
+        
+        <li>
             <a href="../../../2018/12/15/pacman/">pacman でパッケージのインストール・ロードを簡単にする</a>
         </li>
         
@@ -560,10 +564,6 @@
         
         <li>
             <a href="../../../2018/12/02/japanr2018-joined/">Japan.R 2018 感想</a>
-        </li>
-        
-        <li>
-            <a href="../../../2018/11/25/size-of-viridis-color-palette/">viridisの色数</a>
         </li>
         
     </ol>
@@ -599,6 +599,8 @@
             <a class="badge badge-primary" href="../../../tags/blogdown">blogdown</a>
             
             <a class="badge badge-primary" href="../../../tags/callr">callr</a>
+            
+            <a class="badge badge-primary" href="../../../tags/dplyr">dplyr</a>
             
             <a class="badge badge-primary" href="../../../tags/felp">felp</a>
             
