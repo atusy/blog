@@ -9,7 +9,7 @@
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://atusy.github.io/post/" />
-<meta property="og:updated_time" content="2019-01-04T00:00:00&#43;00:00"/>
+<meta property="og:updated_time" content="2019-01-16T00:00:00&#43;00:00"/>
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Posts"/>
@@ -97,6 +97,53 @@
 
 
 
+
+
+
+    
+        <article class="blog-post">
+    <header>
+        <h2 class="blog-post-title">
+            <a class="text-dark" href="../2019/01/16/s3-generics-dont-pass-default-params-to-methods/">S3総称関数の引数の既定値はメソッドに渡らない</a>
+        </h2>
+        
+
+
+<div class="blog-post-date text-secondary">
+    
+        2019-1-16
+    
+    
+        by <span rel="author">Atusy</span>
+    
+</div>
+
+        
+<div class="blog-post-tags text-secondary">
+    <strong>タグ:</strong>
+    
+        <a class="badge badge-primary" href="../tags/s3">S3</a>
+    
+</div>
+
+        
+<div class="blog-post-categories text-secondary">
+    <strong>カテゴリ:</strong>
+    
+        <a class="badge badge-primary" href="../categories/r">R</a>
+    
+</div>
+
+    </header>
+    Error と周辺の挙動 f &lt;- function(x, n = 1, ...) UseMethod(&quot;f&quot;) f.default &lt;- function(x, n, ...) n f(NULL) ## Error in f.default(NULL): argument &quot;n&quot; is missing, with no default てっきり f(NULL) を実行すると，既定で n = 1 だから， f.default(x = NULL, n = 1) が呼び出されるとば
+    
+    <p></p>
+    <a href="../2019/01/16/s3-generics-dont-pass-default-params-to-methods/">読む →</a>
+    
+</article>
+
+
+    
 
 
 
@@ -384,53 +431,6 @@
 
 
 
-    
-        <article class="blog-post">
-    <header>
-        <h2 class="blog-post-title">
-            <a class="text-dark" href="../2018/11/25/rmd-de-word/">書評 「R MarkdownでWord文書を作ろう」</a>
-        </h2>
-        
-
-
-<div class="blog-post-date text-secondary">
-    
-        2018-11-25
-    
-    
-        by <span rel="author">Atusy</span>
-    
-</div>
-
-        
-<div class="blog-post-tags text-secondary">
-    <strong>タグ:</strong>
-    
-        <a class="badge badge-primary" href="../tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86">R MarkdownでWord文書を作ろう</a>
-    
-</div>
-
-        
-<div class="blog-post-categories text-secondary">
-    <strong>カテゴリ:</strong>
-    
-        <a class="badge badge-primary" href="../categories/r">R</a>
-    
-</div>
-
-    </header>
-    RmdでWord本の再販が間近に迫っていますね．これは献本頂いた時にしたレビューの約束を果たす時!! Rmdでこんなに完成したWordドキュメ
-    
-    <p></p>
-    <a href="../2018/11/25/rmd-de-word/">読む →</a>
-    
-</article>
-
-
-    
-
-
-
 
 
 <nav class="blog-pagination">
@@ -554,6 +554,10 @@
     <ol class="list-unstyled">
         
         <li>
+            <a href="../2019/01/16/s3-generics-dont-pass-default-params-to-methods/">S3総称関数の引数の既定値はメソッドに渡らない</a>
+        </li>
+        
+        <li>
             <a href="../2019/01/04/benchmarks-on-summarizing-with-dplyr/">group_map などの data frame を要約する関数をベンチマーク (dplyr &gt; 0.8.x)</a>
         </li>
         
@@ -567,10 +571,6 @@
         
         <li>
             <a href="../2018/12/05/accelerate-list-of-ggplot-with-furrr/">furrr パッケージで ggplot のリストの表示を高速化する</a>
-        </li>
-        
-        <li>
-            <a href="../2018/12/02/japanr2018-joined/">Japan.R 2018 感想</a>
         </li>
         
     </ol>
@@ -654,6 +654,8 @@
             <a class="badge badge-primary" href="../tags/roxygen2">roxygen2</a>
             
             <a class="badge badge-primary" href="../tags/rprofile">rprofile</a>
+            
+            <a class="badge badge-primary" href="../tags/s3">s3</a>
             
             <a class="badge badge-primary" href="../tags/shiny">shiny</a>
             

@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://atusy.github.io/2019/01/16/s3-generics-dont-pass-default-params-to-methods/</loc>
+    <lastmod>2019-01-16T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://atusy.github.io/2019/01/04/benchmarks-on-summarizing-with-dplyr/</loc>
     <lastmod>2019-01-04T00:00:00+00:00</lastmod>
   </url>
@@ -242,7 +247,7 @@
   
   <url>
     <loc>https://atusy.github.io/</loc>
-    <lastmod>2019-01-04T00:00:00+00:00</lastmod>
+    <lastmod>2019-01-16T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -353,14 +358,14 @@
   </url>
   
   <url>
-    <loc>https://atusy.github.io/categories/latex/</loc>
-    <lastmod>2018-07-09T00:00:00+00:00</lastmod>
+    <loc>https://atusy.github.io/tags/latex/</loc>
+    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/tags/latex/</loc>
-    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
+    <loc>https://atusy.github.io/categories/latex/</loc>
+    <lastmod>2018-07-09T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -442,7 +447,7 @@
   
   <url>
     <loc>https://atusy.github.io/post/</loc>
-    <lastmod>2019-01-04T00:00:00+00:00</lastmod>
+    <lastmod>2019-01-16T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -457,8 +462,14 @@
   </url>
   
   <url>
+    <loc>https://atusy.github.io/tags/r/</loc>
+    <lastmod>2018-07-31T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://atusy.github.io/categories/r/</loc>
-    <lastmod>2019-01-04T00:00:00+00:00</lastmod>
+    <lastmod>2019-01-16T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -470,12 +481,6 @@
                 hreflang="ja"
                 href="https://atusy.github.io/categories/r/"
                 />
-  </url>
-  
-  <url>
-    <loc>https://atusy.github.io/tags/r/</loc>
-    <lastmod>2018-07-31T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -515,6 +520,12 @@
   <url>
     <loc>https://atusy.github.io/tags/rprofile/</loc>
     <lastmod>2018-11-06T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://atusy.github.io/tags/s3/</loc>
+    <lastmod>2019-01-16T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

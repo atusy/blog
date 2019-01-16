@@ -1,0 +1,47 @@
+---
+title: S3総称関数の引数の既定値はメソッドに渡らない
+author: ~
+date: '2019-01-16'
+slug: s3-generics-dont-pass-default-params-to-methods
+categories: [R]
+tags: [S3]
+---
+
+
+
+<div id="error-" class="section level1">
+<h1>Error と周辺の挙動</h1>
+<pre class="r"><code>f &lt;- function(x, n = 1, ...) UseMethod(&quot;f&quot;)
+f.default &lt;- function(x, n, ...) n
+f(NULL)</code></pre>
+<pre><code>## Error in f.default(NULL): argument &quot;n&quot; is missing, with no default</code></pre>
+<p>てっきり <code>f(NULL)</code> を実行すると，既定で <code>n = 1</code> だから，
+<code>f.default(x = NULL, n = 1)</code> が呼び出されるとばかり思っていた．
+メソッドに渡される引数は明示的に値を与えたものだけらしい．</p>
+<p><code>f(NULL, n = 2)</code> といった具合にすると，<code>f.default(x = NULL, n = 2)</code> が呼び出されうまく動く．</p>
+<pre class="r"><code>f(NULL, 2)</code></pre>
+<pre><code>## [1] 2</code></pre>
+</div>
+<div id="section" class="section level1">
+<h1>対策</h1>
+<div id="section-1" class="section level2">
+<h2>メソッドにも既定値を設定</h2>
+<pre class="r"><code>f &lt;- function(x, n = 1, ...) UseMethod(&quot;f&quot;)
+f.default &lt;- function(x, n = 1, ...) n
+f()</code></pre>
+<pre><code>## [1] 1</code></pre>
+</div>
+<div id="formals--" class="section level2">
+<h2><code>formals&lt;-</code> を利用</h2>
+<p>複数のメソッドに同じ既定値を与えたい場合に便利．
+コピペを減らせ，後で挙動を変える時は総称関数の既定値を変えるだけで済む．</p>
+<pre class="r"><code>f &lt;- function(x, n = 1, ...) UseMethod(&quot;f&quot;)
+f.numeric &lt;- function(x, n, ...) n
+f.character &lt;- function(x, n, ...) n
+formals(f.numeric)$n &lt;- formals(f.character)$n &lt;- formals(f)$n
+f(1)</code></pre>
+<pre><code>## [1] 1</code></pre>
+<pre class="r"><code>f(&quot;A&quot;)</code></pre>
+<pre><code>## [1] 1</code></pre>
+</div>
+</div>

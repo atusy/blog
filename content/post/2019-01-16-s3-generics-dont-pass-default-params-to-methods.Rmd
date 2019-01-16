@@ -1,0 +1,54 @@
+---
+title: S3総称関数の引数の既定値はメソッドに渡らない
+author: ~
+date: '2019-01-16'
+slug: s3-generics-dont-pass-default-params-to-methods
+categories: [R]
+tags: [S3]
+---
+
+
+# Error と周辺の挙動
+
+```{r error, error = TRUE}
+f <- function(x, n = 1, ...) UseMethod("f")
+f.default <- function(x, n, ...) n
+f(NULL)
+```
+
+てっきり `f(NULL)` を実行すると，既定で `n = 1` だから，
+`f.default(x = NULL, n = 1)` が呼び出されるとばかり思っていた．
+メソッドに渡される引数は明示的に値を与えたものだけらしい．
+
+`f(NULL, n = 2)` といった具合にすると，`f.default(x = NULL, n = 2)` が呼び出されうまく動く．
+
+```{r success}
+f(NULL, 2)
+```
+
+
+# 対策
+
+## メソッドにも既定値を設定
+
+```{r parameterize-each}
+f <- function(x, n = 1, ...) UseMethod("f")
+f.default <- function(x, n = 1, ...) n
+f()
+```
+
+## `formals<-` を利用
+
+複数のメソッドに同じ既定値を与えたい場合に便利．
+コピペを減らせ，後で挙動を変える時は総称関数の既定値を変えるだけで済む．
+
+```{r parameterize-at-once}
+f <- function(x, n = 1, ...) UseMethod("f")
+f.numeric <- function(x, n, ...) n
+f.character <- function(x, n, ...) n
+formals(f.numeric)$n <- formals(f.character)$n <- formals(f)$n
+f(1)
+f("A")
+```
+
+
