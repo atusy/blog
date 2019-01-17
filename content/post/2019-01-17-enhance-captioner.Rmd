@@ -23,7 +23,7 @@ captioner を使うと相互参照に未対応な Rmd フォーマットも相�
 詳しくはテラモナギさんの記事を参照 
 ([ captionerパッケージで図・表に対する参照(レファレンス)を取得する](https://teramonagi.hatenablog.com/entry/20160923/1474591330))．
 
-ただ，相互リンクまでしようとすると結構面倒．
+ただ，リンクをつけようとすると結構面倒．
 あと，キャプション付きで出すときは `fig_cap("figure-name", "hogehoge")` 
 で「図1」みたいに参照番号だけ出す時は `fig_cap("figure-name", display = "cite")` 
 といった具合な仕様で，繰り返し同じ図を参照する時は毎度 `display` 引数を指定しなければならないのが不便だ．
@@ -52,7 +52,7 @@ captioners <- lapply(c(fig = "図", tbl = "表"), captioner)
 ## キャプションを振る時は相互参照に利用する名前を `id` に流用
 
 相互参照に利用する名前をそのまま図表の `id` として利用できるように，
-`captioners` のラッパー関数を作ろう．
+`captioners` の引数を弄るかラッパー関数を作ろう．
 
 Pandoc's markdown では `[hoge]{#fuga}` とすることで 
 文字列 `hoge` に id `fuga` を与えられる．
@@ -61,13 +61,16 @@ html に出力した時は `<span id = "hoge">hoge</span>` になる．
 図表の `name` 引数に与えた文字列を利用して `[]{#name}` という文字列を作り， `caption` 冒頭にでも入れてやればいい．
 
 ```{r cap}
-
 cap <- lapply(
     captioners,
     function(f) {
-      function(name, caption = "", ...) {
-        f(name, paste0("[]{#", name, "}", caption), ...)
-      }
+      formals(f) <- append(formals(f), alist(.caption = ), 1)
+      formals(f)$caption <- quote(paste0("[]{#", name, "}", .caption))
+      f
+      # 以下のようにラッパー関数にしてもOK
+      # function(name, caption = "", ...) {
+      #   f(name, paste0("[]{#", name, "}", caption), ...)
+      # }
     }
   )
 ```
@@ -124,7 +127,7 @@ tmp <- '`r cite$tbl("kable-iris")`'
 
 ```{r kable-iris-test}
 library(knitr)
-.cap <- cap$tbl("kable-iris", "kable(iris) に図表番号とキャプション，idをつけた")
+.cap <- cap$tbl("kable-iris", "kable(iris) に図表番号とキャプションとidをつけた．")
 kable(iris[1:2, ], caption = .cap)
 ```
 
