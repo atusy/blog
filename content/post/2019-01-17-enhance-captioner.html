@@ -1,0 +1,1479 @@
+---
+title: "captioner を魔改造してみた"
+author: ~
+date: '2019-01-17'
+slug: enhance-captioner
+categories: [captioner]
+tags: [R]
+output:
+  blogdown::html_page:
+    toc: yes
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#section">はじめに</a></li>
+<li><a href="#section-1">実装</a><ul>
+<li><a href="#captioner-">captioner を初期化</a></li>
+<li><a href="#id-">キャプションを振る時は相互参照に利用する名前を <code>id</code> に流用</a></li>
+<li><a href="#section-2">参照する時は相互参照に利用する名前をリンクにする</a></li>
+</ul></li>
+<li><a href="#figures">図をテスト</a><ul>
+<li><a href="#plot"><code>plot()</code></a></li>
+</ul></li>
+<li><a href="#tables">表をテスト</a><ul>
+<li><a href="#kable"><code>knitr::kable()</code></a></li>
+<li><a href="#gt"><code>gt::gt()</code></a><ul>
+<li><a href="#bad1">id付け失敗</a></li>
+<li><a href="#good1">id付け成功例1</a></li>
+<li><a href="#good2">id付け成功例2</a></li>
+<li><a href="#gt-crossref">gt は相互参照未対応であることを確認</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+
+<div id="section" class="section level1">
+<h1>はじめに</h1>
+<p>captioner を使うと相互参照に未対応な Rmd フォーマットも相互参照できるようになる
+(<code>rmarkdown::html_document</code> とか <code>pkgdown</code> とか……)．
+詳しくはテラモナギさんの記事を参照
+(<a href="https://teramonagi.hatenablog.com/entry/20160923/1474591330">captionerパッケージで図・表に対する参照(レファレンス)を取得する</a>)．</p>
+<p>ただ，相互リンクまでしようとすると結構面倒．
+あと，キャプション付きで出すときは <code>fig_cap("figure-name", "hogehoge")</code>
+で「図1」みたいに参照番号だけ出す時は <code>fig_cap("figure-name", display = "cite")</code>
+といった具合な仕様で，繰り返し同じ図を参照する時は毎度 <code>display</code> 引数を指定しなければならないのが不便だ．
+また，相互参照を実現するための関数を図，表，式など，それぞれについて作成しないといけない．
+このあたりの改善を試みる．</p>
+<p>ついでに， <code>gt::gt</code> のような bookdown パッケージなどが相互参照に対応できていない関数も相互参照させられるようになる．</p>
+<p>あとは任意の Rmd で内蔵の相互参照を無効化する機能さえあれば……!!</p>
+</div>
+<div id="section-1" class="section level1">
+<h1>実装</h1>
+<div id="captioner-" class="section level2">
+<h2>captioner を初期化</h2>
+<p><code>fig_cap &lt;- captioner::captioner("図")</code> とすることで図を参照するための関数を作ることができる．
+他に <code>"表"</code> とか <code>"式"</code> とか入れて <code>fig_tbl</code> とか <code>fig_eq</code> とか作ればいいわけだけれど，それは面倒なので， <code>lapply</code> を使おう．</p>
+<pre class="r"><code>captioners &lt;- lapply(c(fig = &quot;図&quot;, tbl = &quot;表&quot;), captioner)</code></pre>
+<p>これで一度に初期化できた．
+<code>captioners</code> では名前が長いが， <code>cap</code> などとしておけば
+<code>cap$fig()</code> や <code>cap$tbl()</code> で相互参照できるので便利だ．</p>
+</div>
+<div id="id-" class="section level2">
+<h2>キャプションを振る時は相互参照に利用する名前を <code>id</code> に流用</h2>
+<p>相互参照に利用する名前をそのまま図表の <code>id</code> として利用できるように，
+<code>captioners</code> のラッパー関数を作ろう．</p>
+<p>Pandoc’s markdown では <code>[hoge]{#fuga}</code> とすることで
+文字列 <code>hoge</code> に id <code>fuga</code> を与えられる．
+html に出力した時は <code>&lt;span id = "hoge"&gt;hoge&lt;/span&gt;</code> になる．</p>
+<p>図表の <code>name</code> 引数に与えた文字列を利用して <code>[]{#name}</code> という文字列を作り， <code>caption</code> 冒頭にでも入れてやればいい．</p>
+<pre class="r"><code>cap &lt;- lapply(
+    captioners,
+    function(f) {
+      function(name, caption = &quot;&quot;, ...) {
+        f(name, paste0(&quot;[]{#&quot;, name, &quot;}&quot;, caption), ...)
+      }
+    }
+  )</code></pre>
+</div>
+<div id="section-2" class="section level2">
+<h2>参照する時は相互参照に利用する名前をリンクにする</h2>
+<p>先の <code>cap</code> の実装で，キャプションには <code>id</code> が振られている．
+この <code>id</code> にリンクされるよう，通常の <code>captioner</code> なら <code>図1</code> としか出力しないところを <code>[図1]{#fuga}</code> といった具合に出力されるよう，<code>captioners</code> をラッパーしよう．</p>
+<pre class="r"><code>cite &lt;- lapply(
+    captioners,
+    function(f) {
+      function(name, display = &quot;cite&quot;, ...) {
+        paste0(&quot;[&quot;, f(name, display = display, ...), &quot;](#&quot;, name, &quot;)&quot;)
+      }
+    }
+  )</code></pre>
+<p>これで準備は完了だ．</p>
+</div>
+</div>
+<div id="figures" class="section level1">
+<h1>図をテスト</h1>
+<div id="plot" class="section level2">
+<h2><code>plot()</code></h2>
+<p><code>`r cite$fig("plot-iris")`</code> は <a href="#plot-iris">図 1</a> になる．
+ちゃんとリンクも貼れてるね．
+<code>blogdown</code> が図表の番号付けに対応しているせいで， <code>Figure 1: 図 1:</code> となってしまうのはご愛嬌．</p>
+<pre class="r"><code># チャンクオプションで `fig.cap = .cap` としている
+.cap &lt;- cap$fig(&quot;plot-iris&quot;, &quot;plot(iris) に図表番号とキャプション，idをつけた&quot;)
+plot(iris)</code></pre>
+<div class="figure"><span id="fig:plot-iris"></span>
+<img src="/post/2019-01-17-enhance-captioner_files/figure-html/plot-iris-1.png" alt="図  1: []{#plot-iris}plot(iris) に図表番号とキャプション，idをつけた" width="672" />
+<p class="caption">
+Figure 1: 図 1: <span id="plot-iris"></span>plot(iris) に図表番号とキャプション，idをつけた
+</p>
+</div>
+</div>
+</div>
+<div id="tables" class="section level1">
+<h1>表をテスト</h1>
+<div id="kable" class="section level2">
+<h2><code>knitr::kable()</code></h2>
+<p><code>`r cite$tbl("kable-iris")`</code> は <a href="#kable-iris">表 1</a> になる．
+ちゃんとリンクも貼れてるね．</p>
+<pre class="r"><code>library(knitr)
+.cap &lt;- cap$tbl(&quot;kable-iris&quot;, &quot;kable(iris) に図表番号とキャプション，idをつけた&quot;)
+kable(iris[1:2, ], caption = .cap)</code></pre>
+<table>
+<caption><span id="tab:kable-iris-test">Table 1: </span>表 1: <span id="kable-iris"></span>kable(iris) に図表番号とキャプション，idをつけた</caption>
+<thead>
+<tr class="header">
+<th align="right">Sepal.Length</th>
+<th align="right">Sepal.Width</th>
+<th align="right">Petal.Length</th>
+<th align="right">Petal.Width</th>
+<th align="left">Species</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">5.1</td>
+<td align="right">3.5</td>
+<td align="right">1.4</td>
+<td align="right">0.2</td>
+<td align="left">setosa</td>
+</tr>
+<tr class="even">
+<td align="right">4.9</td>
+<td align="right">3.0</td>
+<td align="right">1.4</td>
+<td align="right">0.2</td>
+<td align="left">setosa</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="gt" class="section level2">
+<h2><code>gt::gt()</code></h2>
+<p><code>gt</code> は今のところ相互参照に対応していない (<a href="#gt-crossref">後述</a>)．
+従って <code>captioner</code> を使う他ない．</p>
+<p>gtが受け取る文字列を md や html として解釈させるには <code>md()</code> や <code>html()</code> といった関数を用いる．
+しかし，この <code>md()</code> は Pandoc’s markdown を解釈してくれないようで，以下のように id 付けに失敗する．</p>
+<div id="bad1" class="section level3">
+<h3>id付け失敗</h3>
+<pre class="r"><code>library(gt)
+gt(iris[1, ]) %&gt;%
+  tab_header(
+    title = md(cap$tbl(
+        &quot;gt-iris&quot;, 
+        &quot;gt(iris) に図表番号とキャプションをつけたが，idはうまくついていない．&quot;
+      ))
+    ) </code></pre>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;
+}
+
+#fnrjzetkqn .gt_table {
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #000000;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  /* table.background.color */
+  width: auto;
+  /* table.width */
+  border-top-style: solid;
+  /* table.border.top.style */
+  border-top-width: 2px;
+  /* table.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table.border.top.color */
+}
+
+#fnrjzetkqn .gt_heading {
+  background-color: #FFFFFF;
+  /* heading.background.color */
+  border-bottom-color: #FFFFFF;
+}
+
+#fnrjzetkqn .gt_title {
+  color: #000000;
+  font-size: 125%;
+  /* heading.title.font.size */
+  padding-top: 4px;
+  /* heading.top.padding */
+  padding-bottom: 1px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#fnrjzetkqn .gt_subtitle {
+  color: #000000;
+  font-size: 85%;
+  /* heading.subtitle.font.size */
+  padding-top: 1px;
+  padding-bottom: 4px;
+  /* heading.bottom.padding */
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#fnrjzetkqn .gt_bottom_border {
+  border-bottom-style: solid;
+  /* heading.border.bottom.style */
+  border-bottom-width: 2px;
+  /* heading.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* heading.border.bottom.color */
+}
+
+#fnrjzetkqn .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#fnrjzetkqn .gt_col_heading {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* column_labels.background.color */
+  font-size: 16px;
+  /* column_labels.font.size */
+  font-weight: initial;
+  /* column_labels.font.weight */
+  padding: 10px;
+  margin: 10px;
+}
+
+#fnrjzetkqn .gt_sep_right {
+  border-right: 5px solid #FFFFFF;
+}
+
+#fnrjzetkqn .gt_group_heading {
+  padding: 8px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#fnrjzetkqn .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#fnrjzetkqn .gt_striped tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#fnrjzetkqn .gt_row {
+  padding: 10px;
+  /* row.padding */
+  margin: 10px;
+}
+
+#fnrjzetkqn .gt_stub {
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #A8A8A8;
+  text-indent: 5px;
+}
+
+#fnrjzetkqn .gt_stub.gt_row {
+  background-color: #FFFFFF;
+}
+
+#fnrjzetkqn .gt_summary_row {
+  background-color: #FFFFFF;
+  /* summary_row.background.color */
+  padding: 6px;
+  /* summary_row.padding */
+  text-transform: inherit;
+  /* summary_row.text_transform */
+}
+
+#fnrjzetkqn .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+}
+
+#fnrjzetkqn .gt_table_body {
+  border-top-style: solid;
+  /* field.border.top.style */
+  border-top-width: 2px;
+  /* field.border.top.width */
+  border-top-color: #A8A8A8;
+  /* field.border.top.color */
+  border-bottom-style: solid;
+  /* field.border.bottom.style */
+  border-bottom-width: 2px;
+  /* field.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* field.border.bottom.color */
+}
+
+#fnrjzetkqn .gt_footnote {
+  font-size: 90%;
+  /* footnote.font.size */
+  padding: 4px;
+  /* footnote.padding */
+}
+
+#fnrjzetkqn .gt_sourcenote {
+  font-size: 90%;
+  /* sourcenote.font.size */
+  padding: 4px;
+  /* sourcenote.padding */
+}
+
+#fnrjzetkqn .gt_center {
+  text-align: center;
+}
+
+#fnrjzetkqn .gt_left {
+  text-align: left;
+}
+
+#fnrjzetkqn .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#fnrjzetkqn .gt_font_normal {
+  font-weight: normal;
+}
+
+#fnrjzetkqn .gt_font_bold {
+  font-weight: bold;
+}
+
+#fnrjzetkqn .gt_font_italic {
+  font-style: italic;
+}
+
+#fnrjzetkqn .gt_super {
+  font-size: 65%;
+}
+
+#fnrjzetkqn .gt_footnote_glyph {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="fnrjzetkqn"><!--gt table start-->
+<table class='gt_table'>
+<thead>
+<tr>
+<th class='gt_heading gt_title gt_font_normal gt_center' colspan='5'>表  2: []{#gt-iris}gt(iris) に図表番号とキャプションをつけたが，idはうまくついていない．</th>
+</tr>
+<tr>
+<th class='gt_heading gt_subtitle gt_font_normal gt_center gt_bottom_border' colspan='5'></th>
+</tr>
+<tr>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Sepal.Length</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Sepal.Width</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Petal.Length</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Petal.Width</th>
+<th class='gt_col_heading gt_center' rowspan='1' colspan='1'>Species</th>
+</tr>
+<tbody class='gt_table_body gt_striped'>
+<tr>
+<td class='gt_row gt_right'>5.1</td>
+<td class='gt_row gt_right'>3.5</td>
+<td class='gt_row gt_right'>1.4</td>
+<td class='gt_row gt_right'>0.2</td>
+<td class='gt_row gt_center'>setosa</td>
+</tr>
+</tbody>
+</table>
+<!--gt table end-->
+</div>
+</div>
+<div id="good1" class="section level3">
+<h3>id付け成功例1</h3>
+<p><a href="#gt-iris2">表 3</a> のように， <code>gt</code> の外でキャプションをつける．
+やや不恰好だが，とりあえず動く．</p>
+<pre class="r"><code>cap$tbl(
+  &quot;gt-iris2&quot;, 
+  &quot;gt(iris) に図表番号とキャプションをつけたが，idはうまくついていない．&quot;
+)
+gt(iris[1, ])</code></pre>
+<p>表 3: <span id="gt-iris2"></span>gt(iris) との一体感はなくなるが，idもつく</p>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;
+}
+
+#wcgwfneorg .gt_table {
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #000000;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  /* table.background.color */
+  width: auto;
+  /* table.width */
+  border-top-style: solid;
+  /* table.border.top.style */
+  border-top-width: 2px;
+  /* table.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table.border.top.color */
+}
+
+#wcgwfneorg .gt_heading {
+  background-color: #FFFFFF;
+  /* heading.background.color */
+  border-bottom-color: #FFFFFF;
+}
+
+#wcgwfneorg .gt_title {
+  color: #000000;
+  font-size: 125%;
+  /* heading.title.font.size */
+  padding-top: 4px;
+  /* heading.top.padding */
+  padding-bottom: 1px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#wcgwfneorg .gt_subtitle {
+  color: #000000;
+  font-size: 85%;
+  /* heading.subtitle.font.size */
+  padding-top: 1px;
+  padding-bottom: 4px;
+  /* heading.bottom.padding */
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#wcgwfneorg .gt_bottom_border {
+  border-bottom-style: solid;
+  /* heading.border.bottom.style */
+  border-bottom-width: 2px;
+  /* heading.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* heading.border.bottom.color */
+}
+
+#wcgwfneorg .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#wcgwfneorg .gt_col_heading {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* column_labels.background.color */
+  font-size: 16px;
+  /* column_labels.font.size */
+  font-weight: initial;
+  /* column_labels.font.weight */
+  padding: 10px;
+  margin: 10px;
+}
+
+#wcgwfneorg .gt_sep_right {
+  border-right: 5px solid #FFFFFF;
+}
+
+#wcgwfneorg .gt_group_heading {
+  padding: 8px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#wcgwfneorg .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#wcgwfneorg .gt_striped tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#wcgwfneorg .gt_row {
+  padding: 10px;
+  /* row.padding */
+  margin: 10px;
+}
+
+#wcgwfneorg .gt_stub {
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #A8A8A8;
+  text-indent: 5px;
+}
+
+#wcgwfneorg .gt_stub.gt_row {
+  background-color: #FFFFFF;
+}
+
+#wcgwfneorg .gt_summary_row {
+  background-color: #FFFFFF;
+  /* summary_row.background.color */
+  padding: 6px;
+  /* summary_row.padding */
+  text-transform: inherit;
+  /* summary_row.text_transform */
+}
+
+#wcgwfneorg .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+}
+
+#wcgwfneorg .gt_table_body {
+  border-top-style: solid;
+  /* field.border.top.style */
+  border-top-width: 2px;
+  /* field.border.top.width */
+  border-top-color: #A8A8A8;
+  /* field.border.top.color */
+  border-bottom-style: solid;
+  /* field.border.bottom.style */
+  border-bottom-width: 2px;
+  /* field.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* field.border.bottom.color */
+}
+
+#wcgwfneorg .gt_footnote {
+  font-size: 90%;
+  /* footnote.font.size */
+  padding: 4px;
+  /* footnote.padding */
+}
+
+#wcgwfneorg .gt_sourcenote {
+  font-size: 90%;
+  /* sourcenote.font.size */
+  padding: 4px;
+  /* sourcenote.padding */
+}
+
+#wcgwfneorg .gt_center {
+  text-align: center;
+}
+
+#wcgwfneorg .gt_left {
+  text-align: left;
+}
+
+#wcgwfneorg .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#wcgwfneorg .gt_font_normal {
+  font-weight: normal;
+}
+
+#wcgwfneorg .gt_font_bold {
+  font-weight: bold;
+}
+
+#wcgwfneorg .gt_font_italic {
+  font-style: italic;
+}
+
+#wcgwfneorg .gt_super {
+  font-size: 65%;
+}
+
+#wcgwfneorg .gt_footnote_glyph {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="wcgwfneorg"><!--gt table start-->
+<table class='gt_table'>
+<tr>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Sepal.Length</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Sepal.Width</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Petal.Length</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Petal.Width</th>
+<th class='gt_col_heading gt_center' rowspan='1' colspan='1'>Species</th>
+</tr>
+<tbody class='gt_table_body gt_striped'>
+<tr>
+<td class='gt_row gt_right'>5.1</td>
+<td class='gt_row gt_right'>3.5</td>
+<td class='gt_row gt_right'>1.4</td>
+<td class='gt_row gt_right'>0.2</td>
+<td class='gt_row gt_center'>setosa</td>
+</tr>
+</tbody>
+</table>
+<!--gt table end-->
+</div>
+</div>
+<div id="good2" class="section level3">
+<h3>id付け成功例2</h3>
+<p>Ppandoc’s markdown が通らないだけで html は通るので， <code>cap</code> を以下のように書き換える．
+すると <a href="#gt-iris3">表 4</a> のように， 見栄えを <code>gt</code> で完結できる．</p>
+<pre class="r"><code>cap &lt;- lapply(
+    captioners,
+    function(f) {
+      function(name, caption = &quot;&quot;, ...) {
+        f(name, paste0(&quot;&lt;span id = &#39;&quot;, name, &quot;&#39;&gt;&lt;/span&gt;&quot;, caption), ...)
+      }
+    }
+  )
+
+gt(iris[1, ]) %&gt;%
+  tab_header(
+    title = html(cap$tbl(
+        &quot;gt-iris3&quot;, 
+        &quot;gt(iris) に図表番号とキャプションをつけたが，idはうまくついていない．&quot;
+      ))
+    ) </code></pre>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;
+}
+
+#nqlpdopphj .gt_table {
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #000000;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  /* table.background.color */
+  width: auto;
+  /* table.width */
+  border-top-style: solid;
+  /* table.border.top.style */
+  border-top-width: 2px;
+  /* table.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table.border.top.color */
+}
+
+#nqlpdopphj .gt_heading {
+  background-color: #FFFFFF;
+  /* heading.background.color */
+  border-bottom-color: #FFFFFF;
+}
+
+#nqlpdopphj .gt_title {
+  color: #000000;
+  font-size: 125%;
+  /* heading.title.font.size */
+  padding-top: 4px;
+  /* heading.top.padding */
+  padding-bottom: 1px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#nqlpdopphj .gt_subtitle {
+  color: #000000;
+  font-size: 85%;
+  /* heading.subtitle.font.size */
+  padding-top: 1px;
+  padding-bottom: 4px;
+  /* heading.bottom.padding */
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#nqlpdopphj .gt_bottom_border {
+  border-bottom-style: solid;
+  /* heading.border.bottom.style */
+  border-bottom-width: 2px;
+  /* heading.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* heading.border.bottom.color */
+}
+
+#nqlpdopphj .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#nqlpdopphj .gt_col_heading {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* column_labels.background.color */
+  font-size: 16px;
+  /* column_labels.font.size */
+  font-weight: initial;
+  /* column_labels.font.weight */
+  padding: 10px;
+  margin: 10px;
+}
+
+#nqlpdopphj .gt_sep_right {
+  border-right: 5px solid #FFFFFF;
+}
+
+#nqlpdopphj .gt_group_heading {
+  padding: 8px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#nqlpdopphj .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#nqlpdopphj .gt_striped tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#nqlpdopphj .gt_row {
+  padding: 10px;
+  /* row.padding */
+  margin: 10px;
+}
+
+#nqlpdopphj .gt_stub {
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #A8A8A8;
+  text-indent: 5px;
+}
+
+#nqlpdopphj .gt_stub.gt_row {
+  background-color: #FFFFFF;
+}
+
+#nqlpdopphj .gt_summary_row {
+  background-color: #FFFFFF;
+  /* summary_row.background.color */
+  padding: 6px;
+  /* summary_row.padding */
+  text-transform: inherit;
+  /* summary_row.text_transform */
+}
+
+#nqlpdopphj .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+}
+
+#nqlpdopphj .gt_table_body {
+  border-top-style: solid;
+  /* field.border.top.style */
+  border-top-width: 2px;
+  /* field.border.top.width */
+  border-top-color: #A8A8A8;
+  /* field.border.top.color */
+  border-bottom-style: solid;
+  /* field.border.bottom.style */
+  border-bottom-width: 2px;
+  /* field.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* field.border.bottom.color */
+}
+
+#nqlpdopphj .gt_footnote {
+  font-size: 90%;
+  /* footnote.font.size */
+  padding: 4px;
+  /* footnote.padding */
+}
+
+#nqlpdopphj .gt_sourcenote {
+  font-size: 90%;
+  /* sourcenote.font.size */
+  padding: 4px;
+  /* sourcenote.padding */
+}
+
+#nqlpdopphj .gt_center {
+  text-align: center;
+}
+
+#nqlpdopphj .gt_left {
+  text-align: left;
+}
+
+#nqlpdopphj .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#nqlpdopphj .gt_font_normal {
+  font-weight: normal;
+}
+
+#nqlpdopphj .gt_font_bold {
+  font-weight: bold;
+}
+
+#nqlpdopphj .gt_font_italic {
+  font-style: italic;
+}
+
+#nqlpdopphj .gt_super {
+  font-size: 65%;
+}
+
+#nqlpdopphj .gt_footnote_glyph {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="nqlpdopphj"><!--gt table start-->
+<table class='gt_table'>
+<thead>
+<tr>
+<th class='gt_heading gt_title gt_font_normal gt_center' colspan='5'>表  4: <span id = 'gt-iris3'></span>gt(iris) に図表番号とキャプションをつけたが，idはうまくついていない．</th>
+</tr>
+<tr>
+<th class='gt_heading gt_subtitle gt_font_normal gt_center gt_bottom_border' colspan='5'></th>
+</tr>
+<tr>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Sepal.Length</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Sepal.Width</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Petal.Length</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Petal.Width</th>
+<th class='gt_col_heading gt_center' rowspan='1' colspan='1'>Species</th>
+</tr>
+<tbody class='gt_table_body gt_striped'>
+<tr>
+<td class='gt_row gt_right'>5.1</td>
+<td class='gt_row gt_right'>3.5</td>
+<td class='gt_row gt_right'>1.4</td>
+<td class='gt_row gt_right'>0.2</td>
+<td class='gt_row gt_center'>setosa</td>
+</tr>
+</tbody>
+</table>
+<!--gt table end-->
+</div>
+</div>
+<div id="gt-crossref" class="section level3">
+<h3>gt は相互参照未対応であることを確認</h3>
+<p><code>fig.cap</code> を指定してもタイトルが表示されない．</p>
+<pre class="r"><code>```{r gt-iris, fig.cap = &quot;gt with fig.cap&quot;, echo = FALSE}  
+gt(iris[1, ])  
+```</code></pre>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;
+}
+
+#cottvxvnyf .gt_table {
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #000000;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  /* table.background.color */
+  width: auto;
+  /* table.width */
+  border-top-style: solid;
+  /* table.border.top.style */
+  border-top-width: 2px;
+  /* table.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table.border.top.color */
+}
+
+#cottvxvnyf .gt_heading {
+  background-color: #FFFFFF;
+  /* heading.background.color */
+  border-bottom-color: #FFFFFF;
+}
+
+#cottvxvnyf .gt_title {
+  color: #000000;
+  font-size: 125%;
+  /* heading.title.font.size */
+  padding-top: 4px;
+  /* heading.top.padding */
+  padding-bottom: 1px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#cottvxvnyf .gt_subtitle {
+  color: #000000;
+  font-size: 85%;
+  /* heading.subtitle.font.size */
+  padding-top: 1px;
+  padding-bottom: 4px;
+  /* heading.bottom.padding */
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#cottvxvnyf .gt_bottom_border {
+  border-bottom-style: solid;
+  /* heading.border.bottom.style */
+  border-bottom-width: 2px;
+  /* heading.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* heading.border.bottom.color */
+}
+
+#cottvxvnyf .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#cottvxvnyf .gt_col_heading {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* column_labels.background.color */
+  font-size: 16px;
+  /* column_labels.font.size */
+  font-weight: initial;
+  /* column_labels.font.weight */
+  padding: 10px;
+  margin: 10px;
+}
+
+#cottvxvnyf .gt_sep_right {
+  border-right: 5px solid #FFFFFF;
+}
+
+#cottvxvnyf .gt_group_heading {
+  padding: 8px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#cottvxvnyf .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#cottvxvnyf .gt_striped tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#cottvxvnyf .gt_row {
+  padding: 10px;
+  /* row.padding */
+  margin: 10px;
+}
+
+#cottvxvnyf .gt_stub {
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #A8A8A8;
+  text-indent: 5px;
+}
+
+#cottvxvnyf .gt_stub.gt_row {
+  background-color: #FFFFFF;
+}
+
+#cottvxvnyf .gt_summary_row {
+  background-color: #FFFFFF;
+  /* summary_row.background.color */
+  padding: 6px;
+  /* summary_row.padding */
+  text-transform: inherit;
+  /* summary_row.text_transform */
+}
+
+#cottvxvnyf .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+}
+
+#cottvxvnyf .gt_table_body {
+  border-top-style: solid;
+  /* field.border.top.style */
+  border-top-width: 2px;
+  /* field.border.top.width */
+  border-top-color: #A8A8A8;
+  /* field.border.top.color */
+  border-bottom-style: solid;
+  /* field.border.bottom.style */
+  border-bottom-width: 2px;
+  /* field.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* field.border.bottom.color */
+}
+
+#cottvxvnyf .gt_footnote {
+  font-size: 90%;
+  /* footnote.font.size */
+  padding: 4px;
+  /* footnote.padding */
+}
+
+#cottvxvnyf .gt_sourcenote {
+  font-size: 90%;
+  /* sourcenote.font.size */
+  padding: 4px;
+  /* sourcenote.padding */
+}
+
+#cottvxvnyf .gt_center {
+  text-align: center;
+}
+
+#cottvxvnyf .gt_left {
+  text-align: left;
+}
+
+#cottvxvnyf .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#cottvxvnyf .gt_font_normal {
+  font-weight: normal;
+}
+
+#cottvxvnyf .gt_font_bold {
+  font-weight: bold;
+}
+
+#cottvxvnyf .gt_font_italic {
+  font-style: italic;
+}
+
+#cottvxvnyf .gt_super {
+  font-size: 65%;
+}
+
+#cottvxvnyf .gt_footnote_glyph {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="cottvxvnyf"><!--gt table start-->
+<table class='gt_table'>
+<tr>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Sepal.Length</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Sepal.Width</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Petal.Length</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Petal.Width</th>
+<th class='gt_col_heading gt_center' rowspan='1' colspan='1'>Species</th>
+</tr>
+<tbody class='gt_table_body gt_striped'>
+<tr>
+<td class='gt_row gt_right'>5.1</td>
+<td class='gt_row gt_right'>3.5</td>
+<td class='gt_row gt_right'>1.4</td>
+<td class='gt_row gt_right'>0.2</td>
+<td class='gt_row gt_center'>setosa</td>
+</tr>
+</tbody>
+</table>
+<!--gt table end-->
+</div>
+<p><code>tab_header(title = )</code> を指定するとタイトルは表示されるが，図表番号は表示されない．</p>
+<pre class="r"><code>```{r gt-iris-titled, echo = FALSE}
+gt(iris[1, ]) %&gt;%
+  tab_header(title = &quot;gt with title&quot;)
+```</code></pre>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;
+}
+
+#fxgcjzovts .gt_table {
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #000000;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  /* table.background.color */
+  width: auto;
+  /* table.width */
+  border-top-style: solid;
+  /* table.border.top.style */
+  border-top-width: 2px;
+  /* table.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table.border.top.color */
+}
+
+#fxgcjzovts .gt_heading {
+  background-color: #FFFFFF;
+  /* heading.background.color */
+  border-bottom-color: #FFFFFF;
+}
+
+#fxgcjzovts .gt_title {
+  color: #000000;
+  font-size: 125%;
+  /* heading.title.font.size */
+  padding-top: 4px;
+  /* heading.top.padding */
+  padding-bottom: 1px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#fxgcjzovts .gt_subtitle {
+  color: #000000;
+  font-size: 85%;
+  /* heading.subtitle.font.size */
+  padding-top: 1px;
+  padding-bottom: 4px;
+  /* heading.bottom.padding */
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#fxgcjzovts .gt_bottom_border {
+  border-bottom-style: solid;
+  /* heading.border.bottom.style */
+  border-bottom-width: 2px;
+  /* heading.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* heading.border.bottom.color */
+}
+
+#fxgcjzovts .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#fxgcjzovts .gt_col_heading {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* column_labels.background.color */
+  font-size: 16px;
+  /* column_labels.font.size */
+  font-weight: initial;
+  /* column_labels.font.weight */
+  padding: 10px;
+  margin: 10px;
+}
+
+#fxgcjzovts .gt_sep_right {
+  border-right: 5px solid #FFFFFF;
+}
+
+#fxgcjzovts .gt_group_heading {
+  padding: 8px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#fxgcjzovts .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#fxgcjzovts .gt_striped tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#fxgcjzovts .gt_row {
+  padding: 10px;
+  /* row.padding */
+  margin: 10px;
+}
+
+#fxgcjzovts .gt_stub {
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #A8A8A8;
+  text-indent: 5px;
+}
+
+#fxgcjzovts .gt_stub.gt_row {
+  background-color: #FFFFFF;
+}
+
+#fxgcjzovts .gt_summary_row {
+  background-color: #FFFFFF;
+  /* summary_row.background.color */
+  padding: 6px;
+  /* summary_row.padding */
+  text-transform: inherit;
+  /* summary_row.text_transform */
+}
+
+#fxgcjzovts .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+}
+
+#fxgcjzovts .gt_table_body {
+  border-top-style: solid;
+  /* field.border.top.style */
+  border-top-width: 2px;
+  /* field.border.top.width */
+  border-top-color: #A8A8A8;
+  /* field.border.top.color */
+  border-bottom-style: solid;
+  /* field.border.bottom.style */
+  border-bottom-width: 2px;
+  /* field.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* field.border.bottom.color */
+}
+
+#fxgcjzovts .gt_footnote {
+  font-size: 90%;
+  /* footnote.font.size */
+  padding: 4px;
+  /* footnote.padding */
+}
+
+#fxgcjzovts .gt_sourcenote {
+  font-size: 90%;
+  /* sourcenote.font.size */
+  padding: 4px;
+  /* sourcenote.padding */
+}
+
+#fxgcjzovts .gt_center {
+  text-align: center;
+}
+
+#fxgcjzovts .gt_left {
+  text-align: left;
+}
+
+#fxgcjzovts .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#fxgcjzovts .gt_font_normal {
+  font-weight: normal;
+}
+
+#fxgcjzovts .gt_font_bold {
+  font-weight: bold;
+}
+
+#fxgcjzovts .gt_font_italic {
+  font-style: italic;
+}
+
+#fxgcjzovts .gt_super {
+  font-size: 65%;
+}
+
+#fxgcjzovts .gt_footnote_glyph {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="fxgcjzovts"><!--gt table start-->
+<table class='gt_table'>
+<thead>
+<tr>
+<th class='gt_heading gt_title gt_font_normal gt_center' colspan='5'>gt with title</th>
+</tr>
+<tr>
+<th class='gt_heading gt_subtitle gt_font_normal gt_center gt_bottom_border' colspan='5'></th>
+</tr>
+<tr>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Sepal.Length</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Sepal.Width</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Petal.Length</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Petal.Width</th>
+<th class='gt_col_heading gt_center' rowspan='1' colspan='1'>Species</th>
+</tr>
+<tbody class='gt_table_body gt_striped'>
+<tr>
+<td class='gt_row gt_right'>5.1</td>
+<td class='gt_row gt_right'>3.5</td>
+<td class='gt_row gt_right'>1.4</td>
+<td class='gt_row gt_right'>0.2</td>
+<td class='gt_row gt_center'>setosa</td>
+</tr>
+</tbody>
+</table>
+<!--gt table end-->
+</div>
+</div>
+</div>
+</div>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Captioner on Atusy&#39;s blog</title>
+    <link>https://atusy.github.io/categories/captioner/</link>
+    <description>Recent content in Captioner on Atusy&#39;s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja-jp</language>
+    <lastBuildDate>Thu, 17 Jan 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://atusy.github.io/categories/captioner/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>captioner を魔改造してみた</title>
+      <link>https://atusy.github.io/2019/01/17/enhance-captioner/</link>
+      <pubDate>Thu, 17 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2019/01/17/enhance-captioner/</guid>
+      <description>はじめに 実装 captioner を初期化 キャプションを振る時は相互参照に利用する名前を id に流用 参照する時は相互参照に利用する名前をリンクにする 図をテスト plot() 表を</description>
+    </item>
+    
+  </channel>
+</rss>

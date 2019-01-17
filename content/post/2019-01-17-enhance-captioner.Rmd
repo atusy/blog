@@ -1,0 +1,223 @@
+---
+title: "captioner を魔改造してみた"
+author: ~
+date: '2019-01-17'
+slug: enhance-captioner
+categories: [captioner]
+tags: [R]
+output:
+  blogdown::html_page:
+    toc: yes
+---
+
+```{r setup, include = FALSE}
+library(pacman)
+p_load(captioner, knitr, magrittr)
+p_load_gh("rstudio/gt")
+```
+
+# はじめに
+
+captioner を使うと相互参照に未対応な Rmd フォーマットも相互参照できるようになる
+(`rmarkdown::html_document` とか `pkgdown` とか……)．
+詳しくはテラモナギさんの記事を参照 
+([ captionerパッケージで図・表に対する参照(レファレンス)を取得する](https://teramonagi.hatenablog.com/entry/20160923/1474591330))．
+
+ただ，相互リンクまでしようとすると結構面倒．
+あと，キャプション付きで出すときは `fig_cap("figure-name", "hogehoge")` 
+で「図1」みたいに参照番号だけ出す時は `fig_cap("figure-name", display = "cite")` 
+といった具合な仕様で，繰り返し同じ図を参照する時は毎度 `display` 引数を指定しなければならないのが不便だ．
+また，相互参照を実現するための関数を図，表，式など，それぞれについて作成しないといけない．
+このあたりの改善を試みる．
+
+ついでに， `gt::gt` のような bookdown パッケージなどが相互参照に対応できていない関数も相互参照させられるようになる．
+
+あとは任意の Rmd で内蔵の相互参照を無効化する機能さえあれば……!!
+
+# 実装
+
+## captioner を初期化
+
+`fig_cap <- captioner::captioner("図")` とすることで図を参照するための関数を作ることができる．
+他に `"表"` とか `"式"` とか入れて `fig_tbl` とか `fig_eq` とか作ればいいわけだけれど，それは面倒なので， `lapply` を使おう．
+
+```{r captioners}
+captioners <- lapply(c(fig = "図", tbl = "表"), captioner)
+```
+
+これで一度に初期化できた．
+`captioners` では名前が長いが， `cap` などとしておけば 
+`cap$fig()` や `cap$tbl()` で相互参照できるので便利だ．
+
+## キャプションを振る時は相互参照に利用する名前を `id` に流用
+
+相互参照に利用する名前をそのまま図表の `id` として利用できるように，
+`captioners` のラッパー関数を作ろう．
+
+Pandoc's markdown では `[hoge]{#fuga}` とすることで 
+文字列 `hoge` に id `fuga` を与えられる．
+html に出力した時は `<span id = "hoge">hoge</span>` になる．
+
+図表の `name` 引数に与えた文字列を利用して `[]{#name}` という文字列を作り， `caption` 冒頭にでも入れてやればいい．
+
+```{r cap}
+
+cap <- lapply(
+    captioners,
+    function(f) {
+      function(name, caption = "", ...) {
+        f(name, paste0("[]{#", name, "}", caption), ...)
+      }
+    }
+  )
+```
+
+## 参照する時は相互参照に利用する名前をリンクにする
+
+先の `cap` の実装で，キャプションには `id` が振られている．
+この `id` にリンクされるよう，通常の `captioner` なら `図1` としか出力しないところを `[図1]{#fuga}` といった具合に出力されるよう，`captioners` をラッパーしよう．
+
+```{r cite}
+cite <- lapply(
+    captioners,
+    function(f) {
+      function(name, display = "cite", ...) {
+        paste0("[", f(name, display = display, ...), "](#", name, ")")
+      }
+    }
+  )
+```
+
+これで準備は完了だ．
+
+# 図をテスト {#figures}
+
+## `plot()` {#plot}
+
+```{r cite-plot-iris, echo = FALSE}
+tmp <- '`r cite$fig("plot-iris")`'
+```
+
+`` `r tmp` `` は `r cite$fig("plot-iris")` になる．
+ちゃんとリンクも貼れてるね．
+`blogdown` が図表の番号付けに対応しているせいで， `Figure 1: 図 1:` となってしまうのはご愛嬌．
+
+```{r plot-iris, fig.cap = .cap}
+# チャンクオプションで `fig.cap = .cap` としている
+.cap <- cap$fig("plot-iris", "plot(iris) に図表番号とキャプション，idをつけた")
+plot(iris)
+```
+
+
+# 表をテスト {#tables}
+
+## `knitr::kable()` {#kable}
+
+
+```{r cite-kable-iris, echo = FALSE}
+tmp <- '`r cite$tbl("kable-iris")`'
+```
+
+`` `r tmp` `` は `r cite$tbl("kable-iris")` になる．
+ちゃんとリンクも貼れてるね．
+
+
+```{r kable-iris-test}
+library(knitr)
+.cap <- cap$tbl("kable-iris", "kable(iris) に図表番号とキャプション，idをつけた")
+kable(iris[1:2, ], caption = .cap)
+```
+
+
+## `gt::gt()` {#gt}
+
+`gt` は今のところ相互参照に対応していない ([後述](#gt-crossref))．
+従って `captioner` を使う他ない．
+
+gtが受け取る文字列を md や html として解釈させるには `md()` や `html()` といった関数を用いる．
+しかし，この `md()` は Pandoc's markdown を解釈してくれないようで，以下のように id 付けに失敗する．
+
+### id付け失敗 {#bad1}
+
+```{r gt-iris-test}
+library(gt)
+gt(iris[1, ]) %>%
+  tab_header(
+    title = md(cap$tbl(
+        "gt-iris", 
+        "gt(iris) に図表番号とキャプションをつけたが，idはうまくついていない．"
+      ))
+    ) 
+```
+
+### id付け成功例1 {#good1}
+
+`r cite$tbl("gt-iris2")` のように， `gt` の外でキャプションをつける．
+やや不恰好だが，とりあえず動く．
+
+```{.r}
+cap$tbl(
+  "gt-iris2", 
+  "gt(iris) に図表番号とキャプションをつけたが，idはうまくついていない．"
+)
+gt(iris[1, ])
+```
+
+`r cap$tbl("gt-iris2", "gt(iris) との一体感はなくなるが，idもつく")`
+
+```{r gt-iris2-test, echo = FALSE}
+gt(iris[1, ])
+```
+
+### id付け成功例2 {#good2}
+
+Ppandoc's markdown が通らないだけで html は通るので， `cap` を以下のように書き換える．
+すると `r cite$tbl("gt-iris3")` のように， 見栄えを `gt` で完結できる．
+
+```{r gt-iris3-test}
+cap <- lapply(
+    captioners,
+    function(f) {
+      function(name, caption = "", ...) {
+        f(name, paste0("<span id = '", name, "'></span>", caption), ...)
+      }
+    }
+  )
+
+gt(iris[1, ]) %>%
+  tab_header(
+    title = html(cap$tbl(
+        "gt-iris3", 
+        "gt(iris) に図表番号とキャプションをつけたが，idはうまくついていない．"
+      ))
+    ) 
+```
+
+
+### gt は相互参照未対応であることを確認 {#gt-crossref}
+
+`fig.cap` を指定してもタイトルが表示されない．
+
+````{.r}
+`r ''````{r gt-iris, fig.cap = "gt with fig.cap", echo = FALSE}  
+gt(iris[1, ])  
+`r ''````
+````
+
+```{r gt-iris-fig-cap, fig.cap = "gt with fig.cap", echo = FALSE}
+gt(iris[1, ])
+```
+
+`tab_header(title = )` を指定するとタイトルは表示されるが，図表番号は表示されない．
+
+````{.r}
+`r ''````{r gt-iris-titled, echo = FALSE}
+gt(iris[1, ]) %>%
+  tab_header(title = "gt with title")
+`r ''````
+````
+
+```{r gt-iris-titled, echo = FALSE}
+gt(iris[1, ]) %>%
+  tab_header(title = "gt with title")
+```
