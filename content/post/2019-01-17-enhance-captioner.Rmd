@@ -105,8 +105,15 @@ tmp <- '`r cite$fig("plot-iris")`'
 ちゃんとリンクも貼れてるね．
 `blogdown` が図表の番号付けに対応しているせいで， `Figure 1: 図 1:` となってしまうのはご愛嬌．
 
-```{r plot-iris, fig.cap = .cap}
-# チャンクオプションで `fig.cap = .cap` としている
+````{.r}
+`r ''````{r plot-iris, fig.cap = .cap}  
+.cap <- cap$fig("plot-iris", "plot(iris) に図表番号とキャプション，idをつけた")  
+plot(iris)
+`r ''````
+````
+
+
+```{r plot-iris, fig.cap = .cap, echo = FALSE}
 .cap <- cap$fig("plot-iris", "plot(iris) に図表番号とキャプション，idをつけた")
 plot(iris)
 ```
