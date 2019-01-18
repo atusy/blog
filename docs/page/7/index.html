@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ja">
   <head>
-	<meta name="generator" content="Hugo 0.49.1" />
+	<meta name="generator" content="Hugo 0.52" />
     <meta charset="utf-8">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -119,10 +119,7 @@
         
         
     </header>
-    RmarkdwonのYAMLフロントマターで titleとか authorとか 改行する /*! jQuery v1.11.3 | (c) 2005, 2015 jQuery Foundation, Inc. | jquery.org/license */ !function(a,b){"object"==typeof module&&"object"==typeof module.exports?module.exports=a.document?b(a,!0):function(a){if(!a.document)throw new Error("jQuery requires a window with a document");return b(a)}:b(a)}("undefined"!=typeof window?window:this,function(a,b){var c=[],d=c.slice,e=c.concat,f=c.push,g=c.indexOf,h={},i=h.toString,j=h.hasOwnProperty,k={},l="1.11.3",m=function(a,b){return new m.fn.init(a,b)},n=/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,o=/^-ms-/,p=/-([\da-z])/gi,q=function(a,b){return
-    
-    <p></p>
-    <a href="../../1/01/01/">読む →</a>
+      いつも使うパッケージはR起動時に読み込みたい .Rprofile を使ったよくある手口 フローチャート    いつも使うパッケージはR起動時に読み込みたい .Rprofile を使ったよくある手口 library(tidyverse)  フローチャート   
     
 </article>
 
@@ -150,41 +147,16 @@
         
         
     </header>
-    いつも使うパッケージはR起動時に読み込みたい .Rprofile を使ったよくある手口 フローチャート いつも使うパッケージはR起動時に読み込みたい .Rprofile を使ったよくあ
-    
-    <p></p>
-    <a href="../../1/01/01/">読む →</a>
-    
-</article>
-
-
-    
-
-
-
-    
-        <article class="blog-post">
-    <header>
-        <h2 class="blog-post-title">
-            <a class="text-dark" href="../../1/01/01/"></a>
-        </h2>
-        
-
-
-<div class="blog-post-date text-secondary">
-    
-    
-        by <span rel="author">Atusy</span>
-    
-</div>
-
-        
-        
-    </header>
-    インストール方法 使い方 主な変更点 Enjoy!! felp 0.1.3 を 公開 しました． ようやく実用レベルになったかと思います． 関数のソースとヘルプを同時に見たい人のためのパ
-    
-    <p></p>
-    <a href="../../1/01/01/">読む →</a>
+      インストール方法 使い方 主な変更点 Enjoy!!   felp 0.1.3 を 公開 しました．
+ようやく実用レベルになったかと思います．
+関数のソースとヘルプを同時に見たい人のためのパッケージです．
+ソースの読解が捗りますね!
+インストール方法 devtools::install_github(&quot;atusy/felp&quot;)  使い方 ?print や print?. と打つだけ．
+prettycode がソースの色付けもしてくれます．
+関数名?ドット という形式をサポートすることで， コーディング中に，ヘルプが欲しくなっても行頭に戻る必要がなくなりました．
+また，特定の関数のパッケージを参照したい人は ?utils::help や utils::help?. といった具合に :: や ::: を使います．
+?iris といった具合に関数以外のものを参照した場合は utils::`?` として働くよう互換性にも留意しました．
+ 主な変更点  ? を使った記法の追加． print.function の廃止．  RStudioとの相性が悪すぎるので……．    Enjoy!!  
     
 </article>
 
@@ -212,10 +184,17 @@
         
         
     </header>
-    Shinyでplotly.jsを使わずにインタラクティブな図を作れるのかなと思ったら、 「Shiny 100本ノック」の 【Shiny小技】グラフ
-    
-    <p></p>
-    <a href="../../1/01/01/">読む →</a>
+    Shinyでplotly.jsを使わずにインタラクティブな図を作れるのかなと思ったら、
+「Shiny 100本ノック」の
+【Shiny小技】グラフをダブルクリックすると情報が取得できる、dblclickOptsの紹介
+を見つけました。
+どうやら、 brushOpts なるものを使えば、 plot (ggplot2 を含む) の拡大ができるようなので試してみました。
+ 選択した領域を拡大 選択した領域を移動 選択した領域外をクリックすることで元のサイズに戻る  といったことができるようです。
+dblclickOpts と組み合わせると、 拡大した領域内で点をダブルクリックして点の情報を取り出すことも可能みたいです。
+```{r ui} library(shiny) library(ggplot2)
+u &lt;- shinyUI(fluidPage( plotOutput( “plot”, brush = brushOpts(id = “brush”) ) ))
+s &lt;- shinyServer(function(input, output) { output\(plot &lt;- renderPlot({ qplot(Sepal.Length, Sepal.Width, data = iris) + coord_cartesian( xlim = unlist(input\)brush[c(“xmin”, “xmax”)]), ylim = unlist(input$brush[c(“ymin”, “ymax”)]) ) }) })
+runApp(list(server = s, ui = u)) ```
     
 </article>
 
@@ -243,10 +222,14 @@
         
         
     </header>
-    こんな人にオススメ RmdでWord本の再販が間近に迫っていますね．これは献本頂いた時にしたレビューの約束を果たす時!! Rmdでこんなに完成し
-    
-    <p></p>
-    <a href="../../1/01/01/">読む →</a>
+      こんな人にオススメ   RmdでWord本の再販が間近に迫っていますね．これは献本頂いた時にしたレビューの約束を果たす時!!
+Rmdでこんなに完成したWordドキュメントを作れるんだ……! と感動できるので是非．
+RmdでWordを考えておられる方は勇気付けられるこ間違いなしです．
+ 集荷ｷﾀ━━━━(ﾟ∀ﾟ)━━━━!! ということで、半月くらいで買えるようになるはず…(不備がなければ
+送料はかかってしまうので、早くほしい、送料なしでほしい方は再販nightで僕と握手…（どちらも本体800円でごぜーますよ
+[@niszet0](https://twitter.com/niszet0/status/1065839595298803712)
+ こんな人にオススメ Rmd使ってるから，Word使いたくないな……という人向けでしょうか．
+ 
     
 </article>
 
@@ -386,10 +369,6 @@
         </li>
         
         <li>
-            <a href="../../2019/01/17/hoge/">hoge</a>
-        </li>
-        
-        <li>
             <a href="../../2019/01/16/s3-generics-dont-pass-default-params-to-methods/">S3総称関数の引数の既定値はメソッドに渡らない</a>
         </li>
         
@@ -399,6 +378,10 @@
         
         <li>
             <a href="../../2018/12/15/pacman/">pacman でパッケージのインストール・ロードを簡単にする</a>
+        </li>
+        
+        <li>
+            <a href="../../2018/12/06/furrr/">furrr パッケージで R で簡単並列処理</a>
         </li>
         
     </ol>

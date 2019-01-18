@@ -130,7 +130,10 @@
     <hr>
 </header>
 <article class="blog-post">
-    <p>Jupyter Notebookでは、コードブロック冒頭で <code>%%timeit</code> と唱えると、ブロックの評価に要した時間を表示できる。<br />
+    
+
+
+<p>Jupyter Notebookでは、コードブロック冒頭で <code>%%timeit</code> と唱えると、ブロックの評価に要した時間を表示できる。<br />
 <a href="https://jakevdp.github.io/PythonDataScienceHandbook/01.07-timing-and-profiling.html" class="uri">https://jakevdp.github.io/PythonDataScienceHandbook/01.07-timing-and-profiling.html</a></p>
 <p>これをRmdでもできないかなー？ と思って <code>knit_hooks()</code> を利用してみた。
 <code>knit_hooks()</code> の使い方の詳細は<a href="https://github.com/yihui/knitr-examples/blob/master/045-chunk-hook.md">こちら</a>。</p>
@@ -229,10 +232,6 @@ knit_hooks$set(
         </li>
         
         <li>
-            <a href="../../../../2019/01/17/hoge/">hoge</a>
-        </li>
-        
-        <li>
             <a href="../../../../2019/01/16/s3-generics-dont-pass-default-params-to-methods/">S3総称関数の引数の既定値はメソッドに渡らない</a>
         </li>
         
@@ -242,6 +241,10 @@ knit_hooks$set(
         
         <li>
             <a href="../../../../2018/12/15/pacman/">pacman でパッケージのインストール・ロードを簡単にする</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/12/06/furrr/">furrr パッケージで R で簡単並列処理</a>
         </li>
         
     </ol>
