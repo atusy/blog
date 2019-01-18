@@ -6,10 +6,19 @@
     <description>Recent content in R on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Wed, 16 Jan 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 18 Jan 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://atusy.github.io/categories/r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>一度に複数の変数を force する</title>
+      <link>https://atusy.github.io/2019/01/18/force-many-vars-at-once/</link>
+      <pubDate>Fri, 18 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2019/01/18/force-many-vars-at-once/</guid>
+      <description>結論 force(list(a, b, c, ...)) とすればいい． f &amp;lt;- function(a, b, c, ...) { force(list(a, b, c, ...)) # 先に評価したいものから list に入れる 10 } f() #&amp;gt; Error in force(list(a, b, c, ...)) : argument &amp;#34;a&amp;#34; is missing, with no default f(stop(&amp;#34;a でエラー&amp;#34;)</description>
+    </item>
     
     <item>
       <title>S3総称関数の引数の既定値はメソッドに渡らない</title>

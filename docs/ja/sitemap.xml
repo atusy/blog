@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://atusy.github.io/2019/01/18/force-many-vars-at-once/</loc>
+    <lastmod>2019-01-18T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://atusy.github.io/2019/01/17/enhance-captioner/</loc>
     <lastmod>2019-01-17T00:00:00+00:00</lastmod>
   </url>
@@ -245,6 +250,10 @@
   </url>
   
   <url>
+    <loc>https://atusy.github.io/1/01/01/</loc>
+  </url>
+  
+  <url>
     <loc>https://atusy.github.io/categories/arch/</loc>
     <lastmod>2018-10-11T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -252,7 +261,7 @@
   
   <url>
     <loc>https://atusy.github.io/</loc>
-    <lastmod>2019-01-17T00:00:00+00:00</lastmod>
+    <lastmod>2019-01-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -315,6 +324,12 @@
   <url>
     <loc>https://atusy.github.io/tags/felp/</loc>
     <lastmod>2018-11-18T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://atusy.github.io/tags/force/</loc>
+    <lastmod>2019-01-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -458,7 +473,7 @@
   
   <url>
     <loc>https://atusy.github.io/post/</loc>
-    <lastmod>2019-01-17T00:00:00+00:00</lastmod>
+    <lastmod>2019-01-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -480,7 +495,7 @@
   
   <url>
     <loc>https://atusy.github.io/categories/r/</loc>
-    <lastmod>2019-01-16T00:00:00+00:00</lastmod>
+    <lastmod>2019-01-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"

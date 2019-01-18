@@ -10,7 +10,7 @@
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://atusy.github.io/" />
-<meta property="og:updated_time" content="2019-01-17T00:00:00&#43;00:00"/>
+<meta property="og:updated_time" content="2019-01-18T00:00:00&#43;00:00"/>
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Atusy&#39;s blog"/>
@@ -98,6 +98,53 @@
 
 
 
+
+
+
+    
+        <article class="blog-post">
+    <header>
+        <h2 class="blog-post-title">
+            <a class="text-dark" href="./2019/01/18/force-many-vars-at-once/">一度に複数の変数を force する</a>
+        </h2>
+        
+
+
+<div class="blog-post-date text-secondary">
+    
+        2019-1-18
+    
+    
+        by <span rel="author">Atusy</span>
+    
+</div>
+
+        
+<div class="blog-post-tags text-secondary">
+    <strong>タグ:</strong>
+    
+        <a class="badge badge-primary" href="./tags/force">force</a>
+    
+</div>
+
+        
+<div class="blog-post-categories text-secondary">
+    <strong>カテゴリ:</strong>
+    
+        <a class="badge badge-primary" href="./categories/r">R</a>
+    
+</div>
+
+    </header>
+    結論 force(list(a, b, c, ...)) とすればいい． f &lt;- function(a, b, c, ...) { force(list(a, b, c, ...)) # 先に評価したいものから list に入れる 10 } f() #&gt; Error in force(list(a, b, c, ...)) : argument &#34;a&#34; is missing, with no default f(stop(&#34;a でエラー&#34;)
+    
+    <p></p>
+    <a href="./2019/01/18/force-many-vars-at-once/">読む →</a>
+    
+</article>
+
+
+    
 
 
 
@@ -385,53 +432,6 @@
 
 
 
-    
-        <article class="blog-post">
-    <header>
-        <h2 class="blog-post-title">
-            <a class="text-dark" href="./2018/12/02/japanr2018-joined/">Japan.R 2018 感想</a>
-        </h2>
-        
-
-
-<div class="blog-post-date text-secondary">
-    
-        2018-12-2
-    
-    
-        by <span rel="author">Atusy</span>
-    
-</div>
-
-        
-<div class="blog-post-tags text-secondary">
-    <strong>タグ:</strong>
-    
-        <a class="badge badge-primary" href="./tags/japanr">japanr</a>
-    
-</div>
-
-        
-<div class="blog-post-categories text-secondary">
-    <strong>カテゴリ:</strong>
-    
-        <a class="badge badge-primary" href="./categories/r">R</a>
-    
-</div>
-
-    </header>
-    Japan.R 2018 に参加しました 発表の感想 Long Talk R によるシステム開発入門 by @kos59125 R Markdown テンプレートの作り方 by @kazutan GUI で簡単！モダンなデータ解析 by @efprime_jp Shiny 完全に理解した by @Med_KU
-    
-    <p></p>
-    <a href="./2018/12/02/japanr2018-joined/">読む →</a>
-    
-</article>
-
-
-    
-
-
-
 
 
 <nav class="blog-pagination">
@@ -555,6 +555,10 @@
     <ol class="list-unstyled">
         
         <li>
+            <a href="./2019/01/18/force-many-vars-at-once/">一度に複数の変数を force する</a>
+        </li>
+        
+        <li>
             <a href="./2019/01/17/enhance-captioner/">captioner を魔改造してみた</a>
         </li>
         
@@ -568,10 +572,6 @@
         
         <li>
             <a href="./2018/12/15/pacman/">pacman でパッケージのインストール・ロードを簡単にする</a>
-        </li>
-        
-        <li>
-            <a href="./2018/12/06/furrr/">furrr パッケージで R で簡単並列処理</a>
         </li>
         
     </ol>
@@ -613,6 +613,8 @@
             <a class="badge badge-primary" href="./tags/dplyr">dplyr</a>
             
             <a class="badge badge-primary" href="./tags/felp">felp</a>
+            
+            <a class="badge badge-primary" href="./tags/force">force</a>
             
             <a class="badge badge-primary" href="./tags/furrr">furrr</a>
             
