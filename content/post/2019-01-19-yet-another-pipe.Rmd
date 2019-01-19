@@ -24,11 +24,11 @@ Tidyverse が覇権を握る世界線において  pipe とは `` magrittr::`%>%
 
 pipe の成り立ちを探る神学者たちも続々と表れております．
 
-- [@hoxo_m](https://twitter.com/hoxo_m): 
+- [\@hoxo_m](https://twitter.com/hoxo_m): 
   [R の NSE を駆使して pipeR ワールドを作る #rstatsj](https://qiita.com/hoxo_m/items/3fd3d2520fa014a248cb)
-- [@igjit](https://twitter.com/igjit): 
+- [\@igjit](https://twitter.com/igjit): 
   [パイプ演算子自作入門](https://igjit.github.io/slides/2018/01/tiny_pipe/#/)
-- [@0_u0 a.k.a きぬいと](https://twitter.com/0_u0):
+- [\@0_u0 a.k.a きぬいと](https://twitter.com/0_u0):
   [宇宙が生まれる前の話](https://t.co/40dvNAiUIP)
 
 しかし，おそらくみなさんは遥か昔からパイプしていた．
