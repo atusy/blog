@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://atusy.github.io/2019/01/19/yet-another-pipe/</loc>
+    <lastmod>2019-01-19T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://atusy.github.io/2019/01/18/force-many-vars-at-once/</loc>
     <lastmod>2019-01-18T00:00:00+00:00</lastmod>
   </url>
@@ -261,7 +266,7 @@
   
   <url>
     <loc>https://atusy.github.io/</loc>
-    <lastmod>2019-01-18T00:00:00+00:00</lastmod>
+    <lastmod>2019-01-19T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -312,6 +317,12 @@
   <url>
     <loc>https://atusy.github.io/categories/css/</loc>
     <lastmod>2018-11-21T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://atusy.github.io/tags/data.table/</loc>
+    <lastmod>2019-01-19T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -384,14 +395,14 @@
   </url>
   
   <url>
-    <loc>https://atusy.github.io/tags/latex/</loc>
-    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
+    <loc>https://atusy.github.io/categories/latex/</loc>
+    <lastmod>2018-07-09T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://atusy.github.io/categories/latex/</loc>
-    <lastmod>2018-07-09T00:00:00+00:00</lastmod>
+    <loc>https://atusy.github.io/tags/latex/</loc>
+    <lastmod>2018-07-28T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -404,6 +415,12 @@
   <url>
     <loc>https://atusy.github.io/tags/linux/</loc>
     <lastmod>2018-10-11T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://atusy.github.io/tags/magrittr/</loc>
+    <lastmod>2019-01-19T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -460,6 +477,12 @@
   </url>
   
   <url>
+    <loc>https://atusy.github.io/tags/pipe/</loc>
+    <lastmod>2019-01-19T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://atusy.github.io/tags/plantuml/</loc>
     <lastmod>2018-10-25T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -473,7 +496,7 @@
   
   <url>
     <loc>https://atusy.github.io/post/</loc>
-    <lastmod>2019-01-18T00:00:00+00:00</lastmod>
+    <lastmod>2019-01-19T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -488,14 +511,8 @@
   </url>
   
   <url>
-    <loc>https://atusy.github.io/tags/r/</loc>
-    <lastmod>2019-01-17T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>https://atusy.github.io/categories/r/</loc>
-    <lastmod>2019-01-18T00:00:00+00:00</lastmod>
+    <lastmod>2019-01-19T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
@@ -507,6 +524,12 @@
                 hreflang="ja"
                 href="https://atusy.github.io/categories/r/"
                 />
+  </url>
+  
+  <url>
+    <loc>https://atusy.github.io/tags/r/</loc>
+    <lastmod>2019-01-17T00:00:00+00:00</lastmod>
+    <priority>0</priority>
   </url>
   
   <url>

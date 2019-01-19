@@ -30,6 +30,15 @@
     </item>
     
     <item>
+      <title>Data.table</title>
+      <link>https://atusy.github.io/tags/data.table/</link>
+      <pubDate>Sat, 19 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/tags/data.table/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Dplyr</title>
       <link>https://atusy.github.io/tags/dplyr/</link>
       <pubDate>Fri, 04 Jan 2019 00:00:00 +0000</pubDate>
@@ -129,6 +138,15 @@
     </item>
     
     <item>
+      <title>Magrittr</title>
+      <link>https://atusy.github.io/tags/magrittr/</link>
+      <pubDate>Sat, 19 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/tags/magrittr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Mathjax</title>
       <link>https://atusy.github.io/tags/mathjax/</link>
       <pubDate>Sat, 28 Jul 2018 00:00:00 +0000</pubDate>
@@ -179,6 +197,15 @@
       <pubDate>Tue, 16 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>https://atusy.github.io/tags/pforeach/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Pipe</title>
+      <link>https://atusy.github.io/tags/pipe/</link>
+      <pubDate>Sat, 19 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/tags/pipe/</guid>
       <description></description>
     </item>
     

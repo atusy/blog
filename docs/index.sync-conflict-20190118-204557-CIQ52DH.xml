@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Atusy&#39;s blog</title>
+    <link>https://atusy.github.io/</link>
+    <description>Recent content on Atusy&#39;s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja-jp</language>
+    <lastBuildDate>Fri, 18 Jan 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://atusy.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>一度に複数の変数を force する</title>
+      <link>https://atusy.github.io/2019/01/18/force-many-vars-at-once/</link>
+      <pubDate>Fri, 18 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2019/01/18/force-many-vars-at-once/</guid>
+      <description>結論 force(list(a, b, c, ...)) とすればいい． f &amp;lt;- function(a, b, c, ...) { force(list(a, b, c, ...)) # 先に評価したいものから list に入れる 10 } f() #&amp;gt; Error in force(list(a, b, c, ...)) : argument &amp;#34;a&amp;#34; is missing, with no default f(stop(&amp;#34;a でエラー&amp;#34;)</description>
+    </item>
+    
+    <item>
+      <title>captioner を魔改造してみた</title>
+      <link>https://atusy.github.io/2019/01/17/enhance-captioner/</link>
+      <pubDate>Thu, 17 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2019/01/17/enhance-captioner/</guid>
+      <description>はじめに 実装 captioner を初期化 キャプションを振る時は相互参照に利用する名前を id に流用 参照する時は相互参照に利用する名前をリンクにする 図をテスト plot() 表を</description>
+    </item>
+    
+    <item>
+      <title>S3総称関数の引数の既定値はメソッドに渡らない</title>
+      <link>https://atusy.github.io/2019/01/16/s3-generics-dont-pass-default-params-to-methods/</link>
+      <pubDate>Wed, 16 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2019/01/16/s3-generics-dont-pass-default-params-to-methods/</guid>
+      <description>Error と周辺の挙動 f &amp;lt;- function(x, n = 1, ...) UseMethod(&amp;quot;f&amp;quot;) f.default &amp;lt;- function(x, n, ...) n f(NULL) ## Error in f.default(NULL): argument &amp;quot;n&amp;quot; is missing, with no default てっきり f(NULL) を実行すると，既定で n = 1 だから， f.default(x = NULL, n = 1) が呼び出されるとば</description>
+    </item>
+    
+    <item>
+      <title>group_map などの data frame を要約する関数をベンチマーク (dplyr &gt; 0.8.x)</title>
+      <link>https://atusy.github.io/2019/01/04/benchmarks-on-summarizing-with-dplyr/</link>
+      <pubDate>Fri, 04 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2019/01/04/benchmarks-on-summarizing-with-dplyr/</guid>
+      <description>パッケージ読み込み ベンチマーク 結果 表 Ridgeline 図 箱ひげ図 感想と補足 Enjoy! tidyverse において，grouped data frame に対して grouping variables 以外の各列に関数を適用する方法は種々あ</description>
+    </item>
+    
+    <item>
+      <title>pacman でパッケージのインストール・ロードを簡単にする</title>
+      <link>https://atusy.github.io/2018/12/15/pacman/</link>
+      <pubDate>Sat, 15 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/12/15/pacman/</guid>
+      <description>pacman パッケージとは pacman パッケージの関数 インストール / 読み込みを行うもの その他便利関数10選 needs パッケージとの比較 pacman でも needs::prioritize したい？ 改善案 GitHub 上のパッケ</description>
+    </item>
+    
+    <item>
+      <title>furrr パッケージで R で簡単並列処理</title>
+      <link>https://atusy.github.io/2018/12/06/furrr/</link>
+      <pubDate>Thu, 06 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/12/06/furrr/</guid>
+      <description>インストール 読み込み 使い方 シングルスレッド (strategy = sequential) マルチスレッド (strategy = multiprocess) コア数を変更 乱数を固定 プログレスバーを表示 出力の型 furrr パッケージを使うと purrr</description>
+    </item>
+    
+    <item>
+      <title>furrr パッケージで ggplot のリストの表示を高速化する</title>
+      <link>https://atusy.github.io/2018/12/05/accelerate-list-of-ggplot-with-furrr/</link>
+      <pubDate>Wed, 05 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/12/05/accelerate-list-of-ggplot-with-furrr/</guid>
+      <description>はじめに 実装とテスト ベンチマーク 感想 はじめに 前に hoxo-m/pforeach パッケージを利用して， ggplot のリストを並列処理し，描写の高速化を行いました． しかし， hoxo-m/pforeach パッケー</description>
+    </item>
+    
+    <item>
+      <title>Japan.R 2018 感想
+</title>
+      <link>https://atusy.github.io/2018/12/02/japanr2018-joined/</link>
+      <pubDate>Sun, 02 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/12/02/japanr2018-joined/</guid>
+      <description>Japan.R 2018 に参加しました 発表の感想 Long Talk R によるシステム開発入門 by @kos59125 R Markdown テンプレートの作り方 by @kazutan GUI で簡単！モダンなデータ解析 by @efprime_jp Shiny 完全に理解した by @Med_KU</description>
+    </item>
+    
+    <item>
+      <title>viridisの色数</title>
+      <link>https://atusy.github.io/2018/11/25/size-of-viridis-color-palette/</link>
+      <pubDate>Sun, 25 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/11/25/size-of-viridis-color-palette/</guid>
+      <description>viridis や cividis は、色の変化が知覚的に一様となるよう調整された、連続的なカラースケール。 白黒印刷するとグレースケールになるので、プリンタにも優しい。 viridis</description>
+    </item>
+    
+    <item>
+      <title>書評 「R MarkdownでWord文書を作ろう」</title>
+      <link>https://atusy.github.io/2018/11/25/rmd-de-word/</link>
+      <pubDate>Sun, 25 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/11/25/rmd-de-word/</guid>
+      <description>RmdでWord本の再販が間近に迫っていますね．これは献本頂いた時にしたレビューの約束を果たす時!! Rmdでこんなに完成したWordドキュメ</description>
+    </item>
+    
+    <item>
+      <title>`ggplot2::coord_cartesian(xlim = c(0, NA))` できるようにしてみた</title>
+      <link>https://atusy.github.io/2018/11/22/strange-coord-functions-ggplot2/</link>
+      <pubDate>Thu, 22 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/11/22/strange-coord-functions-ggplot2/</guid>
+      <description>問題 実装 オリジナル 修正版 実験 他のcoord_系列も問題なさそう 感想 PRに向けての試験的な実装． https://github.com/atusy/ggplot2/commit/26c1b7a478585889947d265d691e375e399637c3 なぜかxlimやylimに長さ3以上の連続値</description>
+    </item>
+    
+    <item>
+      <title>CSSでヘッダの行間を調整してみた</title>
+      <link>https://atusy.github.io/2018/11/21/mod-css-margin/</link>
+      <pubDate>Wed, 21 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/11/21/mod-css-margin/</guid>
+      <description>h1 から h2 そして h3 までの余白が 詰め詰めで読み難かったので、修正しました。 以前はこんな感じで辛かった h2 h2の内容 h3 h3の内容 h2 h2の内容 h3 h3の</description>
+    </item>
+    
+    <item>
+      <title>Shinyでggplot2の選択領域を拡大 (brushOpts)</title>
+      <link>https://atusy.github.io/2018/11/21/shiny-brushopts/</link>
+      <pubDate>Wed, 21 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/11/21/shiny-brushopts/</guid>
+      <description>Shinyでplotly.jsを使わずにインタラクティブな図を作れるのかなと思ったら、 「Shiny 100本ノック」の 【Shiny小技】グラフ</description>
+    </item>
+    
+    <item>
+      <title>ヒストグラムのビンの色をx軸に応じて変える</title>
+      <link>https://atusy.github.io/2018/11/20/histogram-fill-along-x/</link>
+      <pubDate>Tue, 20 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/11/20/histogram-fill-along-x/</guid>
+      <description>ヒストグラムをヒートマップの凡例 + αにしたい 試行錯誤の歴史 データ整形 ヒストグラム fill = x ではダメ fill = stat(x) ならOK ソース 追記 tl; dr geom_histogram(aes(fill = stat(x))) すればいい。</description>
+    </item>
+    
+    <item>
+      <title>felp 0.1.3</title>
+      <link>https://atusy.github.io/2018/11/18/felp-0-1-3/</link>
+      <pubDate>Sun, 18 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/11/18/felp-0-1-3/</guid>
+      <description>felp 0.1.3 を 公開 しました． ようやく実用レベルになったかと思います． 関数のソースとヘルプを同時に見たい人のためのパッケージです． ソースの読解が捗りま</description>
+    </item>
+    
+    <item>
+      <title>Rmdのfig.capを図を生成するチャンク内にglueで書く</title>
+      <link>https://atusy.github.io/2018/11/11/glue-for-fig-cap-in-rmd/</link>
+      <pubDate>Sun, 11 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/11/11/glue-for-fig-cap-in-rmd/</guid>
+      <description>Rmdのchunkオプションである fig.cap の評価は，チャンクの評価が終わってからです． この性質を利用すると，チャンク内にキャプションと図を同居させ</description>
+    </item>
+    
+    <item>
+      <title>ggplot2のレジェンド位置を調整</title>
+      <link>https://atusy.github.io/2018/11/10/ggplot2-legend-pos-n-just/</link>
+      <pubDate>Sat, 10 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/11/10/ggplot2-legend-pos-n-just/</guid>
+      <description>ggplot2のレジェンド位置を変えるには Let’s try! パッケージ 基本となる図を用意 レジェンド位置を数値で指定する レジェンド位置を文字列で指定</description>
+    </item>
+    
+    <item>
+      <title>geom_histogramのビン幅を動的に決定する</title>
+      <link>https://atusy.github.io/2018/11/09/binwdith-for-geom-histogram/</link>
+      <pubDate>Fri, 09 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/11/09/binwdith-for-geom-histogram/</guid>
+      <description>TL; DR ggplot2のヒストグラムはビン数30が既定 ビン幅を動的に決めたい geom_histogram(binwidth = ) に関数を指定 ビン幅を決める関数を定義 テスト Enjoy! TL; DR geom_histogram(binwidth = ) はデータ</description>
+    </item>
+    
+    <item>
+      <title>R起動時に不足パッケージを導入しつつ読み込む</title>
+      <link>https://atusy.github.io/2018/11/06/defaultpackages-rprofile/</link>
+      <pubDate>Tue, 06 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/11/06/defaultpackages-rprofile/</guid>
+      <description>.Rprofileを使って いつも使うパッケージはR起動時に読み込む 例えば， tidyverse を読み込みたいなら， options(defaultPackages = c(getOption(&amp;#39;defaultPackages&amp;#39;), &amp;#39;tidyverse&amp;#39;)) とする． library ではなく options を利用することで</description>
+    </item>
+    
+    <item>
+      <title>ggplot2で$TeX$を利用する</title>
+      <link>https://atusy.github.io/2018/11/03/tex-in-ggplot2/</link>
+      <pubDate>Sat, 03 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/11/03/tex-in-ggplot2/</guid>
+      <description>はじめに インストール 使ってみる タイトルなどで \(TeX\) geom_text で \(TeX\) facet_wrap や facet_grid で \(TeX\) Enjoy! はじめに ggplot2 で \(TeX\) 記法が使えると嬉しいですよね． 一応，そういう人たちのための入口</description>
+    </item>
+    
+    <item>
+      <title>patchworkの表示を高速化したかった……</title>
+      <link>https://atusy.github.io/2018/11/03/accelarate-patchwork/</link>
+      <pubDate>Sat, 03 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/11/03/accelarate-patchwork/</guid>
+      <description>失敗の記録． 目的 ggplotのリストの表示を高速化するで紹介した通り， ggplotオブジェクトはprintされる段になって，プロットに必要な</description>
+    </item>
+    
+    <item>
+      <title>ggplot2とpatchworkで周辺分布</title>
+      <link>https://atusy.github.io/2018/11/02/marginal-patchwork/</link>
+      <pubDate>Fri, 02 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/11/02/marginal-patchwork/</guid>
+      <description>patchworkパッケージを使えばあんな図やこんな図が簡単に，と思い馳せた人も多いのではなかろうか． 参考: TokyoR 73での発表スライド 中でも周辺</description>
+    </item>
+    
+    <item>
+      <title>RmarkdwonのYAMLフロントマターで  
+titleとか  
+authorとか  
+改行する
+</title>
+      <link>https://atusy.github.io/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</link>
+      <pubDate>Sat, 27 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</guid>
+      <description>@niszet0 さん著「R MarkdownでWord文書を作ろう」を読んでます。 Rmdを扱った商業誌にも、同書ほどRmdファイルのYAMLフロントマターの</description>
+    </item>
+    
+    <item>
+      <title>Plotlyで軸比を1:1に固定する</title>
+      <link>https://atusy.github.io/2018/10/26/plotly-fixed-axes/</link>
+      <pubDate>Fri, 26 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/10/26/plotly-fixed-axes/</guid>
+      <description>今迄Plotly.jsを使いたい時は、元の図を ggplot2 パッケージで作成し、 plotly::ggplotly() で変換していた。 しかし、どうもパフォーマンスが悪い気がするので、Plo</description>
+    </item>
+    
+    <item>
+      <title>R Markdown で PlantUML</title>
+      <link>https://atusy.github.io/2018/10/25/plantuml-on-rmd/</link>
+      <pubDate>Thu, 25 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/10/25/plantuml-on-rmd/</guid>
+      <description>@niszet0 さんの “R MarkdownでWord文書を作ろう” を摘み食いしてます (以下RmdでWord本)． ちゃんとしたいずれレビューはいずれするとし</description>
+    </item>
+    
+    <item>
+      <title>結婚式で使った楽曲</title>
+      <link>https://atusy.github.io/2018/10/22/bridal-music/</link>
+      <pubDate>Mon, 22 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/10/22/bridal-music/</guid>
+      <description>9/29に結婚式を挙げました。 なんとこの日は私の愛すDo As Infinityのデビュー日。 ゆかりんが登場したことで、一部が騒然(？)としました</description>
+    </item>
+    
+    <item>
+      <title>TokyoR 73 行ってきました</title>
+      <link>https://atusy.github.io/2018/10/21/tokyor73/</link>
+      <pubDate>Sun, 21 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/10/21/tokyor73/</guid>
+      <description>2018年10月20日はJuliaなんちゃらやらなんやらと沢山の勉強会が同時開催された日だったらしいですね。 私はTokyoR 73を選んで「g</description>
+    </item>
+    
+    <item>
+      <title>ggplotのリストの表示を高速化する</title>
+      <link>https://atusy.github.io/2018/10/16/accelerate-list-of-ggplot/</link>
+      <pubDate>Tue, 16 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/10/16/accelerate-list-of-ggplot/</guid>
+      <description>大きなデータを用いたggplotのリストや，大量のggplotのリストを高速に描写するための関数 print_gglist を作りました． devtools::install_github(&amp;#39;atusy/ggAtusy&amp;#39;) で遊べます． はじめに ggp</description>
+    </item>
+    
+    <item>
+      <title>Antergos導入</title>
+      <link>https://atusy.github.io/2018/10/11/hello-antergosmd/</link>
+      <pubDate>Thu, 11 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/10/11/hello-antergosmd/</guid>
+      <description>自宅用PCにAntergosを導入しました． ppaを足すも.debや.tar.gzを落とすもなんかかったるくなってAURが楽しそうなArch</description>
+    </item>
+    
+    <item>
+      <title>roxygen2タグまとめ</title>
+      <link>https://atusy.github.io/2018/08/28/roxygen2matome/</link>
+      <pubDate>Tue, 28 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/08/28/roxygen2matome/</guid>
+      <description>まとめ Tips @title、@description、@details について @importFrom、@seealso について その他 References 変更履歴 Ro</description>
+    </item>
+    
+    <item>
+      <title>欠損値の発生過程の類別</title>
+      <link>https://atusy.github.io/2018/08/25/missing-value-type/</link>
+      <pubDate>Sat, 25 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/08/25/missing-value-type/</guid>
+      <description>先日、欠損値の発生過程の例を図示してTweetしたところ、思ったより反響がよかったので、図をブラシュアップの上、記事に残すことにした。 俄仕込</description>
+    </item>
+    
+    <item>
+      <title>Rmdでchunkごとの実行時間を計測</title>
+      <link>https://atusy.github.io/2018/08/18/time-each-chunk/</link>
+      <pubDate>Sat, 18 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/08/18/time-each-chunk/</guid>
+      <description>Jupyter Notebookでは、コードブロック冒頭で %%timeit と唱えると、ブロックの評価に要した時間を表示できる。 https://jakevdp.github.io/PythonDataScienceHandbook/01.07-timing-and-profiling.html これをRmdでもできないかなー？ と思って</description>
+    </item>
+    
+    <item>
+      <title>パラメータ付きRmdを試す</title>
+      <link>https://atusy.github.io/2018/08/17/rmd-parameterized/</link>
+      <pubDate>Fri, 17 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/08/17/rmd-parameterized/</guid>
+      <description>パラメータ付きRmdが便利そうだと思ったのでメモと実験 パラメータ付きRmdとは YAMLヘッダーの params で作成される変数のリストを用いたRmd うま</description>
+    </item>
+    
+    <item>
+      <title>R3.5系ではファイル同期ソフトでパッケージを同期しないように</title>
+      <link>https://atusy.github.io/2018/07/31/dont-sync-pkg-r3-5/</link>
+      <pubDate>Tue, 31 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/07/31/dont-sync-pkg-r3-5/</guid>
+      <description>タイトル通り、R3.5系ではファイル同期ソフトでパッケージを同期しないようにしましょう。 同期しておくとある環境にインストールしたパッケージを</description>
+    </item>
+    
+    <item>
+      <title>R3.5系ではファイル同期ソフトでパッケージを同期しないように</title>
+      <link>https://atusy.github.io/2018/07/31/dont-sync-pkg-r3-5/</link>
+      <pubDate>Tue, 31 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/07/31/dont-sync-pkg-r3-5/</guid>
+      <description>タイトル通り、R3.5系ではファイル同期ソフトでパッケージを同期しないようにしましょう。 同期しておくとある環境にインストールしたパッケージを</description>
+    </item>
+    
+    <item>
+      <title>blogdownでMathJax</title>
+      <link>https://atusy.github.io/2018/07/28/how2mathjax/</link>
+      <pubDate>Sat, 28 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/07/28/how2mathjax/</guid>
+      <description>MathJaxとは？ MathJaxを利用すると、$\TeX$ 記法を用いて数式を表現できる。 ブロックにするには $$\latex$$ と入力すると $$ \LaTeX $$ となる。 イン</description>
+    </item>
+    
+    <item>
+      <title>xetexでunicode文字</title>
+      <link>https://atusy.github.io/2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/</link>
+      <pubDate>Mon, 09 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/07/09/xelatex%E3%81%A7utf8%E6%96%87%E5%AD%97/</guid>
+      <description>$\LaTeX{}$ で μ や α など特殊文字を直打ちすると、 □になってしまうことがしばしば。 XeTeXを使っている場合は、 \setmainfont{IPAMincho} など、ユニコードに対応したフォントを使</description>
+    </item>
+    
+    <item>
+      <title>GitHub pages with Rmarkdown</title>
+      <link>https://atusy.github.io/2018/07/05/github-pages-with-rmarkdown/</link>
+      <pubDate>Thu, 05 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/07/05/github-pages-with-rmarkdown/</guid>
+      <description>遅蒔きながら、Rのblogdownパッケージを使ってblogを始めてみた。 “Rとblogdownでかんたんにgithub.io上にブログを使</description>
+    </item>
+    
+    <item>
+      <title>GitHub pages with Rmarkdown</title>
+      <link>https://atusy.github.io/2018/07/05/github-pages-with-rmarkdown/</link>
+      <pubDate>Thu, 05 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2018/07/05/github-pages-with-rmarkdown/</guid>
+      <description>遅蒔きながら、Rのblogdownパッケージを使ってblogを始めてみた。 &amp;ldquo;Rとblogdownでかんたんにgithub.io上</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://atusy.github.io/1/01/01/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/1/01/01/</guid>
+      <description>xetexでunicode文字       code{white-space: pre;} pre:not([class]) { background-color: white; }  if (window.hljs) { hljs.configure({languages: []}); hljs.initHighlightingOnLoad(); if (document.readyState &amp;&amp; document.readyState === &#34;complete&#34;) { window.setTimeout(function() { hljs.initHighlighting(); }, 0); } }  h1 { font-size: 34px; } h1.title { font-size: 38px; } h2 { font-size: 30px; } h3 { font-size: 24px; } h4 { font-size: 18px; } h5 { font-size: 16px; } h6 { font-size: 12px; } .</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://atusy.github.io/1/01/01/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/1/01/01/</guid>
+      <description>MathJaxとは？ blogdownではインラインでMathJaxが使えない……？ 解決方法   MathJaxとは？ MathJaxを利用すると、\(\TeX\) 記法を用いて数式を表現できる。
+ブロックにするには
+$$ \latex $$ と入力すると
+\[ \LaTeX \]
+となる。
+インラインでも $\LaTeX$ とすると、 \(\LaTeX\) となる。
+ブロックでは $$ から成る2行の間に、 インラインでは同じ行の $ 2字の間に \(TeX\) 記法を用いることがポイントだ。
+ blogdownではインラインでMathJaxが使えない……？ しかし、blogdownのデフォルトテーマ (Hugo Lithium) ではインラインの数式を表現できなかった。
+mathjax blogdown で検索して、
+ Yi Hui によるドキュメント や、 ぞうさんの記事 ( blogdownで数式がうまく表示されない場合の対処)  を参考にするも効果なし。
+結局 mathjax 使い方 で検索して、
+ くろきげんさんの記事(MathJaxの使い方)  も参考にしたところ、インラインで使うにはちょっとコードに工夫がいるらしいことが判明。
+ 解決方法 ./themes/hugo-lithium/layouts/partials/footer_mathjax.html
+を下記に書き換える。
+&amp;lt;script type=&amp;quot;text/x-mathjax-config&amp;quot;&amp;gt; MathJax.Hub.Config({ tex2jax: { inlineMath: [[&amp;#39;$&amp;#39;,&amp;#39;$&amp;#39;], [&amp;quot;\\(&amp;quot;,&amp;quot;\\)&amp;quot;]] } }); &amp;lt;/script&amp;gt; &amp;lt;script async src=&amp;quot;//cdn.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://atusy.github.io/1/01/01/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/1/01/01/</guid>
+      <description>TokyoR 73 行ってきました /*! jQuery v1.11.3 | (c) 2005, 2015 jQuery Foundation, Inc. | jquery.org/license */ !function(a,b){&#34;object&#34;==typeof module&amp;&amp;&#34;object&#34;==typeof module.exports?module.exports=a.document?b(a,!0):function(a){if(!a.document)throw new Error(&#34;jQuery requires a window with a document&#34;);return b(a)}:b(a)}(&#34;undefined&#34;!=typeof window?window:this,function(a,b){var c=[],d=c.slice,e=c.concat,f=c.push,g=c.indexOf,h={},i=h.toString,j=h.hasOwnProperty,k={},l=&#34;1.11.3&#34;,m=function(a,b){return new m.fn.init(a,b)},n=/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,o=/^-ms-/,p=/-([\da-z])/gi,q=function(a,b){return b.toUpperCase()};m.fn=m.prototype={jquery:l,constructor:m,selector:&#34;&#34;,length:0,toArray:function(){return d.call(this)},get:function(a){return null!=a?0a?this[a+this.length]:this[a]:d.call(this)},pushStack:function(a){var b=m.merge(this.constructor(),a);return b.prevObject=this,b.context=this.context,b},each:function(a,b){return m.each(this,a,b)},map:function(a){return this.pushStack(m.map(this,function(b,c){return a.call(b,c,b)}))},slice:function(){return this.pushStack(d.apply(this,arguments))},first:function(){return this.eq(0)},last:function(){return this.eq(-1)},eq:function(a){var b=this.length,c=+a+(0a?b:0);return this.pushStack(c=0&amp;&amp;bc?[this[c]]:[])},end:function(){return this.prevObject||this.constructor(null)},push:f,sort:c.sort,splice:c.splice},m.extend=m.fn.extend=function(){var a,b,c,d,e,f,g=arguments[0]||{},h=1,i=arguments.length,j=!1;for(&#34;boolean&#34;==typeof g&amp;&amp;(j=g,g=arguments[h]||{},h++),&#34;object&#34;==typeof g||m.isFunction(g)||(g={}),h===i&amp;&amp;(g=this,h--);ih;h++)if(null!=(e=arguments[h]))for(d in e)a=g[d],c=e[d],g!==c&amp;&amp;(j&amp;&amp;c&amp;&amp;(m.isPlainObject(c)||(b=m.isArray(c)))?(b?(b=!1,f=a&amp;&amp;m.isArray(a)?a:[]):f=a&amp;&amp;m.isPlainObject(a)?a:{},g[d]=m.extend(j,f,c)):void 0!==c&amp;&amp;(g[d]=c));return g},m.extend({expando:&#34;jQuery&#34;+(l+Math.random()).replace(/\D/g,&#34;&#34;),isReady:!0,error:function(a){throw new Error(a)},noop:function(){},isFunction:function(a){return&#34;function&#34;===m.type(a)},isArray:Array.isArray||function(a){return&#34;array&#34;===m.type(a)},isWindow:function(a){return null!=a&amp;&amp;a==a.window},isNumeric:function(a){return!m.isArray(a)&amp;&amp;a-parseFloat(a)+1=0},isEmptyObject:function(a){var b;for(b in a)return!1;return!0},isPlainObject:function(a){var b;if(!a||&#34;object&#34;!==m.type(a)||a.nodeType||m.isWindow(a))return!1;try{if(a.constructor&amp;&amp;!j.call(a,&#34;constructor&#34;)&amp;&amp;!j.call(a.constructor.prototype,&#34;isPrototypeOf&#34;))return!1}catch(c){return!1}if(k.ownLast)for(b in a)return j.call(a,b);for(b in a);return void 0===b||j.call(a,b)},type:function(a){return null==a?a+&#34;&#34;:&#34;object&#34;==typeof a||&#34;function&#34;==typeof a?</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://atusy.github.io/1/01/01/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/1/01/01/</guid>
+      <description>RmarkdwonのYAMLフロントマターで titleとか authorとか 改行する /*! jQuery v1.11.3 | (c) 2005, 2015 jQuery Foundation, Inc. | jquery.org/license */ !function(a,b){&#34;object&#34;==typeof module&amp;&amp;&#34;object&#34;==typeof module.exports?module.exports=a.document?b(a,!0):function(a){if(!a.document)throw new Error(&#34;jQuery requires a window with a document&#34;);return b(a)}:b(a)}(&#34;undefined&#34;!=typeof window?window:this,function(a,b){var c=[],d=c.slice,e=c.concat,f=c.push,g=c.indexOf,h={},i=h.toString,j=h.hasOwnProperty,k={},l=&#34;1.11.3&#34;,m=function(a,b){return new m.fn.init(a,b)},n=/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,o=/^-ms-/,p=/-([\da-z])/gi,q=function(a,b){return b.toUpperCase()};m.fn=m.prototype={jquery:l,constructor:m,selector:&#34;&#34;,length:0,toArray:function(){return d.call(this)},get:function(a){return null!=a?0a?this[a+this.length]:this[a]:d.call(this)},pushStack:function(a){var b=m.merge(this.constructor(),a);return b.prevObject=this,b.context=this.context,b},each:function(a,b){return m.each(this,a,b)},map:function(a){return this.pushStack(m.map(this,function(b,c){return a.call(b,c,b)}))},slice:function(){return this.pushStack(d.apply(this,arguments))},first:function(){return this.eq(0)},last:function(){return this.eq(-1)},eq:function(a){var b=this.length,c=+a+(0a?b:0);return this.pushStack(c=0&amp;&amp;bc?[this[c]]:[])},end:function(){return this.prevObject||this.constructor(null)},push:f,sort:c.sort,splice:c.splice},m.extend=m.fn.extend=function(){var a,b,c,d,e,f,g=arguments[0]||{},h=1,i=arguments.length,j=!1;for(&#34;boolean&#34;==typeof g&amp;&amp;(j=g,g=arguments[h]||{},h++),&#34;object&#34;==typeof g||m.isFunction(g)||(g={}),h===i&amp;&amp;(g=this,h--);ih;h++)if(null!=(e=arguments[h]))for(d in e)a=g[d],c=e[d],g!==c&amp;&amp;(j&amp;&amp;c&amp;&amp;(m.isPlainObject(c)||(b=m.isArray(c)))?(b?(b=!1,f=a&amp;&amp;m.isArray(a)?a:[]):f=a&amp;&amp;m.isPlainObject(a)?a:{},g[d]=m.extend(j,f,c)):void 0!==c&amp;&amp;(g[d]=c));return g},m.extend({expando:&#34;jQuery&#34;+(l+Math.random()).replace(/\D/g,&#34;&#34;),isReady:!0,error:function(a){throw new Error(a)},noop:function(){},isFunction:function(a){return&#34;function&#34;===m.type(a)},isArray:Array.isArray||function(a){return&#34;array&#34;===m.type(a)},isWindow:function(a){return null!=a&amp;&amp;a==a.window},isNumeric:function(a){return!m.isArray(a)&amp;&amp;a-parseFloat(a)+1=0},isEmptyObject:function(a){var b;for(b in a)return!1;return!0},isPlainObject:function(a){var b;if(!a||&#34;object&#34;!==m.type(a)||a.nodeType||m.isWindow(a))return!1;try{if(a.constructor&amp;&amp;!j.call(a,&#34;constructor&#34;)&amp;&amp;!j.call(a.constructor.prototype,&#34;isPrototypeOf&#34;))return!1}catch(c){return!1}if(k.ownLast)for(b in a)return j.call(a,b);for(b in a);return void 0===b||j.call(a,b)},type:function(a){return null==a?a+&#34;&#34;:&#34;object&#34;==typeof a||&#34;</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://atusy.github.io/1/01/01/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/1/01/01/</guid>
+      <description>  いつも使うパッケージはR起動時に読み込みたい .Rprofile を使ったよくある手口 フローチャート    いつも使うパッケージはR起動時に読み込みたい .Rprofile を使ったよくある手口 library(tidyverse)  フローチャート   </description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://atusy.github.io/1/01/01/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/1/01/01/</guid>
+      <description>  インストール方法 使い方 主な変更点 Enjoy!!   felp 0.1.3 を 公開 しました．
+ようやく実用レベルになったかと思います．
+関数のソースとヘルプを同時に見たい人のためのパッケージです．
+ソースの読解が捗りますね!
+インストール方法 devtools::install_github(&amp;quot;atusy/felp&amp;quot;)  使い方 ?print や print?. と打つだけ．
+prettycode がソースの色付けもしてくれます．
+関数名?ドット という形式をサポートすることで， コーディング中に，ヘルプが欲しくなっても行頭に戻る必要がなくなりました．
+また，特定の関数のパッケージを参照したい人は ?utils::help や utils::help?. といった具合に :: や ::: を使います．
+?iris といった具合に関数以外のものを参照した場合は utils::`?` として働くよう互換性にも留意しました．
+ 主な変更点  ? を使った記法の追加． print.function の廃止．  RStudioとの相性が悪すぎるので……．    Enjoy!!  </description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://atusy.github.io/1/01/01/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/1/01/01/</guid>
+      <description>Shinyでplotly.jsを使わずにインタラクティブな図を作れるのかなと思ったら、
+「Shiny 100本ノック」の
+【Shiny小技】グラフをダブルクリックすると情報が取得できる、dblclickOptsの紹介
+を見つけました。
+どうやら、 brushOpts なるものを使えば、 plot (ggplot2 を含む) の拡大ができるようなので試してみました。
+ 選択した領域を拡大 選択した領域を移動 選択した領域外をクリックすることで元のサイズに戻る  といったことができるようです。
+dblclickOpts と組み合わせると、 拡大した領域内で点をダブルクリックして点の情報を取り出すことも可能みたいです。
+```{r ui} library(shiny) library(ggplot2)
+u &amp;lt;- shinyUI(fluidPage( plotOutput( “plot”, brush = brushOpts(id = “brush”) ) ))
+s &amp;lt;- shinyServer(function(input, output) { output\(plot &amp;lt;- renderPlot({ qplot(Sepal.Length, Sepal.Width, data = iris) + coord_cartesian( xlim = unlist(input\)brush[c(“xmin”, “xmax”)]), ylim = unlist(input$brush[c(“ymin”, “ymax”)]) ) }) })
+runApp(list(server = s, ui = u)) ```</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://atusy.github.io/1/01/01/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/1/01/01/</guid>
+      <description>  こんな人にオススメ   RmdでWord本の再販が間近に迫っていますね．これは献本頂いた時にしたレビューの約束を果たす時!!
+Rmdでこんなに完成したWordドキュメントを作れるんだ……! と感動できるので是非．
+RmdでWordを考えておられる方は勇気付けられるこ間違いなしです．
+ 集荷ｷﾀ━━━━(ﾟ∀ﾟ)━━━━!! ということで、半月くらいで買えるようになるはず…(不備がなければ
+送料はかかってしまうので、早くほしい、送料なしでほしい方は再販nightで僕と握手…（どちらも本体800円でごぜーますよ
+[@niszet0](https://twitter.com/niszet0/status/1065839595298803712)
+ こんな人にオススメ Rmd使ってるから，Word使いたくないな……という人向けでしょうか．
+ </description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://atusy.github.io/1/01/01/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/1/01/01/</guid>
+      <description>一度に複数の変数を force する /*! jQuery v1.11.3 | (c) 2005, 2015 jQuery Foundation, Inc. | jquery.org/license */ !function(a,b){&#34;object&#34;==typeof module&amp;&amp;&#34;object&#34;==typeof module.exports?module.exports=a.document?b(a,!0):function(a){if(!a.document)throw new Error(&#34;jQuery requires a window with a document&#34;);return b(a)}:b(a)}(&#34;undefined&#34;!=typeof window?window:this,function(a,b){var c=[],d=c.slice,e=c.concat,f=c.push,g=c.indexOf,h={},i=h.toString,j=h.hasOwnProperty,k={},l=&#34;1.11.3&#34;,m=function(a,b){return new m.fn.init(a,b)},n=/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,o=/^-ms-/,p=/-([\da-z])/gi,q=function(a,b){return b.toUpperCase()};m.fn=m.prototype={jquery:l,constructor:m,selector:&#34;&#34;,length:0,toArray:function(){return d.call(this)},get:function(a){return null!=a?0a?this[a+this.length]:this[a]:d.call(this)},pushStack:function(a){var b=m.merge(this.constructor(),a);return b.prevObject=this,b.context=this.context,b},each:function(a,b){return m.each(this,a,b)},map:function(a){return this.pushStack(m.map(this,function(b,c){return a.call(b,c,b)}))},slice:function(){return this.pushStack(d.apply(this,arguments))},first:function(){return this.eq(0)},last:function(){return this.eq(-1)},eq:function(a){var b=this.length,c=+a+(0a?b:0);return this.pushStack(c=0&amp;&amp;bc?[this[c]]:[])},end:function(){return this.prevObject||this.constructor(null)},push:f,sort:c.sort,splice:c.splice},m.extend=m.fn.extend=function(){var a,b,c,d,e,f,g=arguments[0]||{},h=1,i=arguments.length,j=!1;for(&#34;boolean&#34;==typeof g&amp;&amp;(j=g,g=arguments[h]||{},h++),&#34;object&#34;==typeof g||m.isFunction(g)||(g={}),h===i&amp;&amp;(g=this,h--);ih;h++)if(null!=(e=arguments[h]))for(d in e)a=g[d],c=e[d],g!==c&amp;&amp;(j&amp;&amp;c&amp;&amp;(m.isPlainObject(c)||(b=m.isArray(c)))?(b?(b=!1,f=a&amp;&amp;m.isArray(a)?a:[]):f=a&amp;&amp;m.isPlainObject(a)?a:{},g[d]=m.extend(j,f,c)):void 0!==c&amp;&amp;(g[d]=c));return g},m.extend({expando:&#34;jQuery&#34;+(l+Math.random()).replace(/\D/g,&#34;&#34;),isReady:!0,error:function(a){throw new Error(a)},noop:function(){},isFunction:function(a){return&#34;function&#34;===m.type(a)},isArray:Array.isArray||function(a){return&#34;array&#34;===m.type(a)},isWindow:function(a){return null!=a&amp;&amp;a==a.window},isNumeric:function(a){return!m.isArray(a)&amp;&amp;a-parseFloat(a)+1=0},isEmptyObject:function(a){var b;for(b in a)return!1;return!0},isPlainObject:function(a){var b;if(!a||&#34;object&#34;!==m.type(a)||a.nodeType||m.isWindow(a))return!1;try{if(a.constructor&amp;&amp;!j.call(a,&#34;constructor&#34;)&amp;&amp;!j.call(a.constructor.prototype,&#34;isPrototypeOf&#34;))return!1}catch(c){return!1}if(k.ownLast)for(b in a)return j.call(a,b);for(b in a);return void 0===b||j.call(a,b)},type:function(a){return null==a?a+&#34;&#34;:&#34;object&#34;==typeof a||&#34;function&#34;==typeof a?</description>
+    </item>
+    
+  </channel>
+</rss>

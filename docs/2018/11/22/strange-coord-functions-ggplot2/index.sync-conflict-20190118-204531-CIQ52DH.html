@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta property="og:title" content="`ggplot2::coord_cartesian(xlim = c(0, NA))` できるようにしてみた" />
+<meta property="og:description" content="問題 実装 オリジナル 修正版 実験 他のcoord_系列も問題なさそう 感想 PRに向けての試験的な実装． https://github.com/atusy/ggplot2/commit/26c1b7a478585889947d265d691e375e399637c3 なぜかxlimやylimに長さ3以上の連続値" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://atusy.github.io/2018/11/22/strange-coord-functions-ggplot2/" /><meta property="article:published_time" content="2018-11-22T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2018-11-22T00:00:00&#43;00:00"/>
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="`ggplot2::coord_cartesian(xlim = c(0, NA))` できるようにしてみた"/>
+<meta name="twitter:description" content="問題 実装 オリジナル 修正版 実験 他のcoord_系列も問題なさそう 感想 PRに向けての試験的な実装． https://github.com/atusy/ggplot2/commit/26c1b7a478585889947d265d691e375e399637c3 なぜかxlimやylimに長さ3以上の連続値"/>
+
+
+
+    <link rel="canonical" href="https://atusy.github.io/2018/11/22/strange-coord-functions-ggplot2/">
+
+    <title>
+      
+        `ggplot2::coord_cartesian(xlim = c(0, NA))` できるようにしてみた | Atusy&#39;s blog
+      
+    </title>
+
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+
+    <link href="https://atusy.github.io/css/style.css" rel="stylesheet">
+
+    
+
+    
+
+    <link rel="stylesheet" href="../../../../css/chroma-styles.css">
+
+  </head>
+  <body>
+    
+      <header class="blog-header">
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+        <a class="navbar-brand" href="../../../../">
+            <img src="../../../../images/atusy.jpg" width="50" height="50" class="d-inline-block align-top" alt="">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+            <ul class="navbar-nav">
+                
+                
+                <li class="nav-item ">
+                    
+                        <a class="nav-link" href="https://github.com/atusy">GitHub</a>
+                    
+                </li>
+                
+                <li class="nav-item ">
+                    
+                        <a class="nav-link" href="https://twitter.com/Atsushi776">Twitter</a>
+                    
+                </li>
+                
+            </ul>
+            
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Language
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                        
+                            <a class="dropdown-item" href="https://atusy.github.io/">Japanese</a>
+                        
+                            <a class="dropdown-item" href="https://atusy.github.io/en/">English</a>
+                        
+                    </div>
+                </li>
+            </ul>
+            
+        </div>
+    </nav>
+</header>
+    
+
+    
+    <div class="container">
+      <div class="row">
+        <div class="col-12 col-lg-8 blog-main">
+
+          
+
+<header>
+    <h2 class="blog-post-title">
+        <a class="text-dark" href="../../../../2018/11/22/strange-coord-functions-ggplot2/"><code>ggplot2::coord_cartesian(xlim = c(0, NA))</code> できるようにしてみた</a>
+    </h2>
+    
+
+
+<div class="blog-post-date text-secondary">
+    
+        2018-11-22
+    
+    
+        by <span rel="author">Atusy</span>
+    
+</div>
+
+    
+<div class="blog-post-tags text-secondary">
+    <strong>タグ:</strong>
+    
+        <a class="badge badge-primary" href="../../../../tags/ggplot2">ggplot2</a>
+    
+</div>
+
+    
+<div class="blog-post-categories text-secondary">
+    <strong>カテゴリ:</strong>
+    
+        <a class="badge badge-primary" href="../../../../categories/r">R</a>
+    
+</div>
+
+    <hr>
+</header>
+<article class="blog-post">
+    
+
+<div id="TOC">
+<ul>
+<li><a href="#problem">問題</a></li>
+<li><a href="#implementation">実装</a><ul>
+<li><a href="#original">オリジナル</a></li>
+<li><a href="#fix">修正版</a></li>
+</ul></li>
+<li><a href="#test">実験</a><ul>
+<li><a href="#fine">他のcoord_系列も問題なさそう</a></li>
+</ul></li>
+<li><a href="#note">感想</a></li>
+</ul>
+</div>
+
+<p>PRに向けての試験的な実装．</p>
+<p><a href="https://github.com/atusy/ggplot2/commit/26c1b7a478585889947d265d691e375e399637c3" class="uri">https://github.com/atusy/ggplot2/commit/26c1b7a478585889947d265d691e375e399637c3</a></p>
+<p>なぜかxlimやylimに長さ3以上の連続値を取れてしまうので，
+本来はscale_*_continuousやxlimに合わせて長さ2までに制限すべきだと思う</p>
+<p>試験的ながら，パッケージとして試したい方は</p>
+<pre class="r"><code>devtools::install_github(&quot;atusy/ggplot2&quot;, ref = &quot;scale_range_accept_na&quot;)</code></pre>
+<div id="problem" class="section level1">
+<h1>問題</h1>
+<p><code>xlim(0, NA)</code> みたいに， <code>coord_cartesian(limits = c(0, NA))</code> とすると，エラーを吐く．</p>
+<pre class="r"><code>g &lt;- qplot(wt, mpg, data = mtcars, geom = c(&quot;point&quot;, &quot;smooth&quot;))
+g</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="../../../../post/2018-11-22-strange-coord-functions-ggplot2_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<pre class="r"><code>g + coord_cartesian(xlim = c(2, NA))</code></pre>
+<blockquote>
+<p>Error in if (zero_range(range)) zero_width else diff(range) : missing value where TRUE/FALSE needed</p>
+</blockquote>
+<p>これが嫌でソースを確認したところ，
+<a href="https://github.com/tidyverse/ggplot2/blob/6057d7f1983e80a62eebb2133ef47f3cc950cb3e/R/coord-cartesian-.r#L119"><code>scale_range</code></a>
+の処理を直せばいいと分かった．</p>
+<p>エラー源である，<code>zero_range</code>利用部分の修正は他の機能に影響しかねないので避けた．</p>
+</div>
+<div id="implementation" class="section level1">
+<h1>実装</h1>
+<div id="original" class="section level2">
+<h2>オリジナル</h2>
+<pre class="r"><code>scale_range &lt;- function(scale, limits = NULL, expand = TRUE) {
+  expansion &lt;- if (expand) expand_default(scale) else c(0, 0)
+
+  if (is.null(limits)) {
+    scale$dimension(expansion)
+  } else {
+    range &lt;- range(scale$transform(limits))
+    expand_range(range, expansion[1], expansion[2])
+  }
+}</code></pre>
+<p><code>limits</code> として，<code>xlim</code>ないし<code>ylim</code>を受け取り，
+利用しているscaleに応じた<code>transform</code> (常用対数変換や平方根変換) を行ったものの <code>range</code> (範囲) をとる．</p>
+</div>
+<div id="fix" class="section level2">
+<h2>修正版</h2>
+<pre class="r"><code>scale_range &lt;- function(scale, limits = NULL, expand = TRUE) {
+  expansion &lt;- if (expand) ggplot2:::expand_default(scale) else c(0, 0)
+
+  if(is.null(limits)) return(scale$dimension(expansion))
+
+  if(length(limits) == 2) {
+    limits &lt;- ifelse(is.na(limits), scale$dimension(c(0, 0)), limits)
+  }
+
+  range &lt;- range(scale$transform(limits))
+  scales::expand_range(range, expansion[1], expansion[2])
+}</code></pre>
+<p>limitsの長さが2の時は，<code>NA</code>をデータの範囲に置き換えるようにした．</p>
+</div>
+</div>
+<div id="test" class="section level1">
+<h1>実験</h1>
+<p>まず，新しい <code>scale_range</code> をggplot2の名前空間に上書きする．</p>
+<pre class="r"><code>assignInNamespace(&quot;scale_range&quot;, scale_range, getNamespace(&quot;ggplot2&quot;))</code></pre>
+<p>そして試す</p>
+<pre class="r"><code>g + coord_cartesian(xlim = c(2, NA))</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="../../../../post/2018-11-22-strange-coord-functions-ggplot2_files/figure-html/try-err-1.png" width="672" /></p>
+<p><code>xlim</code> を使った場合，以下のように除去された点の存在を教えてくれる．</p>
+<p>また，点を除去した後に回帰曲線を引くので，点を除去せずに回帰曲線を引く <code>coord_cartesian</code> とは根本的に結果が違う．</p>
+<pre class="r"><code>g + xlim(2, NA)</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<pre><code>## Warning: Removed 4 rows containing non-finite values (stat_smooth).</code></pre>
+<pre><code>## Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
+<p><img src="../../../../post/2018-11-22-strange-coord-functions-ggplot2_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<div id="fine" class="section level2">
+<h2>他のcoord_系列も問題なさそう</h2>
+<pre class="r"><code>g + coord_fixed(xlim = c(0, NA))</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="../../../../post/2018-11-22-strange-coord-functions-ggplot2_files/figure-html/unnamed-chunk-6-1.png" width="192" /></p>
+<pre class="r"><code>g + coord_flip(xlim = c(0, NA))</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="../../../../post/2018-11-22-strange-coord-functions-ggplot2_files/figure-html/unnamed-chunk-6-2.png" width="192" /></p>
+</div>
+</div>
+<div id="note" class="section level1">
+<h1>感想</h1>
+<p>coord_系もscale_系やxlimなどに合わせて，xlim/ylimの値を長さ2の連続値に制限すべきだと思うのだけれど，なんでそうしないのだろう？</p>
+</div>
+
+
+    
+
+    
+
+    <h4>See also</h4>
+    <ul>
+        
+            <li><a href="../../../../2018/11/20/histogram-fill-along-x/">ヒストグラムのビンの色をx軸に応じて変える</a></li>
+        
+            <li><a href="../../../../2018/11/10/ggplot2-legend-pos-n-just/">ggplot2のレジェンド位置を調整</a></li>
+        
+            <li><a href="../../../../2018/11/09/binwdith-for-geom-histogram/">geom_histogramのビン幅を動的に決定する</a></li>
+        
+            <li><a href="../../../../2018/11/03/tex-in-ggplot2/">ggplot2で$TeX$を利用する</a></li>
+        
+            <li><a href="../../../../2018/11/03/accelarate-patchwork/">patchworkの表示を高速化したかった……</a></li>
+        
+    </ul>
+
+
+</article>
+
+
+
+        </div>
+
+        <aside class="col-12 col-lg-3 ml-auto blog-sidebar">
+    
+        
+
+
+<section>
+    <h4>New</h4>
+    <ol class="list-unstyled">
+        
+        <li>
+            <a href="../../../../2019/01/18/force-many-vars-at-once/">一度に複数の変数を force する</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2019/01/17/enhance-captioner/">captioner を魔改造してみた</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2019/01/16/s3-generics-dont-pass-default-params-to-methods/">S3総称関数の引数の既定値はメソッドに渡らない</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2019/01/04/benchmarks-on-summarizing-with-dplyr/">group_map などの data frame を要約する関数をベンチマーク (dplyr &gt; 0.8.x)</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2018/12/15/pacman/">pacman でパッケージのインストール・ロードを簡単にする</a>
+        </li>
+        
+    </ol>
+</section>
+
+    
+    
+        <section>
+    
+        
+        <h4>カテゴリ</h4>
+        <p>
+            
+            <a class="badge badge-primary" href="../../../../categories/arch">arch</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/captioner">captioner</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/css">css</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/latex">latex</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/music">music</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/r">r</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/stats">stats</a>
+            
+        </p>
+        
+    
+        
+        <h4>タグ</h4>
+        <p>
+            
+            <a class="badge badge-primary" href="../../../../tags/blogdown">blogdown</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/callr">callr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/dplyr">dplyr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/felp">felp</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/force">force</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/furrr">furrr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/ggplot2">ggplot2</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/glue">glue</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/japanr">japanr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/knitr">knitr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/latex">latex</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/latex2exp">latex2exp</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/linux">linux</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/mathjax">mathjax</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/missing-value">missing-value</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/package">package</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/pacman">pacman</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/patchwork">patchwork</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/pforeach">pforeach</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/plantuml">plantuml</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/plotly">plotly</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/r">r</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86">r-markdownでword文書を作ろう</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/rd">rd</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/rmd">rmd</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/roxygen2">roxygen2</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/rprofile">rprofile</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/s3">s3</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/shiny">shiny</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/tex">tex</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/tokyor">tokyor</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/unicode">unicode</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/viridis">viridis</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/yaml">yaml</a>
+            
+        </p>
+        
+    
+</section>
+    
+</aside>
+
+      </div>
+    </div>
+    
+
+    
+      
+
+
+
+<footer class="blog-footer w-100">
+    <nav class="navbar navbar-light bg-light">
+        <p class="w-100 text-center"></p>
+        <p class="w-100 text-center"><a href="#">Home</a></p>
+    </nav>
+</footer>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script async
+src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+    
+
+    
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+  </body>
+</html>

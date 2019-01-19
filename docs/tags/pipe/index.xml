@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Pipe on Atusy&#39;s blog</title>
+    <link>https://atusy.github.io/tags/pipe/</link>
+    <description>Recent content in Pipe on Atusy&#39;s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja-jp</language>
+    <lastBuildDate>Sat, 19 Jan 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://atusy.github.io/tags/pipe/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>base にパイプはないといつ言った？</title>
+      <link>https://atusy.github.io/2019/01/19/yet-another-pipe/</link>
+      <pubDate>Sat, 19 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2019/01/19/yet-another-pipe/</guid>
+      <description>時はパイプ戦国時代． Tidyverse が覇権を握る世界線において pipe とは magrittr::`%&amp;gt;%` のことでしょうか．私は pipeR::`%&amp;gt;&amp;gt;%` 派ですね．他にも wrapr::`%.&amp;gt;%` など，色々な宗派があります． pipe の成り立ちを</description>
+    </item>
+    
+  </channel>
+</rss>

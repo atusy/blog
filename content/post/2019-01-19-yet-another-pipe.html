@@ -1,0 +1,96 @@
+---
+title: base にパイプはないといつ言った？
+author: ~
+date: '2019-01-19'
+slug: yet-another-pipe
+output:
+  blogdown::html_page:
+    pandoc_args: 
+      - --from
+      - markdown+east_asian_line_breaks
+categories: [R]
+tags: [pipe, magrittr, data.table]
+---
+
+
+
+<p>時はパイプ戦国時代．
+Tidyverse が覇権を握る世界線において pipe とは <code class="r">magrittr::`%&gt;%`</code> のことでしょうか．私は <code class="r">pipeR::`%&gt;&gt;%`</code> 派ですね．他にも <code class="r">wrapr::`%.&gt;%`</code> など，色々な宗派があります．</p>
+<p>pipe の成り立ちを探る神学者たちも続々と表れております．</p>
+<ul>
+<li><span class="citation">[@hoxo_m]</span>(https://twitter.com/hoxo_m):
+<a href="https://qiita.com/hoxo_m/items/3fd3d2520fa014a248cb">R の NSE を駆使して pipeR ワールドを作る #rstatsj</a></li>
+<li><span class="citation">[@igjit]</span>(https://twitter.com/igjit):
+<a href="https://igjit.github.io/slides/2018/01/tiny_pipe/#/">パイプ演算子自作入門</a></li>
+<li><span class="citation">[@0_u0 a.k.a きぬいと]</span>(https://twitter.com/0_u0):
+<a href="https://t.co/40dvNAiUIP">宇宙が生まれる前の話</a></li>
+</ul>
+<p>しかし，おそらくみなさんは遥か昔からパイプしていた．</p>
+<p>R では全ての出来事が関数呼び出しです．
+<code class="r">[</code> や <code class="r">[[</code> も関数に過ぎません．ところで皆さんこんなことしたことありませんか？</p>
+<pre class="r"><code>iris[iris$Sepal.Length &gt; 3, &quot;Sepal.Width&quot;][1:5]</code></pre>
+<pre><code>## [1] 3.5 3.0 3.2 3.1 3.6</code></pre>
+<p>上記は更に以下のように書き換えられます．</p>
+<pre class="r"><code>iris[iris$Sepal.Length &gt; 3, ][, &quot;Sepal.Width&quot;][1:5]</code></pre>
+<pre><code>## [1] 3.5 3.0 3.2 3.1 3.6</code></pre>
+<p>すると，</p>
+<ol style="list-style-type: decimal">
+<li>iris の Sepal.Length が 3より大きいものを抽出</li>
+<li>1から Sepal.Width 列を抽出</li>
+<li>先頭の5つの要素を取り出し</li>
+</ol>
+<p>と pipe-like に書かれていますね．というか機能が限定的なだけでこれはパイプと呼んで差し支えないです．</p>
+<p>この性質をうまく利用しているのが data.table パッケージです．
+<code class="r">data.table:::`[`</code> では， <code>[...]</code> 内でデータの選択だけではなく，加工もできるように拡張されています．あまり読み易いとは言えませんが，<code>dplyr::summarize</code> 相当のこともできます．</p>
+<pre class="r"><code>as.data.table(iris)[, lapply(.SD, mean), by= Species]</code></pre>
+<pre><code>##       Species Sepal.Length Sepal.Width Petal.Length Petal.Width
+## 1:     setosa        5.006       3.428        1.462       0.246
+## 2: versicolor        5.936       2.770        4.260       1.326
+## 3:  virginica        6.588       2.974        5.552       2.026</code></pre>
+<p>data.table パッケージによる <code class="r">[</code> の拡張と，<code class="r">[</code> が元々備えている左辺を第一引数に取り <code>[...]</code>
+の内部を第二引数以降に渡す性質を応用すると，以下のようなパイプラインを実現できます．</p>
+<pre class="r"><code>library(data.table)
+as.data.table(iris)[, x := Sepal.Length * 3][, .(Sepal.Length, x)][1:3, ][]</code></pre>
+<pre><code>##    Sepal.Length    x
+## 1:          5.1 15.3
+## 2:          4.9 14.7
+## 3:          4.7 14.1</code></pre>
+<ol style="list-style-type: decimal">
+<li>iris に x列を追加し，Sepal.Length を3倍した値を代入</li>
+<li>1 から Sepal.Length 列と x列を抽出</li>
+<li>先頭の3行を抽出</li>
+<li>プリント (おまじない．今回はなくてもいける．)</li>
+</ol>
+<p>これを知ると，思うわけです．data.table 以外でも <code>[</code> を使って柔軟なパイプラインを築けるのでは……？</p>
+<p>そこでやってみたのが以下．副作用もばっちり実現できていますね!!</p>
+<pre class="r"><code># `[` を上書きするので，元々の `[` の機能を関数 `extract` に移譲しましょう．
+extract &lt;- base::`[`
+
+# 
+`[` &lt;- function(x, f, ...) f(x, ...)
+
+# テスト
+iris[
+  function(x) {plot(x, col = iris$Species); x} # 副作用で plot
+  ][
+    extract, , -5 # iris[, -5] 相当
+    ][
+      kmeans, 3 # kmeans で3つのクラスタに分ける
+      ][
+        summary
+        ]</code></pre>
+<p><img src="/post/2019-01-19-yet-another-pipe_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre><code>##              Length Class  Mode   
+## cluster      150    -none- numeric
+## centers       12    -none- numeric
+## totss          1    -none- numeric
+## withinss       3    -none- numeric
+## tot.withinss   1    -none- numeric
+## betweenss      1    -none- numeric
+## size           3    -none- numeric
+## iter           1    -none- numeric
+## ifault         1    -none- numeric</code></pre>
+<pre class="r"><code># 良い子のみんなは遊び終わったら `[` の上書きを解除しましょう．
+rm(&quot;[&quot;)</code></pre>
+<p>わかりましたか，みなさん．羽鳥神が現れるよりも前から世界は光に満ちていたのです．</p>
+<p>Enjoy!!</p>
