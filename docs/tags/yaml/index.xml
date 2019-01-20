@@ -2,13 +2,13 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Yaml on Atusy&#39;s blog</title>
-    <link>https://atusy.github.io/tags/yaml/</link>
+    <link>/tags/yaml/</link>
     <description>Recent content in Yaml on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Sat, 27 Oct 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://atusy.github.io/tags/yaml/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/yaml/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -17,10 +17,10 @@ titleとか
 authorとか  
 改行する
 </title>
-      <link>https://atusy.github.io/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</link>
+      <link>/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</link>
       <pubDate>Sat, 27 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</guid>
+      <guid>/2018/10/27/linbreaks-in-yaml-front-matter-of-rmd/</guid>
       <description>@niszet0 さん著「R MarkdownでWord文書を作ろう」を読んでます。 Rmdを扱った商業誌にも、同書ほどRmdファイルのYAMLフロントマターの</description>
     </item>
     

@@ -8,20 +8,20 @@
 <meta property="og:title" content="Benchmark chunks in Rmd" />
 <meta property="og:description" content="Implementation Test Question Tip   In order to benchmark chunks, I implemented a hook for Rmd’s chunk which works as if Jupyter Notebook’s %%timeit command.
 Implementation A simple benchmark is done by saving proc.time() before running code and subtract the value from new proc.time() after code runs.
-t &lt;- proc.time()[&#39;elapsed&#39;] invisible(runif(100)) proc.time()[&#39;elapsed&#39;] - t ## elapsed ## 0.003 However, hooks are functions, and bodies of functions are evaluated in different environments every time." />
+t &lt;- proc.time()[&#39;elapsed&#39;] invisible(runif(100)) proc.time()[&#39;elapsed&#39;] - t ## elapsed ## 0.006 However, hooks are functions, and bodies of functions are evaluated in different environments every time." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://atusy.github.io/en/2018/08/18/time-each-chunk/" /><meta property="article:published_time" content="2018-08-18T00:00:00&#43;00:00"/>
+<meta property="og:url" content="/en/2018/08/18/time-each-chunk/" /><meta property="article:published_time" content="2018-08-18T00:00:00&#43;00:00"/>
 <meta property="article:modified_time" content="2018-08-18T00:00:00&#43;00:00"/>
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Benchmark chunks in Rmd"/>
 <meta name="twitter:description" content="Implementation Test Question Tip   In order to benchmark chunks, I implemented a hook for Rmd’s chunk which works as if Jupyter Notebook’s %%timeit command.
 Implementation A simple benchmark is done by saving proc.time() before running code and subtract the value from new proc.time() after code runs.
-t &lt;- proc.time()[&#39;elapsed&#39;] invisible(runif(100)) proc.time()[&#39;elapsed&#39;] - t ## elapsed ## 0.003 However, hooks are functions, and bodies of functions are evaluated in different environments every time."/>
+t &lt;- proc.time()[&#39;elapsed&#39;] invisible(runif(100)) proc.time()[&#39;elapsed&#39;] - t ## elapsed ## 0.006 However, hooks are functions, and bodies of functions are evaluated in different environments every time."/>
 
 
 
-    <link rel="canonical" href="https://atusy.github.io/en/2018/08/18/time-each-chunk/">
+    <link rel="canonical" href="../../../../../en/2018/08/18/time-each-chunk/">
 
     <title>
       
@@ -32,7 +32,7 @@ t &lt;- proc.time()[&#39;elapsed&#39;] invisible(runif(100)) proc.time()[&#39;el
     
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
 
-    <link href="https://atusy.github.io/css/style.css" rel="stylesheet">
+    <link href="../../../../../css/style.css" rel="stylesheet">
 
     
 
@@ -77,9 +77,9 @@ t &lt;- proc.time()[&#39;elapsed&#39;] invisible(runif(100)) proc.time()[&#39;el
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                         
-                            <a class="dropdown-item" href="https://atusy.github.io/">Japanese</a>
+                            <a class="dropdown-item" href="../../../../../">Japanese</a>
                         
-                            <a class="dropdown-item" href="https://atusy.github.io/en/">English</a>
+                            <a class="dropdown-item" href="../../../../../en/">English</a>
                         
                     </div>
                 </li>
@@ -156,16 +156,16 @@ command.</p>
 invisible(runif(100))
 proc.time()[&#39;elapsed&#39;] - t</code></pre>
 <pre><code>## elapsed 
-##   0.003</code></pre>
+##   0.006</code></pre>
 <p>However, hooks are functions, and
 bodies of functions are evaluated in different environments every time.</p>
 <pre class="r"><code>f &lt;- function() environment()
 c(f(), f())</code></pre>
 <pre><code>## [[1]]
-## &lt;environment: 0x55b87292c658&gt;
+## &lt;environment: 0x563a7b3ceb08&gt;
 ## 
 ## [[2]]
-## &lt;environment: 0x55b87292c460&gt;</code></pre>
+## &lt;environment: 0x563a7b3ce910&gt;</code></pre>
 <p>Thus, an implementing hook function has to know environment to save <code>proc.time()</code>, and to call the saved <code>proc.time()</code>.</p>
 <p>Fortunately, the hook with <code>envir</code> argument enables it because <code>envir</code> captures an environment in which a code chunk is evaluated.</p>
 <p>In addition, the hook needs to know if they are called before or after a code chunk, which is possible by using <code>before</code> argument.</p>
@@ -197,7 +197,7 @@ head(x)
 ## 4          4.6         3.1          1.5         0.2  setosa
 ## 5          5.0         3.6          1.4         0.2  setosa
 ## 6          5.4         3.9          1.7         0.4  setosa</code></pre>
-<p>0.025 sec.</p>
+<p>0.041 sec.</p>
 <p>Great!</p>
 </div>
 <div id="question" class="section level1">

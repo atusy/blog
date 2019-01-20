@@ -33,16 +33,16 @@ command.</p>
 invisible(runif(100))
 proc.time()[&#39;elapsed&#39;] - t</code></pre>
 <pre><code>## elapsed 
-##   0.003</code></pre>
+##   0.006</code></pre>
 <p>However, hooks are functions, and
 bodies of functions are evaluated in different environments every time.</p>
 <pre class="r"><code>f &lt;- function() environment()
 c(f(), f())</code></pre>
 <pre><code>## [[1]]
-## &lt;environment: 0x55b87292c658&gt;
+## &lt;environment: 0x563a7b3ceb08&gt;
 ## 
 ## [[2]]
-## &lt;environment: 0x55b87292c460&gt;</code></pre>
+## &lt;environment: 0x563a7b3ce910&gt;</code></pre>
 <p>Thus, an implementing hook function has to know environment to save <code>proc.time()</code>, and to call the saved <code>proc.time()</code>.</p>
 <p>Fortunately, the hook with <code>envir</code> argument enables it because <code>envir</code> captures an environment in which a code chunk is evaluated.</p>
 <p>In addition, the hook needs to know if they are called before or after a code chunk, which is possible by using <code>before</code> argument.</p>
@@ -74,7 +74,7 @@ head(x)
 ## 4          4.6         3.1          1.5         0.2  setosa
 ## 5          5.0         3.6          1.4         0.2  setosa
 ## 6          5.4         3.9          1.7         0.4  setosa</code></pre>
-<p>0.025 sec.</p>
+<p>0.041 sec.</p>
 <p>Great!</p>
 </div>
 <div id="question" class="section level1">

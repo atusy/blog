@@ -2,75 +2,75 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on Atusy&#39;s blog</title>
-    <link>https://atusy.github.io/categories/</link>
+    <link>/categories/</link>
     <description>Recent content in Categories on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Thu, 11 Oct 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://atusy.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Arch</title>
-      <link>https://atusy.github.io/categories/arch/</link>
+      <link>/categories/arch/</link>
       <pubDate>Thu, 11 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/categories/arch/</guid>
+      <guid>/categories/arch/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Captioner</title>
-      <link>https://atusy.github.io/categories/captioner/</link>
+      <link>/categories/captioner/</link>
       <pubDate>Thu, 17 Jan 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/categories/captioner/</guid>
+      <guid>/categories/captioner/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Css</title>
-      <link>https://atusy.github.io/categories/css/</link>
+      <link>/categories/css/</link>
       <pubDate>Wed, 21 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/categories/css/</guid>
+      <guid>/categories/css/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Latex</title>
-      <link>https://atusy.github.io/categories/latex/</link>
+      <link>/categories/latex/</link>
       <pubDate>Mon, 09 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/categories/latex/</guid>
+      <guid>/categories/latex/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Music</title>
-      <link>https://atusy.github.io/categories/music/</link>
+      <link>/categories/music/</link>
       <pubDate>Mon, 22 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/categories/music/</guid>
+      <guid>/categories/music/</guid>
       <description></description>
     </item>
     
     <item>
       <title>R</title>
-      <link>https://atusy.github.io/categories/r/</link>
+      <link>/categories/r/</link>
       <pubDate>Sun, 20 Jan 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/categories/r/</guid>
+      <guid>/categories/r/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Stats</title>
-      <link>https://atusy.github.io/categories/stats/</link>
+      <link>/categories/stats/</link>
       <pubDate>Sat, 25 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/categories/stats/</guid>
+      <guid>/categories/stats/</guid>
       <description></description>
     </item>
     

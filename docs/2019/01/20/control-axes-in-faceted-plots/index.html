@@ -8,7 +8,7 @@
 <meta property="og:title" content="ggplot で scale = free な facet の軸を調整する" />
 <meta property="og:description" content="はじめに facet の基本的な例 パッケージのロード scales 引数を変えた時の様子を比較 全 facet 共通で xmin = ymin = 0 にしてみる 任意の facet で軸の範囲をコントロールする． Enjoy! 前" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://atusy.github.io/2019/01/20/control-axes-in-faceted-plots/" /><meta property="article:published_time" content="2019-01-20T00:00:00&#43;00:00"/>
+<meta property="og:url" content="/2019/01/20/control-axes-in-faceted-plots/" /><meta property="article:published_time" content="2019-01-20T00:00:00&#43;00:00"/>
 <meta property="article:modified_time" content="2019-01-20T00:00:00&#43;00:00"/>
 
 <meta name="twitter:card" content="summary"/>
@@ -17,7 +17,7 @@
 
 
 
-    <link rel="canonical" href="https://atusy.github.io/2019/01/20/control-axes-in-faceted-plots/">
+    <link rel="canonical" href="../../../../2019/01/20/control-axes-in-faceted-plots/">
 
     <title>
       
@@ -28,7 +28,7 @@
     
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
 
-    <link href="https://atusy.github.io/css/style.css" rel="stylesheet">
+    <link href="../../../../css/style.css" rel="stylesheet">
 
     
 
@@ -73,9 +73,9 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                         
-                            <a class="dropdown-item" href="https://atusy.github.io/">Japanese</a>
+                            <a class="dropdown-item" href="../../../../">Japanese</a>
                         
-                            <a class="dropdown-item" href="https://atusy.github.io/en/">English</a>
+                            <a class="dropdown-item" href="../../../../en/">English</a>
                         
                     </div>
                 </li>
@@ -153,6 +153,9 @@ facet ごとの軸の範囲を可変にできます．軸の範囲は ggplot2 �
 <h2>facet の基本的な例</h2>
 <div id="pkg" class="section level3">
 <h3>パッケージのロード</h3>
+<pre class="r"><code>library(pacman)
+p_load(dplyr, ggplot2)
+p_load_gh(&quot;thomasp85/patchwork&quot;)</code></pre>
 </div>
 <div id="compare-scales-args" class="section level3">
 <h3>scales 引数を変えた時の様子を比較</h3>
@@ -239,18 +242,6 @@ bind_rows(
 </div>
 <div id="enjoy" class="section level1">
 <h1>Enjoy!</h1>
-<pre class="r"><code>wrap_plots(
-  g + facet_wrap(vars(Species), scales = &quot;free&quot;) + ggtitle(&quot;scales = &#39;free&#39;&quot;),
-  bind_rows(
-    mutate(x, alpha = 1),
-    mutate(df_lims_versocolor, alpha = 0)
-  ) %&gt;%
-    ggplot(aes(Sepal.Length, Sepal.Width, colour = Species, alpha = alpha)) +
-    geom_point() +
-    scale_alpha_identity() +
-    facet_wrap(vars(Species), scales = &quot;free&quot;) + ggtitle(&quot;versicolor だけx-y-軸を調整&quot;),
-  ncol = 1
-)</code></pre>
 </div>
 
 

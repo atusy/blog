@@ -13,6 +13,12 @@ categories: [R]
 tags: [ggplot2, facet]
 ---
 
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, dev = "svg")
+library(pacman)
+p_load(dplyr, ggplot2)
+p_load_gh("thomasp85/patchwork")
+```
 
 前に Tokyo.R で
 「[ggplot2で図を並べる](https://atusy.github.io/presentation/tokyor073/tokyor073-multi-ggplot2.html?raw#/)」
@@ -30,8 +36,7 @@ facet ごとの軸の範囲を可変にできます．
 
 ### パッケージのロード {#pkg}
 
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = TRUE, dev = "svg")
+```{r pkg, results='hide'}
 library(pacman)
 p_load(dplyr, ggplot2)
 p_load_gh("thomasp85/patchwork")
@@ -156,7 +161,7 @@ g +
 # Enjoy!
 
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, include = FALSE}
 wrap_plots(
   g + facet_wrap(vars(Species), scales = "free") + ggtitle("scales = 'free'"),
   bind_rows(

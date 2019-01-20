@@ -2,39 +2,39 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Blogdown on Atusy&#39;s blog</title>
-    <link>https://atusy.github.io/tags/blogdown/</link>
+    <link>/tags/blogdown/</link>
     <description>Recent content in Blogdown on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Sat, 28 Jul 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://atusy.github.io/tags/blogdown/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/blogdown/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>blogdownでMathJax</title>
-      <link>https://atusy.github.io/2018/07/28/how2mathjax/</link>
+      <link>/2018/07/28/how2mathjax/</link>
       <pubDate>Sat, 28 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/2018/07/28/how2mathjax/</guid>
+      <guid>/2018/07/28/how2mathjax/</guid>
       <description>MathJaxとは？ MathJaxを利用すると、$\TeX$ 記法を用いて数式を表現できる。 ブロックにするには $$\latex$$ と入力すると $$ \LaTeX $$ となる。 イン</description>
     </item>
     
     <item>
       <title>GitHub pages with Rmarkdown</title>
-      <link>https://atusy.github.io/2018/07/05/github-pages-with-rmarkdown/</link>
+      <link>/2018/07/05/github-pages-with-rmarkdown/</link>
       <pubDate>Thu, 05 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/2018/07/05/github-pages-with-rmarkdown/</guid>
+      <guid>/2018/07/05/github-pages-with-rmarkdown/</guid>
       <description>遅蒔きながら、Rのblogdownパッケージを使ってblogを始めてみた。 “Rとblogdownでかんたんにgithub.io上にブログを使</description>
     </item>
     
     <item>
       <title>GitHub pages with Rmarkdown</title>
-      <link>https://atusy.github.io/2018/07/05/github-pages-with-rmarkdown/</link>
+      <link>/2018/07/05/github-pages-with-rmarkdown/</link>
       <pubDate>Thu, 05 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://atusy.github.io/2018/07/05/github-pages-with-rmarkdown/</guid>
+      <guid>/2018/07/05/github-pages-with-rmarkdown/</guid>
       <description>遅蒔きながら、Rのblogdownパッケージを使ってblogを始めてみた。 &amp;ldquo;Rとblogdownでかんたんにgithub.io上</description>
     </item>
     

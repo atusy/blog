@@ -37,6 +37,9 @@ facet ごとの軸の範囲を可変にできます．軸の範囲は ggplot2 �
 <h2>facet の基本的な例</h2>
 <div id="pkg" class="section level3">
 <h3>パッケージのロード</h3>
+<pre class="r"><code>library(pacman)
+p_load(dplyr, ggplot2)
+p_load_gh(&quot;thomasp85/patchwork&quot;)</code></pre>
 </div>
 <div id="compare-scales-args" class="section level3">
 <h3>scales 引数を変えた時の様子を比較</h3>
@@ -123,16 +126,4 @@ bind_rows(
 </div>
 <div id="enjoy" class="section level1">
 <h1>Enjoy!</h1>
-<pre class="r"><code>wrap_plots(
-  g + facet_wrap(vars(Species), scales = &quot;free&quot;) + ggtitle(&quot;scales = &#39;free&#39;&quot;),
-  bind_rows(
-    mutate(x, alpha = 1),
-    mutate(df_lims_versocolor, alpha = 0)
-  ) %&gt;%
-    ggplot(aes(Sepal.Length, Sepal.Width, colour = Species, alpha = alpha)) +
-    geom_point() +
-    scale_alpha_identity() +
-    facet_wrap(vars(Species), scales = &quot;free&quot;) + ggtitle(&quot;versicolor だけx-y-軸を調整&quot;),
-  ncol = 1
-)</code></pre>
 </div>
