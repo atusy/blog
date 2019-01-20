@@ -1,0 +1,1483 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta property="og:title" content="ggplot の facet ごとに共通なプロットを盛り込む" />
+<meta property="og:description" content="はじめに facet で表示されない部分のデータをグレーでプロットしてみる versicolor と virginica だけで facet してそれぞれの facet に setosa を表示する Enjoy! はじめに facet を使うと以下のようにグ" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://atusy.github.io/2019/01/20/share-data-in-facets/" /><meta property="article:published_time" content="2019-01-20T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2019-01-20T00:00:00&#43;00:00"/>
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="ggplot の facet ごとに共通なプロットを盛り込む"/>
+<meta name="twitter:description" content="はじめに facet で表示されない部分のデータをグレーでプロットしてみる versicolor と virginica だけで facet してそれぞれの facet に setosa を表示する Enjoy! はじめに facet を使うと以下のようにグ"/>
+
+
+
+    <link rel="canonical" href="https://atusy.github.io/2019/01/20/share-data-in-facets/">
+
+    <title>
+      
+        ggplot の facet ごとに共通なプロットを盛り込む | Atusy&#39;s blog
+      
+    </title>
+
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+
+    <link href="https://atusy.github.io/css/style.css" rel="stylesheet">
+
+    
+
+    
+
+    <link rel="stylesheet" href="../../../../css/chroma-styles.css">
+
+  </head>
+  <body>
+    
+      <header class="blog-header">
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+        <a class="navbar-brand" href="../../../../">
+            <img src="../../../../images/atusy.jpg" width="50" height="50" class="d-inline-block align-top" alt="">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+            <ul class="navbar-nav">
+                
+                
+                <li class="nav-item ">
+                    
+                        <a class="nav-link" href="https://github.com/atusy">GitHub</a>
+                    
+                </li>
+                
+                <li class="nav-item ">
+                    
+                        <a class="nav-link" href="https://twitter.com/Atsushi776">Twitter</a>
+                    
+                </li>
+                
+            </ul>
+            
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Language
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                        
+                            <a class="dropdown-item" href="https://atusy.github.io/">Japanese</a>
+                        
+                            <a class="dropdown-item" href="https://atusy.github.io/en/">English</a>
+                        
+                    </div>
+                </li>
+            </ul>
+            
+        </div>
+    </nav>
+</header>
+    
+
+    
+    <div class="container">
+      <div class="row">
+        <div class="col-12 col-lg-8 blog-main">
+
+          
+
+<header>
+    <h2 class="blog-post-title">
+        <a class="text-dark" href="../../../../2019/01/20/share-data-in-facets/">ggplot の facet ごとに共通なプロットを盛り込む</a>
+    </h2>
+    
+
+
+<div class="blog-post-date text-secondary">
+    
+        2019-1-20
+    
+    
+        by <span rel="author">Atusy</span>
+    
+</div>
+
+    
+<div class="blog-post-tags text-secondary">
+    <strong>タグ:</strong>
+    
+        <a class="badge badge-primary" href="../../../../tags/ggplot2">ggplot2</a>
+    
+        <a class="badge badge-primary" href="../../../../tags/facet">facet</a>
+    
+</div>
+
+    
+<div class="blog-post-categories text-secondary">
+    <strong>カテゴリ:</strong>
+    
+        <a class="badge badge-primary" href="../../../../categories/r">R</a>
+    
+</div>
+
+    <hr>
+</header>
+<article class="blog-post">
+    <div id="TOC">
+<ul>
+<li><a href="#はじめに">はじめに</a></li>
+<li><a href="#facet-で表示されない部分のデータをグレーでプロットしてみる">facet で表示されない部分のデータをグレーでプロットしてみる</a></li>
+<li><a href="#versicolor-と-virginica-だけで-facet-してそれぞれの-facet-に-setosa-を表示する">versicolor と virginica だけで facet してそれぞれの facet に setosa を表示する</a></li>
+<li><a href="#enjoy">Enjoy!</a></li>
+</ul>
+</div>
+
+<div id="はじめに" class="section level1">
+<h1>はじめに</h1>
+<p>facet を使うと以下のようにグループごとにプロットを分けることができます．しかし，グループ間の比較を行うのがちょっと辛いですね．こんな時，どうすればいいのでしょうか．</p>
+<p>「<a href="https://atusy.github.io/blog/2019/01/20/control-axes-in-faceted-plots/">ggplot で scale = free な facet の軸を調整する</a>」と同様，基本はレイヤーを足すかデータを弄るかです．</p>
+<pre class="r"><code>library(ggplot2)
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
+  geom_point() +
+  facet_wrap(vars(Species))</code></pre>
+<p><img src="../../../../post/2019-01-20-share-data-in-facets_files/figure-html/unnamed-chunk-1-1.svg" width="672" /></p>
+</div>
+<div id="facet-で表示されない部分のデータをグレーでプロットしてみる" class="section level1">
+<h1>facet で表示されない部分のデータをグレーでプロットしてみる</h1>
+<p>ここからは <code>tidyverse</code> パッケージのオンパレードですね．
+nested data frame の扱いに慣れていないと辛いです．</p>
+<pre class="r"><code>library(dplyr)
+library(tidyr)
+library(purrr)
+
+bg &lt;- iris %&gt;% 
+  mutate(Species = map(Species, ~ setdiff(unique(Species), .x))) %&gt;%
+  unnest
+  
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
+  geom_point(data = bg, colour = &quot;gray&quot;) +
+  geom_point() +
+  facet_wrap(vars(Species))</code></pre>
+<p><img src="../../../../post/2019-01-20-share-data-in-facets_files/figure-html/unnamed-chunk-2-1.svg" width="672" /></p>
+<p>いいですね!</p>
+<p>bgは以下のようにして facet と group の組み合わせを調整しています．</p>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;
+}
+
+#whtiwwicei .gt_table {
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #000000;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  /* table.background.color */
+  width: auto;
+  /* table.width */
+  border-top-style: solid;
+  /* table.border.top.style */
+  border-top-width: 2px;
+  /* table.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table.border.top.color */
+}
+
+#whtiwwicei .gt_heading {
+  background-color: #FFFFFF;
+  /* heading.background.color */
+  border-bottom-color: #FFFFFF;
+}
+
+#whtiwwicei .gt_title {
+  color: #000000;
+  font-size: 125%;
+  /* heading.title.font.size */
+  padding-top: 4px;
+  /* heading.top.padding */
+  padding-bottom: 1px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#whtiwwicei .gt_subtitle {
+  color: #000000;
+  font-size: 85%;
+  /* heading.subtitle.font.size */
+  padding-top: 1px;
+  padding-bottom: 4px;
+  /* heading.bottom.padding */
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#whtiwwicei .gt_bottom_border {
+  border-bottom-style: solid;
+  /* heading.border.bottom.style */
+  border-bottom-width: 2px;
+  /* heading.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* heading.border.bottom.color */
+}
+
+#whtiwwicei .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#whtiwwicei .gt_col_heading {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* column_labels.background.color */
+  font-size: 16px;
+  /* column_labels.font.size */
+  font-weight: initial;
+  /* column_labels.font.weight */
+  padding: 10px;
+  margin: 10px;
+}
+
+#whtiwwicei .gt_sep_right {
+  border-right: 5px solid #FFFFFF;
+}
+
+#whtiwwicei .gt_group_heading {
+  padding: 8px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#whtiwwicei .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#whtiwwicei .gt_striped tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#whtiwwicei .gt_row {
+  padding: 10px;
+  /* row.padding */
+  margin: 10px;
+}
+
+#whtiwwicei .gt_stub {
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #A8A8A8;
+  text-indent: 5px;
+}
+
+#whtiwwicei .gt_stub.gt_row {
+  background-color: #FFFFFF;
+}
+
+#whtiwwicei .gt_summary_row {
+  background-color: #FFFFFF;
+  /* summary_row.background.color */
+  padding: 6px;
+  /* summary_row.padding */
+  text-transform: inherit;
+  /* summary_row.text_transform */
+}
+
+#whtiwwicei .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+}
+
+#whtiwwicei .gt_table_body {
+  border-top-style: solid;
+  /* field.border.top.style */
+  border-top-width: 2px;
+  /* field.border.top.width */
+  border-top-color: #A8A8A8;
+  /* field.border.top.color */
+  border-bottom-style: solid;
+  /* field.border.bottom.style */
+  border-bottom-width: 2px;
+  /* field.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* field.border.bottom.color */
+}
+
+#whtiwwicei .gt_footnote {
+  font-size: 90%;
+  /* footnote.font.size */
+  padding: 4px;
+  /* footnote.padding */
+}
+
+#whtiwwicei .gt_sourcenote {
+  font-size: 90%;
+  /* sourcenote.font.size */
+  padding: 4px;
+  /* sourcenote.padding */
+}
+
+#whtiwwicei .gt_center {
+  text-align: center;
+}
+
+#whtiwwicei .gt_left {
+  text-align: left;
+}
+
+#whtiwwicei .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#whtiwwicei .gt_font_normal {
+  font-weight: normal;
+}
+
+#whtiwwicei .gt_font_bold {
+  font-weight: bold;
+}
+
+#whtiwwicei .gt_font_italic {
+  font-style: italic;
+}
+
+#whtiwwicei .gt_super {
+  font-size: 65%;
+}
+
+#whtiwwicei .gt_footnote_glyph {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="whtiwwicei"><!--gt table start-->
+<table class='gt_table'>
+<thead>
+<tr>
+<th class='gt_heading gt_title gt_font_normal gt_center' colspan='3'>元のデータフレーム</th>
+</tr>
+<tr>
+<th class='gt_heading gt_subtitle gt_font_normal gt_center gt_bottom_border' colspan='3'></th>
+</tr>
+<tr>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>x</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>y</th>
+<th class='gt_col_heading gt_left' rowspan='1' colspan='1'>group</th>
+</tr>
+<tbody class='gt_table_body gt_striped'>
+<tr>
+<td class='gt_row gt_right'>1</td>
+<td class='gt_row gt_right'>1</td>
+<td class='gt_row gt_left'>a</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>2</td>
+<td class='gt_row gt_right'>2</td>
+<td class='gt_row gt_left'>b</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>3</td>
+<td class='gt_row gt_right'>3</td>
+<td class='gt_row gt_left'>c</td>
+</tr>
+</tbody>
+</table>
+<!--gt table end-->
+</div>
+<div style="text-align:center">
+↓
+</div>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;
+}
+
+#mheczrmkme .gt_table {
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #000000;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  /* table.background.color */
+  width: auto;
+  /* table.width */
+  border-top-style: solid;
+  /* table.border.top.style */
+  border-top-width: 2px;
+  /* table.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table.border.top.color */
+}
+
+#mheczrmkme .gt_heading {
+  background-color: #FFFFFF;
+  /* heading.background.color */
+  border-bottom-color: #FFFFFF;
+}
+
+#mheczrmkme .gt_title {
+  color: #000000;
+  font-size: 125%;
+  /* heading.title.font.size */
+  padding-top: 4px;
+  /* heading.top.padding */
+  padding-bottom: 1px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#mheczrmkme .gt_subtitle {
+  color: #000000;
+  font-size: 85%;
+  /* heading.subtitle.font.size */
+  padding-top: 1px;
+  padding-bottom: 4px;
+  /* heading.bottom.padding */
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#mheczrmkme .gt_bottom_border {
+  border-bottom-style: solid;
+  /* heading.border.bottom.style */
+  border-bottom-width: 2px;
+  /* heading.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* heading.border.bottom.color */
+}
+
+#mheczrmkme .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#mheczrmkme .gt_col_heading {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* column_labels.background.color */
+  font-size: 16px;
+  /* column_labels.font.size */
+  font-weight: initial;
+  /* column_labels.font.weight */
+  padding: 10px;
+  margin: 10px;
+}
+
+#mheczrmkme .gt_sep_right {
+  border-right: 5px solid #FFFFFF;
+}
+
+#mheczrmkme .gt_group_heading {
+  padding: 8px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#mheczrmkme .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#mheczrmkme .gt_striped tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#mheczrmkme .gt_row {
+  padding: 10px;
+  /* row.padding */
+  margin: 10px;
+}
+
+#mheczrmkme .gt_stub {
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #A8A8A8;
+  text-indent: 5px;
+}
+
+#mheczrmkme .gt_stub.gt_row {
+  background-color: #FFFFFF;
+}
+
+#mheczrmkme .gt_summary_row {
+  background-color: #FFFFFF;
+  /* summary_row.background.color */
+  padding: 6px;
+  /* summary_row.padding */
+  text-transform: inherit;
+  /* summary_row.text_transform */
+}
+
+#mheczrmkme .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+}
+
+#mheczrmkme .gt_table_body {
+  border-top-style: solid;
+  /* field.border.top.style */
+  border-top-width: 2px;
+  /* field.border.top.width */
+  border-top-color: #A8A8A8;
+  /* field.border.top.color */
+  border-bottom-style: solid;
+  /* field.border.bottom.style */
+  border-bottom-width: 2px;
+  /* field.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* field.border.bottom.color */
+}
+
+#mheczrmkme .gt_footnote {
+  font-size: 90%;
+  /* footnote.font.size */
+  padding: 4px;
+  /* footnote.padding */
+}
+
+#mheczrmkme .gt_sourcenote {
+  font-size: 90%;
+  /* sourcenote.font.size */
+  padding: 4px;
+  /* sourcenote.padding */
+}
+
+#mheczrmkme .gt_center {
+  text-align: center;
+}
+
+#mheczrmkme .gt_left {
+  text-align: left;
+}
+
+#mheczrmkme .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#mheczrmkme .gt_font_normal {
+  font-weight: normal;
+}
+
+#mheczrmkme .gt_font_bold {
+  font-weight: bold;
+}
+
+#mheczrmkme .gt_font_italic {
+  font-style: italic;
+}
+
+#mheczrmkme .gt_super {
+  font-size: 65%;
+}
+
+#mheczrmkme .gt_footnote_glyph {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="mheczrmkme"><!--gt table start-->
+<table class='gt_table'>
+<thead>
+<tr>
+<th class='gt_heading gt_title gt_font_normal gt_center' colspan='4'>背景用に用意したデータフレーム</th>
+</tr>
+<tr>
+<th class='gt_heading gt_subtitle gt_font_normal gt_center gt_bottom_border' colspan='4'></th>
+</tr>
+<tr>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>x</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>y</th>
+<th class='gt_col_heading gt_left' rowspan='1' colspan='1'>group</th>
+<th class='gt_col_heading gt_left' rowspan='1' colspan='1'>group_for_facet</th>
+</tr>
+<tbody class='gt_table_body gt_striped'>
+<tr>
+<td class='gt_row gt_right'>1</td>
+<td class='gt_row gt_right'>1</td>
+<td class='gt_row gt_left'>a</td>
+<td class='gt_row gt_left'>b</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>1</td>
+<td class='gt_row gt_right'>1</td>
+<td class='gt_row gt_left'>a</td>
+<td class='gt_row gt_left'>c</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>2</td>
+<td class='gt_row gt_right'>2</td>
+<td class='gt_row gt_left'>b</td>
+<td class='gt_row gt_left'>a</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>2</td>
+<td class='gt_row gt_right'>2</td>
+<td class='gt_row gt_left'>b</td>
+<td class='gt_row gt_left'>c</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>3</td>
+<td class='gt_row gt_right'>3</td>
+<td class='gt_row gt_left'>c</td>
+<td class='gt_row gt_left'>a</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>3</td>
+<td class='gt_row gt_right'>3</td>
+<td class='gt_row gt_left'>c</td>
+<td class='gt_row gt_left'>b</td>
+</tr>
+</tbody>
+</table>
+<!--gt table end-->
+</div>
+</div>
+<div id="versicolor-と-virginica-だけで-facet-してそれぞれの-facet-に-setosa-を表示する" class="section level1">
+<h1>versicolor と virginica だけで facet してそれぞれの facet に setosa を表示する</h1>
+<pre class="r"><code>iris %&gt;%
+  mutate(
+    Species = as.character(Species),
+    facet = ifelse(
+      Species == &quot;setosa&quot;, 
+      list(setdiff(unique(Species), &quot;setosa&quot;)),
+      as.list(Species)
+    )
+  ) %&gt;%
+  unnest %&gt;%
+  ggplot(aes(Sepal.Length, Sepal.Width, colour = Species)) +
+  geom_point() +
+  facet_wrap(vars(facet))</code></pre>
+<p><img src="../../../../post/2019-01-20-share-data-in-facets_files/figure-html/unnamed-chunk-5-1.svg" width="672" /></p>
+<p>GOOD! このような用途では <code>scales = "fixed"</code> がいいと思います．</p>
+<p>データフレームの操作では以下のようにして facet と group の組み合わせを調整しています．</p>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;
+}
+
+#ihxzlfkqjo .gt_table {
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #000000;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  /* table.background.color */
+  width: auto;
+  /* table.width */
+  border-top-style: solid;
+  /* table.border.top.style */
+  border-top-width: 2px;
+  /* table.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table.border.top.color */
+}
+
+#ihxzlfkqjo .gt_heading {
+  background-color: #FFFFFF;
+  /* heading.background.color */
+  border-bottom-color: #FFFFFF;
+}
+
+#ihxzlfkqjo .gt_title {
+  color: #000000;
+  font-size: 125%;
+  /* heading.title.font.size */
+  padding-top: 4px;
+  /* heading.top.padding */
+  padding-bottom: 1px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#ihxzlfkqjo .gt_subtitle {
+  color: #000000;
+  font-size: 85%;
+  /* heading.subtitle.font.size */
+  padding-top: 1px;
+  padding-bottom: 4px;
+  /* heading.bottom.padding */
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#ihxzlfkqjo .gt_bottom_border {
+  border-bottom-style: solid;
+  /* heading.border.bottom.style */
+  border-bottom-width: 2px;
+  /* heading.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* heading.border.bottom.color */
+}
+
+#ihxzlfkqjo .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#ihxzlfkqjo .gt_col_heading {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* column_labels.background.color */
+  font-size: 16px;
+  /* column_labels.font.size */
+  font-weight: initial;
+  /* column_labels.font.weight */
+  padding: 10px;
+  margin: 10px;
+}
+
+#ihxzlfkqjo .gt_sep_right {
+  border-right: 5px solid #FFFFFF;
+}
+
+#ihxzlfkqjo .gt_group_heading {
+  padding: 8px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#ihxzlfkqjo .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#ihxzlfkqjo .gt_striped tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#ihxzlfkqjo .gt_row {
+  padding: 10px;
+  /* row.padding */
+  margin: 10px;
+}
+
+#ihxzlfkqjo .gt_stub {
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #A8A8A8;
+  text-indent: 5px;
+}
+
+#ihxzlfkqjo .gt_stub.gt_row {
+  background-color: #FFFFFF;
+}
+
+#ihxzlfkqjo .gt_summary_row {
+  background-color: #FFFFFF;
+  /* summary_row.background.color */
+  padding: 6px;
+  /* summary_row.padding */
+  text-transform: inherit;
+  /* summary_row.text_transform */
+}
+
+#ihxzlfkqjo .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+}
+
+#ihxzlfkqjo .gt_table_body {
+  border-top-style: solid;
+  /* field.border.top.style */
+  border-top-width: 2px;
+  /* field.border.top.width */
+  border-top-color: #A8A8A8;
+  /* field.border.top.color */
+  border-bottom-style: solid;
+  /* field.border.bottom.style */
+  border-bottom-width: 2px;
+  /* field.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* field.border.bottom.color */
+}
+
+#ihxzlfkqjo .gt_footnote {
+  font-size: 90%;
+  /* footnote.font.size */
+  padding: 4px;
+  /* footnote.padding */
+}
+
+#ihxzlfkqjo .gt_sourcenote {
+  font-size: 90%;
+  /* sourcenote.font.size */
+  padding: 4px;
+  /* sourcenote.padding */
+}
+
+#ihxzlfkqjo .gt_center {
+  text-align: center;
+}
+
+#ihxzlfkqjo .gt_left {
+  text-align: left;
+}
+
+#ihxzlfkqjo .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#ihxzlfkqjo .gt_font_normal {
+  font-weight: normal;
+}
+
+#ihxzlfkqjo .gt_font_bold {
+  font-weight: bold;
+}
+
+#ihxzlfkqjo .gt_font_italic {
+  font-style: italic;
+}
+
+#ihxzlfkqjo .gt_super {
+  font-size: 65%;
+}
+
+#ihxzlfkqjo .gt_footnote_glyph {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="ihxzlfkqjo"><!--gt table start-->
+<table class='gt_table'>
+<thead>
+<tr>
+<th class='gt_heading gt_title gt_font_normal gt_center' colspan='3'>元のデータフレーム</th>
+</tr>
+<tr>
+<th class='gt_heading gt_subtitle gt_font_normal gt_center gt_bottom_border' colspan='3'></th>
+</tr>
+<tr>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>x</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>y</th>
+<th class='gt_col_heading gt_left' rowspan='1' colspan='1'>group</th>
+</tr>
+<tbody class='gt_table_body gt_striped'>
+<tr>
+<td class='gt_row gt_right'>1</td>
+<td class='gt_row gt_right'>1</td>
+<td class='gt_row gt_left'>a</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>2</td>
+<td class='gt_row gt_right'>2</td>
+<td class='gt_row gt_left'>b</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>3</td>
+<td class='gt_row gt_right'>3</td>
+<td class='gt_row gt_left'>c</td>
+</tr>
+</tbody>
+</table>
+<!--gt table end-->
+</div>
+<div style="text-align:center">
+↓
+</div>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;
+}
+
+#qjlykdthdd .gt_table {
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #000000;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  /* table.background.color */
+  width: auto;
+  /* table.width */
+  border-top-style: solid;
+  /* table.border.top.style */
+  border-top-width: 2px;
+  /* table.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table.border.top.color */
+}
+
+#qjlykdthdd .gt_heading {
+  background-color: #FFFFFF;
+  /* heading.background.color */
+  border-bottom-color: #FFFFFF;
+}
+
+#qjlykdthdd .gt_title {
+  color: #000000;
+  font-size: 125%;
+  /* heading.title.font.size */
+  padding-top: 4px;
+  /* heading.top.padding */
+  padding-bottom: 1px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#qjlykdthdd .gt_subtitle {
+  color: #000000;
+  font-size: 85%;
+  /* heading.subtitle.font.size */
+  padding-top: 1px;
+  padding-bottom: 4px;
+  /* heading.bottom.padding */
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#qjlykdthdd .gt_bottom_border {
+  border-bottom-style: solid;
+  /* heading.border.bottom.style */
+  border-bottom-width: 2px;
+  /* heading.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* heading.border.bottom.color */
+}
+
+#qjlykdthdd .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#qjlykdthdd .gt_col_heading {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* column_labels.background.color */
+  font-size: 16px;
+  /* column_labels.font.size */
+  font-weight: initial;
+  /* column_labels.font.weight */
+  padding: 10px;
+  margin: 10px;
+}
+
+#qjlykdthdd .gt_sep_right {
+  border-right: 5px solid #FFFFFF;
+}
+
+#qjlykdthdd .gt_group_heading {
+  padding: 8px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#qjlykdthdd .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom  .style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom  .width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom  .color */
+}
+
+#qjlykdthdd .gt_striped tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#qjlykdthdd .gt_row {
+  padding: 10px;
+  /* row.padding */
+  margin: 10px;
+}
+
+#qjlykdthdd .gt_stub {
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #A8A8A8;
+  text-indent: 5px;
+}
+
+#qjlykdthdd .gt_stub.gt_row {
+  background-color: #FFFFFF;
+}
+
+#qjlykdthdd .gt_summary_row {
+  background-color: #FFFFFF;
+  /* summary_row.background.color */
+  padding: 6px;
+  /* summary_row.padding */
+  text-transform: inherit;
+  /* summary_row.text_transform */
+}
+
+#qjlykdthdd .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+}
+
+#qjlykdthdd .gt_table_body {
+  border-top-style: solid;
+  /* field.border.top.style */
+  border-top-width: 2px;
+  /* field.border.top.width */
+  border-top-color: #A8A8A8;
+  /* field.border.top.color */
+  border-bottom-style: solid;
+  /* field.border.bottom.style */
+  border-bottom-width: 2px;
+  /* field.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* field.border.bottom.color */
+}
+
+#qjlykdthdd .gt_footnote {
+  font-size: 90%;
+  /* footnote.font.size */
+  padding: 4px;
+  /* footnote.padding */
+}
+
+#qjlykdthdd .gt_sourcenote {
+  font-size: 90%;
+  /* sourcenote.font.size */
+  padding: 4px;
+  /* sourcenote.padding */
+}
+
+#qjlykdthdd .gt_center {
+  text-align: center;
+}
+
+#qjlykdthdd .gt_left {
+  text-align: left;
+}
+
+#qjlykdthdd .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#qjlykdthdd .gt_font_normal {
+  font-weight: normal;
+}
+
+#qjlykdthdd .gt_font_bold {
+  font-weight: bold;
+}
+
+#qjlykdthdd .gt_font_italic {
+  font-style: italic;
+}
+
+#qjlykdthdd .gt_super {
+  font-size: 65%;
+}
+
+#qjlykdthdd .gt_footnote_glyph {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="qjlykdthdd"><!--gt table start-->
+<table class='gt_table'>
+<thead>
+<tr>
+<th class='gt_heading gt_title gt_font_normal gt_center' colspan='4'>プロット用に整形したデータフレーム</th>
+</tr>
+<tr>
+<th class='gt_heading gt_subtitle gt_font_normal gt_center gt_bottom_border' colspan='4'></th>
+</tr>
+<tr>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>x</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>y</th>
+<th class='gt_col_heading gt_left' rowspan='1' colspan='1'>group</th>
+<th class='gt_col_heading gt_left' rowspan='1' colspan='1'>facet</th>
+</tr>
+<tbody class='gt_table_body gt_striped'>
+<tr>
+<td class='gt_row gt_right'>1</td>
+<td class='gt_row gt_right'>1</td>
+<td class='gt_row gt_left'>a</td>
+<td class='gt_row gt_left'>b</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>2</td>
+<td class='gt_row gt_right'>2</td>
+<td class='gt_row gt_left'>b</td>
+<td class='gt_row gt_left'>b</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>1</td>
+<td class='gt_row gt_right'>1</td>
+<td class='gt_row gt_left'>a</td>
+<td class='gt_row gt_left'>c</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>3</td>
+<td class='gt_row gt_right'>3</td>
+<td class='gt_row gt_left'>c</td>
+<td class='gt_row gt_left'>c</td>
+</tr>
+</tbody>
+</table>
+<!--gt table end-->
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>
+
+
+    
+
+    
+
+    <h4>See also</h4>
+    <ul>
+        
+            <li><a href="../../../../2019/01/20/control-axes-in-faceted-plots/">ggplot で scale = free な facet の軸を調整する</a></li>
+        
+            <li><a href="../../../../2018/12/05/accelerate-list-of-ggplot-with-furrr/">furrr パッケージで ggplot のリストの表示を高速化する</a></li>
+        
+            <li><a href="../../../../2018/11/22/strange-coord-functions-ggplot2/">`ggplot2::coord_cartesian(xlim = c(0, NA))` できるようにしてみた</a></li>
+        
+            <li><a href="../../../../2018/11/20/histogram-fill-along-x/">ヒストグラムのビンの色をx軸に応じて変える</a></li>
+        
+            <li><a href="../../../../2018/11/10/ggplot2-legend-pos-n-just/">ggplot2のレジェンド位置を調整</a></li>
+        
+    </ul>
+
+
+</article>
+
+
+
+        </div>
+
+        <aside class="col-12 col-lg-3 ml-auto blog-sidebar">
+    
+        
+
+
+<section>
+    <h4>New</h4>
+    <ol class="list-unstyled">
+        
+        <li>
+            <a href="../../../../2019/01/20/control-axes-in-faceted-plots/">ggplot で scale = free な facet の軸を調整する</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2019/01/20/share-data-in-facets/">ggplot の facet ごとに共通なプロットを盛り込む</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2019/01/19/yet-another-pipe/">base にパイプはないといつ言った？</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2019/01/18/force-many-vars-at-once/">一度に複数の変数を force する</a>
+        </li>
+        
+        <li>
+            <a href="../../../../2019/01/17/enhance-captioner/">captioner を魔改造してみた</a>
+        </li>
+        
+    </ol>
+</section>
+
+    
+    
+        <section>
+    
+        
+        <h4>カテゴリ</h4>
+        <p>
+            
+            <a class="badge badge-primary" href="../../../../categories/arch">arch</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/captioner">captioner</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/css">css</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/latex">latex</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/music">music</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/r">r</a>
+            
+            <a class="badge badge-primary" href="../../../../categories/stats">stats</a>
+            
+        </p>
+        
+    
+        
+        <h4>タグ</h4>
+        <p>
+            
+            <a class="badge badge-primary" href="../../../../tags/blogdown">blogdown</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/callr">callr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/data.table">data.table</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/dplyr">dplyr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/facet">facet</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/felp">felp</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/force">force</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/furrr">furrr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/ggplot2">ggplot2</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/glue">glue</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/japanr">japanr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/knitr">knitr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/latex">latex</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/latex2exp">latex2exp</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/linux">linux</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/magrittr">magrittr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/mathjax">mathjax</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/missing-value">missing-value</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/package">package</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/pacman">pacman</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/patchwork">patchwork</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/pforeach">pforeach</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/pipe">pipe</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/plantuml">plantuml</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/plotly">plotly</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/r">r</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/r-markdown%E3%81%A7word%E6%96%87%E6%9B%B8%E3%82%92%E4%BD%9C%E3%82%8D%E3%81%86">r-markdownでword文書を作ろう</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/rd">rd</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/rmd">rmd</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/roxygen2">roxygen2</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/rprofile">rprofile</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/s3">s3</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/shiny">shiny</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/tex">tex</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/tokyor">tokyor</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/unicode">unicode</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/viridis">viridis</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/yaml">yaml</a>
+            
+        </p>
+        
+    
+</section>
+    
+</aside>
+
+      </div>
+    </div>
+    
+
+    
+      
+
+
+
+<footer class="blog-footer w-100">
+    <nav class="navbar navbar-light bg-light">
+        <p class="w-100 text-center"></p>
+        <p class="w-100 text-center"><a href="#">Home</a></p>
+    </nav>
+</footer>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ["\\(","\\)"]] } });
+</script>
+<script async
+src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+    
+
+    
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+  </body>
+</html>

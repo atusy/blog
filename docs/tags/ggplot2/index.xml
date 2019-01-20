@@ -21,6 +21,15 @@
     </item>
     
     <item>
+      <title>ggplot の facet ごとに共通なプロットを盛り込む</title>
+      <link>https://atusy.github.io/2019/01/20/share-data-in-facets/</link>
+      <pubDate>Sun, 20 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2019/01/20/share-data-in-facets/</guid>
+      <description>はじめに facet で表示されない部分のデータをグレーでプロットしてみる versicolor と virginica だけで facet してそれぞれの facet に setosa を表示する Enjoy! はじめに facet を使うと以下のようにグ</description>
+    </item>
+    
+    <item>
       <title>furrr パッケージで ggplot のリストの表示を高速化する</title>
       <link>https://atusy.github.io/2018/12/05/accelerate-list-of-ggplot-with-furrr/</link>
       <pubDate>Wed, 05 Dec 2018 00:00:00 +0000</pubDate>

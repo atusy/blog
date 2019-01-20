@@ -21,6 +21,15 @@
     </item>
     
     <item>
+      <title>ggplot の facet ごとに共通なプロットを盛り込む</title>
+      <link>https://atusy.github.io/2019/01/20/share-data-in-facets/</link>
+      <pubDate>Sun, 20 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2019/01/20/share-data-in-facets/</guid>
+      <description>はじめに facet で表示されない部分のデータをグレーでプロットしてみる versicolor と virginica だけで facet してそれぞれの facet に setosa を表示する Enjoy! はじめに facet を使うと以下のようにグ</description>
+    </item>
+    
+    <item>
       <title>base にパイプはないといつ言った？</title>
       <link>https://atusy.github.io/2019/01/19/yet-another-pipe/</link>
       <pubDate>Sat, 19 Jan 2019 00:00:00 +0000</pubDate>

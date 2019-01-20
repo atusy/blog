@@ -1,0 +1,137 @@
+---
+title: ggplot の facet ごとに共通なプロットを盛り込む
+author: ~
+date: '2019-01-20'
+slug: share-data-in-facets
+output:
+  blogdown::html_page:
+    toc: yes
+    pandoc_args: 
+      - --from
+      - markdown+east_asian_line_breaks
+categories: [R]
+tags: [ggplot2, facet]
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, dev = "svg")
+library(pacman)
+p_load(dplyr, ggplot2, tidyr, purrr)
+p_load_gh("rstudio/gt")
+```
+
+# はじめに
+
+facet を使うと以下のようにグループごとにプロットを分けることができます．
+しかし，グループ間の比較を行うのがちょっと辛いですね．
+こんな時，どうすればいいのでしょうか．
+
+「[ggplot で scale = free な facet の軸を調整する](https://atusy.github.io/blog/2019/01/20/control-axes-in-faceted-plots/)」
+と同様，基本はレイヤーを足すかデータを弄るかです．
+
+
+```{r, fig.width = 7, fig.height = 3}
+library(ggplot2)
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
+  geom_point() +
+  facet_wrap(vars(Species))
+```
+
+# facet で表示されない部分のデータをグレーでプロットしてみる
+
+ここからは `tidyverse` パッケージのオンパレードですね．
+nested data frame の扱いに慣れていないと辛いです．
+
+```{r, fig.width = 7, fig.height = 3}
+library(dplyr)
+library(tidyr)
+library(purrr)
+
+bg <- iris %>% 
+  mutate(Species = map(Species, ~ setdiff(unique(Species), .x))) %>%
+  unnest
+  
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
+  geom_point(data = bg, colour = "gray") +
+  geom_point() +
+  facet_wrap(vars(Species))
+```
+
+いいですね!
+
+
+bgは以下のようにして facet と group の組み合わせを調整しています．
+
+```{r, echo = FALSE}
+x <- data.frame(
+  x = 1:3,
+  y = 1:3,
+  group = letters[1:3],
+  stringsAsFactors = FALSE
+)
+gt(x) %>% tab_header("元のデータフレーム")
+```
+
+<div style="text-align:center"> ↓ </div>
+
+```{r, echo = FALSE}
+x %>%
+  mutate(
+    group_for_facet = map(group, ~ setdiff(unique(group), .x))
+  ) %>%
+  unnest %>%
+  arrange(group) %>%
+  gt() %>% 
+  tab_header("背景用に用意したデータフレーム")
+```
+
+
+# versicolor と virginica だけで facet してそれぞれの facet に setosa を表示する
+
+
+
+```{r, fig.width = 7, fig.height = 3}
+iris %>%
+  mutate(
+    Species = as.character(Species),
+    facet = ifelse(
+      Species == "setosa", 
+      list(setdiff(unique(Species), "setosa")),
+      as.list(Species)
+    )
+  ) %>%
+  unnest %>%
+  ggplot(aes(Sepal.Length, Sepal.Width, colour = Species)) +
+  geom_point() +
+  facet_wrap(vars(facet))
+```
+
+GOOD! このような用途では `scales = "fixed"` がいいと思います．
+
+データフレームの操作では以下のようにして facet と group の組み合わせを調整しています．
+
+```{r, echo = FALSE}
+x <- data.frame(
+  x = 1:3,
+  y = 1:3,
+  group = letters[1:3],
+  stringsAsFactors = FALSE
+)
+gt(x) %>% tab_header("元のデータフレーム")
+```
+
+<div style="text-align:center"> ↓ </div>
+
+```{r, echo = FALSE}
+x %>%
+  mutate(
+    facet = ifelse(group == "a", list(setdiff(unique(group), "a")), as.list(group))
+  ) %>%
+  unnest %>%
+  arrange(facet, group) %>%
+  gt() %>% 
+  tab_header("プロット用に整形したデータフレーム")
+```
+
+
+# Enjoy!
