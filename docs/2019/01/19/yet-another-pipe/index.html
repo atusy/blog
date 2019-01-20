@@ -73,9 +73,9 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                         
-                            <a class="dropdown-item" href="https://atusy.github.io/en/">English</a>
-                        
                             <a class="dropdown-item" href="https://atusy.github.io/">Japanese</a>
+                        
+                            <a class="dropdown-item" href="https://atusy.github.io/en/">English</a>
                         
                     </div>
                 </li>
@@ -132,10 +132,7 @@
     <hr>
 </header>
 <article class="blog-post">
-    
-
-
-<p>時はパイプ戦国時代．
+    <p>時はパイプ戦国時代．
 Tidyverse が覇権を握る世界線において pipe とは <code class="r">magrittr::`%&gt;%`</code> のことでしょうか．私は <code class="r">pipeR::`%&gt;&gt;%`</code> 派ですね．他にも <code class="r">wrapr::`%.&gt;%`</code> など，色々な宗派があります．</p>
 <p>pipe の成り立ちを探る神学者たちも続々と表れております．</p>
 <ul>
@@ -162,7 +159,7 @@ Tidyverse が覇権を握る世界線において pipe とは <code class="r">ma
 </ol>
 <p>と pipe-like に書かれていますね．というか機能が限定的なだけでこれはパイプと呼んで差し支えないです．</p>
 <p>この性質をうまく利用しているのが data.table パッケージです．
-<code class="r">data.table:::`[`</code> では， <code>[...]</code> 内でデータの選択だけではなく，加工もできるように拡張されています．あまり読み易いとは言えませんが，<code>dplyr::summarize</code> 相当のこともできます．</p>
+<code class="r">data.table:::`[.data.table`</code> では， <code>[...]</code> 内でデータの選択だけではなく，加工もできるように拡張されています．あまり読み易いとは言えませんが，<code>dplyr::summarize</code> 相当のこともできます．</p>
 <pre class="r"><code>as.data.table(iris)[, lapply(.SD, mean), by= Species]</code></pre>
 <pre><code>##       Species Sepal.Length Sepal.Width Petal.Length Petal.Width
 ## 1:     setosa        5.006       3.428        1.462       0.246
@@ -238,6 +235,10 @@ rm(&quot;[&quot;)</code></pre>
     <ol class="list-unstyled">
         
         <li>
+            <a href="../../../../2019/01/20/control-axes-in-faceted-plots/">ggplot で scale = free な facet の軸を調整する</a>
+        </li>
+        
+        <li>
             <a href="../../../../2019/01/19/yet-another-pipe/">base にパイプはないといつ言った？</a>
         </li>
         
@@ -251,10 +252,6 @@ rm(&quot;[&quot;)</code></pre>
         
         <li>
             <a href="../../../../2019/01/16/s3-generics-dont-pass-default-params-to-methods/">S3総称関数の引数の既定値はメソッドに渡らない</a>
-        </li>
-        
-        <li>
-            <a href="../../../../2019/01/04/benchmarks-on-summarizing-with-dplyr/">group_map などの data frame を要約する関数をベンチマーク (dplyr &gt; 0.8.x)</a>
         </li>
         
     </ol>
@@ -296,6 +293,8 @@ rm(&quot;[&quot;)</code></pre>
             <a class="badge badge-primary" href="../../../../tags/data.table">data.table</a>
             
             <a class="badge badge-primary" href="../../../../tags/dplyr">dplyr</a>
+            
+            <a class="badge badge-primary" href="../../../../tags/facet">facet</a>
             
             <a class="badge badge-primary" href="../../../../tags/felp">felp</a>
             

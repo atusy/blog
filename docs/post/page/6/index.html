@@ -75,9 +75,9 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                         
-                            <a class="dropdown-item" href="https://atusy.github.io/en/">English</a>
-                        
                             <a class="dropdown-item" href="https://atusy.github.io/">Japanese</a>
+                        
+                            <a class="dropdown-item" href="https://atusy.github.io/en/">English</a>
                         
                     </div>
                 </li>
@@ -97,6 +97,55 @@
 
 
 
+
+
+
+    
+        <article class="blog-post">
+    <header>
+        <h2 class="blog-post-title">
+            <a class="text-dark" href="../../../2018/07/31/dont-sync-pkg-r3-5/">R3.5系ではファイル同期ソフトでパッケージを同期しないように</a>
+        </h2>
+        
+
+
+<div class="blog-post-date text-secondary">
+    
+        2018-7-31
+    
+    
+        by <span rel="author">Atusy</span>
+    
+</div>
+
+        
+<div class="blog-post-tags text-secondary">
+    <strong>タグ:</strong>
+    
+        <a class="badge badge-primary" href="../../../tags/r">R</a>
+    
+        <a class="badge badge-primary" href="../../../tags/package">package</a>
+    
+</div>
+
+        
+<div class="blog-post-categories text-secondary">
+    <strong>カテゴリ:</strong>
+    
+        <a class="badge badge-primary" href="../../../categories/r">R</a>
+    
+</div>
+
+    </header>
+    タイトル通り、R3.5系ではファイル同期ソフトでパッケージを同期しないようにしましょう。 同期しておくとある環境にインストールしたパッケージを
+    
+    <p></p>
+    <a href="../../../2018/07/31/dont-sync-pkg-r3-5/">読む →</a>
+    
+</article>
+
+
+    
 
 
 
@@ -362,52 +411,7 @@
         
         
     </header>
-    xetexでunicode文字       code{white-space: pre;} pre:not([class]) { background-color: white; }  if (window.hljs) { hljs.configure({languages: []}); hljs.initHighlightingOnLoad(); if (document.readyState && document.readyState === "complete") { window.setTimeout(function() { hljs.initHighlighting(); }, 0); } }  h1 { font-size: 34px; } h1.title { font-size: 38px; } h2 { font-size: 30px; } h3 { font-size: 24px; } h4 { font-size: 18px; } h5 { font-size: 16px; } h6 { font-size: 12px; } .
-    
-    <p></p>
-    <a href="../../../1/01/01/">読む →</a>
-    
-</article>
-
-
-    
-
-
-
-    
-        <article class="blog-post">
-    <header>
-        <h2 class="blog-post-title">
-            <a class="text-dark" href="../../../1/01/01/"></a>
-        </h2>
-        
-
-
-<div class="blog-post-date text-secondary">
-    
-    
-        by <span rel="author">Atusy</span>
-    
-</div>
-
-        
-        
-    </header>
-    MathJaxとは？ blogdownではインラインでMathJaxが使えない……？ 解決方法   MathJaxとは？ MathJaxを利用すると、\(\TeX\) 記法を用いて数式を表現できる。
-ブロックにするには
-$$ \latex $$ と入力すると
-\[ \LaTeX \]
-となる。
-インラインでも $\LaTeX$ とすると、 \(\LaTeX\) となる。
-ブロックでは $$ から成る2行の間に、 インラインでは同じ行の $ 2字の間に \(TeX\) 記法を用いることがポイントだ。
- blogdownではインラインでMathJaxが使えない……？ しかし、blogdownのデフォルトテーマ (Hugo Lithium) ではインラインの数式を表現できなかった。
-mathjax blogdown で検索して、
- Yi Hui によるドキュメント や、 ぞうさんの記事 ( blogdownで数式がうまく表示されない場合の対処)  を参考にするも効果なし。
-結局 mathjax 使い方 で検索して、
- くろきげんさんの記事(MathJaxの使い方)  も参考にしたところ、インラインで使うにはちょっとコードに工夫がいるらしいことが判明。
- 解決方法 ./themes/hugo-lithium/layouts/partials/footer_mathjax.html
-を下記に書き換える。
-&lt;script type=&quot;text/x-mathjax-config&quot;&gt; MathJax.Hub.Config({ tex2jax: { inlineMath: [[&#39;$&#39;,&#39;$&#39;], [&quot;\\(&quot;,&quot;\\)&quot;]] } }); &lt;/script&gt; &lt;script async src=&quot;//cdn.
+    xetexでunicode文字 code{white-space: pre;} pre:not([class]) { background-color: white; } if (window.hljs) { hljs.configure({languages: []}); hljs.initHighlightingOnLoad(); if (document.readyState && document.readyState === "complete") { window.setTimeout(function() { hljs.initHighlighting(); }, 0); } } h1 { font-size: 34px; } h1.title { font-size: 38px; } h2 { font-size: 30px; } h3 { font-size: 24px; } h4 { font-size: 18px; } h5 { font-size:
     
     <p></p>
     <a href="../../../1/01/01/">読む →</a>
@@ -524,12 +528,25 @@ mathjax blogdown で検索して、
                 </li>
             
         
+            
+            
+            
+            
+                
+                
+            
+            
+                <li class="page-item ">
+                    <a class="page-link" href="../../../post/page/8/">8</a>
+                </li>
+            
+        
         <li class="page-item ">
             <a class="page-link" href="../../../post/page/7/" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
         </li>
         
             <li class="page-item">
-                <a class="page-link" href="../../../post/page/7/" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+                <a class="page-link" href="../../../post/page/8/" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
             </li>
         
     </ul>
@@ -550,6 +567,10 @@ mathjax blogdown で検索して、
     <ol class="list-unstyled">
         
         <li>
+            <a href="../../../2019/01/20/control-axes-in-faceted-plots/">ggplot で scale = free な facet の軸を調整する</a>
+        </li>
+        
+        <li>
             <a href="../../../2019/01/19/yet-another-pipe/">base にパイプはないといつ言った？</a>
         </li>
         
@@ -563,10 +584,6 @@ mathjax blogdown で検索して、
         
         <li>
             <a href="../../../2019/01/16/s3-generics-dont-pass-default-params-to-methods/">S3総称関数の引数の既定値はメソッドに渡らない</a>
-        </li>
-        
-        <li>
-            <a href="../../../2019/01/04/benchmarks-on-summarizing-with-dplyr/">group_map などの data frame を要約する関数をベンチマーク (dplyr &gt; 0.8.x)</a>
         </li>
         
     </ol>
@@ -608,6 +625,8 @@ mathjax blogdown で検索して、
             <a class="badge badge-primary" href="../../../tags/data.table">data.table</a>
             
             <a class="badge badge-primary" href="../../../tags/dplyr">dplyr</a>
+            
+            <a class="badge badge-primary" href="../../../tags/facet">facet</a>
             
             <a class="badge badge-primary" href="../../../tags/felp">felp</a>
             

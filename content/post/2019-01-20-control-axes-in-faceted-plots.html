@@ -1,0 +1,138 @@
+---
+title: ggplot で scale = free な facet の軸を調整する
+author: ~
+date: '2019-01-20'
+slug: control-axes-in-faceted-plots
+output:
+  blogdown::html_page:
+    toc: yes
+    pandoc_args: 
+      - --from
+      - markdown+east_asian_line_breaks
+categories: [R]
+tags: [ggplot2, facet]
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#intro">はじめに</a><ul>
+<li><a href="#facet-basics">facet の基本的な例</a><ul>
+<li><a href="#pkg">パッケージのロード</a></li>
+<li><a href="#compare-scales-args">scales 引数を変えた時の様子を比較</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#include-origin">全 facet 共通で xmin = ymin = 0 にしてみる</a></li>
+<li><a href="#任意の-facet-で軸の範囲をコントロールする">任意の facet で軸の範囲をコントロールする．</a></li>
+<li><a href="#enjoy">Enjoy!</a></li>
+</ul>
+</div>
+
+<p>前に Tokyo.R で「<a href="https://atusy.github.io/presentation/tokyor073/tokyor073-multi-ggplot2.html?raw#/">ggplot2で図を並べる</a>」と題して色々話させてもらいました．時間や難易度の都合で話し切れていない部分も多々あるのですが，今日はその中の1つを補足したいと思います．</p>
+<div id="intro" class="section level1">
+<h1>はじめに</h1>
+<p>ggplot2 で facet を使って図を並べる時， <code>scales</code> 引数を指定することで
+facet ごとの軸の範囲を可変にできます．軸の範囲は ggplot2 がそれっぽく決めてくれるのですが，特定の facet について自分でコントロールしたい時はどうすればいいでしょうか．</p>
+<div id="facet-basics" class="section level2">
+<h2>facet の基本的な例</h2>
+<div id="pkg" class="section level3">
+<h3>パッケージのロード</h3>
+</div>
+<div id="compare-scales-args" class="section level3">
+<h3>scales 引数を変えた時の様子を比較</h3>
+<pre class="r"><code>x &lt;- iris %&gt;% filter(Species != &quot;setosa&quot;) # Species を 2種に制限
+g &lt;- ggplot(x, aes(Sepal.Length, Sepal.Width, colour = Species)) +
+  geom_point()
+
+wrap_plots(
+  g + facet_wrap(vars(Species), scales = &quot;fixed&quot;) + # scales = &quot;fixed&quot; が既定値
+    ggtitle(&quot;scales = &#39;fixed&#39;&quot;), 
+  g + facet_wrap(vars(Species), scales = &quot;free&quot;) +
+    ggtitle(&quot;scales = &#39;free&#39;&quot;),
+  ncol = 1
+)</code></pre>
+<p><img src="/post/2019-01-20-control-axes-in-faceted-plots_files/figure-html/unnamed-chunk-1-1.svg" width="672" /></p>
+</div>
+</div>
+</div>
+<div id="include-origin" class="section level1">
+<h1>全 facet 共通で xmin = ymin = 0 にしてみる</h1>
+<p>特定の facet について軸の範囲をコントロールするための準備体操として，全 facet 共通で xmin = ymin = 0 にしてみましょう．つまり，原点が左下に来るようにしてみます．</p>
+<p>実は <code>xlim</code>, <code>ylim</code> を使うだけで簡単にできてしまいますが，それはそれとしてやってみましょう．</p>
+<pre class="r"><code>g + facet_wrap(vars(Species), scales = &quot;free&quot;) + 
+  xlim(0, NA) + 
+  ylim(0, NA)</code></pre>
+<p><img src="/post/2019-01-20-control-axes-in-faceted-plots_files/figure-html/unnamed-chunk-2-1.svg" width="672" /></p>
+<p>free-scale facet において軸の範囲はデータの範囲で決定されるので，原点に点をプロットしてやれば OK です．</p>
+<p>facet ごとに <code>Sepal.Length = 0</code>, <code>Sepal.Width = 0</code> となるデータを持つデータフレーム <code>df_lims</code> を作り，このデータフレームに基いた レイヤーを追加してみます．</p>
+<pre class="r"><code>df_lims &lt;- expand.grid(Sepal.Length = 0, Sepal.Width = 0, Species = unique(x$Species))
+
+g +
+  geom_point(data = df_lims, colour = &quot;black&quot;) +
+  facet_wrap(vars(Species), scales = &quot;free&quot;)</code></pre>
+<p><img src="/post/2019-01-20-control-axes-in-faceted-plots_files/figure-html/unnamed-chunk-3-1.svg" width="672" /></p>
+<p>上図ではわかりやすいように原点に黒点をプロットしましたが，非表示にしたい場合は <code>alpha = 0</code> にしてやります．</p>
+<pre class="r"><code>g +
+  geom_point(data = df_lims, alpha = 0) +
+  facet_wrap(vars(Species), scales = &quot;free&quot;)</code></pre>
+<p><img src="/post/2019-01-20-control-axes-in-faceted-plots_files/figure-html/unnamed-chunk-4-1.svg" width="672" /></p>
+<p>別解として，元のデータフレームにデータを追加しておくこともできます．
+facet を個別に扱うにはこちらのテクニックが必要になります．</p>
+<pre class="r"><code>ggplot(bind_rows(x, df_lims), aes(Sepal.Length, Sepal.Width, colour = Species)) +
+  geom_point() +
+  facet_wrap(vars(Species))</code></pre>
+<p><img src="/post/2019-01-20-control-axes-in-faceted-plots_files/figure-html/unnamed-chunk-5-1.svg" width="672" /></p>
+<p>しかしこの場合は，原点にいる点の色のコントロールが厄介になってしまいます．表示したいデータとしたくないデータを区別できる列がないからです．そこで，表示したいデータについては <code>alpha = 1</code>，表示したくないデータについては <code>alpha = 0</code> となるようにデータを追加してあげ， <code>aes(alpha = alpha)</code> を指定しましょう．
+ggplot のレイヤには <code>scale_alpha_identity()</code>
+を足してあげることで，データ通りの透明度になります．</p>
+<pre class="r"><code>bind_rows(
+  mutate(x, alpha = 1),
+  mutate(df_lims, alpha = 0)
+) %&gt;%
+  ggplot(aes(Sepal.Length, Sepal.Width, colour = Species, alpha = alpha)) +
+  geom_point() +
+  scale_alpha_identity() +
+  facet_wrap(vars(Species))</code></pre>
+<p><img src="/post/2019-01-20-control-axes-in-faceted-plots_files/figure-html/unnamed-chunk-6-1.svg" width="672" /></p>
+</div>
+<div id="任意の-facet-で軸の範囲をコントロールする" class="section level1">
+<h1>任意の facet で軸の範囲をコントロールする．</h1>
+<p>準備体操は終わりです．全 facet 共通の場合と基本は同じです．例えば versicolor について <code>xlim(1, 10)</code>, <code>ylim(0, 5)</code> となるようにしてみます．</p>
+<pre class="r"><code>df_lims_versocolor &lt;- data.frame(
+    Sepal.Length = c(1, 10), 
+    Sepal.Width = c(0, 5),
+    Species = &quot;versicolor&quot; %&gt;%
+      factor(levels = levels(x$Species)) # 警告回避のため levels を調整
+  )
+
+bind_rows(
+  mutate(x, alpha = 1),
+  mutate(df_lims_versocolor, alpha = 0)
+) %&gt;%
+  ggplot(aes(Sepal.Length, Sepal.Width, colour = Species, alpha = alpha)) +
+  geom_point() +
+  scale_alpha_identity() +
+  facet_wrap(vars(Species), scales = &quot;free&quot;)</code></pre>
+<p><img src="/post/2019-01-20-control-axes-in-faceted-plots_files/figure-html/unnamed-chunk-7-1.svg" width="672" /></p>
+<p>ちなみに以下はエラーになってしまいます．</p>
+<pre class="r"><code>g +
+  geom_point(data = df_lims_versocolor, colour = &quot;black&quot;) +
+  facet_wrap(vars(Species), scales = &quot;free&quot;)</code></pre>
+<pre><code>## Error in scale_index[[i]]: subscript out of bounds</code></pre>
+<p><img src="/post/2019-01-20-control-axes-in-faceted-plots_files/figure-html/unnamed-chunk-8-1.svg" width="672" /></p>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+<pre class="r"><code>wrap_plots(
+  g + facet_wrap(vars(Species), scales = &quot;free&quot;) + ggtitle(&quot;scales = &#39;free&#39;&quot;),
+  bind_rows(
+    mutate(x, alpha = 1),
+    mutate(df_lims_versocolor, alpha = 0)
+  ) %&gt;%
+    ggplot(aes(Sepal.Length, Sepal.Width, colour = Species, alpha = alpha)) +
+    geom_point() +
+    scale_alpha_identity() +
+    facet_wrap(vars(Species), scales = &quot;free&quot;) + ggtitle(&quot;versicolor だけx-y-軸を調整&quot;),
+  ncol = 1
+)</code></pre>
+</div>

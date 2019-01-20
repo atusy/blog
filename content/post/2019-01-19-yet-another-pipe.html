@@ -41,7 +41,7 @@ Tidyverse が覇権を握る世界線において pipe とは <code class="r">ma
 </ol>
 <p>と pipe-like に書かれていますね．というか機能が限定的なだけでこれはパイプと呼んで差し支えないです．</p>
 <p>この性質をうまく利用しているのが data.table パッケージです．
-<code class="r">data.table:::`[`</code> では， <code>[...]</code> 内でデータの選択だけではなく，加工もできるように拡張されています．あまり読み易いとは言えませんが，<code>dplyr::summarize</code> 相当のこともできます．</p>
+<code class="r">data.table:::`[.data.table`</code> では， <code>[...]</code> 内でデータの選択だけではなく，加工もできるように拡張されています．あまり読み易いとは言えませんが，<code>dplyr::summarize</code> 相当のこともできます．</p>
 <pre class="r"><code>as.data.table(iris)[, lapply(.SD, mean), by= Species]</code></pre>
 <pre><code>##       Species Sepal.Length Sepal.Width Petal.Length Petal.Width
 ## 1:     setosa        5.006       3.428        1.462       0.246
