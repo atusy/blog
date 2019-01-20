@@ -33,8 +33,8 @@ output:
 <a href="http://www.cookbook-r.com/Graphs/Legends_(ggplot2)/#changing-the-position-of-the-legend">Changing the position of the legend</a>
 が参考になる．</p>
 <p>要は <code>theme()</code> を使って</p>
-<p><code>legend.position</code> を長さ2の数値ベクトルないし<code>&quot;none&quot;</code> , <code>&quot;left&quot;</code> , <code>&quot;right&quot;</code> , <code>&quot;bottom&quot;</code> , <code>&quot;top&quot;</code> の文字列で与え，</p>
-<p><code>legend.justification</code> を長さ2の数値ベクトルないし<code>&quot;center&quot;</code> の文字列で与えれば</p>
+<p><code>legend.position</code> を長さ2の数値ベクトルないし<code>"none"</code> , <code>"left"</code> , <code>"right"</code> , <code>"bottom"</code> , <code>"top"</code> の文字列で与え，</p>
+<p><code>legend.justification</code> を長さ2の数値ベクトルないし<code>"center"</code> の文字列で与えれば</p>
 <p>いいわけだが，早見表が欲しい．</p>
 </div>
 <div id="try" class="section level1">
@@ -107,7 +107,7 @@ g</code></pre>
 <h2>レジェンド位置を文字列で指定する</h2>
 <div id="legend.position" class="section level3">
 <h3><code>legend.position</code></h3>
-<p>には文字列で <code>&quot;none&quot;</code> , <code>&quot;left&quot;</code> , <code>&quot;right&quot;</code> , <code>&quot;bottom&quot;</code> , <code>&quot;top&quot;</code> を指定できる．</p>
+<p>には文字列で <code>"none"</code> , <code>"left"</code> , <code>"right"</code> , <code>"bottom"</code> , <code>"top"</code> を指定できる．</p>
 <p>各軸の文字列とレジェンドが重ならないようにうまく配置してくれる．</p>
 <p>レジェンドが見えないところへ飛んでいくこともない．</p>
 <pre class="r"><code>c(&quot;none&quot;, &quot;left&quot;, &quot;right&quot;, &quot;bottom&quot;, &quot;top&quot;) %&gt;%
@@ -126,7 +126,7 @@ g</code></pre>
 </div>
 <div id="legend.justification" class="section level3">
 <h3><code>legend.justification</code></h3>
-<p>には文字列で <code>&quot;center&quot;</code> を与えることができ，<code>legend.justification = c(0.5, 0.5)</code> に相当する．</p>
+<p>には文字列で <code>"center"</code> を与えることができ，<code>legend.justification = c(0.5, 0.5)</code> に相当する．</p>
 <pre class="r"><code>wrap_plots(
   g + theme(legend.position = c(1, 1), legend.justification = &quot;center&quot;) + labs(x = &quot;center&quot;, y = &quot;&quot;),
   g + theme(legend.position = c(1, 1), legend.justification = c(0.5, 0.5)) + labs(x = &quot;c(0.5, 0.5)&quot;, y = &quot;&quot;),

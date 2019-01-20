@@ -34,7 +34,7 @@
 
     
 
-    <link rel="stylesheet" href="../../../../css/chroma-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css" rel="stylesheet">
 
   </head>
   <body>
@@ -133,7 +133,7 @@
     <p>大きなデータを用いたggplotのリストや，大量のggplotのリストを高速に描写するための関数 <code>print_gglist</code> を作りました．</p>
 <pre class="r"><code>devtools::install_github(&#39;atusy/ggAtusy&#39;)</code></pre>
 <p>で遊べます．</p>
-<div class="section level1">
+<div id="section" class="section level1">
 <h1>はじめに</h1>
 <p>ggplot2パッケージで作成したプロット (ggplotオブジェクト) はprintされる段になって，プロットに必要な計算を行っている．</p>
 <p>つまり</p>
@@ -146,7 +146,7 @@ g &lt;- ggplot(iris, aes(Sepal.Length)) + geom_histogram()</code></pre>
 <p>このため，ggplotオブジェクトのリストをprintする際には，一つずつ，内部で計算することになる．
 最後の最後のprint (グラフィックデバイスへの表示) は順次やるしかないが，計算部分は事前に並列処理させた方がいいのではないか．</p>
 </div>
-<div class="section level1">
+<div id="section-1" class="section level1">
 <h1>実装</h1>
 <p>先の例のように，コンソールに単に <code>g</code> と入力した時は暗黙に <code>print(g)</code> している．
 <code>print</code> 関数は与えられた変数のクラスに従って最適なメソッドを呼び出している．
@@ -173,7 +173,7 @@ ggplotオブジェクトに適切なメソッドは <code>ggplot2:::print.ggplot
 ##     }
 ##     invisible(x)
 ## }
-## &lt;bytecode: 0x556e3092c380&gt;
+## &lt;bytecode: 0x560a64ad79a8&gt;
 ## &lt;environment: namespace:ggplot2&gt;</code></pre>
 <p>上記の<code>ggplot2:::print.ggplot</code> の実装を参考に，計算部分を並列化し，表示を順次行うようにしたものが以下のコード．</p>
 <pre class="r"><code>#library(pforeach) # install by devtools::install_github(&#39;hoxo-m/pforeach&#39;)
@@ -189,12 +189,12 @@ print_gglist &lt;- function(x, ...) {
       })
 }</code></pre>
 </div>
-<div class="section level1">
+<div id="section-2" class="section level1">
 <h1>テスト</h1>
 <pre class="r"><code>print_gglist(list(g, g))</code></pre>
 <p><img src="../../../../post/2018-10-16-accelerate-list-of-ggplot_files/figure-html/unnamed-chunk-5-1.png" width="192" /><img src="../../../../post/2018-10-16-accelerate-list-of-ggplot_files/figure-html/unnamed-chunk-5-2.png" width="192" /></p>
 </div>
-<div class="section level1">
+<div id="section-3" class="section level1">
 <h1>ベンチマーク</h1>
 <p>先程のgを60個含むリストを出力するために必要な時間を計測する．</p>
 <pre class="r"><code># library(microbenchmark)
@@ -210,7 +210,10 @@ plot(bench)</code></pre>
 <pre><code>## Unit: seconds
 ##           expr      min       lq     mean   median       uq      max neval
 ##  single thread 15.90173 16.58560 18.08624 18.48958 19.16229 21.97050   100
-##   multi thread 12.17476 12.75376 13.86049 13.96567 14.64058 20.18083   100</code></pre>
+##   multi thread 12.17476 12.75376 13.86049 13.96567 14.64058 20.18083   100
+##  cld
+##    b
+##   a</code></pre>
 <p><img src="../../../../post/2018-10-16-accelerate-list-of-ggplot_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <p>思ったほどの威力はないが，多少の高速化はできたようだ．</p>
 </div>
@@ -403,6 +406,15 @@ plot(bench)</code></pre>
 <script async
 src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/languages/r.min.js"></script>
+
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
 
     
 

@@ -10,7 +10,7 @@ draft: yes
 
 
 
-<div id="-return-" class="section level1">
+<div id="return-" class="section level1">
 <h1>メソッドを読んだ行で <code>return</code> される</h1>
 <p><code>UseMethod()</code> した行で <code>return</code> されるが <code>NextMethod()</code> した行では <code>return</code> されない</p>
 <pre class="r"><code>f &lt;- function(x, ...) {
@@ -45,7 +45,7 @@ f.hoge &lt;- function(x, ...) {
 <p><code>NextMethod</code> として、 <code>f.integer</code> が呼び出された。
 しかし返り値は <code>1</code> ではなく <code>NULL</code>。</p>
 </div>
-<div class="section level1">
+<div id="section" class="section level1">
 <h1>引数の既定値は引き継がれない</h1>
 <pre class="r"><code>g &lt;- function(x = 1L) UseMethod(&#39;g&#39;)
 g.default &lt;- function(x) x

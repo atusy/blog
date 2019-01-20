@@ -13,7 +13,7 @@ tags: [Rmd, glue]
 この性質を利用すると，チャンク内にキャプションと図を同居させることが簡単になります．</p>
 <p>更にglueパッケージを使うとほぼ，地のMarkdownを書いているくらいのノリでキャプションを書けるようになります．
 ただし， <code>\</code> を使う場合はエスケープする必要があります．</p>
-<div class="section level1">
+<div id="section" class="section level1">
 <h1>例</h1>
 <div class="figure"><span id="fig:fig"></span>
 <img src="/post/2018-11-11-glue-for-fig-cap-in-rmd_files/figure-html/fig-1.png" alt="**ここからキャプションです．**
@@ -72,7 +72,7 @@ Pandoc Markdown風の改行にはならないみたいです．</p>
 </p>
 </div>
 </div>
-<div class="section level1">
+<div id="section-1" class="section level1">
 <h1>以下ソース</h1>
 <p><code>```{r fig, fig.height = 1, fig.cap = cap}</code></p>
 <pre class="r"><code>cap &lt;- glue::glue(

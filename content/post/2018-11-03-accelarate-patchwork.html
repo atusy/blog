@@ -10,7 +10,7 @@ tags: [ggplot2, patchwork]
 
 
 <p>失敗の記録．</p>
-<div class="section level1">
+<div id="section" class="section level1">
 <h1>目的</h1>
 <p><a href="https://atusy.github.io/blog/2018/10/16/accelerate-list-of-ggplot/">ggplotのリストの表示を高速化する</a>で紹介した通り，
 ggplotオブジェクトはprintされる段になって，プロットに必要な計算を行っているため，大量のggplotを行うならば，計算部分を並列化し，表示を順次行うのが効率的だ．
@@ -45,13 +45,13 @@ g_list &lt;- lapply(N, function(n) g + ggtitle(n))</code></pre>
   })
 }</code></pre>
 </div>
-<div class="section level1">
+<div id="section-1" class="section level1">
 <h1>実験</h1>
 <pre class="r"><code>g_list %&gt;% head %&gt;% pbuild(.inorder = TRUE) %&gt;% wrap_plots</code></pre>
 <p><img src="/post/2018-11-03-accelarate-patchwork_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <p>GOOD!</p>
 </div>
-<div class="section level1">
+<div id="section-2" class="section level1">
 <h1>ベンチマーク</h1>
 <pre class="r"><code>res &lt;- microbenchmark::microbenchmark(
   single = {g_list %&gt;% wrap_plots},

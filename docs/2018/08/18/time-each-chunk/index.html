@@ -34,7 +34,7 @@
 
     
 
-    <link rel="stylesheet" href="../../../../css/chroma-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css" rel="stylesheet">
 
   </head>
   <body>
@@ -134,7 +134,7 @@
 <a href="https://jakevdp.github.io/PythonDataScienceHandbook/01.07-timing-and-profiling.html" class="uri">https://jakevdp.github.io/PythonDataScienceHandbook/01.07-timing-and-profiling.html</a></p>
 <p>これをRmdでもできないかなー？ と思って <code>knit_hooks()</code> を利用してみた。
 <code>knit_hooks()</code> の使い方の詳細は<a href="https://github.com/yihui/knitr-examples/blob/master/045-chunk-hook.md">こちら</a>。</p>
-<div class="section level1">
+<div id="section" class="section level1">
 <h1>実装</h1>
 <p>hook用の関数の引数として <code>before</code> と <code>envir</code> を用意しておく。</p>
 <p><code>before</code> は論理値でhookをchunk実行前に呼び出しているか (<code>before == TRUE</code>)、後に呼び出しているか (<code>before == FALSE</code>) を教えてくれる。</p>
@@ -159,7 +159,7 @@ knit_hooks$set(
   }
 )</code></pre>
 </div>
-<div class="section level1">
+<div id="section-1" class="section level1">
 <h1>テスト</h1>
 <pre class="r"><code>head(iris)</code></pre>
 <pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
@@ -169,7 +169,7 @@ knit_hooks$set(
 ## 4          4.6         3.1          1.5         0.2  setosa
 ## 5          5.0         3.6          1.4         0.2  setosa
 ## 6          5.4         3.9          1.7         0.4  setosa</code></pre>
-<p>0.0580000000000001 sec.</p>
+<p>0.038 sec.</p>
 <p>できた!</p>
 </div>
 <div id="tips" class="section level1">
@@ -177,7 +177,7 @@ knit_hooks$set(
 <p>時間を測りたくない場合はchunk optionで <code>time = FALSE</code>。</p>
 <p>特定のchunkのみを測りたい場合は setup chunkで <code>knitr::opts_chunk$set(time = TRUE)</code> とし、特定のchunkでのみchunk optionに <code>time = TRUE</code> を指定する。</p>
 </div>
-<div class="section level1">
+<div id="section-2" class="section level1">
 <h1>発展させたい</h1>
 <p>hookを利用して、<code>knit</code> 時に (!) チャンクの評価に要した時間を表示させることに成功した。<br />
 しかしこの方法では、RStudioのエディタには経過時間を表示できない。<br />
@@ -381,6 +381,15 @@ knit_hooks$set(
 <script async
 src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/languages/r.min.js"></script>
+
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
 
     
 

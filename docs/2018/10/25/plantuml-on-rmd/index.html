@@ -34,7 +34,7 @@
 
     
 
-    <link rel="stylesheet" href="../../../../css/chroma-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css" rel="stylesheet">
 
   </head>
   <body>
@@ -138,7 +138,7 @@
 色々辛そう．
 もうちょっと簡単にできる方法はないかな，と思ったら <a href="https://github.com/rkrug/plantuml"><code>rkrug/plantuml</code></a> パッケージを見つけたのでメモ．</p>
 <p>pandocにplantumlを扱わせる方法もあるようなので，使い勝手のよいものを選べばいいと思う．</p>
-<div class="section level1">
+<div id="section" class="section level1">
 <h1>導入</h1>
 <p>導入には他パッケージや，PlantUML jar fileのアップデートなどいくつかステップを踏む必要がある．</p>
 <pre class="r"><code>library(devtools) # GitHub上のパッケージをインストールするためのパッケージ
@@ -150,7 +150,7 @@ updatePlantumlJar() # PlantUMLのjarファイルを最新版にする</code></pr
 というかRmdでWord本でも，java環境は必要，図によってgraphvizも必要と言及されていますね．</p>
 <pre class="sh"><code>pacman -S jre10-openjdk graphviz</code></pre>
 </div>
-<div class="section level1">
+<div id="section-1" class="section level1">
 <h1>試す</h1>
 <p><a href="http://plantuml.com/" class="uri">http://plantuml.com/</a> に載っている図を色々試してみた．</p>
 <p>Use Case図，Ditaa図， AsciiMathやJLaTeXMathを使った数式以外は使えるみたいだ．</p>
@@ -400,7 +400,7 @@ WAIT -down-&gt; JunctionAnd
 &quot;))</code></pre>
 <p><img src="../../../../post/2018-10-25-plantuml-on-rmd_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 </div>
-<div class="section level2">
+<div id="section-2" class="section level2">
 <h2>数式……</h2>
 <pre class="r"><code>plot(plantuml(&#39;
 :&lt;math&gt;int_0^1f(x)dx&lt;/math&gt;;
@@ -604,6 +604,15 @@ end note
 <script async
 src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/languages/r.min.js"></script>
+
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
 
     
 

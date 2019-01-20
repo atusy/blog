@@ -34,7 +34,7 @@
 
     
 
-    <link rel="stylesheet" href="../../../../css/chroma-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css" rel="stylesheet">
 
   </head>
   <body>
@@ -134,7 +134,7 @@
 この性質を利用すると，チャンク内にキャプションと図を同居させることが簡単になります．</p>
 <p>更にglueパッケージを使うとほぼ，地のMarkdownを書いているくらいのノリでキャプションを書けるようになります．
 ただし， <code>\</code> を使う場合はエスケープする必要があります．</p>
-<div class="section level1">
+<div id="section" class="section level1">
 <h1>例</h1>
 <div class="figure"><span id="fig:fig"></span>
 <img src="../../../../post/2018-11-11-glue-for-fig-cap-in-rmd_files/figure-html/fig-1.png" alt="**ここからキャプションです．**
@@ -193,7 +193,7 @@ Pandoc Markdown風の改行にはならないみたいです．</p>
 </p>
 </div>
 </div>
-<div class="section level1">
+<div id="section-1" class="section level1">
 <h1>以下ソース</h1>
 <p><code>```{r fig, fig.height = 1, fig.cap = cap}</code></p>
 <pre class="r"><code>cap &lt;- glue::glue(
@@ -436,6 +436,15 @@ authorとか
 <script async
 src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/languages/r.min.js"></script>
+
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
 
     
 

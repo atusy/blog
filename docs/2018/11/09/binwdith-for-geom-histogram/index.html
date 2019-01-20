@@ -34,7 +34,7 @@
 
     
 
-    <link rel="stylesheet" href="../../../../css/chroma-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css" rel="stylesheet">
 
   </head>
   <body>
@@ -163,7 +163,7 @@ ggplot(diamonds, aes(price)) + geom_histogram()</code></pre>
 事前に頻度分布を集計した結果をデータフレームとして <code>ggplot()</code> に与えるというもの。</p>
 <p><a href="https://qiita.com/Atsushi776/items/f71a6f011118031f6e0a" class="uri">https://qiita.com/Atsushi776/items/f71a6f011118031f6e0a</a></p>
 <p><code>facet</code> した変数ごとにbin幅を変える方法の決定版は今でもこれだと思う。</p>
-<p><code>facet</code> した変数ごとにbin幅を変える必要がなければ、@hoxo_m氏から頂いたコメントも有用。
+<p><code>facet</code> した変数ごとにbin幅を変える必要がなければ、<span class="citation">@hoxo_m氏から頂いたコメントも有用</span>。
 こちらでは、<code>stat_bin(breaks = )</code> を利用する。
 ただし、同じデータに二度参照せねばならず、もう一歩といった感がある。</p>
 <pre class="r"><code>ggplot(diamonds, aes(x = price)) + 
@@ -225,9 +225,9 @@ g_St &lt;- g + geom_histogram(binwidth = sturges) + ggtitle(&#39;Sturges&#39;)</
     <h4>See also</h4>
     <ul>
         
-            <li><a href="../../../../2018/11/03/accelarate-patchwork/">patchworkの表示を高速化したかった……</a></li>
-        
             <li><a href="../../../../2018/11/03/tex-in-ggplot2/">ggplot2で$TeX$を利用する</a></li>
+        
+            <li><a href="../../../../2018/11/03/accelarate-patchwork/">patchworkの表示を高速化したかった……</a></li>
         
             <li><a href="../../../../2018/11/02/marginal-patchwork/">ggplot2とpatchworkで周辺分布</a></li>
         
@@ -410,6 +410,15 @@ g_St &lt;- g + geom_histogram(binwidth = sturges) + ggtitle(&#39;Sturges&#39;)</
 <script async
 src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/languages/r.min.js"></script>
+
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
 
     
 

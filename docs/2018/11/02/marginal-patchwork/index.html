@@ -34,7 +34,7 @@
 
     
 
-    <link rel="stylesheet" href="../../../../css/chroma-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css" rel="stylesheet">
 
   </head>
   <body>
@@ -158,7 +158,7 @@ wrap_plots(x + xlimits, plot_spacer(), xy + xlimits, y, nrow = 2)</code></pre>
 <p>の2つ．</p>
 <p>どうも <code>xlim()</code> を使うと，指定した範囲でビン幅を計算し直してしまうっぽい．</p>
 <p>そして，2項演算子と <code>wrap_plots()</code> ではマージンの扱い方が違うようだ．</p>
-<div class="section level1">
+<div id="section" class="section level1">
 <h1>追記</h1>
 <p>よくよくよく，見ると，y軸の周辺分布も軸が揃っていなかった．
 というわけで，最終形は以下のように．
@@ -383,6 +383,15 @@ wrap_plots(
 <script async
 src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/languages/r.min.js"></script>
+
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
 
     
 

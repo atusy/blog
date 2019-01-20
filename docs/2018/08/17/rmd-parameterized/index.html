@@ -34,7 +34,7 @@
 
     
 
-    <link rel="stylesheet" href="../../../../css/chroma-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/github.min.css" rel="stylesheet">
 
   </head>
   <body>
@@ -137,7 +137,7 @@
 <a href="https://bookdown.org/yihui/rmarkdown/params-knit.html" class="uri">https://bookdown.org/yihui/rmarkdown/params-knit.html</a></p>
 <p>リンク先にはパラメータ入力用GUIを用いる方法も紹介されている。</p>
 </div>
-<div class="section level1">
+<div id="section" class="section level1">
 <h1>使い方</h1>
 <p><code>変数名:値</code> という記法で以下のように書け、型の推測もしてくれる。</p>
 <pre class="yaml"><code>---
@@ -154,7 +154,7 @@ params:
 ##  $ c: chr &quot;aaa bbb&quot;</code></pre>
 <p>GOOD!</p>
 </div>
-<div class="section level1">
+<div id="section-1" class="section level1">
 <h1>注意点</h1>
 <p>Rmdでは、例えば記事作成日の自動入力などを行うためYAMLヘッダー中でRコード (インラインコード)を評価させることが可能だ。</p>
 <pre class="r"><code>---
@@ -354,6 +354,15 @@ Scanner error: while scanning for the next token at line 11, column 8 found char
 <script async
 src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/languages/r.min.js"></script>
+
+<script>
+hljs.configure({languages: []});
+hljs.initHighlightingOnLoad();
+</script>
+
 
     
 
