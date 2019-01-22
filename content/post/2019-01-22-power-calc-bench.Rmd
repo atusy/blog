@@ -1,0 +1,331 @@
+---
+title: べき演算のベンチマーク
+author: ~
+date: '2019-01-22'
+slug: power-calc-bench
+categories: [R]
+tags: [bench]
+output:
+  blogdown::html_page:
+    toc: yes
+    pandoc_args: 
+      - --from
+      - markdown+east_asian_line_breaks
+---
+
+べき演算をするには `^` を使うか `*` を使えばいいけれど，
+条件次第ではなんと `*` が勝つらしいことが分かった．
+
+数msecの最適化をするならもっと先にやるべきことがあるだろうけれど，
+`lapply` などで繰り返しべき演算をする時は役立つかもしれない．
+
+  - 底が長いと `*` が勝つ or 勝てる
+      - `*` を90回以上使うと負けることがあるので，
+        何回かかけた結果をキャッシュして再帰的にかけ算するのがコツ
+  - 底が長さ数十の短いベクトルなら `^` が勝つ
+  - `*` では指数がベクトルになるようなべき演算が辛いので，
+    そういう時は `^` の方がいいんじゃないかな？
+
+`bench` パッケージ便利だぞ!
+
+# 確認のための準備
+
+```{r setup}
+# 結果をキャッシュする
+knitr::opts_chunk$set(cache = TRUE)
+
+# ライブラリのロード
+library(pacman)
+p_load(bench, ggbeeswarm, ggplot2, dplyr, purrr)
+p_load_gh("stefano-meschiari/latex2exp", "thomasp85/patchwork")
+
+# べき演算の底の準備
+set.seed(123)
+x <- runif(1e5)
+
+# ggplot の theme を設定
+theme_set(theme_grey(base_size = 14) + theme(axis.title = element_blank()))
+```
+
+# bench::mark
+
+bench::mark は単純にコードの実行時間を測るだけでなく，
+
+  - 比較するコードの結果が一致するか確認する
+  - 指定時間内で可能な限りループを回す
+  - ガベージコレクションを検知し，可視化に反映する
+  
+などといった機能がついててなかなか便利．
+もちろんこれらの機能は随意に on/off できる．
+
+指数が正・負の整数であれば `*` が `^` に勝つようだ．
+
+指数が実数の場合は `*` だけでべき演算できるはずもなく，
+小数点以下の部分を計算するために一度 `^` を使う．
+だから， `^` 一回で済む方が速いのはまああたりまえ．
+
+```{r positive}
+# x は0から1の範囲を取る10,0000個の一様乱数
+benchmarks <- list(
+  "正の整数" = bench::mark(
+     x ^ 10L,
+     x * x * x * x * x * x * x * x * x * x
+  ),
+  "負の正数" = bench::mark(
+     x ^ -10L,
+     1 / (x * x * x * x * x * x * x * x * x * x)
+  ),
+  "実数" = bench::mark(
+     x ^ 10.3,
+     x * x * x * x * x * x * x * x * x * x * (x ^ 0.3)
+  )
+)
+
+benchmarks %>%
+  map(autoplot) %>%
+  imap(~ .x + ggtitle(.y)) %>%
+  wrap_plots(ncol = 1)
+```
+
+# bench::press
+
+`bench::press` 関数を使うと関数の引数を指定した範囲で変えながら `bench::mark` を走らせることができる．
+こいつも `autoplot` できる．
+カンタン・ラクチン!!
+
+```{r benchpress, message = FALSE}
+.power <- function(n) x ^ n
+.prod  <- function(n) Reduce(`*`, rep(list(x), n))
+
+benchpresses <- bench::press(
+  n = seq(5, 100, 5), 
+  bench::mark(
+    `^` = .power(n), `*` = .prod(n), 
+    filter_gc = FALSE, min_iterations = 100L
+  )
+)
+```
+
+```{r plot-benchpress, fig.height = 2}
+ggplot(benchpresses, aes(n, median, colour = expression)) +
+  geom_point() +
+  xlim(0, NA) +
+  ggtitle("経過時間の中央値")
+benchpresses %>%
+  filter(n %in% c(20, 100)) %>%
+  autoplot
+```
+
+40乗以上で `*` が負け出すのは大量のガベージコレクションのせいか？
+
+## 手動ベンチプレス
+
+`rep` とか `Reduce` を使ったせいでガベージコレクションが発生したのかな？ 
+と思ったので，愚直なコーディングで指数を変えながらベンチマークしてみる．
+こういう時 `bench::mark` が結果の同一性を担保してくれるので助かる．
+
+### 100乗: * の負け
+
+結局かけ算の負け!! ガベージコレクションのせいだけではないらしい．
+
+```{r p100}
+list(
+  "正の整数" = bench::mark(
+    "^" = x ^ 100L,
+    "*" = 
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x 
+  ),
+  "負の正数" = bench::mark(
+    "^" = x ^ -100L,
+    "*" = 
+      1 / (
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x
+      )
+  )
+) %>%
+  map(autoplot) %>%
+  imap(~ .x + ggtitle(.y) + xlab(NULL)) %>%
+  wrap_plots(ncol = 1)
+```
+
+### 90乗: * の勝ち
+
+90乗ではかけ算の勝ちのようだ．
+
+```{r p90}
+list(
+  "正の整数" = bench::mark(
+    "^" = x ^ 90L,
+    "*" = 
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x 
+  ),
+  "負の正数" = bench::mark(
+    "^" = x ^ -90L,
+    "*" = 
+      1 / (
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x *
+        x * x * x * x * x * x * x * x * x * x
+      )
+  )
+) %>%
+  map(autoplot) %>%
+  imap(~ .x + ggtitle(.y) + xlab(NULL)) %>%
+  wrap_plots(ncol = 1)
+```
+
+### 1000乗: 工夫すれば * も勝てる
+
+90乗から100乗の間で `*` が `^` に負けるようになるので，
+何度か `*` した結果をキャッシュして再利用すれば `*` の数を減らせて 100乗以上でも
+`^` と勝負できると予想される．
+
+で試してみたら1000乗でもかけ算が勝った．
+
+```{r p1000, fig.height = 2}
+bench::mark(
+  "^" = x ^ 1000L,
+  "*" = {
+    y <-         x * x # 2
+    y <-         y * y # 4
+    y <-   x8 <- y * y # 8
+    y <-         y * y # 16
+    y <-  x32 <- y * y # 32
+    y <-  x64 <- y * y # 64
+    y <- x128 <- y * y # 128
+    y <- x256 <- y * y # 256
+    x256 * x256 * x256 * x128 * x64 * x32 * x8 # 256 * 3 + 128 + 64 + 32 + 8 = 1000
+  }
+) %>%
+  autoplot
+```
+
+
+やったね!!
+
+指数が整数であれば $±2^{90} = ±`r 2 ^ 90`$ 乗くらいまではかけ算で勝てるってことだろうか？
+圧倒的やんけ．
+
+ワンライナー風にしたければこんな狂おしい書き方もある．
+浮動小数点の誤差のことを考えればフツーに `^` した方がよさそうな気もする．
+
+```{r one-line}
+(((((((x * x) -> x2) * x2 -> x4) * x4 -> x8) * x8 -> x16) * x16 -> x32) * x32 -> x64) * x64 -> x128
+all.equal(x2, x ^ 2) # identical は FALSE になる
+```
+
+## ベクトルを長くしてみる @ 90乗: * が勝てる {#long-x}
+
+```{r long-vec, fig.height = 2}
+w <- runif(1e7)
+bench::mark(
+  "^" = w ^ 64L,
+  "*1" =
+      w * w * w * w * w * w * w * w * w * w *
+      w * w * w * w * w * w * w * w * w * w *
+      w * w * w * w * w * w * w * w * w * w *
+      w * w * w * w * w * w * w * w * w * w *
+      w * w * w * w * w * w * w * w * w * w *
+      w * w * w * w * w * w * w * w * w * w *
+      w * w * w * w,
+  "*2" = {
+      y <- w * w # 2
+      y <- y * y # 4
+      y <- y * y # 8
+      y <- y * y # 16
+      y <- y * y # 32
+      y * y
+  },
+  min_iterations = 50L
+) %>%
+  autoplot
+```
+
+愚直にかけ算するとべき演算に負けるけど，工夫すればやっぱり勝てた．
+
+## ベクトルを短かくしてみる @ 90乗: : * が負ける {#long-x}
+
+負けた……!!
+
+```{r short-vec, fig.height = 2}
+w <- runif(1e1)
+bench::mark(
+  "^" = w ^ 64L,
+  "*1" =
+      w * w * w * w * w * w * w * w * w * w *
+      w * w * w * w * w * w * w * w * w * w *
+      w * w * w * w * w * w * w * w * w * w *
+      w * w * w * w * w * w * w * w * w * w *
+      w * w * w * w * w * w * w * w * w * w *
+      w * w * w * w * w * w * w * w * w * w *
+      w * w * w * w,
+  "*2" = {
+      y <- w * w # 2
+      y <- y * y # 4
+      y <- y * y # 8
+      y <- y * y # 16
+      y <- y * y # 32
+      y * y
+  },
+  min_iterations = 50L
+) %>%
+  autoplot
+```
+
+## 底をデカくしてみる @ 90乗: * が勝つ {#large-x}
+
+底の大小によらず `*` が勝つらしい．
+
+```{r large-base, fig.height = 2}
+z <- runif(1e5, 1e2, 1e4)
+bench::mark(
+  "^" = z ^ 90L,
+  "*" = 
+      z * z * z * z * z * z * z * z * z * z * 
+      z * z * z * z * z * z * z * z * z * z * 
+      z * z * z * z * z * z * z * z * z * z * 
+      z * z * z * z * z * z * z * z * z * z * 
+      z * z * z * z * z * z * z * z * z * z * 
+      z * z * z * z * z * z * z * z * z * z * 
+      z * z * z * z * z * z * z * z * z * z * 
+      z * z * z * z * z * z * z * z * z * z * 
+      z * z * z * z * z * z * z * z * z * z
+) %>%
+  autoplot
+```
+
+# Enjoy
+
+ガベージコレクションが発生するわけでもなく，ベンチ結果が2峰性になるのはなんなんやろなー．
