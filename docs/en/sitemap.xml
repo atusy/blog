@@ -3,175 +3,175 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/en/2018/11/02/marginal-patchwork/</loc>
+    <loc>https://atusy.github.io/en/2018/11/02/marginal-patchwork/</loc>
     <lastmod>2018-11-02T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="/2018/11/02/marginal-patchwork/"
+                href="https://atusy.github.io/2018/11/02/marginal-patchwork/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="/en/2018/11/02/marginal-patchwork/"
+                href="https://atusy.github.io/en/2018/11/02/marginal-patchwork/"
                 />
   </url>
   
   <url>
-    <loc>/en/2018/08/18/time-each-chunk/</loc>
+    <loc>https://atusy.github.io/en/2018/08/18/time-each-chunk/</loc>
     <lastmod>2018-08-18T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="/2018/08/18/time-each-chunk/"
+                href="https://atusy.github.io/2018/08/18/time-each-chunk/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="/en/2018/08/18/time-each-chunk/"
+                href="https://atusy.github.io/en/2018/08/18/time-each-chunk/"
                 />
   </url>
   
   <url>
-    <loc>/en/</loc>
+    <loc>https://atusy.github.io/en/</loc>
     <lastmod>2018-11-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="/"
+                href="https://atusy.github.io/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="/en/"
+                href="https://atusy.github.io/en/"
                 />
   </url>
   
   <url>
-    <loc>/en/categories/</loc>
+    <loc>https://atusy.github.io/en/categories/</loc>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="/categories/"
+                href="https://atusy.github.io/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="/en/categories/"
+                href="https://atusy.github.io/en/categories/"
                 />
   </url>
   
   <url>
-    <loc>/en/tags/ggplot2/</loc>
+    <loc>https://atusy.github.io/en/tags/ggplot2/</loc>
     <lastmod>2018-11-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="/tags/ggplot2/"
+                href="https://atusy.github.io/tags/ggplot2/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="/en/tags/ggplot2/"
+                href="https://atusy.github.io/en/tags/ggplot2/"
                 />
   </url>
   
   <url>
-    <loc>/en/tags/knitr/</loc>
-    <lastmod>2018-08-18T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-    <xhtml:link
-                rel="alternate"
-                hreflang="ja"
-                href="/tags/knitr/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="en"
-                href="/en/tags/knitr/"
-                />
-  </url>
-  
-  <url>
-    <loc>/en/tags/patchwork/</loc>
-    <lastmod>2018-11-02T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-    <xhtml:link
-                rel="alternate"
-                hreflang="ja"
-                href="/tags/patchwork/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="en"
-                href="/en/tags/patchwork/"
-                />
-  </url>
-  
-  <url>
-    <loc>/en/post/</loc>
-    <lastmod>2018-11-02T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-    <xhtml:link
-                rel="alternate"
-                hreflang="ja"
-                href="/post/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="en"
-                href="/en/post/"
-                />
-  </url>
-  
-  <url>
-    <loc>/en/categories/r/</loc>
-    <lastmod>2018-11-02T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-    <xhtml:link
-                rel="alternate"
-                hreflang="ja"
-                href="/categories/r/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="en"
-                href="/en/categories/r/"
-                />
-  </url>
-  
-  <url>
-    <loc>/en/tags/rmd/</loc>
+    <loc>https://atusy.github.io/en/tags/knitr/</loc>
     <lastmod>2018-08-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="/tags/rmd/"
+                href="https://atusy.github.io/tags/knitr/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="/en/tags/rmd/"
+                href="https://atusy.github.io/en/tags/knitr/"
                 />
   </url>
   
   <url>
-    <loc>/en/tags/</loc>
+    <loc>https://atusy.github.io/en/tags/patchwork/</loc>
     <lastmod>2018-11-02T00:00:00+00:00</lastmod>
     <priority>0</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="/tags/"
+                href="https://atusy.github.io/tags/patchwork/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="/en/tags/"
+                href="https://atusy.github.io/en/tags/patchwork/"
+                />
+  </url>
+  
+  <url>
+    <loc>https://atusy.github.io/en/post/</loc>
+    <lastmod>2018-11-02T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="ja"
+                href="https://atusy.github.io/post/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://atusy.github.io/en/post/"
+                />
+  </url>
+  
+  <url>
+    <loc>https://atusy.github.io/en/categories/r/</loc>
+    <lastmod>2018-11-02T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="ja"
+                href="https://atusy.github.io/categories/r/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://atusy.github.io/en/categories/r/"
+                />
+  </url>
+  
+  <url>
+    <loc>https://atusy.github.io/en/tags/rmd/</loc>
+    <lastmod>2018-08-18T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="ja"
+                href="https://atusy.github.io/tags/rmd/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://atusy.github.io/en/tags/rmd/"
+                />
+  </url>
+  
+  <url>
+    <loc>https://atusy.github.io/en/tags/</loc>
+    <lastmod>2018-11-02T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="ja"
+                href="https://atusy.github.io/tags/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://atusy.github.io/en/tags/"
                 />
   </url>
   

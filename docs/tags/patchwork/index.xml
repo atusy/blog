@@ -2,30 +2,30 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Patchwork on Atusy&#39;s blog</title>
-    <link>/tags/patchwork/</link>
+    <link>https://atusy.github.io/tags/patchwork/</link>
     <description>Recent content in Patchwork on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Sat, 03 Nov 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/patchwork/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://atusy.github.io/tags/patchwork/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>patchworkの表示を高速化したかった……</title>
-      <link>/2018/11/03/accelarate-patchwork/</link>
+      <link>https://atusy.github.io/2018/11/03/accelarate-patchwork/</link>
       <pubDate>Sat, 03 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/11/03/accelarate-patchwork/</guid>
+      <guid>https://atusy.github.io/2018/11/03/accelarate-patchwork/</guid>
       <description>失敗の記録． 目的 ggplotのリストの表示を高速化するで紹介した通り， ggplotオブジェクトはprintされる段になって，プロットに必要な</description>
     </item>
     
     <item>
       <title>ggplot2とpatchworkで周辺分布</title>
-      <link>/2018/11/02/marginal-patchwork/</link>
+      <link>https://atusy.github.io/2018/11/02/marginal-patchwork/</link>
       <pubDate>Fri, 02 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/11/02/marginal-patchwork/</guid>
+      <guid>https://atusy.github.io/2018/11/02/marginal-patchwork/</guid>
       <description>patchworkパッケージを使えばあんな図やこんな図が簡単に，と思い馳せた人も多いのではなかろうか． 参考: TokyoR 73での発表スライド 中でも周辺</description>
     </item>
     

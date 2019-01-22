@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Knitr on Atusy&#39;s blog</title>
-    <link>/en/tags/knitr/</link>
+    <link>https://atusy.github.io/en/tags/knitr/</link>
     <description>Recent content in Knitr on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Sat, 18 Aug 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/en/tags/knitr/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://atusy.github.io/en/tags/knitr/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Benchmark chunks in Rmd</title>
-      <link>/en/2018/08/18/time-each-chunk/</link>
+      <link>https://atusy.github.io/en/2018/08/18/time-each-chunk/</link>
       <pubDate>Sat, 18 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/en/2018/08/18/time-each-chunk/</guid>
+      <guid>https://atusy.github.io/en/2018/08/18/time-each-chunk/</guid>
       <description>Implementation Test Question Tip   In order to benchmark chunks, I implemented a hook for Rmd’s chunk which works as if Jupyter Notebook’s %%timeit command.
 Implementation A simple benchmark is done by saving proc.time() before running code and subtract the value from new proc.time() after code runs.
 t &amp;lt;- proc.time()[&amp;#39;elapsed&amp;#39;] invisible(runif(100)) proc.time()[&amp;#39;elapsed&amp;#39;] - t ## elapsed ## 0.006 However, hooks are functions, and bodies of functions are evaluated in different environments every time.</description>

@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Force on Atusy&#39;s blog</title>
-    <link>/tags/force/</link>
+    <link>https://atusy.github.io/tags/force/</link>
     <description>Recent content in Force on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Fri, 18 Jan 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/force/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://atusy.github.io/tags/force/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>一度に複数の変数を force する</title>
-      <link>/2019/01/18/force-many-vars-at-once/</link>
+      <link>https://atusy.github.io/2019/01/18/force-many-vars-at-once/</link>
       <pubDate>Fri, 18 Jan 2019 00:00:00 +0000</pubDate>
       
-      <guid>/2019/01/18/force-many-vars-at-once/</guid>
+      <guid>https://atusy.github.io/2019/01/18/force-many-vars-at-once/</guid>
       <description>結論 force(list(a, b, c, ...)) とすればいい． f &amp;lt;- function(a, b, c, ...) { force(list(a, b, c, ...)) # 先に評価したいものから list に入れる 10 } f() #&amp;gt; Error in force(list(a, b, c, ...)) : argument &amp;#34;a&amp;#34; is missing, with no default f(stop(&amp;#34;a でエラー&amp;#34;)</description>
     </item>
     

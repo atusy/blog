@@ -2,30 +2,30 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Furrr on Atusy&#39;s blog</title>
-    <link>/tags/furrr/</link>
+    <link>https://atusy.github.io/tags/furrr/</link>
     <description>Recent content in Furrr on Atusy&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Thu, 06 Dec 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/furrr/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://atusy.github.io/tags/furrr/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>furrr パッケージで R で簡単並列処理</title>
-      <link>/2018/12/06/furrr/</link>
+      <link>https://atusy.github.io/2018/12/06/furrr/</link>
       <pubDate>Thu, 06 Dec 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/12/06/furrr/</guid>
+      <guid>https://atusy.github.io/2018/12/06/furrr/</guid>
       <description>インストール 読み込み 使い方 シングルスレッド (strategy = sequential) マルチスレッド (strategy = multiprocess) コア数を変更 乱数を固定 プログレスバーを表示 出力の型 furrr パッケージを使うと purrr</description>
     </item>
     
     <item>
       <title>furrr パッケージで ggplot のリストの表示を高速化する</title>
-      <link>/2018/12/05/accelerate-list-of-ggplot-with-furrr/</link>
+      <link>https://atusy.github.io/2018/12/05/accelerate-list-of-ggplot-with-furrr/</link>
       <pubDate>Wed, 05 Dec 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/12/05/accelerate-list-of-ggplot-with-furrr/</guid>
+      <guid>https://atusy.github.io/2018/12/05/accelerate-list-of-ggplot-with-furrr/</guid>
       <description>はじめに 実装とテスト ベンチマーク 感想 はじめに 前に hoxo-m/pforeach パッケージを利用して， ggplot のリストを並列処理し，描写の高速化を行いました． しかし， hoxo-m/pforeach パッケー</description>
     </item>
     

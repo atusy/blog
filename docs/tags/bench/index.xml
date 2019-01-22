@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Bench on Atusy&#39;s blog</title>
+    <link>https://atusy.github.io/tags/bench/</link>
+    <description>Recent content in Bench on Atusy&#39;s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja-jp</language>
+    <lastBuildDate>Tue, 22 Jan 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://atusy.github.io/tags/bench/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>べき演算のベンチマーク</title>
+      <link>https://atusy.github.io/2019/01/22/power-calc-bench/</link>
+      <pubDate>Tue, 22 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://atusy.github.io/2019/01/22/power-calc-bench/</guid>
+      <description>確認のための準備 bench::mark bench::press 手動ベンチプレス 100乗: * の負け 90乗: * の勝ち 1000乗: 工夫すれば * も勝てる ベクトルを長くしてみる @ 90乗: * が勝</description>
+    </item>
+    
+  </channel>
+</rss>
