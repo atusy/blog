@@ -1,6 +1,6 @@
-baseurl = "https://atusy.github.io/"
+baseurl = "https://atusy-blog.netlify.com/"
 relativeurls = true
-publishDir = "docs"
+publishDir = "netlify"
 hasCJKLanguage = true
 languageCode = "ja-jp"
 title = "Atusy's blog"
