@@ -1,0 +1,13 @@
+---
+title: try-rmd-on-netlify
+author: ~
+date: '2019-01-23'
+slug: try-rmd-on-netlify
+categories: []
+tags: []
+---
+
+```{r}
+plot(iris)
+```
+
