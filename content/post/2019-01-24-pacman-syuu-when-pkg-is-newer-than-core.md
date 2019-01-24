@@ -7,9 +7,9 @@ categories: [Archlinux]
 tags: [pacman, manjaro]
 ---
 
-`pacman -Syu`{.sh} でアップグレードした際に，`Warnning: newer than the core`といった警告が出ることがあります．
+`pacman -Syu` でアップグレードした際に，`Warnning: newer than the core`といった警告が出ることがあります．
 
-そんな時は `pacman -Syuu`{.sh} して新しすぎるパッケージをダウングレードしましょう．
+そんな時は `pacman -Syuu` して新しすぎるパッケージをダウングレードしましょう．
 
 放置するとパッケージの依存関係が壊れて，最悪の場合はブートしなくなります．
 
@@ -20,7 +20,7 @@ Manjaro linux に限った話ではないと思います．
 1. ブートしなくなったディストロと同じディストロをUSBメモリなどから起動
 1. ブートしなくなったディストロのインストールされたディスクをマウント
     - 例えば `/mnt` に
-1. `pacman -Syuu --root /mnt/`{.sh}
+1. `pacman -Syuu --root /mnt/`
 1. リブート
 
 参考: https://bbs.archlinux.org/viewtopic.php?pid=1827243#p1827243
