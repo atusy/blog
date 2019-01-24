@@ -44,8 +44,11 @@ tags: [pacman, manjaro]
           - 更に [こちら](https://forum.manjaro.org/t/stable-update-2019-01-23-kernels-mesa-browsers-nvidia-deepin-virtualbox/72986) に案内される
               - "newer than the core" と表示されるパッケージをダウングレードせよ
               - そういえばそんなパッケージが複数あったけど，起動しないのにどうやってダウングレードするのよ……．
-      - [\[solved\]after upgrade  system doesn't boot anymore; libidn2.so.0 is missing](https://bbs.archlinux.org/viewtopic.php?pid=1827243#p1827243)
-              - [先述の対策](#ブートしなくなった場合の対策)っぽい答えが載ってた．\
-              > I created and booted an actual ArchLive USB. Then I mounted my disk to /mnt/ and did the following similar to https://wiki.archlinux.org/index.php/Pacman#Pacman_crashes_during_an_upgrade :
-              > `pacman -S pacman libpsl libidn2 --root /mnt/`{.sh}
+        - [\[solved\]after upgrade  system doesn't boot anymore; libidn2.so.0 is missing](https://bbs.archlinux.org/viewtopic.php?pid=1827243#p1827243)
+            - [先述の対策](#ブートしなくなった場合の対策)っぽい答えが載ってた．\
+            > I created and booted an actual ArchLive USB. Then I mounted my disk to /mnt/ and did the following similar to https://wiki.archlinux.org/index.php/Pacman#Pacman_crashes_during_an_upgrade :
+              
+                ```{.sh}
+                pacman -S pacman libpsl libidn2 --root /mnt/
+                ```
 - [ググった結果を合体させた](#ブートしなくなった場合の対策)
