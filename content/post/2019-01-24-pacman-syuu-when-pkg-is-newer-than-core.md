@@ -1,5 +1,5 @@
 ---
-title: 'Warnning: newer than the core を放置せずに pacman -Syuu しとこう'
+title: 'Warnning: newer than the core を放置せずに pacman -Syuu しとこう (Manjaro linux)'
 author: ~
 date: '2019-01-24'
 slug: pacman-syuu-when-pkg-is-newer-than-core
@@ -12,6 +12,8 @@ tags: [pacman, manjaro]
 そんな時は `pacman -Syuu`{.sh} して新しすぎるパッケージをダウングレードしましょう．
 
 放置するとパッケージの依存関係が壊れて，最悪の場合はブートしなくなります．
+
+Manjaro linux に限った話ではないと思います．
 
 # ブートしなくなった場合の対策
 
