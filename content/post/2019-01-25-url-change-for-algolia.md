@@ -6,6 +6,7 @@ slug: url-change-for-algolia
 categories: [R]
 tags: [pkgdown, algolia]
 description: 'Test description'
+content: 'Test description'
 ---
 
 docsearch を利用すると，pkgdown で作ったページの全文検索機能を簡単に設定できる (https://pkgdown.r-lib.org/articles/pkgdown.html#search)．
