@@ -1,5 +1,5 @@
 ---
-title: ドメインを引っ越したら algolia に設定変更を PR しよう
+title: pkgdown で作った Webサイトを引越ししたら algolia/docsearch-configs に設定変更を PR しよう
 author: ~
 date: '2019-01-25'
 slug: url-change-for-algolia
@@ -7,7 +7,7 @@ categories: [R]
 tags: [pkgdown, algolia]
 ---
 
-algolia を利用すると，pkgdown で作ったページの全文検索機能を簡単に設定できる．
+docsearch を利用すると，pkgdown で作ったページの全文検索機能を簡単に設定できる (https://pkgdown.r-lib.org/articles/pkgdown.html#search)．
 
 先日 pkgdown サイトの URL を qntmap.atusy.net に変更したので，algolia も変えなきゃと思って改めて新規申し込みしてしまった．
 
