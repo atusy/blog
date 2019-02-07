@@ -10,10 +10,10 @@ tags: [remotes]
 # TL;DR
 
 GitHub上の R パッケージのインストールは以下のようにコマンド一発でできる．
-公式は詳解していないが，ブランチや PR の指定や `force = TRUE` による強制インストールなどいろいろできる．
+ブランチの指定や `force = TRUE` による強制インストールなどいろいろできる．
 
 - `source("https://install-github.me/username/repo[/subdir][@ref|#pull]")`
-    - `reomtes::install_github()` の機能限定版で，第一引数 `repo` のみを使え，指定できるパッケージも1種のみ．
+    - 1つのパッケージのみインストールする時用．
 - `source("https://raw.githubusercontent.com/r-lib/remotes/master/install-github.R")$value(...)`
     - `...` には `rmeotes::instlal_github()` が受け取る引数を指定．
     - 複数のパッケージも指定可能．
@@ -75,6 +75,8 @@ source("https://raw.githubusercontent.com/r-lib/remotes/master/install-github.R"
     - 特定のプルリクからインストール
         - `r-lib/reomtes#266`
 1. `dependencies = TRUE` により依存パッケージを全てインストール
-1. `upgrade = never` 
+1. `upgrade = never` で既存パッケージのアップグレードを行わない
 
+など．
 
+https://install-github.me 経由でのインストールでは1番の機能しか利用できない．
