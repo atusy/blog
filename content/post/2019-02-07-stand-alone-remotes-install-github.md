@@ -80,3 +80,5 @@ source("https://raw.githubusercontent.com/r-lib/remotes/master/install-github.R"
 など．
 
 https://install-github.me 経由でのインストールでは1番の機能しか利用できない．
+
+# Enjoy!
