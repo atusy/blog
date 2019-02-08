@@ -21,11 +21,11 @@
 
 .blog-post h3 {
   margin: 1em 0em .3em;
-
+}
 
 /* Font Awesome hatena bookmark */
 .fa-hatena:before {
-    content: "B!";
-    font-family: Verdana;
-    font-weight: bold
+  content: "B!";
+  font-family: Verdana;
+  font-weight: bold;
 }

@@ -1,10 +1,10 @@
 ---
-title: サイドバーにシェアボタンを追加
+title: hugo_bootstrap のサイドバーにシェアボタンを追加
 author: ~
 date: '2019-02-08'
 slug: sns-buttons
 categories: [Hugo]
-tags: [SNS]
+tags: [SNS, hugo_bootstrap]
 ---
 
 やっぱり Share ボタンは欲しいよねということで雑に実装．
@@ -47,19 +47,19 @@ tags: [SNS]
     <section class="section sns_parent">
       <div class="container sns_section">
           <span class="sns_button twitter">
-            <a href="http://twitter.com/intent/tweet?url={{ .Permalink }}&text={{ .Title }}" target="_blank" title="Tweet"><i class="fab fa-twitter"></i></a>
+            <a href="http://twitter.com/intent/tweet?url={{ .Permalink }}&text={{ .Title }}" target="_blank" title="Tweet"><i class="fab fa-twitter fa-2x"></i></a>
           </span>
           <span class="sns_button hatena">
-            <a href="http://b.hatena.ne.jp/add?mode=confirm&url={{ .Permalink }}&title={{ .Title }}" target="_blank" title="hatena"><i class="fa fa-hatena"></i></i></a>
+            <a href="http://b.hatena.ne.jp/add?mode=confirm&url={{ .Permalink }}&title={{ .Title }}" target="_blank" title="hatena"><i class="fa fa-hatena fa-2x"></i></i></a>
           </span>
           <span class="sns_button facebook">
-            <a href="http://www.facebook.com/sharer.php?u={{ .Permalink }}&t={{ .Title }}" target="_blank" title="Facebook"><i class="fab fa-facebook"></i></a>
+            <a href="http://www.facebook.com/sharer.php?u={{ .Permalink }}&t={{ .Title }}" target="_blank" title="Facebook"><i class="fab fa-facebook fa-2x"></i></a>
           </span>
           <span class="sns_button google">
-            <a href="https://plus.google.com/share?url={{ .Permalink }}" target="_blank" title="google+"><i class="fab fa-google-plus"></i></a>
+            <a href="https://plus.google.com/share?url={{ .Permalink }}" target="_blank" title="google+"><i class="fab fa-google-plus fa-2x"></i></a>
           </span>
           <span class="sns_button pocket">
-            <a href="http://getpocket.com/edit?url={{ .Permalink }}&title={{ .Title }}" target="_blank" title="pocket"><i class="fab fa-get-pocket"></i></a>
+            <a href="http://getpocket.com/edit?url={{ .Permalink }}&title={{ .Title }}" target="_blank" title="pocket"><i class="fab fa-get-pocket fa-2x"></i></a>
           </span>
       </div>
     </section>
