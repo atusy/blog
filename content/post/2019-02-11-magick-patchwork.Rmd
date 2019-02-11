@@ -1,0 +1,54 @@
+---
+title: magick + patchwork + purrr で画像を並べる
+author: ~
+date: '2019-02-11'
+slug: magick-patchwork
+categories: [R]
+tags: [magick, ggplot2, patchwork]
+---
+
+Rmd で画像を並べる
+
+```{r setup}
+library(pacman)
+p_load(ggplot2, magick)
+p_load_gh("thomasp85/patchwork")
+```
+
+
+```{r}
+system.file(package="magick", "images") %>%
+  dir(full.names = TRUE) %>%
+  purrr::map(magick::image_read) %>%
+  purrr::map(magick::image_ggplot) %>%
+  patchwork::wrap_plots() +
+  patchwork::plot_annotation(tag_levels = "a")
+```
+
+
+```{r}
+system.file(package="magick", "images") %>%
+  dir(full.names = TRUE) %>%
+  purrr::map(magick::image_read) %>%
+  purrr::map(magick::image_raster) %>%
+  purrr::map2(
+    letters[seq_along(.)],
+    ~ mutate(.x, tag = .y)
+  ) %>%
+  map(ggplot, aes(x, y, fill = col)) %>%
+  map(`+`, list(
+    geom_raster(),
+    coord_fixed(expand = FALSE),
+    scale_y_reverse(),
+    scale_fill_identity(),
+    theme_void(),
+    theme(
+      strip.text.x = element_text(hjust = 0, size = 12),
+      plot.margin = margin(10,0,0,0, unit = "pt")
+    ),
+    facet_wrap(~ tag)
+  )) %>%
+  patchwork::wrap_plots() 
+```
+
+
