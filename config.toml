@@ -1,4 +1,4 @@
-baseurl = "https://atusy-blog.netlify.com/"
+baseurl = "https://blog.atusy.net/"
 relativeurls = true
 publishDir = "netlify"
 hasCJKLanguage = true
