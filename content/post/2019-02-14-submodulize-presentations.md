@@ -7,11 +7,11 @@ categories: [git]
 tags: [git-submodule]
 ---
 
-私はプレゼン資料を [atusy/presentation](!https://github.com/atusy/presentation) に纏めて公開している．
+私はプレゼン資料を [atusy/presentation](https://github.com/atusy/presentation) に纏めて公開している．
 
 プレゼンの機会なんて無制限にあるので色々面倒が生じる気がしてきた．
 
-## 資料ごとに git log が分かれていないのはジャマくさい
+## 資料ごとに git log を分けたい
 
 submodule ならできる
 
@@ -23,7 +23,18 @@ submodule ならできる
 git submodule deinit [name]
 ```
 
-## 特定のプレゼンだけ集めたレポジトリを作りたくなるかも
+## あの時の資料を参照したい
+
+submodule の中で submodule 化しよう．
+
+レポジトリの外を参照せずに済む．
+また，参照したい資料のレポジトリの任意時点の commit を submodule にできる．
+
+おかげでリンク切れなどの自己の心配が減る……はず．
+
+## 特定の資料を集めたレポジトリを作りたくなるかも
+
+新しいレポジトリに各資料のレポジトリを submodule として登録するだけ
 
 ```{sh}
 mkdir hoge
