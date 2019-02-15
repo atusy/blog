@@ -1,5 +1,5 @@
 ---
-title: プレゼン資料のレポジトリはサブモジュールを纏めたものにしておくといいかも？
+title: git でプレゼン資料を纏めるなら各資料は submodule 化しとくとよさげ
 author: ~
 date: '2019-02-14'
 slug: submodulize-presentations
@@ -19,19 +19,19 @@ submodule ならできる
 
 ディスク容量節約
 
-```
+```{sh}
 git submodule deinit [name]
 ```
 
 ## 特定のプレゼンだけ集めたレポジトリを作りたくなるかも
 
-```
+```{sh}
 mkdir hoge
 cd hoge
 hub create atusy/hoge
-git submodule add atusy/a1
-git submodule add atusy/a2
-git submodule add atusy/a3
+git submodule add git@github.com:atusy/a1
+git submodule add git@github.com:atusy/a2
+git submodule add git@github.com:atusy/a3
 git add .
 git commit -m "A collection of presentations"
 git push origin master
