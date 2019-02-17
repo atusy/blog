@@ -1,0 +1,2 @@
+# Redirect default Netlify subdomain to primary domain
+https://atusy-blog.netlify.com/* https://blog.atusy.net/:splat 301!
