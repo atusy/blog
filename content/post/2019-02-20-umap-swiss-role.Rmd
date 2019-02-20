@@ -1,0 +1,68 @@
+---
+title: スイスロールを UMAP してみる
+author: ~
+date: '2019-02-20'
+slug: umap-swiss-role
+categories: []
+tags: []
+---
+
+
+```{r setup0, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r setup}
+pacman::p_load(ggplot2, plotly, umap)
+```
+
+
+```{r swissrole, echo = FALSE}
+N=1e4
+p = sqrt(2 + 2 * seq(-1, 1 - 2/N, 2/N))
+d = data.frame(
+  x = p * cos(2 * pi * p * 2), 
+  y = 2 * runif(N, -1, 1), 
+  z = p * sin(2 * pi * p * 2),
+  color = seq(N) %/% 50
+)
+
+plotly::plot_ly(
+  d, x = ~ x, y = ~ y, z = ~ z, color = ~ color, 
+  type = "scatter3d", mode = "markers",
+  marker = list(symbol = 'circle', sizemode = 'diameter', size = 2)
+)
+```
+
+```{r siwssrole-echo, ref.label = "swissrole", echo = TRUE, eval = FALSE}
+
+```
+
+
+```{r}
+res <- umap::umap(d[-4])
+res$layout %>%
+  as.data.frame %>%
+  setNames(c("umap_x", "umap_y")) %>%
+  cbind(d) %>%
+  ggplot(aes(umap_x, umap_y, color = color)) +
+  geom_point() +
+  scale_color_viridis_c()
+```
+
+3次元 -> 3次元にしてもあんまり意味はないけれど，やってみるとスイスロールがちょっとほどけた感じになる．
+
+```{r}
+res <- umap::umap(d[-4], n_components = 3)
+res$layout %>%
+  as.data.frame %>%
+  setNames(c("umap_x", "umap_y", "umap_z")) %>%
+  cbind(d) %>%
+  plotly::plot_ly(
+  x = ~ umap_x, y = ~ umap_y, z = ~ umap_z, color = ~ color, 
+  type = "scatter3d", mode = "markers",
+  marker = list(symbol = 'circle', sizemode = 'diameter', size = 2)
+)
+```
+
