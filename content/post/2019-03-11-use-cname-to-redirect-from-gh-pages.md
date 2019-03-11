@@ -21,7 +21,7 @@ blog.atusy.net
 
 ドメインを購入したのと Netlify に以降したのを理由に， atusy.github.io/blog を blog.atusy.net に転送したくなった．
 
-「[Github pages で 別サイトへリダイレクトさせる](https://qiita.com/okhiroyuki/items/a7bc638d9f50de977bd1)」を読んで，できるのは分かったけど gekyllとか用意するの面倒だなと思った．そこで，同記事が参考に公開しているレポジトリ ([okhiroyuki/okhiroyuki.github.io](https://github.com/okhiroyuki/okhiroyuki.github.io)) をフォークして必要なところだけ弄ればいいじゃんと．
+セキュリティ上の理由から `.htaccess` とか `.conf` は使えないけど， Jekyll でごにょごにょしてくれよなという[公式声明](https://help.github.com/en/articles/redirects-on-github-pages)や，「[Github pages で 別サイトへリダイレクトさせる](https://qiita.com/okhiroyuki/items/a7bc638d9f50de977bd1)」を読んで，できるのは分かったけど Jekyllとか用意するの面倒だなと思った．そこで，同記事が参考に公開しているレポジトリ ([okhiroyuki/okhiroyuki.github.io](https://github.com/okhiroyuki/okhiroyuki.github.io)) をフォークして必要なところだけ弄ればいいじゃんと．
 
 気付いたら CNAME しか残ってませんでした （笑）
 
@@ -45,8 +45,9 @@ GitHub Pages は公開ディレクトリとして
 
 を選べるので，`gh-pages` ブランチを Orphan ブランチとして作成し，そこに CNAME を置くことにした．
 
-```
+```{.sh}
 git checkout --orphan gh-pages
+rm * -R
 echo "blog.atusy.net" >> CNAME
 git add CNAME
 git commit -m "CNAME for 301 redirect"
@@ -93,3 +94,4 @@ curl -I http://atusy.github.io/blog
 # X-Fastly-Request-ID: 49f74f393efb559b7f2c521efc59ec142cf4029e
 ```
 
+# Enjoy!!
