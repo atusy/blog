@@ -60,7 +60,7 @@ ggplotly( # ggplotに戻すためにはコメントアウト
 `ggplot_add` を利用し， `plot + gginteractive()` すればいいようにします
 (参考: [ggplot2の拡張パッケージをつくるのにggplot_add()が便利そう](https://notchained.hatenablog.com/entry/2017/11/07/103007))．
 
-まず， `"ggplotly"` クラスを与えた `plotly::ggplotly` 関数を返す `gginteractive` 関数を定義する．
+まず， `"gginteractive"` クラスを与えた `plotly::ggplotly` 関数を返す `gginteractive` 関数を定義する．
 
 ```{r gginteractive-prototype}
 gginteractive <- function() structure(plotly::ggplotly, class = c("gginteractive", "function"))
