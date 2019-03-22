@@ -1,0 +1,191 @@
+---
+title: ggplot2 をもっとカンタンに plotly 化する
+author: ~
+date: '2019-03-22'
+slug: ggplotly-asif-layer
+categories: [R]
+tags: [ggplot2, plotly]
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.show = "hold")
+library(ggplot2)
+library(plotly)
+gginteractive <- function(interactive = TRUE, ...) {
+  structure(
+    if(interactive) function(p, ...) plotly::ggplotly(p, ...) else identity,
+    class = c("gginteractive", "function")
+  )
+}
+ggplot_add.gginteractive <- function (object, plot, object_name) {
+  object(plot)
+}
+```
+
+
+# TL; DR
+
+ggplot を対話的にしたい時， `plotly::ggplotly()` に食わせるのが面倒だから， `+ ggintearctive()` すればいいようにした ([改善した実装](#kaizen))．
+
+```{r plot-tldr, fig.width = 3, fig.height = 2}
+qplot(wt, mpg, data = mtcars) + ggtitle("マウスオーバーしてみてね") + gginteractive()
+```
+
+
+# はじめに
+
+`plotly::ggplotly()` を使うと，カンタンに `ggplot2` を使ったプロットを対話的にできる．
+ズームしたり，点の座標を読めるようになって便利だ．
+
+ただし，利用には同関数に `ggplot` オブジェクトを与える必要がある．
+このため一度 `plotly` で必要な軸の範囲を調べてから `ggplot` として最終出力したいなんて時に不便だ．
+例えば以下の例では 3行目の `ggplotly(` と6行目の `)` を最終出力時にコメントアウトしなければならない．
+
+これは面倒なので， `ggplot` らしく最後にナニか足せば `plotly` 化できるようにしてみせよう．
+
+```{r plot-intro, fig.width = 3, fig.height = 2}
+library(ggplot2)
+library(plotly)
+ggplotly( # ggplotに戻すためにはコメントアウト
+  ggplot(mtcars, aes(wt, mpg)) + 
+    geom_point()
+) # ggplotに戻すためにはコメントアウト
+```
+
+
+# 実装
+
+## プロトタイプ
+
+`ggplot_add` を利用し， `plot + gginteractive()` すればいいようにします
+(参考: [ggplot2の拡張パッケージをつくるのにggplot_add()が便利そう](https://notchained.hatenablog.com/entry/2017/11/07/103007))．
+
+まず， `"ggplotly"` クラスを与えた `plotly::ggplotly` 関数を返す `gginteractive` 関数を定義する．
+
+```{r gginteractive-prototype}
+gginteractive <- function() structure(plotly::ggplotly, class = c("gginteractive", "function"))
+```
+
+次に `plot + gginteractive()` を実行した時に呼ばれる `ggplot_add.gginteractive` を定義する．
+
+```{r ggplot_add}
+ggplot_add.gginteractive <- function (object, plot, object_name) object(plot)
+```
+
+`plot + gginteractive()` で対話的にできた．
+
+```{r test-prototype, fig.width = 3, fig.height = 2}
+qplot(wt, mpg, data = mtcars) + 
+  gginteractive()
+```
+
+## 改善したい点
+
+1. `plotly::ggplotly` は `width`, `height`, `tooltip` など様々な引数を持つが，これらを利用できない
+1. 非対話的に戻したい時は，以下のように `gginteractive()` とその直前の `+` をコメントアウトしなければならない．
+    
+    ```{r commentout-gginteractive, fig.width = 3, fig.height = 2}
+    qplot(wt, mpg, data = mtcars) # + 
+      # gginteractive()
+    ```
+1. `gginteractive()` は最後に足さなければならない
+
+最後のはちょっとどうすればいいかわからない．
+
+## 改善した実装 {#kaizen}
+
+1. `gginteractive` の第一引数として `interactive` を用意し， `TRUE` ならば `plotly` 化， `FALSE` ならそのままになるようにする．
+1. `gginteractive` に `...` 引数を用意しここに与えた内容で， `plotly::ggplotly` の初期値を変更しておく (`purrr::partial` の出番)．
+
+```{r kaizen-gginteractive}
+gginteractive <- function(interactive = TRUE, ...) {
+  structure(
+    if(interactive) {
+      purrr::partial(plotly::ggplotly, ...)
+    } else {
+      identity
+    },
+    class = c("gginteractive", "function")
+  )
+}
+
+ggplot_add.gginteractive <- function (object, plot, object_name) object(plot)
+```
+
+# テスト
+
+## 対話的・非対話的の切り替え
+
+### 対話的
+
+```{r test-interactive, fig.width = 3, fig.height = 2}
+qplot(wt, mpg, data = mtcars) + 
+  gginteractive(TRUE) # TRUE なら明示しなくてもよい
+```
+
+### 非対話的
+
+```{r test-noninteractive, test-noninteractive, fig.width = 3, fig.height = 2}
+qplot(wt, mpg, data = mtcars) + 
+  gginteractive(
+    FALSE # ここをコメントアウトするだけで対話的にできる
+  )
+```
+
+## ggplotly の持つ引数の利用
+
+### ツールチップに x 軸の情報だけを表示
+
+```{r test-tooltip, fig.width = 3, fig.height = 2}
+qplot(wt, mpg, data = mtcars) + 
+  gginteractive(tooltip = "x")
+```
+
+ちなみに引数は前方一致できる．
+
+```{r test-partial, fig.width = 3, fig.height = 2}
+qplot(wt, mpg, data = mtcars) + 
+  gginteractive(tool = "x")
+```
+
+# 応用 gghighlight とのコンビ
+
+`gghighlight` はプロット中のデータの内，指定した条件にマッチするものを強調表示できるステキパッケージです．
+この時， `gginteractive` によって，どれをハイライトすべきか探索するには対話的にしておくと便利ですね．
+トドメに `interactive = FALSE` してやれば，清書がカンタン!
+
+ちなみに`gghighlight` は強調したデータのラベンリグに `ggrepel` パッケージをりようできますが `plotly::ggplotly` は `ggrepel` に対応していないため，ごちゃごちゃ言われます．
+これが嫌な人は `gghighlight(use_direct_label = FALSE)` しましょう．
+
+以下の例は `gghighlight` パッケージの[ドキュメント](https://yutannihilation.github.io/gghighlight/articles/gghighlight.html)に載っているものに，`+ gginteractive(...)` しただけです．
+
+```{r with-gghighlight}
+library(gghighlight)
+set.seed(2)
+d <- purrr::map_dfr(
+  letters,
+  ~ data.frame(
+      idx = 1:400,
+      value = cumsum(runif(400, -1, 1)),
+      type = .,
+      flag = sample(c(TRUE, FALSE), size = 400, replace = TRUE),
+      stringsAsFactors = FALSE
+    )
+)
+
+ggplot(d) +
+  geom_line(aes(idx, value, colour = type)) +
+  gghighlight(
+    max(value) > 20,
+    # use_direct_label = FALSE # 対話的表示でごちゃごちゃ言われたくなければ利用
+  ) +
+  gginteractive(
+    # FALSE # 非対話的にしたい時用
+  )
+```
+
+`gghighlight` が `plotly` を念頭に設計されていないから (？) か，
+灰色になった系列のツールチップでは，`idx`, `value`, `type` が `highlight..........1` みたいな感じに連番のツールチップに置き換えられてしまってます……．
+まあ使えないこともないかな？
+
+## Enjoy!
