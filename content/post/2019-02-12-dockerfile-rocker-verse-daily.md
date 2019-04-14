@@ -14,7 +14,7 @@ tags: [rocker]
 
 成果品: https://hub.docker.com/r/atusy/verse-daily
 
-[`rocker/verse` の `Dockerfile`](https://github.com/rocker-org/rstudio-daily/blob/master/latest/Dockerfile) の1行目を以下に変更しただけ．
+[`rocker/rstudio-daily` の `Dockerfile`](https://github.com/rocker-org/rstudio-daily/blob/master/latest/Dockerfile) の1行目を以下に変更しただけ．
 
 ```
 FROM docker/verse:latest
