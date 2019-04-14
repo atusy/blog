@@ -1,0 +1,126 @@
+---
+title: xonsh 始めました + xonshrc 弄って oh-my-fish/yimmy inspired な見た目にする
+author: ~
+date: '2019-04-14'
+slug: xonsh-debut
+categories: [xonsh]
+tags: [xonshrc]
+output:
+  blogdown::html_page:
+    pandoc_args: 
+      - --from
+      - markdown+east_asian_line_breaks
+---
+
+# xonsh にした動機とか
+
+今までシェルには `fish` を使ってきましたが， `xonsh` に乗り換えることにしました．
+
+`xonsh` がナニモノでナゼおすすめかは，ばんくし氏による
+「
+[Pythonistaに贈るXonshのススメ](https://vaaaaaanquish.hatenablog.com/entry/2017/11/30/175236)
+」
+あたりを見て頂くといいです．
+
+ざっくり言うと `sh` も `Python` も動かせちゃうシェル．
+
+だからこそ「Pythonistaに贈る」との煽り文句がついたわけですが，
+私は `Python` わからん人です．
+
+それでも引っ越す理由は，
+関数を `Python` で書けるので `python` の勉強になるからです．
+
+後ろ向きな理由としては `fish` 独自の文法を覚える気が湧かないからですね．
+
+# とりま xonshrc
+
+とりあえずばんくし氏の
+「
+[xonshrcを書く](https://vaaaaaanquish.hatenablog.com/entry/2017/12/09/154201)
+」
+から，撮み食いしてコピペしました．
+
+## プロントについて
+
+他はばんくし氏の撮み食いに等しいですが，プロンプトだけは拘りました．
+
+私は `fish` のテーマでは [oh-my-fish/theme-yimmy](https://github.com/oh-my-fish/oh-my-fish/blob/master/docs/Themes.md#yimmy) を愛用していました．
+
+そこで yimmy に似せつつ (下図上側)，より良いカンジにしようと思いました (下図下側)．
+
+![](/images/xonsh-and-fish-compare-prompt.png)
+
+
+yimmyではユーザー名・ホスト名・カレントディレクトリ・ブランチ情報を一行に左詰めに表示し，
+改行した先にコマンドを入力させます．
+
+このスタイルの良いところは
+
+1. シンプルながら情報量が多いこと
+2. 2行使うため，履歴を遡った時，プロンプトと標準出力の区別がつきやすいこと
+3. ほぼ行頭からコマンド入力できるため，少々長くても安心なこと
+
+だと思います．
+
+一方で，
+
+1. カレントパスは親ディレクトリ名もフルネームにして欲しい
+2. プロンプトと直前の標準出力との境界はもっとはっきりしさせたい
+
+といった要望がありました．そこで
+
+- 1行目は空行
+- 2行目は
+    - 左に `[ フルパス ] git status`
+    - 右に `ユーザー名@ホスト名`
+- 3行目はコマンド入力行
+
+となるようにしました (先程の画像を参照)．
+
+色使いも似せようと思いましたが， `xonsh` による `git status` 
+の色使いを変更するのが面倒だったので，
+色被りしない範囲で見易そうな色を選択した次第です．
+
+ウィンドウ幅を小さくすると，右側の
+`ユーザー名@ホスト名` が省略されるようになるのもちょっとステキ．
+
+実装したスクリプトは以下の通り． 
+
+```{.xonsh}
+# Look & Feel inspired by oh-my-fish/theme-yimmy
+# Go http://xon.sh/tutorial.html#customizing-the-prompt for help
+
+$PROMPT = "\n{RED}┌{INTENSE_GREEN}[ {cwd} ] {gitstatus}\n{RED}└{INTENSE_GREEN}> "
+$RIGHT_PROMPT = "\n{user}@{hostname}"
+```
+
+ばんくし氏は下記のスクリプトにより，
+ウィンドウ下部にユーザー名・ホスト名を表示するようにしています．
+私の場合はこの情報をプロンプト右側に持ってきたので，下部には情報を表示しないことにしました．
+
+```{.xonsh}
+$BOTTOM_TOOLBAR = "{BACKGROUND_WHITE}{BLACK}{user}@{hostname}"
+```
+
+## よくアクセスするパスへのショートカット
+
+```{.xonsh}
+aliases["cd.fav"] = "cd ~/path/to/the/favorite/directory"
+```
+
+といった感じで `cd.キーワード` 形式でお気に入り登録してます．
+一般的にどうやってるのかは知らない．
+
+## その他
+
+連続した重複コマンドを保存しないようにする `$HISTCONTROL = (ignoredups)` については，
+`ignoredups は未定義だゾ` と怒られました．
+
+GitHub で先人の
+[設定](https://github.com/search?q=filename%3A.xonshrc+HISTCONTROL+in%3Afile)
+を検索すると `$HISTCONTROL = "ignoredups"` にすればよさそうです．
+
+でも `history` コマンド実行すると，連続した重複コマンドが保存されている気がするのだけれど……？
+
+あとの設定はほとんどばんくし氏のコピペなので，省略します．
+

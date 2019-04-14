@@ -1,0 +1,86 @@
+---
+title: xonsh 始めました + xonshrc 弄って oh-my-fish/yimmy inspired な見た目にする
+author: ~
+date: '2019-04-14'
+slug: xonsh-debut
+categories: [xonsh]
+tags: [xonshrc]
+output:
+  blogdown::html_page:
+    pandoc_args: 
+      - --from
+      - markdown+east_asian_line_breaks
+---
+
+
+
+<div id="xonsh-にした動機とか" class="section level1">
+<h1>xonsh にした動機とか</h1>
+<p>今までシェルには <code>fish</code> を使ってきましたが， <code>xonsh</code> に乗り換えることにしました．</p>
+<p><code>xonsh</code> がナニモノでナゼおすすめかは，ばんくし氏による「
+<a href="https://vaaaaaanquish.hatenablog.com/entry/2017/11/30/175236">Pythonistaに贈るXonshのススメ</a>」あたりを見て頂くといいです．</p>
+<p>ざっくり言うと <code>sh</code> も <code>Python</code> も動かせちゃうシェル．</p>
+<p>だからこそ「Pythonistaに贈る」との煽り文句がついたわけですが，私は <code>Python</code> わからん人です．</p>
+<p>それでも引っ越す理由は，関数を <code>Python</code> で書けるので <code>python</code> の勉強になるからです．</p>
+<p>後ろ向きな理由としては <code>fish</code> 独自の文法を覚える気が湧かないからですね．</p>
+</div>
+<div id="とりま-xonshrc" class="section level1">
+<h1>とりま xonshrc</h1>
+<p>とりあえずばんくし氏の「
+<a href="https://vaaaaaanquish.hatenablog.com/entry/2017/12/09/154201">xonshrcを書く</a>」から，撮み食いしてコピペしました．</p>
+<div id="プロントについて" class="section level2">
+<h2>プロントについて</h2>
+<p>他はばんくし氏の撮み食いに等しいですが，プロンプトだけは拘りました．</p>
+<p>私は <code>fish</code> のテーマでは <a href="https://github.com/oh-my-fish/oh-my-fish/blob/master/docs/Themes.md#yimmy">oh-my-fish/theme-yimmy</a> を愛用していました．</p>
+<p>そこで yimmy に似せつつ (下図上側)，より良いカンジにしようと思いました (下図下側)．</p>
+<p><img src="/images/xonsh-and-fish-compare-prompt.png" /></p>
+<p>yimmyではユーザー名・ホスト名・カレントディレクトリ・ブランチ情報を一行に左詰めに表示し，改行した先にコマンドを入力させます．</p>
+<p>このスタイルの良いところは</p>
+<ol style="list-style-type: decimal">
+<li>シンプルながら情報量が多いこと</li>
+<li>2行使うため，履歴を遡った時，プロンプトと標準出力の区別がつきやすいこと</li>
+<li>ほぼ行頭からコマンド入力できるため，少々長くても安心なこと</li>
+</ol>
+<p>だと思います．</p>
+<p>一方で，</p>
+<ol style="list-style-type: decimal">
+<li>カレントパスは親ディレクトリ名もフルネームにして欲しい</li>
+<li>プロンプトと直前の標準出力との境界はもっとはっきりしさせたい</li>
+</ol>
+<p>といった要望がありました．そこで</p>
+<ul>
+<li>1行目は空行</li>
+<li>2行目は
+<ul>
+<li>左に <code>[ フルパス ] git status</code></li>
+<li>右に <code>ユーザー名@ホスト名</code></li>
+</ul></li>
+<li>3行目はコマンド入力行</li>
+</ul>
+<p>となるようにしました (先程の画像を参照)．</p>
+<p>色使いも似せようと思いましたが， <code>xonsh</code> による <code>git status</code>
+の色使いを変更するのが面倒だったので，色被りしない範囲で見易そうな色を選択した次第です．</p>
+<p>ウィンドウ幅を小さくすると，右側の<code>ユーザー名@ホスト名</code> が省略されるようになるのもちょっとステキ．</p>
+<p>実装したスクリプトは以下の通り．</p>
+<pre class="xonsh"><code># Look &amp; Feel inspired by oh-my-fish/theme-yimmy
+# Go http://xon.sh/tutorial.html#customizing-the-prompt for help
+
+$PROMPT = &quot;\n{RED}┌{INTENSE_GREEN}[ {cwd} ] {gitstatus}\n{RED}└{INTENSE_GREEN}&gt; &quot;
+$RIGHT_PROMPT = &quot;\n{user}@{hostname}&quot;</code></pre>
+<p>ばんくし氏は下記のスクリプトにより，ウィンドウ下部にユーザー名・ホスト名を表示するようにしています．私の場合はこの情報をプロンプト右側に持ってきたので，下部には情報を表示しないことにしました．</p>
+<pre class="xonsh"><code>$BOTTOM_TOOLBAR = &quot;{BACKGROUND_WHITE}{BLACK}{user}@{hostname}&quot;</code></pre>
+</div>
+<div id="よくアクセスするパスへのショートカット" class="section level2">
+<h2>よくアクセスするパスへのショートカット</h2>
+<pre class="xonsh"><code>aliases[&quot;cd.fav&quot;] = &quot;cd ~/path/to/the/favorite/directory&quot;</code></pre>
+<p>といった感じで <code>cd.キーワード</code> 形式でお気に入り登録してます．一般的にどうやってるのかは知らない．</p>
+</div>
+<div id="その他" class="section level2">
+<h2>その他</h2>
+<p>連続した重複コマンドを保存しないようにする <code>$HISTCONTROL = (ignoredups)</code> については，
+<code>ignoredups は未定義だゾ</code> と怒られました．</p>
+<p>GitHub で先人の<a href="https://github.com/search?q=filename%3A.xonshrc+HISTCONTROL+in%3Afile">設定</a>を検索すると <code>$HISTCONTROL = "ignoredups"</code> にすればよさそうです．</p>
+<p>でも <code>history</code> コマンド実行すると，連続した重複コマンドが保存されている気がするのだけれど……？</p>
+<p>あとの設定はほとんどばんくし氏のコピペなので，省略します．</p>
+</div>
+</div>
