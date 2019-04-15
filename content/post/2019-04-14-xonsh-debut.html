@@ -49,26 +49,30 @@ output:
 </ol>
 <p>といった要望がありました．そこで</p>
 <ul>
-<li>1行目は空行</li>
-<li>2行目は
+<li>1行目は
 <ul>
 <li>左に <code>[ フルパス ] git status</code></li>
 <li>右に <code>ユーザー名@ホスト名</code></li>
 </ul></li>
-<li>3行目はコマンド入力行</li>
+<li>2行目はコマンド入力行</li>
+<li>標準出力の後に空行を挿入</li>
 </ul>
 <p>となるようにしました (先程の画像を参照)．</p>
+<p>初回投稿時は <code>\n</code> で一行目に空行を入れていましたが，
+<code>$XONSH_APPEND_NEWLINE</code> という環境変数を見つけたので，標準出力の後に空行を挿入するよう変更しました (2019-04-15)．この方が <code>xonsh</code> 起動時に無駄な空白が1行目に入らず済みます．</p>
 <p>色使いも似せようと思いましたが， <code>xonsh</code> による <code>git status</code>
 の色使いを変更するのが面倒だったので，色被りしない範囲で見易そうな色を選択した次第です．</p>
-<p>ウィンドウ幅を小さくすると，右側の<code>ユーザー名@ホスト名</code> が省略されるようになるのもちょっとステキ．</p>
+<p>ちなみにウィンドウ幅を小さくすると，右側の<code>ユーザー名@ホスト名</code> が省略されるのもちょっとステキ．</p>
 <p>実装したスクリプトは以下の通り．</p>
 <pre class="xonsh"><code># Look &amp; Feel inspired by oh-my-fish/theme-yimmy
-# Go http://xon.sh/tutorial.html#customizing-the-prompt for help
+# http://xon.sh/tutorial.html#customizing-the-prompt
 
-$PROMPT = &quot;\n{RED}┌{INTENSE_GREEN}[ {cwd} ] {gitstatus}\n{RED}└{INTENSE_GREEN}&gt; &quot;
-$RIGHT_PROMPT = &quot;\n{user}@{hostname}&quot;</code></pre>
+$PROMPT = &quot;{RED}┌{INTENSE_GREEN}[ {cwd} ] {gitstatus}\n{RED}└{INTENSE_GREEN}&gt; &quot;
+$RIGHT_PROMPT = &quot;{user}@{hostname}&quot;
+$XONSH_APPEND_NEWLINE = True</code></pre>
 <p>ばんくし氏は下記のスクリプトにより，ウィンドウ下部にユーザー名・ホスト名を表示するようにしています．私の場合はこの情報をプロンプト右側に持ってきたので，下部には情報を表示しないことにしました．</p>
-<pre class="xonsh"><code>$BOTTOM_TOOLBAR = &quot;{BACKGROUND_WHITE}{BLACK}{user}@{hostname}&quot;</code></pre>
+<pre class="xonsh"><code># 私の場合は以下をコメントアウト
+$BOTTOM_TOOLBAR = &quot;{BACKGROUND_WHITE}{BLACK}{user}@{hostname}&quot;</code></pre>
 </div>
 <div id="よくアクセスするパスへのショートカット" class="section level2">
 <h2>よくアクセスするパスへのショートカット</h2>
