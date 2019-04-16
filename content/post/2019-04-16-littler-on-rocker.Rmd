@@ -161,7 +161,7 @@ install.packages(c("dplyr", "tidyr"), error = TRUE, dependencies = TRUE)
 
 に相当．
 
-### TIPS: `--ncpu -1` すると最大限並列化できる
+### TIPS: `--ncpus -1` すると最大限並列化できる
 
 ソースを見て気付いた 
 ([68行目](https://github.com/eddelbuettel/littler/blob/56851a5be87ec2c5f0a62036c069f98a99d25f78/inst/examples/install2.r#L68))．
@@ -229,5 +229,5 @@ installGithub.r RcppCore/Rcpp@1.0.0
 # Enjoy!
 
 `remotes::install_github` は可変長引数を使って `install.packages` の引数を指定できるので，
-`installGithub.r` にも是非 `--ncpu` が欲しいなあ……．
+`installGithub.r` にも是非 `--ncpus` が欲しいなあ……．
 PR の機運？

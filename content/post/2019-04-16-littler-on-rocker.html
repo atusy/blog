@@ -24,7 +24,7 @@ output:
 <li><a href="#rocker-で使える-littler-由来の-r-スクリプト">rocker で使える littler 由来の R スクリプト</a><ul>
 <li><a href="#install.r"><span>install.r</span></a></li>
 <li><a href="#install2.r"><span>install2.r</span></a><ul>
-<li><a href="#tips---ncpu--1-すると最大限並列化できる">TIPS: <code>--ncpu -1</code> すると最大限並列化できる</a></li>
+<li><a href="#tips---ncpus--1-すると最大限並列化できる">TIPS: <code>--ncpus -1</code> すると最大限並列化できる</a></li>
 <li><a href="#tips-rocker-派生には---skipinstalled-が便利そう">TIPS: rocker 派生には <code>--skipinstalled</code> が便利そう</a></li>
 </ul></li>
 <li><a href="#installgithub.r"><span>installGithub.r</span></a><ul>
@@ -134,8 +134,8 @@ print(&quot;Hello World!&quot;)</code></pre>
 <p>で R でいうところの</p>
 <pre class="r"><code>install.packages(c(&quot;dplyr&quot;, &quot;tidyr&quot;), error = TRUE, dependencies = TRUE)</code></pre>
 <p>に相当．</p>
-<div id="tips---ncpu--1-すると最大限並列化できる" class="section level3">
-<h3>TIPS: <code>--ncpu -1</code> すると最大限並列化できる</h3>
+<div id="tips---ncpus--1-すると最大限並列化できる" class="section level3">
+<h3>TIPS: <code>--ncpus -1</code> すると最大限並列化できる</h3>
 <p>ソースを見て気付いた
 (<a href="https://github.com/eddelbuettel/littler/blob/56851a5be87ec2c5f0a62036c069f98a99d25f78/inst/examples/install2.r#L68">68行目</a>)．</p>
 <p>これは R の install.packages が ncpu に正の整数しか指定できないこととの大きな違い．</p>
@@ -184,6 +184,6 @@ print(&quot;Hello World!&quot;)</code></pre>
 <div id="enjoy" class="section level1">
 <h1>Enjoy!</h1>
 <p><code>remotes::install_github</code> は可変長引数を使って <code>install.packages</code> の引数を指定できるので，
-<code>installGithub.r</code> にも是非 <code>--ncpu</code> が欲しいなあ……．
+<code>installGithub.r</code> にも是非 <code>--ncpus</code> が欲しいなあ……．
 PR の機運？</p>
 </div>
