@@ -5,6 +5,7 @@ date: '2019-02-08'
 slug: sns-buttons
 categories: [Hugo]
 tags: [SNS, hugo_bootstrap]
+summary: やっぱり Share ボタンは欲しいよねということで雑に実装した．
 ---
 
 やっぱり Share ボタンは欲しいよねということで雑に実装．

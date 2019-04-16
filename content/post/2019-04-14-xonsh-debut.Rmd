@@ -10,6 +10,8 @@ output:
     pandoc_args: 
       - --from
       - markdown+east_asian_line_breaks
+summary: |
+  Python が動いちゃうシェルこと xonsh を導入しました．早速最低限の設定としてばんくし氏の xonshrc を撮み食いしつつ，Look & Feel を oh-my-fish/theme-yimmy inspired なものにしました．
 ---
 
 # xonsh にした動機とか

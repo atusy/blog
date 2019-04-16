@@ -11,6 +11,8 @@ output:
     pandoc_args: 
       - --from
       - markdown+east_asian_line_breaks
+summary: |
+  rocker で使える `install2.r` や `installGithub.r` は，シェル上から CRAN や GitHub 上の R パッケージをインストールするコマンドです．これらの正体や TIP を纏めました．
 ---
 
 # はじめに

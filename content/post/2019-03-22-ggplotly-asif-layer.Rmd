@@ -5,12 +5,20 @@ date: '2019-03-22'
 slug: ggplotly-asif-layer
 categories: [R]
 tags: [ggplot2, plotly]
+output:
+  blogdown::html_page:
+    toc: true
+    pandoc_args: 
+      - --from
+      - markdown+east_asian_line_breaks
+summary: |
+  `ggplot(mtcars, aes(wt, mpg)) + geom_point() + gginteractive()` といった感じで，ggplot に優しい文法で ggplot を plotly 化できるようにしてみました．gghighlight との組み合わせも便利です．
 ---
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE, fig.show = "hold")
-library(ggplot2)
-library(plotly)
+pacman::p_load(ggplot2, plotly)
+pacman::p_load_gh("yutannihilation/gghighlight")
 gginteractive <- function(interactive = TRUE, ...) {
   structure(
     if(interactive) function(p, ...) plotly::ggplotly(p, ...) else identity,
