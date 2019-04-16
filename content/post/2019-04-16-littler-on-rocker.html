@@ -1,0 +1,189 @@
+---
+title: rocker で使える便利コマンド install2.r とその仲間たち powered by littler 
+author: ~
+date: '2019-04-16'
+slug: littler-on-rocker
+categories: [R]
+tags: [littler, rocker]
+output:
+  blogdown::html_page:
+    toc: true
+    pandoc_args: 
+      - --from
+      - markdown+east_asian_line_breaks
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#はじめに">はじめに</a></li>
+<li><a href="#littler-とは">littler とは？</a><ul>
+<li><a href="#os-用アプリとしての-littler">OS 用アプリとしての littler</a></li>
+<li><a href="#r-パッケージとしての-littler">R パッケージとしての littler</a></li>
+</ul></li>
+<li><a href="#rocker-で使える-littler-由来の-r-スクリプト">rocker で使える littler 由来の R スクリプト</a><ul>
+<li><a href="#install.r"><span>install.r</span></a></li>
+<li><a href="#install2.r"><span>install2.r</span></a><ul>
+<li><a href="#tips---ncpu--1-すると最大限並列化できる">TIPS: <code>--ncpu -1</code> すると最大限並列化できる</a></li>
+<li><a href="#tips-rocker-派生には---skipinstalled-が便利そう">TIPS: rocker 派生には <code>--skipinstalled</code> が便利そう</a></li>
+</ul></li>
+<li><a href="#installgithub.r"><span>installGithub.r</span></a><ul>
+<li><a href="#tips-pkgbranch-などブランチやバージョンの指定が可能">TIPS: <code>pkg@branch</code> などブランチやバージョンの指定が可能．</a></li>
+</ul></li>
+<li><a href="#testinstalled.r"><span>testInstalled.r</span></a></li>
+</ul></li>
+<li><a href="#enjoy">Enjoy!</a></li>
+</ul>
+</div>
+
+<div id="はじめに" class="section level1">
+<h1>はじめに</h1>
+<p>みなさん rocker してますか？
+rocker を使うと Docker で R ± RStudio できるので</p>
+<ul>
+<li>複数のマシンにセットアップ</li>
+<li>R本体やパッケージのバージョンを管理</li>
+</ul>
+<p>といったことが簡単になって便利です．先日の Tokyo.R でも話題になりました
+(<a href="https://speakerdeck.com/s_uryu/rstudio-for-team?slide=20">Rにおけるバージョン管理とプロジェクト運用 / rstudio-for-team</a>
+by <span class="citation">@u_ribo</span> 氏)</p>
+<p>GitPod に R を導入するのもとっても簡単ですヨ (<a href="https://github.com/atusy/gitpodr">atusy/gitpodr</a>)．</p>
+<p>さて， rocker の <code>Dockerfile</code> では
+<a href="https://github.com/eddelbuettel/littler"><code>eddelbuettel/littler</code></a> パッケージ由来の
+<a href="https://github.com/eddelbuettel/littler/blob/master/inst/examples/install2.r"><code>install2.r</code></a>
+を用い，R のパッケージの導入をシェルスクリプトらしい文法で実現しています． (下記)．</p>
+<pre class="sh"><code>install2.r --error --deps TRUE \
+  dplyr \
+  tidyr \
+  ggplot2</code></pre>
+<p>以下のように R のスクリプトを実行するより読み易くていいですね．</p>
+<pre class="sh"><code>Rscript -e &quot;install.packages(c(&#39;dplyr&#39;, &#39;tidyr&#39;, &#39;ggplot2&#39;), dependencies = TRUE, error = TRUE)&quot;</code></pre>
+<p>実装としては <code>rocker/r-base</code> の Dockerfile の
+<a href="https://github.com/rocker-org/rocker/blob/2115bb75eec90fee87114e8e7e2441eeb68e3f7f/r-base/Dockerfile#L52">52行目</a>で，シンボリックリンクを貼ってシェルから実行できるようにしています．</p>
+<pre><code>ln -s /usr/lib/R/site-library/littler/examples/install2.r /usr/local/bin/install2.r</code></pre>
+<p>更に <code>Dockerfile</code> を見ると全部で</p>
+<ul>
+<li><code>install.r</code></li>
+<li><code>install2.r</code></li>
+<li><code>installGithub.r</code></li>
+<li><code>testInstalled.r</code></li>
+</ul>
+<p>が有効化されていますね．</p>
+<p>では <code>littler</code> やこれらのコマンドがナニモノか見ていきましょう．</p>
+</div>
+<div id="littler-とは" class="section level1">
+<h1>littler とは？</h1>
+<p>OS用のアプリ (apt パッケージなど) としての <code>littler</code> と Rパッケージとしての <code>littler</code> がいるようです．</p>
+<div id="os-用アプリとしての-littler" class="section level2">
+<h2>OS 用アプリとしての littler</h2>
+<p><code>apt show littler</code> によれば， “GNU R scripting and command-line front-end” とのことで，ターミナル上での R スクリプト実行を容易にしてくれるもののようです．</p>
+<p>yutannihilation 氏による紹介記事もあります
+(<a href="https://notchained.hatenablog.com/entry/2015/02/01/112657">littlerを使ってRで危険シェル芸とかできそう</a>)．</p>
+<p>以下のように，Rコマンドを文字列として渡すことでシェル上で実行できるようになります．</p>
+<pre class="｛.sh}"><code>r -e &#39;print(&quot;Hello World!&quot;)&#39;</code></pre>
+<p>また，行頭には <code>#!/usr/bin/env r</code> と <code>Shebang</code> を記た <code>hello.r</code> を用意し，</p>
+<pre class="r"><code>#!/usr/bin/env r
+print(&quot;Hello World!&quot;)</code></pre>
+<p>実行可能にするとちゃんと走ります．</p>
+<pre class="sh"><code>chmod +x hello.r
+./hello.r
+# [1] Hello World!</code></pre>
+</div>
+<div id="r-パッケージとしての-littler" class="section level2">
+<h2>R パッケージとしての littler</h2>
+<ul>
+<li>CRAN: <a href="https://cran.r-project.org/package=littler" class="uri">https://cran.r-project.org/package=littler</a></li>
+<li>GitHub: <a href="https://github.com/eddelbuettel/littler" class="uri">https://github.com/eddelbuettel/littler</a></li>
+</ul>
+<p>OS 用 littler の実行ファイルと，サンプルスクリプトの詰め合わせ……かな？</p>
+<p>実行ファイルは，
+<code>system.file("bin", "r", package="littler")</code>
+にあるので，これを PATH の通った場所にシンボリックリンクしてやれば，手動で OS 用アプリとしての littler をインストールできるようです．</p>
+<p>サンプルスクリプトは
+<a href="https://github.com/eddelbuettel/littler/tree/master/inst/examples">inst/examples</a>
+にいっぱいありますが，今回は rocker で利用できるもののみ紹介します．</p>
+</div>
+</div>
+<div id="rocker-で使える-littler-由来の-r-スクリプト" class="section level1">
+<h1>rocker で使える littler 由来の R スクリプト</h1>
+<div id="install.r" class="section level2">
+<h2><a href="https://github.com/eddelbuettel/littler/blob/master/inst/examples/install.r">install.r</a></h2>
+<p>シンプルな CRAN 上の R パッケージインストール用スクリプト．引数にはインストールしたいパッケージしか指定できない．インストール時の細かい挙動を弄りたい人は <a href="#install2.r"><code>install2.r</code></a> へ．</p>
+<p>簡単な用例:</p>
+<pre class="sh"><code>install.r dplyr tidyr</code></pre>
+</div>
+<div id="install2.r" class="section level2">
+<h2><a href="https://github.com/eddelbuettel/littler/blob/master/inst/examples/install2.r">install2.r</a></h2>
+<p>CRAN 上の R パッケージをインストールするための，ちょっとリッチなスクリプト．以下の様々な引数を利用できる．</p>
+<pre><code>-l --libloc LIBLOC  パッケージインストール先 
+                    [default: /usr/local/lib/R/site-library]
+-d --deps DEPS      依存しているパッケージをインストールするか 
+                    [default: NA]
+-n --ncpus NCPUS    インストールを並列化する時のスレッド数 
+                    [default: getOption]
+-r --repos REPOS    参照するレポジトリ．複数可．ファイルからなら NULL を指定．
+                    [default: getOption]
+-e --error          警告をエラー扱いにしてスクリプトを停止させるか 
+                    [default: FALSE]
+-s --skipinstalled  インストール済みのパッケージのインストールはスキップするか 
+                    [default: FALSE]
+-h --help           install2.r のヘルプを見る
+-x --usage          ヘルプと簡単な用例を見る</code></pre>
+<p>簡単な用例は</p>
+<pre class="sh"><code>install2.r dplyr tidyr --error --deps TRUE</code></pre>
+<p>で R でいうところの</p>
+<pre class="r"><code>install.packages(c(&quot;dplyr&quot;, &quot;tidyr&quot;), error = TRUE, dependencies = TRUE)</code></pre>
+<p>に相当．</p>
+<div id="tips---ncpu--1-すると最大限並列化できる" class="section level3">
+<h3>TIPS: <code>--ncpu -1</code> すると最大限並列化できる</h3>
+<p>ソースを見て気付いた
+(<a href="https://github.com/eddelbuettel/littler/blob/56851a5be87ec2c5f0a62036c069f98a99d25f78/inst/examples/install2.r#L68">68行目</a>)．</p>
+<p>これは R の install.packages が ncpu に正の整数しか指定できないこととの大きな違い．</p>
+<p>Docker で複数のパッケージのインストールに時間がかかっている人には朗報だろう．</p>
+</div>
+<div id="tips-rocker-派生には---skipinstalled-が便利そう" class="section level3">
+<h3>TIPS: rocker 派生には <code>--skipinstalled</code> が便利そう</h3>
+<p>オレオレ verse を作るとき，このパッケージは既にインストール済みだろうか……？インストール済みなのにまたインストールするとビルドに時間がかかるな……．</p>
+<p>などと悩むくらいならこれを有効にしておくとよい．</p>
+</div>
+</div>
+<div id="installgithub.r" class="section level2">
+<h2><a href="https://github.com/eddelbuettel/littler/blob/master/inst/examples/installGithub.r">installGithub.r</a></h2>
+<p>GitHub 上の R パッケージをインストールするためのスクリプト．中身は <code>remotes::install_github</code> のラッパー．以下の様々な引数を利用できる．</p>
+<pre><code>-d --deps DEPS       依存パッケージをインストールするか 
+                     [default: NA]
+-u --update UPDATE   依存パッケージをアップデートするか 
+                     [default: TRUE]
+-r --repos REPOS     依存パッケージをインストールする時に使うレポジトリ 
+                     [default: getOption]
+-h --help            ヘルプを表示
+-x --usage           ヘルプと用例を表示</code></pre>
+<p>簡単な用例:</p>
+<pre class="sh"><code>installGithub.r RcppCore/Rcpp@1.0.0</code></pre>
+<div id="tips-pkgbranch-などブランチやバージョンの指定が可能" class="section level3">
+<h3>TIPS: <code>pkg@branch</code> などブランチやバージョンの指定が可能．</h3>
+<p><code>remotes::install_github</code> だからね．詳しくは<code>remotes::install_github</code> の<a href="https://remotes.r-lib.org/reference/install_github.html">ドキュメント</a>を参照．</p>
+</div>
+</div>
+<div id="testinstalled.r" class="section level2">
+<h2><a href="https://github.com/eddelbuettel/littler/blob/master/inst/examples/testInstalled.r">testInstalled.r</a></h2>
+<p>インストール済みのパッケージをテストするためのスクリプトで，
+<a href="https://www.rdocumentation.org/packages/tools/versions/3.5.3/topics/testInstalledPackage"><code>tools::testInstalledPackage</code></a>
+のラッパーらしい．</p>
+<pre><code>-l --libloc LIBLOC  パッケージのインストール先 
+                    [default: NULL]
+-o --outdir OUTDIR  結果の保存先 
+                    [default: .]
+-t --types TYPES    テスト内容 
+                    [default: c(&#39;examples&#39;, &#39;tests&#39;, &#39;vignettes&#39;)]
+-s --srcdir SRCDIR  追加したい .save ファイルの参照先 
+                    [default: NULL]
+-h --help           ヘルプを表示</code></pre>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+<p><code>remotes::install_github</code> は可変長引数を使って <code>install.packages</code> の引数を指定できるので，
+<code>installGithub.r</code> にも是非 <code>--ncpu</code> が欲しいなあ……．
+PR の機運？</p>
+</div>

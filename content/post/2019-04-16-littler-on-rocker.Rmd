@@ -1,0 +1,233 @@
+---
+title: rocker で使える便利コマンド install2.r とその仲間たち powered by littler 
+author: ~
+date: '2019-04-16'
+slug: littler-on-rocker
+categories: [R]
+tags: [littler, rocker]
+output:
+  blogdown::html_page:
+    toc: true
+    pandoc_args: 
+      - --from
+      - markdown+east_asian_line_breaks
+---
+
+# はじめに
+
+みなさん rocker してますか？
+rocker を使うと Docker で R ± RStudio できるので
+
+- 複数のマシンにセットアップ
+- R本体やパッケージのバージョンを管理
+
+といったことが簡単になって便利です．
+先日の Tokyo.R でも話題になりました 
+([Rにおけるバージョン管理とプロジェクト運用 / rstudio-for-team](https://speakerdeck.com/s_uryu/rstudio-for-team?slide=20)
+by @u_ribo 氏)
+
+GitPod に R を導入するのもとっても簡単ですヨ ([atusy/gitpodr](https://github.com/atusy/gitpodr))．
+
+さて， rocker の `Dockerfile` では
+[`eddelbuettel/littler`](https://github.com/eddelbuettel/littler) パッケージ由来の 
+[`install2.r`](https://github.com/eddelbuettel/littler/blob/master/inst/examples/install2.r)
+を用い，R のパッケージの導入をシェルスクリプトらしい文法で実現しています． (下記)．
+
+```{.sh}
+install2.r --error --deps TRUE \
+  dplyr \
+  tidyr \
+  ggplot2
+```
+
+以下のように R のスクリプトを実行するより読み易くていいですね．
+
+```{.sh}
+Rscript -e "install.packages(c('dplyr', 'tidyr', 'ggplot2'), dependencies = TRUE, error = TRUE)"
+```
+実装としては `rocker/r-base` の Dockerfile の
+[52行目](https://github.com/rocker-org/rocker/blob/2115bb75eec90fee87114e8e7e2441eeb68e3f7f/r-base/Dockerfile#L52)
+で，シンボリックリンクを貼ってシェルから実行できるようにしています．
+
+```
+ln -s /usr/lib/R/site-library/littler/examples/install2.r /usr/local/bin/install2.r
+```
+
+更に `Dockerfile` を見ると全部で
+
+- `install.r`
+- `install2.r`
+- `installGithub.r`
+- `testInstalled.r` 
+
+が有効化されていますね．
+
+では `littler` やこれらのコマンドがナニモノか見ていきましょう．
+
+# littler とは？
+
+OS用のアプリ (apt パッケージなど) としての `littler` と Rパッケージとしての `littler` がいるようです．
+
+## OS 用アプリとしての littler
+
+`apt show littler` によれば， "GNU R scripting and command-line front-end" とのことで，ターミナル上での R スクリプト実行を容易にしてくれるもののようです．
+
+yutannihilation 氏による紹介記事もあります 
+([littlerを使ってRで危険シェル芸とかできそう](https://notchained.hatenablog.com/entry/2015/02/01/112657))．
+
+以下のように，Rコマンドを文字列として渡すことでシェル上で実行できるようになります．
+
+```｛.sh}
+r -e 'print("Hello World!")'
+```
+
+また，行頭には `#!/usr/bin/env r` と `Shebang` を記た `hello.r` を用意し，
+
+```{.r}
+#!/usr/bin/env r
+print("Hello World!")
+```
+実行可能にするとちゃんと走ります．
+
+```{.sh}
+chmod +x hello.r
+./hello.r
+# [1] Hello World!
+```
+
+## R パッケージとしての littler
+
+- CRAN: <https://cran.r-project.org/package=littler>
+- GitHub: <https://github.com/eddelbuettel/littler>
+
+OS 用 littler の実行ファイルと，サンプルスクリプトの詰め合わせ……かな？
+
+実行ファイルは，
+`system.file("bin", "r", package="littler")`
+にあるので，これを PATH の通った場所にシンボリックリンクしてやれば，
+手動で OS 用アプリとしての littler をインストールできるようです．
+
+サンプルスクリプトは 
+[inst/examples](https://github.com/eddelbuettel/littler/tree/master/inst/examples)
+にいっぱいありますが，今回は rocker で利用できるもののみ紹介します．
+
+# rocker で使える littler 由来の R スクリプト
+
+## [install.r](https://github.com/eddelbuettel/littler/blob/master/inst/examples/install.r)
+
+シンプルな CRAN 上の R パッケージインストール用スクリプト．
+引数にはインストールしたいパッケージしか指定できない．
+インストール時の細かい挙動を弄りたい人は [`install2.r`](#install2.r) へ．
+
+簡単な用例:
+
+```{.sh}
+install.r dplyr tidyr
+```
+
+## [install2.r](https://github.com/eddelbuettel/littler/blob/master/inst/examples/install2.r)
+
+CRAN 上の R  パッケージをインストールするための，ちょっとリッチなスクリプト．
+以下の様々な引数を利用できる．
+
+```
+-l --libloc LIBLOC  パッケージインストール先 
+                    [default: /usr/local/lib/R/site-library]
+-d --deps DEPS      依存しているパッケージをインストールするか 
+                    [default: NA]
+-n --ncpus NCPUS    インストールを並列化する時のスレッド数 
+                    [default: getOption]
+-r --repos REPOS    参照するレポジトリ．複数可．ファイルからなら NULL を指定．
+                    [default: getOption]
+-e --error          警告をエラー扱いにしてスクリプトを停止させるか 
+                    [default: FALSE]
+-s --skipinstalled  インストール済みのパッケージのインストールはスキップするか 
+                    [default: FALSE]
+-h --help           install2.r のヘルプを見る
+-x --usage          ヘルプと簡単な用例を見る
+```
+
+簡単な用例は
+
+```{.sh}
+install2.r dplyr tidyr --error --deps TRUE
+```
+
+で R でいうところの
+
+```{.r}
+install.packages(c("dplyr", "tidyr"), error = TRUE, dependencies = TRUE)
+```
+
+に相当．
+
+### TIPS: `--ncpu -1` すると最大限並列化できる
+
+ソースを見て気付いた 
+([68行目](https://github.com/eddelbuettel/littler/blob/56851a5be87ec2c5f0a62036c069f98a99d25f78/inst/examples/install2.r#L68))．
+
+これは R の install.packages が ncpu に正の整数しか指定できないこととの大きな違い．
+
+Docker で複数のパッケージのインストールに時間がかかっている人には朗報だろう．
+
+### TIPS: rocker 派生には `--skipinstalled` が便利そう
+
+オレオレ verse を作るとき，このパッケージは既にインストール済みだろうか……？
+インストール済みなのにまたインストールするとビルドに時間がかかるな……．
+
+などと悩むくらいならこれを有効にしておくとよい．
+
+## [installGithub.r](https://github.com/eddelbuettel/littler/blob/master/inst/examples/installGithub.r)
+
+GitHub 上の R  パッケージをインストールするためのスクリプト．
+中身は `remotes::install_github` のラッパー．
+以下の様々な引数を利用できる．
+
+```
+-d --deps DEPS       依存パッケージをインストールするか 
+                     [default: NA]
+-u --update UPDATE   依存パッケージをアップデートするか 
+                     [default: TRUE]
+-r --repos REPOS     依存パッケージをインストールする時に使うレポジトリ 
+                     [default: getOption]
+-h --help            ヘルプを表示
+-x --usage           ヘルプと用例を表示
+```
+
+簡単な用例:
+
+```{.sh}
+installGithub.r RcppCore/Rcpp@1.0.0
+```
+
+### TIPS: `pkg@branch` などブランチやバージョンの指定が可能．
+
+`remotes::install_github` だからね．
+詳しくは`remotes::install_github` の
+[ドキュメント](https://remotes.r-lib.org/reference/install_github.html)
+を参照．
+
+## [testInstalled.r](https://github.com/eddelbuettel/littler/blob/master/inst/examples/testInstalled.r)
+
+インストール済みのパッケージをテストするためのスクリプトで，
+[`tools::testInstalledPackage`](https://www.rdocumentation.org/packages/tools/versions/3.5.3/topics/testInstalledPackage)
+のラッパーらしい．
+
+
+```
+-l --libloc LIBLOC  パッケージのインストール先 
+                    [default: NULL]
+-o --outdir OUTDIR  結果の保存先 
+                    [default: .]
+-t --types TYPES    テスト内容 
+                    [default: c('examples', 'tests', 'vignettes')]
+-s --srcdir SRCDIR  追加したい .save ファイルの参照先 
+                    [default: NULL]
+-h --help           ヘルプを表示
+```
+
+# Enjoy!
+
+`remotes::install_github` は可変長引数を使って `install.packages` の引数を指定できるので，
+`installGithub.r` にも是非 `--ncpu` が欲しいなあ……．
+PR の機運？
