@@ -70,6 +70,8 @@ pygmentsCodeFences = true
   # Display post summaries instead of content in list templates (default: true)
   # truncate = false
 
+  images = ["/images/atusy.jpg"]
+  
   [params.sidebar]
     # Whether to show the recent posts or not (default: true)
     # showRecent = false
