@@ -5,9 +5,11 @@
     <h4>{{ i18n "recentPosts" }}</h4>
     <ol class="list-unstyled">
         {{ range $posts }}
+        {{ if ne .RelPermalink "/post/" }}
         <li>
             <a href="{{.RelPermalink}}">{{.Title | markdownify }}</a>
         </li>
+        {{ end }}
         {{ end }}
     </ol>
 </section>
