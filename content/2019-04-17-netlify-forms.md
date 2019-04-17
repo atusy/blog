@@ -7,7 +7,10 @@ categories: []
 tags: []
 ---
 
-<form name="contact" method="POST" data-netlify="true">
+<form name="contact" method="POST" data-netlify="true" data-netlify-recaptcha="true" netlify-honeypot="bot-field">
+  <p>
+    <label style="visibility:hidden">None: <input name="bot-field" /></label>
+  </p>
   <p>
     <label>Name: <input type="text" name="name" /></label>   
   </p>
