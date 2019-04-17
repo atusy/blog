@@ -1,5 +1,5 @@
 ---
-title: Forms
+title: Form
 author: ~
 date: '2019-04-17'
 slug: netlify-forms
@@ -9,18 +9,18 @@ tags: []
 
 <form name="contact" method="POST" data-netlify="true" data-netlify-recaptcha="true" netlify-honeypot="bot-field">
   <p>
-    <label style="visibility:hidden">None: <input name="bot-field" /></label>
+    <label><input type="text" name="name" placeholder="Name"/></label>   
   </p>
   <p>
-    <label>Name: <input type="text" name="name" /></label>   
+    <label><input type="email" name="email" placeholder="Email Address" /></label>
   </p>
   <p>
-    <label>Email: <input type="email" name="email" /></label>
-  </p>
-  <p>
-    <label>Message: <textarea name="message"></textarea></label>
+    <label><textarea name="message" cols = "40" rows = "10" placeholder="Message"></textarea></label>
   </p>
   <p>
     <button type="submit">Send</button>
+  </p>
+  <p>
+    <label style="visibility:hidden"><input name="bot-field" /></label>
   </p>
 </form>
