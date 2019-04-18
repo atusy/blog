@@ -1,0 +1,3 @@
+[submodule "static/submodules/rmd-line-num"]
+	path = static/submodules/rmd-line-num
+	url = https://github.com/atusy/rmd-line-num
