@@ -1,0 +1,83 @@
+---
+title: Rmarkdown でチャンクとその出力に行番号を付ける
+author: ~
+date: '2019-04-18'
+slug: rmd-line-num
+categories: [R]
+tags: [Rmarkdown, pandoc]
+output:
+  blogdown::html_page:
+    pandoc_args: 
+      - --from
+      - markdown+east_asian_line_breaks
+summary: |
+  `html_document` と `pdf_document` でチャンクとその出力に行番号を付ける方法が判ったので，紹介します．出力例と詳解は[英語版](/submodules/rmd-line-num/index.html)をご覧下さい \
+  `r knitr::include_graphics("/images/rmd-line-num.png")`．
+---
+
+
+```{r kilometer, echo = FALSE}
+blogdown::shortcode("tweet", "1118680971992109056")
+```
+
+ということで前から私も挑戦しては挫折していたことに再挑戦しました．
+
+"[Pandoc User’s Guide](https://www.pandoc.org/MANUAL.html)" と 
+"[Rmarkdown Definitive Guide](https://bookdown.org/yihui/rmarkdown/)"
+と Yi Hui のブログ記事 
+"[Chunk options and package options](https://yihui.name/knitr/options/#text-results)"
+に繰り返し目を通して来たのがようやく実り，答えを得ました，
+
+確認したところ `html_document` と `pdf_document` でうまく動くようです．
+
+`r knitr::include_graphics("/images/rmd-line-num.png")`
+
+え，何か忘れてるって？．
+
+ああ，`blogdown::html_page` では残念ながらうまくいきませんでした．
+
+従って[英語による詳細版](/submodules/rmd-line-num/index.html)をご覧下さい．
+
+英語版のソースと出力例は GitHub の [atusy/rmd-line-num](https://github.com/atusy/rmd-line-num) にあります．
+
+# 簡単なやり方の紹介
+
+以下の内容の Rmd ファイルを作成し `<!-- ここから先は自由に記述 -->` 以降を自由に記述してくれれば，
+チャンクとその出力が番号付けできるはずだ．
+
+````
+---
+output:
+  html_document:
+    # pygment を指定しなければならない
+    highlight: pygment
+  pdf_document: default
+---
+
+```{`r "r"` "setup"}
+knitr::opts_chunk$set(
+  # ソースを番号付けする
+  class.source = "numberLines", 
+  # 出力を番号付けする
+  class.output = c("numberLines", "chunkout") 
+)
+
+# 他に setup チャンクでやっておきたいことがあれば記述
+```
+
+
+```{`r "css"`}
+/* html用 */
+/* 出力の背景が灰色になってしまうので，白に直す */
+/* pdf の場合どうしたらいいかは知らない */
+div.sourceCode pre.chunkout {
+  background: white;
+}
+```
+
+<!-- ここから先は自由に記述 -->
+
+````
+
+
+# Enjoy!
