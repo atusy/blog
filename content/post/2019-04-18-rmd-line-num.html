@@ -10,6 +10,8 @@ output:
     pandoc_args: 
       - --from
       - markdown+east_asian_line_breaks
+images: 
+  - /images/rmd-line-num.png
 summary: |
   `html_document` と `pdf_document` でチャンクとその出力に行番号を付ける方法が判ったので，紹介します．出力例と詳解は[英語版](/submodules/rmd-line-num/index.html)をご覧下さい \
   ![](/images/rmd-line-num.png)．
@@ -32,11 +34,12 @@ summary: |
 <p>英語版のソースと出力例は GitHub の <a href="https://github.com/atusy/rmd-line-num">atusy/rmd-line-num</a> にあります．</p>
 <div id="簡単なやり方の紹介" class="section level1">
 <h1>簡単なやり方の紹介</h1>
-<p>以下の内容の Rmd ファイルを作成し <code>&lt;!-- ここから先は自由に記述 --&gt;</code> 以降を自由に記述してくれれば，チャンクとその出力が番号付けできるはずだ．</p>
+<p>以下の内容の Rmd ファイルを作成し <code>&lt;!-- ここから先は自由に記述 --&gt;</code> 以降を自由に記述してくれれば，チャンクとその出力が番号付けできるはずだ．番号をクリックして行ごとのリンクを取得することもできる<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>．</p>
 <pre><code>---
 output:
   html_document:
-    # pygment を指定しなければならない
+    # highlight には defailt 以外を指定
+    # help(rmarkdown::html_document) 参照
     highlight: pygment
   pdf_document: default
 ---
@@ -44,9 +47,9 @@ output:
 ```{r &quot;setup&quot;}
 knitr::opts_chunk$set(
   # ソースを番号付けする
-  class.source = &quot;numberLines&quot;, 
+  class.source = &quot;numberLines lineAnchors&quot;, 
   # 出力を番号付けする
-  class.output = c(&quot;numberLines&quot;, &quot;chunkout&quot;) 
+  class.output = &quot;numberLines lineAnchors chunkout&quot;) 
 )
 
 # 他に setup チャンクでやっておきたいことがあれば記述
@@ -67,4 +70,17 @@ div.sourceCode pre.chunkout {
 </div>
 <div id="enjoy" class="section level1">
 <h1>Enjoy!</h1>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://twitter.com/niszet0">@niszet</a> さんに色々教えてもらいました</p>
+<ul>
+<li><code>lineAnchors</code> クラスを足すと行番号がクリッカブルになる
+(<a href="https://twitter.com/niszet0/status/1118837863200591872" class="uri">https://twitter.com/niszet0/status/1118837863200591872</a>)．</li>
+<li><code>highlight</code> には <code>pygment</code> 以外も使える
+(<a href="https://niszet.hatenablog.com/entry/2019/04/18/194246" class="uri">https://niszet.hatenablog.com/entry/2019/04/18/194246</a>)．</li>
+</ul>
+<a href="#fnref1" class="footnote-back">↩</a></li>
+</ol>
 </div>

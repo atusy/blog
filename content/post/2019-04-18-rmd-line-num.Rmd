@@ -10,6 +10,8 @@ output:
     pandoc_args: 
       - --from
       - markdown+east_asian_line_breaks
+images: 
+  - /images/rmd-line-num.png
 summary: |
   `html_document` と `pdf_document` でチャンクとその出力に行番号を付ける方法が判ったので，紹介します．出力例と詳解は[英語版](/submodules/rmd-line-num/index.html)をご覧下さい \
   `r knitr::include_graphics("/images/rmd-line-num.png")`．
@@ -44,12 +46,22 @@ blogdown::shortcode("tweet", "1118680971992109056")
 
 以下の内容の Rmd ファイルを作成し `<!-- ここから先は自由に記述 -->` 以降を自由に記述してくれれば，
 チャンクとその出力が番号付けできるはずだ．
+番号をクリックして行ごとのリンクを取得することもできる[^niszet]．
+
+[^niszet]: 
+[\@niszet](https://twitter.com/niszet0) さんに色々教えてもらいました
+    
+    - `lineAnchors` クラスを足すと行番号がクリッカブルになる
+      (<https://twitter.com/niszet0/status/1118837863200591872>)．
+    - `highlight` には `pygment` 以外も使える
+      (<https://niszet.hatenablog.com/entry/2019/04/18/194246>)．
 
 ````
 ---
 output:
   html_document:
-    # pygment を指定しなければならない
+    # highlight には defailt 以外を指定
+    # help(rmarkdown::html_document) 参照
     highlight: pygment
   pdf_document: default
 ---
@@ -57,9 +69,9 @@ output:
 ```{`r "r"` "setup"}
 knitr::opts_chunk$set(
   # ソースを番号付けする
-  class.source = "numberLines", 
+  class.source = "numberLines lineAnchors", 
   # 出力を番号付けする
-  class.output = c("numberLines", "chunkout") 
+  class.output = "numberLines lineAnchors chunkout") 
 )
 
 # 他に setup チャンクでやっておきたいことがあれば記述
