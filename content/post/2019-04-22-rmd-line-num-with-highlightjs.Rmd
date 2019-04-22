@@ -1,0 +1,201 @@
+---
+title: highlightjs と highlightjs-line-numbers プラグインで Rmarkdown のコードブロックに行番号をつける
+author: ~
+date: '2019-04-22'
+slug: rmd-line-num-with-highlightjs
+categories: [R, javascript, html]
+tags: [Rmarkdown, blogdown, highlightjs]
+images: 
+  - /images/covers/rmd-line-num.png
+summary: |
+  `highlightjs` と `highlightjs-line-numbers` プラグインによって， 様々な html フォーマットにおいてコードブロックに番号付けできるようにする方法を紹介する． \
+  `r knitr::include_graphics("/images/covers/rmd-line-num-with-highlightjs.png")`
+output:
+  blogdown::html_page:
+    pandoc_args: 
+      - --from
+      - markdown+east_asian_line_breaks
+---
+
+先日の記事では pandoc 自身の力を持ってコードブロックに行番号を振る方法を紹介した
+([Rmarkdown でチャンクとその出力に行番号を付ける](/2019/04/18/rmd-line-num/))．
+
+先日の方法は基本的に html と pdf に対応する一方，現状では `html_notebook`, `bookdown::html_document2`, `blogdown::html_page`, `pagedown::html_paged` では使えない．
+
+`bookdown::html_document2` に限れば [PR#706](//github.com/rstudio/bookdown/pull/706) がマージされれば先日の方法が使えるようになる．
+
+それはさておき，`pagedown::html_paged` を除くおおよその `html_*` 出力に対応できる， `highlightjs` と `highlightjs-line-numbers` プラグインを用いた方法を発見したので紹介する．
+
+実際に使うと以下のようになる．
+
+```{r, class.output = 'nohighlight'}
+iris[
+  1:5,
+]
+```
+
+
+# blogdown の場合
+
+blogdown のコードブロックにおいてシンタックスハイライトと行番号を有効にするには，以下のコードをそれぞれの html に仕込めばいいようだ．
+
+もうちょっと杜撰ながら，記事ごとにコントロールしやすい方法としては，「[その他の html 出力の場合]」と同様に本文中にスクリプトを直接書き込む．
+本記事ではそうした．
+
+尚，下記は [`hugo-bootstrap`](//themes.gohugo.io/hugo-bootstrap/) テーマを利用した場合の話で，テーマによっては若干ファイル名に差異があるかもしれない．
+
+## /layouts/partials/head-custom.html
+
+monokai など，お好みのスタイルを選ぶ (<https://cdnjs.com/libraries/highlight.js/>)．
+
+```{.html}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/monokai.min.css" rel="stylesheet">
+```
+
+
+
+## /layouts/partials/footer.html
+
+パフォーマンスを重視して， JavaScript は footer に仕込む．[^js-at-last]
+
+[^js-at-last]: JavaScript は body の一番下、 `</body>` の直前に記述するのが良いらしい．
+head にすると記述，head の読み込み完了を待って body を読むためロードが遅くなるそうだ (<https://www.pazru.net/js/kihon/2.html>)．
+
+
+```{.html}
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.3.0/highlightjs-line-numbers.min.js"></script>
+<script>
+  hljs.initHighlightingOnLoad();
+  hljs.initLineNumbersOnLoad();
+</script>
+```
+
+
+
+## /static/css/style.css
+
+デフォルトでは，行番号とコードの境界が分かりにくいなど見た目がイマイチ．
+下記を参考に弄った．
+
+<http://nkurilog.blogspot.com/2017/11/blogger-highlightjs-line-numbersjs.html>
+
+```{css css-highlightjs}
+/* for block of numbers */
+
+td.hljs-ln-numbers {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    text-align: right;
+    color: #ccc;
+    border-right: 1px solid #CCC;
+    vertical-align: top;
+    padding-right: 5px;
+
+    color: #ccc;
+}
+ 
+/* for block of code */
+td.hljs-ln-code {
+    padding-left: 10px !important;
+}
+```
+
+## 本文
+
+上述の css + js では出力もハイライトしてしまい，コードとの区別が難しくなる．
+そこで，セットアップチャンクで， `class.output = 'nohighlight'` しておく．
+
+本文に毎回入れておく必要があるので，適用には過去の記事も修正が必要．[^atusy]
+
+[^atusy]: 各記事冒頭で `class.output` を指定しておくのは面倒なので，
+  弊 `blog はhighlightjs-line-numbers` プラグインの採用を見送った．
+  js を使うくらいなら Hugo 自身の機能を `knit_hook` によって使えるようにしたい……
+  という妄想もある．
+  <https://gohugo.io/content-management/syntax-highlighting/>
+  
+
+
+````
+```{`r "r"` setup, include = FALSE}
+knitr::opts_chunk$set(class.output = 'nohighlight')
+```
+````
+
+# その他の html 出力の場合
+
+とりあえず下記を Rmd ファイル冒頭にでも仕込んで下さい．
+なぜか knit にえらく時間がかかるようになるので注意です．
+すぐ結果を見れるのがウリな `html_notebook` ではストレスが大きいと思います．[^zousan]
+
+[^zousan]: knit 時間さえ解決できれば，`zousan::zousan_document` への PR を考えたい．
+
+`html_document`, `html_notebook`, `bookdown::html_document2`, `tufte::tufte_html` で動作を確認しました．
+`pagdown::html_paged` では動きませんでした．
+
+````
+
+<link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/monokai.min.css" rel="stylesheet">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.3.0/highlightjs-line-numbers.min.js"></script>
+<script>
+  hljs.initHighlightingOnLoad();
+  hljs.initLineNumbersOnLoad();
+</script>
+
+```{`r "css"`, echo = FALSE}
+/* To remove box around code */
+pre {
+  background: transparent;
+  border: transparent;
+}
+
+/* for block of numbers */
+
+td.hljs-ln-numbers {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    text-align: right;
+    color: #ccc;
+    border-right: 1px solid #CCC;
+    vertical-align: top;
+    padding-right: 5px;
+
+    /* your custom style here */
+}
+ 
+/* for block of code */
+td.hljs-ln-code {
+    padding-left: 10px !important;
+}
+```
+
+```{`r "r"` setup, include = FALSE}
+# 出力をハイライトをオフにする
+# 残念なが行番号もオフになる
+knitr::opts_chunk$set(class.output = 'nohighlight')
+```
+````
+
+# Enjoy!
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.3.0/highlightjs-line-numbers.min.js"></script>
+<script>
+  hljs.initHighlightingOnLoad();
+  hljs.initLineNumbersOnLoad();
+</script>
+

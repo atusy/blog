@@ -1,0 +1,194 @@
+---
+title: highlightjs と highlightjs-line-numbers プラグインで Rmarkdown のコードブロックに行番号をつける
+author: ~
+date: '2019-04-22'
+slug: rmd-line-num-with-highlightjs
+categories: [R, javascript, html]
+tags: [Rmarkdown, blogdown, highlightjs]
+images: 
+  - /images/covers/rmd-line-num.png
+summary: |
+  `highlightjs` と `highlightjs-line-numbers` プラグインによって， 様々な html フォーマットにおいてコードブロックに番号付けできるようにする方法を紹介する． \
+  ![](/images/covers/rmd-line-num-with-highlightjs.png)
+output:
+  blogdown::html_page:
+    pandoc_args: 
+      - --from
+      - markdown+east_asian_line_breaks
+---
+
+
+
+<p>先日の記事では pandoc 自身の力を持ってコードブロックに行番号を振る方法を紹介した
+(<a href="/2019/04/18/rmd-line-num/">Rmarkdown でチャンクとその出力に行番号を付ける</a>)．</p>
+<p>先日の方法は基本的に html と pdf に対応する一方，現状では <code>html_notebook</code>, <code>bookdown::html_document2</code>, <code>blogdown::html_page</code>, <code>pagedown::html_paged</code> では使えない．</p>
+<p><code>bookdown::html_document2</code> に限れば <a href="//github.com/rstudio/bookdown/pull/706">PR#706</a> がマージされれば先日の方法が使えるようになる．</p>
+<p>それはさておき，<code>pagedown::html_paged</code> を除くおおよその <code>html_*</code> 出力に対応できる， <code>highlightjs</code> と <code>highlightjs-line-numbers</code> プラグインを用いた方法を発見したので紹介する．</p>
+<p>実際に使うと以下のようになる．</p>
+<pre class="r"><code>iris[
+  1:5,
+]</code></pre>
+<pre class="nohighlight"><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1          5.1         3.5          1.4         0.2  setosa
+## 2          4.9         3.0          1.4         0.2  setosa
+## 3          4.7         3.2          1.3         0.2  setosa
+## 4          4.6         3.1          1.5         0.2  setosa
+## 5          5.0         3.6          1.4         0.2  setosa</code></pre>
+<div id="blogdown-の場合" class="section level1">
+<h1>blogdown の場合</h1>
+<p>blogdown のコードブロックにおいてシンタックスハイライトと行番号を有効にするには，以下のコードをそれぞれの html に仕込めばいいようだ．</p>
+<p>もうちょっと杜撰ながら，記事ごとにコントロールしやすい方法としては，「<a href="#その他の-html-出力の場合">その他の html 出力の場合</a>」と同様に本文中にスクリプトを直接書き込む．本記事ではそうした．</p>
+<p>尚，下記は <a href="//themes.gohugo.io/hugo-bootstrap/"><code>hugo-bootstrap</code></a> テーマを利用した場合の話で，テーマによっては若干ファイル名に差異があるかもしれない．</p>
+<div id="layoutspartialshead-custom.html" class="section level2">
+<h2>/layouts/partials/head-custom.html</h2>
+<p>monokai など，お好みのスタイルを選ぶ (<a href="https://cdnjs.com/libraries/highlight.js/" class="uri">https://cdnjs.com/libraries/highlight.js/</a>)．</p>
+<pre class="html"><code>&lt;link href=&quot;https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/monokai.min.css&quot; rel=&quot;stylesheet&quot;&gt;</code></pre>
+</div>
+<div id="layoutspartialsfooter.html" class="section level2">
+<h2>/layouts/partials/footer.html</h2>
+<p>パフォーマンスを重視して， JavaScript は footer に仕込む．<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
+<pre class="html"><code>&lt;script src=&quot;//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.3.0/highlightjs-line-numbers.min.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+  hljs.initHighlightingOnLoad();
+  hljs.initLineNumbersOnLoad();
+&lt;/script&gt;</code></pre>
+</div>
+<div id="staticcssstyle.css" class="section level2">
+<h2>/static/css/style.css</h2>
+<p>デフォルトでは，行番号とコードの境界が分かりにくいなど見た目がイマイチ．下記を参考に弄った．</p>
+<p><a href="http://nkurilog.blogspot.com/2017/11/blogger-highlightjs-line-numbersjs.html" class="uri">http://nkurilog.blogspot.com/2017/11/blogger-highlightjs-line-numbersjs.html</a></p>
+<pre class="css"><code>/* for block of numbers */
+
+td.hljs-ln-numbers {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    text-align: right;
+    color: #ccc;
+    border-right: 1px solid #CCC;
+    vertical-align: top;
+    padding-right: 5px;
+
+    color: #ccc;
+}
+ 
+/* for block of code */
+td.hljs-ln-code {
+    padding-left: 10px !important;
+}</code></pre>
+<style type="text/css">
+/* for block of numbers */
+
+td.hljs-ln-numbers {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    text-align: right;
+    color: #ccc;
+    border-right: 1px solid #CCC;
+    vertical-align: top;
+    padding-right: 5px;
+
+    color: #ccc;
+}
+ 
+/* for block of code */
+td.hljs-ln-code {
+    padding-left: 10px !important;
+}
+</style>
+</div>
+<div id="本文" class="section level2">
+<h2>本文</h2>
+<p>上述の css + js では出力もハイライトしてしまい，コードとの区別が難しくなる．そこで，セットアップチャンクで， <code>class.output = 'nohighlight'</code> しておく．</p>
+<p>本文に毎回入れておく必要があるので，適用には過去の記事も修正が必要．<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></p>
+<pre><code>```{r setup, include = FALSE}
+knitr::opts_chunk$set(class.output = &#39;nohighlight&#39;)
+```</code></pre>
+</div>
+</div>
+<div id="その他の-html-出力の場合" class="section level1">
+<h1>その他の html 出力の場合</h1>
+<p>とりあえず下記を Rmd ファイル冒頭にでも仕込んで下さい．なぜか knit にえらく時間がかかるようになるので注意です．すぐ結果を見れるのがウリな <code>html_notebook</code> ではストレスが大きいと思います．<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p>
+<p><code>html_document</code>, <code>html_notebook</code>, <code>bookdown::html_document2</code>, <code>tufte::tufte_html</code> で動作を確認しました．
+<code>pagdown::html_paged</code> では動きませんでした．</p>
+<pre><code>
+&lt;link href=&quot;//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/monokai.min.css&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;script src=&quot;//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.3.0/highlightjs-line-numbers.min.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+  hljs.initHighlightingOnLoad();
+  hljs.initLineNumbersOnLoad();
+&lt;/script&gt;
+
+```{css, echo = FALSE}
+/* To remove box around code */
+pre {
+  background: transparent;
+  border: transparent;
+}
+
+/* for block of numbers */
+
+td.hljs-ln-numbers {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    text-align: right;
+    color: #ccc;
+    border-right: 1px solid #CCC;
+    vertical-align: top;
+    padding-right: 5px;
+
+    /* your custom style here */
+}
+ 
+/* for block of code */
+td.hljs-ln-code {
+    padding-left: 10px !important;
+}
+```
+
+```{r setup, include = FALSE}
+# 出力をハイライトをオフにする
+# 残念なが行番号もオフになる
+knitr::opts_chunk$set(class.output = &#39;nohighlight&#39;)
+```</code></pre>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.3.0/highlightjs-line-numbers.min.js"></script>
+<script>
+  hljs.initHighlightingOnLoad();
+  hljs.initLineNumbersOnLoad();
+</script>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>JavaScript は body の一番下、 <code>&lt;/body&gt;</code> の直前に記述するのが良いらしい．
+head にすると記述，head の読み込み完了を待って body を読むためロードが遅くなるそうだ (<a href="https://www.pazru.net/js/kihon/2.html" class="uri">https://www.pazru.net/js/kihon/2.html</a>)．<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>各記事冒頭で <code>class.output</code> を指定しておくのは面倒なので，弊 <code>blog はhighlightjs-line-numbers</code> プラグインの採用を見送った．
+js を使うくらいなら Hugo 自身の機能を <code>knit_hook</code> によって使えるようにしたい……
+という妄想もある．
+<a href="https://gohugo.io/content-management/syntax-highlighting/" class="uri">https://gohugo.io/content-management/syntax-highlighting/</a><a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>knit 時間さえ解決できれば，<code>zousan::zousan_document</code> への PR を考えたい．<a href="#fnref3" class="footnote-back">↩</a></p></li>
+</ol>
+</div>
