@@ -6,7 +6,7 @@ slug: rmd-line-num-with-highlightjs
 categories: [R, javascript, html]
 tags: [Rmarkdown, blogdown, highlightjs]
 images: 
-  - /images/covers/rmd-line-num.png
+  - /images/covers/rmd-line-num-with-highlightjs.png
 summary: |
   `highlightjs` と `highlightjs-line-numbers` プラグインによって， 様々な html フォーマットにおいてコードブロックに番号付けできるようにする方法を紹介する． \
   `r knitr::include_graphics("/images/covers/rmd-line-num-with-highlightjs.png")`
