@@ -1,0 +1,73 @@
+---
+title: rocker/verse でも Rmd → PDF 時に必要なパッケージが自動インストールできるようになった
+author: ~
+date: '2019-04-27'
+slug: tlmgr-install-on-rocker
+categories: [R, docker, TeX]
+tags: [rocker, tlmgr, texlive]
+output:
+  blogdown::html_page:
+    pandoc_args: 
+      - --from
+      - markdown+east_asian_line_breaks
+summary: |
+  rocker/verse における Tex Live 関連の権限が更新され， `tlmgr install` や Rmd → PDF 時に必要なパッケージの自動インストールが可能になった．Dockerfile 編集時には注意点あり．
+---
+
+`rocker/verse` で R Markdown を使って pdf をレンダリングする人はそれなりに多いと思う．
+
+これは内部では TeX Live を利用しているため，
+日本語利用を始めとした諸機能を追加するには `tlmgr` を利用している．
+
+親切設計により `preamble.tex` や YAML フロントマターにおける
+`header-includes:` を適切に記述しておけば，
+通常では `knit` 時に必要なパッケージを自動で `tlmgr install` + `tlmgr path add` してくれることになっている[^tip-knitr-and-tlmgr]．
+
+[^tip-knitr-and-tlmgr]:
+    `knit` 時に自動で `tlmgr install` させると利用するパッケージが一つ見つかるごとに
+    ```
+    tlmgr search hoge
+    tlmgr install hoge
+    tlmgr path add
+    ```
+    を繰り返す．
+    このため，初回knit時はknitに長めの時間がかかる．
+    これを避けるには手動で一度にパッケージをインストールする．
+    ```
+    tlmgr install hoge fuga
+    tlmgr path add
+    ```
+
+しかし以前の `rocker/verse` は `knit` 時などにユーザーが `tlmgr install` 
+を試みると，`permission denied` されてしまう残念仕様でした．
+
+ところが最近の更新で，この点が改善されました[^rocker-verse-dockerfile-diff]!!
+
+[^rocker-verse-dockerfile-diff]: 
+    <https://github.com/rocker-org/rocker-versioned/compare/99403746f4c7d2310a8eb955db0218484addc016...053a26137013a52d7cca805c6ee32241e9fa855a> の `Files changed` タブを開く `verse/Dockerfile` の51--56行目を参照
+    ```.diff
+       && chown -R root:staff /opt/TinyTeX \
+    -  && chmod -R a+w /opt/TinyTeX \
+    -  && chmod -R a+wx /opt/TinyTeX/bin \
+    +  && chown -R root:staff /usr/local/lib/R/site-library \
+    +  && chmod -R g+w /opt/TinyTeX \
+    +  && chmod -R g+wx /opt/TinyTeX/bin \
+    ```
+
+
+R コンソール上で `tlmgr install` したい場合は `tinytex::tlmgr_install()` を使いましょう．
+こいつは `tlmgr path add` もしておいてくれます．
+
+`Dockerfile` で `tlmgr install` したい場合は下記のように
+権限周りを正しく再設定しないと，
+`docker run` して以降，ユーザーレベルで `tlmgr install` できなるので注意．
+
+```.dockerfile
+RUN tlmgr install hoge fuga \
+  && tlmgr path add \
+  && chown -R root:staff /opt/TinyTeX \
+  && chmod -R g+w /opt/TinyTeX \
+  && chmod -R g+wx /opt/TinyTeX/bin
+```
+
+# Enjoy!!

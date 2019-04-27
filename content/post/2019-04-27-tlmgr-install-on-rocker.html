@@ -1,0 +1,57 @@
+---
+title: rocker/verse でも Rmd → PDF 時に必要なパッケージが自動インストールできるようになった
+author: ~
+date: '2019-04-27'
+slug: tlmgr-install-on-rocker
+categories: [R, docker, TeX]
+tags: [rocker, tlmgr, texlive]
+output:
+  blogdown::html_page:
+    pandoc_args: 
+      - --from
+      - markdown+east_asian_line_breaks
+summary: |
+  rocker/verse における Tex Live 関連の権限が更新され， `tlmgr install` や Rmd → PDF 時に必要なパッケージの自動インストールが可能になった．Dockerfile 編集時には注意点あり．
+---
+
+
+
+<p><code>rocker/verse</code> で R Markdown を使って pdf をレンダリングする人はそれなりに多いと思う．</p>
+<p>これは内部では TeX Live を利用しているため，日本語利用を始めとした諸機能を追加するには <code>tlmgr</code> を利用している．</p>
+<p>親切設計により <code>preamble.tex</code> や YAML フロントマターにおける
+<code>header-includes:</code> を適切に記述しておけば，通常では <code>knit</code> 時に必要なパッケージを自動で <code>tlmgr install</code> + <code>tlmgr path add</code> してくれることになっている<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>．</p>
+<p>しかし以前の <code>rocker/verse</code> は <code>knit</code> 時などにユーザーが <code>tlmgr install</code>
+を試みると，<code>permission denied</code> されてしまう残念仕様でした．</p>
+<p>ところが最近の更新で，この点が改善されました<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>!!</p>
+<p>R コンソール上で <code>tlmgr install</code> したい場合は <code>tinytex::tlmgr_install()</code> を使いましょう．こいつは <code>tlmgr path add</code> もしておいてくれます．</p>
+<p><code>Dockerfile</code> で <code>tlmgr install</code> したい場合は下記のように権限周りを正しく再設定しないと，
+<code>docker run</code> して以降，ユーザーレベルで <code>tlmgr install</code> できなるので注意．</p>
+<pre class=".dockerfile"><code>RUN tlmgr install hoge fuga \
+  &amp;&amp; tlmgr path add \
+  &amp;&amp; chown -R root:staff /opt/TinyTeX \
+  &amp;&amp; chmod -R g+w /opt/TinyTeX \
+  &amp;&amp; chmod -R g+wx /opt/TinyTeX/bin</code></pre>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!!</h1>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><code>knit</code> 時に自動で <code>tlmgr install</code> させると利用するパッケージが一つ見つかるごとに</p>
+<pre><code>tlmgr search hoge
+tlmgr install hoge
+tlmgr path add</code></pre>
+<p>を繰り返す．このため，初回knit時はknitに長めの時間がかかる．これを避けるには手動で一度にパッケージをインストールする．</p>
+<pre><code>tlmgr install hoge fuga
+tlmgr path add</code></pre>
+<a href="#fnref1" class="footnote-back">↩</a></li>
+<li id="fn2"><p><a href="https://github.com/rocker-org/rocker-versioned/compare/99403746f4c7d2310a8eb955db0218484addc016...053a26137013a52d7cca805c6ee32241e9fa855a" class="uri">https://github.com/rocker-org/rocker-versioned/compare/99403746f4c7d2310a8eb955db0218484addc016...053a26137013a52d7cca805c6ee32241e9fa855a</a> の <code>Files changed</code> タブを開く <code>verse/Dockerfile</code> の51–56行目を参照</p>
+<pre class=".diff"><code>   &amp;&amp; chown -R root:staff /opt/TinyTeX \
+-  &amp;&amp; chmod -R a+w /opt/TinyTeX \
+-  &amp;&amp; chmod -R a+wx /opt/TinyTeX/bin \
++  &amp;&amp; chown -R root:staff /usr/local/lib/R/site-library \
++  &amp;&amp; chmod -R g+w /opt/TinyTeX \
++  &amp;&amp; chmod -R g+wx /opt/TinyTeX/bin \</code></pre>
+<a href="#fnref2" class="footnote-back">↩</a></li>
+</ol>
+</div>
