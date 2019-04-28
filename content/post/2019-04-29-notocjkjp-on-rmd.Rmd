@@ -1,0 +1,125 @@
+---
+title: RMarkdown + XeLaTeX + Noto フォントで日本語 PDF を出力する
+author: ~
+date: '2019-04-29'
+slug: notocjkjp-on-rmd
+categories: [R]
+tags: [Rmd, Font, docker, r-wakalang]
+output:
+  blogdown::html_page:
+    pandoc_args: 
+      - --from
+      - markdown+east_asian_line_breaks
+---
+
+# はじめに
+
+過去に 「[Rmarkdownで日本語PDFを出力する](//qiita.com/Atsushi776/items/9ef1e5d744e2b91c61ee)」という記事を書いた．
+
+
+ここでは以下のような YAML フロントマターを用いて， IPA フォントによる日本語 PDF を出力した．
+
+```.yaml
+---
+output:
+  pdf_document: 
+    latex_engine: xelatex 
+header-includes: 
+  - \usepackage{bookmark} 
+  - \usepackage{xltxtra} 
+  - \usepackage{zxjatype} 
+  - \usepackage[ipa]{zxjafont} 
+---
+```
+
+`\usepackage[ipa]{zxjafont}` という部分で IPA フォントを指定しているが，
+ここには他のフォントも指定できる[^zxjafont-0-4]．
+
+[^zxjafont-0-4]: 
+    [zr-tex8r/ZXjafont](//github.com/zr-tex8r/ZXjafont) ドキュメント参照
+    (<https://github.com/zr-tex8r/ZXjafont/raw/master/zxjafont.pdf>)
+
+そこで No Tofu な Noto フォントを試してみた．
+
+やるべきことはフォントのインストールと，YAMLフロントマターの書き換えだ．
+
+# 手順
+
+## Noto フォントのインストール
+
+Windows なら [https://www.google.com/get/noto/] で 
+Noto Sans CJK JP と Noto Serif CJK JP をダウンロードして解凍し，
+右クリックからインストールできるはずだが，試していない．
+
+Ubuntu / Debian なら以下の手順で行う．
+
+```.bash
+# Noto Sans CJK をインストール
+sudo apt get update
+sudo apt install fonts-noto-cjk
+
+# Noto Serif CJKjp をインストール
+wget -q https://noto-website-2.storage.googleapis.com/pkgs/NotoSerifCJKjp-hinted.zip
+sudo unzip NotoSerifCJKjp-hinted.zip -d /usr/share/fonts/opentype/noto
+rm NotoSerifCJKjp-hinted.zip
+sudo chmod 644 /usr/share/fonts/opentype/noto/*
+```
+
+Dockerfile なら以下のように書く．
+
+```.Dockerfile
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends fonts-noto-cjk \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* \
+  && wget -q https://noto-website-2.storage.googleapis.com/pkgs/NotoSerifCJKjp-hinted.zip \
+  && unzip NotoSerifCJKjp-hinted.zip -d /usr/share/fonts/opentype/noto \
+  && rm NotoSerifCJKjp-hinted.zip \
+  && chmod 644 /usr/share/fonts/opentype/noto/*
+```
+
+ハマった点は以下の通り．
+
+- `apt` 経由でインストールした `fonts-noto-cjk` は Sans (ゴシック) しか含まないようで，追加で Serif を入手する必要がある[^thx-rwakalang]
+- 手動で入手したフォントをシステムにインストールする場合は権限を `644` に設定する必要がある[^fonts-on-system]
+
+
+[^thx-rwakalang]: 
+    [r-wakalang](//qiita.com/uri/items/5583e91bb5301ed5a4ba)
+    で相談したところ，
+    フォントがちゃんと見える位置にあるかと聞かれ，
+    `/usr/share/fonts` 以下を確認したところ判明した．
+    原因究明に協力頂いた Carlos Luis Rivera 氏に感謝します．
+    もっと簡単な方法としてはインストール済みのフォントのパスを一覧してくれる
+    `fc-list` コマンドがあると後から知った
+    (<https://www.softel.co.jp/blogs/tech/archives/3762>)．
+
+[^fonts-on-system]:
+    CentOSにGoogle Noto フォントをインストール 
+    (<https://nmbr8.com/post/how_to_install_noto_sans_cjk_on_centos/>)
+
+## YAMLフロントマター
+
+以下のように指定する．`\usepackage[noto]{zxjafont}` がミソ．
+
+```.yaml
+---
+output:
+  pdf_document:
+    latex_engine: xelatex
+header-includes:
+  - \usepackage{bookmark}
+  - \usepackage{xltxtra}
+  - \usepackage{zxjatype}
+  - \usepackage[noto]{zxjafont}
+---
+```
+
+
+
+## 内容を書いて knit
+
+RStudio ユーザーなら Ctrl + Shift + K 
+
+# Enjoy!!
+
