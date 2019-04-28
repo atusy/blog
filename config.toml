@@ -10,6 +10,7 @@ disqusShortname = ""
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$", "drafts$"]
 defaultContentLanguage = "ja"
 buildDrafts = false
+buildFuture = true
 
 # Pagination
 paginate = 7
