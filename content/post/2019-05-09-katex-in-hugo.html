@@ -1,0 +1,113 @@
+---
+title: Hugo で KaTeX
+author: ~
+date: '2019-05-09'
+slug: katex-in-hugo
+categories: [Hugo]
+tags: [KaTeX, MathJax]
+math: true
+weight: 1
+output:
+  html_page:
+    - --from
+    - markdown+east_asian_line_breaks
+summary: "MathJax より軽量で高速な KaTeX に乗り換えた"
+---
+
+
+
+<div id="mathjax--katex-" class="section level1">
+<h1>MathJax から KaTeX に乗り換えた</h1>
+<p>当サイトでは数式レンダリングに MathJax を採用してきたが，
+より軽量で高速な KaTeX に乗り換えた．</p>
+<p>“<a href="https://www.intmath.com/cg5/katex-mathjax-comparison.php">KaTeX and MathJax Comparison Demo</a>”
+をレンダリングするのに要した時間は</p>
+<ul>
+<li>KaTeX は 109 ms</li>
+<li>MathJax は 1770 ms</li>
+</ul>
+<p>であった．</p>
+<p>ライブラリのサイズも zip の段階で</p>
+<ul>
+<li>KaTeX 0.10.1 は 1.45MB<br />
+<a href="https://github.com/KaTeX/KaTeX/releases" class="uri">https://github.com/KaTeX/KaTeX/releases</a></li>
+<li>MathJax 2.6 は 36.23 MB<br />
+<a href="http://docs.mathjax.org/en/latest/installation.html" class="uri">http://docs.mathjax.org/en/latest/installation.html</a></li>
+</ul>
+<p>と大幅に異なる．</p>
+</div>
+<div id="section" class="section level1">
+<h1>使い方</h1>
+<div id="katex-" class="section level2">
+<h2>全ページで KaTeX を有効にする場合</h2>
+<p>使っている theme のディレクトリ内にある <code>layouts/partials/footer.html</code> をドキュメントルートの <code>layouts/partials/footer.html</code> にコピーして，
+下記を追記する<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>．</p>
+<p>最新のバージョンを利用するには<a href="https://github.com/KaTeX/KaTeX">公式</a>を参照されたい．</p>
+<pre class="html"><code>&lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css&quot; integrity=&quot;sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ&quot; crossorigin=&quot;anonymous&quot;&gt;
+&lt;script defer src=&quot;https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js&quot; integrity=&quot;sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij&quot; crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
+&lt;script defer src=&quot;https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js&quot; integrity=&quot;sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI&quot; crossorigin=&quot;anonymous&quot; onload=&quot;renderMathInElement(document.body);&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+  document.addEventListener(&quot;DOMContentLoaded&quot;, function() {
+    renderMathInElement(document.body, {delimiters: [
+      {left: &quot;$$&quot;, right: &quot;$$&quot;, display: true},
+      {left: &quot;$&quot;, right: &quot;$&quot;, display: false}]
+    });
+  });
+&lt;/script&gt;</code></pre>
+<p>4行目以降では数式の開始位置と終了位置を
+ディスプレイ数式 (<code>display: true</code>) の場合と
+インライン数式 (<code>display: false</code>)
+の場合について定義している<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>．</p>
+<p><code>integrity</code> は参照しているリソースのハッシュ値で，セキュリティを気にして付けておくべきらしい<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>．</p>
+</div>
+<div id="katex--1" class="section level2">
+<h2>一部のページで KaTeX を有効にする場合</h2>
+<p>いくら KaTeX が軽いとはいえ，数式のないページでまで KaTeX を読み込んでしまうのはよろしくない……と思う．</p>
+<p>私はホーム画面と，YAML フロントマターに <code>math: true</code> を指定した記事のみに KaTeX を適用にすることにした．</p>
+<p>ホーム画面でも KaTeX をロードするのは，各記事のサマリーに数式が含まれている場合に対処するためである．</p>
+<p>それには上述の HTML と Hugo のテンプレート記法を組み合わせればよい<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>．</p>
+<pre class="html"><code>{{ if or (.IsHome) ($.Param &quot;math&quot;) }}
+  &lt;!-- ここに上述の HTML コードを記述 --&gt;
+{{ end }}</code></pre>
+</div>
+</div>
+<div id="section-1" class="section level1">
+<h1>テスト</h1>
+<div id="section-2" class="section level2">
+<h2>ディスプレイ数式</h2>
+<pre class="tex"><code>$$
+f(x)= ∑_{k=0}^{∞} \frac{ f^{(k)}(x_0)}{n!} \left( x-x_0 \right)^k
+$$</code></pre>
+<p>は</p>
+<p><span class="math display">\[
+f(x)= ∑_{k=0}^{∞} \frac{ f^{(k)}(x_0)}{n!} \left( x-x_0 \right)^k
+\]</span></p>
+<p>になる．</p>
+</div>
+<div id="section-3" class="section level2">
+<h2>インライン数式</h2>
+<p><code>$\LaTeX{}$</code> は <span class="math inline">\(\LaTeX{}\)</span> になる．</p>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><span class="citation">@kazutan</span> 氏による「R MarkdownでKatexを使って数式表示」を参考にした．<br />
+<a href="https://qiita.com/kazutan/items/c07d317dde68b90ef118" class="uri">https://qiita.com/kazutan/items/c07d317dde68b90ef118</a><a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>以下のようにする例も見受けられたが，インラインの数式が動作しなかった．</p>
+<pre class="html"><code>&lt;script&gt;
+  renderMathInElement(document.body, {delimiters: [
+    {left: &quot;$$&quot;, right: &quot;$$&quot;, display: true},
+    {left: &quot;$&quot;, right: &quot;$&quot;, display: false}
+  ]});
+&lt;/script&gt;</code></pre>
+<a href="#fnref2" class="footnote-back">↩</a></li>
+<li id="fn3"><p>サブリソース完全性<br />
+<a href="https://developer.mozilla.org/ja/docs/Web/Security/Subresource_Integrity" class="uri">https://developer.mozilla.org/ja/docs/Web/Security/Subresource_Integrity</a><a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn4"><p>Introduction to Hugo Templating<br />
+<a href="https://gohugo.io/templates/introduction/" class="uri">https://gohugo.io/templates/introduction/</a><a href="#fnref4" class="footnote-back">↩</a></p></li>
+</ol>
+</div>

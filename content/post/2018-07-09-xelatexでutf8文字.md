@@ -5,6 +5,7 @@ date: '2018-07-09'
 slug: xelatexでutf8文字
 categories: [latex]
 tags: [latex, Rmd, unicode]
+math: true
 ---
 
 $\LaTeX{}$ で μ や α など特殊文字を直打ちすると、

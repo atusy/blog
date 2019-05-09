@@ -2,13 +2,23 @@
 output:
   blogdown::html_page:
     toc: true
-title: blogdownでMathJax
+title: Hugo (blogdown) で MathJax
 author: ~
-date: '2018-07-28'
+date: '2019-05-09'
 slug: how2mathjax
-categories: [R]
-tags: [blogdown, mathjax, latex]
+categories: [R, Hugo]
+tags: [blogdown, MathJax, LaTeX]
+math: true
+aliases:
+  - /2018/07/28/how2mathjax/
+weight: 2
+summary: Hugo (blogdown) で MathJax を利用する方法を紹介．ただし，2019-05-09 以降は KaTeX を採用しているため，数式のレンダリングは KaTeX によるもの．
 ---
+
+- 2018-07-28 公開\\
+- 2019-05-09 
+    - 「blogdownでMathJax」から「Hugo (blogdown) で MathJax」に改題
+    - KaTeX 採用に伴い，下記の数式は KaTeX がレンダリングしている
 
 # MathJaxとは？
 
@@ -18,23 +28,21 @@ MathJaxを利用すると、$\TeX$ 記法を用いて数式を表現できる。
 
 ```tex
 $$
-\latex
+\LaTeX{}
 $$
 ```
 
 と入力すると
 
 $$
-\LaTeX
+\LaTeX{}
 $$
 
 となる。
 
+インラインでも `$\LaTeX{}$` とすると、 $\LaTeX{}$ となる。 
 
-
-インラインでも `$\LaTeX$` とすると、 $\LaTeX$ となる。 
-
-ブロックでは `$$` から成る2行の間に、 インラインでは同じ行の `$` 2字の間に $TeX$ 記法を用いることがポイントだ。
+ブロックでは `$$` から成る2行の間に、 インラインでは同じ行の `$` 2字の間に $\TeX{}$ 記法を用いることがポイントだ。
 
 # blogdownではインラインでMathJaxが使えない……？
 

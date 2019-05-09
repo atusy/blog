@@ -1,0 +1,136 @@
+---
+title: Hugo で KaTeX
+author: ~
+date: '2019-05-09'
+slug: katex-in-hugo
+categories: [Hugo]
+tags: [KaTeX, MathJax]
+math: true
+weight: 1
+output:
+  html_page:
+    - --from
+    - markdown+east_asian_line_breaks
+summary: "MathJax より軽量で高速な KaTeX に乗り換えた"
+---
+
+# MathJax から KaTeX に乗り換えた
+
+当サイトでは数式レンダリングに MathJax を採用してきたが，
+より軽量で高速な KaTeX に乗り換えた．
+
+"[KaTeX and MathJax Comparison Demo](https://www.intmath.com/cg5/katex-mathjax-comparison.php)"
+をレンダリングするのに要した時間は
+
+- KaTeX は 109 ms 
+- MathJax は 1770 ms 
+
+であった．
+
+ライブラリのサイズも zip の段階で
+
+- KaTeX 0.10.1 は 1.45MB \
+  <https://github.com/KaTeX/KaTeX/releases>
+- MathJax 2.6 は 36.23 MB \
+  <http://docs.mathjax.org/en/latest/installation.html>
+
+と大幅に異なる．
+
+# 使い方
+
+## 全ページで KaTeX を有効にする場合
+
+使っている theme のディレクトリ内にある `layouts/partials/footer.html` をドキュメントルートの `layouts/partials/footer.html` にコピーして，
+下記を追記する[^zousan]．
+
+最新のバージョンを利用するには[公式](https://github.com/KaTeX/KaTeX)を参照されたい．
+
+[^zousan]: 
+    @kazutan 氏による「R MarkdownでKatexを使って数式表示」を参考にした．\
+    <https://qiita.com/kazutan/items/c07d317dde68b90ef118> 
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js" integrity="sha384-2BKqo+exmr9su6dir+qCw08N2ZKRucY4PrGQPPWU1A7FtlCGjmEGFqXCv5nyM5Ij" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}]
+    });
+  });
+</script>
+```
+
+4行目以降では数式の開始位置と終了位置を
+ディスプレイ数式 (`display: true`) の場合と
+インライン数式 (`display: false`)
+の場合について定義している[^autorender]．
+
+[^autorender]:
+    以下のようにする例も見受けられたが，インラインの数式が動作しなかった．
+    ```html
+    <script>
+      renderMathInElement(document.body, {delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$", right: "$", display: false}
+      ]});
+    </script>
+    ```
+
+`integrity` は参照しているリソースのハッシュ値で，セキュリティを気にして付けておくべきらしい[^SRI]．
+
+[^SRI]:
+    サブリソース完全性 \
+    <https://developer.mozilla.org/ja/docs/Web/Security/Subresource_Integrity>
+
+## 一部のページで KaTeX を有効にする場合
+
+いくら KaTeX が軽いとはいえ，数式のないページでまで KaTeX を読み込んでしまうのはよろしくない……と思う．
+
+私はホーム画面と，YAML フロントマターに `math: true` を指定した記事のみに KaTeX を適用にすることにした．
+
+ホーム画面でも KaTeX をロードするのは，各記事のサマリーに数式が含まれている場合に対処するためである．
+
+それには上述の HTML と Hugo のテンプレート記法を組み合わせればよい[^templating-hugo]．
+
+[^templating-hugo]:
+    Introduction to Hugo Templating \
+    <https://gohugo.io/templates/introduction/>
+
+```html
+{{ if or (.IsHome) ($.Param "math") }}
+  <!-- ここに上述の HTML コードを記述 -->
+{{ end }}
+```
+
+# テスト
+
+
+## ディスプレイ数式
+
+```{r math, include = FALSE}
+math <- "f(x)= ∑_{k=0}^{∞} \\frac{ f^{(k)}(x_0)}{n!} \\left( x-x_0 \\right)^k"
+```
+
+```tex
+$$
+`r math`
+$$
+```
+
+は
+
+$$
+`r math`
+$$
+
+になる．
+
+## インライン数式
+
+`$\LaTeX{}$` は $\LaTeX{}$ になる．
+
+
+# Enjoy!
