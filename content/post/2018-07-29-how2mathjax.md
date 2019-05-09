@@ -4,14 +4,13 @@ output:
     toc: true
 title: Hugo (blogdown) で MathJax
 author: ~
-date: '2019-05-09'
+date: '2019-05-09 18:00:00'
 slug: how2mathjax
 categories: [R, Hugo]
 tags: [blogdown, MathJax, LaTeX]
 math: true
 aliases:
   - /2018/07/28/how2mathjax/
-weight: 2
 summary: Hugo (blogdown) で MathJax を利用する方法を紹介．ただし，2019-05-09 以降は KaTeX を採用しているため，数式のレンダリングは KaTeX によるもの．
 ---
 
