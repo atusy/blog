@@ -10,13 +10,13 @@
 .blog-post h1 {
   margin: 1.5em 0em .3em;
   color: white;
-  background: #007BFF; 
+  background: #6c757d; 
   padding: 0.2em;
 }
 
 .blog-post h2 {
   margin: 1em 0em .3em;
-  border-bottom: solid 3px #007BFF;
+  border-bottom: solid 3px #6c757d;
 }
 
 .blog-post h3 {
@@ -29,3 +29,17 @@
   font-family: Verdana;
   font-weight: bold;
 }
+
+.badge-primary {
+  background-color: #6c757d;
+}
+
+.page-item.active .page-link {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.page-link {
+  color: #6c757d;
+}
+
