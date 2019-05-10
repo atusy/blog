@@ -20,7 +20,7 @@ pygmentsUseClasses = true
 pygmentsCodeFences = true
 
 [taxonomies]
-  tag = "tags"
+  # tag = "tags"
   category = "categories"
 
 [languages.ja]
