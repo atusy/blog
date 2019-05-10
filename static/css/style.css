@@ -8,19 +8,23 @@
 }
 
 .blog-post h1 {
-  margin: 1.5em 0em .3em;
+  margin: 1.5rem 0 .3rem;
   color: white;
   background: #6c757d; 
-  padding: 0.2em;
+  padding: 0.2rem;
 }
 
 .blog-post h2 {
-  margin: 1em 0em .3em;
+  margin: 1rem 0 .3rem;
   border-bottom: solid 3px #6c757d;
 }
 
+.blog-post-title:nth-child(1) {
+  margin-top: 0;
+}
+
 .blog-post h3 {
-  margin: 1em 0em .3em;
+  margin: 1rem 0 .3rem;
 }
 
 .page-item.active .page-link {
