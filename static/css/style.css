@@ -23,17 +23,6 @@
   margin: 1em 0em .3em;
 }
 
-/* Font Awesome hatena bookmark */
-.fa-hatena:before {
-  content: "B!";
-  font-family: Verdana;
-  font-weight: bold;
-}
-
-.badge-primary {
-  background-color: #6c757d;
-}
-
 .page-item.active .page-link {
   background-color: #6c757d;
   border-color: #6c757d;
@@ -43,3 +32,14 @@
   color: #6c757d;
 }
 
+a {
+  color: #0056b3;
+}
+
+a.text-dark:hover {
+  color: #0056b3 !important;
+}
+
+.badge-primary {
+  background-color: #6c757d;
+}
