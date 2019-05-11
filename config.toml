@@ -88,9 +88,9 @@ pygmentsCodeFences = true
  
 threshold = 80
  
-includeNewer = false
+includeNewer = true
  
-toLower = false
+toLower = true
  
 [[related.indices]]
 name = "keywords"
@@ -104,7 +104,7 @@ name  = "tags"
 weight = 100
 [[related.indices]]
 name  = "categories"
-weight = 80
+weight = 100
 [[related.indices]]
 name  = "date"
 weight = 10
