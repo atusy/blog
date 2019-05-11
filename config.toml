@@ -11,6 +11,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$", "drafts$"]
 defaultContentLanguage = "ja"
 buildDrafts = false
 buildFuture = true
+footnoteReturnLinkContents = "↩"
 
 # Pagination
 paginate = 7
