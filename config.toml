@@ -75,7 +75,7 @@ pygmentsCodeFences = true
   
   [params.sidebar]
     # Whether to show the recent posts or not (default: true)
-    # showRecent = false
+    showRecent = false
 
     # Whether to show the taxonomies or not (default: true)
     # showTaxonomy = false
@@ -83,3 +83,28 @@ pygmentsCodeFences = true
     # How many posts to show on the sidebar (Default: 5)
     # num_recent_posts = 5
 
+[related]
+ 
+threshold = 80
+ 
+includeNewer = false
+ 
+toLower = false
+ 
+[[related.indices]]
+name = "keywords"
+weight = 150
+[[related.indices]]
+name  = "author"
+toLower = true
+weight = 30
+[[related.indices]]
+name  = "tags"
+weight = 100
+[[related.indices]]
+name  = "categories"
+weight = 80
+[[related.indices]]
+name  = "date"
+weight = 10
+pattern = "2006"
