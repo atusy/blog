@@ -27,10 +27,9 @@ tags: [knitr, RMarkdown]
 <p>一体なぜだと悩んでいたのですが，どうやら
 <code>yihui/knitr-examples</code>
 をフォークし，更にフォークした
-<code>knitr</code> の中でテストしたいブランチと同じ名前のブランチを作っておいてあげないといけません[^travis-yml]．</p>
+<code>knitr</code> の中でテストしたいブランチと同じ名前のブランチを作っておいてあげないといけません<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>．</p>
 <p>Travis CI では <code>yihui/knitr-examples</code> に保存されている様々なドキュメントを
 knit して，過去の knit 結果と比較し，互換性を担保しています．</p>
-<pre><code>https://github.com/yihui/knitr/blob/00ffce24b08f79fc15e2b77309bc0b34a0def647/.travis.yml#L17</code></pre>
 <p>で言われた通りにすると，悲しいことにちゃんと自分の開発中のレポジトリがフォークでも PR でも同じようにコケました．</p>
 <p>とは言え，なんだか身に覚えのない原因でコケてるクサいので，master ブランチもテストしてみたところ，同様にコケました．</p>
 <p>ダメじゃん!!</p>
@@ -41,3 +40,10 @@ knit して，過去の knit 結果と比較し，互換性を担保していま
 に挙げておいたんで，ゼヒ協力お願いします．</p>
 <p>ついでに同じ Issue で <code>CONTRIBUTING.md</code> に <code>knitr-exmaples</code> のフォークについても記載したらどうかと言及しておきました．</p>
 <p>ではでは．</p>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><code>.travis.yml</code> を見て初めて気付いた．
+<a href="https://github.com/yihui/knitr/blob/00ffce24b08f79fc15e2b77309bc0b34a0def647/.travis.yml#L17" class="uri">https://github.com/yihui/knitr/blob/00ffce24b08f79fc15e2b77309bc0b34a0def647/.travis.yml#L17</a><a href="#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
+</div>

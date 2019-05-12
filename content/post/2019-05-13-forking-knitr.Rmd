@@ -28,12 +28,13 @@ R Markdown のコードブロックで行番号を便利に使えるよう，関
 一体なぜだと悩んでいたのですが，どうやら
 `yihui/knitr-examples`
 をフォークし，更にフォークした 
-`knitr` の中でテストしたいブランチと同じ名前のブランチを作っておいてあげないといけません[^travis-yml]．
+`knitr` の中でテストしたいブランチと同じ名前のブランチを作っておいてあげないといけません[^travisyml]．
 
 Travis CI では `yihui/knitr-examples` に保存されている様々なドキュメントを
 knit して，過去の knit 結果と比較し，互換性を担保しています．
 
-[travis-yml]: `.travis.yml` を見て初めて気付いた．
+[^travisyml]: 
+    `.travis.yml` を見て初めて気付いた．
     https://github.com/yihui/knitr/blob/00ffce24b08f79fc15e2b77309bc0b34a0def647/.travis.yml#L17
 
 で言われた通りにすると，悲しいことにちゃんと自分の開発中のレポジトリがフォークでも PR でも同じようにコケました．
