@@ -1,0 +1,54 @@
+---
+title: knitr をフォークする時は knitr-examples もフォークした方がいい
+author: ~
+date: '2019-05-13'
+slug: forking-knitr
+categories: [R]
+tags: [knitr, RMarkdown]
+---
+
+R Markdown のコードブロックで行番号を便利に使えるよう，関連パッケージに働きかけています．
+
+- `bookdown::html_document2` に `clean_highlight_tags` を追加
+  ([#706](https://github.com/rstudio/bookdown/pull/706); merged)
+- `pagedown` の `default.css` を編集して出力の見た目を修正
+  ([#100](https://github.com/rstudio/pagedown/pull/100); approved)
+- `knitr` のコードブロックに Pandoc の
+  [fenced code attributes](https://www.pandoc.org/MANUAL.html#fenced-code-blocks) 
+  をフルサポートさせる
+  ([#1710](https://github.com/yihui/knitr/pull/1710))
+
+詳細は全てがマージされたら報告しようかなと．
+
+で，`knitr` なんですが，こいつの開発がなかなかトリッキーです．
+
+テストは Travis CI によって自動化してくれているのですが，
+フォーク先ではテストをパスするのにいざ PR するとコケることがあります．
+
+一体なぜだと悩んでいたのですが，どうやら
+`yihui/knitr-examples`
+をフォークし，更にフォークした 
+`knitr` の中でテストしたいブランチと同じ名前のブランチを作っておいてあげないといけません[^travis-yml]．
+
+Travis CI では `yihui/knitr-examples` に保存されている様々なドキュメントを
+knit して，過去の knit 結果と比較し，互換性を担保しています．
+
+[travis-yml]: `.travis.yml` を見て初めて気付いた．
+    https://github.com/yihui/knitr/blob/00ffce24b08f79fc15e2b77309bc0b34a0def647/.travis.yml#L17
+
+で言われた通りにすると，悲しいことにちゃんと自分の開発中のレポジトリがフォークでも PR でも同じようにコケました．
+
+とは言え，なんだか身に覚えのない原因でコケてるクサいので，master ブランチもテストしてみたところ，同様にコケました．
+
+ダメじゃん!!
+
+ログを見る限り，knit 時の R やらパッケージやらのバージョンが変わってるのが原因かなあとあたりをつけています
+(R 3.2.3 -> R 3.6.0 など)．
+
+とりあえず Issue 
+[#1712](https://github.com/yihui/knitr/issues/1712)
+に挙げておいたんで，ゼヒ協力お願いします．
+
+ついでに同じ Issue で `CONTRIBUTING.md` に `knitr-exmaples` のフォークについても記載したらどうかと言及しておきました．
+
+ではでは．
