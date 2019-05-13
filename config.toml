@@ -23,6 +23,7 @@ pygmentsCodeFences = true
 [taxonomies]
   # tag = "tags"
   category = "categories"
+  tag = "tags"
 
 [languages.ja]
   languageName = "Japanese"
