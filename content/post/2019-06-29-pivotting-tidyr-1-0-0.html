@@ -1,0 +1,434 @@
+---
+title: 雑訳 Pivoting (tidyr 1.0.0) \[WIP\]
+author: ~
+date: '2019-06-29'
+slug: tidyr-1-0-0
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#section">はじめに</a></li>
+<li><a href="#longer">Longer</a><ul>
+<li><a href="#pew">列の名前が文字列データに相当する場合</a></li>
+<li><a href="#billboard">列の名前が数値データに相当する場合</a></li>
+<li><a href="#section-1">列名に複数の変数がある場合</a></li>
+<li><a href="#section-2">一行に複数の観測値が記録されている場合</a></li>
+<li><a href="#section-3">列名が重複している場合</a></li>
+</ul></li>
+<li><a href="#wider">Wider</a></li>
+</ul>
+</div>
+
+<p>この記事は tiydr 1.0.0 で追加される <code>pivot_longer()</code> と <code>pivot_wider()</code> の使い方を紹介する vignette の雑な訳です．まだ正式リリースしていないので，いつ本家の仕様が変わるかも分かりません．これらの点に注意の上読んでください．実際，この翻訳作業で気付いたことをコメントした結果，変わってしまった仕様もありました
+(<a href="https://github.com/tidyverse/tidyr/issues/630">#630</a>)．</p>
+<p>また，翻訳にはこなれていない部分や，適切な訳が分からず英語が残された部分もあります．是非みなさんのコメントで訳を育てて下さい．質問も歓迎です．<a href="https://twitter.com/Atsushi776/">@Atsushi776</a> (Twitter) までどうぞ．</p>
+<p><code>pivot_wider()</code> についてはまだ訳せていないが，<code>pivot_longer()</code> の部分だけ先行公開することにした．</p>
+<p>原文: <a href="https://tidyr.tidyverse.org/dev/articles/pivot.html" class="uri">https://tidyr.tidyverse.org/dev/articles/pivot.html</a></p>
+<div id="section" class="section level1">
+<h1>はじめに</h1>
+<p>この vignette では <code>pivot_longer()</code> と <code>pivot_wider()</code> の使い方を紹介する．これらの関数は <code>gather()</code> と <code>spread()</code> の機能を拡張し，他のパッケージから最新の機能を取り込むことを目指す．</p>
+<p><code>spread()</code> と <code>gather()</code> には設計の基本的な部分に誤りがあった．これらの関数がどの方向に<em>データ</em>を広げたり集めたりするのか予想しにくく，覚えることも困難だった．更にこれらの関数の引数ついては覚えることがとても難しかったので，開発者を含め多くの人は度々ドキュメントを参照する羽目になった．</p>
+<p>そこで R における<em>データ</em>整形を発展させる2つの重要な新機能が，他のパッケージからの着想を得て実装された．</p>
+<ul>
+<li><code>pivot_longer()</code> は型の異なる複数の値を記録した変数を扱うことができる．この機能は Matt Dowle と Arun Srinivasan による
+<a href="https://github.com/Rdatatable/data.table/wiki">data.table</a> パッケージにおける改良型の <code>melt()</code> と <code>dcast()</code>
+から着想を得た．</li>
+<li><code>pivot_longer()</code> と <code>pivot_wider()</code> はデータフレームに対し，列名に記録されたメタデータがどのようにデータ変数に変換されるべきか，あるいは逆変換されるべきかを的確に指定できる．この機能は John Mount と Nina Zumel による <a href="https://winvector.github.io/cdata/">cdata</a> パッケージから着想を得た．</li>
+</ul>
+<p>この vignette では，
+<code>pivot_longer()</code> と <code>pivot_wider()</code> の背景にある重要なアイディアを紹介する．これらのアイディアはこれまであなたが単純なものから複雑なものまで様々なデータ整形に取り組んできた中で用いてきたものだ．</p>
+<p>始めに必要なパッケージを読み込む．実用的には <code>library(tidyverse)</code> で読み込むだろうが，
+<code>tidyverse</code> をパッケージの vignette で読み込むことはできない．</p>
+<pre class="r"><code>library(tidyr)
+library(dplyr)
+library(readr)</code></pre>
+</div>
+<div id="longer" class="section level1">
+<h1>Longer</h1>
+<p><code>pivot_longer()</code> はデータセットの行を増やし，列を減らすことで <strong>長く</strong> (longer) する．開発者は「長い形式 (long form)」という呼び方は合理的ではないと考えている．なぜなら，長さは相対的なもので例えばデータセットの A と B のどちらが長いといった言い方しかできないからだ．</p>
+<p><code>pivot_longer()</code> は野生のデータセットに対してよく適用されるもので，分析を楽にするためというよりは，データの入力や比較を適切に行うために用いられる．次の章からは， <code>pivot_longer()</code> の使い方を現実にありうる様々なデータセットを用いて紹介する．</p>
+<div id="pew" class="section level2">
+<h2>列の名前が文字列データに相当する場合</h2>
+<p><code>relig_income</code> データセットは人々の宗教や年収について集計した結果をカウントデータとして記録している．</p>
+<pre class="r"><code>relig_income
+#&gt; # A tibble: 18 x 11
+#&gt;    religion `&lt;$10k` `$10-20k` `$20-30k` `$30-40k` `$40-50k` `$50-75k`
+#&gt;    &lt;chr&gt;      &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+#&gt;  1 Agnostic      27        34        60        81        76       137
+#&gt;  2 Atheist       12        27        37        52        35        70
+#&gt;  3 Buddhist      27        21        30        34        33        58
+#&gt;  4 Catholic     418       617       732       670       638      1116
+#&gt;  5 Don’t k…      15        14        15        11        10        35
+#&gt;  6 Evangel…     575       869      1064       982       881      1486
+#&gt;  7 Hindu          1         9         7         9        11        34
+#&gt;  8 Histori…     228       244       236       238       197       223
+#&gt;  9 Jehovah…      20        27        24        24        21        30
+#&gt; 10 Jewish        19        19        25        25        30        95
+#&gt; # … with 8 more rows, and 4 more variables: `$75-100k` &lt;dbl&gt;,
+#&gt; #   `$100-150k` &lt;dbl&gt;, `&gt;150k` &lt;dbl&gt;, `Don&#39;t know/refused` &lt;dbl&gt;</code></pre>
+<p>データセットには3つの変数が含まれる．</p>
+<ul>
+<li><code>religion</code> は行ごとに記録されている</li>
+<li><code>income</code> は複数の列の名前として記録されている</li>
+<li><code>count</code> はセルごとの値として記録されている</li>
+</ul>
+<p><code>pivot_longer()</code> を使って整形してみよう．</p>
+<pre class="r"><code>relig_income %&gt;% 
+  pivot_longer(-religion, names_to = &quot;income&quot;, values_to = &quot;count&quot;)
+#&gt; Warning: `vec_type_common()` has been renamed to `vec_ptype_common()`.
+#&gt; This warning is displayed once per session.
+#&gt; # A tibble: 180 x 3
+#&gt;    religion income             count
+#&gt;    &lt;chr&gt;    &lt;chr&gt;              &lt;dbl&gt;
+#&gt;  1 Agnostic &lt;$10k                 27
+#&gt;  2 Agnostic $10-20k               34
+#&gt;  3 Agnostic $20-30k               60
+#&gt;  4 Agnostic $30-40k               81
+#&gt;  5 Agnostic $40-50k               76
+#&gt;  6 Agnostic $50-75k              137
+#&gt;  7 Agnostic $75-100k             122
+#&gt;  8 Agnostic $100-150k            109
+#&gt;  9 Agnostic &gt;150k                 84
+#&gt; 10 Agnostic Don&#39;t know/refused    96
+#&gt; # … with 170 more rows</code></pre>
+<ul>
+<li><p>第一引数は整形したいデータセットをとる (例えば <code>relig_income</code>)．</p></li>
+<li><p>第二引数は整形対象となる列を指定する．今回は <code>religion</code> 以外の全ての列だ．</p></li>
+<li><p><code>names_to</code> 引数には，列の名前として記録されたデータに変数としての名前を与える．今回なら <code>income</code> だ．</p></li>
+<li><p><code>values_to</code> 引数にはセルの値として記録されているデータに変数としての名前を与える．今回なら <code>count</code> だ．</p></li>
+</ul>
+<p><code>names_to</code> と <code>values_to</code> のどちら<em>によって作られる列</em>も <code>relig_income</code> には含まれていないため，これらの引数には引用符で囲った文字列を指定する.</p>
+</div>
+<div id="billboard" class="section level2">
+<h2>列の名前が数値データに相当する場合</h2>
+<p><code>billboard</code> データセットは2000年のビルボードランキングを記録している．データの形式としては <code>relig_income</code> と似ているが，列の名前に記録されたデータは文字列ではなく数値そのものである．</p>
+<pre class="r"><code>billboard
+#&gt; # A tibble: 317 x 79
+#&gt;    artist track date.entered   wk1   wk2   wk3   wk4   wk5   wk6   wk7
+#&gt;    &lt;chr&gt;  &lt;chr&gt; &lt;date&gt;       &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#&gt;  1 2 Pac  Baby… 2000-02-26      87    82    72    77    87    94    99
+#&gt;  2 2Ge+h… The … 2000-09-02      91    87    92    NA    NA    NA    NA
+#&gt;  3 3 Doo… Kryp… 2000-04-08      81    70    68    67    66    57    54
+#&gt;  4 3 Doo… Loser 2000-10-21      76    76    72    69    67    65    55
+#&gt;  5 504 B… Wobb… 2000-04-15      57    34    25    17    17    31    36
+#&gt;  6 98^0   Give… 2000-08-19      51    39    34    26    26    19     2
+#&gt;  7 A*Tee… Danc… 2000-07-08      97    97    96    95   100    NA    NA
+#&gt;  8 Aaliy… I Do… 2000-01-29      84    62    51    41    38    35    35
+#&gt;  9 Aaliy… Try … 2000-03-18      59    53    38    28    21    18    16
+#&gt; 10 Adams… Open… 2000-08-26      76    76    74    69    68    67    61
+#&gt; # … with 307 more rows, and 69 more variables: wk8 &lt;dbl&gt;, wk9 &lt;dbl&gt;,
+#&gt; #   wk10 &lt;dbl&gt;, wk11 &lt;dbl&gt;, wk12 &lt;dbl&gt;, wk13 &lt;dbl&gt;, wk14 &lt;dbl&gt;,
+#&gt; #   wk15 &lt;dbl&gt;, wk16 &lt;dbl&gt;, wk17 &lt;dbl&gt;, wk18 &lt;dbl&gt;, wk19 &lt;dbl&gt;,
+#&gt; #   wk20 &lt;dbl&gt;, wk21 &lt;dbl&gt;, wk22 &lt;dbl&gt;, wk23 &lt;dbl&gt;, wk24 &lt;dbl&gt;,
+#&gt; #   wk25 &lt;dbl&gt;, wk26 &lt;dbl&gt;, wk27 &lt;dbl&gt;, wk28 &lt;dbl&gt;, wk29 &lt;dbl&gt;,
+#&gt; #   wk30 &lt;dbl&gt;, wk31 &lt;dbl&gt;, wk32 &lt;dbl&gt;, wk33 &lt;dbl&gt;, wk34 &lt;dbl&gt;,
+#&gt; #   wk35 &lt;dbl&gt;, wk36 &lt;dbl&gt;, wk37 &lt;dbl&gt;, wk38 &lt;dbl&gt;, wk39 &lt;dbl&gt;,
+#&gt; #   wk40 &lt;dbl&gt;, wk41 &lt;dbl&gt;, wk42 &lt;dbl&gt;, wk43 &lt;dbl&gt;, wk44 &lt;dbl&gt;,
+#&gt; #   wk45 &lt;dbl&gt;, wk46 &lt;dbl&gt;, wk47 &lt;dbl&gt;, wk48 &lt;dbl&gt;, wk49 &lt;dbl&gt;,
+#&gt; #   wk50 &lt;dbl&gt;, wk51 &lt;dbl&gt;, wk52 &lt;dbl&gt;, wk53 &lt;dbl&gt;, wk54 &lt;dbl&gt;,
+#&gt; #   wk55 &lt;dbl&gt;, wk56 &lt;dbl&gt;, wk57 &lt;dbl&gt;, wk58 &lt;dbl&gt;, wk59 &lt;dbl&gt;,
+#&gt; #   wk60 &lt;dbl&gt;, wk61 &lt;dbl&gt;, wk62 &lt;dbl&gt;, wk63 &lt;dbl&gt;, wk64 &lt;dbl&gt;,
+#&gt; #   wk65 &lt;dbl&gt;, wk66 &lt;lgl&gt;, wk67 &lt;lgl&gt;, wk68 &lt;lgl&gt;, wk69 &lt;lgl&gt;,
+#&gt; #   wk70 &lt;lgl&gt;, wk71 &lt;lgl&gt;, wk72 &lt;lgl&gt;, wk73 &lt;lgl&gt;, wk74 &lt;lgl&gt;,
+#&gt; #   wk75 &lt;lgl&gt;, wk76 &lt;lgl&gt;</code></pre>
+<p>まずは <code>relig_income</code> dataset と同様に <code>billboard</code> データセットを整形してみよう．列名は <code>week</code> という変数に，セルの値は <code>rank</code> という変数にしよう．加えて，整形時に欠損値が出たらその行を消去するように <code>values_drop_na</code> を使おう．必ずしも全ての曲が76週間ランキング圏内にあるわけではないため，入力したデータを<em><code>values_drop_na</code>を使わず</em>整形すると，不必要に自明な <code>NA</code> が強制的に生じてしまう．</p>
+<pre class="r"><code>billboard %&gt;% 
+  pivot_longer(
+    cols = starts_with(&quot;wk&quot;), 
+    names_to = &quot;week&quot;, 
+    values_to = &quot;rank&quot;,
+    values_drop_na = TRUE
+  )
+#&gt; # A tibble: 5,307 x 5
+#&gt;    artist  track                   date.entered week   rank
+#&gt;    &lt;chr&gt;   &lt;chr&gt;                   &lt;date&gt;       &lt;chr&gt; &lt;dbl&gt;
+#&gt;  1 2 Pac   Baby Don&#39;t Cry (Keep... 2000-02-26   wk1      87
+#&gt;  2 2 Pac   Baby Don&#39;t Cry (Keep... 2000-02-26   wk2      82
+#&gt;  3 2 Pac   Baby Don&#39;t Cry (Keep... 2000-02-26   wk3      72
+#&gt;  4 2 Pac   Baby Don&#39;t Cry (Keep... 2000-02-26   wk4      77
+#&gt;  5 2 Pac   Baby Don&#39;t Cry (Keep... 2000-02-26   wk5      87
+#&gt;  6 2 Pac   Baby Don&#39;t Cry (Keep... 2000-02-26   wk6      94
+#&gt;  7 2 Pac   Baby Don&#39;t Cry (Keep... 2000-02-26   wk7      99
+#&gt;  8 2Ge+her The Hardest Part Of ... 2000-09-02   wk1      91
+#&gt;  9 2Ge+her The Hardest Part Of ... 2000-09-02   wk2      87
+#&gt; 10 2Ge+her The Hardest Part Of ... 2000-09-02   wk3      92
+#&gt; # … with 5,297 more rows</code></pre>
+<p>各曲が何週間ランキング入りしていたか簡単に分かると嬉しいが，それには変数 <code>week</code> を整数に直す必要がある．これには2つの引数を追加で指定する必要がある．まず <code>names_prefix</code> 引数によって接頭辞の <code>wk</code> を消した上で，
+<code>names_ptypes</code> 引数によって <code>week</code> が整数であることを指定する<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>．</p>
+<pre class="r"><code>billboard %&gt;% 
+  pivot_longer(
+    cols = starts_with(&quot;wk&quot;), 
+    names_to = &quot;week&quot;, 
+    names_prefix = &quot;wk&quot;,
+    names_ptypes = list(week = integer()),
+    values_to = &quot;rank&quot;,
+    values_drop_na = TRUE
+  )
+#&gt; # A tibble: 5,307 x 5
+#&gt;    artist  track                   date.entered  week  rank
+#&gt;    &lt;chr&gt;   &lt;chr&gt;                   &lt;date&gt;       &lt;int&gt; &lt;dbl&gt;
+#&gt;  1 2 Pac   Baby Don&#39;t Cry (Keep... 2000-02-26       1    87
+#&gt;  2 2 Pac   Baby Don&#39;t Cry (Keep... 2000-02-26       2    82
+#&gt;  3 2 Pac   Baby Don&#39;t Cry (Keep... 2000-02-26       3    72
+#&gt;  4 2 Pac   Baby Don&#39;t Cry (Keep... 2000-02-26       4    77
+#&gt;  5 2 Pac   Baby Don&#39;t Cry (Keep... 2000-02-26       5    87
+#&gt;  6 2 Pac   Baby Don&#39;t Cry (Keep... 2000-02-26       6    94
+#&gt;  7 2 Pac   Baby Don&#39;t Cry (Keep... 2000-02-26       7    99
+#&gt;  8 2Ge+her The Hardest Part Of ... 2000-09-02       1    91
+#&gt;  9 2Ge+her The Hardest Part Of ... 2000-09-02       2    87
+#&gt; 10 2Ge+her The Hardest Part Of ... 2000-09-02       3    92
+#&gt; # … with 5,297 more rows</code></pre>
+</div>
+<div id="section-1" class="section level2">
+<h2>列名に複数の変数がある場合</h2>
+<p>列名に複数の変数が詰めこまれていると，整形はより大変なものになる．例えば <code>who</code> データセットを見てみよう．</p>
+<pre class="r"><code>who
+#&gt; # A tibble: 7,240 x 60
+#&gt;    country iso2  iso3   year new_sp_m014 new_sp_m1524 new_sp_m2534
+#&gt;    &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt; &lt;int&gt;       &lt;int&gt;        &lt;int&gt;        &lt;int&gt;
+#&gt;  1 Afghan… AF    AFG    1980          NA           NA           NA
+#&gt;  2 Afghan… AF    AFG    1981          NA           NA           NA
+#&gt;  3 Afghan… AF    AFG    1982          NA           NA           NA
+#&gt;  4 Afghan… AF    AFG    1983          NA           NA           NA
+#&gt;  5 Afghan… AF    AFG    1984          NA           NA           NA
+#&gt;  6 Afghan… AF    AFG    1985          NA           NA           NA
+#&gt;  7 Afghan… AF    AFG    1986          NA           NA           NA
+#&gt;  8 Afghan… AF    AFG    1987          NA           NA           NA
+#&gt;  9 Afghan… AF    AFG    1988          NA           NA           NA
+#&gt; 10 Afghan… AF    AFG    1989          NA           NA           NA
+#&gt; # … with 7,230 more rows, and 53 more variables: new_sp_m3544 &lt;int&gt;,
+#&gt; #   new_sp_m4554 &lt;int&gt;, new_sp_m5564 &lt;int&gt;, new_sp_m65 &lt;int&gt;,
+#&gt; #   new_sp_f014 &lt;int&gt;, new_sp_f1524 &lt;int&gt;, new_sp_f2534 &lt;int&gt;,
+#&gt; #   new_sp_f3544 &lt;int&gt;, new_sp_f4554 &lt;int&gt;, new_sp_f5564 &lt;int&gt;,
+#&gt; #   new_sp_f65 &lt;int&gt;, new_sn_m014 &lt;int&gt;, new_sn_m1524 &lt;int&gt;,
+#&gt; #   new_sn_m2534 &lt;int&gt;, new_sn_m3544 &lt;int&gt;, new_sn_m4554 &lt;int&gt;,
+#&gt; #   new_sn_m5564 &lt;int&gt;, new_sn_m65 &lt;int&gt;, new_sn_f014 &lt;int&gt;,
+#&gt; #   new_sn_f1524 &lt;int&gt;, new_sn_f2534 &lt;int&gt;, new_sn_f3544 &lt;int&gt;,
+#&gt; #   new_sn_f4554 &lt;int&gt;, new_sn_f5564 &lt;int&gt;, new_sn_f65 &lt;int&gt;,
+#&gt; #   new_ep_m014 &lt;int&gt;, new_ep_m1524 &lt;int&gt;, new_ep_m2534 &lt;int&gt;,
+#&gt; #   new_ep_m3544 &lt;int&gt;, new_ep_m4554 &lt;int&gt;, new_ep_m5564 &lt;int&gt;,
+#&gt; #   new_ep_m65 &lt;int&gt;, new_ep_f014 &lt;int&gt;, new_ep_f1524 &lt;int&gt;,
+#&gt; #   new_ep_f2534 &lt;int&gt;, new_ep_f3544 &lt;int&gt;, new_ep_f4554 &lt;int&gt;,
+#&gt; #   new_ep_f5564 &lt;int&gt;, new_ep_f65 &lt;int&gt;, newrel_m014 &lt;int&gt;,
+#&gt; #   newrel_m1524 &lt;int&gt;, newrel_m2534 &lt;int&gt;, newrel_m3544 &lt;int&gt;,
+#&gt; #   newrel_m4554 &lt;int&gt;, newrel_m5564 &lt;int&gt;, newrel_m65 &lt;int&gt;,
+#&gt; #   newrel_f014 &lt;int&gt;, newrel_f1524 &lt;int&gt;, newrel_f2534 &lt;int&gt;,
+#&gt; #   newrel_f3544 &lt;int&gt;, newrel_f4554 &lt;int&gt;, newrel_f5564 &lt;int&gt;,
+#&gt; #   newrel_f65 &lt;int&gt;</code></pre>
+<p><code>country</code>, <code>iso2</code>, <code>iso3</code>, そして <code>year</code> は既に変数であり，そのままにしておけばいい．しかし <code>new_sp_m014</code> 列から <code>newrel_f65</code> 列までは4種類の変数がそれぞれの列名に含まれている．</p>
+<ul>
+<li><p>接頭辞の <code>new_</code>/<code>new</code> は新しくカウントした症状であることを示す．このデータセットは新しい例しか含まない．定数に相当するため今回は無視する．</p></li>
+<li><p><code>sp</code>/<code>rel</code>/<code>sp</code>/<code>ep</code> は症状を診断した手法を示す．</p></li>
+<li><p><code>m</code>/<code>f</code> は性別を示す．</p></li>
+<li><p><code>014</code>/<code>1524</code>/<code>2535</code>/<code>3544</code>/<code>4554</code>/<code>65</code> は年齢層を示す<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>．</p></li>
+</ul>
+<p>今回は <code>names_pattern</code> がしっくりくるだろう．
+<code>names_pattern</code> は <code>extract</code> と似た操作性を持ち，
+<code>()</code> を用いてグループ化した正規表現を指定することで，列名からグループとして各変数を取り出すことができる．</p>
+<pre class="r"><code>who %&gt;% pivot_longer(
+  cols = new_sp_m014:newrel_f65,
+  names_to = c(&quot;diagnosis&quot;, &quot;gender&quot;, &quot;age&quot;), 
+  names_pattern = &quot;new_?(.*)_(.)(.*)&quot;,
+  values_to = &quot;count&quot;
+)
+#&gt; # A tibble: 405,440 x 8
+#&gt;    country     iso2  iso3   year diagnosis gender age   count
+#&gt;    &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt; &lt;int&gt; &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt; &lt;int&gt;
+#&gt;  1 Afghanistan AF    AFG    1980 sp        m      014      NA
+#&gt;  2 Afghanistan AF    AFG    1980 sp        m      1524     NA
+#&gt;  3 Afghanistan AF    AFG    1980 sp        m      2534     NA
+#&gt;  4 Afghanistan AF    AFG    1980 sp        m      3544     NA
+#&gt;  5 Afghanistan AF    AFG    1980 sp        m      4554     NA
+#&gt;  6 Afghanistan AF    AFG    1980 sp        m      5564     NA
+#&gt;  7 Afghanistan AF    AFG    1980 sp        m      65       NA
+#&gt;  8 Afghanistan AF    AFG    1980 sp        f      014      NA
+#&gt;  9 Afghanistan AF    AFG    1980 sp        f      1524     NA
+#&gt; 10 Afghanistan AF    AFG    1980 sp        f      2534     NA
+#&gt; # … with 405,430 more rows</code></pre>
+<p>更に一歩進んで <code>gender</code> と <code>age</code> 列に型を指定してみよう．この作法は値の分かっているカテゴリカルな変数の操作に優れている．</p>
+<pre class="r"><code>who %&gt;% pivot_longer(
+  cols = new_sp_m014:newrel_f65,
+  names_to = c(&quot;diagnosis&quot;, &quot;gender&quot;, &quot;age&quot;), 
+  names_pattern = &quot;new_?(.*)_(.)(.*)&quot;,
+  names_ptypes = list(
+    gender = factor(levels = c(&quot;f&quot;, &quot;m&quot;)),
+    age = factor(
+      levels = c(&quot;014&quot;, &quot;1524&quot;, &quot;2534&quot;, &quot;3544&quot;, &quot;4554&quot;, &quot;5564&quot;, &quot;65&quot;), 
+      ordered = TRUE
+    )
+  ),
+  values_to = &quot;count&quot;
+)
+#&gt; # A tibble: 405,440 x 8
+#&gt;    country     iso2  iso3   year diagnosis gender age   count
+#&gt;    &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt; &lt;int&gt; &lt;chr&gt;     &lt;fct&gt;  &lt;ord&gt; &lt;int&gt;
+#&gt;  1 Afghanistan AF    AFG    1980 sp        m      014      NA
+#&gt;  2 Afghanistan AF    AFG    1980 sp        m      1524     NA
+#&gt;  3 Afghanistan AF    AFG    1980 sp        m      2534     NA
+#&gt;  4 Afghanistan AF    AFG    1980 sp        m      3544     NA
+#&gt;  5 Afghanistan AF    AFG    1980 sp        m      4554     NA
+#&gt;  6 Afghanistan AF    AFG    1980 sp        m      5564     NA
+#&gt;  7 Afghanistan AF    AFG    1980 sp        m      65       NA
+#&gt;  8 Afghanistan AF    AFG    1980 sp        f      014      NA
+#&gt;  9 Afghanistan AF    AFG    1980 sp        f      1524     NA
+#&gt; 10 Afghanistan AF    AFG    1980 sp        f      2534     NA
+#&gt; # … with 405,430 more rows</code></pre>
+</div>
+<div id="section-2" class="section level2">
+<h2>一行に複数の観測値が記録されている場合</h2>
+<p>これまで見てきたデータフレームは single value column<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> から成っていた．しかし多くの場合，複数の値の操作がデータ整形における重要な課題になる．このような課題には，整形後のデータフレームに欲しい列名が，整形前のデータフレームの列名の一部になっていることで気付く．この章では，そんなデータをどうやって整形するか見ていく．</p>
+<p>以下の例の出典は
+<a href="https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html">data.table vignette</a>
+で，<code>tidyr</code> における解法を閃くきっかけとなったものだ．</p>
+<pre class="r"><code>family &lt;- tribble(
+  ~family,  ~dob_child1,  ~dob_child2, ~gender_child1, ~gender_child2,
+       1L, &quot;1998-11-26&quot;, &quot;2000-01-29&quot;,             1L,             2L,
+       2L, &quot;1996-06-22&quot;,           NA,             2L,             NA,
+       3L, &quot;2002-07-11&quot;, &quot;2004-04-05&quot;,             2L,             2L,
+       4L, &quot;2004-10-10&quot;, &quot;2009-08-27&quot;,             1L,             1L,
+       5L, &quot;2000-12-05&quot;, &quot;2005-02-28&quot;,             2L,             1L,
+)
+family &lt;- family %&gt;% mutate_at(vars(starts_with(&quot;dob&quot;)), parse_date)
+family
+#&gt; # A tibble: 5 x 5
+#&gt;   family dob_child1 dob_child2 gender_child1 gender_child2
+#&gt;    &lt;int&gt; &lt;date&gt;     &lt;date&gt;             &lt;int&gt;         &lt;int&gt;
+#&gt; 1      1 1998-11-26 2000-01-29             1             2
+#&gt; 2      2 1996-06-22 NA                     2            NA
+#&gt; 3      3 2002-07-11 2004-04-05             2             2
+#&gt; 4      4 2004-10-10 2009-08-27             1             1
+#&gt; 5      5 2000-12-05 2005-02-28             2             1</code></pre>
+<p>ここには子供たちそれぞれの <code>gender</code> と <code>dob</code> (誕生日) の2種類の情報 (または値) が載っている．これらの情報を別々の列に分けなければならい．そこで <code>names_to</code> に複数の値を指定し，<code>names_sep</code> を使って変数の名前を切り分ける．ただし，特別な変数名である <code>.value</code> を使って <code>pivot_longer()</code> に列名の一部が整形後の列になることを伝える．</p>
+<pre class="r"><code>family %&gt;% 
+  pivot_longer(
+    -family, 
+    names_to = c(&quot;.value&quot;, &quot;child&quot;),
+    names_sep = &quot;_&quot;, 
+    values_drop_na = TRUE
+  )
+#&gt; # A tibble: 9 x 4
+#&gt;   family child  dob        gender
+#&gt;    &lt;int&gt; &lt;chr&gt;  &lt;date&gt;      &lt;int&gt;
+#&gt; 1      1 child1 1998-11-26      1
+#&gt; 2      1 child2 2000-01-29      2
+#&gt; 3      2 child1 1996-06-22      2
+#&gt; 4      3 child1 2002-07-11      2
+#&gt; 5      3 child2 2004-04-05      2
+#&gt; 6      4 child1 2004-10-10      1
+#&gt; 7      4 child2 2009-08-27      1
+#&gt; 8      5 child1 2000-12-05      2
+#&gt; 9      5 child2 2005-02-28      1</code></pre>
+<p><code>values_drop_na = TRUE</code> を使うことで，入力データ上に観測値のない部分が出力において明示的に欠測値になってしまうことを防いでいる点に注意されたい．</p>
+<p>この問題は base R に含まれている <code>anscombe</code> データセットにも存在する．</p>
+<pre class="r"><code>anscombe
+#&gt;    x1 x2 x3 x4    y1   y2    y3    y4
+#&gt; 1  10 10 10  8  8.04 9.14  7.46  6.58
+#&gt; 2   8  8  8  8  6.95 8.14  6.77  5.76
+#&gt; 3  13 13 13  8  7.58 8.74 12.74  7.71
+#&gt; 4   9  9  9  8  8.81 8.77  7.11  8.84
+#&gt; 5  11 11 11  8  8.33 9.26  7.81  8.47
+#&gt; 6  14 14 14  8  9.96 8.10  8.84  7.04
+#&gt; 7   6  6  6  8  7.24 6.13  6.08  5.25
+#&gt; 8   4  4  4 19  4.26 3.10  5.39 12.50
+#&gt; 9  12 12 12  8 10.84 9.13  8.15  5.56
+#&gt; 10  7  7  7  8  4.82 7.26  6.42  7.91
+#&gt; 11  5  5  5  8  5.68 4.74  5.73  6.89</code></pre>
+<p>このデータセットは Anscombe’s quartet を構成する4対の変数から成る (<code>x1</code> と <code>y1</code>，<code>x2</code> と <code>y2</code>，など)．これら4つのデータセットは内容が大きく異なるにも拘らず同じ要約統計量を示す(平均，標準偏差，相関など)．これを <code>set</code>, <code>x</code>, <code>y</code> から成るデータセットに整形してみる．</p>
+<pre class="r"><code>anscombe %&gt;% 
+  pivot_longer(everything(), 
+    names_to = c(&quot;.value&quot;, &quot;set&quot;), 
+    names_pattern = &quot;(.)(.)&quot;
+  ) %&gt;% 
+  arrange(set)
+#&gt; # A tibble: 44 x 3
+#&gt;    set       x     y
+#&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;
+#&gt;  1 1        10  8.04
+#&gt;  2 1         8  6.95
+#&gt;  3 1        13  7.58
+#&gt;  4 1         9  8.81
+#&gt;  5 1        11  8.33
+#&gt;  6 1        14  9.96
+#&gt;  7 1         6  7.24
+#&gt;  8 1         4  4.26
+#&gt;  9 1        12 10.8 
+#&gt; 10 1         7  4.82
+#&gt; # … with 34 more rows</code></pre>
+<p>パネルデータでも似たような状況に遭遇する．例えば
+<a href="http://github.com/leeper/rio/issues/193">Thomas Leeper</a>
+によるデータセットを例にとってみよう．このデータの整形方法は <code>anscombe</code> に対して行ったものと同様だ．</p>
+<pre class="r"><code>pnl &lt;- tibble(
+  x = 1:4,
+  a = c(1, 1,0, 0),
+  b = c(0, 1, 1, 1),
+  y1 = rnorm(4),
+  y2 = rnorm(4),
+  z1 = rep(3, 4),
+  z2 = rep(-2, 4),
+)
+
+pnl %&gt;% 
+  pivot_longer(
+    -c(x, a, b), 
+    names_to = c(&quot;.value&quot;, &quot;time&quot;), 
+    names_pattern = &quot;(.)(.)&quot;
+  )
+#&gt; # A tibble: 8 x 6
+#&gt;       x     a     b time       y     z
+#&gt;   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt;
+#&gt; 1     1     1     0 1      1.80      3
+#&gt; 2     1     1     0 2      0.280    -2
+#&gt; 3     2     1     1 1      1.06      3
+#&gt; 4     2     1     1 2      0.559    -2
+#&gt; 5     3     0     1 1      0.999     3
+#&gt; 6     3     0     1 2     -0.365    -2
+#&gt; 7     4     0     1 1     -0.103     3
+#&gt; 8     4     0     1 2     -0.888    -2</code></pre>
+</div>
+<div id="section-3" class="section level2">
+<h2>列名が重複している場合</h2>
+<p>時には，重複した列名を持つデータセットに遭遇することもあるだろう．一般的には，R でこのようなデータセットを扱うのは難しい．なぜなら，名前で列を参照しようとすると，最初にマッチしたものしか参照できないからだ．列名の重複した tibble を作るには，そのようなデータセットの作成を防ぐ列名の修正機能を明示的に止めておく必要がある．</p>
+<pre class="r"><code>df &lt;- tibble(x = 1:3, y = 4:6, y = 5:7, y = 7:9, .name_repair = &quot;minimal&quot;)
+df
+#&gt; # A tibble: 3 x 4
+#&gt;       x     y     y     y
+#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+#&gt; 1     1     4     5     7
+#&gt; 2     2     5     6     8
+#&gt; 3     3     6     7     9</code></pre>
+<p>このようなデータを <code>pivot_longer()</code> で処理すると，出力には自動的に新しい列を追加される．</p>
+<pre class="r"><code>df %&gt;% pivot_longer(-x, names_to = &quot;name&quot;, values_to = &quot;value&quot;)
+#&gt; Warning: Duplicate column names detected, adding .copy variable
+#&gt; # A tibble: 9 x 4
+#&gt;       x name  .copy value
+#&gt;   &lt;int&gt; &lt;chr&gt; &lt;int&gt; &lt;int&gt;
+#&gt; 1     1 y         1     4
+#&gt; 2     1 y         2     5
+#&gt; 3     1 y         3     7
+#&gt; 4     2 y         1     5
+#&gt; 5     2 y         2     6
+#&gt; 6     2 y         3     8
+#&gt; 7     3 y         1     6
+#&gt; 8     3 y         2     7
+#&gt; 9     3 y         3     9</code></pre>
+</div>
+</div>
+<div id="wider" class="section level1">
+<h1>Wider</h1>
+<p><strong><em>以降翻訳作業中</em></strong></p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>訳注: ヘルプを参照するに，ptype は prototype の略称のようだ．本来のタイプくらいの意味合いだろうか．<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>訳注: <code>014</code>なら0歳から14歳，<code>1524</code>なら15歳から24歳であることを示す．<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p>訳注: 適訳が分からない．single な value column なのか single value な column なのか．「結果の」 value column が single か multiple かという違いで語られているとの説あり
+(<a href="https://twitter.com/yutannihilation/status/1144845335467970560" class="uri">https://twitter.com/yutannihilation/status/1144845335467970560</a>)．<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>

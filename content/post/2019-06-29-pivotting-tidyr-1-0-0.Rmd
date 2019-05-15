@@ -1,0 +1,336 @@
+---
+title: 雑訳 Pivoting (tidyr 1.0.0) \[WIP\]
+author: ~
+date: '2019-06-29'
+slug: tidyr-1-0-0
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(tibble.print_max = 10)
+cache = TRUE
+```
+
+この記事は tiydr 1.0.0 で追加される `pivot_longer()` と `pivot_wider()` の使い方を紹介する vignette の雑な訳です．
+まだ正式リリースしていないので，いつ本家の仕様が変わるかも分かりません．
+これらの点に注意の上読んでください．
+実際，この翻訳作業で気付いたことをコメントした結果，変わってしまった仕様もありました
+([#630](https://github.com/tidyverse/tidyr/issues/630))．
+
+また，翻訳にはこなれていない部分や，適切な訳が分からず英語が残された部分もあります．
+是非みなさんのコメントで訳を育てて下さい．
+質問も歓迎です．[\@Atsushi776](https://twitter.com/Atsushi776/) (Twitter) までどうぞ．
+
+`pivot_wider()` についてはまだ訳せていないが，`pivot_longer()` の部分だけ先行公開することにした．
+
+原文: https://tidyr.tidyverse.org/dev/articles/pivot.html
+
+# はじめに
+
+この vignette では `pivot_longer()` と `pivot_wider()` の使い方を紹介する．これらの関数は `gather()` と `spread()` の機能を拡張し，他のパッケージから最新の機能を取り込むことを目指す．
+
+`spread()` と `gather()` には設計の基本的な部分に誤りがあった．
+これらの関数がどの方向に*データ*を広げたり集めたりするのか予想しにくく，覚えることも困難だった．
+更にこれらの関数の引数ついては覚えることがとても難しかったので，開発者を含め多くの人は度々ドキュメントを参照する羽目になった．
+
+そこで R における*データ*整形を発展させる2つの重要な新機能が，
+他のパッケージからの着想を得て実装された．
+
+* `pivot_longer()` は型の異なる複数の値を記録した変数を扱うことができる．
+  この機能は Matt Dowle と Arun Srinivasan による
+  [data.table][data.table] パッケージにおける改良型の `melt()` と `dcast()`
+  から着想を得た．
+* `pivot_longer()` と `pivot_wider()` はデータフレームに対し，
+  列名に記録されたメタデータがどのようにデータ変数に変換されるべきか，
+  あるいは逆変換されるべきかを的確に指定できる．
+  この機能は John Mount と Nina Zumel による [cdata][cdata] パッケージから着想を得た． 
+
+この vignette では，
+`pivot_longer()` と `pivot_wider()` の背景にある重要なアイディアを紹介する．
+これらのアイディアはこれまであなたが単純なものから複雑なものまで様々なデータ整形に取り組んできた中で用いてきたものだ．
+
+始めに必要なパッケージを読み込む．
+実用的には `library(tidyverse)` で読み込むだろうが，
+`tidyverse` をパッケージの vignette で読み込むことはできない．
+
+```{r setup, message = FALSE}
+library(tidyr)
+library(dplyr)
+library(readr)
+```
+
+# Longer
+
+`pivot_longer()` はデータセットの行を増やし，列を減らすことで __長く__ (longer) する． 
+開発者は「長い形式 (long form)」という呼び方は合理的ではないと考えている．
+なぜなら，長さは相対的なもので例えばデータセットの A と B のどちらが長いといった言い方しかできないからだ．
+
+`pivot_longer()` は野生のデータセットに対してよく適用されるもので，
+  分析を楽にするためというよりは，
+  データの入力や比較を適切に行うために用いられる．
+次の章からは， `pivot_longer()` の使い方を現実にありうる様々なデータセットを用いて紹介する．
+
+## 列の名前が文字列データに相当する場合 {#pew}
+
+`relig_income` データセットは人々の宗教や年収について集計した結果をカウントデータとして記録している．
+
+```{r}
+relig_income
+```
+
+データセットには3つの変数が含まれる．
+
+* `religion` は行ごとに記録されている
+* `income` は複数の列の名前として記録されている
+* `count` はセルごとの値として記録されている
+
+`pivot_longer()` を使って整形してみよう．
+
+```{r}
+relig_income %>% 
+  pivot_longer(-religion, names_to = "income", values_to = "count")
+```
+
+* 第一引数は整形したいデータセットをとる (例えば `relig_income`)．
+
+* 第二引数は整形対象となる列を指定する．今回は `religion` 以外の全ての列だ．
+
+* `names_to` 引数には，列の名前として記録されたデータに変数としての名前を与える．
+  今回なら `income` だ．
+  
+* `values_to` 引数にはセルの値として記録されているデータに変数としての名前を与える．
+  今回なら `count` だ．
+  
+`names_to` と `values_to` のどちら*によって作られる列*も `relig_income` には含まれていないため，
+これらの引数には引用符で囲った文字列を指定する.
+
+## 列の名前が数値データに相当する場合 {#billboard}
+
+`billboard` データセットは2000年のビルボードランキングを記録している．
+データの形式としては `relig_income` と似ているが，
+列の名前に記録されたデータは文字列ではなく数値そのものである．
+
+```{r}
+billboard
+```
+
+まずは `relig_income` dataset と同様に `billboard` データセットを整形してみよう． 
+列名は `week` という変数に，セルの値は `rank` という変数にしよう．
+加えて，整形時に欠損値が出たらその行を消去するように `values_drop_na` を使おう．
+必ずしも全ての曲が76週間ランキング圏内にあるわけではないため，
+入力したデータを*`values_drop_na`を使わず*整形すると，
+不必要に自明な `NA` が強制的に生じてしまう．
+
+```{r}
+billboard %>% 
+  pivot_longer(
+    cols = starts_with("wk"), 
+    names_to = "week", 
+    values_to = "rank",
+    values_drop_na = TRUE
+  )
+```
+
+各曲が何週間ランキング入りしていたか簡単に分かると嬉しいが，
+それには変数 `week` を整数に直す必要がある．
+これには2つの引数を追加で指定する必要がある．
+まず `names_prefix` 引数によって接頭辞の `wk` を消した上で，
+`names_ptypes` 引数によって `week` が整数であることを指定する[^ptype]．
+
+[^ptype]:
+  訳注: ヘルプを参照するに，ptype は prototype の略称のようだ．本来のタイプくらいの意味合いだろうか．
+
+```{r}
+billboard %>% 
+  pivot_longer(
+    cols = starts_with("wk"), 
+    names_to = "week", 
+    names_prefix = "wk",
+    names_ptypes = list(week = integer()),
+    values_to = "rank",
+    values_drop_na = TRUE
+  )
+```
+
+## 列名に複数の変数がある場合
+
+列名に複数の変数が詰めこまれていると，整形はより大変なものになる．
+例えば `who` データセットを見てみよう．
+
+```{r}
+who
+```
+
+`country`, `iso2`, `iso3`, そして `year` は既に変数であり，そのままにしておけばいい．
+しかし `new_sp_m014` 列から `newrel_f65` 列までは4種類の変数がそれぞれの列名に含まれている．
+
+* 接頭辞の `new_`/`new` は新しくカウントした症状であることを示す．
+  このデータセットは新しい例しか含まない．
+  定数に相当するため今回は無視する．
+
+* `sp`/`rel`/`sp`/`ep` は症状を診断した手法を示す．
+
+* `m`/`f` は性別を示す．
+
+* `014`/`1524`/`2535`/`3544`/`4554`/`65` は年齢層を示す[^age]．
+
+[^age]: 訳注: `014`なら0歳から14歳，`1524`なら15歳から24歳であることを示す．
+
+今回は `names_pattern` がしっくりくるだろう．
+`names_pattern` は `extract` と似た操作性を持ち，
+`()` を用いてグループ化した正規表現を指定することで，
+列名からグループとして各変数を取り出すことができる．
+
+```{r}
+who %>% pivot_longer(
+  cols = new_sp_m014:newrel_f65,
+  names_to = c("diagnosis", "gender", "age"), 
+  names_pattern = "new_?(.*)_(.)(.*)",
+  values_to = "count"
+)
+```
+
+更に一歩進んで `gender` と `age` 列に型を指定してみよう．
+この作法は値の分かっているカテゴリカルな変数の操作に優れている．
+
+```{r}
+who %>% pivot_longer(
+  cols = new_sp_m014:newrel_f65,
+  names_to = c("diagnosis", "gender", "age"), 
+  names_pattern = "new_?(.*)_(.)(.*)",
+  names_ptypes = list(
+    gender = factor(levels = c("f", "m")),
+    age = factor(
+      levels = c("014", "1524", "2534", "3544", "4554", "5564", "65"), 
+      ordered = TRUE
+    )
+  ),
+  values_to = "count"
+)
+```
+
+## 一行に複数の観測値が記録されている場合
+
+これまで見てきたデータフレームは single value column[^single-value-column] から成っていた．
+しかし多くの場合，複数の値の操作がデータ整形における重要な課題になる．
+このような課題には，整形後のデータフレームに欲しい列名が，整形前のデータフレームの列名の一部になっていることで気付く．
+この章では，そんなデータをどうやって整形するか見ていく．
+
+[^single-value-column]:
+    訳注: 適訳が分からない．single な value column なのか single value な column なのか．
+    「結果の」 value column が single か multiple かという違いで語られているとの説あり
+    (<https://twitter.com/yutannihilation/status/1144845335467970560>)．
+
+以下の例の出典は
+[data.table vignette](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html)
+で，`tidyr` における解法を閃くきっかけとなったものだ．
+
+```{r}
+family <- tribble(
+  ~family,  ~dob_child1,  ~dob_child2, ~gender_child1, ~gender_child2,
+       1L, "1998-11-26", "2000-01-29",             1L,             2L,
+       2L, "1996-06-22",           NA,             2L,             NA,
+       3L, "2002-07-11", "2004-04-05",             2L,             2L,
+       4L, "2004-10-10", "2009-08-27",             1L,             1L,
+       5L, "2000-12-05", "2005-02-28",             2L,             1L,
+)
+family <- family %>% mutate_at(vars(starts_with("dob")), parse_date)
+family
+```
+
+ここには子供たちそれぞれの `gender` と `dob` (誕生日) の2種類の情報 (または値) が載っている．
+これらの情報を別々の列に分けなければならい．
+そこで `names_to` に複数の値を指定し，`names_sep` を使って変数の名前を切り分ける．
+ただし，特別な変数名である `.value` を使って `pivot_longer()` に列名の一部が整形後の列になることを伝える．
+
+```{r}
+family %>% 
+  pivot_longer(
+    -family, 
+    names_to = c(".value", "child"),
+    names_sep = "_", 
+    values_drop_na = TRUE
+  )
+```
+
+`values_drop_na = TRUE` を使うことで，
+入力データ上に観測値のない部分が出力において明示的に欠測値になってしまうことを防いでいる点に注意されたい．
+
+この問題は base R に含まれている `anscombe` データセットにも存在する．
+
+```{r}
+anscombe
+```
+
+このデータセットは Anscombe's quartet を構成する4対の変数から成る (`x1` と `y1`，`x2` と `y2`，など)．
+これら4つのデータセットは内容が大きく異なるにも拘らず同じ要約統計量を示す(平均，標準偏差，相関など)．
+これを `set`, `x`, `y` から成るデータセットに整形してみる．
+
+```{r}
+anscombe %>% 
+  pivot_longer(everything(), 
+    names_to = c(".value", "set"), 
+    names_pattern = "(.)(.)"
+  ) %>% 
+  arrange(set)
+```
+
+パネルデータでも似たような状況に遭遇する．
+例えば
+[Thomas Leeper](http://github.com/leeper/rio/issues/193)
+によるデータセットを例にとってみよう．
+このデータの整形方法は `anscombe` に対して行ったものと同様だ．
+
+```{r}
+pnl <- tibble(
+  x = 1:4,
+  a = c(1, 1,0, 0),
+  b = c(0, 1, 1, 1),
+  y1 = rnorm(4),
+  y2 = rnorm(4),
+  z1 = rep(3, 4),
+  z2 = rep(-2, 4),
+)
+
+pnl %>% 
+  pivot_longer(
+    -c(x, a, b), 
+    names_to = c(".value", "time"), 
+    names_pattern = "(.)(.)"
+  )
+```
+
+## 列名が重複している場合
+
+時には，重複した列名を持つデータセットに遭遇することもあるだろう．
+一般的には，R でこのようなデータセットを扱うのは難しい．
+なぜなら，名前で列を参照しようとすると，最初にマッチしたものしか参照できないからだ．
+列名の重複した tibble を作るには，そのようなデータセットの作成を防ぐ列名の修正機能を明示的に止めておく必要がある．
+
+```{r}
+df <- tibble(x = 1:3, y = 4:6, y = 5:7, y = 7:9, .name_repair = "minimal")
+df
+```
+
+このようなデータを `pivot_longer()` で処理すると，出力には自動的に新しい列を追加される．
+
+```{r}
+df %>% pivot_longer(-x, names_to = "name", values_to = "value")
+```
+
+
+# Wider
+
+***以降翻訳作業中***
+
+[cdata]: https://winvector.github.io/cdata/
+[data.table]: https://github.com/Rdatatable/data.table/wiki
+[tidycensus]: https://walkerke.github.io/tidycensus
