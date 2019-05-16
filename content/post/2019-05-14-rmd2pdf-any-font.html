@@ -1,0 +1,221 @@
+---
+title: |
+  R Markdown + XeLaTeX で日本語含め好きなフォントを使って PDF を出力する
+author: ~
+date: '2019-05-14'
+slug: rmd2pdf-any-font
+categories: [R]
+tags: [RMarkdown]
+output:
+  blogdown::html_page:
+    pandoc_args:
+      - -f
+      - markdown+east_asian_line_breaks
+highlightjs:
+  - tex
+  - yaml
+  - bash
+  - diff
+---
+
+
+
+<p>これまでに度々 Rmd で日本語 PDF を出力する系の記事を書いてきました．</p>
+<ul>
+<li>RMarkdown + XeLaTeX + Noto フォントで日本語 PDF を出力する<br />
+<a href="https://blog.atusy.net/2019/04/29/notocjkjp-on-rmd/" class="uri">https://blog.atusy.net/2019/04/29/notocjkjp-on-rmd/</a></li>
+<li>Rmarkdownで日本語PDFを出力する<br />
+<a href="https://qiita.com/Atsushi776/items/9ef1e5d744e2b91c61eej" class="uri">https://qiita.com/Atsushi776/items/9ef1e5d744e2b91c61eej</a></li>
+</ul>
+<p>両記事は共に IPA(ex) フォントを使ってきました．</p>
+<p>しかしもっと自由にフォントを選びたくなるのが人の定め……．</p>
+<p>これには YAML フロントマターで簡単に済ます方法と プリアンブルで柔軟性を重視する方法があります．</p>
+<p>LuaTeX 使ったことないので XeLaTeX に限定して話します.</p>
+<p>今回紹介する内容により，ユニコード対応フォントを使うことで，ギリシャ文字などが簡単に平文でも数式でも扱えるようになります．</p>
+<div id="r-の環境を整えておく" class="section level1">
+<h1>R の環境を整えておく</h1>
+<p>R で以下の2行を実行するだけ
+by <a href="//twitter.com/nozma">@nozma</a> 氏．</p>
+<p>フルバージョンの TeXLive 導入済みの場合は1行目のみでよい．</p>
+<pre class="r"><code>install.packages(c(&#39;tinytex&#39;, &#39;rmarkdown&#39;))
+tinytex::install_tinytex()</code></pre>
+</div>
+<div id="フォントを指定する" class="section level1">
+<h1>フォントを指定する</h1>
+<div id="by-yaml" class="section level2">
+<h2>By YAML</h2>
+<p>例えば Noto フォントで統一するなら以下の通り．</p>
+<pre class="yaml"><code>---
+output: 
+  pdf_document:
+    latex_engine: xelatex
+header-includes: |
+  \usepackage{zxjatype}
+  \setCJKmonofont{Noto Sans Mono CJK JP}
+  \setCJKsansfont{Noto Sans CJK JP}
+mainfont: Noto Serif
+mainfontoptions: Scale=MatchUppercase
+sansfont: Noto Sans
+monofont: Noto Mono
+mathfont: Noto Serif
+CJKmainfont: Noto Serif CJK JP
+CJKoptions: Scale=1
+---</code></pre>
+<p>Pandoc マニュアルの Fonts の項には，好きなフォントを使いたければ
+<code>mainfont</code> だの <code>CJKmainfont</code><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> だのを指定せよとあるのでそうしてみた．<br />
+<a href="https://www.pandoc.org/MANUAL.html#fonts" class="uri">https://www.pandoc.org/MANUAL.html#fonts</a></p>
+<p>CJKmainfont については <a href="//twitter.com/skyy_writing">@skyy_writing</a> 氏による「<a href="https://qiita.com/sky_y/items/15bf7737f4b37da50372#%E6%96%B9%E6%B3%952-3-bxjscls%E3%81%A7-cjkmainfont%E5%A4%89%E6%95%B0%E3%82%92%E4%BD%BF%E3%81%86%E6%96%B9%E6%B3%95">メモ: Pandoc+LaTeXで気軽に日本語PDFを出力する</a>」でも紹介されている．</p>
+<p>Pandoc における LaTeX のデフォルトテンプレートを見るに，
+<code>CJKmainfont</code> を指定すると XeLaTeX エンジンを使う場合は CJK フォントを使うために必要な xeCJK を読み込んでくれるようだ．
+(<a href="//github.com/jgm/pandoc/blob/8b00bc6029b9285f872ae517a8d4538c66070fa9/data/templates/default.latex#L138-L142">L138-L142</a>)</p>
+<p>ただし，<code>CJKmonofont</code> と <code>CJKsansfont</code> は変数として用意されていないので，
+<code>header-includes</code> を使って TeX 記法で追加する必要がある．統一感を求めて全部 <code>header-includes</code> に書きたくなるだろうが，そうすると今度は mathfont の指定に失敗する．</p>
+<p>何ともびみょーなので，改善案を
+<a href="https://groups.google.com/forum/?utm_medium=email&amp;utm_source=footer#!forum/pandoc-discuss">pandoc-discuss</a> に提案しておいた．
+(<a href="https://groups.google.com/d/msg/pandoc-discuss/aQLekl0xzJo/E32PNIEnAgAJ" class="uri">https://groups.google.com/d/msg/pandoc-discuss/aQLekl0xzJo/E32PNIEnAgAJ</a>)</p>
+<p>手元でなんとかしたい人は後述の「<a href="#テンプレート最適化">テンプレート最適化</a>」を参照して下さい．</p>
+<p><code>\usepackage{zxjatype}</code> は行末の禁則処理などをするために必要．</p>
+</div>
+<div id="by-yaml-preamble" class="section level2">
+<h2>by YAML + preamble</h2>
+<p>r-wakalang で Carlos Luis Rivera 氏に教えてもらった内容をそのまま転載します．</p>
+<p>ただし，この方法では， <code>unicode-math</code>
+の利用に難がありますので，改善には後述の「<a href="#テンプレート最適化">テンプレート最適化</a>」を参照して下さい．</p>
+<p>まず以下の内容を適宜編集して， <code>font-config.tex</code> として作業ディレクトリに保存して下さい．</p>
+<pre class="tex"><code>%---------------------------------------------------
+%
+% フォント指定
+%
+%---------------------------------------------------
+%XeTeXでの設定については
+%http://user.math.kyushu-u.ac.jp/index.php?iwase%2Fkaken
+%http://konoyonohana.blog.fc2.com/blog-entry-393.html
+\usepackage[japanese]{babel}
+
+\usepackage{fontspec}
+
+%欧文ローマン体の設定
+\setmainfont[Scale=MatchUppercase]{TeX Gyre Termes} %いわゆるTimes New Roman
+
+%欧文サンセリフ体の設定
+\setsansfont[Scale=1]{TeX Gyre Heros} %いわゆるHelveticaもしくはArial
+
+%欧文タイプライタ体の設定
+\setmonofont[Scale=MatchLowercase]{zcoN} %Courierの横幅がすっきりした書体
+
+%数学モードで使う書体の設定
+%\usepackage{mathtools}
+%\usepackage{amsmath}
+%\usepackage{mathspec}
+%\usepackage{unicode-math} %勝手に読み込まれるmathspecパッケージと相性が悪いのでロードしない
+%\setmathfont[Scale=MatchUppercase]{Garamond-math.otf}  %
+
+%\setmathfont(Digits,Latin,Greek)[Scale=MatchUppercase]{TeX Gyre Termes}
+%\setmathfont[Scale=MatchUppercase]{TeX Gyre Termes}
+\setmathfont[Scale=MatchUppercase]{TeX Gyre Termes Math} %Beamerでは適用できるが、article系統では適用できない？
+
+\setmathrm{TeX Gyre Termes}
+%https://tex.stackexchange.com/questions/11058/how-do-i-change-the-math-italic-font-in-xetex-fontspec
+
+%日本語フォント設定のために読み込む
+\usepackage{zxjatype}
+%\usepackage[deluxe]{otf} %platexが必要なのでRmarkdown単体では使えない
+
+\setjafontscale{1} %日本語フォントの大きさを、欧文フォントと釣り合うようにする%
+
+%日本語明朝体の設定（太字も設定）
+\setjamainfont[BoldFont=SourceHanSerifJP-Bold.otf]{SourceHanSerifJP-Light.otf}
+
+%日本語ゴシック体の設定（太字も設定）
+\setjasansfont[Scale=1,BoldFont=SourceHanSansJP-Medium.otf]{SourceHanSansJP-Light.otf}
+
+%日本語タイプライタ体の設定
+\setjamonofont{SourceHanSansJP-Normal.otf}</code></pre>
+<p>次に YAML フロントマターを以下のように書き knit します．</p>
+<pre class="yaml"><code>output:
+  bookdown::pdf_document2:
+    latex_engine: xelatex
+    includes:
+      in_header:
+        - font-config.tex</code></pre>
+</div>
+<div id="テンプレート最適化" class="section level2">
+<h2>テンプレート最適化</h2>
+<p>最適化済みのものはこちら:
+<a href="https://github.com/atusy/rmarkdown/blob/template-for-better-font-usage/inst/rmd/latex/default-1.17.0.2.tex" class="uri">https://github.com/atusy/rmarkdown/blob/template-for-better-font-usage/inst/rmd/latex/default-1.17.0.2.tex</a></p>
+<p>既に見てきた様に</p>
+<ul>
+<li>YAML フロントマターに <code>CJKmonofont</code> や <code>CJKsansfont</code> を指定しても無効</li>
+<li>プリアンブルで <code>unicode-math</code> パッケージを有効化できない</li>
+</ul>
+<p>といった制約がありました．</p>
+<p>加えて，そのままでは日本語組版用に <code>bxjsarticle</code> クラスなどを利用できない問題がある．</p>
+<p>これらを解決するにはテンプレートを編集が必要になる．</p>
+<p>まず以下のコマンドにより， LaTeX テンプレートを作業ディレクトリにコピーしておく．テンプレートのバージョンは適宜修正のこと．</p>
+<pre class="r"><code>file.copy(
+  system.file(package=&quot;rmarkdown&quot;, &quot;/rmd/latex/default-1.17.0.2.tex&quot;),
+  &quot;template.tex&quot;
+)</code></pre>
+<p>そして YAML フロントマターで編集したテンプレートを利用しましょう．</p>
+<pre class="diff"><code>  output: 
+    pdf_document:
+      latex_engine: xelatex
++     template: template.tex</code></pre>
+<p>具体的な編集箇所は以下の通り．</p>
+</div>
+<div id="日本語用ドキュメントクラスを指定可能にする" class="section level2">
+<h2>日本語用ドキュメントクラスを指定可能にする</h2>
+<p>以下のコードを YAML フロントマターに追加すると， <code>bxjsarticle</code> を利用を宣言できる．</p>
+<pre class="yaml"><code>documentclass: bxjsarticle
+classoption: xelatex,ja=standard</code></pre>
+<p>しかしいざ knit すると bxjsarticle を提供する <code>BXjscls</code> パッケージの読み込み時と，テンプレートの読み込み時の2回に渡って <code>geometery</code> パッケージを読み込むため，</p>
+<blockquote>
+<p>! LaTeX Error: Option clash for package geometry.</p>
+</blockquote>
+<p>とエラーを吐く．</p>
+<p>エラーを回避するにはテンプレート中の該当個所をコメントアウトする．</p>
+<pre class="diff"><code>  $if(geometry)$
+- \usepackage[$for(geometry)$$geometry$$sep$,$endfor$]{geometry}`
++ % \usepackage[$for(geometry)$$geometry$$sep$,$endfor$]{geometry}`
+  $endif$</code></pre>
+</div>
+<div id="プリアンブルで-unicode-math-を利用できるようにする" class="section level2">
+<h2>プリアンブルで <code>unicode-math</code> を利用できるようにする</h2>
+<pre class="diff"><code>-   \ifxetex
+-    \usepackage{mathspec}
+-   \else
++ %  \ifxetex
++ %   \usepackage{mathspec}
++ %  \else
+     \usepackage{fontspec}
+-   \fi
++ %  \fi</code></pre>
+</div>
+<div id="yaml-フロントマターで-cjkmonofont-や-cjksansfont-を指定可能にする" class="section level2">
+<h2>YAML フロントマターで <code>CJKmonofont</code> や <code>CJKsansfont</code> を指定可能にする</h2>
+<p><code>$if(変数名)$</code> とすると，YAML フロントマターで変数に値を放り込んだ時に実行する内容を記述できます．</p>
+<p>これを利用して <code>$if(CJKsansfont)$</code> と <code>$if(CJKmonofont)$</code> を書きましょう．</p>
+<pre class="diff"><code>  $if(CJKmainfont)$
+    \ifxetex
+      \usepackage{xeCJK}
+      \setCJKmainfont[$for(CJKoptions)$$CJKoptions$$sep$,$endfor$]{$CJKmainfont$}
++     $if(CJKsansfont)$
++       \setCJKsansfont[$for(CJKsansoptions)$$CJKsansoptions$$sep$,$endfor$]{$CJKsansfont$}
++     $endif$
++     $if(CJKmonofont)$
++       \setCJKmonofont[$for(CJKmonooptions)$$CJKmonooptions$$sep$,$endfor$]{$CJKmonofont$}
++     $endif$
+    \fi
+  $endif$</code></pre>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+<p>あらがあるきがするけれど，つかれてきたのでこのへんで．</p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>CJK = Chinese Japanese Korean<a href="#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
+</div>
