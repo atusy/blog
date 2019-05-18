@@ -31,9 +31,7 @@ output:
 </div>
 <div id="default" class="section level1">
 <h1>ggplot2のヒストグラムはビン数30が既定</h1>
-<p>なぜ……。
-調整するには <code>bins</code> でビン数を変えるか、 <code>binwidth</code> でビン幅を変える。
-両方指定すると <code>binwidth</code> が優先される。</p>
+<p>なぜ……。調整するには <code>bins</code> でビン数を変えるか、 <code>binwidth</code> でビン幅を変える。両方指定すると <code>binwidth</code> が優先される。</p>
 <pre class="r"><code>library(ggplot2)
 ggplot(diamonds, aes(price)) + geom_histogram()</code></pre>
 <pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
@@ -42,13 +40,10 @@ ggplot(diamonds, aes(price)) + geom_histogram()</code></pre>
 </div>
 <div id="autobw" class="section level1">
 <h1>ビン幅を動的に決めたい</h1>
-<p>という話は随分前にQiitaでもした。
-事前に頻度分布を集計した結果をデータフレームとして <code>ggplot()</code> に与えるというもの。</p>
+<p>という話は随分前にQiitaでもした。事前に頻度分布を集計した結果をデータフレームとして <code>ggplot()</code> に与えるというもの。</p>
 <p><a href="https://qiita.com/Atsushi776/items/f71a6f011118031f6e0a" class="uri">https://qiita.com/Atsushi776/items/f71a6f011118031f6e0a</a></p>
 <p><code>facet</code> した変数ごとにbin幅を変える方法の決定版は今でもこれだと思う。</p>
-<p><code>facet</code> した変数ごとにbin幅を変える必要がなければ、<span class="citation">@hoxo_m氏から頂いたコメントも有用</span>。
-こちらでは、<code>stat_bin(breaks = )</code> を利用する。
-ただし、同じデータに二度参照せねばならず、もう一歩といった感がある。</p>
+<p><code>facet</code> した変数ごとにbin幅を変える必要がなければ、<span class="citation">@hoxo_m氏から頂いたコメントも有用</span>。こちらでは、<code>stat_bin(breaks = )</code> を利用する。ただし、同じデータに二度参照せねばならず、もう一歩といった感がある。</p>
 <pre class="r"><code>ggplot(diamonds, aes(x = price)) + 
   stat_bin(breaks = hist(diamonds$price, plot = FALSE)$breaks)</code></pre>
 <p><img src="/post/2018-11-09-binwdith-for-geom-histogram_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
@@ -63,11 +58,8 @@ ggplot(diamonds, aes(price)) +
 <p><img src="/post/2018-11-09-binwdith-for-geom-histogram_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <div id="define" class="section level3">
 <h3>ビン幅を決める関数を定義</h3>
-<p>世の中には平方根選択以外にも色々なビン幅の決め方があります。
-個人的な推しはScottの選択ですね。</p>
-<p>実装にはWikipediaの
-<a href="https://ja.wikipedia.org/wiki/%E3%83%92%E3%82%B9%E3%83%88%E3%82%B0%E3%83%A9%E3%83%A0#%E3%83%93%E3%83%B3%E3%81%AE%E5%80%8B%E6%95%B0%E3%81%A8%E5%B9%85">ヒストグラム#ビンの個数と幅</a>
-あたりを参考にしてもいいですが、
+<p>世の中には平方根選択以外にも色々なビン幅の決め方があります。個人的な推しはScottの選択ですね。</p>
+<p>実装にはWikipediaの<a href="https://ja.wikipedia.org/wiki/%E3%83%92%E3%82%B9%E3%83%88%E3%82%B0%E3%83%A9%E3%83%A0#%E3%83%93%E3%83%B3%E3%81%AE%E5%80%8B%E6%95%B0%E3%81%A8%E5%B9%85">ヒストグラム#ビンの個数と幅</a>あたりを参考にしてもいいですが、
 Scottの選択などによるビン数を求める関数であれば、
 grDevicesパッケージに定義されています。</p>
 <p><code>hist()</code> のビン数も、grDevicesパッケージを利用して決めているので、

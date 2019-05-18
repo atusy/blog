@@ -9,11 +9,9 @@ tags: [viridis]
 
 
 
-<p><a href="https://bids.github.io/colormap/">viridis</a> や <a href="https://github.com/marcosci/cividis">cividis</a> は、色の変化が知覚的に一様となるよう調整された、連続的なカラースケール。
-白黒印刷するとグレースケールになるので、プリンタにも優しい。</p>
+<p><a href="https://bids.github.io/colormap/">viridis</a> や <a href="https://github.com/marcosci/cividis">cividis</a> は、色の変化が知覚的に一様となるよう調整された、連続的なカラースケール。白黒印刷するとグレースケールになるので、プリンタにも優しい。</p>
 <p>viridis は論文がなさそうだが、 cividis は論文にもなっているようだ (<a href="https://arxiv.org/ftp/arxiv/papers/1712/1712.01662.pdf" class="uri">https://arxiv.org/ftp/arxiv/papers/1712/1712.01662.pdf</a>)。</p>
-<p>これらはカラフルらしいのだが、見た目としてカラフルなだけではなく、
-階調としてもカラフルなのか気になったので調べることにした。</p>
+<p>これらはカラフルらしいのだが、見た目としてカラフルなだけではなく、階調としてもカラフルなのか気になったので調べることにした。</p>
 <div id="colourful" class="section level1">
 <h1>viridisってカラフル？</h1>
 <p>少なくとも見た目にはカラフルだ．</p>
@@ -27,12 +25,9 @@ qplot(x=0:255, y = 1, fill = 0:255, geom = &quot;raster&quot;, show.legend = FAL
 <div id="how-many" class="section level1">
 <h1>何色あるんだろう？</h1>
 <p>viridisは色の変化が知覚的に一様 (perceptually uniform) であるよう、
-CIELAB空間で色を変化させている。
-多分、色空間を真面目に調べれば、CIELAB空間上のviridisをRGBに直した時、
-最大何色利用できるかは数理的に決定できる。</p>
+CIELAB空間で色を変化させている。多分、色空間を真面目に調べれば、CIELAB空間上のviridisをRGBに直した時、最大何色利用できるかは数理的に決定できる。</p>
 <p>しかし、めんどくさいので、とりあえずシミュレーションしてみた。</p>
-<p>1 - 255 階調までは色の数も 1:1 に単調増加。
-以降は振動しつつ、650色程度で飽和するようだ。</p>
+<p>1 - 255 階調までは色の数も 1:1 に単調増加。以降は振動しつつ、650色程度で飽和するようだ。</p>
 <p><img src="/post/2018-11-25-size-of-viridis-color-palette_files/figure-html/n-viri-1.png" width="672" /></p>
 <pre class="r"><code>library(scales)
 library(ggplot2)

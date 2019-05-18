@@ -39,9 +39,7 @@ wrap_plots(x + xlimits, plot_spacer(), xy + xlimits, y, nrow = 2)</code></pre>
 <p>そして，2項演算子と <code>wrap_plots()</code> ではマージンの扱い方が違うようだ．</p>
 <div id="section" class="section level1">
 <h1>追記</h1>
-<p>よくよくよく，見ると，y軸の周辺分布も軸が揃っていなかった．
-というわけで，最終形は以下のように．
-やや面倒ですな．</p>
+<p>よくよくよく，見ると，y軸の周辺分布も軸が揃っていなかった．というわけで，最終形は以下のように．やや面倒ですな．</p>
 <pre class="r"><code>xlimits &lt;- coord_cartesian(xlim = c(1, 6)) # xlim() はNG
 wrap_plots(
   x + coord_cartesian(xlim = c(1, 6)), 

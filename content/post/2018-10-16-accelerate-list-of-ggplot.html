@@ -22,8 +22,7 @@ g &lt;- ggplot(iris, aes(Sepal.Length)) + geom_histogram()</code></pre>
 <pre class="r"><code>g</code></pre>
 <p><img src="/post/2018-10-16-accelerate-list-of-ggplot_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p>として，gを図に出力する時になって始めて必要な計算が行われる．</p>
-<p>このため，ggplotオブジェクトのリストをprintする際には，一つずつ，内部で計算することになる．
-最後の最後のprint (グラフィックデバイスへの表示) は順次やるしかないが，計算部分は事前に並列処理させた方がいいのではないか．</p>
+<p>このため，ggplotオブジェクトのリストをprintする際には，一つずつ，内部で計算することになる．最後の最後のprint (グラフィックデバイスへの表示) は順次やるしかないが，計算部分は事前に並列処理させた方がいいのではないか．</p>
 </div>
 <div id="section-1" class="section level1">
 <h1>実装</h1>
@@ -89,10 +88,7 @@ plot(bench)</code></pre>
 <pre><code>## Unit: seconds
 ##           expr      min       lq     mean   median       uq      max neval
 ##  single thread 15.90173 16.58560 18.08624 18.48958 19.16229 21.97050   100
-##   multi thread 12.17476 12.75376 13.86049 13.96567 14.64058 20.18083   100
-##  cld
-##    b
-##   a</code></pre>
+##   multi thread 12.17476 12.75376 13.86049 13.96567 14.64058 20.18083   100</code></pre>
 <p><img src="/post/2018-10-16-accelerate-list-of-ggplot_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <p>思ったほどの威力はないが，多少の高速化はできたようだ．</p>
 </div>

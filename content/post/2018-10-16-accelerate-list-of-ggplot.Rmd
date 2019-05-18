@@ -9,11 +9,8 @@ tags: [ggplot2, pforeach]
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
-library(ggplot2)
-library(microbenchmark)
-library(pforeach) # devtools::install_github('hoxo-m/pforeach')
-library(purrr)
-library(pipeR)
+pacman::p_load(ggplot2, microbenchmark, purrr, pipeR)
+pacman::p_load_gh("atusy/pforeach")
 ```
 
 大きなデータを用いたggplotのリストや，大量のggplotのリストを高速に描写するための関数 `print_gglist` を作りました．

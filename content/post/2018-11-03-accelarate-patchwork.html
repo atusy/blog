@@ -37,8 +37,7 @@ g_list &lt;- lapply(N, function(n) g + ggtitle(n))</code></pre>
 </div>
 <div id="ggplotgtable" class="section level1">
 <h1>ggplotオブジェクトのリストを並列してgtableオブジェクト化する関数を定義</h1>
-<p>並列化にはhoxo_m印のpforeachを使う．
-定義する関数の引数 <code>g</code> にはggplotのリストを， <code>...</code> には <code>pforeach()</code> に与える引数を入力する．</p>
+<p>並列化にはhoxo_m印のpforeachを使う．定義する関数の引数 <code>g</code> にはggplotのリストを， <code>...</code> には <code>pforeach()</code> に与える引数を入力する．</p>
 <pre class="r"><code>pbuild &lt;- function(g, ...) {
   pforeach::pforeach(g = g, ...)({
     list(ggplot_gtable(ggplot_build(g)))

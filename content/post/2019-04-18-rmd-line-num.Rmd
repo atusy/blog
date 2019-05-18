@@ -5,11 +5,6 @@ date: '2019-04-18'
 slug: rmd-line-num
 categories: [R]
 tags: [Rmarkdown, pandoc]
-output:
-  blogdown::html_page:
-    pandoc_args: 
-      - --from
-      - markdown+east_asian_line_breaks
 images: 
   - /images/covers/rmd-line-num.png
 summary: |

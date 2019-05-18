@@ -27,8 +27,7 @@ output:
 
 <p>PRに向けての試験的な実装．</p>
 <p><a href="https://github.com/atusy/ggplot2/commit/26c1b7a478585889947d265d691e375e399637c3" class="uri">https://github.com/atusy/ggplot2/commit/26c1b7a478585889947d265d691e375e399637c3</a></p>
-<p>なぜかxlimやylimに長さ3以上の連続値を取れてしまうので，
-本来はscale_*_continuousやxlimに合わせて長さ2までに制限すべきだと思う</p>
+<p>なぜかxlimやylimに長さ3以上の連続値を取れてしまうので，本来はscale_*_continuousやxlimに合わせて長さ2までに制限すべきだと思う</p>
 <p>試験的ながら，パッケージとして試したい方は</p>
 <pre class="r"><code>devtools::install_github(&quot;atusy/ggplot2&quot;, ref = &quot;scale_range_accept_na&quot;)</code></pre>
 <div id="problem" class="section level1">
@@ -61,8 +60,7 @@ g</code></pre>
     expand_range(range, expansion[1], expansion[2])
   }
 }</code></pre>
-<p><code>limits</code> として，<code>xlim</code>ないし<code>ylim</code>を受け取り，
-利用しているscaleに応じた<code>transform</code> (常用対数変換や平方根変換) を行ったものの <code>range</code> (範囲) をとる．</p>
+<p><code>limits</code> として，<code>xlim</code>ないし<code>ylim</code>を受け取り，利用しているscaleに応じた<code>transform</code> (常用対数変換や平方根変換) を行ったものの <code>range</code> (範囲) をとる．</p>
 </div>
 <div id="fix" class="section level2">
 <h2>修正版</h2>

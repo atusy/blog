@@ -9,11 +9,8 @@ tags: [Rmd, R MarkdownでWord文書を作ろう, PlantUML]
 
 
 
-<p><span class="citation">@niszet0</span> さんの “R MarkdownでWord文書を作ろう” を摘み食いしてます (以下RmdでWord本)．
-ちゃんとしたいずれレビューはいずれするとして，気付いたところを少しずつメモしていきたい．</p>
-<p>さて，同書は，PlantUMLという非常に簡便な記述でシーケンス図などを書けるフレームワークに触れているが，
-色々辛そう．
-もうちょっと簡単にできる方法はないかな，と思ったら <a href="https://github.com/rkrug/plantuml"><code>rkrug/plantuml</code></a> パッケージを見つけたのでメモ．</p>
+<p><span class="citation">@niszet0</span> さんの “R MarkdownでWord文書を作ろう” を摘み食いしてます (以下RmdでWord本)．ちゃんとしたいずれレビューはいずれするとして，気付いたところを少しずつメモしていきたい．</p>
+<p>さて，同書は，PlantUMLという非常に簡便な記述でシーケンス図などを書けるフレームワークに触れているが，色々辛そう．もうちょっと簡単にできる方法はないかな，と思ったら <a href="https://github.com/rkrug/plantuml"><code>rkrug/plantuml</code></a> パッケージを見つけたのでメモ．</p>
 <p>pandocにplantumlを扱わせる方法もあるようなので，使い勝手のよいものを選べばいいと思う．</p>
 <div id="section" class="section level1">
 <h1>導入</h1>
@@ -23,8 +20,7 @@ install_github(&quot;rforge/grimport/pkg/grImport&quot;) # CRAN版のgrimportは
 devtools::install_github(&quot;rkrug/plantuml&quot;) # plantumlパッケージのインストール
 library(plantuml) # plangumlパッケージのロード
 updatePlantumlJar() # PlantUMLのjarファイルを最新版にする</code></pre>
-<p>Archlinuxな当方では，これらに加えて， <code>openjdk</code> と <code>graphviz</code> を入れておく必要があった．
-というかRmdでWord本でも，java環境は必要，図によってgraphvizも必要と言及されていますね．</p>
+<p>Archlinuxな当方では，これらに加えて， <code>openjdk</code> と <code>graphviz</code> を入れておく必要があった．というかRmdでWord本でも，java環境は必要，図によってgraphvizも必要と言及されていますね．</p>
 <pre class="sh"><code>pacman -S jre10-openjdk graphviz</code></pre>
 </div>
 <div id="section-1" class="section level1">

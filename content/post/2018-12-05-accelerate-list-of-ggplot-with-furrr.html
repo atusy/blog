@@ -28,12 +28,9 @@ output:
 <p>しかし， <code>hoxo-m/pforeach</code> パッケージの霊圧が消えてしまったので，
 <code>furrr</code> パッケージを試してみることにしました．</p>
 <p><a href="https://github.com/DavisVaughan/furrr" class="uri">https://github.com/DavisVaughan/furrr</a></p>
-<p><code>furrr</code> パッケージは <code>purrr</code> パッケージと似た感覚で操作でき，
-事前に <code>plan(multiprocess)</code> としておくだけで並列化してくれる化け物．
-関数名も <code>future_map</code> など， <code>purrr</code> パッケージの関数名に <code>future_</code> という prefix がつくだけで覚えやすい．
+<p><code>furrr</code> パッケージは <code>purrr</code> パッケージと似た感覚で操作でき，事前に <code>plan(multiprocess)</code> としておくだけで並列化してくれる化け物．関数名も <code>future_map</code> など， <code>purrr</code> パッケージの関数名に <code>future_</code> という prefix がつくだけで覚えやすい．
 <code>plan(sequential)</code> すれば並列化を解除できます．</p>
-<p><code>multiprocess</code> や <code>sequential</code> 以外にも様々な <code>strategy</code> が選べますが，
-詳しくは， <code>?future::plan</code> を見ましょう．</p>
+<p><code>multiprocess</code> や <code>sequential</code> 以外にも様々な <code>strategy</code> が選べますが，詳しくは， <code>?future::plan</code> を見ましょう．</p>
 </div>
 <div id="impl" class="section level1">
 <h1>実装とテスト</h1>
@@ -57,6 +54,8 @@ print_gglist &lt;- function(x, strategy = multiprocess, ...) {
 
 g &lt;- ggplot(iris, aes(Sepal.Length)) + geom_histogram()
 print_gglist(list(g, g))</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
 <p><img src="/post/2018-12-05-accelerate-list-of-ggplot-with-furrr_files/figure-html/test-1.png" width="192" /><img src="/post/2018-12-05-accelerate-list-of-ggplot-with-furrr_files/figure-html/test-2.png" width="192" /></p>
 </div>
 <div id="bench" class="section level1">
@@ -72,10 +71,7 @@ plot(bench)</code></pre>
 <pre><code>## Unit: milliseconds
 ##           expr      min       lq     mean   median       uq      max neval
 ##  single thread 774.9664 846.9223 911.0551 896.0701 952.7812 1303.653   100
-##   multi thread 572.6841 610.1190 667.7990 643.0180 693.4269 1216.081   100
-##  cld
-##    b
-##   a</code></pre>
+##   multi thread 572.6841 610.1190 667.7990 643.0180 693.4269 1216.081   100</code></pre>
 <p><img src="/post/2018-12-05-accelerate-list-of-ggplot-with-furrr_files/figure-html/bench-result-1.png" width="672" /></p>
 <p>うまくいきましたね!!</p>
 </div>

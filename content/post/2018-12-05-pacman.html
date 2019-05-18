@@ -38,11 +38,8 @@ output:
 <p>CRAN や GitHub 上に存在するパッケージを必要に応じてインストールしつつ読み込める，<code class="r">p_load()</code> や <code class="r">p_load_gh()</code> といった関数を持つことが最大の特徴．</p>
 <p>これにより，Tech ブログや共同作業などで人とコードを共有する時，相手は <code>pacman</code> パッケージさえインストールしておけばよくなる．</p>
 <p>また，カンマ区切りで複数のパッケージを同時にインストール / 読み込みできる．</p>
-<p>他にパッケージを削除する <code>p_del()</code> やアンロードする <code>p_unload()</code>，
-製作者情報の読み出す <code>p_author()</code> など，
-パッケージ管理ツールの名に相応しい機能の充実っぷり．</p>
-<p>Archlinux におけるパッケージ管理ツール <code>pacman</code> と同じ名前であるため， googlability が低い．
-検索時は「<code>pacman p_load</code>」といった具合にキーワードを組み合わせよう．</p>
+<p>他にパッケージを削除する <code>p_del()</code> やアンロードする <code>p_unload()</code>，製作者情報の読み出す <code>p_author()</code> など，パッケージ管理ツールの名に相応しい機能の充実っぷり．</p>
+<p>Archlinux におけるパッケージ管理ツール <code>pacman</code> と同じ名前であるため， googlability が低い．検索時は「<code>pacman p_load</code>」といった具合にキーワードを組み合わせよう．</p>
 </div>
 <div id="pacman-funs" class="section level1">
 <h1>pacman パッケージの関数</h1>
@@ -152,8 +149,7 @@ CRAN
 <ul>
 <li><code>pacman</code> 自身の導入すら自動化するためのコマンド．
 <code class="r">if (!require("pacman")) install.packages("pacman"); library(pacman)</code>
-をクリップボードにコピーしてくれる．
-ファイルの頭にでも貼っておこう．</li>
+をクリップボードにコピーしてくれる．ファイルの頭にでも貼っておこう．</li>
 </ul></li>
 <li><code class="r">p_citation</code>
 <ul>
@@ -163,9 +159,7 @@ CRAN
 <ul>
 <li>パッケージが提供するデータセットの一覧をコンソールに表示．<br />
 例: <code class="r">p_data(datasets)</code></li>
-<li><code class="r">data(package = "datasets")</code> と似ているが，
-こちらは新しいウィンドウを立ち上げる上に，
-パッケージ名を <code>""</code> で囲む必要がある．</li>
+<li><code class="r">data(package = "datasets")</code> と似ているが，こちらは新しいウィンドウを立ち上げる上に，パッケージ名を <code>""</code> で囲む必要がある．</li>
 </ul></li>
 <li><code class="r">p_del</code>
 <ul>
@@ -191,9 +185,7 @@ CRAN
 <li><code class="r">p_unlock</code>
 <ul>
 <li><p>なんらかの事情でパッケージのインストールに失敗し，
-<code>00LOCK-package</code> というディレクトリが発生した時に利用する．
-この種のディレクトリが残っていると，以下のようなエラーメッセージが出て
-継続的にパッケージのインストールに失敗する．</p>
+<code>00LOCK-package</code> というディレクトリが発生した時に利用する．この種のディレクトリが残っていると，以下のようなエラーメッセージが出て継続的にパッケージのインストールに失敗する．</p>
 <blockquote>
 <p>ERROR: failed to lock directory ‘/home/atusy/R/x86_64-pc-linux-gnu-library/3.5’ for modifying<br />
 Try removing ‘/home/atusy/R/x86_64-pc-linux-gnu-library/3.5/00LOCK-callr’</p>
@@ -210,8 +202,7 @@ Try removing ‘/home/atusy/R/x86_64-pc-linux-gnu-library/3.5/00LOCK-callr’</p
 <h1>needs パッケージとの比較</h1>
 <p><code>needs</code> パッケージもパッケージのインストール・読み込みを手軽にしてくれる．<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a></p>
 <p>ただし， CRAN 上のパッケージのみを対象としていて，パッケージのアップデートや削除などの機能もない．</p>
-<p><code class="r">library(needs)</code> せずに <code class="r">needs()</code> できる機能があるが，
-有効化する際，一度だけ R を管理者権限で実行する必要がある．
+<p><code class="r">library(needs)</code> せずに <code class="r">needs()</code> できる機能があるが，有効化する際，一度だけ R を管理者権限で実行する必要がある．
 <code>.Rprofile</code> で <code class="r">library(pacman)</code> しておけば済む話かな．</p>
 <p>変数名の衝突時に優先するパッケージを指定する <code class="r">needs::prioritize()</code>
 は <code>pacman</code> パッケージにない便利機能かもしれない
@@ -225,8 +216,7 @@ Try removing ‘/home/atusy/R/x86_64-pc-linux-gnu-library/3.5/00LOCK-callr’</p
 <pre class="r"><code>needs::prioritize(dplyr)</code></pre>
 <p>すると，
 <code class="r">select == dplyr::select</code> になる．</p>
-<p><code>pacman</code> パッケージには同様の機能がない．
-しかし，優先したいパッケージを読み込み直せば良いので以下の要領でいける．</p>
+<p><code>pacman</code> パッケージには同様の機能がない．しかし，優先したいパッケージを読み込み直せば良いので以下の要領でいける．</p>
 <pre class="r"><code>p_unload(dplyr)
 p_load(dplyr)</code></pre>
 <p>どうしても同じ機能が欲しければ，以下のように関数を定義する．</p>
@@ -306,9 +296,7 @@ library(pkgB)</code></pre>
 <p>ブランチなどの指定方法の詳細は <code>remotes</code> パッケージの
 <a href="https://github.com/r-lib/remotes/#usage">Usage</a>
 を参照．</p>
-<p><code class="r">p_load_gh()</code> でも のようにバージョンやブランチを指定できる．
-しかしインストール済みのパッケージである場合は，そちらを優先するため，
-指定したブランチやバージョンを使う保証がない．</p>
+<p><code class="r">p_load_gh()</code> でも のようにバージョンやブランチを指定できる．しかしインストール済みのパッケージである場合は，そちらを優先するため，指定したブランチやバージョンを使う保証がない．</p>
 <p><code class="r">p_install_version_gh()</code> もあるが，覚えることが少なくて済むので， <code>@</code> を使った記法がオススメ．<a href="#fnref3" class="footnote-back">↩</a></p></li>
 <li id="fn4"><p>一つのコードファイル中での複数パッケージの読み込みを容易にする <span class="citation">@uri</span> on Qiita
 <a href="https://qiita.com/uri/items/dd7c5cddbb6b0ae342c6" class="uri">https://qiita.com/uri/items/dd7c5cddbb6b0ae342c6</a><a href="#fnref4" class="footnote-back">↩</a></p></li>

@@ -6,10 +6,6 @@ slug: katex-in-hugo
 categories: [Hugo]
 tags: [KaTeX, MathJax]
 math: true
-output:
-  html_page:
-    - --from
-    - markdown+east_asian_line_breaks
 summary: "MathJax より軽量で高速な KaTeX に乗り換えた"
 ---
 

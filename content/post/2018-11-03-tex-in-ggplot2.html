@@ -27,13 +27,9 @@ output:
 
 <div id="intro" class="section level1">
 <h1>はじめに</h1>
-<p><code>ggplot2</code> で <span class="math inline">\(TeX\)</span> 記法が使えると嬉しいですよね．
-一応，そういう人たちのための入口としては <code>expression</code> だとか <code>bquote</code> だとかがあるんですが，ここでは紹介しません．
-いえ，毎度使い方を忘れてしまい，紹介できないというのが正しいです．</p>
+<p><code>ggplot2</code> で <span class="math inline">\(TeX\)</span> 記法が使えると嬉しいですよね．一応，そういう人たちのための入口としては <code>expression</code> だとか <code>bquote</code> だとかがあるんですが，ここでは紹介しません．いえ，毎度使い方を忘れてしまい，紹介できないというのが正しいです．</p>
 <p>そんな私に <code>latex2tex</code> パッケージ．
-<code>TeX()</code> により， <span class="math inline">\(TeX\)</span> 記法の文字列をRの <code>expression</code> に変換してくれます．
-覚えることが少なくシンプルになっていいですね．
-皆さんも是非．</p>
+<code>TeX()</code> により， <span class="math inline">\(TeX\)</span> 記法の文字列をRの <code>expression</code> に変換してくれます．覚えることが少なくシンプルになっていいですね．皆さんも是非．</p>
 <pre class="r"><code>library(latex2exp)
 TeX(&#39;\\LaTeX&#39;)</code></pre>
 <pre><code>## expression(`\LaTeX` = paste(&quot;&quot;, L^{
@@ -96,8 +92,7 @@ ggplot(d, aes(x = x, y = x, label = label)) +
 </div>
 <div id="facet" class="section level2">
 <h2><code>facet_wrap</code> や <code>facet_grid</code> で <span class="math inline">\(TeX\)</span></h2>
-<p><code>facet</code> の strip でも勿論 <span class="math inline">\(TeX\)</span> できます．
-この場合は，<code>facet_wrap</code> や <code>facet_grid</code> のオプションで， <code>labeller = label_parsed</code> します．</p>
+<p><code>facet</code> の strip でも勿論 <span class="math inline">\(TeX\)</span> できます．この場合は，<code>facet_wrap</code> や <code>facet_grid</code> のオプションで， <code>labeller = label_parsed</code> します．</p>
 <pre class="r"><code>ggplot(d, aes(x, x)) +
   geom_point() +
   facet_wrap(~ label, labeller = label_parsed)</code></pre>
