@@ -5,11 +5,6 @@ date: '2019-04-18'
 slug: rmd-line-num
 categories: [R]
 tags: [Rmarkdown, pandoc]
-output:
-  blogdown::html_page:
-    pandoc_args: 
-      - --from
-      - markdown+east_asian_line_breaks
 images: 
   - /images/covers/rmd-line-num.png
 summary: |
@@ -32,7 +27,7 @@ summary: |
 <p>ああ，<code>blogdown::html_page</code> では残念ながらうまくいきませんでした．</p>
 <p>従って<a href="/submodules/rmd-line-num/index.html">英語による詳細版</a>をご覧下さい．</p>
 <p>英語版のソースと出力例は GitHub の <a href="https://github.com/atusy/rmd-line-num">atusy/rmd-line-num</a> にあります．</p>
-<div id="簡単なやり方の紹介" class="section level1">
+<div id="section" class="section level1">
 <h1>簡単なやり方の紹介</h1>
 <p>以下の内容の Rmd ファイルを作成し <code>&lt;!-- ここから先は自由に記述 --&gt;</code> 以降を自由に記述してくれれば，チャンクとその出力が番号付けできるはずだ．番号をクリックして行ごとのリンクを取得することもできる<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>．</p>
 <pre><code>---

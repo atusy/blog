@@ -5,18 +5,13 @@ date: '2019-04-14'
 slug: xonsh-debut
 categories: [xonsh]
 tags: [xonshrc]
-output:
-  blogdown::html_page:
-    pandoc_args: 
-      - --from
-      - markdown+east_asian_line_breaks
 summary: |
   Python が動いちゃうシェルこと xonsh を導入しました．早速最低限の設定としてばんくし氏の xonshrc を撮み食いしつつ，Look & Feel を oh-my-fish/theme-yimmy inspired なものにしました．
 ---
 
 
 
-<div id="xonsh-にした動機とか" class="section level1">
+<div id="xonsh-" class="section level1">
 <h1>xonsh にした動機とか</h1>
 <p>今までシェルには <code>fish</code> を使ってきましたが， <code>xonsh</code> に乗り換えることにしました．</p>
 <p><code>xonsh</code> がナニモノでナゼおすすめかは，ばんくし氏による「
@@ -26,11 +21,11 @@ summary: |
 <p>それでも引っ越す理由は，関数を <code>Python</code> で書けるので <code>python</code> の勉強になるからです．</p>
 <p>後ろ向きな理由としては <code>fish</code> 独自の文法を覚える気が湧かないからですね．</p>
 </div>
-<div id="とりま-xonshrc" class="section level1">
+<div id="xonshrc" class="section level1">
 <h1>とりま xonshrc</h1>
 <p>とりあえずばんくし氏の「
 <a href="https://vaaaaaanquish.hatenablog.com/entry/2017/12/09/154201">xonshrcを書く</a>」から，撮み食いしてコピペしました．</p>
-<div id="プロントについて" class="section level2">
+<div id="section" class="section level2">
 <h2>プロントについて</h2>
 <p>他はばんくし氏の撮み食いに等しいですが，プロンプトだけは拘りました．</p>
 <p>私は <code>fish</code> のテーマでは <a href="https://github.com/oh-my-fish/oh-my-fish/blob/master/docs/Themes.md#yimmy">oh-my-fish/theme-yimmy</a> を愛用していました．</p>
@@ -76,12 +71,12 @@ $XONSH_APPEND_NEWLINE = True</code></pre>
 <pre class="xonsh"><code># 私の場合は以下をコメントアウト
 $BOTTOM_TOOLBAR = &quot;{BACKGROUND_WHITE}{BLACK}{user}@{hostname}&quot;</code></pre>
 </div>
-<div id="よくアクセスするパスへのショートカット" class="section level2">
+<div id="section-1" class="section level2">
 <h2>よくアクセスするパスへのショートカット</h2>
 <pre class="xonsh"><code>aliases[&quot;cd.fav&quot;] = &quot;cd ~/path/to/the/favorite/directory&quot;</code></pre>
 <p>といった感じで <code>cd.キーワード</code> 形式でお気に入り登録してます．一般的にどうやってるのかは知らない．</p>
 </div>
-<div id="その他" class="section level2">
+<div id="section-2" class="section level2">
 <h2>その他</h2>
 <p>連続した重複コマンドを保存しないようにする <code>$HISTCONTROL = (ignoredups)</code> については，
 <code>ignoredups は未定義だゾ</code> と怒られました．</p>

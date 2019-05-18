@@ -1,0 +1,46 @@
+---
+title: RStudio 1.2.x では install.packages する時にパッケージ名を補完してくれる
+author: ~
+date: '2019-05-18'
+slug: auto-complete-when-install-package
+categories: [R]
+tags: [RStudio, RStudio 1.2]
+images: 
+  - /images/covers/2019-05-18-install-packages.png
+---
+
+```{r setup, include = FALSE}
+pacman::p_load(blogdown)
+```
+
+[リリースノート](//www.rstudio.com/products/rstudio/release-notes/)にも載っていない RStudio 1.2.x の世界
+
+```{r, echo = FALSE}
+shortcode("tweet", "1129251313668173827")
+```
+
+という [\@niszet0](//twitter.com/niszet0) 氏の Tweet を発端に確認．
+
+なぜか私が纏めることに．
+
+```{r echo=FALSE}
+knitr::include_graphics("/images/posts/2019-05-18-install-packages-by-rstudio-1-2.gif")
+```
+
+上の画像のように，パッケージ名を引用符で**囲わずに**入力し始め，tab キーを押すと幸せになれる．
+
+パッケージの説明については，インストール済みの場合のみ見れるようだ．
+
+残念ながら以下のように，`c()` で囲った中にパッケージ名を書き出しても，
+パッケージ名を補完することはできない．
+
+```.r
+install.packages(c(tid))
+```
+
+`pacman` パッケージや `pak` パッケージなど，パッケージの管理を便利にしてくれる
+パッケージでも利用できるといいが，まあ難しいだろうことは想像に固くない．
+
+ちなみに GitHub 上のパッケージをインストールしたいけど，
+ユーザー名やパッケージ名があやふやな時には `githubinstall` パッケージが便利です
+(参考: <https://www.karada-good.net/analyticsr/r-341>)．

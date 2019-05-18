@@ -6,9 +6,6 @@ slug: share-data-in-facets
 output:
   blogdown::html_page:
     toc: yes
-    pandoc_args: 
-      - --from
-      - markdown+east_asian_line_breaks
 categories: [R]
 tags: [ggplot2, facet]
 ---
@@ -16,14 +13,14 @@ tags: [ggplot2, facet]
 
 <div id="TOC">
 <ul>
-<li><a href="#はじめに">はじめに</a></li>
-<li><a href="#facet-で表示されない部分のデータをグレーでプロットしてみる">facet で表示されない部分のデータをグレーでプロットしてみる</a></li>
-<li><a href="#versicolor-と-virginica-だけで-facet-してそれぞれの-facet-に-setosa-を表示する">versicolor と virginica だけで facet してそれぞれの facet に setosa を表示する</a></li>
+<li><a href="#section">はじめに</a></li>
+<li><a href="#facet-">facet で表示されない部分のデータをグレーでプロットしてみる</a></li>
+<li><a href="#versicolor--virginica--facet--facet--setosa-">versicolor と virginica だけで facet してそれぞれの facet に setosa を表示する</a></li>
 <li><a href="#enjoy">Enjoy!</a></li>
 </ul>
 </div>
 
-<div id="はじめに" class="section level1">
+<div id="section" class="section level1">
 <h1>はじめに</h1>
 <p>facet を使うと以下のようにグループごとにプロットを分けることができます．しかし，グループ間の比較を行うのがちょっと辛いですね．こんな時，どうすればいいのでしょうか．</p>
 <p>「<a href="https://atusy.github.io/blog/2019/01/20/control-axes-in-faceted-plots/">ggplot で scale = free な facet の軸を調整する</a>」と同様，基本はレイヤーを足すかデータを弄るかです．</p>
@@ -33,7 +30,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   facet_wrap(vars(Species))</code></pre>
 <p><img src="/post/2019-01-20-share-data-in-facets_files/figure-html/unnamed-chunk-1-1.svg" width="672" /></p>
 </div>
-<div id="facet-で表示されない部分のデータをグレーでプロットしてみる" class="section level1">
+<div id="facet-" class="section level1">
 <h1>facet で表示されない部分のデータをグレーでプロットしてみる</h1>
 <p>ここからは <code>tidyverse</code> パッケージのオンパレードですね．
 nested data frame の扱いに慣れていないと辛いです．</p>
@@ -56,7 +53,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#zygsjhwceu .gt_table {
+#hsdofvclzt .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -75,13 +72,13 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* table.border.top.color */
 }
 
-#zygsjhwceu .gt_heading {
+#hsdofvclzt .gt_heading {
   background-color: #FFFFFF;
   /* heading.background.color */
   border-bottom-color: #FFFFFF;
 }
 
-#zygsjhwceu .gt_title {
+#hsdofvclzt .gt_title {
   color: #000000;
   font-size: 125%;
   /* heading.title.font.size */
@@ -92,7 +89,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   border-bottom-width: 0;
 }
 
-#zygsjhwceu .gt_subtitle {
+#hsdofvclzt .gt_subtitle {
   color: #000000;
   font-size: 85%;
   /* heading.subtitle.font.size */
@@ -103,7 +100,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   border-top-width: 0;
 }
 
-#zygsjhwceu .gt_bottom_border {
+#hsdofvclzt .gt_bottom_border {
   border-bottom-style: solid;
   /* heading.border.bottom.style */
   border-bottom-width: 2px;
@@ -112,7 +109,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* heading.border.bottom.color */
 }
 
-#zygsjhwceu .gt_column_spanner {
+#hsdofvclzt .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #A8A8A8;
@@ -120,7 +117,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   padding-bottom: 4px;
 }
 
-#zygsjhwceu .gt_col_heading {
+#hsdofvclzt .gt_col_heading {
   color: #000000;
   background-color: #FFFFFF;
   /* column_labels.background.color */
@@ -133,11 +130,11 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   margin: 10px;
 }
 
-#zygsjhwceu .gt_sep_right {
+#hsdofvclzt .gt_sep_right {
   border-right: 5px solid #FFFFFF;
 }
 
-#zygsjhwceu .gt_group_heading {
+#hsdofvclzt .gt_group_heading {
   padding: 8px;
   color: #000000;
   background-color: #FFFFFF;
@@ -161,7 +158,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   vertical-align: middle;
 }
 
-#zygsjhwceu .gt_empty_group_heading {
+#hsdofvclzt .gt_empty_group_heading {
   padding: 0.5px;
   color: #000000;
   background-color: #FFFFFF;
@@ -185,33 +182,33 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   vertical-align: middle;
 }
 
-#zygsjhwceu .gt_striped {
+#hsdofvclzt .gt_striped {
   background-color: #f2f2f2;
 }
 
-#zygsjhwceu .gt_from_md > :first-child {
+#hsdofvclzt .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#zygsjhwceu .gt_from_md > :last-child {
+#hsdofvclzt .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#zygsjhwceu .gt_row {
+#hsdofvclzt .gt_row {
   padding: 8px;
   /* row.padding */
   margin: 10px;
   vertical-align: middle;
 }
 
-#zygsjhwceu .gt_stub {
+#hsdofvclzt .gt_stub {
   border-right-style: solid;
   border-right-width: 2px;
   border-right-color: #A8A8A8;
   padding-left: 12px;
 }
 
-#zygsjhwceu .gt_summary_row {
+#hsdofvclzt .gt_summary_row {
   color: #000000;
   background-color: #FFFFFF;
   /* summary_row.background.color */
@@ -221,7 +218,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* summary_row.text_transform */
 }
 
-#zygsjhwceu .gt_grand_summary_row {
+#hsdofvclzt .gt_grand_summary_row {
   color: #000000;
   background-color: #FFFFFF;
   /* grand_summary_row.background.color */
@@ -231,19 +228,19 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* grand_summary_row.text_transform */
 }
 
-#zygsjhwceu .gt_first_summary_row {
+#hsdofvclzt .gt_first_summary_row {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #A8A8A8;
 }
 
-#zygsjhwceu .gt_first_grand_summary_row {
+#hsdofvclzt .gt_first_grand_summary_row {
   border-top-style: double;
   border-top-width: 6px;
   border-top-color: #A8A8A8;
 }
 
-#zygsjhwceu .gt_table_body {
+#hsdofvclzt .gt_table_body {
   border-top-style: solid;
   /* table_body.border.top.style */
   border-top-width: 2px;
@@ -258,55 +255,55 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* table_body.border.bottom.color */
 }
 
-#zygsjhwceu .gt_footnote {
+#hsdofvclzt .gt_footnote {
   font-size: 90%;
   /* footnote.font.size */
   padding: 4px;
   /* footnote.padding */
 }
 
-#zygsjhwceu .gt_sourcenote {
+#hsdofvclzt .gt_sourcenote {
   font-size: 90%;
   /* sourcenote.font.size */
   padding: 4px;
   /* sourcenote.padding */
 }
 
-#zygsjhwceu .gt_center {
+#hsdofvclzt .gt_center {
   text-align: center;
 }
 
-#zygsjhwceu .gt_left {
+#hsdofvclzt .gt_left {
   text-align: left;
 }
 
-#zygsjhwceu .gt_right {
+#hsdofvclzt .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#zygsjhwceu .gt_font_normal {
+#hsdofvclzt .gt_font_normal {
   font-weight: normal;
 }
 
-#zygsjhwceu .gt_font_bold {
+#hsdofvclzt .gt_font_bold {
   font-weight: bold;
 }
 
-#zygsjhwceu .gt_font_italic {
+#hsdofvclzt .gt_font_italic {
   font-style: italic;
 }
 
-#zygsjhwceu .gt_super {
+#hsdofvclzt .gt_super {
   font-size: 65%;
 }
 
-#zygsjhwceu .gt_footnote_glyph {
+#hsdofvclzt .gt_footnote_glyph {
   font-style: italic;
   font-size: 65%;
 }
 </style>
-<div id="zygsjhwceu" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
+<div id="hsdofvclzt" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
 <table class='gt_table'>
 <thead>
 <tr>
@@ -348,7 +345,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#kvxynufbsf .gt_table {
+#ftwjrfmhlt .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -367,13 +364,13 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* table.border.top.color */
 }
 
-#kvxynufbsf .gt_heading {
+#ftwjrfmhlt .gt_heading {
   background-color: #FFFFFF;
   /* heading.background.color */
   border-bottom-color: #FFFFFF;
 }
 
-#kvxynufbsf .gt_title {
+#ftwjrfmhlt .gt_title {
   color: #000000;
   font-size: 125%;
   /* heading.title.font.size */
@@ -384,7 +381,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   border-bottom-width: 0;
 }
 
-#kvxynufbsf .gt_subtitle {
+#ftwjrfmhlt .gt_subtitle {
   color: #000000;
   font-size: 85%;
   /* heading.subtitle.font.size */
@@ -395,7 +392,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   border-top-width: 0;
 }
 
-#kvxynufbsf .gt_bottom_border {
+#ftwjrfmhlt .gt_bottom_border {
   border-bottom-style: solid;
   /* heading.border.bottom.style */
   border-bottom-width: 2px;
@@ -404,7 +401,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* heading.border.bottom.color */
 }
 
-#kvxynufbsf .gt_column_spanner {
+#ftwjrfmhlt .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #A8A8A8;
@@ -412,7 +409,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   padding-bottom: 4px;
 }
 
-#kvxynufbsf .gt_col_heading {
+#ftwjrfmhlt .gt_col_heading {
   color: #000000;
   background-color: #FFFFFF;
   /* column_labels.background.color */
@@ -425,11 +422,11 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   margin: 10px;
 }
 
-#kvxynufbsf .gt_sep_right {
+#ftwjrfmhlt .gt_sep_right {
   border-right: 5px solid #FFFFFF;
 }
 
-#kvxynufbsf .gt_group_heading {
+#ftwjrfmhlt .gt_group_heading {
   padding: 8px;
   color: #000000;
   background-color: #FFFFFF;
@@ -453,7 +450,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   vertical-align: middle;
 }
 
-#kvxynufbsf .gt_empty_group_heading {
+#ftwjrfmhlt .gt_empty_group_heading {
   padding: 0.5px;
   color: #000000;
   background-color: #FFFFFF;
@@ -477,33 +474,33 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   vertical-align: middle;
 }
 
-#kvxynufbsf .gt_striped {
+#ftwjrfmhlt .gt_striped {
   background-color: #f2f2f2;
 }
 
-#kvxynufbsf .gt_from_md > :first-child {
+#ftwjrfmhlt .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#kvxynufbsf .gt_from_md > :last-child {
+#ftwjrfmhlt .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#kvxynufbsf .gt_row {
+#ftwjrfmhlt .gt_row {
   padding: 8px;
   /* row.padding */
   margin: 10px;
   vertical-align: middle;
 }
 
-#kvxynufbsf .gt_stub {
+#ftwjrfmhlt .gt_stub {
   border-right-style: solid;
   border-right-width: 2px;
   border-right-color: #A8A8A8;
   padding-left: 12px;
 }
 
-#kvxynufbsf .gt_summary_row {
+#ftwjrfmhlt .gt_summary_row {
   color: #000000;
   background-color: #FFFFFF;
   /* summary_row.background.color */
@@ -513,7 +510,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* summary_row.text_transform */
 }
 
-#kvxynufbsf .gt_grand_summary_row {
+#ftwjrfmhlt .gt_grand_summary_row {
   color: #000000;
   background-color: #FFFFFF;
   /* grand_summary_row.background.color */
@@ -523,19 +520,19 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* grand_summary_row.text_transform */
 }
 
-#kvxynufbsf .gt_first_summary_row {
+#ftwjrfmhlt .gt_first_summary_row {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #A8A8A8;
 }
 
-#kvxynufbsf .gt_first_grand_summary_row {
+#ftwjrfmhlt .gt_first_grand_summary_row {
   border-top-style: double;
   border-top-width: 6px;
   border-top-color: #A8A8A8;
 }
 
-#kvxynufbsf .gt_table_body {
+#ftwjrfmhlt .gt_table_body {
   border-top-style: solid;
   /* table_body.border.top.style */
   border-top-width: 2px;
@@ -550,55 +547,55 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* table_body.border.bottom.color */
 }
 
-#kvxynufbsf .gt_footnote {
+#ftwjrfmhlt .gt_footnote {
   font-size: 90%;
   /* footnote.font.size */
   padding: 4px;
   /* footnote.padding */
 }
 
-#kvxynufbsf .gt_sourcenote {
+#ftwjrfmhlt .gt_sourcenote {
   font-size: 90%;
   /* sourcenote.font.size */
   padding: 4px;
   /* sourcenote.padding */
 }
 
-#kvxynufbsf .gt_center {
+#ftwjrfmhlt .gt_center {
   text-align: center;
 }
 
-#kvxynufbsf .gt_left {
+#ftwjrfmhlt .gt_left {
   text-align: left;
 }
 
-#kvxynufbsf .gt_right {
+#ftwjrfmhlt .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#kvxynufbsf .gt_font_normal {
+#ftwjrfmhlt .gt_font_normal {
   font-weight: normal;
 }
 
-#kvxynufbsf .gt_font_bold {
+#ftwjrfmhlt .gt_font_bold {
   font-weight: bold;
 }
 
-#kvxynufbsf .gt_font_italic {
+#ftwjrfmhlt .gt_font_italic {
   font-style: italic;
 }
 
-#kvxynufbsf .gt_super {
+#ftwjrfmhlt .gt_super {
   font-size: 65%;
 }
 
-#kvxynufbsf .gt_footnote_glyph {
+#ftwjrfmhlt .gt_footnote_glyph {
   font-style: italic;
   font-size: 65%;
 }
 </style>
-<div id="kvxynufbsf" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
+<div id="ftwjrfmhlt" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
 <table class='gt_table'>
 <thead>
 <tr>
@@ -656,7 +653,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
 <!--gt table end-->
 </div>
 </div>
-<div id="versicolor-と-virginica-だけで-facet-してそれぞれの-facet-に-setosa-を表示する" class="section level1">
+<div id="versicolor--virginica--facet--facet--setosa-" class="section level1">
 <h1>versicolor と virginica だけで facet してそれぞれの facet に setosa を表示する</h1>
 <pre class="r"><code>iris %&gt;%
   mutate(
@@ -678,7 +675,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#kzujkltvsg .gt_table {
+#nqwnbkitgw .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -697,13 +694,13 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* table.border.top.color */
 }
 
-#kzujkltvsg .gt_heading {
+#nqwnbkitgw .gt_heading {
   background-color: #FFFFFF;
   /* heading.background.color */
   border-bottom-color: #FFFFFF;
 }
 
-#kzujkltvsg .gt_title {
+#nqwnbkitgw .gt_title {
   color: #000000;
   font-size: 125%;
   /* heading.title.font.size */
@@ -714,7 +711,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   border-bottom-width: 0;
 }
 
-#kzujkltvsg .gt_subtitle {
+#nqwnbkitgw .gt_subtitle {
   color: #000000;
   font-size: 85%;
   /* heading.subtitle.font.size */
@@ -725,7 +722,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   border-top-width: 0;
 }
 
-#kzujkltvsg .gt_bottom_border {
+#nqwnbkitgw .gt_bottom_border {
   border-bottom-style: solid;
   /* heading.border.bottom.style */
   border-bottom-width: 2px;
@@ -734,7 +731,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* heading.border.bottom.color */
 }
 
-#kzujkltvsg .gt_column_spanner {
+#nqwnbkitgw .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #A8A8A8;
@@ -742,7 +739,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   padding-bottom: 4px;
 }
 
-#kzujkltvsg .gt_col_heading {
+#nqwnbkitgw .gt_col_heading {
   color: #000000;
   background-color: #FFFFFF;
   /* column_labels.background.color */
@@ -755,11 +752,11 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   margin: 10px;
 }
 
-#kzujkltvsg .gt_sep_right {
+#nqwnbkitgw .gt_sep_right {
   border-right: 5px solid #FFFFFF;
 }
 
-#kzujkltvsg .gt_group_heading {
+#nqwnbkitgw .gt_group_heading {
   padding: 8px;
   color: #000000;
   background-color: #FFFFFF;
@@ -783,7 +780,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   vertical-align: middle;
 }
 
-#kzujkltvsg .gt_empty_group_heading {
+#nqwnbkitgw .gt_empty_group_heading {
   padding: 0.5px;
   color: #000000;
   background-color: #FFFFFF;
@@ -807,33 +804,33 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   vertical-align: middle;
 }
 
-#kzujkltvsg .gt_striped {
+#nqwnbkitgw .gt_striped {
   background-color: #f2f2f2;
 }
 
-#kzujkltvsg .gt_from_md > :first-child {
+#nqwnbkitgw .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#kzujkltvsg .gt_from_md > :last-child {
+#nqwnbkitgw .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#kzujkltvsg .gt_row {
+#nqwnbkitgw .gt_row {
   padding: 8px;
   /* row.padding */
   margin: 10px;
   vertical-align: middle;
 }
 
-#kzujkltvsg .gt_stub {
+#nqwnbkitgw .gt_stub {
   border-right-style: solid;
   border-right-width: 2px;
   border-right-color: #A8A8A8;
   padding-left: 12px;
 }
 
-#kzujkltvsg .gt_summary_row {
+#nqwnbkitgw .gt_summary_row {
   color: #000000;
   background-color: #FFFFFF;
   /* summary_row.background.color */
@@ -843,7 +840,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* summary_row.text_transform */
 }
 
-#kzujkltvsg .gt_grand_summary_row {
+#nqwnbkitgw .gt_grand_summary_row {
   color: #000000;
   background-color: #FFFFFF;
   /* grand_summary_row.background.color */
@@ -853,19 +850,19 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* grand_summary_row.text_transform */
 }
 
-#kzujkltvsg .gt_first_summary_row {
+#nqwnbkitgw .gt_first_summary_row {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #A8A8A8;
 }
 
-#kzujkltvsg .gt_first_grand_summary_row {
+#nqwnbkitgw .gt_first_grand_summary_row {
   border-top-style: double;
   border-top-width: 6px;
   border-top-color: #A8A8A8;
 }
 
-#kzujkltvsg .gt_table_body {
+#nqwnbkitgw .gt_table_body {
   border-top-style: solid;
   /* table_body.border.top.style */
   border-top-width: 2px;
@@ -880,55 +877,55 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* table_body.border.bottom.color */
 }
 
-#kzujkltvsg .gt_footnote {
+#nqwnbkitgw .gt_footnote {
   font-size: 90%;
   /* footnote.font.size */
   padding: 4px;
   /* footnote.padding */
 }
 
-#kzujkltvsg .gt_sourcenote {
+#nqwnbkitgw .gt_sourcenote {
   font-size: 90%;
   /* sourcenote.font.size */
   padding: 4px;
   /* sourcenote.padding */
 }
 
-#kzujkltvsg .gt_center {
+#nqwnbkitgw .gt_center {
   text-align: center;
 }
 
-#kzujkltvsg .gt_left {
+#nqwnbkitgw .gt_left {
   text-align: left;
 }
 
-#kzujkltvsg .gt_right {
+#nqwnbkitgw .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#kzujkltvsg .gt_font_normal {
+#nqwnbkitgw .gt_font_normal {
   font-weight: normal;
 }
 
-#kzujkltvsg .gt_font_bold {
+#nqwnbkitgw .gt_font_bold {
   font-weight: bold;
 }
 
-#kzujkltvsg .gt_font_italic {
+#nqwnbkitgw .gt_font_italic {
   font-style: italic;
 }
 
-#kzujkltvsg .gt_super {
+#nqwnbkitgw .gt_super {
   font-size: 65%;
 }
 
-#kzujkltvsg .gt_footnote_glyph {
+#nqwnbkitgw .gt_footnote_glyph {
   font-style: italic;
   font-size: 65%;
 }
 </style>
-<div id="kzujkltvsg" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
+<div id="nqwnbkitgw" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
 <table class='gt_table'>
 <thead>
 <tr>
@@ -970,7 +967,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#qrbxhpqjbr .gt_table {
+#ipkaryfgks .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -989,13 +986,13 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* table.border.top.color */
 }
 
-#qrbxhpqjbr .gt_heading {
+#ipkaryfgks .gt_heading {
   background-color: #FFFFFF;
   /* heading.background.color */
   border-bottom-color: #FFFFFF;
 }
 
-#qrbxhpqjbr .gt_title {
+#ipkaryfgks .gt_title {
   color: #000000;
   font-size: 125%;
   /* heading.title.font.size */
@@ -1006,7 +1003,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   border-bottom-width: 0;
 }
 
-#qrbxhpqjbr .gt_subtitle {
+#ipkaryfgks .gt_subtitle {
   color: #000000;
   font-size: 85%;
   /* heading.subtitle.font.size */
@@ -1017,7 +1014,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   border-top-width: 0;
 }
 
-#qrbxhpqjbr .gt_bottom_border {
+#ipkaryfgks .gt_bottom_border {
   border-bottom-style: solid;
   /* heading.border.bottom.style */
   border-bottom-width: 2px;
@@ -1026,7 +1023,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* heading.border.bottom.color */
 }
 
-#qrbxhpqjbr .gt_column_spanner {
+#ipkaryfgks .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #A8A8A8;
@@ -1034,7 +1031,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   padding-bottom: 4px;
 }
 
-#qrbxhpqjbr .gt_col_heading {
+#ipkaryfgks .gt_col_heading {
   color: #000000;
   background-color: #FFFFFF;
   /* column_labels.background.color */
@@ -1047,11 +1044,11 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   margin: 10px;
 }
 
-#qrbxhpqjbr .gt_sep_right {
+#ipkaryfgks .gt_sep_right {
   border-right: 5px solid #FFFFFF;
 }
 
-#qrbxhpqjbr .gt_group_heading {
+#ipkaryfgks .gt_group_heading {
   padding: 8px;
   color: #000000;
   background-color: #FFFFFF;
@@ -1075,7 +1072,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   vertical-align: middle;
 }
 
-#qrbxhpqjbr .gt_empty_group_heading {
+#ipkaryfgks .gt_empty_group_heading {
   padding: 0.5px;
   color: #000000;
   background-color: #FFFFFF;
@@ -1099,33 +1096,33 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   vertical-align: middle;
 }
 
-#qrbxhpqjbr .gt_striped {
+#ipkaryfgks .gt_striped {
   background-color: #f2f2f2;
 }
 
-#qrbxhpqjbr .gt_from_md > :first-child {
+#ipkaryfgks .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#qrbxhpqjbr .gt_from_md > :last-child {
+#ipkaryfgks .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#qrbxhpqjbr .gt_row {
+#ipkaryfgks .gt_row {
   padding: 8px;
   /* row.padding */
   margin: 10px;
   vertical-align: middle;
 }
 
-#qrbxhpqjbr .gt_stub {
+#ipkaryfgks .gt_stub {
   border-right-style: solid;
   border-right-width: 2px;
   border-right-color: #A8A8A8;
   padding-left: 12px;
 }
 
-#qrbxhpqjbr .gt_summary_row {
+#ipkaryfgks .gt_summary_row {
   color: #000000;
   background-color: #FFFFFF;
   /* summary_row.background.color */
@@ -1135,7 +1132,7 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* summary_row.text_transform */
 }
 
-#qrbxhpqjbr .gt_grand_summary_row {
+#ipkaryfgks .gt_grand_summary_row {
   color: #000000;
   background-color: #FFFFFF;
   /* grand_summary_row.background.color */
@@ -1145,19 +1142,19 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* grand_summary_row.text_transform */
 }
 
-#qrbxhpqjbr .gt_first_summary_row {
+#ipkaryfgks .gt_first_summary_row {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #A8A8A8;
 }
 
-#qrbxhpqjbr .gt_first_grand_summary_row {
+#ipkaryfgks .gt_first_grand_summary_row {
   border-top-style: double;
   border-top-width: 6px;
   border-top-color: #A8A8A8;
 }
 
-#qrbxhpqjbr .gt_table_body {
+#ipkaryfgks .gt_table_body {
   border-top-style: solid;
   /* table_body.border.top.style */
   border-top-width: 2px;
@@ -1172,55 +1169,55 @@ ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) +
   /* table_body.border.bottom.color */
 }
 
-#qrbxhpqjbr .gt_footnote {
+#ipkaryfgks .gt_footnote {
   font-size: 90%;
   /* footnote.font.size */
   padding: 4px;
   /* footnote.padding */
 }
 
-#qrbxhpqjbr .gt_sourcenote {
+#ipkaryfgks .gt_sourcenote {
   font-size: 90%;
   /* sourcenote.font.size */
   padding: 4px;
   /* sourcenote.padding */
 }
 
-#qrbxhpqjbr .gt_center {
+#ipkaryfgks .gt_center {
   text-align: center;
 }
 
-#qrbxhpqjbr .gt_left {
+#ipkaryfgks .gt_left {
   text-align: left;
 }
 
-#qrbxhpqjbr .gt_right {
+#ipkaryfgks .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#qrbxhpqjbr .gt_font_normal {
+#ipkaryfgks .gt_font_normal {
   font-weight: normal;
 }
 
-#qrbxhpqjbr .gt_font_bold {
+#ipkaryfgks .gt_font_bold {
   font-weight: bold;
 }
 
-#qrbxhpqjbr .gt_font_italic {
+#ipkaryfgks .gt_font_italic {
   font-style: italic;
 }
 
-#qrbxhpqjbr .gt_super {
+#ipkaryfgks .gt_super {
   font-size: 65%;
 }
 
-#qrbxhpqjbr .gt_footnote_glyph {
+#ipkaryfgks .gt_footnote_glyph {
   font-style: italic;
   font-size: 65%;
 }
 </style>
-<div id="qrbxhpqjbr" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
+<div id="ipkaryfgks" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
 <table class='gt_table'>
 <thead>
 <tr>
