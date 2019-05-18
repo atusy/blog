@@ -6,11 +6,6 @@ date: '2019-05-14'
 slug: rmd2pdf-any-font
 categories: [R]
 tags: [RMarkdown]
-output:
-  blogdown::html_page:
-    pandoc_args:
-      - -f
-      - markdown+east_asian_line_breaks
 highlightjs:
   - tex
   - yaml
@@ -32,7 +27,7 @@ highlightjs:
 <p>これには YAML フロントマターで簡単に済ます方法と プリアンブルで柔軟性を重視する方法があります．</p>
 <p>LuaTeX 使ったことないので XeLaTeX に限定して話します.</p>
 <p>今回紹介する内容により，ユニコード対応フォントを使うことで，ギリシャ文字などが簡単に平文でも数式でも扱えるようになります．</p>
-<div id="r-の環境を整えておく" class="section level1">
+<div id="r-" class="section level1">
 <h1>R の環境を整えておく</h1>
 <p>R で以下の2行を実行するだけ
 by <a href="//twitter.com/nozma">@nozma</a> 氏．</p>
@@ -40,7 +35,7 @@ by <a href="//twitter.com/nozma">@nozma</a> 氏．</p>
 <pre class="r"><code>install.packages(c(&#39;tinytex&#39;, &#39;rmarkdown&#39;))
 tinytex::install_tinytex()</code></pre>
 </div>
-<div id="フォントを指定する" class="section level1">
+<div id="section" class="section level1">
 <h1>フォントを指定する</h1>
 <div id="by-yaml" class="section level2">
 <h2>By YAML</h2>
@@ -73,14 +68,14 @@ CJKoptions: Scale=1
 <p>何ともびみょーなので，改善案を
 <a href="https://groups.google.com/forum/?utm_medium=email&amp;utm_source=footer#!forum/pandoc-discuss">pandoc-discuss</a> に提案しておいた．
 (<a href="https://groups.google.com/d/msg/pandoc-discuss/aQLekl0xzJo/E32PNIEnAgAJ" class="uri">https://groups.google.com/d/msg/pandoc-discuss/aQLekl0xzJo/E32PNIEnAgAJ</a>)</p>
-<p>手元でなんとかしたい人は後述の「<a href="#テンプレート最適化">テンプレート最適化</a>」を参照して下さい．</p>
+<p>手元でなんとかしたい人は後述の「<a href="#section-1">テンプレート最適化</a>」を参照して下さい．</p>
 <p><code>\usepackage{zxjatype}</code> は行末の禁則処理などをするために必要．</p>
 </div>
 <div id="by-yaml-preamble" class="section level2">
 <h2>by YAML + preamble</h2>
 <p>r-wakalang で Carlos Luis Rivera 氏に教えてもらった内容をそのまま転載します．</p>
 <p>ただし，この方法では， <code>unicode-math</code>
-の利用に難がありますので，改善には後述の「<a href="#テンプレート最適化">テンプレート最適化</a>」を参照して下さい．</p>
+の利用に難がありますので，改善には後述の「<a href="#section-1">テンプレート最適化</a>」を参照して下さい．</p>
 <p>まず以下の内容を適宜編集して， <code>font-config.tex</code> として作業ディレクトリに保存して下さい．</p>
 <pre class="tex"><code>%---------------------------------------------------
 %
@@ -139,7 +134,7 @@ CJKoptions: Scale=1
       in_header:
         - font-config.tex</code></pre>
 </div>
-<div id="テンプレート最適化" class="section level2">
+<div id="section-1" class="section level2">
 <h2>テンプレート最適化</h2>
 <p>最適化済みのものはこちら:
 <a href="https://github.com/atusy/rmarkdown/blob/template-for-better-font-usage/inst/rmd/latex/default-1.17.0.2.tex" class="uri">https://github.com/atusy/rmarkdown/blob/template-for-better-font-usage/inst/rmd/latex/default-1.17.0.2.tex</a></p>
@@ -163,7 +158,7 @@ CJKoptions: Scale=1
 +     template: template.tex</code></pre>
 <p>具体的な編集箇所は以下の通り．</p>
 </div>
-<div id="日本語用ドキュメントクラスを指定可能にする" class="section level2">
+<div id="section-2" class="section level2">
 <h2>日本語用ドキュメントクラスを指定可能にする</h2>
 <p>以下のコードを YAML フロントマターに追加すると， <code>bxjsarticle</code> を利用を宣言できる．</p>
 <pre class="yaml"><code>documentclass: bxjsarticle
@@ -179,7 +174,7 @@ classoption: xelatex,ja=standard</code></pre>
 + % \usepackage[$for(geometry)$$geometry$$sep$,$endfor$]{geometry}`
   $endif$</code></pre>
 </div>
-<div id="プリアンブルで-unicode-math-を利用できるようにする" class="section level2">
+<div id="unicode-math-" class="section level2">
 <h2>プリアンブルで <code>unicode-math</code> を利用できるようにする</h2>
 <pre class="diff"><code>-   \ifxetex
 -    \usepackage{mathspec}
@@ -191,7 +186,7 @@ classoption: xelatex,ja=standard</code></pre>
 -   \fi
 + %  \fi</code></pre>
 </div>
-<div id="yaml-フロントマターで-cjkmonofont-や-cjksansfont-を指定可能にする" class="section level2">
+<div id="yaml--cjkmonofont--cjksansfont-" class="section level2">
 <h2>YAML フロントマターで <code>CJKmonofont</code> や <code>CJKsansfont</code> を指定可能にする</h2>
 <p><code>$if(変数名)$</code> とすると，YAML フロントマターで変数に値を放り込んだ時に実行する内容を記述できます．</p>
 <p>これを利用して <code>$if(CJKsansfont)$</code> と <code>$if(CJKmonofont)$</code> を書きましょう．</p>

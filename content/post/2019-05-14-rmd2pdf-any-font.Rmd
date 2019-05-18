@@ -6,11 +6,6 @@ date: '2019-05-14'
 slug: rmd2pdf-any-font
 categories: [R]
 tags: [RMarkdown]
-output:
-  blogdown::html_page:
-    pandoc_args:
-      - -f
-      - markdown+east_asian_line_breaks
 highlightjs:
   - tex
   - yaml

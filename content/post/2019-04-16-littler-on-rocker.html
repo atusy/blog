@@ -8,9 +8,6 @@ tags: [littler, rocker]
 output:
   blogdown::html_page:
     toc: true
-    pandoc_args: 
-      - --from
-      - markdown+east_asian_line_breaks
 summary: |
   rocker で使える `install2.r` や `installGithub.r` は，シェル上から CRAN や GitHub 上の R パッケージをインストールするコマンドです．これらの正体や TIP を纏めました．
 ---
@@ -18,19 +15,19 @@ summary: |
 
 <div id="TOC">
 <ul>
-<li><a href="#はじめに">はじめに</a></li>
-<li><a href="#littler-とは">littler とは？</a><ul>
-<li><a href="#os-用アプリとしての-littler">OS 用アプリとしての littler</a></li>
-<li><a href="#r-パッケージとしての-littler">R パッケージとしての littler</a></li>
+<li><a href="#section">はじめに</a></li>
+<li><a href="#littler-">littler とは？</a><ul>
+<li><a href="#os--littler">OS 用アプリとしての littler</a></li>
+<li><a href="#r--littler">R パッケージとしての littler</a></li>
 </ul></li>
-<li><a href="#rocker-で使える-littler-由来の-r-スクリプト">rocker で使える littler 由来の R スクリプト</a><ul>
+<li><a href="#rocker--littler--r-">rocker で使える littler 由来の R スクリプト</a><ul>
 <li><a href="#install.r"><span>install.r</span></a></li>
 <li><a href="#install2.r"><span>install2.r</span></a><ul>
-<li><a href="#tips---ncpus--1-すると最大限並列化できる">TIPS: <code>--ncpus -1</code> すると最大限並列化できる</a></li>
-<li><a href="#tips-rocker-派生には---skipinstalled-が便利そう">TIPS: rocker 派生には <code>--skipinstalled</code> が便利そう</a></li>
+<li><a href="#tips---ncpus--1-">TIPS: <code>--ncpus -1</code> すると最大限並列化できる</a></li>
+<li><a href="#tips-rocker----skipinstalled-">TIPS: rocker 派生には <code>--skipinstalled</code> が便利そう</a></li>
 </ul></li>
 <li><a href="#installgithub.r"><span>installGithub.r</span></a><ul>
-<li><a href="#tips-pkgbranch-などブランチやバージョンの指定が可能">TIPS: <code>pkg@branch</code> などブランチやバージョンの指定が可能．</a></li>
+<li><a href="#tips-pkgbranch-">TIPS: <code>pkg@branch</code> などブランチやバージョンの指定が可能．</a></li>
 </ul></li>
 <li><a href="#testinstalled.r"><span>testInstalled.r</span></a></li>
 </ul></li>
@@ -38,7 +35,7 @@ summary: |
 </ul>
 </div>
 
-<div id="はじめに" class="section level1">
+<div id="section" class="section level1">
 <h1>はじめに</h1>
 <p>みなさん rocker してますか？
 rocker を使うと Docker で R ± RStudio できるので</p>
@@ -73,10 +70,10 @@ by <span class="citation">@u_ribo</span> 氏)</p>
 <p>が有効化されていますね．</p>
 <p>では <code>littler</code> やこれらのコマンドがナニモノか見ていきましょう．</p>
 </div>
-<div id="littler-とは" class="section level1">
+<div id="littler-" class="section level1">
 <h1>littler とは？</h1>
 <p>OS用のアプリ (apt パッケージなど) としての <code>littler</code> と Rパッケージとしての <code>littler</code> がいるようです．</p>
-<div id="os-用アプリとしての-littler" class="section level2">
+<div id="os--littler" class="section level2">
 <h2>OS 用アプリとしての littler</h2>
 <p><code>apt show littler</code> によれば， “GNU R scripting and command-line front-end” とのことで，ターミナル上での R スクリプト実行を容易にしてくれるもののようです．</p>
 <p>yutannihilation 氏による紹介記事もあります
@@ -91,7 +88,7 @@ print(&quot;Hello World!&quot;)</code></pre>
 ./hello.r
 # [1] Hello World!</code></pre>
 </div>
-<div id="r-パッケージとしての-littler" class="section level2">
+<div id="r--littler" class="section level2">
 <h2>R パッケージとしての littler</h2>
 <ul>
 <li>CRAN: <a href="https://cran.r-project.org/package=littler" class="uri">https://cran.r-project.org/package=littler</a></li>
@@ -106,7 +103,7 @@ print(&quot;Hello World!&quot;)</code></pre>
 にいっぱいありますが，今回は rocker で利用できるもののみ紹介します．</p>
 </div>
 </div>
-<div id="rocker-で使える-littler-由来の-r-スクリプト" class="section level1">
+<div id="rocker--littler--r-" class="section level1">
 <h1>rocker で使える littler 由来の R スクリプト</h1>
 <div id="install.r" class="section level2">
 <h2><a href="https://github.com/eddelbuettel/littler/blob/master/inst/examples/install.r">install.r</a></h2>
@@ -136,14 +133,14 @@ print(&quot;Hello World!&quot;)</code></pre>
 <p>で R でいうところの</p>
 <pre class="r"><code>install.packages(c(&quot;dplyr&quot;, &quot;tidyr&quot;), error = TRUE, dependencies = TRUE)</code></pre>
 <p>に相当．</p>
-<div id="tips---ncpus--1-すると最大限並列化できる" class="section level3">
+<div id="tips---ncpus--1-" class="section level3">
 <h3>TIPS: <code>--ncpus -1</code> すると最大限並列化できる</h3>
 <p>ソースを見て気付いた
 (<a href="https://github.com/eddelbuettel/littler/blob/56851a5be87ec2c5f0a62036c069f98a99d25f78/inst/examples/install2.r#L68">68行目</a>)．</p>
 <p>これは R の install.packages が ncpu に正の整数しか指定できないこととの大きな違い．</p>
 <p>Docker で複数のパッケージのインストールに時間がかかっている人には朗報だろう．</p>
 </div>
-<div id="tips-rocker-派生には---skipinstalled-が便利そう" class="section level3">
+<div id="tips-rocker----skipinstalled-" class="section level3">
 <h3>TIPS: rocker 派生には <code>--skipinstalled</code> が便利そう</h3>
 <p>オレオレ verse を作るとき，このパッケージは既にインストール済みだろうか……？インストール済みなのにまたインストールするとビルドに時間がかかるな……．</p>
 <p>などと悩むくらいならこれを有効にしておくとよい．</p>
@@ -162,7 +159,7 @@ print(&quot;Hello World!&quot;)</code></pre>
 -x --usage           ヘルプと用例を表示</code></pre>
 <p>簡単な用例:</p>
 <pre class="sh"><code>installGithub.r RcppCore/Rcpp@1.0.0</code></pre>
-<div id="tips-pkgbranch-などブランチやバージョンの指定が可能" class="section level3">
+<div id="tips-pkgbranch-" class="section level3">
 <h3>TIPS: <code>pkg@branch</code> などブランチやバージョンの指定が可能．</h3>
 <p><code>remotes::install_github</code> だからね．詳しくは<code>remotes::install_github</code> の<a href="https://remotes.r-lib.org/reference/install_github.html">ドキュメント</a>を参照．</p>
 </div>

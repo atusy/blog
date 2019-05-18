@@ -5,16 +5,11 @@ date: '2019-04-29'
 slug: notocjkjp-on-rmd
 categories: [R]
 tags: [Rmd, Font, docker, r-wakalang]
-output:
-  blogdown::html_page:
-    pandoc_args: 
-      - --from
-      - markdown+east_asian_line_breaks
 ---
 
 
 
-<div id="はじめに" class="section level1">
+<div id="section" class="section level1">
 <h1>はじめに</h1>
 <p>過去に 「<a href="//qiita.com/Atsushi776/items/9ef1e5d744e2b91c61ee">Rmarkdownで日本語PDFを出力する</a>」という記事を書いた．</p>
 <p>ここでは以下のような YAML フロントマターを用いて， IPA フォントによる日本語 PDF を出力した．</p>
@@ -32,11 +27,11 @@ header-includes:
 <p>そこで No Tofu な Noto フォントを試してみた．</p>
 <p>やるべきことはフォントのインストールと，YAMLフロントマターの書き換えだ．</p>
 </div>
-<div id="手順" class="section level1">
+<div id="section-1" class="section level1">
 <h1>手順</h1>
-<div id="noto-フォントのインストール" class="section level2">
+<div id="noto-" class="section level2">
 <h2>Noto フォントのインストール</h2>
-<p>Windows なら [https://www.google.com/get/noto/] で
+<p>Windows なら [<a href="https://www.google.com/get/noto/" class="uri">https://www.google.com/get/noto/</a>] で
 Noto Sans CJK JP と Noto Serif CJK JP をダウンロードして解凍し，右クリックからインストールできるはずだが，試していない．</p>
 <p>Ubuntu / Debian なら以下の手順で行う．</p>
 <pre class=".bash"><code># Noto Sans CJK をインストール
@@ -63,7 +58,7 @@ sudo chmod 644 /usr/share/fonts/opentype/noto/*</code></pre>
 <li>手動で入手したフォントをシステムにインストールする場合は権限を <code>644</code> に設定する必要がある<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></li>
 </ul>
 </div>
-<div id="yamlフロントマター" class="section level2">
+<div id="yaml" class="section level2">
 <h2>YAMLフロントマター</h2>
 <p>以下のように指定する．<code>\usepackage[noto]{zxjafont}</code> がミソ．</p>
 <pre class=".yaml"><code>---
@@ -77,7 +72,7 @@ header-includes:
   - \usepackage[noto]{zxjafont}
 ---</code></pre>
 </div>
-<div id="内容を書いて-knit" class="section level2">
+<div id="knit" class="section level2">
 <h2>内容を書いて knit</h2>
 <p>RStudio ユーザーなら Ctrl + Shift + K</p>
 </div>

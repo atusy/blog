@@ -8,9 +8,6 @@ tags: [bench]
 output:
   blogdown::html_page:
     toc: yes
-    pandoc_args: 
-      - --from
-      - markdown+east_asian_line_breaks
 ---
 
 べき演算をするには `^` を使うか `*` を使えばいいけれど，
@@ -41,7 +38,7 @@ p_load_gh("stefano-meschiari/latex2exp", "thomasp85/patchwork")
 
 # べき演算の底の準備
 set.seed(123)
-x <- runif(1e5)
+x <- runif(1e5, 1, 2)
 
 # ggplot の theme を設定
 theme_set(theme_grey(base_size = 14) + theme(axis.title = element_blank()))
@@ -107,7 +104,10 @@ benchpresses <- bench::press(
 ```
 
 ```{r plot-benchpress, fig.height = 2}
-ggplot(benchpresses, aes(n, median, colour = expression)) +
+ggplot(
+  transmute(benchpresses, n, median, expression = as.character(expression)), 
+  aes(n, median, colour = expression)
+) +
   geom_point() +
   xlim(0, NA) +
   ggtitle("経過時間の中央値")
@@ -147,7 +147,7 @@ list(
   "負の正数" = bench::mark(
     "^" = x ^ -100L,
     "*" = 
-      1 / (
+      1L / (
         x * x * x * x * x * x * x * x * x * x *
         x * x * x * x * x * x * x * x * x * x *
         x * x * x * x * x * x * x * x * x * x *
@@ -309,7 +309,7 @@ bench::mark(
 底の大小によらず `*` が勝つらしい．
 
 ```{r large-base, fig.height = 2}
-z <- runif(1e5, 1e2, 1e4)
+z <- runif(1e5, 1e2, 1e3)
 bench::mark(
   "^" = z ^ 90L,
   "*" = 

@@ -8,25 +8,22 @@ tags: [bench]
 output:
   blogdown::html_page:
     toc: yes
-    pandoc_args: 
-      - --from
-      - markdown+east_asian_line_breaks
 ---
 
 
 <div id="TOC">
 <ul>
-<li><a href="#確認のための準備">確認のための準備</a></li>
+<li><a href="#section">確認のための準備</a></li>
 <li><a href="#benchmark">bench::mark</a></li>
 <li><a href="#benchpress">bench::press</a><ul>
-<li><a href="#手動ベンチプレス">手動ベンチプレス</a><ul>
-<li><a href="#乗-の負け">100乗: * の負け</a></li>
-<li><a href="#乗-の勝ち">90乗: * の勝ち</a></li>
-<li><a href="#乗-工夫すれば-も勝てる">1000乗: 工夫すれば * も勝てる</a></li>
+<li><a href="#section-1">手動ベンチプレス</a><ul>
+<li><a href="#section-2">100乗: * の負け</a></li>
+<li><a href="#section-3">90乗: * の勝ち</a></li>
+<li><a href="#section-4">1000乗: 工夫すれば * も勝てる</a></li>
 </ul></li>
-<li><a href="#long-x">ベクトルを長くしてみる @ 90乗: * が勝てる</a></li>
-<li><a href="#long-x">ベクトルを短かくしてみる @ 90乗: : * が負ける</a></li>
-<li><a href="#large-x">底をデカくしてみる @ 90乗: * が勝つ</a></li>
+<li><a href="#section-5">ベクトルを長くしてみる @ 90乗: * が勝てる</a></li>
+<li><a href="#section-6">ベクトルを短かくしてみる @ 90乗: : * が負ける</a></li>
+<li><a href="#section-7">底をデカくしてみる @ 90乗: * が勝つ</a></li>
 </ul></li>
 <li><a href="#enjoy">Enjoy</a></li>
 </ul>
@@ -44,7 +41,7 @@ output:
 <li><code>*</code> では指数がベクトルになるようなべき演算が辛いので，そういう時は <code>^</code> の方がいいんじゃないかな？</li>
 </ul>
 <p><code>bench</code> パッケージ便利だぞ!</p>
-<div id="確認のための準備" class="section level1">
+<div id="section" class="section level1">
 <h1>確認のための準備</h1>
 <pre class="r"><code># 結果をキャッシュする
 knitr::opts_chunk$set(cache = TRUE)
@@ -56,7 +53,7 @@ p_load_gh(&quot;stefano-meschiari/latex2exp&quot;, &quot;thomasp85/patchwork&quo
 
 # べき演算の底の準備
 set.seed(123)
-x &lt;- runif(1e5)
+x &lt;- runif(1e5, 1, 2)
 
 # ggplot の theme を設定
 theme_set(theme_grey(base_size = 14) + theme(axis.title = element_blank()))</code></pre>
@@ -78,7 +75,7 @@ benchmarks &lt;- list(
      x ^ 10L,
      x * x * x * x * x * x * x * x * x * x
   ),
-  &quot;負の正数&quot; = bench::mark(
+  &quot;負の整数&quot; = bench::mark(
      x ^ -10L,
      1 / (x * x * x * x * x * x * x * x * x * x)
   ),
@@ -92,6 +89,7 @@ benchmarks %&gt;%
   map(autoplot) %&gt;%
   imap(~ .x + ggtitle(.y)) %&gt;%
   wrap_plots(ncol = 1)</code></pre>
+<pre><code>## Loading required namespace: tidyr</code></pre>
 <p><img src="/post/2019-01-22-power-calc-bench_files/figure-html/positive-1.png" width="672" /></p>
 </div>
 <div id="benchpress" class="section level1">
@@ -107,7 +105,10 @@ benchpresses &lt;- bench::press(
     filter_gc = FALSE, min_iterations = 100L
   )
 )</code></pre>
-<pre class="r"><code>ggplot(benchpresses, aes(n, median, colour = expression)) +
+<pre class="r"><code>ggplot(
+  transmute(benchpresses, n, median, expression = as.character(expression)), 
+  aes(n, median, colour = expression)
+) +
   geom_point() +
   xlim(0, NA) +
   ggtitle(&quot;経過時間の中央値&quot;)</code></pre>
@@ -115,12 +116,13 @@ benchpresses &lt;- bench::press(
 <pre class="r"><code>benchpresses %&gt;%
   filter(n %in% c(20, 100)) %&gt;%
   autoplot</code></pre>
+<pre><code>## Loading required namespace: tidyr</code></pre>
 <p><img src="/post/2019-01-22-power-calc-bench_files/figure-html/plot-benchpress-2.png" width="672" /></p>
 <p>40乗以上で <code>*</code> が負け出すのは大量のガベージコレクションのせいか？</p>
-<div id="手動ベンチプレス" class="section level2">
+<div id="section-1" class="section level2">
 <h2>手動ベンチプレス</h2>
 <p><code>rep</code> とか <code>Reduce</code> を使ったせいでガベージコレクションが発生したのかな？と思ったので，愚直なコーディングで指数を変えながらベンチマークしてみる．こういう時 <code>bench::mark</code> が結果の同一性を担保してくれるので助かる．</p>
-<div id="乗-の負け" class="section level3">
+<div id="section-2" class="section level3">
 <h3>100乗: * の負け</h3>
 <p>結局かけ算の負け!! ガベージコレクションのせいだけではないらしい．</p>
 <pre class="r"><code>list(
@@ -141,7 +143,7 @@ benchpresses &lt;- bench::press(
   &quot;負の正数&quot; = bench::mark(
     &quot;^&quot; = x ^ -100L,
     &quot;*&quot; = 
-      1 / (
+      1L / (
         x * x * x * x * x * x * x * x * x * x *
         x * x * x * x * x * x * x * x * x * x *
         x * x * x * x * x * x * x * x * x * x *
@@ -158,9 +160,10 @@ benchpresses &lt;- bench::press(
   map(autoplot) %&gt;%
   imap(~ .x + ggtitle(.y) + xlab(NULL)) %&gt;%
   wrap_plots(ncol = 1)</code></pre>
+<pre><code>## Loading required namespace: tidyr</code></pre>
 <p><img src="/post/2019-01-22-power-calc-bench_files/figure-html/p100-1.png" width="672" /></p>
 </div>
-<div id="乗-の勝ち" class="section level3">
+<div id="section-3" class="section level3">
 <h3>90乗: * の勝ち</h3>
 <p>90乗ではかけ算の勝ちのようだ．</p>
 <pre class="r"><code>list(
@@ -198,7 +201,7 @@ benchpresses &lt;- bench::press(
   wrap_plots(ncol = 1)</code></pre>
 <p><img src="/post/2019-01-22-power-calc-bench_files/figure-html/p90-1.png" width="672" /></p>
 </div>
-<div id="乗-工夫すれば-も勝てる" class="section level3">
+<div id="section-4" class="section level3">
 <h3>1000乗: 工夫すれば * も勝てる</h3>
 <p>90乗から100乗の間で <code>*</code> が <code>^</code> に負けるようになるので，何度か <code>*</code> した結果をキャッシュして再利用すれば <code>*</code> の数を減らせて 100乗以上でも
 <code>^</code> と勝負できると予想される．</p>
@@ -227,7 +230,7 @@ all.equal(x2, x ^ 2) # identical は FALSE になる</code></pre>
 <pre><code>## [1] TRUE</code></pre>
 </div>
 </div>
-<div id="long-x" class="section level2">
+<div id="section-5" class="section level2">
 <h2>ベクトルを長くしてみる @ 90乗: * が勝てる</h2>
 <pre class="r"><code>w &lt;- runif(1e7)
 bench::mark(
@@ -256,7 +259,7 @@ bench::mark(
 <p><img src="/post/2019-01-22-power-calc-bench_files/figure-html/long-vec-1.png" width="672" /></p>
 <p>愚直にかけ算するとべき演算に負けるけど，工夫すればやっぱり勝てた．</p>
 </div>
-<div id="long-x" class="section level2">
+<div id="section-6" class="section level2">
 <h2>ベクトルを短かくしてみる @ 90乗: : * が負ける</h2>
 <p>負けた……!!</p>
 <pre class="r"><code>w &lt;- runif(1e1)
@@ -283,10 +286,10 @@ bench::mark(
   autoplot</code></pre>
 <p><img src="/post/2019-01-22-power-calc-bench_files/figure-html/short-vec-1.png" width="672" /></p>
 </div>
-<div id="large-x" class="section level2">
+<div id="section-7" class="section level2">
 <h2>底をデカくしてみる @ 90乗: * が勝つ</h2>
 <p>底の大小によらず <code>*</code> が勝つらしい．</p>
-<pre class="r"><code>z &lt;- runif(1e5, 1e2, 1e4)
+<pre class="r"><code>z &lt;- runif(1e5, 1e2, 1e3)
 bench::mark(
   &quot;^&quot; = z ^ 90L,
   &quot;*&quot; = 

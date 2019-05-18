@@ -6,9 +6,6 @@ slug: control-axes-in-faceted-plots
 output:
   blogdown::html_page:
     toc: yes
-    pandoc_args: 
-      - --from
-      - markdown+east_asian_line_breaks
 categories: [R]
 tags: [ggplot2, facet]
 ---

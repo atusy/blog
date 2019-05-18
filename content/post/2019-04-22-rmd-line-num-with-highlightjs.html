@@ -10,11 +10,6 @@ images:
 summary: |
   `highlightjs` と `highlightjs-line-numbers` プラグインによって， 様々な html フォーマットにおいてコードブロックに番号付けできるようにする方法を紹介する． \
   ![](/images/covers/rmd-line-num-with-highlightjs.png)
-output:
-  blogdown::html_page:
-    pandoc_args: 
-      - --from
-      - markdown+east_asian_line_breaks
 ---
 
 
@@ -34,10 +29,10 @@ output:
 ## 3          4.7         3.2          1.3         0.2  setosa
 ## 4          4.6         3.1          1.5         0.2  setosa
 ## 5          5.0         3.6          1.4         0.2  setosa</code></pre>
-<div id="blogdown-の場合" class="section level1">
+<div id="blogdown-" class="section level1">
 <h1>blogdown の場合</h1>
 <p>blogdown のコードブロックにおいてシンタックスハイライトと行番号を有効にするには，以下のコードをそれぞれの html に仕込めばいいようだ．</p>
-<p>もうちょっと杜撰ながら，記事ごとにコントロールしやすい方法としては，「<a href="#その他の-html-出力の場合">その他の html 出力の場合</a>」と同様に本文中にスクリプトを直接書き込む．本記事ではそうした．</p>
+<p>もうちょっと杜撰ながら，記事ごとにコントロールしやすい方法としては，「<a href="#html-">その他の html 出力の場合</a>」と同様に本文中にスクリプトを直接書き込む．本記事ではそうした．</p>
 <p>尚，下記は <a href="//themes.gohugo.io/hugo-bootstrap/"><code>hugo-bootstrap</code></a> テーマを利用した場合の話で，テーマによっては若干ファイル名に差異があるかもしれない．</p>
 <div id="layoutspartialshead-custom.html" class="section level2">
 <h2>/layouts/partials/head-custom.html</h2>
@@ -108,7 +103,7 @@ td.hljs-ln-code {
 }
 </style>
 </div>
-<div id="本文" class="section level2">
+<div id="section" class="section level2">
 <h2>本文</h2>
 <p>上述の css + js では出力もハイライトしてしまい，コードとの区別が難しくなる．そこで，セットアップチャンクで， <code>class.output = 'nohighlight'</code> しておく．</p>
 <p>本文に毎回入れておく必要があるので，適用には過去の記事も修正が必要．<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></p>
@@ -117,7 +112,7 @@ knitr::opts_chunk$set(class.output = &#39;nohighlight&#39;)
 ```</code></pre>
 </div>
 </div>
-<div id="その他の-html-出力の場合" class="section level1">
+<div id="html-" class="section level1">
 <h1>その他の html 出力の場合</h1>
 <p>とりあえず下記を Rmd ファイル冒頭にでも仕込んで下さい．なぜか knit にえらく時間がかかるようになるので注意です．すぐ結果を見れるのがウリな <code>html_notebook</code> ではストレスが大きいと思います．<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p>
 <p><code>html_document</code>, <code>html_notebook</code>, <code>bookdown::html_document2</code>, <code>tufte::tufte_html</code> で動作を確認しました．

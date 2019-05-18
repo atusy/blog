@@ -8,9 +8,6 @@ tags: [ggplot2, plotly]
 output:
   blogdown::html_page:
     toc: true
-    pandoc_args: 
-      - --from
-      - markdown+east_asian_line_breaks
 summary: |
   `ggplot(mtcars, aes(wt, mpg)) + geom_point() + gginteractive()` といった感じで，ggplot に優しい文法で ggplot を plotly 化できるようにしてみました．gghighlight との組み合わせも便利です．
 ---

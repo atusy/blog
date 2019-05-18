@@ -5,11 +5,6 @@ date: '2019-04-29'
 slug: notocjkjp-on-rmd
 categories: [R]
 tags: [Rmd, Font, docker, r-wakalang]
-output:
-  blogdown::html_page:
-    pandoc_args: 
-      - --from
-      - markdown+east_asian_line_breaks
 ---
 
 # はじめに

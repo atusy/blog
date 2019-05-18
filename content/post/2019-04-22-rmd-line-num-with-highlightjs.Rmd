@@ -10,11 +10,6 @@ images:
 summary: |
   `highlightjs` と `highlightjs-line-numbers` プラグインによって， 様々な html フォーマットにおいてコードブロックに番号付けできるようにする方法を紹介する． \
   `r knitr::include_graphics("/images/covers/rmd-line-num-with-highlightjs.png")`
-output:
-  blogdown::html_page:
-    pandoc_args: 
-      - --from
-      - markdown+east_asian_line_breaks
 ---
 
 先日の記事では pandoc 自身の力を持ってコードブロックに行番号を振る方法を紹介した

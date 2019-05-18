@@ -6,9 +6,6 @@ slug: control-axes-in-faceted-plots
 output:
   blogdown::html_page:
     toc: yes
-    pandoc_args: 
-      - --from
-      - markdown+east_asian_line_breaks
 categories: [R]
 tags: [ggplot2, facet]
 ---
@@ -23,7 +20,7 @@ tags: [ggplot2, facet]
 </ul></li>
 </ul></li>
 <li><a href="#include-origin">全 facet 共通で xmin = ymin = 0 にしてみる</a></li>
-<li><a href="#任意の-facet-で軸の範囲をコントロールする">任意の facet で軸の範囲をコントロールする．</a></li>
+<li><a href="#facet-">任意の facet で軸の範囲をコントロールする．</a></li>
 <li><a href="#enjoy">Enjoy!</a></li>
 </ul>
 </div>
@@ -98,7 +95,7 @@ ggplot のレイヤには <code>scale_alpha_identity()</code>
   facet_wrap(vars(Species))</code></pre>
 <p><img src="/post/2019-01-20-control-axes-in-faceted-plots_files/figure-html/unnamed-chunk-6-1.svg" width="672" /></p>
 </div>
-<div id="任意の-facet-で軸の範囲をコントロールする" class="section level1">
+<div id="facet-" class="section level1">
 <h1>任意の facet で軸の範囲をコントロールする．</h1>
 <p>準備体操は終わりです．全 facet 共通の場合と基本は同じです．例えば versicolor について <code>xlim(1, 10)</code>, <code>ylim(0, 5)</code> となるようにしてみます．</p>
 <pre class="r"><code>df_lims_versocolor &lt;- data.frame(
@@ -121,7 +118,6 @@ bind_rows(
 <pre class="r"><code>g +
   geom_point(data = df_lims_versocolor, colour = &quot;black&quot;) +
   facet_wrap(vars(Species), scales = &quot;free&quot;)</code></pre>
-<pre><code>## Error in scale_index[[i]]: subscript out of bounds</code></pre>
 <p><img src="/post/2019-01-20-control-axes-in-faceted-plots_files/figure-html/unnamed-chunk-8-1.svg" width="672" /></p>
 </div>
 <div id="enjoy" class="section level1">
