@@ -325,7 +325,7 @@ echo 'Hello world!'
 
 ![By @RLesur https://github.com/rstudio/pagedown/pull/100#pullrequestreview-236393492](//user-images.githubusercontent.com/19177171/57575490-33169d00-744b-11e9-8ba1-039c7183eaa4.png)
 
-# Pandoc による行番号表示に未対応なフォーマットについて
+# 行番号表示に未対応なフォーマットについて
 
 ## rmarkdown::html_notebook
 

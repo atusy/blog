@@ -32,12 +32,12 @@ summary: |
 <li><a href="#bookdown">bookdown</a></li>
 <li><a href="#pagedown">pagedown</a></li>
 </ul></li>
-<li><a href="#pandoc-">Pandoc による行番号表示に未対応なフォーマットについて</a><ul>
+<li><a href="#section-4">行番号表示に未対応なフォーマットについて</a><ul>
 <li><a href="#rmarkdownhtml_notebook">rmarkdown::html_notebook</a></li>
 <li><a href="#blogdownhtml_page">blogdown::html_page</a></li>
 <li><a href="#word_document">word_document</a></li>
 </ul></li>
-<li><a href="#section-4">注釈</a></li>
+<li><a href="#section-5">注釈</a></li>
 </ul>
 </div>
 
@@ -94,7 +94,7 @@ HTML でも tufte 系や
 <p>私としては基本的なフォーマットに加え，次世代組版技術と目す
 <code>pagedown</code> をサポートできたので非常に満足している．つまり，他のフォーマットまでサポートする気は特にない．</p>
 <p>実を言うと開発の動機はただただ <code>pagedown</code> のためである．印刷物として刊行する場合は，コードブロックがページを跨ぐ可能性がある．そんなコードブロックの連続性を示唆する道具として行番号が有用だと思っている．</p>
-<p>一方で，その他のフォーマットでは行番号は装飾過多な場面が多いと思う．もしどうしてもと言う人は後述の「<a href="#pandoc-">Pandoc による行番号表示に未対応なフォーマットについて</a>」を参考にしてみて欲しい．</p>
+<p>一方で，その他のフォーマットでは行番号は装飾過多な場面が多いと思う．もしどうしてもと言う人は後述の「[Pandoc による行番号表示に未対応なフォーマットについて]」を参考にしてみて欲しい．</p>
 <p>特にスライドはいかにシンプルにするかが肝だ．複雑なスライドは目のやり場に困る．特に行番号が必要なほど長大なコードブロックは，複数のスライドに分割した方がいい．だから revealjs への対応には興味が湧かなかった．</p>
 <p>文章形式のドキュメントであっても，本文からコードブロックのある行の説明をするくらいなら，コードブロックにコメントを入れた方が視線の動きが少なくて済む．</p>
 <p>行番号をつけ，行番号にリンクをつけ，ある行をハイライトして……
@@ -235,8 +235,8 @@ echo &#39;Hello world!&#39;</code></pre>
 </div>
 </div>
 </div>
-<div id="pandoc-" class="section level1">
-<h1>Pandoc による行番号表示に未対応なフォーマットについて</h1>
+<div id="section-4" class="section level1">
+<h1>行番号表示に未対応なフォーマットについて</h1>
 <div id="rmarkdownhtml_notebook" class="section level2">
 <h2>rmarkdown::html_notebook</h2>
 <p>knit 時にチャンクの評価を飛ばすため，クラス属性をハードコードしてるっぽいので実質コントロール不能．</p>
@@ -265,7 +265,7 @@ Docx は ページ・セクション単位でしかカウンタを持ってな�
 <p>その場合，適切なスタイルをあてる必要もあるのでかなり茨の道．</p>
 </div>
 </div>
-<div id="section-4" class="section level1">
+<div id="section-5" class="section level1">
 <h1>注釈</h1>
 </div>
 <div class="footnotes">
