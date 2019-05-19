@@ -1,0 +1,373 @@
+---
+title: R Markdown でコードブロックに行番号を表示する 〜最終章〜
+author: ~
+date: '2019-05-19'
+slug: rmd-line-num-pr
+categories: [R]
+tags: [RMarkdown, Pandoc]
+output:
+  blogdown::html_page:
+    toc: TRUE
+highlightjs:
+  - yaml
+---
+
+```{r setup0, include = FALSE}
+pacman::p_load_gh("atusy/atusydown")
+pacman::p_load(blogdown)
+```
+
+****
+
+# 前書き
+
+色々 PR して Rmd -> HTML 時にコードブロックに行番号をつけられるフォーマットを増やし，
+好きな行番号から始められるようにした話．
+例えば以下の画像のようなことができる．
+最終章は希望的観測．
+
+![](/images/posts/2019-05-18-rmd-code-line-num.png)
+
+丁度1月ほど前から Rmd でコードブロック (チャンク) に行番号を付ける方法を紹介してきた．
+
+- [Rmarkdown でチャンクとその出力に行番号を付ける](/2019/04/18/rmd-line-num/)
+- [highlightjs と highlightjs-line-numbers プラグインで Rmarkdown のコードブロックに行番号をつける](/2019/04/22/rmd-line-num-with-highlightjs/)
+
+前者は Rmd を knit する時に裏で動いている Pandoc の機能を使い，
+後者は Javascript を利用した．
+
+これらの記事を投稿した時点では，Pandoc の機能を利用して
+コードブロックに行番号を付けられる出力形式が
+
+- html_document
+- pdf_document を始めとした主要な PDF 出力
+
+に限られていた．
+加えて，任意の番号から行番号を開始する機能をサポートしていた．
+
+Javascript を利用すると以下のフォーマットに対応できるが，knit に長時間要するのが難点だった．
+
+- html_notebook
+- bookdown::html_document2
+- blogdown::html_paged (例外的に高速)
+
+こういった現状を打開すべく，
+
+- knitr
+- bookdown
+- pagedown
+
+に PR したところ，全てマージされたので報告する．
+
+上述の内，knitr と bookdown は既に CRAN で利用できるが
+pagedown は GitHub 版の rstudio/pagedown を利用する必要がある．
+
+# 対応状況
+
+今回の PR により少なくとも HTML 形式では
+
+- HTML
+  - html_document
+  - bookdown::html_document2
+  - pagedown::html_paged
+  
+に対応できた．また HTML/PDFを問わず行番号の開始番号も自在になった．
+
+Word は全滅．
+`bookdown::epub_book` もだめ．
+HTML でも tufte 系や
+`bookdown::gitbook`，`blogdown::html_page`，`revealjs::revealjs_presentation`
+はだめ．
+
+私としては基本的なフォーマットに加え，次世代組版技術と目す
+`pagedown` をサポートできたので非常に満足している．
+つまり，他のフォーマットまでサポートする気は特にない．
+
+実を言うと開発の動機はただただ `pagedown` のためである．
+印刷物として刊行する場合は，コードブロックがページを跨ぐ可能性がある．
+そんなコードブロックの連続性を示唆する道具として行番号が有用だと思っている．
+
+一方で，その他のフォーマットでは行番号は装飾過多な場面が多いと思う．
+もしどうしてもと言う人は後述の
+「[Pandoc による行番号表示に未対応なフォーマットについて]」を参考にしてみて欲しい．
+
+特にスライドはいかにシンプルにするかが肝だ．
+複雑なスライドは目のやり場に困る．
+特に行番号が必要なほど長大なコードブロックは，複数のスライドに分割した方がいい．
+だから revealjs への対応には興味が湧かなかった．
+
+文章形式のドキュメントであっても，
+本文からコードブロックのある行の説明をするくらいなら，
+コードブロックにコメントを入れた方が視線の動きが少なくて済む．
+
+行番号をつけ，行番号にリンクをつけ，ある行をハイライトして……
+それが本当に必要かは
+Rmd 開発の中心人物である Yihui や，
+シンタックスハイライトを JavaScript で実現する
+`highlight.js` の開発者である Ivan の記事を参考にして欲しい．
+なお，Yihui は JS を使った方が HTML の見通しがよくていいと述べているが，
+私は見通しのよい文章はマークダウンのソースがあるからそれでいいと思っている．
+
+- On Syntax Highlighting by Yihui Xi\
+  <https://yihui.name/en/2017/07/on-syntax-highlighting/>
+- highlight.js: Docs » Line numbers by Ivan Sagalaev\
+  <https://highlightjs.readthedocs.io/en/latest/line-numbers.html>
+
+# 簡単な使い方
+
+
+## YAML フロントマター
+
+HTML 出力の場合は，YAML フロントマターにして `highlight` テーマとして `tango` などを指定する必要がある．
+加えて，`bookdown` や `pagedown` パッケージでは `clean_highlight_tags: false` にする．
+
+PDF 出力の場合は特に設定は必要ない．
+
+```yaml
+---
+output:
+  html_document:
+    highlight: pygments
+  pagedown::html_paged
+    highlight: monochrome
+    clean_highlight_tags: false
+  pdf_document: default
+---
+````
+
+## コードブロック
+
+### Pandoc's fenced code block の場合
+
+Pandoc ではコードブロックに対して，`{}`
+の中に ID や言語などの attribute を付与できる[^fn-pandoc]．
+
+````{fn fn-pandoc}
+Pandoc Manual \
+<https://pandoc.org/MANUAL.html#fenced-code-blocks>
+````
+
+中でも 
+
+- `.numberLines` はコードブロックに行番号を付与することを宣言する
+- `.lineAnchors` はコードブロックにリンクを付ける
+- `startFrom="100"` は指定した番号から行番号を開始する
+- `#id` は `#` 以降に指定した文字列で ID を付与でき相互参照に利用できる
+
+といった特別な役目がある．
+以下の様に指定して用いる．
+
+````
+```{.r .numberLines .lineAnchors .startFrom="100" #id}
+rnorm(100)
+```
+````
+
+ちなみに HTML 出力の場合は
+
+- `.numberLines .lineAnchors` はクラスとして扱われ，`class="numberLines lineAnchors` に相当する．
+  任意のクラスを追加可能
+- `key=value` 形式のものは HTML タグでの attribute として扱われ，任意に追加可能
+- `#id` は `id="id"` として扱われる
+
+といった特徴がある．
+
+### Rmd チャンクの場合 (手動)
+
+Rmd のチャンクから Pandoc 用の fenced code block attributes を利用するには，
+以下のように `attr.source` というチャンクオプションを追加すればよい．
+
+
+```{r eval-false, include = FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+
+```{r attr.source='.numberLines .lineAnchors .startFrom="100" #id', opts.include = TRUE}
+rnorm(100)
+```
+
+これは，従来の knitr が `class.source` によってクラスしか指定できなかったところを
+knitr へ PR で拡張したものである[^fn-attr]．
+他に `attr.output`，`attr.error`，`attr.message`，`attr.warning` があるので，
+適宜利用されたい．
+
+````{fn fn-attr}
+従来は `class.source` を用いてクラスしか指定できなかったが，`attr.source` 
+によって一般化した．`class.source` は `attr.source` と異なり，
+クラス名の頭に `.` をつけなくていい点も異なる．例えば以下は同等の表現．
+
+~~~
+class.source="class"
+attr.source=".class"
+~~~
+````
+
+### Rmd チャンクの場合 (自動)
+
+setup チャンクを，YAMLフロントマター直下に配する．
+中では `knitr::opts_chunk` を用いて，各チャンクの `attr.source` オプションを固定しておく．
+
+```{r setup, opts.include = TRUE}
+knitr::opts_chunk$set(
+  attr.source=c(".numberLines .lineAnchors")
+)
+```
+
+```{r eval-true, include = FALSE, eval = TRUE}
+knitr::opts_chunk$set(eval = TRUE)
+```
+
+# PR 内容について
+
+PR は既存のコードをどこまで書き換えたものか悩みつつ，
+単体テストとの整合性も鑑みて，最小限に抑えるようにした．
+
+結果としてやや冗長な部分もあったが，
+その辺りはメンテナが世話してくれた．
+感謝である．
+
+## knitr
+
+knitr に対する PR は上述の通り，コードブロックに attribute を付与するための機能として，
+チャンクオプションに `attr.*` を追加した
+(`attr.source`，`attr.output`，`attr.error`，`attr.message`，`attr.warning`)．
+
+これにより，例えば以下のような CSS を用意しておき，
+特定のチャンクに `show-title` クラスと `title` 属性を与えておくことで，
+コードブロックの前に簡単にタイトルを表示できるようになる．
+
+````
+```{css, echo = FALSE`r "}"`
+.show-title[title]:before {
+  content: attr(title); 
+  background: skyblue;
+  position: absolute;
+}
+.show-title code {
+  padding-top: 2rem;
+}
+```
+
+```{r, attr.source = ".show-title title='density-plot.R'"`r "}"`
+`r knitr::knit_code$get("density-plot")`
+```
+````
+
+```{css show-title, echo = FALSE}
+.show-title[title]:before {
+  content: attr(title); 
+  background: skyblue;
+  position: absolute;
+}
+.show-title code {
+  padding-top: 2rem;
+}
+```
+
+```{r density-plot, attr.source = ".show-title title='density-plot.R'"}
+plot(
+  density(iris[[1]])
+)
+```
+
+個人的には，行頭にコメントを入れておけば十分なようにも思う．
+
+```r
+# density-plot.R
+`r knitr::knit_code$get("density-plot")`
+```
+
+例外的にはシェルスクリプトなど，行頭にコメントを入れられない場合か．
+
+```sh
+#!/bin/sh
+echo 'Hello world!'
+```
+
+上記にファイル名を表示させたいなら，
+以下のように CSS を駆使する必然性も理解できる．
+
+
+```{.sh .show-title title='hello-world.sh'}
+#!/bin/sh
+echo 'Hello world!'
+```
+
+## bookdown
+
+`bookdown::html_document2` ではせっかく Pandoc によってつけた行番号などを
+内部で掃除する仕様になっていた．Yihui の思想を鑑みるに妥当かも知れないが，
+選択の余地はあってしかるべきだろうということで，`clean_highlight_tags` という
+引数を追加し，YAML フロントマターで操作できるようにした．
+
+後方互換性の観点から既定値は `FALSE` である．
+
+
+## pagedown
+
+`pagedown::html_paged` は `bookdown::html_document2` を拡張している．
+そのため上述の PR をすることで連動して行番号を利用できるようになった．
+
+印刷を前提とした `pagedown` では長いコードの自動改行が必要になるが，
+その時の行頭が揃わない不具合があった．
+
+![](/images/posts/2019-05-18-pagedown-ugly-code-block.png)
+
+そこで，CSS の改善を提案し以下のように綺麗な出力を得た．
+
+![](/images/posts/2019-05-18-pagedown-beautiful-code-block.png)
+
+更に，メンテナの Romain がコードをレビューしてくれた結果，
+プレビューと印刷時の整合性がとれ，行番号のないブロックとの表示の差異も改善された．
+
+![By @RLesur https://github.com/rstudio/pagedown/pull/100#pullrequestreview-236393492](//user-images.githubusercontent.com/19177171/57575490-33169d00-744b-11e9-8ba1-039c7183eaa4.png)
+
+# Pandoc による行番号表示に未対応なフォーマットについて
+
+## rmarkdown::html_notebook
+
+knit 時にチャンクの評価を飛ばすため，
+クラス属性をハードコードしてるっぽいので実質コントロール不能．
+
+https://github.com/rstudio/rmarkdown/blob/7fa4eb4b7cbf60b35404c3ecf35dfe0730301a46/R/html_notebook_output.R#L74-L76
+
+ただし，`html_notebook` には `output_options` 引数があり，うまいこと関数を作ってパッケージングしておけば，
+
+```
+html_notebook:
+  output_options:
+    output_source: mypkg::output_source_line_num
+```
+
+みたいな感じでできそう．
+ただし全てのコードブロックに行番号がつくことになる．
+
+highlight.js の経験で行くと， CSS も頑張らないとツラいことになるんじゃないかな……．
+
+## blogdown::html_page
+
+blogdown は Hugo というフレームワークにより静的ウェブサイトを生成するためのラッパー．
+`Rmd` ファイルの場合は `blogdown` が Hugo 向けの HTML に変換し， `md` ファイルの場合は Hugo 自身がレンダリングする．
+
+Hugo にはビルトインでシンタックスハイライトをしたり行番号をつけたりする仕組みがある．
+一応 Rmd のチャンクであれば，Hugo に組込みな機能を使えるようにチャンクを整形することが可能であることを確認している．
+しかし， Pandoc's fenced code を Hugo に最適化することはできないため，混在すると辛いことになる……．
+
+というわけで素直に highlight.js などを用いることを勧める，
+
+## word_document
+
+KY技研の [\@\_K4ZUKI\_](//twitter.com/_K4ZUKI_) 氏によると，
+Docx は ページ・セクション単位でしかカウンタを持ってないらしい．
+
+`r shortcode("tweet", "1118832141985402880")`
+
+つまり Pandoc の機能でどうこうは無理．
+
+どうしてもやるなら， knitr の output hook 機能を使って，
+コードブロックを表組みするのがいいんじゃないかな．
+
+その場合，適切なスタイルをあてる必要もあるのでかなり茨の道．
+
+# 注釈
