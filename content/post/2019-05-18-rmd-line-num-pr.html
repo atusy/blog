@@ -190,7 +190,9 @@ knitr::opts_chunk$set(
 ```
 
 ```{r, attr.source = &quot;.show-title title=&#39;density-plot.R&#39;&quot;}
-plot(,   density(iris[[1]]), )
+plot(
+  density(iris[[1]])
+)
 ```</code></pre>
 <style type="text/css">
 .show-title[title]:before {
@@ -208,7 +210,9 @@ plot(,   density(iris[[1]]), )
 <p><img src="/post/2019-05-18-rmd-line-num-pr_files/figure-html/density-plot-1.png" width="672" /></p>
 <p>個人的には，行頭にコメントを入れておけば十分なようにも思う．</p>
 <pre class="r"><code># density-plot.R
-plot(,   density(iris[[1]]), )</code></pre>
+plot(
+  density(iris[[1]])
+)</code></pre>
 <p>例外的にはシェルスクリプトなど，行頭にコメントを入れられない場合か．</p>
 <pre class="sh"><code>#!/bin/sh
 echo &#39;Hello world!&#39;</code></pre>

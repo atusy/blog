@@ -252,7 +252,7 @@ knitr に対する PR は上述の通り，コードブロックに attribute �
 ```
 
 ```{r, attr.source = ".show-title title='density-plot.R'"`r "}"`
-`r knitr::knit_code$get("density-plot")`
+`r paste(knitr::knit_code$get("density-plot"), collapse = "\n")`
 ```
 ````
 
@@ -277,7 +277,7 @@ plot(
 
 ```r
 # density-plot.R
-`r knitr::knit_code$get("density-plot")`
+`r paste(knitr::knit_code$get("density-plot"), collapse = "\n")`
 ```
 
 例外的にはシェルスクリプトなど，行頭にコメントを入れられない場合か．
