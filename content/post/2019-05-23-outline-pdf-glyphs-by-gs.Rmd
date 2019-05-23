@@ -37,15 +37,14 @@ CSS組版の光と闇 \
 <https://blog.fieldnotes.jp/entry/css-layouting>
 ```
 
-
-
-
-Re:VIEWナレッジベースによると[^review]，
+Re:VIEWナレッジベースによると[^fn-review]，
 Type 3 は印刷品質が低く，印刷機によってはエラーを起こす．
 
-[^review]: 
-    Re:VIEWナレッジベース 》 生成した PDF の印刷所入稿 》 フォント \
-    <https://review-knowledge-ja.readthedocs.io/ja/latest/printing/submit.html#71533ec87c26e13f448c6bf22d8ef91b>
+```{fn fn-review}
+Re:VIEWナレッジベース 》 生成した PDF の印刷所入稿 》 フォント \
+<https://review-knowledge-ja.readthedocs.io/ja/latest/printing/submit.html#71533ec87c26e13f448c6bf22d8ef91b>
+```
+
 
 無難な対策は，フォントのアウトライン化で，
 
