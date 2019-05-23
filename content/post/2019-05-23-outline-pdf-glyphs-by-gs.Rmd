@@ -1,0 +1,66 @@
+---
+title: Ghostscript (> 9.15) を使って PDF 中の文字列をアウトライン化する
+author: ~
+date: '2019-05-23'
+slug: outline-pdf-glyphs-by-gs
+categories: [Ghostscript]
+tags: [PDF, font]
+---
+
+```{r setup, include = FALSE}
+pacman::p_load_gh("atusy/atusydown")
+```
+
+HTML + CSS で作ったポスターをちゃんと印刷したくて調べたメモ．
+
+どうやら Ghostscript (> 9.15) で以下のような呪文を唱えればいいようだ．
+
+```
+gs -o output.pdf -dNoOutputFonts -sDEVICE=pdfwrite input.pdf
+```
+
+手元で試した分にはうまくいってそう (gs 9.27-1)．
+
+ただし，組版 (製本？) でも使えるか分からないので強い人のコメントが欲しいところ．
+
+Twitter ([\@Atsushi776](https://twitter.com/Atsushi776)) までゼヒ!!
+
+## 経緯
+
+Vivliostyle や Paged.js などを利用した CSS 組版では，
+HTML -> PDF の変換を Chromium にしてもらう．
+
+この時，埋め込みフォントが Type 3 になってしまうことが，CSS 組版の闇の一つらしい[^fn-angel-or-devil]．
+
+```{fn fn-angel-or-devil}
+CSS組版の光と闇 \
+<https://blog.fieldnotes.jp/entry/css-layouting>
+```
+
+
+
+
+Re:VIEWナレッジベースによると[^review]，
+Type 3 は印刷品質が低く，印刷機によってはエラーを起こす．
+
+[^review]: 
+    Re:VIEWナレッジベース 》 生成した PDF の印刷所入稿 》 フォント \
+    <https://review-knowledge-ja.readthedocs.io/ja/latest/printing/submit.html#71533ec87c26e13f448c6bf22d8ef91b>
+
+無難な対策は，フォントのアウトライン化で，
+
+- macOS のプレビュー.app で保存し直し
+- InDesign に貼り付け
+
+といった手が取られるようだ．
+
+例えば，[\@setoazusa](https://twitter.com/setoazusa) 氏は前者の方法を取ったようだ[^fn-angel-or-devil]．
+
+しかし，macOS も InDesign もない人はどうしたらいいのか．
+
+というわけでググったところ，冒頭の結論を Stack Overflow で得た[^fn-stackoverflow]．
+
+```{fn fn-stackoverflow}
+Replace all font glyphs in a PDF by converting them to outline shapes\
+<https://stackoverflow.com/questions/28797418/replace-all-font-glyphs-in-a-pdf-by-converting-them-to-outline-shapes>
+```

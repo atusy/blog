@@ -1,0 +1,44 @@
+---
+title: Ghostscript (> 9.15) を使って PDF 中の文字列をアウトライン化する
+author: ~
+date: '2019-05-23'
+slug: outline-pdf-glyphs-by-gs
+categories: [Ghostscript]
+tags: [PDF, font]
+---
+
+
+
+<p>HTML + CSS で作ったポスターをちゃんと印刷したくて調べたメモ．</p>
+<p>どうやら Ghostscript (&gt; 9.15) で以下のような呪文を唱えればいいようだ．</p>
+<pre><code>gs -o output.pdf -dNoOutputFonts -sDEVICE=pdfwrite input.pdf</code></pre>
+<p>手元で試した分にはうまくいってそう (gs 9.27-1)．</p>
+<p>ただし，組版 (製本？) でも使えるか分からないので強い人のコメントが欲しいところ．</p>
+<p>Twitter (<a href="https://twitter.com/Atsushi776">@Atsushi776</a>) までゼヒ!!</p>
+<div id="section" class="section level2">
+<h2>経緯</h2>
+<p>Vivliostyle や Paged.js などを利用した CSS 組版では，
+HTML -&gt; PDF の変換を Chromium にしてもらう．</p>
+<p>この時，埋め込みフォントが Type 3 になってしまうことが，CSS 組版の闇の一つらしい<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>．</p>
+<p>Re:VIEWナレッジベースによると<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>，
+Type 3 は印刷品質が低く，印刷機によってはエラーを起こす．</p>
+<p>無難な対策は，フォントのアウトライン化で，</p>
+<ul>
+<li>macOS のプレビュー.app で保存し直し</li>
+<li>InDesign に貼り付け</li>
+</ul>
+<p>といった手が取られるようだ．</p>
+<p>例えば，<a href="https://twitter.com/setoazusa">@setoazusa</a> 氏は前者の方法を取ったようだ<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>．</p>
+<p>しかし，macOS も InDesign もない人はどうしたらいいのか．</p>
+<p>というわけでググったところ，冒頭の結論を Stack Overflow で得た<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>．</p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>CSS組版の光と闇 <a href="https://blog.fieldnotes.jp/entry/css-layouting" class="uri">https://blog.fieldnotes.jp/entry/css-layouting</a><a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>Re:VIEWナレッジベース 》 生成した PDF の印刷所入稿 》 フォント<br />
+<a href="https://review-knowledge-ja.readthedocs.io/ja/latest/printing/submit.html#71533ec87c26e13f448c6bf22d8ef91b" class="uri">https://review-knowledge-ja.readthedocs.io/ja/latest/printing/submit.html#71533ec87c26e13f448c6bf22d8ef91b</a><a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>CSS組版の光と闇 <a href="https://blog.fieldnotes.jp/entry/css-layouting" class="uri">https://blog.fieldnotes.jp/entry/css-layouting</a><a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn4"><p>Replace all font glyphs in a PDF by converting them to outline shapes <a href="https://stackoverflow.com/questions/28797418/replace-all-font-glyphs-in-a-pdf-by-converting-them-to-outline-shapes" class="uri">https://stackoverflow.com/questions/28797418/replace-all-font-glyphs-in-a-pdf-by-converting-them-to-outline-shapes</a><a href="#fnref4" class="footnote-back">↩</a></p></li>
+</ol>
+</div>
