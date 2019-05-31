@@ -1,0 +1,225 @@
+---
+title: 行列を行/列ごとのリストに変換する関数の紹介とベンチマーク (base::asplit, purrr::array_tree, purrr::array_branch)
+author: ~
+date: '2019-06-01'
+slug: alist-r-3-6-0
+categories: [R]
+tags: [purrr, bench]
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+```{r opts, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", dev = "svg")
+```
+
+```{r setup, include = FALSE}
+pacman::p_load(purrr, bench, tidyr)
+```
+
+R 3.6.0 では行列や配列を `MARGIN` に応じたリストに分割する `asplit` 関数が追加された．
+既に purrr パッケージが同様の機能として `array_tree` や `array_branch` を実装していたので，挙動とベンチマーク結果を比較してみる．
+
+これらの使い道は行ごとなどに `lapply` する時だろうか．
+`apply` が返り値をベクトル・行列・配列・リストに勝手に変換してしまうのを嫌う場合に有用かも知れない．
+
+```{r usage}
+m <- matrix(1:100, nrow = 50)
+
+# 返り値はリスト
+lapply(asplit(m, 2), head)
+
+# 返り値は行列
+apply(m, 2, head)
+```
+
+
+# base
+
+## asplit
+
+`asplit` 関数は第一引数 `x` に行列ないし配列を，第二引数 `MARGIN` に数値のベクトルを取る．
+`MARGIN` に応じて `x` を分割するが， `MARGIN` の長さは `x` の次元数未満でなければならない．
+例えば `x` が3次元配列の場合は `MARGIN = 1:2`, `2:3`, `c(1, 3)` は可能であるが， `1:3` はエラーを返す．
+
+### asplit(行列)
+
+`asplit` は行列を行ごと (`MARGIN = 1`) ないし列ごと (`MARGIN = 2`) のリストに変換する．
+
+```{r asplit-matrix, error = TRUE}
+(M <- matrix(c(11, 21, 12, 22, 13, 23), 2, 3))
+
+# 行ごとのリストに分割
+(x <- asplit(M, 1))
+
+# 行と列で分割しようとするとエラー
+asplit(M, 1:2)
+```
+
+### asplit(配列)
+
+配列の場合は `3` 以上の `MARGIN` を与えることができる．
+また， `MARGIN = 1:2` といった具合に複数の次元で切ることもできる．
+
+
+```{r asplit-array}
+# 配列の容易
+(A <- array(M, c(2, 2, 2)))
+
+# 3次元目で分割
+asplit(A, 3)
+
+# 1:2 次元目で分割
+(y <- asplit(A, 1:2))
+```
+
+猶， `y` の出力が一風変わっていることに注目されたい．
+実は，`asplit` はリストの配列を返り値に持つ．
+`y` の各要素は `Numeric, 2` と表示されているので一見ベクトルであるが，実体は配列である．
+ある変数が配列であるかどうかは `is.array` が `TRUE` を返すことや `dim` が整数ベクトルを返すことで確認できる．
+
+```{r asplit-array-return}
+# y は配列なので，dimが数値を返す
+dim(y)
+
+# y の各要素も配列
+lapply(y, dim)
+```
+
+先の行列の例においても，返り値は数値ベクトルのリストに見えるが，
+数値の一次元配列を内包したリストの一次元配列である．
+
+```{r asplit-matrix-return}
+# x は配列
+dim(x)
+
+# x の各要素も配列
+lapply(x, dim)
+```
+
+# purrr
+
+`array_tree` や `array_branch` は
+`margin` 引数が 長さ1の数値である場合に `asplit` とよく似た挙動を示す．
+`asplit` では大文字な `MARGIN` 引数が `purrr` では小文字であることに注意されたい．
+
+この `margin` 引数に長さ2以上の数値を与えた場合，配列を階層的に切る．
+このため`array_tree` はリストのリストを作る．
+`array_branch` は `array_tree` のフラットリスト版に相当する．
+
+また `margin` 引数には，入力した配列の次元数と同じ長さのベクトルを取ることができる．
+何なら，1次元のベクトルを与えるとリスト化して返してくれる．
+
+更に `margin` 引数は省略すると `seq(dim(x))` 相当の値が与えられる．
+ただし `x` がベクトルの場合は `1L`．
+
+## array_tree
+
+### array_tree(行列)
+
+行列を行ごとに切ると，ベクトルを束ねたリストを返す．
+
+```{r tree-matrix}
+M
+
+str(array_tree(M, 1))
+
+# asplit は配列のリストを返すため，
+# 要素の長さに (1d) と記載される
+str(asplit(M, 1))
+```
+
+2行3列の行列を行→列の順で切ると
+長さ3のリストを2つ束ねたリストを返す．
+
+また逆順で列→行の順で切ると
+長さ2のリストを3つ束ねたリストを返す．
+
+```{r tree-matrix-hierarchical, error = TRUE}
+str(array_tree(M, 1:2))
+
+str(array_tree(M, 2:1))
+
+# asplit では次元数と同じ長さの MARGIN に対してエラーを返す
+asplit(M, 1:2)
+```
+
+`margin` 引数を省略すると， `margin = 1:2` として扱う．
+
+```{r tree-no-margin}
+identical(array_tree(M), array_tree(M, 1:2))
+```
+
+
+### array_branch(配列)
+
+行列での挙動をそのまま配列に拡張しただけなので，特筆することはない，
+
+```{r tree-array}
+A
+
+# margin の長さが1の時
+str(array_tree(A, 3))
+
+# margin の長さが2以上の時
+str(array_tree(A, 1:2))
+
+# margin を省略した時
+str(array_tree(A))
+```
+
+### array_tree(ベクトル)
+
+ベクトルに対しては `as.list` に似た挙動を示す．
+
+```{r tree-vector}
+str(array_tree(1:3))
+```
+
+
+## array_branch
+
+`array_branch` はざっくり言うと，`array_tree` の返り値をフラットなリストにしたもの，
+
+
+```{r branch-matrix}
+A
+
+# array_branch は フラットなリストを返す
+str(array_branch(A, 1:2))
+
+str(array_tree(A, 1:2))
+
+# `margin` の長さが1の時は `array_tree` と同じ値を返す．
+identical(array_branch(A, 3), array_tree(A, 3))
+```
+
+
+
+# ベンチマーク
+
+`asplit`, `array_tree`, `array_branch` は `margin` の長さが2以上の場合は異なる返り値を返す．
+どれを使うかは用途次第といったところ．
+一方で `margin` の長さが1の場合は似た返り値を持つので `asplit` と `array_tree` の性能を比較してみよう．
+
+
+```{r bench-matrix, cache = TRUE}
+library(bench)
+library(ggplot2)
+
+set.seed(1)
+n <- 1e3
+x <- matrix(rnorm(n * n), n, n)
+
+result <- mark(
+  asplit = asplit(x, 2L),
+  array_tree = array_tree(x, 2L),
+  check = FALSE,
+  min_iterations = 100L
+)
+
+autoplot(result, 'beeswarm')
+```
+
+ガベージコレクション次第ではあるが，概ね `array_tree` が強いようだ．

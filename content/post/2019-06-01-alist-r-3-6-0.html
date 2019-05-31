@@ -1,0 +1,332 @@
+---
+title: 行列を行/列ごとのリストに変換する関数の紹介とベンチマーク (base::asplit, purrr::array_tree, purrr::array_branch)
+author: ~
+date: '2019-06-01'
+slug: alist-r-3-6-0
+categories: [R]
+tags: [purrr, bench]
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#base">base</a><ul>
+<li><a href="#asplit">asplit</a><ul>
+<li><a href="#asplit-1">asplit(行列)</a></li>
+<li><a href="#asplit-2">asplit(配列)</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#purrr">purrr</a><ul>
+<li><a href="#array_tree">array_tree</a><ul>
+<li><a href="#array_tree-1">array_tree(行列)</a></li>
+<li><a href="#array_branch">array_branch(配列)</a></li>
+<li><a href="#array_tree-2">array_tree(ベクトル)</a></li>
+</ul></li>
+<li><a href="#array_branch-1">array_branch</a></li>
+</ul></li>
+<li><a href="#section">ベンチマーク</a></li>
+</ul>
+</div>
+
+<p>R 3.6.0 では行列や配列を <code>MARGIN</code> に応じたリストに分割する <code>asplit</code> 関数が追加された．既に purrr パッケージが同様の機能として <code>array_tree</code> や <code>array_branch</code> を実装していたので，挙動とベンチマーク結果を比較してみる．</p>
+<p>これらの使い道は行ごとなどに <code>lapply</code> する時だろうか．
+<code>apply</code> が返り値をベクトル・行列・配列・リストに勝手に変換してしまうのを嫌う場合に有用かも知れない．</p>
+<pre class="r"><code>m &lt;- matrix(1:100, nrow = 50)
+
+# 返り値はリスト
+lapply(asplit(m, 2), head)
+#&gt; [[1]]
+#&gt; [1] 1 2 3 4 5 6
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] 51 52 53 54 55 56
+
+# 返り値は行列
+apply(m, 2, head)
+#&gt;      [,1] [,2]
+#&gt; [1,]    1   51
+#&gt; [2,]    2   52
+#&gt; [3,]    3   53
+#&gt; [4,]    4   54
+#&gt; [5,]    5   55
+#&gt; [6,]    6   56</code></pre>
+<div id="base" class="section level1">
+<h1>base</h1>
+<div id="asplit" class="section level2">
+<h2>asplit</h2>
+<p><code>asplit</code> 関数は第一引数 <code>x</code> に行列ないし配列を，第二引数 <code>MARGIN</code> に数値のベクトルを取る．
+<code>MARGIN</code> に応じて <code>x</code> を分割するが， <code>MARGIN</code> の長さは <code>x</code> の次元数未満でなければならない．例えば <code>x</code> が3次元配列の場合は <code>MARGIN = 1:2</code>, <code>2:3</code>, <code>c(1, 3)</code> は可能であるが， <code>1:3</code> はエラーを返す．</p>
+<div id="asplit-1" class="section level3">
+<h3>asplit(行列)</h3>
+<p><code>asplit</code> は行列を行ごと (<code>MARGIN = 1</code>) ないし列ごと (<code>MARGIN = 2</code>) のリストに変換する．</p>
+<pre class="r"><code>(M &lt;- matrix(c(11, 21, 12, 22, 13, 23), 2, 3))
+#&gt;      [,1] [,2] [,3]
+#&gt; [1,]   11   12   13
+#&gt; [2,]   21   22   23
+
+# 行ごとのリストに分割
+(x &lt;- asplit(M, 1))
+#&gt; [[1]]
+#&gt; [1] 11 12 13
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] 21 22 23
+
+# 行と列で分割しようとするとエラー
+asplit(M, 1:2)
+#&gt; Error in array(newx[, i], d.call, dn.call): &#39;dims&#39; cannot be of length 0</code></pre>
+</div>
+<div id="asplit-2" class="section level3">
+<h3>asplit(配列)</h3>
+<p>配列の場合は <code>3</code> 以上の <code>MARGIN</code> を与えることができる．また， <code>MARGIN = 1:2</code> といった具合に複数の次元で切ることもできる．</p>
+<pre class="r"><code># 配列の容易
+(A &lt;- array(M, c(2, 2, 2)))
+#&gt; , , 1
+#&gt; 
+#&gt;      [,1] [,2]
+#&gt; [1,]   11   12
+#&gt; [2,]   21   22
+#&gt; 
+#&gt; , , 2
+#&gt; 
+#&gt;      [,1] [,2]
+#&gt; [1,]   13   11
+#&gt; [2,]   23   21
+
+# 3次元目で分割
+asplit(A, 3)
+#&gt; [[1]]
+#&gt;      [,1] [,2]
+#&gt; [1,]   11   12
+#&gt; [2,]   21   22
+#&gt; 
+#&gt; [[2]]
+#&gt;      [,1] [,2]
+#&gt; [1,]   13   11
+#&gt; [2,]   23   21
+
+# 1:2 次元目で分割
+(y &lt;- asplit(A, 1:2))
+#&gt;      [,1]      [,2]     
+#&gt; [1,] Numeric,2 Numeric,2
+#&gt; [2,] Numeric,2 Numeric,2</code></pre>
+<p>猶， <code>y</code> の出力が一風変わっていることに注目されたい．実は，<code>asplit</code> はリストの配列を返り値に持つ．
+<code>y</code> の各要素は <code>Numeric, 2</code> と表示されているので一見ベクトルであるが，実体は配列である．ある変数が配列であるかどうかは <code>is.array</code> が <code>TRUE</code> を返すことや <code>dim</code> が整数ベクトルを返すことで確認できる．</p>
+<pre class="r"><code># y は配列なので，dimが数値を返す
+dim(y)
+#&gt; [1] 2 2
+
+# y の各要素も配列
+lapply(y, dim)
+#&gt; [[1]]
+#&gt; [1] 2
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] 2
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] 2
+#&gt; 
+#&gt; [[4]]
+#&gt; [1] 2</code></pre>
+<p>先の行列の例においても，返り値は数値ベクトルのリストに見えるが，数値の一次元配列を内包したリストの一次元配列である．</p>
+<pre class="r"><code># x は配列
+dim(x)
+#&gt; [1] 2
+
+# x の各要素も配列
+lapply(x, dim)
+#&gt; [[1]]
+#&gt; [1] 3
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] 3</code></pre>
+</div>
+</div>
+</div>
+<div id="purrr" class="section level1">
+<h1>purrr</h1>
+<p><code>array_tree</code> や <code>array_branch</code> は
+<code>margin</code> 引数が 長さ1の数値である場合に <code>asplit</code> とよく似た挙動を示す．
+<code>asplit</code> では大文字な <code>MARGIN</code> 引数が <code>purrr</code> では小文字であることに注意されたい．</p>
+<p>この <code>margin</code> 引数に長さ2以上の数値を与えた場合，配列を階層的に切る．このため<code>array_tree</code> はリストのリストを作る．
+<code>array_branch</code> は <code>array_tree</code> のフラットリスト版に相当する．</p>
+<p>また <code>margin</code> 引数には，入力した配列の次元数と同じ長さのベクトルを取ることができる．何なら，1次元のベクトルを与えるとリスト化して返してくれる．</p>
+<p>更に <code>margin</code> 引数は省略すると <code>seq(dim(x))</code> 相当の値が与えられる．ただし <code>x</code> がベクトルの場合は <code>1L</code>．</p>
+<div id="array_tree" class="section level2">
+<h2>array_tree</h2>
+<div id="array_tree-1" class="section level3">
+<h3>array_tree(行列)</h3>
+<p>行列を行ごとに切ると，ベクトルを束ねたリストを返す．</p>
+<pre class="r"><code>M
+#&gt;      [,1] [,2] [,3]
+#&gt; [1,]   11   12   13
+#&gt; [2,]   21   22   23
+
+str(array_tree(M, 1))
+#&gt; List of 2
+#&gt;  $ : num [1:3] 11 12 13
+#&gt;  $ : num [1:3] 21 22 23
+
+# asplit は配列のリストを返すため，
+# 要素の長さに (1d) と記載される
+str(asplit(M, 1))
+#&gt; List of 2
+#&gt;  $ : num [1:3(1d)] 11 12 13
+#&gt;  $ : num [1:3(1d)] 21 22 23
+#&gt;  - attr(*, &quot;dim&quot;)= int 2</code></pre>
+<p>2行3列の行列を行→列の順で切ると長さ3のリストを2つ束ねたリストを返す．</p>
+<p>また逆順で列→行の順で切ると長さ2のリストを3つ束ねたリストを返す．</p>
+<pre class="r"><code>str(array_tree(M, 1:2))
+#&gt; List of 2
+#&gt;  $ :List of 3
+#&gt;   ..$ : num 11
+#&gt;   ..$ : num 12
+#&gt;   ..$ : num 13
+#&gt;  $ :List of 3
+#&gt;   ..$ : num 21
+#&gt;   ..$ : num 22
+#&gt;   ..$ : num 23
+
+str(array_tree(M, 2:1))
+#&gt; List of 3
+#&gt;  $ :List of 2
+#&gt;   ..$ : num 11
+#&gt;   ..$ : num 21
+#&gt;  $ :List of 2
+#&gt;   ..$ : num 12
+#&gt;   ..$ : num 22
+#&gt;  $ :List of 2
+#&gt;   ..$ : num 13
+#&gt;   ..$ : num 23
+
+# asplit では次元数と同じ長さの MARGIN に対してエラーを返す
+asplit(M, 1:2)
+#&gt; Error in array(newx[, i], d.call, dn.call): &#39;dims&#39; cannot be of length 0</code></pre>
+<p><code>margin</code> 引数を省略すると， <code>margin = 1:2</code> として扱う．</p>
+<pre class="r"><code>identical(array_tree(M), array_tree(M, 1:2))
+#&gt; [1] TRUE</code></pre>
+</div>
+<div id="array_branch" class="section level3">
+<h3>array_branch(配列)</h3>
+<p>行列での挙動をそのまま配列に拡張しただけなので，特筆することはない，</p>
+<pre class="r"><code>A
+#&gt; , , 1
+#&gt; 
+#&gt;      [,1] [,2]
+#&gt; [1,]   11   12
+#&gt; [2,]   21   22
+#&gt; 
+#&gt; , , 2
+#&gt; 
+#&gt;      [,1] [,2]
+#&gt; [1,]   13   11
+#&gt; [2,]   23   21
+
+# margin の長さが1の時
+str(array_tree(A, 3))
+#&gt; List of 2
+#&gt;  $ : num [1:2, 1:2] 11 21 12 22
+#&gt;  $ : num [1:2, 1:2] 13 23 11 21
+
+# margin の長さが2以上の時
+str(array_tree(A, 1:2))
+#&gt; List of 2
+#&gt;  $ :List of 2
+#&gt;   ..$ : num [1:2] 11 13
+#&gt;   ..$ : num [1:2] 12 11
+#&gt;  $ :List of 2
+#&gt;   ..$ : num [1:2] 21 23
+#&gt;   ..$ : num [1:2] 22 21
+
+# margin を省略した時
+str(array_tree(A))
+#&gt; List of 2
+#&gt;  $ :List of 2
+#&gt;   ..$ :List of 2
+#&gt;   .. ..$ : num 11
+#&gt;   .. ..$ : num 13
+#&gt;   ..$ :List of 2
+#&gt;   .. ..$ : num 12
+#&gt;   .. ..$ : num 11
+#&gt;  $ :List of 2
+#&gt;   ..$ :List of 2
+#&gt;   .. ..$ : num 21
+#&gt;   .. ..$ : num 23
+#&gt;   ..$ :List of 2
+#&gt;   .. ..$ : num 22
+#&gt;   .. ..$ : num 21</code></pre>
+</div>
+<div id="array_tree-2" class="section level3">
+<h3>array_tree(ベクトル)</h3>
+<p>ベクトルに対しては <code>as.list</code> に似た挙動を示す．</p>
+<pre class="r"><code>str(array_tree(1:3))
+#&gt; List of 3
+#&gt;  $ : int 1
+#&gt;  $ : int 2
+#&gt;  $ : int 3</code></pre>
+</div>
+</div>
+<div id="array_branch-1" class="section level2">
+<h2>array_branch</h2>
+<p><code>array_branch</code> はざっくり言うと，<code>array_tree</code> の返り値をフラットなリストにしたもの，</p>
+<pre class="r"><code>A
+#&gt; , , 1
+#&gt; 
+#&gt;      [,1] [,2]
+#&gt; [1,]   11   12
+#&gt; [2,]   21   22
+#&gt; 
+#&gt; , , 2
+#&gt; 
+#&gt;      [,1] [,2]
+#&gt; [1,]   13   11
+#&gt; [2,]   23   21
+
+# array_branch は フラットなリストを返す
+str(array_branch(A, 1:2))
+#&gt; List of 4
+#&gt;  $ : num [1:2] 11 13
+#&gt;  $ : num [1:2] 21 23
+#&gt;  $ : num [1:2] 12 11
+#&gt;  $ : num [1:2] 22 21
+
+str(array_tree(A, 1:2))
+#&gt; List of 2
+#&gt;  $ :List of 2
+#&gt;   ..$ : num [1:2] 11 13
+#&gt;   ..$ : num [1:2] 12 11
+#&gt;  $ :List of 2
+#&gt;   ..$ : num [1:2] 21 23
+#&gt;   ..$ : num [1:2] 22 21
+
+# `margin` の長さが1の時は `array_tree` と同じ値を返す．
+identical(array_branch(A, 3), array_tree(A, 3))
+#&gt; [1] TRUE</code></pre>
+</div>
+</div>
+<div id="section" class="section level1">
+<h1>ベンチマーク</h1>
+<p><code>asplit</code>, <code>array_tree</code>, <code>array_branch</code> は <code>margin</code> の長さが2以上の場合は異なる返り値を返す．どれを使うかは用途次第といったところ．一方で <code>margin</code> の長さが1の場合は似た返り値を持つので <code>asplit</code> と <code>array_tree</code> の性能を比較してみよう．</p>
+<pre class="r"><code>library(bench)
+library(ggplot2)
+
+set.seed(1)
+n &lt;- 1e3
+x &lt;- matrix(rnorm(n * n), n, n)
+
+result &lt;- mark(
+  asplit = asplit(x, 2L),
+  array_tree = array_tree(x, 2L),
+  check = FALSE,
+  min_iterations = 100L
+)
+
+autoplot(result, &#39;beeswarm&#39;)
+#&gt; Loading required namespace: tidyr</code></pre>
+<p><img src="/post/2019-06-01-alist-r-3-6-0_files/figure-html/bench-matrix-1.svg" width="672" /></p>
+<p>ガベージコレクション次第ではあるが，概ね <code>array_tree</code> が強いようだ．</p>
+</div>
