@@ -2,9 +2,11 @@
 title: 行列を行/列ごとのリストに変換する関数の紹介とベンチマーク (base::asplit, purrr::array_tree, purrr::array_branch)
 author: ~
 date: '2019-06-01'
-slug: alist-r-3-6-0
+slug: asplit-r-3-6-0
 categories: [R]
 tags: [purrr, bench]
+aliases:
+  - /2019/06/01/alist-r-3-6-0/
 output:
   blogdown::html_page:
     toc: true
@@ -325,8 +327,7 @@ result &lt;- mark(
   min_iterations = 100L
 )
 
-autoplot(result, &#39;beeswarm&#39;)
-#&gt; Loading required namespace: tidyr</code></pre>
-<p><img src="/post/2019-06-01-alist-r-3-6-0_files/figure-html/bench-matrix-1.svg" width="672" /></p>
+autoplot(result, &#39;beeswarm&#39;)</code></pre>
+<p><img src="/post/2019-06-01-asplit-r-3-6-0_files/figure-html/bench-matrix-1.svg" width="672" /></p>
 <p>ガベージコレクション次第ではあるが，概ね <code>array_tree</code> が強いようだ．</p>
 </div>

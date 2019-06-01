@@ -2,9 +2,11 @@
 title: 行列を行/列ごとのリストに変換する関数の紹介とベンチマーク (base::asplit, purrr::array_tree, purrr::array_branch)
 author: ~
 date: '2019-06-01'
-slug: alist-r-3-6-0
+slug: asplit-r-3-6-0
 categories: [R]
 tags: [purrr, bench]
+aliases:
+  - /2019/06/01/alist-r-3-6-0/
 output:
   blogdown::html_page:
     toc: true
