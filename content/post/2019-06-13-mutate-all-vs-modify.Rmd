@@ -1,0 +1,94 @@
+---
+title: dplyr::mutate_all と purrr::modify の比較
+author: ~
+date: '2019-06-13'
+slug: mutate-all-vs-modify
+categories: [R]
+tags: [dplyr, purrr]
+---
+
+```{r setup, include=FALSE}
+pacman::p_load(dplyr, purrr, bench, ggplot2)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+
+`dplyr::mutate_all` はデータフレーム中の各変数 (列) に対して関数を適用する。
+
+`purrr::modify` はリストライクなオブジェクトの各要素に対して関数を適用するが、返り値は入力したオブジェクトと同じクラスになる。このため、データフレームを入力するとデータフレームを返すので、 `dplyr::mutate_all` のように振る舞うことができる。
+
+`purrr::modify` の方が色々なデータを受け取れる上位互換なのだろうか？ と疑問に思ったので調べてみた。
+
+# 引数を比べてみる
+
+```r
+library(dplyr)
+library(purrr)
+```
+
+
+```{r args, collapse=TRUE}
+args(dplyr::mutate_all)
+
+args(purrr::modify)
+```
+
+さっそく違いが分かるが、`mutate_all` の第二引数は `funs` で複数の関数を取る。つまり複数の関数をデータフレームに適用できる。
+一方で `modify` の第二引数は `.f` で一つの関数しか取れない。
+
+なお、Ellipsis (`...`) には、 `.funs` や `.f` に追加で指定したい引数を与えることができる。
+
+## mutate_all を使ってみる
+
+シンプルなデータフレームを容易しておこう。
+
+```{r prepare-data}
+d <- data.frame(x = 1:3, y = 4:6)
+```
+
+`.funs` に単一の関数として `sqrt` を指定すると、`x` と `y` の平方根が得られる。
+
+```{r mutate-all-fun}
+d %>% mutate_all(sqrt)
+```
+
+一方、`.funs = list(sqrt, log)` として複数の関数を指定すると、`x` 列、 `y` 列はそのままに、関数を適用した結果の列が `x_fn1`, `y_fn1`, `x_fn2`, `y_fn2` といった具合に追加される。
+
+```{r mutate-all-funs}
+d %>% mutate_all(list(sqrt, log))
+```
+
+`_fn*` というサフィックスをコントロールしたい場合は、 `.funs` に与える関数のリストを名前付きリストにしておけばいい。
+
+```{r mutate-all-named-funs}
+d %>% mutate_all(list(sqrt = sqrt, log = log))
+```
+
+## modify を使ってみる
+
+```{r modify}
+d %>% modify(sqrt)
+```
+
+`d %>% mutate_all(sqrt)` と同じ結果が得られた。
+
+# ベンチマーク
+
+適用する関数が一つだけの時は `mutate_all` と `modify` は同じ結果を返すので、それぞれの性能を比較してみることにした。
+
+```r
+library(bench)
+library(ggplot2)
+```
+
+
+```{r bench, cache = TRUE}
+autoplot(mark(
+  mutate_all(d, identity),
+  modify(d, identity)
+))
+```
+
+機能がシンプルな分 `modify` が圧倒的ですね。
+
+# Enjoy!

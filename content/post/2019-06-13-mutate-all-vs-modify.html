@@ -1,0 +1,76 @@
+---
+title: dplyr::mutate_all と purrr::modify の比較
+author: ~
+date: '2019-06-13'
+slug: mutate-all-vs-modify
+categories: [R]
+tags: [dplyr, purrr]
+---
+
+
+
+<p><code>dplyr::mutate_all</code> はデータフレーム中の各変数 (列) に対して関数を適用する。</p>
+<p><code>purrr::modify</code> はリストライクなオブジェクトの各要素に対して関数を適用するが、返り値は入力したオブジェクトと同じクラスになる。このため、データフレームを入力するとデータフレームを返すので、 <code>dplyr::mutate_all</code> のように振る舞うことができる。</p>
+<p><code>purrr::modify</code> の方が色々なデータを受け取れる上位互換なのだろうか？ と疑問に思ったので調べてみた。</p>
+<div id="section" class="section level1">
+<h1>引数を比べてみる</h1>
+<pre class="r"><code>library(dplyr)
+library(purrr)</code></pre>
+<pre class="r"><code>args(dplyr::mutate_all)
+#&gt; function (.tbl, .funs, ...) 
+#&gt; NULL
+
+args(purrr::modify)
+#&gt; function (.x, .f, ...) 
+#&gt; NULL</code></pre>
+<p>さっそく違いが分かるが、<code>mutate_all</code> の第二引数は <code>funs</code> で複数の関数を取る。つまり複数の関数をデータフレームに適用できる。一方で <code>modify</code> の第二引数は <code>.f</code> で一つの関数しか取れない。</p>
+<p>なお、Ellipsis (<code>...</code>) には、 <code>.funs</code> や <code>.f</code> に追加で指定したい引数を与えることができる。</p>
+<div id="mutate_all-" class="section level2">
+<h2>mutate_all を使ってみる</h2>
+<p>シンプルなデータフレームを容易しておこう。</p>
+<pre class="r"><code>d &lt;- data.frame(x = 1:3, y = 4:6)</code></pre>
+<p><code>.funs</code> に単一の関数として <code>sqrt</code> を指定すると、<code>x</code> と <code>y</code> の平方根が得られる。</p>
+<pre class="r"><code>d %&gt;% mutate_all(sqrt)
+#&gt;          x        y
+#&gt; 1 1.000000 2.000000
+#&gt; 2 1.414214 2.236068
+#&gt; 3 1.732051 2.449490</code></pre>
+<p>一方、<code>.funs = list(sqrt, log)</code> として複数の関数を指定すると、<code>x</code> 列、 <code>y</code> 列はそのままに、関数を適用した結果の列が <code>x_fn1</code>, <code>y_fn1</code>, <code>x_fn2</code>, <code>y_fn2</code> といった具合に追加される。</p>
+<pre class="r"><code>d %&gt;% mutate_all(list(sqrt, log))
+#&gt;   x y    x_fn1    y_fn1     x_fn2    y_fn2
+#&gt; 1 1 4 1.000000 2.000000 0.0000000 1.386294
+#&gt; 2 2 5 1.414214 2.236068 0.6931472 1.609438
+#&gt; 3 3 6 1.732051 2.449490 1.0986123 1.791759</code></pre>
+<p><code>_fn*</code> というサフィックスをコントロールしたい場合は、 <code>.funs</code> に与える関数のリストを名前付きリストにしておけばいい。</p>
+<pre class="r"><code>d %&gt;% mutate_all(list(sqrt = sqrt, log = log))
+#&gt;   x y   x_sqrt   y_sqrt     x_log    y_log
+#&gt; 1 1 4 1.000000 2.000000 0.0000000 1.386294
+#&gt; 2 2 5 1.414214 2.236068 0.6931472 1.609438
+#&gt; 3 3 6 1.732051 2.449490 1.0986123 1.791759</code></pre>
+</div>
+<div id="modify-" class="section level2">
+<h2>modify を使ってみる</h2>
+<pre class="r"><code>d %&gt;% modify(sqrt)
+#&gt;          x        y
+#&gt; 1 1.000000 2.000000
+#&gt; 2 1.414214 2.236068
+#&gt; 3 1.732051 2.449490</code></pre>
+<p><code>d %&gt;% mutate_all(sqrt)</code> と同じ結果が得られた。</p>
+</div>
+</div>
+<div id="section-1" class="section level1">
+<h1>ベンチマーク</h1>
+<p>適用する関数が一つだけの時は <code>mutate_all</code> と <code>modify</code> は同じ結果を返すので、それぞれの性能を比較してみることにした。</p>
+<pre class="r"><code>library(bench)
+library(ggplot2)</code></pre>
+<pre class="r"><code>autoplot(mark(
+  mutate_all(d, identity),
+  modify(d, identity)
+))
+#&gt; Loading required namespace: tidyr</code></pre>
+<p><img src="/post/2019-06-13-mutate-all-vs-modify_files/figure-html/bench-1.png" width="672" /></p>
+<p>機能がシンプルな分 <code>modify</code> が圧倒的ですね。</p>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>
