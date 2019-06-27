@@ -1,0 +1,250 @@
+---
+title: CRAN にパッケージを初投稿する手順
+author: ~
+date: '2019-06-28'
+slug: cran-submission
+categories: [R]
+tags: [devtools]
+output:
+    blogdown::html_page:
+        toc: TRUE
+summary: |
+    R のヘルプをもっと便利にする [felp](https://felp.atusy.net) パッケージが CRAN
+    からリリースされた．この経験を踏まえ，CRAN 投稿を初挑戦する人向けの情報を纏めた．
+---
+
+(ref:rpkg) [R packages](http://r-pkgs.had.co.nz/)
+
+R のヘルプをもっと便利にする [felp](https://felp.atusy.net) パッケージが CRAN
+からリリースされた．
+[![felp](https://felp.atusy.net/reference/figures/logo.png){width=120 align=right}](https://felp.atusy.net)
+
+そこで，投稿にあたって参考にした "(ref:rpkg)" の
+"[Releasing a package]( http://r-pkgs.had.co.nz/release.html)"
+と自身の経験を振り返りつつ，
+CRAN 投稿を初挑戦する人向けに最小限の手順を纏めた．
+
+"[Releasing a package]( http://r-pkgs.had.co.nz/release.html)" は良い資料だが，
+初投稿に限らずパッケージを更新する場合についての言及や，思想語り，古い情報がある．
+おかげで初挑戦するには読む量が多く，試行錯誤させられたので，情報を整理した次第だ．
+
+上から下に実行していけばいいように纏めたつもりだ．
+
+R パッケージの作りかたそのものには触れない．
+
+```{r setup, include = FALSE}
+library(atusydown)
+```
+
+# CRAN Policies を確認
+
+https://cran.r-project.org/web/packages/policies.html
+
+CRAN Policies の変更を追うために Twitter アカウント [\@CRANPolicyWatch](https://twitter.com/CRANPolicyWatch) をフォローしておくとよい．
+
+以下は (ref:rpkg) に記されている要点．
+
+- パッケージ管理者の e-mail アドレスは有効である
+- `DESCRIPTION` に著作権保持者を明示した
+- パッケージが2つ以上の異なるプラットフォームで動作することを確認
+- ユーザーの許可を得ずパッケージ外部に変更を加える動作をしない
+    - ファイルシステムへの書き込み
+    - オプションの変更
+    - パッケージのインストール
+    - R を終了する
+    - インターネットを通じて情報を流す
+    - 外部のソフトウェアを開く
+    - ほか
+- 更新は1-2ヵ月に1回まで
+
+# 重要なファイルの更新
+
+- `README.md` にパッケージ本体の概要を記す
+- `NEWS.md` にパッケージ更新の概要を記す
+- `DESCRIPTION` のバージョンを上げておく
+    - 例えば `0.1.0.9000` などの末尾の9000番台は開発版であることを示すので `0.1.1` にしておく
+    - CRAN から修正を要求されるかも知れないので，GitHub 上ではリリースを保留しておく
+
+# スペルチェックする
+
+`devtools::spell_check()` によりスペルチェックを行い，適宜修正する．
+
+言語は既定で `en_US` を採用するが， `DESCRIPTION` ファイルの `Language` フィールドに明示しておくと良い．
+
+辞書にない単語は `inst/WORDLIST` に追加する．
+
+# 異なるプラットフォームで R CMD check する
+
+CRAN でリリースする前には，以下のコマンドにより
+異なるプラットフォームで `R CMD check` しておく．
+
+- `devtools::check()` (ローカル環境)
+- `devtools::check_rhub()` (The R-hub builder)
+- `devtools::check_win_release()` (Win builder)[^win-builder]
+
+`devtools` パッケージを使って CRAN に提出する時は，これらの `check` を行なったか確認される．
+
+エラー・警告があると CRAN はリジェクトするので，これらは0になるよう適宜修正する．
+NOTES は最小限を旨とし CRAN 側の確認の負担を減らす．
+
+R-hub と Win builder による `check` 結果はメールで届くので確認する．
+
+R-hub では Windows と Linux でテストでき CRAN Policy の「2つ以上の環境でテストすること」を満たせる．
+
+Win builder ではより厳格な `check` をしてくれるらしく，
+
+- タイトルを `Title Case` に修正せよ
+- `DESCRIPTION` の `Author` と `Author@R` の齟齬を修正せよ
+- `DESCRIPTION` 中にこれこれのスペルミスらしきものがある
+
+といった情報をエラー・警告・NOTES いずれにも属さない形で提示してくる．
+初回投稿であることを示す NOTES が必ずつくがこれは無視してよい．
+
+```{fn win-builder}
+Win builder は時々，調子が悪いようで FTP 通信がうまくいかなかったという趣旨のエラーが返ることがあるが，しばらくしてから再挑戦するといいらしい (<https://github.com/r-lib/devtools/issues/1435>)．
+Win builder は過去には `devtools::build_win()` によって利用していたが，今では deprecate され，`devtools::check_win_*` を利用することが望ましい．
+```
+
+
+日常的には Travis CI (Linux / macOS) や AppVeyor (Windows) といった CI サービスを用いて，異なる OS と異なるバージョンの R で `R CMD check` しておくと良い．
+
+
+# R CMD check 結果の要約
+
+`cran-comments.md` にテスト環境，チェック結果，revdep 結果などを記録する．
+パッケージのビルドには不要なファイルなので，`.Rbuildignore` に加えておくこと．
+
+例えば httr パッケージの例はこちら
+<https://github.com/r-lib/httr/blob/master/cran-comments.md>
+．
+
+## 記録内容
+
+### テスト環境
+
+どの OS や R バージョンでテストしたか記す．
+
+httr パッケージの例 (<https://github.com/r-lib/httr/blob/436d97fe9fc6d3c59e4971913f17d98741d22701/cran-comments.md#test-environments>)
+
+```
+## Test environments
+
+* local: darwin15.6.0-3.5.1
+* travis: 3.1, 3.2, 3.3, oldrel, release, devel
+* r-hub: windows-x86_64-devel, ubuntu-gcc-release, fedora-clang-devel
+* win-builder: windows-x86_64-devel
+```
+
+
+### Check 結果
+
+- エラー・警告共に0であることを記す
+- NOTEを箇条書きし，その正当性を述べる
+- +α
+    - R CMD check からのメッセージ
+    - Check 結果を良しとした理由
+
+httr パッケージの例 (<https://github.com/r-lib/httr/blob/436d97fe9fc6d3c59e4971913f17d98741d22701/cran-comments.md#r-cmd-check-results>)
+
+```
+## R CMD check results
+0 errors | 0 warnings | 0 notes
+```
+
+
+### revdep (被依存)
+
+初リリース時は revdep[^fn-revdep] がないので以下のように記す．
+
+```
+## revdepcheck results
+
+There are currently no downstream dependencies for this package
+```
+
+
+```{fn fn-revdep}
+revdep とは 自身のパッケージを `Depends`, `Imports`, `Suggests`, `LinkingTo` に含むパッケージ．`devtools::revdep_check()` で探す．
+```
+
+
+<!-- #### revdep がある場合[^fn-revdep] -->
+
+<!-- - revdep に対し `R CMD check` -->
+<!-- - check に失敗する revdep の管理者に修正を依頼 -->
+<!-- - 2週間後，revdep に対して `R CMD check` を再実行 -->
+<!-- - `cran-comments.md` に以下を記す -->
+<!--     - check に失敗する revdep における -->
+<!--         - 失敗内容 (エラーや警告など) -->
+<!--         - 失敗がインストールできなかったなどのテスト環境由来のものか，revdep 管理者が修正していないからか -->
+<!--     - “I advised all downstream package maintainers of these problems two weeks ago” -->
+
+<!-- dplyr の例 (<http://r-pkgs.had.co.nz/release.html>) -->
+
+<!-- ``` -->
+<!-- Important reverse dependency check notes (full details at  -->
+<!-- https://github.com/wch/checkresults/tree/master/dplyr/r-release); -->
+
+<!-- * COPASutils, freqweights, qdap, simPH: fail for various reasons. All package  -->
+<!--   authors were informed of the upcoming release and shown R CMD check issues  -->
+<!--   over two weeks ago. -->
+
+<!-- * ggvis: You'll be receiving a submission that fixes these issues very shortly -->
+<!--   from Winston. -->
+
+<!-- * repra, rPref: uses a deprecated function. -->
+<!-- ``` -->
+
+
+# 投稿
+
+- `devtools::release()` を実行
+    - `R CMD check` と yes/no 形式の問答の後，ビルド済みパッケージと `cran-comments.md` の内容が CRAN submission form に送られる
+- 投稿確認のメールを承認する
+- CRAN 側から投稿したパッケージを Win builder で `check` してくれる．
+  既に `check` 済みなので問題ないはずだが，念のため結果を確認しておく．
+- 最短24時間以内，最長5日で CRAN から結果を知らされる [^cran-response-1st]
+
+# 再投稿
+
+CRAN に再投稿を要求された場合，`Resubmission` という見出しを作って，修正点を記す．
+
+```
+## Resubmission
+
+This is a resubmission. In this version I have:
+
+* Converted the DESCRIPTION title to title case.
+```
+
+私の場合は
+
+- Author を "Atsushi YASUMOTO" ではなく  "Atsushi Yasumoto" としろ
+- Description では一段落でパッケージの有用性を示せ
+- ソースには実行可能な examples を付けろ
+
+といった指摘を受けた．
+即日再投稿したが返事・公開まで16日待たされた[^cran-response-2nd]．
+
+もし CRAN から感情的なコメントがあっても無視して技術的な話に焦点を絞ろう……とわざわざ Hadley が書いているのが気になるところ．
+
+もし devtools に問題があった結果 CRAN 管理者があれこれ言ってきてあああって時はハドリーに住所知らせたら，手書きの謝罪文を送ってくれるらしいぞ．
+
+# 公開
+
+CRAN から "Thanks, on its way to CRAN" と手短な連絡があって間も無く公開されるようだ．
+
+公開されたら，GitHub でも CRAN に投稿した段階のコミットに対してリリースをしておこう．Watch してくれている人に連絡が行く．
+
+Twitter や blog で紹介記事を書くとより良い．
+
+# Enjoy!
+
+[^cran-response-1st]:
+    私のが felp パッケージを初投稿した時は 3日で返事があった．
+    Hadley は5日以内に返事があると言うが，CRAN 公式にはおよそ10日以内としている．
+
+[^cran-response-2nd]:
+    返事が遅くても基本的には待つしかないらしい．
+    r-package-devel のメーリングリストで聞いてみると返事が得られるかも知れないとのこと
+    (https://twitter.com/yutannihilation/status/1141907124563263489)．
