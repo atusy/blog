@@ -1,5 +1,5 @@
 ---
-title: 雑訳 Pivoting (tidyr 1.0.0) \[WIP\]
+title: 雑訳 Pivoting (tidyr 1.0.0) [WIP]
 author: ~
 date: '2019-06-29'
 slug: tidyr-1-0-0
