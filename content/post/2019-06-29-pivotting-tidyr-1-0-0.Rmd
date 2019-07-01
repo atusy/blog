@@ -1,5 +1,5 @@
 ---
-title: 雑訳 Pivoting (tidyr 1.0.0)
+title: "雑訳vignette: Pivoting (tidyr 1.0.0)"
 author: ~
 date: '2019-06-29'
 lastmod: '2019-07-01'

@@ -1,5 +1,5 @@
 ---
-title: 雑訳 Pivoting (tidyr 1.0.0)
+title: "雑訳vignette: Pivoting (tidyr 1.0.0)"
 author: ~
 date: '2019-06-29'
 lastmod: '2019-07-01'
@@ -407,16 +407,16 @@ pnl %&gt;%
     names_pattern = &quot;(.)(.)&quot;
   )
 #&gt; # A tibble: 8 x 6
-#&gt;       x     a     b time       y     z
-#&gt;   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt;
-#&gt; 1     1     1     0 1     -1.05      3
-#&gt; 2     1     1     0 2      0.216    -2
-#&gt; 3     2     1     1 1      1.08      3
-#&gt; 4     2     1     1 2     -1.47     -2
-#&gt; 5     3     0     1 1      1.01      3
-#&gt; 6     3     0     1 2      0.205    -2
-#&gt; 7     4     0     1 1     -1.38      3
-#&gt; 8     4     0     1 2     -0.899    -2</code></pre>
+#&gt;       x     a     b time        y     z
+#&gt;   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt;
+#&gt; 1     1     1     0 1     -0.461      3
+#&gt; 2     1     1     0 2     -1.40      -2
+#&gt; 3     2     1     1 1     -0.324      3
+#&gt; 4     2     1     1 2     -0.823     -2
+#&gt; 5     3     0     1 1      0.210      3
+#&gt; 6     3     0     1 2      0.761     -2
+#&gt; 7     4     0     1 1      0.0984     3
+#&gt; 8     4     0     1 2      0.846     -2</code></pre>
 </div>
 <div id="section-2" class="section level2">
 <h2>列名が重複している場合</h2>
@@ -582,16 +582,16 @@ production
 #&gt; # A tibble: 45 x 4
 #&gt;    product country  year production
 #&gt;    &lt;chr&gt;   &lt;chr&gt;   &lt;int&gt;      &lt;dbl&gt;
-#&gt;  1 A       AI       2000    -0.0974
-#&gt;  2 A       AI       2001    -1.39  
-#&gt;  3 A       AI       2002    -0.586 
-#&gt;  4 A       AI       2003    -0.151 
-#&gt;  5 A       AI       2004    -0.256 
-#&gt;  6 A       AI       2005     0.271 
-#&gt;  7 A       AI       2006    -0.518 
-#&gt;  8 A       AI       2007     0.160 
-#&gt;  9 A       AI       2008     0.959 
-#&gt; 10 A       AI       2009     0.477 
+#&gt;  1 A       AI       2000      0.350
+#&gt;  2 A       AI       2001      1.60 
+#&gt;  3 A       AI       2002     -1.48 
+#&gt;  4 A       AI       2003      0.117
+#&gt;  5 A       AI       2004      1.60 
+#&gt;  6 A       AI       2005      1.49 
+#&gt;  7 A       AI       2006      0.781
+#&gt;  8 A       AI       2007      0.540
+#&gt;  9 A       AI       2008     -0.306
+#&gt; 10 A       AI       2009      0.531
 #&gt; # … with 35 more rows</code></pre>
 <p>このデータを広げて，列ごとに異なる <code>product</code> と <code>country</code> の組み合わせを示すようにしよう．
 <code>names_from</code> に複数の変数を指定するのが鍵だ．</p>
@@ -600,18 +600,18 @@ production
   values_from = production
 )
 #&gt; # A tibble: 15 x 4
-#&gt;     year    A_AI   B_AI    B_EI
-#&gt;    &lt;int&gt;   &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;
-#&gt;  1  2000 -0.0974  0.988 -1.70  
-#&gt;  2  2001 -1.39    1.15  -0.826 
-#&gt;  3  2002 -0.586   1.16  -1.00  
-#&gt;  4  2003 -0.151  -0.342  0.574 
-#&gt;  5  2004 -0.256  -1.21   1.26  
-#&gt;  6  2005  0.271  -0.163 -0.935 
-#&gt;  7  2006 -0.518   1.16   0.313 
-#&gt;  8  2007  0.160   0.406 -0.942 
-#&gt;  9  2008  0.959   0.735 -0.0324
-#&gt; 10  2009  0.477  -1.12  -0.554 
+#&gt;     year   A_AI   B_AI   B_EI
+#&gt;    &lt;int&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+#&gt;  1  2000  0.350  0.582 -0.125
+#&gt;  2  2001  1.60  -1.13  -1.55 
+#&gt;  3  2002 -1.48   0.316 -0.922
+#&gt;  4  2003  0.117  1.15   0.512
+#&gt;  5  2004  1.60  -1.39   0.802
+#&gt;  6  2005  1.49  -0.245 -0.115
+#&gt;  7  2006  0.781  1.45   0.842
+#&gt;  8  2007  0.540 -1.81  -1.71 
+#&gt;  9  2008 -0.306 -0.610  0.614
+#&gt; 10  2009  0.531 -1.56   0.503
 #&gt; # … with 5 more rows</code></pre>
 </div>
 <div id="tidy-census" class="section level2">
