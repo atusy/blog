@@ -1,13 +1,18 @@
 ---
-title: 雑訳 Pivoting (tidyr 1.0.0) [WIP]
+title: 雑訳 Pivoting (tidyr 1.0.0)
 author: ~
 date: '2019-06-29'
-slug: tidyr-1-0-0
-categories: []
-tags: []
+lastmod: '2019-07-01'
+slug: pivoting-tidyr-1-0-0
+categories: [R]
+tags: [tidyr]
 output:
   blogdown::html_page:
     toc: true
+aliases:
+  - /2019/06/29/tidyr-1-0-0/
+summary: |
+  tiydr 1.0.0 で追加される pivot_longer() と pivot_wider() の使い方を紹介する vignette の雑な訳
 ---
 
 ```{r, include = FALSE}
@@ -19,35 +24,48 @@ options(tibble.print_max = 10)
 cache = TRUE
 ```
 
-この記事は tiydr 1.0.0 で追加される `pivot_longer()` と `pivot_wider()` の使い方を紹介する vignette の雑な訳です．
-まだ正式リリースしていないので，いつ本家の仕様が変わるかも分かりません．
-これらの点に注意の上読んでください．
-実際，この翻訳作業で気付いたことをコメントした結果，変わってしまった仕様もありました
+tiydr 1.0.0 で追加される `pivot_longer()` と `pivot_wider()` の使い方を紹介する vignette を雑に訳した．
+まだ正式リリースしていないので，仕様もドキュメントも変わる可能性がある．
+これらの点に注意の上読んで欲しい．
+
+実際，気付いたことをコメントした結果，変わってしまった仕様もある
 ([#630](https://github.com/tidyverse/tidyr/issues/630))．
+他にも仕様やドキュメントに関する Issues 4件 と typo に対する PR を2件挙げてしまったので，
+`pivot_*` はまだまだこれから感が強い．
 
-また，翻訳にはこなれていない部分や，適切な訳が分からず英語が残された部分もあります．
-是非みなさんのコメントで訳を育てて下さい．
-質問も歓迎です．[\@Atsushi776](https://twitter.com/Atsushi776/) (Twitter) までどうぞ．
+また，翻訳にはこなれていない部分や，適切な訳が分からず英語が残された部分もある．
+是非みなさんのコメントで訳を育てて欲しい．
+質問・コメントは [\@Atsushi776](https://twitter.com/Atsushi776/) (Twitter) まで．
 
-`pivot_wider()` についてはまだ訳せていないが，`pivot_longer()` の部分だけ先行公開することにした．
+個人的には， [\@yutannihilation](https://twitter.com/yutannihilation/) 氏による
+スライド「idyr 1.0.0?の新機能 pivot_*()」
+の説明が非常に分かりやすいのでまず，こちらを読んで，更に深いところを
+vignette から学ぶことを薦める．
+<https://speakerdeck.com/yutannihilation/tidyr-pivot>
 
-原文: https://tidyr.tidyverse.org/dev/articles/pivot.html
+英語の記事では "Pivoting data from columns to rows (and back!) in the tidyverse" も
+評判が良い．私はまだ読んでいない．
+<http://www.storybench.org/pivoting-data-from-columns-to-rows-and-back-in-the-tidyverse/>
+
+vignette 原文: https://tidyr.tidyverse.org/dev/articles/pivot.html
 
 # はじめに
 
-この vignette では `pivot_longer()` と `pivot_wider()` の使い方を紹介する．これらの関数は `gather()` と `spread()` の機能を拡張し，他のパッケージから最新の機能を取り込むことを目指す．
+この vignette では `pivot_longer()` と `pivot_wider()` の使い方を紹介する．
+これらの関数は `gather()` と `spread()` の機能を拡張し，
+他のパッケージから最新の機能を取り込むことを目指す．
 
 `spread()` と `gather()` には設計の基本的な部分に誤りがあった．
-これらの関数がどの方向に*データ*を広げたり集めたりするのか予想しにくく，覚えることも困難だった．
-更にこれらの関数の引数ついては覚えることがとても難しかったので，開発者を含め多くの人は度々ドキュメントを参照する羽目になった．
+これらの関数がどの方向に*データ*を広げたり集めたりするのか予想することも覚えることも難しかった．
+更に引数も非常に覚え辛く，開発者を含め多くの人が度々ドキュメントを参照する羽目になった．
 
 そこで R における*データ*整形を発展させる2つの重要な新機能が，
-他のパッケージからの着想を得て実装された．
+他のパッケージを参考に実装された．
 
 * `pivot_longer()` は型の異なる複数の値を記録した変数を扱うことができる．
   この機能は Matt Dowle と Arun Srinivasan による
   [data.table][data.table] パッケージにおける改良型の `melt()` と `dcast()`
-  から着想を得た．
+  を参考にした．
 * `pivot_longer()` と `pivot_wider()` はデータフレームに対し，
   列名に記録されたメタデータがどのようにデータ変数に変換されるべきか，
   あるいは逆変換されるべきかを的確に指定できる．
@@ -55,11 +73,20 @@ cache = TRUE
 
 この vignette では，
 `pivot_longer()` と `pivot_wider()` の背景にある重要なアイディアを紹介する．
-これらのアイディアはこれまであなたが単純なものから複雑なものまで様々なデータ整形に取り組んできた中で用いてきたものだ．
+これらのアイディアはこれまであなたが単純なものから複雑なものまで
+様々なデータ整形に取り組んできた中で用いてきたものだ．
 
 始めに必要なパッケージを読み込む．
 実用的には `library(tidyverse)` で読み込むだろうが，
-`tidyverse` をパッケージの vignette で読み込むことはできない．
+`tidyverse` をパッケージの vignette で読み込むことはできない[^tidyverse]．
+
+[^tidyverse]: 
+    訳注: `tidyverse` を vignette で利用すると，最低でも `Suggests` に `tidyverse`
+    を加えなければならない．
+    しかし `tidyverse` は多くのパッケージを纏めたメタパッケージなので，
+    不要なパッケージにも依存することになり，パッケージがいたずらに肥大化するのでよくない．
+    参考: "The tidyverse is for EDA, not packages"
+    <https://www.tidyverse.org/articles/2018/06/tidyverse-not-for-packages/>
 
 ```{r setup, message = FALSE}
 library(tidyr)
@@ -69,14 +96,13 @@ library(readr)
 
 # Longer
 
-`pivot_longer()` はデータセットの行を増やし，列を減らすことで __長く__ (longer) する． 
+`pivot_longer()` はデータセットの行を増やし，列を減らすことで*長く* (longer) する． 
 開発者は「長い形式 (long form)」という呼び方は合理的ではないと考えている．
 なぜなら，長さは相対的なもので例えばデータセットの A と B のどちらが長いといった言い方しかできないからだ．
 
 `pivot_longer()` は野生のデータセットに対してよく適用されるもので，
-  分析を楽にするためというよりは，
-  データの入力や比較を適切に行うために用いられる．
-次の章からは， `pivot_longer()` の使い方を現実にありうる様々なデータセットを用いて紹介する．
+分析を楽にするためというよりは，データの入力や比較を適切に行うために用いられる．
+次節からは， `pivot_longer()` の使い方を現実にありうる様々なデータセットを用いて紹介する．
 
 ## 列の名前が文字列データに相当する場合 {#pew}
 
@@ -146,7 +172,9 @@ billboard %>%
 `names_ptypes` 引数によって `week` が整数であることを指定する[^ptype]．
 
 [^ptype]:
-  訳注: ヘルプを参照するに，ptype は prototype の略称のようだ．本来のタイプくらいの意味合いだろうか．
+  訳注: ptype は prototype の略称．本来のタイプくらいの意味合いだろうか．
+  [\@yutannihilation](https://twitter.com/yutannihilation) 氏によるスライドも参考にして欲しい．
+  <https://speakerdeck.com/yutannihilation/tidyr-pivot?slide=51>
 
 ```{r}
 billboard %>% 
@@ -162,7 +190,7 @@ billboard %>%
 
 ## 列名に複数の変数がある場合
 
-列名に複数の変数が詰めこまれていると，整形はより大変なものになる．
+列名に複数の変数が詰めこまれていると，整形はより大変になる．
 例えば `who` データセットを見てみよう．
 
 ```{r}
@@ -184,7 +212,7 @@ who
 
 [^age]: 訳注: `014`なら0歳から14歳，`1524`なら15歳から24歳であることを示す．
 
-今回は `names_pattern` がしっくりくるだろう．
+今回は `names_pattern` を使うとしっくりくるだろう．
 `names_pattern` は `extract` と似た操作性を持ち，
 `()` を用いてグループ化した正規表現を指定することで，
 列名からグループとして各変数を取り出すことができる．
@@ -217,21 +245,21 @@ who %>% pivot_longer(
 )
 ```
 
-## 一行に複数の観測値が記録されている場合
+## 一行に複数の観測値がある場合[^multiple-observations-per-row]
 
-これまで見てきたデータフレームは single value column[^single-value-column] から成っていた．
-しかし多くの場合，複数の値の操作がデータ整形における重要な課題になる．
-このような課題には，整形後のデータフレームに欲しい列名が，整形前のデータフレームの列名の一部になっていることで気付く．
-この章では，そんなデータをどうやって整形するか見ていく．
+[^multiple-observations-per-row]:
+    訳注: 直感的な見出しではないと思う．
+    かと言って良い対案も思いついていない．
+    暫定版は整形対象となる列の値に複数種の変数がある場合，くらいだろうか．
 
-[^single-value-column]:
-    訳注: 適訳が分からない．single な value column なのか single value な column なのか．
-    「結果の」 value column が single か multiple かという違いで語られているとの説あり
-    (<https://twitter.com/yutannihilation/status/1144845335467970560>)．
+これまで見てきたデータフレームでは，整形時にセルの値が入る列 (value column) は1つだった．
+しかし多くの重要な整形問題では，セルの値が複数列に入ることがある．
+このような問題は，整形後のデータフレームに欲しい列名が，整形前のデータフレームの列名の一部になっていることで発覚する．
+この節では，そんなデータをどうやって整形するか見ていく．
 
 以下の例の出典は
 [data.table vignette](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html)
-で，`tidyr` における解法を閃くきっかけとなったものだ．
+で，`tidyr` における解法を閃くきっかけとなった．
 
 ```{r}
 family <- tribble(
@@ -249,7 +277,7 @@ family
 ここには子供たちそれぞれの `gender` と `dob` (誕生日) の2種類の情報 (または値) が載っている．
 これらの情報を別々の列に分けなければならい．
 そこで `names_to` に複数の値を指定し，`names_sep` を使って変数の名前を切り分ける．
-ただし，特別な変数名である `.value` を使って `pivot_longer()` に列名の一部が整形後の列になることを伝える．
+ただし，特別な変数名である `.value` を使って `pivot_longer()` に列名の一部が整形後の value column になることを伝える．
 
 ```{r}
 family %>% 
@@ -310,8 +338,8 @@ pnl %>%
 
 ## 列名が重複している場合
 
-時には，重複した列名を持つデータセットに遭遇することもあるだろう．
-一般的には，R でこのようなデータセットを扱うのは難しい．
+列名が重複したデータセットに遭遇することもあるだろう．
+一般的には R でこのようなデータセットを扱うのは難しい．
 なぜなら，名前で列を参照しようとすると，最初にマッチしたものしか参照できないからだ．
 列名の重複した tibble を作るには，そのようなデータセットの作成を防ぐ列名の修正機能を明示的に止めておく必要がある．
 
@@ -329,7 +357,388 @@ df %>% pivot_longer(-x, names_to = "name", values_to = "value")
 
 # Wider
 
-***以降翻訳作業中***
+`pivot_wider()` は `pivot_longer()` の反対で，列数を増やして行数を減らすことで，データセットを*広く* (wider) する．
+`pivot_wider()` を使って整然データを作ることは珍しいが，
+`pivot_wider()` は発表用に要約した表を作る際やデータを他のツールに必要な形式に変換する際に役立つ．
+
+## Capture-recapture data
+
+[Myfanwy Johnston](https://fishsciences.github.io/post/visualizing-fish-encounter-histories/) による
+`fish_encounters` データセットは，自動観測機が川を下る魚を検出したかをまとめている．
+
+```{r}
+fish_encounters
+```
+
+解析ツールの多くは，このデータが観測機ごとに列を成す形式に従っていることを求める．
+
+```{r}
+fish_encounters %>% pivot_wider(names_from = station, values_from = seen)
+```
+
+このデータセットは，ある魚が観測機に観測された時だけ記録していて，
+観測されなかった時のことは記録していない (この種のデータでは一般的なことだ)．
+従って出力は `NA` で埋められる．
+しかしこの場合，欠測が魚を`見なかった`ことを意味すると分かっているので，
+`pivot_wider()` を使って欠測値を0で埋められる．
+
+```{r}
+fish_encounters %>% pivot_wider(
+  names_from = station, 
+  values_from = seen,
+  values_fill = list(seen = 0)
+)
+```
+
+## Aggregation
+
+また，`pivot_wider()` を使って単純な aggregation を行うこともできる．
+Base R に組込まれている `warpbreaks` データセットを例にとってみよう (出力の見栄えをよくするため tibble に変換しておく):
+
+```{r}
+warpbreaks <- warpbreaks %>% as_tibble() %>% select(wool, tension, breaks)
+warpbreaks
+```
+
+これは，`wool` (`A` と `B`) と `tension` (`L`, `M`, `H`) の全組み合わせに対し，
+9回ずつ実験を繰り返した計画実験だ．
+
+```{r}
+warpbreaks %>% count(wool, tension)
+```
+
+`wool` (訳注: factor 型) の水準を列に展開するとどうなるだろうか．
+
+```{r}
+warpbreaks %>% pivot_wider(names_from = wool, values_from = breaks)
+```
+
+出力される各セルが入力された複数のセルに対応すると警告される．
+既定の挙動ではリストから成る列 (list-columns) を生成し，各要素は全ての個別の値を格納する．
+より便利な出力は要約統計量だろう．
+例えば `mean` によって，`wool` と `tention` の組み合わせごとに平均値を算出できる．
+
+```{r}
+warpbreaks %>% 
+  pivot_wider(
+    names_from = wool, 
+    values_from = breaks,
+    values_fn = list(breaks = mean)
+  )
+```
+
+より複雑な要約は，整形前に行っておくことを薦めるが，単純なものは `pivot_wider()` で済ましてしまう方が便利なことも多い．
+
+## 複数の変数から複数の列名を生成する
+
+あるデータセットが product，country，yearの組み合わせで構成されているとしよう
+(例えば <http://stackoverflow.com/questions/24929954>)．
+整然とした形式では以下のようになる．
+
+```{r}
+production <- expand_grid(
+    product = c("A", "B"), 
+    country = c("AI", "EI"), 
+    year = 2000:2014
+  ) %>%
+  filter((product == "A" & country == "AI") | product == "B") %>% 
+  mutate(production = rnorm(nrow(.)))
+production
+```
+
+このデータを広げて，列ごとに異なる `product` と `country` の組み合わせを示すようにしよう．
+`names_from` に複数の変数を指定するのが鍵だ．
+
+```{r}
+production %>% pivot_wider(
+  names_from = c(product, country), 
+  values_from = production
+)
+```
+
+## 整然とした国勢調査 (Tidy census)
+
+`us_rent_income` データセットは，2017年のアメリカ合衆国における年収と家賃の中央値を州ごとに集計している (the American Community Survey から [tidycensus][tidycensus] パッケージによって入手した).
+
+```{r}
+us_rent_income
+```
+
+`estimate` と `moe` は両方とも values columns であるため，`values_from` に指定する．
+
+```{r}
+us_rent_income %>% 
+  pivot_wider(names_from = variable, values_from = c(estimate, moe))
+```
+
+出力される列には変数名が自動的に追記されることに注意されたい．
+
+## 連絡帳
+
+最後に取り組む問題は
+[Jiena Gu](https://github.com/jienagu/tidyverse_examples/blob/master/example_long_wide.R)
+に影響されたものだ．
+以下のようにウェブサイトからコピー&ペーストした連絡帳があるとしよう．
+
+```{r}
+contacts <- tribble(
+  ~field, ~value,
+  "name", "Jiena McLellan",
+  "company", "Toyota", 
+  "name", "John Smith", 
+  "company", "google", 
+  "email", "john@google.com",
+  "name", "Huxley Ratcliffe"
+)
+```
+
+このデータセットではどの値が同じ組になるか分からないことが課題だ．
+全ての連絡先が名前 (name) から始まっていることに気付けば，この課題を解決できる．
+`field` 列に "name" が現れる度に固有の id を割り当てよう．
+
+```{r}
+contacts <- contacts %>% 
+  mutate(
+    person_id = cumsum(field == "name")
+  )
+contacts
+```
+
+これで各人に対し，固有な識別子が割り当てられたので，`field` と `value` を列に展開できる．
+
+```{r}
+contacts %>% 
+  pivot_wider(names_from = field, values_from = value)
+```
+
+# Longer にしてから wider にする
+
+一方向に pivot するだけでは問題が解決しないことがある．
+本節では`pivot_longer()` と `pivot_wider()` を組み合わせて複雑な問題を解決する例を紹介する．
+
+## 世界銀行
+
+`world_bank_pop` は世界銀行による2000年から2018年までの各国の人口に関するデータが記録されている．
+
+```{r}
+world_bank_pop
+```
+
+このデータセットを，それぞれの変数が一つの列に納ままるように整形しよう．
+この段階ではどのような手順を踏めばいいか分からないが，まず最も明らかな問題である，
+複数列にまたがる `yaer` を修正しよう．
+
+```{r}
+pop2 <- world_bank_pop %>% 
+  pivot_longer(`2000`:`2017`, names_to = "year", values_to = "value")
+pop2
+```
+
+次に， `indicator` 列を見てみよう．
+
+```{r}
+pop2 %>% count(indicator)
+```
+
+`SP.POP.GROW` は人口増加を, `SP.POP.TOTL` は総人口を, そして `SP.URB.*` は都会における人口増加と総人口を示す．
+これらを観測値が全域から得たものか都会から得たものか示す `area` 列と，
+観測値が総人口と人口増加のどちらを記録しているか示す `variable` 列の2列に分けよう．
+
+
+```{r}
+pop3 <- pop2 %>% 
+  separate(indicator, c(NA, "area", "variable"))
+pop3
+```
+
+最後に `variable` 列と `value` 列を展開し，`TOTL` 列と `GROW` 列にしよう．
+
+```{r}
+pop3 %>% 
+  pivot_wider(names_from = variable, values_from = value)
+```
+
+## 複数回答
+
+[Maxime Wack](https://github.com/MaximeWack) による提案を受けて <https://github.com/tidyverse/tidyr/issues/384>)，よくある複数回答データをどのように扱えばいいかを最後の例としよう．
+複数回答データは以下のような形式であることが多い．
+
+```{r}
+multi <- tribble(
+  ~id, ~choice1, ~choice2, ~choice3,
+  1, "A", "B", "C",
+  2, "C", "B",  NA,
+  3, "D",  NA,  NA,
+  4, "B", "D",  NA
+)
+```
+
+しかし，実際の順番は重要ではなく，id ごとの解答内容を示したいとしよう[^multi-choice]．
+望んだ形式への変換は2つの操作で完了する．
+まず，データを longer 形式にし，自明な `NA` を消去し，選択肢から回答を得られたかを示す列を追加する．
+
+[^multi-choice]:
+  訳注: 原文は "you'd prefer to have the individual questions in the columns." であるが，"questions" ではなく "answers" が正しい気がする．
+
+```{r}
+multi2 <- multi %>% 
+  pivot_longer(-id, values_drop_na = TRUE) %>% 
+  mutate(checked = TRUE)
+multi2
+```
+
+次にデータを `wider` 型にし，無回答部分を `FALSE` で埋める．
+
+```{r}
+multi2 %>% 
+  pivot_wider(
+    id_cols = id,
+    names_from = value, 
+    values_from = checked, 
+    values_fill = list(checked = FALSE)
+  )
+```
+
+# Manual specs
+
+`pivot_longer()` と `pivot_wider()` の引数は，様々なデータセットの整形を可能とする．
+しかし人々がデータ構造に対して発揮する想像力は無尽蔵にも見えるので，
+一見 `pivot_longer()` と `pivot_wider()` でもどうしようもない問題に遭遇することもありえる．
+より柔軟な整形を行うためには，仕様となるデータフレームを作り，厳格に列名ごとに格納されるデータがどのようにあるべきか，あるいはある種のデータが格納される列の名前がどのようにあるべきか，決めておける．
+本節では，どのようにデータ構造の仕様を定めればよいか紹介し，
+`pivot_longer()` と `pivot_wider()` が不十分な場合にその仕様をどう示せばいいのかを紹介する．
+
+## Longer
+
+仕様の策定方法を学ぶにあたって， `relig_income` データセットを用いた
+もっとも単純な整形をやり直してみよう．
+今回は整形に2段階の手順を踏む．
+まず，仕様となるオブジェクトを `pivot_longer_spec()` を用いて作り，
+整形時に仕様を利用する．
+
+```{r}
+spec <- relig_income %>% pivot_longer_spec(
+  cols = -religion, 
+  names_to = "income",
+  values_to = "count"
+)
+relig_income %>% pivot_longer(spec = spec)
+```
+
+(コードは増えたが結果は以前と同じだ．この場合， `spec` を定める必要はないが，用例を示す単純な例として紹介した．)
+
+`spec` の中身はデータフレームで，各行は元のデータフレームの各列に対応しており[^spec-cols]，
+`.` から始まる2つの特別な列を持つ．
+
+* `.name` は列名を示す．
+* `.value` はセルの移動先となる列の名前を示す．
+
+[^spec-cols]:
+    訳注: 原文では元のデータフレームとまで書いていないが伝わらないと思ったので追記した．
+    `pivot_wider_spec()` の場合は `.name` 列の値が出力のデータフレームの各列に対応するので注意．
+
+
+```{r}
+spec
+```
+
+## Wider
+
+以下では `us_rent_income` を `pivot_wider()` によって広げている．
+良い結果が得られているが改善の余地があるだろう．
+
+```{r}
+us_rent_income %>% 
+  pivot_wider(names_from = variable, values_from = c(estimate, moe))
+```
+
+手製の仕様 (manual spec) を使って列名を `rent`，`rent_moe`，`income`，`income_moe` に改善しよう． 
+現在の仕様は以下の通りだ．
+
+```{r}
+us_rent_income %>% 
+  pivot_wider_spec(names_from = variable, values_from = c(estimate, moe))
+```
+
+まず，`.value` と `variable` の組み合わせを全て作り，注意深く列名を決める[^manual-spec-wider]．
+
+[^manual-spec-wider]: 
+    訳注: `expand %>% mutate` よりも `pivot_wider_spec %>% mutate` の方が，
+    行や列の順序が `pivot_wider_spec` の結果と整合的で比べやすく，安全だと思う ([#666](https://github.com/tidyverse/tidyr/issues/666))．
+    ```{r}
+    us_rent_income %>%
+      pivot_wider_spec(names_from = variable, values_from = c(estimate, moe)) %>%
+      mutate(.name = paste0(variable, ifelse(.value == "moe", "_moe", "")))
+    ```
+
+```{r}
+spec <- us_rent_income %>% 
+  expand(variable, .value = c("estimate", "moe")) %>% 
+  mutate(
+    .name = paste0(variable, ifelse(.value == "moe", "_moe", ""))
+  )
+spec
+```
+
+
+この仕様を `pivot_wider()` に与えると，望み通りのデータフレームが得られる．
+
+```{r}
+us_rent_income %>% pivot_wider(spec = spec)
+```
+
+## By hand
+
+時には仕様を算出させるのが不可能な場合や不都合な場合があり，
+自前 ("by hand") で仕様を定めた方が都合がいいこともある．
+`construction` データを例に見てみよう．
+このデータは下記 URL の表5 "completions" を少し改造したものだ <https://www.census.gov/construction/nrc/index.html>．
+
+```{r}
+construction
+```
+
+このようなデータは政府機関が発行するものにありがちで，列名が色々な変数に属している．
+今回の場合は色々なユニットごと (1, 2--4, 5+) に要約した列と，国内の地方ごと (NE, NW, midwest, S, W) の要約した列がある．
+このようなデータを整形する際の仕様は tibble を使って簡単に記述できる．
+
+```{r}
+spec <- tribble(
+  ~.name,            ~.value, ~units,  ~region,     
+  "1 unit",          "n",     "1",     NA,          
+  "2 to 4 units",    "n",     "2-4",   NA,          
+  "5 units or more", "n",     "5+",    NA,          
+  "Northeast",       "n",     NA,      "Northeast", 
+  "Midwest",         "n",     NA,      "Midwest",   
+  "South",           "n",     NA,      "South",     
+  "West",            "n",     NA,      "West",      
+)
+```
+
+この仕様を用いると，以下のような longer な形式になる．
+
+```{r}
+construction %>% pivot_longer(spec = spec)
+```
+
+`units` 変数と `region` 変数には重複するとこがないことに注意されたい．
+今回の場合はデータを独立した二つの表に分けるのが最も自然だ．
+
+## 理論
+
+`spec` の良いところは，`pivot_longer()` と `pivot_wider()` に同じものを与えられることだ．
+これにより，二つの操作の対称性が明確になる．
+
+```{r}
+construction %>% 
+  pivot_longer(spec = spec) %>% 
+  pivot_wider(spec = spec)
+```
+
+整形の仕様を定めることで，`pivot_longer(df, spec = spec)` がどのように `df` を整形するかより明瞭で厳密にできる．
+出力結果は `nrow(df) * nrow(spec)` に相当する行数と, 
+`ncol(df) - nrow(spec) + ncol(spec) - 2` に相当する列数を持つ．
+
 
 [cdata]: https://winvector.github.io/cdata/
 [data.table]: https://github.com/Rdatatable/data.table/wiki

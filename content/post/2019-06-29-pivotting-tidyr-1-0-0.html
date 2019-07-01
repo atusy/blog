@@ -1,13 +1,18 @@
 ---
-title: 雑訳 Pivoting (tidyr 1.0.0) [WIP]
+title: 雑訳 Pivoting (tidyr 1.0.0)
 author: ~
 date: '2019-06-29'
-slug: tidyr-1-0-0
-categories: []
-tags: []
+lastmod: '2019-07-01'
+slug: pivoting-tidyr-1-0-0
+categories: [R]
+tags: [tidyr]
 output:
   blogdown::html_page:
     toc: true
+aliases:
+  - /2019/06/29/tidyr-1-0-0/
+summary: |
+  tiydr 1.0.0 で追加される pivot_longer() と pivot_wider() の使い方を紹介する vignette の雑な訳
 ---
 
 
@@ -18,41 +23,63 @@ output:
 <li><a href="#pew">列の名前が文字列データに相当する場合</a></li>
 <li><a href="#billboard">列の名前が数値データに相当する場合</a></li>
 <li><a href="#section-1">列名に複数の変数がある場合</a></li>
-<li><a href="#section-2">一行に複数の観測値が記録されている場合</a></li>
-<li><a href="#section-3">列名が重複している場合</a></li>
+<li><a href="#multiple-observations-per-row">一行に複数の観測値がある場合</a></li>
+<li><a href="#section-2">列名が重複している場合</a></li>
 </ul></li>
-<li><a href="#wider">Wider</a></li>
+<li><a href="#wider">Wider</a><ul>
+<li><a href="#capture-recapture-data">Capture-recapture data</a></li>
+<li><a href="#aggregation">Aggregation</a></li>
+<li><a href="#section-3">複数の変数から複数の列名を生成する</a></li>
+<li><a href="#tidy-census">整然とした国勢調査 (Tidy census)</a></li>
+<li><a href="#section-4">連絡帳</a></li>
+</ul></li>
+<li><a href="#longer--wider-">Longer にしてから wider にする</a><ul>
+<li><a href="#section-5">世界銀行</a></li>
+<li><a href="#section-6">複数回答</a></li>
+</ul></li>
+<li><a href="#manual-specs">Manual specs</a><ul>
+<li><a href="#longer-1">Longer</a></li>
+<li><a href="#wider-1">Wider</a></li>
+<li><a href="#by-hand">By hand</a></li>
+<li><a href="#section-7">理論</a></li>
+</ul></li>
 </ul>
 </div>
 
-<p>この記事は tiydr 1.0.0 で追加される <code>pivot_longer()</code> と <code>pivot_wider()</code> の使い方を紹介する vignette の雑な訳です．まだ正式リリースしていないので，いつ本家の仕様が変わるかも分かりません．これらの点に注意の上読んでください．実際，この翻訳作業で気付いたことをコメントした結果，変わってしまった仕様もありました
-(<a href="https://github.com/tidyverse/tidyr/issues/630">#630</a>)．</p>
-<p>また，翻訳にはこなれていない部分や，適切な訳が分からず英語が残された部分もあります．是非みなさんのコメントで訳を育てて下さい．質問も歓迎です．<a href="https://twitter.com/Atsushi776/">@Atsushi776</a> (Twitter) までどうぞ．</p>
-<p><code>pivot_wider()</code> についてはまだ訳せていないが，<code>pivot_longer()</code> の部分だけ先行公開することにした．</p>
-<p>原文: <a href="https://tidyr.tidyverse.org/dev/articles/pivot.html" class="uri">https://tidyr.tidyverse.org/dev/articles/pivot.html</a></p>
+<p>tiydr 1.0.0 で追加される <code>pivot_longer()</code> と <code>pivot_wider()</code> の使い方を紹介する vignette を雑に訳した．まだ正式リリースしていないので，仕様もドキュメントも変わる可能性がある．これらの点に注意の上読んで欲しい．</p>
+<p>実際，気付いたことをコメントした結果，変わってしまった仕様もある
+(<a href="https://github.com/tidyverse/tidyr/issues/630">#630</a>)．他にも仕様やドキュメントに関する Issues 4件 と typo に対する PR を2件挙げてしまったので，
+<code>pivot_*</code> はまだまだこれから感が強い．</p>
+<p>また，翻訳にはこなれていない部分や，適切な訳が分からず英語が残された部分もある．是非みなさんのコメントで訳を育てて欲しい．質問・コメントは <a href="https://twitter.com/Atsushi776/">@Atsushi776</a> (Twitter) まで．</p>
+<p>個人的には， <a href="https://twitter.com/yutannihilation/">@yutannihilation</a> 氏によるスライド「idyr 1.0.0?の新機能 pivot_*()」の説明が非常に分かりやすいのでまず，こちらを読んで，更に深いところを
+vignette から学ぶことを薦める．
+<a href="https://speakerdeck.com/yutannihilation/tidyr-pivot" class="uri">https://speakerdeck.com/yutannihilation/tidyr-pivot</a></p>
+<p>英語の記事では “Pivoting data from columns to rows (and back!) in the tidyverse” も評判が良い．私はまだ読んでいない．
+<a href="http://www.storybench.org/pivoting-data-from-columns-to-rows-and-back-in-the-tidyverse/" class="uri">http://www.storybench.org/pivoting-data-from-columns-to-rows-and-back-in-the-tidyverse/</a></p>
+<p>vignette 原文: <a href="https://tidyr.tidyverse.org/dev/articles/pivot.html" class="uri">https://tidyr.tidyverse.org/dev/articles/pivot.html</a></p>
 <div id="section" class="section level1">
 <h1>はじめに</h1>
 <p>この vignette では <code>pivot_longer()</code> と <code>pivot_wider()</code> の使い方を紹介する．これらの関数は <code>gather()</code> と <code>spread()</code> の機能を拡張し，他のパッケージから最新の機能を取り込むことを目指す．</p>
-<p><code>spread()</code> と <code>gather()</code> には設計の基本的な部分に誤りがあった．これらの関数がどの方向に<em>データ</em>を広げたり集めたりするのか予想しにくく，覚えることも困難だった．更にこれらの関数の引数ついては覚えることがとても難しかったので，開発者を含め多くの人は度々ドキュメントを参照する羽目になった．</p>
-<p>そこで R における<em>データ</em>整形を発展させる2つの重要な新機能が，他のパッケージからの着想を得て実装された．</p>
+<p><code>spread()</code> と <code>gather()</code> には設計の基本的な部分に誤りがあった．これらの関数がどの方向に<em>データ</em>を広げたり集めたりするのか予想することも覚えることも難しかった．更に引数も非常に覚え辛く，開発者を含め多くの人が度々ドキュメントを参照する羽目になった．</p>
+<p>そこで R における<em>データ</em>整形を発展させる2つの重要な新機能が，他のパッケージを参考に実装された．</p>
 <ul>
 <li><code>pivot_longer()</code> は型の異なる複数の値を記録した変数を扱うことができる．この機能は Matt Dowle と Arun Srinivasan による
 <a href="https://github.com/Rdatatable/data.table/wiki">data.table</a> パッケージにおける改良型の <code>melt()</code> と <code>dcast()</code>
-から着想を得た．</li>
+を参考にした．</li>
 <li><code>pivot_longer()</code> と <code>pivot_wider()</code> はデータフレームに対し，列名に記録されたメタデータがどのようにデータ変数に変換されるべきか，あるいは逆変換されるべきかを的確に指定できる．この機能は John Mount と Nina Zumel による <a href="https://winvector.github.io/cdata/">cdata</a> パッケージから着想を得た．</li>
 </ul>
 <p>この vignette では，
 <code>pivot_longer()</code> と <code>pivot_wider()</code> の背景にある重要なアイディアを紹介する．これらのアイディアはこれまであなたが単純なものから複雑なものまで様々なデータ整形に取り組んできた中で用いてきたものだ．</p>
 <p>始めに必要なパッケージを読み込む．実用的には <code>library(tidyverse)</code> で読み込むだろうが，
-<code>tidyverse</code> をパッケージの vignette で読み込むことはできない．</p>
+<code>tidyverse</code> をパッケージの vignette で読み込むことはできない<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>．</p>
 <pre class="r"><code>library(tidyr)
 library(dplyr)
 library(readr)</code></pre>
 </div>
 <div id="longer" class="section level1">
 <h1>Longer</h1>
-<p><code>pivot_longer()</code> はデータセットの行を増やし，列を減らすことで <strong>長く</strong> (longer) する．開発者は「長い形式 (long form)」という呼び方は合理的ではないと考えている．なぜなら，長さは相対的なもので例えばデータセットの A と B のどちらが長いといった言い方しかできないからだ．</p>
-<p><code>pivot_longer()</code> は野生のデータセットに対してよく適用されるもので，分析を楽にするためというよりは，データの入力や比較を適切に行うために用いられる．次の章からは， <code>pivot_longer()</code> の使い方を現実にありうる様々なデータセットを用いて紹介する．</p>
+<p><code>pivot_longer()</code> はデータセットの行を増やし，列を減らすことで<em>長く</em> (longer) する．開発者は「長い形式 (long form)」という呼び方は合理的ではないと考えている．なぜなら，長さは相対的なもので例えばデータセットの A と B のどちらが長いといった言い方しかできないからだ．</p>
+<p><code>pivot_longer()</code> は野生のデータセットに対してよく適用されるもので，分析を楽にするためというよりは，データの入力や比較を適切に行うために用いられる．次節からは， <code>pivot_longer()</code> の使い方を現実にありうる様々なデータセットを用いて紹介する．</p>
 <div id="pew" class="section level2">
 <h2>列の名前が文字列データに相当する場合</h2>
 <p><code>relig_income</code> データセットは人々の宗教や年収について集計した結果をカウントデータとして記録している．</p>
@@ -160,7 +187,7 @@ library(readr)</code></pre>
 #&gt; 10 2Ge+her The Hardest Part Of ... 2000-09-02   wk3      92
 #&gt; # … with 5,297 more rows</code></pre>
 <p>各曲が何週間ランキング入りしていたか簡単に分かると嬉しいが，それには変数 <code>week</code> を整数に直す必要がある．これには2つの引数を追加で指定する必要がある．まず <code>names_prefix</code> 引数によって接頭辞の <code>wk</code> を消した上で，
-<code>names_ptypes</code> 引数によって <code>week</code> が整数であることを指定する<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>．</p>
+<code>names_ptypes</code> 引数によって <code>week</code> が整数であることを指定する<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>．</p>
 <pre class="r"><code>billboard %&gt;% 
   pivot_longer(
     cols = starts_with(&quot;wk&quot;), 
@@ -187,7 +214,7 @@ library(readr)</code></pre>
 </div>
 <div id="section-1" class="section level2">
 <h2>列名に複数の変数がある場合</h2>
-<p>列名に複数の変数が詰めこまれていると，整形はより大変なものになる．例えば <code>who</code> データセットを見てみよう．</p>
+<p>列名に複数の変数が詰めこまれていると，整形はより大変になる．例えば <code>who</code> データセットを見てみよう．</p>
 <pre class="r"><code>who
 #&gt; # A tibble: 7,240 x 60
 #&gt;    country iso2  iso3   year new_sp_m014 new_sp_m1524 new_sp_m2534
@@ -226,9 +253,9 @@ library(readr)</code></pre>
 <li><p>接頭辞の <code>new_</code>/<code>new</code> は新しくカウントした症状であることを示す．このデータセットは新しい例しか含まない．定数に相当するため今回は無視する．</p></li>
 <li><p><code>sp</code>/<code>rel</code>/<code>sp</code>/<code>ep</code> は症状を診断した手法を示す．</p></li>
 <li><p><code>m</code>/<code>f</code> は性別を示す．</p></li>
-<li><p><code>014</code>/<code>1524</code>/<code>2535</code>/<code>3544</code>/<code>4554</code>/<code>65</code> は年齢層を示す<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>．</p></li>
+<li><p><code>014</code>/<code>1524</code>/<code>2535</code>/<code>3544</code>/<code>4554</code>/<code>65</code> は年齢層を示す<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>．</p></li>
 </ul>
-<p>今回は <code>names_pattern</code> がしっくりくるだろう．
+<p>今回は <code>names_pattern</code> を使うとしっくりくるだろう．
 <code>names_pattern</code> は <code>extract</code> と似た操作性を持ち，
 <code>()</code> を用いてグループ化した正規表現を指定することで，列名からグループとして各変数を取り出すことができる．</p>
 <pre class="r"><code>who %&gt;% pivot_longer(
@@ -280,12 +307,12 @@ library(readr)</code></pre>
 #&gt; 10 Afghanistan AF    AFG    1980 sp        f      2534     NA
 #&gt; # … with 405,430 more rows</code></pre>
 </div>
-<div id="section-2" class="section level2">
-<h2>一行に複数の観測値が記録されている場合</h2>
-<p>これまで見てきたデータフレームは single value column<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> から成っていた．しかし多くの場合，複数の値の操作がデータ整形における重要な課題になる．このような課題には，整形後のデータフレームに欲しい列名が，整形前のデータフレームの列名の一部になっていることで気付く．この章では，そんなデータをどうやって整形するか見ていく．</p>
+<div id="multiple-observations-per-row" class="section level2">
+<h2>一行に複数の観測値がある場合<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a></h2>
+<p>これまで見てきたデータフレームでは，整形時にセルの値が入る列 (value column) は1つだった．しかし多くの重要な整形問題では，セルの値が複数列に入ることがある．このような問題は，整形後のデータフレームに欲しい列名が，整形前のデータフレームの列名の一部になっていることで発覚する．この節では，そんなデータをどうやって整形するか見ていく．</p>
 <p>以下の例の出典は
 <a href="https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html">data.table vignette</a>
-で，<code>tidyr</code> における解法を閃くきっかけとなったものだ．</p>
+で，<code>tidyr</code> における解法を閃くきっかけとなった．</p>
 <pre class="r"><code>family &lt;- tribble(
   ~family,  ~dob_child1,  ~dob_child2, ~gender_child1, ~gender_child2,
        1L, &quot;1998-11-26&quot;, &quot;2000-01-29&quot;,             1L,             2L,
@@ -304,7 +331,7 @@ family
 #&gt; 3      3 2002-07-11 2004-04-05             2             2
 #&gt; 4      4 2004-10-10 2009-08-27             1             1
 #&gt; 5      5 2000-12-05 2005-02-28             2             1</code></pre>
-<p>ここには子供たちそれぞれの <code>gender</code> と <code>dob</code> (誕生日) の2種類の情報 (または値) が載っている．これらの情報を別々の列に分けなければならい．そこで <code>names_to</code> に複数の値を指定し，<code>names_sep</code> を使って変数の名前を切り分ける．ただし，特別な変数名である <code>.value</code> を使って <code>pivot_longer()</code> に列名の一部が整形後の列になることを伝える．</p>
+<p>ここには子供たちそれぞれの <code>gender</code> と <code>dob</code> (誕生日) の2種類の情報 (または値) が載っている．これらの情報を別々の列に分けなければならい．そこで <code>names_to</code> に複数の値を指定し，<code>names_sep</code> を使って変数の名前を切り分ける．ただし，特別な変数名である <code>.value</code> を使って <code>pivot_longer()</code> に列名の一部が整形後の value column になることを伝える．</p>
 <pre class="r"><code>family %&gt;% 
   pivot_longer(
     -family, 
@@ -382,18 +409,18 @@ pnl %&gt;%
 #&gt; # A tibble: 8 x 6
 #&gt;       x     a     b time       y     z
 #&gt;   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt;
-#&gt; 1     1     1     0 1      2.05      3
-#&gt; 2     1     1     0 2     -0.720    -2
-#&gt; 3     2     1     1 1     -1.18      3
-#&gt; 4     2     1     1 2     -0.900    -2
-#&gt; 5     3     0     1 1     -0.149     3
-#&gt; 6     3     0     1 2     -0.416    -2
-#&gt; 7     4     0     1 1     -0.430     3
-#&gt; 8     4     0     1 2      0.725    -2</code></pre>
+#&gt; 1     1     1     0 1     -1.05      3
+#&gt; 2     1     1     0 2      0.216    -2
+#&gt; 3     2     1     1 1      1.08      3
+#&gt; 4     2     1     1 2     -1.47     -2
+#&gt; 5     3     0     1 1      1.01      3
+#&gt; 6     3     0     1 2      0.205    -2
+#&gt; 7     4     0     1 1     -1.38      3
+#&gt; 8     4     0     1 2     -0.899    -2</code></pre>
 </div>
-<div id="section-3" class="section level2">
+<div id="section-2" class="section level2">
 <h2>列名が重複している場合</h2>
-<p>時には，重複した列名を持つデータセットに遭遇することもあるだろう．一般的には，R でこのようなデータセットを扱うのは難しい．なぜなら，名前で列を参照しようとすると，最初にマッチしたものしか参照できないからだ．列名の重複した tibble を作るには，そのようなデータセットの作成を防ぐ列名の修正機能を明示的に止めておく必要がある．</p>
+<p>列名が重複したデータセットに遭遇することもあるだろう．一般的には R でこのようなデータセットを扱うのは難しい．なぜなら，名前で列を参照しようとすると，最初にマッチしたものしか参照できないからだ．列名の重複した tibble を作るには，そのようなデータセットの作成を防ぐ列名の修正機能を明示的に止めておく必要がある．</p>
 <pre class="r"><code>df &lt;- tibble(x = 1:3, y = 4:6, y = 5:7, y = 7:9, .name_repair = &quot;minimal&quot;)
 df
 #&gt; # A tibble: 3 x 4
@@ -421,14 +448,583 @@ df
 </div>
 <div id="wider" class="section level1">
 <h1>Wider</h1>
-<p><strong><em>以降翻訳作業中</em></strong></p>
+<p><code>pivot_wider()</code> は <code>pivot_longer()</code> の反対で，列数を増やして行数を減らすことで，データセットを<em>広く</em> (wider) する．
+<code>pivot_wider()</code> を使って整然データを作ることは珍しいが，
+<code>pivot_wider()</code> は発表用に要約した表を作る際やデータを他のツールに必要な形式に変換する際に役立つ．</p>
+<div id="capture-recapture-data" class="section level2">
+<h2>Capture-recapture data</h2>
+<p><a href="https://fishsciences.github.io/post/visualizing-fish-encounter-histories/">Myfanwy Johnston</a> による
+<code>fish_encounters</code> データセットは，自動観測機が川を下る魚を検出したかをまとめている．</p>
+<pre class="r"><code>fish_encounters
+#&gt; # A tibble: 114 x 3
+#&gt;    fish  station  seen
+#&gt;    &lt;fct&gt; &lt;fct&gt;   &lt;int&gt;
+#&gt;  1 4842  Release     1
+#&gt;  2 4842  I80_1       1
+#&gt;  3 4842  Lisbon      1
+#&gt;  4 4842  Rstr        1
+#&gt;  5 4842  Base_TD     1
+#&gt;  6 4842  BCE         1
+#&gt;  7 4842  BCW         1
+#&gt;  8 4842  BCE2        1
+#&gt;  9 4842  BCW2        1
+#&gt; 10 4842  MAE         1
+#&gt; # … with 104 more rows</code></pre>
+<p>解析ツールの多くは，このデータが観測機ごとに列を成す形式に従っていることを求める．</p>
+<pre class="r"><code>fish_encounters %&gt;% pivot_wider(names_from = station, values_from = seen)
+#&gt; # A tibble: 19 x 12
+#&gt;    fish  Release I80_1 Lisbon  Rstr Base_TD   BCE   BCW  BCE2  BCW2   MAE
+#&gt;    &lt;fct&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+#&gt;  1 4842        1     1      1     1       1     1     1     1     1     1
+#&gt;  2 4843        1     1      1     1       1     1     1     1     1     1
+#&gt;  3 4844        1     1      1     1       1     1     1     1     1     1
+#&gt;  4 4845        1     1      1     1       1    NA    NA    NA    NA    NA
+#&gt;  5 4847        1     1      1    NA      NA    NA    NA    NA    NA    NA
+#&gt;  6 4848        1     1      1     1      NA    NA    NA    NA    NA    NA
+#&gt;  7 4849        1     1     NA    NA      NA    NA    NA    NA    NA    NA
+#&gt;  8 4850        1     1     NA     1       1     1     1    NA    NA    NA
+#&gt;  9 4851        1     1     NA    NA      NA    NA    NA    NA    NA    NA
+#&gt; 10 4854        1     1     NA    NA      NA    NA    NA    NA    NA    NA
+#&gt; # … with 9 more rows, and 1 more variable: MAW &lt;int&gt;</code></pre>
+<p>このデータセットは，ある魚が観測機に観測された時だけ記録していて，観測されなかった時のことは記録していない (この種のデータでは一般的なことだ)．従って出力は <code>NA</code> で埋められる．しかしこの場合，欠測が魚を<code>見なかった</code>ことを意味すると分かっているので，
+<code>pivot_wider()</code> を使って欠測値を0で埋められる．</p>
+<pre class="r"><code>fish_encounters %&gt;% pivot_wider(
+  names_from = station, 
+  values_from = seen,
+  values_fill = list(seen = 0)
+)
+#&gt; # A tibble: 19 x 12
+#&gt;    fish  Release I80_1 Lisbon  Rstr Base_TD   BCE   BCW  BCE2  BCW2   MAE
+#&gt;    &lt;fct&gt;   &lt;int&gt; &lt;int&gt;  &lt;int&gt; &lt;int&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+#&gt;  1 4842        1     1      1     1       1     1     1     1     1     1
+#&gt;  2 4843        1     1      1     1       1     1     1     1     1     1
+#&gt;  3 4844        1     1      1     1       1     1     1     1     1     1
+#&gt;  4 4845        1     1      1     1       1     0     0     0     0     0
+#&gt;  5 4847        1     1      1     0       0     0     0     0     0     0
+#&gt;  6 4848        1     1      1     1       0     0     0     0     0     0
+#&gt;  7 4849        1     1      0     0       0     0     0     0     0     0
+#&gt;  8 4850        1     1      0     1       1     1     1     0     0     0
+#&gt;  9 4851        1     1      0     0       0     0     0     0     0     0
+#&gt; 10 4854        1     1      0     0       0     0     0     0     0     0
+#&gt; # … with 9 more rows, and 1 more variable: MAW &lt;int&gt;</code></pre>
+</div>
+<div id="aggregation" class="section level2">
+<h2>Aggregation</h2>
+<p>また，<code>pivot_wider()</code> を使って単純な aggregation を行うこともできる．
+Base R に組込まれている <code>warpbreaks</code> データセットを例にとってみよう (出力の見栄えをよくするため tibble に変換しておく):</p>
+<pre class="r"><code>warpbreaks &lt;- warpbreaks %&gt;% as_tibble() %&gt;% select(wool, tension, breaks)
+warpbreaks
+#&gt; # A tibble: 54 x 3
+#&gt;    wool  tension breaks
+#&gt;    &lt;fct&gt; &lt;fct&gt;    &lt;dbl&gt;
+#&gt;  1 A     L           26
+#&gt;  2 A     L           30
+#&gt;  3 A     L           54
+#&gt;  4 A     L           25
+#&gt;  5 A     L           70
+#&gt;  6 A     L           52
+#&gt;  7 A     L           51
+#&gt;  8 A     L           26
+#&gt;  9 A     L           67
+#&gt; 10 A     M           18
+#&gt; # … with 44 more rows</code></pre>
+<p>これは，<code>wool</code> (<code>A</code> と <code>B</code>) と <code>tension</code> (<code>L</code>, <code>M</code>, <code>H</code>) の全組み合わせに対し，
+9回ずつ実験を繰り返した計画実験だ．</p>
+<pre class="r"><code>warpbreaks %&gt;% count(wool, tension)
+#&gt; # A tibble: 6 x 3
+#&gt;   wool  tension     n
+#&gt;   &lt;fct&gt; &lt;fct&gt;   &lt;int&gt;
+#&gt; 1 A     L           9
+#&gt; 2 A     M           9
+#&gt; 3 A     H           9
+#&gt; 4 B     L           9
+#&gt; 5 B     M           9
+#&gt; 6 B     H           9</code></pre>
+<p><code>wool</code> (訳注: factor 型) の水準を列に展開するとどうなるだろうか．</p>
+<pre class="r"><code>warpbreaks %&gt;% pivot_wider(names_from = wool, values_from = breaks)
+#&gt; Warning: Values in `breaks` are not uniquely identified; output will contain list-cols.
+#&gt; * Use `values_fn = list(breaks = list)` to suppress this warning.
+#&gt; * Use `values_fn = list(breaks = length)` to identify where the duplicates arise
+#&gt; * Use `values_fn = list(breaks = summary_fun)` to summarise duplicates
+#&gt; # A tibble: 3 x 3
+#&gt;   tension           A           B
+#&gt;   &lt;fct&gt;   &lt;list&lt;dbl&gt;&gt; &lt;list&lt;dbl&gt;&gt;
+#&gt; 1 L               [9]         [9]
+#&gt; 2 M               [9]         [9]
+#&gt; 3 H               [9]         [9]</code></pre>
+<p>出力される各セルが入力された複数のセルに対応すると警告される．既定の挙動ではリストから成る列 (list-columns) を生成し，各要素は全ての個別の値を格納する．より便利な出力は要約統計量だろう．例えば <code>mean</code> によって，<code>wool</code> と <code>tention</code> の組み合わせごとに平均値を算出できる．</p>
+<pre class="r"><code>warpbreaks %&gt;% 
+  pivot_wider(
+    names_from = wool, 
+    values_from = breaks,
+    values_fn = list(breaks = mean)
+  )
+#&gt; # A tibble: 3 x 3
+#&gt;   tension     A     B
+#&gt;   &lt;fct&gt;   &lt;dbl&gt; &lt;dbl&gt;
+#&gt; 1 L        44.6  28.2
+#&gt; 2 M        24    28.8
+#&gt; 3 H        24.6  18.8</code></pre>
+<p>より複雑な要約は，整形前に行っておくことを薦めるが，単純なものは <code>pivot_wider()</code> で済ましてしまう方が便利なことも多い．</p>
+</div>
+<div id="section-3" class="section level2">
+<h2>複数の変数から複数の列名を生成する</h2>
+<p>あるデータセットが product，country，yearの組み合わせで構成されているとしよう
+(例えば <a href="http://stackoverflow.com/questions/24929954" class="uri">http://stackoverflow.com/questions/24929954</a>)．整然とした形式では以下のようになる．</p>
+<pre class="r"><code>production &lt;- expand_grid(
+    product = c(&quot;A&quot;, &quot;B&quot;), 
+    country = c(&quot;AI&quot;, &quot;EI&quot;), 
+    year = 2000:2014
+  ) %&gt;%
+  filter((product == &quot;A&quot; &amp; country == &quot;AI&quot;) | product == &quot;B&quot;) %&gt;% 
+  mutate(production = rnorm(nrow(.)))
+production
+#&gt; # A tibble: 45 x 4
+#&gt;    product country  year production
+#&gt;    &lt;chr&gt;   &lt;chr&gt;   &lt;int&gt;      &lt;dbl&gt;
+#&gt;  1 A       AI       2000    -0.0974
+#&gt;  2 A       AI       2001    -1.39  
+#&gt;  3 A       AI       2002    -0.586 
+#&gt;  4 A       AI       2003    -0.151 
+#&gt;  5 A       AI       2004    -0.256 
+#&gt;  6 A       AI       2005     0.271 
+#&gt;  7 A       AI       2006    -0.518 
+#&gt;  8 A       AI       2007     0.160 
+#&gt;  9 A       AI       2008     0.959 
+#&gt; 10 A       AI       2009     0.477 
+#&gt; # … with 35 more rows</code></pre>
+<p>このデータを広げて，列ごとに異なる <code>product</code> と <code>country</code> の組み合わせを示すようにしよう．
+<code>names_from</code> に複数の変数を指定するのが鍵だ．</p>
+<pre class="r"><code>production %&gt;% pivot_wider(
+  names_from = c(product, country), 
+  values_from = production
+)
+#&gt; # A tibble: 15 x 4
+#&gt;     year    A_AI   B_AI    B_EI
+#&gt;    &lt;int&gt;   &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;
+#&gt;  1  2000 -0.0974  0.988 -1.70  
+#&gt;  2  2001 -1.39    1.15  -0.826 
+#&gt;  3  2002 -0.586   1.16  -1.00  
+#&gt;  4  2003 -0.151  -0.342  0.574 
+#&gt;  5  2004 -0.256  -1.21   1.26  
+#&gt;  6  2005  0.271  -0.163 -0.935 
+#&gt;  7  2006 -0.518   1.16   0.313 
+#&gt;  8  2007  0.160   0.406 -0.942 
+#&gt;  9  2008  0.959   0.735 -0.0324
+#&gt; 10  2009  0.477  -1.12  -0.554 
+#&gt; # … with 5 more rows</code></pre>
+</div>
+<div id="tidy-census" class="section level2">
+<h2>整然とした国勢調査 (Tidy census)</h2>
+<p><code>us_rent_income</code> データセットは，2017年のアメリカ合衆国における年収と家賃の中央値を州ごとに集計している (the American Community Survey から <a href="https://walkerke.github.io/tidycensus">tidycensus</a> パッケージによって入手した).</p>
+<pre class="r"><code>us_rent_income
+#&gt; # A tibble: 104 x 5
+#&gt;    GEOID NAME       variable estimate   moe
+#&gt;    &lt;chr&gt; &lt;chr&gt;      &lt;chr&gt;       &lt;dbl&gt; &lt;dbl&gt;
+#&gt;  1 01    Alabama    income      24476   136
+#&gt;  2 01    Alabama    rent          747     3
+#&gt;  3 02    Alaska     income      32940   508
+#&gt;  4 02    Alaska     rent         1200    13
+#&gt;  5 04    Arizona    income      27517   148
+#&gt;  6 04    Arizona    rent          972     4
+#&gt;  7 05    Arkansas   income      23789   165
+#&gt;  8 05    Arkansas   rent          709     5
+#&gt;  9 06    California income      29454   109
+#&gt; 10 06    California rent         1358     3
+#&gt; # … with 94 more rows</code></pre>
+<p><code>estimate</code> と <code>moe</code> は両方とも values columns であるため，<code>values_from</code> に指定する．</p>
+<pre class="r"><code>us_rent_income %&gt;% 
+  pivot_wider(names_from = variable, values_from = c(estimate, moe))
+#&gt; # A tibble: 52 x 6
+#&gt;    GEOID NAME             estimate_income estimate_rent moe_income moe_rent
+#&gt;    &lt;chr&gt; &lt;chr&gt;                      &lt;dbl&gt;         &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;
+#&gt;  1 01    Alabama                    24476           747        136        3
+#&gt;  2 02    Alaska                     32940          1200        508       13
+#&gt;  3 04    Arizona                    27517           972        148        4
+#&gt;  4 05    Arkansas                   23789           709        165        5
+#&gt;  5 06    California                 29454          1358        109        3
+#&gt;  6 08    Colorado                   32401          1125        109        5
+#&gt;  7 09    Connecticut                35326          1123        195        5
+#&gt;  8 10    Delaware                   31560          1076        247       10
+#&gt;  9 11    District of Col…           43198          1424        681       17
+#&gt; 10 12    Florida                    25952          1077         70        3
+#&gt; # … with 42 more rows</code></pre>
+<p>出力される列には変数名が自動的に追記されることに注意されたい．</p>
+</div>
+<div id="section-4" class="section level2">
+<h2>連絡帳</h2>
+<p>最後に取り組む問題は
+<a href="https://github.com/jienagu/tidyverse_examples/blob/master/example_long_wide.R">Jiena Gu</a>
+に影響されたものだ．以下のようにウェブサイトからコピー&amp;ペーストした連絡帳があるとしよう．</p>
+<pre class="r"><code>contacts &lt;- tribble(
+  ~field, ~value,
+  &quot;name&quot;, &quot;Jiena McLellan&quot;,
+  &quot;company&quot;, &quot;Toyota&quot;, 
+  &quot;name&quot;, &quot;John Smith&quot;, 
+  &quot;company&quot;, &quot;google&quot;, 
+  &quot;email&quot;, &quot;john@google.com&quot;,
+  &quot;name&quot;, &quot;Huxley Ratcliffe&quot;
+)</code></pre>
+<p>このデータセットではどの値が同じ組になるか分からないことが課題だ．全ての連絡先が名前 (name) から始まっていることに気付けば，この課題を解決できる．
+<code>field</code> 列に “name” が現れる度に固有の id を割り当てよう．</p>
+<pre class="r"><code>contacts &lt;- contacts %&gt;% 
+  mutate(
+    person_id = cumsum(field == &quot;name&quot;)
+  )
+contacts
+#&gt; # A tibble: 6 x 3
+#&gt;   field   value            person_id
+#&gt;   &lt;chr&gt;   &lt;chr&gt;                &lt;int&gt;
+#&gt; 1 name    Jiena McLellan           1
+#&gt; 2 company Toyota                   1
+#&gt; 3 name    John Smith               2
+#&gt; 4 company google                   2
+#&gt; 5 email   john@google.com          2
+#&gt; 6 name    Huxley Ratcliffe         3</code></pre>
+<p>これで各人に対し，固有な識別子が割り当てられたので，<code>field</code> と <code>value</code> を列に展開できる．</p>
+<pre class="r"><code>contacts %&gt;% 
+  pivot_wider(names_from = field, values_from = value)
+#&gt; # A tibble: 3 x 4
+#&gt;   person_id name             company email          
+#&gt;       &lt;int&gt; &lt;chr&gt;            &lt;chr&gt;   &lt;chr&gt;          
+#&gt; 1         1 Jiena McLellan   Toyota  &lt;NA&gt;           
+#&gt; 2         2 John Smith       google  john@google.com
+#&gt; 3         3 Huxley Ratcliffe &lt;NA&gt;    &lt;NA&gt;</code></pre>
+</div>
+</div>
+<div id="longer--wider-" class="section level1">
+<h1>Longer にしてから wider にする</h1>
+<p>一方向に pivot するだけでは問題が解決しないことがある．本節では<code>pivot_longer()</code> と <code>pivot_wider()</code> を組み合わせて複雑な問題を解決する例を紹介する．</p>
+<div id="section-5" class="section level2">
+<h2>世界銀行</h2>
+<p><code>world_bank_pop</code> は世界銀行による2000年から2018年までの各国の人口に関するデータが記録されている．</p>
+<pre class="r"><code>world_bank_pop
+#&gt; # A tibble: 1,056 x 20
+#&gt;    country indicator `2000` `2001` `2002` `2003`  `2004`  `2005`   `2006`
+#&gt;    &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;
+#&gt;  1 ABW     SP.URB.T… 4.24e4 4.30e4 4.37e4 4.42e4 4.47e+4 4.49e+4  4.49e+4
+#&gt;  2 ABW     SP.URB.G… 1.18e0 1.41e0 1.43e0 1.31e0 9.51e-1 4.91e-1 -1.78e-2
+#&gt;  3 ABW     SP.POP.T… 9.09e4 9.29e4 9.50e4 9.70e4 9.87e+4 1.00e+5  1.01e+5
+#&gt;  4 ABW     SP.POP.G… 2.06e0 2.23e0 2.23e0 2.11e0 1.76e+0 1.30e+0  7.98e-1
+#&gt;  5 AFG     SP.URB.T… 4.44e6 4.65e6 4.89e6 5.16e6 5.43e+6 5.69e+6  5.93e+6
+#&gt;  6 AFG     SP.URB.G… 3.91e0 4.66e0 5.13e0 5.23e0 5.12e+0 4.77e+0  4.12e+0
+#&gt;  7 AFG     SP.POP.T… 2.01e7 2.10e7 2.20e7 2.31e7 2.41e+7 2.51e+7  2.59e+7
+#&gt;  8 AFG     SP.POP.G… 3.49e0 4.25e0 4.72e0 4.82e0 4.47e+0 3.87e+0  3.23e+0
+#&gt;  9 AGO     SP.URB.T… 8.23e6 8.71e6 9.22e6 9.77e6 1.03e+7 1.09e+7  1.15e+7
+#&gt; 10 AGO     SP.URB.G… 5.44e0 5.59e0 5.70e0 5.76e0 5.75e+0 5.69e+0  4.92e+0
+#&gt; # … with 1,046 more rows, and 11 more variables: `2007` &lt;dbl&gt;,
+#&gt; #   `2008` &lt;dbl&gt;, `2009` &lt;dbl&gt;, `2010` &lt;dbl&gt;, `2011` &lt;dbl&gt;, `2012` &lt;dbl&gt;,
+#&gt; #   `2013` &lt;dbl&gt;, `2014` &lt;dbl&gt;, `2015` &lt;dbl&gt;, `2016` &lt;dbl&gt;, `2017` &lt;dbl&gt;</code></pre>
+<p>このデータセットを，それぞれの変数が一つの列に納ままるように整形しよう．この段階ではどのような手順を踏めばいいか分からないが，まず最も明らかな問題である，複数列にまたがる <code>yaer</code> を修正しよう．</p>
+<pre class="r"><code>pop2 &lt;- world_bank_pop %&gt;% 
+  pivot_longer(`2000`:`2017`, names_to = &quot;year&quot;, values_to = &quot;value&quot;)
+pop2
+#&gt; # A tibble: 19,008 x 4
+#&gt;    country indicator   year  value
+#&gt;    &lt;chr&gt;   &lt;chr&gt;       &lt;chr&gt; &lt;dbl&gt;
+#&gt;  1 ABW     SP.URB.TOTL 2000  42444
+#&gt;  2 ABW     SP.URB.TOTL 2001  43048
+#&gt;  3 ABW     SP.URB.TOTL 2002  43670
+#&gt;  4 ABW     SP.URB.TOTL 2003  44246
+#&gt;  5 ABW     SP.URB.TOTL 2004  44669
+#&gt;  6 ABW     SP.URB.TOTL 2005  44889
+#&gt;  7 ABW     SP.URB.TOTL 2006  44881
+#&gt;  8 ABW     SP.URB.TOTL 2007  44686
+#&gt;  9 ABW     SP.URB.TOTL 2008  44375
+#&gt; 10 ABW     SP.URB.TOTL 2009  44052
+#&gt; # … with 18,998 more rows</code></pre>
+<p>次に， <code>indicator</code> 列を見てみよう．</p>
+<pre class="r"><code>pop2 %&gt;% count(indicator)
+#&gt; # A tibble: 4 x 2
+#&gt;   indicator       n
+#&gt;   &lt;chr&gt;       &lt;int&gt;
+#&gt; 1 SP.POP.GROW  4752
+#&gt; 2 SP.POP.TOTL  4752
+#&gt; 3 SP.URB.GROW  4752
+#&gt; 4 SP.URB.TOTL  4752</code></pre>
+<p><code>SP.POP.GROW</code> は人口増加を, <code>SP.POP.TOTL</code> は総人口を, そして <code>SP.URB.*</code> は都会における人口増加と総人口を示す．これらを観測値が全域から得たものか都会から得たものか示す <code>area</code> 列と，観測値が総人口と人口増加のどちらを記録しているか示す <code>variable</code> 列の2列に分けよう．</p>
+<pre class="r"><code>pop3 &lt;- pop2 %&gt;% 
+  separate(indicator, c(NA, &quot;area&quot;, &quot;variable&quot;))
+pop3
+#&gt; # A tibble: 19,008 x 5
+#&gt;    country area  variable year  value
+#&gt;    &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt;
+#&gt;  1 ABW     URB   TOTL     2000  42444
+#&gt;  2 ABW     URB   TOTL     2001  43048
+#&gt;  3 ABW     URB   TOTL     2002  43670
+#&gt;  4 ABW     URB   TOTL     2003  44246
+#&gt;  5 ABW     URB   TOTL     2004  44669
+#&gt;  6 ABW     URB   TOTL     2005  44889
+#&gt;  7 ABW     URB   TOTL     2006  44881
+#&gt;  8 ABW     URB   TOTL     2007  44686
+#&gt;  9 ABW     URB   TOTL     2008  44375
+#&gt; 10 ABW     URB   TOTL     2009  44052
+#&gt; # … with 18,998 more rows</code></pre>
+<p>最後に <code>variable</code> 列と <code>value</code> 列を展開し，<code>TOTL</code> 列と <code>GROW</code> 列にしよう．</p>
+<pre class="r"><code>pop3 %&gt;% 
+  pivot_wider(names_from = variable, values_from = value)
+#&gt; # A tibble: 9,504 x 5
+#&gt;    country area  year   TOTL    GROW
+#&gt;    &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt;   &lt;dbl&gt;
+#&gt;  1 ABW     URB   2000  42444  1.18  
+#&gt;  2 ABW     URB   2001  43048  1.41  
+#&gt;  3 ABW     URB   2002  43670  1.43  
+#&gt;  4 ABW     URB   2003  44246  1.31  
+#&gt;  5 ABW     URB   2004  44669  0.951 
+#&gt;  6 ABW     URB   2005  44889  0.491 
+#&gt;  7 ABW     URB   2006  44881 -0.0178
+#&gt;  8 ABW     URB   2007  44686 -0.435 
+#&gt;  9 ABW     URB   2008  44375 -0.698 
+#&gt; 10 ABW     URB   2009  44052 -0.731 
+#&gt; # … with 9,494 more rows</code></pre>
+</div>
+<div id="section-6" class="section level2">
+<h2>複数回答</h2>
+<p><a href="https://github.com/MaximeWack">Maxime Wack</a> による提案を受けて <a href="https://github.com/tidyverse/tidyr/issues/384" class="uri">https://github.com/tidyverse/tidyr/issues/384</a>)，よくある複数回答データをどのように扱えばいいかを最後の例としよう．複数回答データは以下のような形式であることが多い．</p>
+<pre class="r"><code>multi &lt;- tribble(
+  ~id, ~choice1, ~choice2, ~choice3,
+  1, &quot;A&quot;, &quot;B&quot;, &quot;C&quot;,
+  2, &quot;C&quot;, &quot;B&quot;,  NA,
+  3, &quot;D&quot;,  NA,  NA,
+  4, &quot;B&quot;, &quot;D&quot;,  NA
+)</code></pre>
+<p>しかし，実際の順番は重要ではなく，id ごとの解答内容を示したいとしよう<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>．望んだ形式への変換は2つの操作で完了する．まず，データを longer 形式にし，自明な <code>NA</code> を消去し，選択肢から回答を得られたかを示す列を追加する．</p>
+<pre class="r"><code>multi2 &lt;- multi %&gt;% 
+  pivot_longer(-id, values_drop_na = TRUE) %&gt;% 
+  mutate(checked = TRUE)
+multi2
+#&gt; # A tibble: 8 x 4
+#&gt;      id name    value checked
+#&gt;   &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt; &lt;lgl&gt;  
+#&gt; 1     1 choice1 A     TRUE   
+#&gt; 2     1 choice2 B     TRUE   
+#&gt; 3     1 choice3 C     TRUE   
+#&gt; 4     2 choice1 C     TRUE   
+#&gt; 5     2 choice2 B     TRUE   
+#&gt; 6     3 choice1 D     TRUE   
+#&gt; 7     4 choice1 B     TRUE   
+#&gt; 8     4 choice2 D     TRUE</code></pre>
+<p>次にデータを <code>wider</code> 型にし，無回答部分を <code>FALSE</code> で埋める．</p>
+<pre class="r"><code>multi2 %&gt;% 
+  pivot_wider(
+    id_cols = id,
+    names_from = value, 
+    values_from = checked, 
+    values_fill = list(checked = FALSE)
+  )
+#&gt; # A tibble: 4 x 5
+#&gt;      id A     B     C     D    
+#&gt;   &lt;dbl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt;
+#&gt; 1     1 TRUE  TRUE  TRUE  FALSE
+#&gt; 2     2 FALSE TRUE  TRUE  FALSE
+#&gt; 3     3 FALSE FALSE FALSE TRUE 
+#&gt; 4     4 FALSE TRUE  FALSE TRUE</code></pre>
+</div>
+</div>
+<div id="manual-specs" class="section level1">
+<h1>Manual specs</h1>
+<p><code>pivot_longer()</code> と <code>pivot_wider()</code> の引数は，様々なデータセットの整形を可能とする．しかし人々がデータ構造に対して発揮する想像力は無尽蔵にも見えるので，一見 <code>pivot_longer()</code> と <code>pivot_wider()</code> でもどうしようもない問題に遭遇することもありえる．より柔軟な整形を行うためには，仕様となるデータフレームを作り，厳格に列名ごとに格納されるデータがどのようにあるべきか，あるいはある種のデータが格納される列の名前がどのようにあるべきか，決めておける．本節では，どのようにデータ構造の仕様を定めればよいか紹介し，
+<code>pivot_longer()</code> と <code>pivot_wider()</code> が不十分な場合にその仕様をどう示せばいいのかを紹介する．</p>
+<div id="longer-1" class="section level2">
+<h2>Longer</h2>
+<p>仕様の策定方法を学ぶにあたって， <code>relig_income</code> データセットを用いたもっとも単純な整形をやり直してみよう．今回は整形に2段階の手順を踏む．まず，仕様となるオブジェクトを <code>pivot_longer_spec()</code> を用いて作り，整形時に仕様を利用する．</p>
+<pre class="r"><code>spec &lt;- relig_income %&gt;% pivot_longer_spec(
+  cols = -religion, 
+  names_to = &quot;income&quot;,
+  values_to = &quot;count&quot;
+)
+relig_income %&gt;% pivot_longer(spec = spec)
+#&gt; # A tibble: 180 x 3
+#&gt;    religion income             count
+#&gt;    &lt;chr&gt;    &lt;chr&gt;              &lt;dbl&gt;
+#&gt;  1 Agnostic &lt;$10k                 27
+#&gt;  2 Agnostic $10-20k               34
+#&gt;  3 Agnostic $20-30k               60
+#&gt;  4 Agnostic $30-40k               81
+#&gt;  5 Agnostic $40-50k               76
+#&gt;  6 Agnostic $50-75k              137
+#&gt;  7 Agnostic $75-100k             122
+#&gt;  8 Agnostic $100-150k            109
+#&gt;  9 Agnostic &gt;150k                 84
+#&gt; 10 Agnostic Don&#39;t know/refused    96
+#&gt; # … with 170 more rows</code></pre>
+<p>(コードは増えたが結果は以前と同じだ．この場合， <code>spec</code> を定める必要はないが，用例を示す単純な例として紹介した．)</p>
+<p><code>spec</code> の中身はデータフレームで，各行は元のデータフレームの各列に対応しており<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a>，
+<code>.</code> から始まる2つの特別な列を持つ．</p>
+<ul>
+<li><code>.name</code> は列名を示す．</li>
+<li><code>.value</code> はセルの移動先となる列の名前を示す．</li>
+</ul>
+<pre class="r"><code>spec
+#&gt; # A tibble: 10 x 3
+#&gt;    .name              .value income            
+#&gt;    &lt;chr&gt;              &lt;chr&gt;  &lt;chr&gt;             
+#&gt;  1 &lt;$10k              count  &lt;$10k             
+#&gt;  2 $10-20k            count  $10-20k           
+#&gt;  3 $20-30k            count  $20-30k           
+#&gt;  4 $30-40k            count  $30-40k           
+#&gt;  5 $40-50k            count  $40-50k           
+#&gt;  6 $50-75k            count  $50-75k           
+#&gt;  7 $75-100k           count  $75-100k          
+#&gt;  8 $100-150k          count  $100-150k         
+#&gt;  9 &gt;150k              count  &gt;150k             
+#&gt; 10 Don&#39;t know/refused count  Don&#39;t know/refused</code></pre>
+</div>
+<div id="wider-1" class="section level2">
+<h2>Wider</h2>
+<p>以下では <code>us_rent_income</code> を <code>pivot_wider()</code> によって広げている．良い結果が得られているが改善の余地があるだろう．</p>
+<pre class="r"><code>us_rent_income %&gt;% 
+  pivot_wider(names_from = variable, values_from = c(estimate, moe))
+#&gt; # A tibble: 52 x 6
+#&gt;    GEOID NAME             estimate_income estimate_rent moe_income moe_rent
+#&gt;    &lt;chr&gt; &lt;chr&gt;                      &lt;dbl&gt;         &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;
+#&gt;  1 01    Alabama                    24476           747        136        3
+#&gt;  2 02    Alaska                     32940          1200        508       13
+#&gt;  3 04    Arizona                    27517           972        148        4
+#&gt;  4 05    Arkansas                   23789           709        165        5
+#&gt;  5 06    California                 29454          1358        109        3
+#&gt;  6 08    Colorado                   32401          1125        109        5
+#&gt;  7 09    Connecticut                35326          1123        195        5
+#&gt;  8 10    Delaware                   31560          1076        247       10
+#&gt;  9 11    District of Col…           43198          1424        681       17
+#&gt; 10 12    Florida                    25952          1077         70        3
+#&gt; # … with 42 more rows</code></pre>
+<p>手製の仕様 (manual spec) を使って列名を <code>rent</code>，<code>rent_moe</code>，<code>income</code>，<code>income_moe</code> に改善しよう．現在の仕様は以下の通りだ．</p>
+<pre class="r"><code>us_rent_income %&gt;% 
+  pivot_wider_spec(names_from = variable, values_from = c(estimate, moe))
+#&gt; # A tibble: 4 x 3
+#&gt;   .name           .value   variable
+#&gt;   &lt;chr&gt;           &lt;chr&gt;    &lt;chr&gt;   
+#&gt; 1 estimate_income estimate income  
+#&gt; 2 estimate_rent   estimate rent    
+#&gt; 3 moe_income      moe      income  
+#&gt; 4 moe_rent        moe      rent</code></pre>
+<p>まず，<code>.value</code> と <code>variable</code> の組み合わせを全て作り，注意深く列名を決める<a href="#fn7" class="footnote-ref" id="fnref7"><sup>7</sup></a>．</p>
+<pre class="r"><code>spec &lt;- us_rent_income %&gt;% 
+  expand(variable, .value = c(&quot;estimate&quot;, &quot;moe&quot;)) %&gt;% 
+  mutate(
+    .name = paste0(variable, ifelse(.value == &quot;moe&quot;, &quot;_moe&quot;, &quot;&quot;))
+  )
+spec
+#&gt; # A tibble: 4 x 3
+#&gt;   variable .value   .name     
+#&gt;   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;     
+#&gt; 1 income   estimate income    
+#&gt; 2 income   moe      income_moe
+#&gt; 3 rent     estimate rent      
+#&gt; 4 rent     moe      rent_moe</code></pre>
+<p>この仕様を <code>pivot_wider()</code> に与えると，望み通りのデータフレームが得られる．</p>
+<pre class="r"><code>us_rent_income %&gt;% pivot_wider(spec = spec)
+#&gt; # A tibble: 52 x 6
+#&gt;    GEOID NAME                 income income_moe  rent rent_moe
+#&gt;    &lt;chr&gt; &lt;chr&gt;                 &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
+#&gt;  1 01    Alabama               24476        136   747        3
+#&gt;  2 02    Alaska                32940        508  1200       13
+#&gt;  3 04    Arizona               27517        148   972        4
+#&gt;  4 05    Arkansas              23789        165   709        5
+#&gt;  5 06    California            29454        109  1358        3
+#&gt;  6 08    Colorado              32401        109  1125        5
+#&gt;  7 09    Connecticut           35326        195  1123        5
+#&gt;  8 10    Delaware              31560        247  1076       10
+#&gt;  9 11    District of Columbia  43198        681  1424       17
+#&gt; 10 12    Florida               25952         70  1077        3
+#&gt; # … with 42 more rows</code></pre>
+</div>
+<div id="by-hand" class="section level2">
+<h2>By hand</h2>
+<p>時には仕様を算出させるのが不可能な場合や不都合な場合があり，自前 (“by hand”) で仕様を定めた方が都合がいいこともある．
+<code>construction</code> データを例に見てみよう．このデータは下記 URL の表5 “completions” を少し改造したものだ <a href="https://www.census.gov/construction/nrc/index.html" class="uri">https://www.census.gov/construction/nrc/index.html</a>．</p>
+<pre class="r"><code>construction
+#&gt; # A tibble: 9 x 9
+#&gt;    Year Month `1 unit` `2 to 4 units` `5 units or mor… Northeast Midwest
+#&gt;   &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;lgl&gt;                     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
+#&gt; 1  2018 Janu…      859 NA                          348       114     169
+#&gt; 2  2018 Febr…      882 NA                          400       138     160
+#&gt; 3  2018 March      862 NA                          356       150     154
+#&gt; 4  2018 April      797 NA                          447       144     196
+#&gt; 5  2018 May        875 NA                          364        90     169
+#&gt; 6  2018 June       867 NA                          342        76     170
+#&gt; 7  2018 July       829 NA                          360       108     183
+#&gt; 8  2018 Augu…      939 NA                          286        90     205
+#&gt; 9  2018 Sept…      835 NA                          304       117     175
+#&gt; # … with 2 more variables: South &lt;dbl&gt;, West &lt;dbl&gt;</code></pre>
+<p>このようなデータは政府機関が発行するものにありがちで，列名が色々な変数に属している．今回の場合は色々なユニットごと (1, 2–4, 5+) に要約した列と，国内の地方ごと (NE, NW, midwest, S, W) の要約した列がある．このようなデータを整形する際の仕様は tibble を使って簡単に記述できる．</p>
+<pre class="r"><code>spec &lt;- tribble(
+  ~.name,            ~.value, ~units,  ~region,     
+  &quot;1 unit&quot;,          &quot;n&quot;,     &quot;1&quot;,     NA,          
+  &quot;2 to 4 units&quot;,    &quot;n&quot;,     &quot;2-4&quot;,   NA,          
+  &quot;5 units or more&quot;, &quot;n&quot;,     &quot;5+&quot;,    NA,          
+  &quot;Northeast&quot;,       &quot;n&quot;,     NA,      &quot;Northeast&quot;, 
+  &quot;Midwest&quot;,         &quot;n&quot;,     NA,      &quot;Midwest&quot;,   
+  &quot;South&quot;,           &quot;n&quot;,     NA,      &quot;South&quot;,     
+  &quot;West&quot;,            &quot;n&quot;,     NA,      &quot;West&quot;,      
+)</code></pre>
+<p>この仕様を用いると，以下のような longer な形式になる．</p>
+<pre class="r"><code>construction %&gt;% pivot_longer(spec = spec)
+#&gt; # A tibble: 63 x 5
+#&gt;     Year Month    units region        n
+#&gt;    &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt; &lt;chr&gt;     &lt;dbl&gt;
+#&gt;  1  2018 January  1     &lt;NA&gt;        859
+#&gt;  2  2018 January  2-4   &lt;NA&gt;         NA
+#&gt;  3  2018 January  5+    &lt;NA&gt;        348
+#&gt;  4  2018 January  &lt;NA&gt;  Northeast   114
+#&gt;  5  2018 January  &lt;NA&gt;  Midwest     169
+#&gt;  6  2018 January  &lt;NA&gt;  South       596
+#&gt;  7  2018 January  &lt;NA&gt;  West        339
+#&gt;  8  2018 February 1     &lt;NA&gt;        882
+#&gt;  9  2018 February 2-4   &lt;NA&gt;         NA
+#&gt; 10  2018 February 5+    &lt;NA&gt;        400
+#&gt; # … with 53 more rows</code></pre>
+<p><code>units</code> 変数と <code>region</code> 変数には重複するとこがないことに注意されたい．今回の場合はデータを独立した二つの表に分けるのが最も自然だ．</p>
+</div>
+<div id="section-7" class="section level2">
+<h2>理論</h2>
+<p><code>spec</code> の良いところは，<code>pivot_longer()</code> と <code>pivot_wider()</code> に同じものを与えられることだ．これにより，二つの操作の対称性が明確になる．</p>
+<pre class="r"><code>construction %&gt;% 
+  pivot_longer(spec = spec) %&gt;% 
+  pivot_wider(spec = spec)
+#&gt; # A tibble: 9 x 9
+#&gt;    Year Month `1 unit` `2 to 4 units` `5 units or mor… Northeast Midwest
+#&gt;   &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt;          &lt;dbl&gt;            &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
+#&gt; 1  2018 Janu…      859             NA              348       114     169
+#&gt; 2  2018 Febr…      882             NA              400       138     160
+#&gt; 3  2018 March      862             NA              356       150     154
+#&gt; 4  2018 April      797             NA              447       144     196
+#&gt; 5  2018 May        875             NA              364        90     169
+#&gt; 6  2018 June       867             NA              342        76     170
+#&gt; 7  2018 July       829             NA              360       108     183
+#&gt; 8  2018 Augu…      939             NA              286        90     205
+#&gt; 9  2018 Sept…      835             NA              304       117     175
+#&gt; # … with 2 more variables: South &lt;dbl&gt;, West &lt;dbl&gt;</code></pre>
+<p>整形の仕様を定めることで，<code>pivot_longer(df, spec = spec)</code> がどのように <code>df</code> を整形するかより明瞭で厳密にできる．出力結果は <code>nrow(df) * nrow(spec)</code> に相当する行数と,
+<code>ncol(df) - nrow(spec) + ncol(spec) - 2</code> に相当する列数を持つ．</p>
+</div>
 </div>
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p>訳注: ヘルプを参照するに，ptype は prototype の略称のようだ．本来のタイプくらいの意味合いだろうか．<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
-<li id="fn2"><p>訳注: <code>014</code>なら0歳から14歳，<code>1524</code>なら15歳から24歳であることを示す．<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
-<li id="fn3"><p>訳注: 適訳が分からない．single な value column なのか single value な column なのか．「結果の」 value column が single か multiple かという違いで語られているとの説あり
-(<a href="https://twitter.com/yutannihilation/status/1144845335467970560" class="uri">https://twitter.com/yutannihilation/status/1144845335467970560</a>)．<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn1"><p>訳注: <code>tidyverse</code> を vignette で利用すると，最低でも <code>Suggests</code> に <code>tidyverse</code>
+を加えなければならない．しかし <code>tidyverse</code> は多くのパッケージを纏めたメタパッケージなので，不要なパッケージにも依存することになり，パッケージがいたずらに肥大化するのでよくない．参考: “The tidyverse is for EDA, not packages”
+<a href="https://www.tidyverse.org/articles/2018/06/tidyverse-not-for-packages/" class="uri">https://www.tidyverse.org/articles/2018/06/tidyverse-not-for-packages/</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>訳注: ptype は prototype の略称．本来のタイプくらいの意味合いだろうか．
+<a href="https://twitter.com/yutannihilation">@yutannihilation</a> 氏によるスライドも参考にして欲しい．
+<a href="https://speakerdeck.com/yutannihilation/tidyr-pivot?slide=51" class="uri">https://speakerdeck.com/yutannihilation/tidyr-pivot?slide=51</a><a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p>訳注: <code>014</code>なら0歳から14歳，<code>1524</code>なら15歳から24歳であることを示す．<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn4"><p>訳注: 直感的な見出しではないと思う．かと言って良い対案も思いついていない．暫定版は整形対象となる列の値に複数種の変数がある場合，くらいだろうか．<a href="#fnref4" class="footnote-back">↩︎</a></p></li>
+<li id="fn5"><p>訳注: 原文は “you’d prefer to have the individual questions in the columns.” であるが，“questions” ではなく “answers” が正しい気がする．<a href="#fnref5" class="footnote-back">↩︎</a></p></li>
+<li id="fn6"><p>訳注: 原文では元のデータフレームとまで書いていないが伝わらないと思ったので追記した．
+<code>pivot_wider_spec()</code> の場合は <code>.name</code> 列の値が出力のデータフレームの各列に対応するので注意．<a href="#fnref6" class="footnote-back">↩︎</a></p></li>
+<li id="fn7"><p>訳注: <code>expand %&gt;% mutate</code> よりも <code>pivot_wider_spec %&gt;% mutate</code> の方が，行や列の順序が <code>pivot_wider_spec</code> の結果と整合的で比べやすく，安全だと思う (<a href="https://github.com/tidyverse/tidyr/issues/666">#666</a>)．</p>
+<pre class="r"><code>us_rent_income %&gt;%
+  pivot_wider_spec(names_from = variable, values_from = c(estimate, moe)) %&gt;%
+  mutate(.name = paste0(variable, ifelse(.value == &quot;moe&quot;, &quot;_moe&quot;, &quot;&quot;)))
+#&gt; # A tibble: 4 x 3
+#&gt;   .name      .value   variable
+#&gt;   &lt;chr&gt;      &lt;chr&gt;    &lt;chr&gt;   
+#&gt; 1 income     estimate income  
+#&gt; 2 rent       estimate rent    
+#&gt; 3 income_moe moe      income  
+#&gt; 4 rent_moe   moe      rent</code></pre>
+<a href="#fnref7" class="footnote-back">↩︎</a></li>
 </ol>
 </div>
