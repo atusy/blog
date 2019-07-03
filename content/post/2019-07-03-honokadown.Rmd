@@ -8,10 +8,12 @@ tags: [rmarkdown, bootstrap, honoka]
 highlightjs:
   - yaml
 summary: |
-  `rmarkdown::html_document` に Honoka という 日本語表示を最適化した Bootstrap テーマをあてたかった．
+  `rmarkdown::html_document` に Honoka という 日本語表示を最適化した Bootstrap テーマをあてたかった． 今のところ，まともに使おうとすると本家と Honoka の `bootstrap.min.css` を両方取り込むことになって非効率．
 ---
 
 `rmarkdown::html_document` に Honoka という 日本語表示を最適化した Bootstrap テーマをあてたかった．
+
+今のところ，まともに使おうとすると本家と Honoka の `bootstrap.min.css` を両方取り込むことになって非効率．
 
 # Honoka について
 
