@@ -5,6 +5,7 @@ date: '2019-07-03'
 slug: rmd-line-num-in-pandoc-2-7-3
 categories: [R]
 tags: [rmarkdown, bookdown, pandoc]
+summary: Pandoc 2.7.3 を使うと bookdown におけるコードブロックの行番号がちょっと楽になりそうな一方で問題もあるのでメモ．bookdown に依存している pagedown や blogdown も関係しうる．
 ---
 
 `Pandoc 2.7.3` を使うと `bookdown` におけるコードブロックの行番号がちょっと楽になりそうな一方で問題もあるのでメモ．
@@ -12,6 +13,8 @@ tags: [rmarkdown, bookdown, pandoc]
 `RStudio v1.2.1555-1 preview release` では `Pandoc 2.7.2` がバンドルされてるのでわざわざ最新の `Pandoc` を使っている人は少ないだろう．
 
 もし最新版を使いたい人は後述の通り，バージョンアップの影響で `bookdown 0.11.1` がエンバグされるので，GitHub 版を使って欲しい．
+
+以下の話は `bookdown` だけではなく，`bookdown` に依存している `pagedown` や `blogdown` も関係しうる．
 
 # Pandoc 2.7.3 が bookdown に与えた影響
 
