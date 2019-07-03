@@ -1,0 +1,164 @@
+---
+title: Pandoc 2.7.3 を使うと bookdown におけるコードブロックの行番号がちょっと楽になりそう
+author: ~
+date: '2019-07-03'
+slug: rmd-line-num-in-pandoc-2-7-3
+categories: [R]
+tags: [rmarkdown, bookdown, pandoc]
+---
+
+`Pandoc 2.7.3` を使うと `bookdown` におけるコードブロックの行番号がちょっと楽になりそうな一方で問題もあるのでメモ．
+
+`RStudio v1.2.1555-1 preview release` では `Pandoc 2.7.2` がバンドルされてるのでわざわざ最新の `Pandoc` を使っている人は少ないだろう．
+
+もし最新版を使いたい人は後述の通り，バージョンアップの影響で `bookdown 0.11.1` がエンバグされるので，GitHub 版を使って欲しい．
+
+# Pandoc 2.7.3 が bookdown に与えた影響
+
+## コードブロックの出力が変わった
+
+`Pandoc` のバージョンアップに伴い．シンタックスハイライトに利用している `skylighting` も `0.7.7` から `0.8.1` 引き上げられた影響だ．
+
+私は `bookdown` の [issue #733](https://github.com/rstudio/bookdown/issues/733#issuecomment-506913254) で知らされた，
+本家の `Pandoc` の[リリースノート](https://pandoc.org/releases.html#pandoc-2.7.3-11-june-2019)には一切記載がないのは酷い．
+
+バージョンアップに伴う変更はいくつもあるが， bookdown に影響したのは，
+
+- コードブロックの行を `<a>` タグではなく `<span>` タグで囲うようにした
+- 行番号を CSS カウンタによってつけるようにした
+- `<a>` タグから `sourceLine` クラスを除去した
+
+というもの (skylighting の[変更履歴](https://github.com/jgm/skylighting/blob/master/changelog.md#08----2019-05-27)参照)．
+
+これにより，以下のチャンクが
+
+````r
+```{`r "r}"`
+print("hello")
+```
+````
+
+`Pandoc 2.7.2` では
+
+```html
+<div class="sourceCode" id="cb1">
+    <pre class="sourceCode r">
+        <code class="sourceCode r">
+            <a class="sourceLine" id="cb1-1" title="1">
+                <span class="kw">print</span>
+                (<span class="st">&quot;hello&quot;</span>)
+            </a>
+        </code>
+    </pre>
+</div>
+```
+
+だったところ，`Pandoc 2.7.3` では
+
+```html
+<div class="sourceCode" id="cb1">
+    <pre class="sourceCode r">
+        <code class="sourceCode r">
+            <span id="cb1-1">
+                <a href="#cb1-1"></a>
+                <span class="kw">print</span>
+                (<span class="st">&quot;hello&quot;</span>)
+            </span>
+        </code>
+    </pre>
+</div>
+```
+
+になった．
+
+## bookdown 0.11.1 がエンバグされた
+
+`bookdown` が提供する HTML 系の出力 (`html_document2`, `html_book`, `html_chapters`, `gitbook`) では，
+内部で `clean_pandoc2_highlight_tags()` というものが実行される．
+これは，上述の HTML 出力されたコードブロックにおいて，一番外側の`<div>` タグと，各行を囲む `sourceLine` クラスの `<a>` タグを除去するものだ ([ソースコード](https://github.com/rstudio/bookdown/blob/364092ad5c1baf6740711d4a3c4d68c024291bb3/R/html.R#L1012-L1018))．
+
+おそらく `gitbook` 向けの機能らしいのだが，詳しいところは知らない．
+
+除去は正規表現を利用した置換により行われていたが， `Pandoc 2.7.2` 以前に合わせていたため， `Pandoc 2.7.3` では `</div>` が除去されずに残ってしまった．
+
+この問題は YiHui が修正を [commit](https://github.com/rstudio/bookdown/commit/364092ad5c1baf6740711d4a3c4d68c024291bb3) してくれた．
+
+## bookdown (開発版) で行番号表示が簡単になりかけてる
+
+### YAML を弄ることなく行番号を表示できるようになった
+
+`Pandoc 2.7.2` 以前を使っている場合，行番号の表示には 
+
+1. YAML フロントマターで `clean_highlight_tags: false` を指定
+1. YAML フロントマターで `highlight: pygments` などを指定
+1. チャンクオプションで `class.source = "numberLines"` を指定
+
+が必要がだった．
+
+中でも**1**は行番号表示の根幹を担う `<a>` タグを内部関数 `clean_pandoc2_highlight_tags()` が除去してしまうのを役割があった．
+
+しかし，`Pandoc 2.7.3` では `<a>` タグが `sourceLine` クラスを持たないため，`clean_highlight_tags: true` でも `<a>` タグは除去されなくなった．
+
+というわけで，**2**と**3**を設定すれば，行番号を表示できるようになった．
+
+わざわざ `clean_highlight_tags: false` できる機能を PR したのにショックだが，まあこんなこともある ([#706](https://github.com/rstudio/bookdown/pull/706))．
+
+### 行番号を使う場合，CSS の指定が必要な場合がある
+
+チャンクオプションで一箇所でも `class.source = "numberLines"` を指定すると，`Pandoc` は行番号表示に関連する CSS を追加する．
+
+その中には
+
+```css
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+```
+
+というものがあり，これが `html_document2` で使われている `bootstrap.min.css` の
+
+```css
+pre {margin: 0 0 10px}
+```
+
+とバッティングする．
+
+`clean_highlight_tags: false` を指定していれば，マージンの幅がちょっと変わったな，くらいで済む．
+
+しかし，既定値の `true` のまま，コードブロックに行番号を表示させようとすると， `clean_pandoc2_highlight_tags` により，`<div>` タグが除去されてしまうせいで，
+
+```css
+pre.sourceCode { margin: 0; }
+```
+
+しか適用されず，結果として隣接する `<pre></pre>` が密着してしまう．
+
+![](/images/posts/2019-07-03-rmd-line-num-in-pandoc-2-7-3/html-document2.png)
+
+これを避けるには
+
+````
+```{`r "css}"`
+pre.sourceCode {margin: 0 0 10px}
+```
+````
+
+といった具合に CSS をあてるチャンクを追加しておくが，外部に CSS を書いてYAMLフロントマターで取り込む必要がある．
+
+ユーザー指定の CSS は Pandoc が追加するものよりも後に読み込まれるので，優先度も高い．
+
+また，`gitbook` では行番号の表示位置が悪い問題があり，これも CSS でうまく直してやる必要がある．
+
+![](/images/posts/2019-07-03-rmd-line-num-in-pandoc-2-7-3/gitbook.png)
+
+
+# PR の方針
+
+長くなったが最近の bookdown におけるコードブロックの表示の変化をざっと振り返った．
+
+`bookdown` における様々な HTML 出力において，CSS の更新が必要と分かったので，PR していきたいと考えている．
+
+トリッキーになりそうなのは`bookdown::html_document2` は `rmarkdown::html_document` とテンプレートを共有していることだ．
+`bookdown::html_document2` の時だけ CSS を変更するようにうまく調整しなければならない．
+
+それはそうと，CSS に手を出すなら先に `rmarkdown` パッケージにおける CSS を修正した方がいいところがある．
+これについてはまた後日語ろう……．

@@ -1,0 +1,112 @@
+---
+title: Pandoc 2.7.3 を使うと bookdown におけるコードブロックの行番号がちょっと楽になりそう
+author: ~
+date: '2019-07-03'
+slug: rmd-line-num-in-pandoc-2-7-3
+categories: [R]
+tags: [rmarkdown, bookdown, pandoc]
+---
+
+
+
+<p><code>Pandoc 2.7.3</code> を使うと <code>bookdown</code> におけるコードブロックの行番号がちょっと楽になりそうな一方で問題もあるのでメモ．</p>
+<p><code>RStudio v1.2.1555-1 preview release</code> では <code>Pandoc 2.7.2</code> がバンドルされてるのでわざわざ最新の <code>Pandoc</code> を使っている人は少ないだろう．</p>
+<p>もし最新版を使いたい人は後述の通り，バージョンアップの影響で <code>bookdown 0.11.1</code> がエンバグされるので，GitHub 版を使って欲しい．</p>
+<div id="pandoc-2.7.3--bookdown-" class="section level1">
+<h1>Pandoc 2.7.3 が bookdown に与えた影響</h1>
+<div id="section" class="section level2">
+<h2>コードブロックの出力が変わった</h2>
+<p><code>Pandoc</code> のバージョンアップに伴い．シンタックスハイライトに利用している <code>skylighting</code> も <code>0.7.7</code> から <code>0.8.1</code> 引き上げられた影響だ．</p>
+<p>私は <code>bookdown</code> の <a href="https://github.com/rstudio/bookdown/issues/733#issuecomment-506913254">issue #733</a> で知らされた，本家の <code>Pandoc</code> の<a href="https://pandoc.org/releases.html#pandoc-2.7.3-11-june-2019">リリースノート</a>には一切記載がないのは酷い．</p>
+<p>バージョンアップに伴う変更はいくつもあるが， bookdown に影響したのは，</p>
+<ul>
+<li>コードブロックの行を <code>&lt;a&gt;</code> タグではなく <code>&lt;span&gt;</code> タグで囲うようにした</li>
+<li>行番号を CSS カウンタによってつけるようにした</li>
+<li><code>&lt;a&gt;</code> タグから <code>sourceLine</code> クラスを除去した</li>
+</ul>
+<p>というもの (skylighting の<a href="https://github.com/jgm/skylighting/blob/master/changelog.md#08----2019-05-27">変更履歴</a>参照)．</p>
+<p>これにより，以下のチャンクが</p>
+<pre class="r"><code>```{r}
+print(&quot;hello&quot;)
+```</code></pre>
+<p><code>Pandoc 2.7.2</code> では</p>
+<pre class="html"><code>&lt;div class=&quot;sourceCode&quot; id=&quot;cb1&quot;&gt;
+    &lt;pre class=&quot;sourceCode r&quot;&gt;
+        &lt;code class=&quot;sourceCode r&quot;&gt;
+            &lt;a class=&quot;sourceLine&quot; id=&quot;cb1-1&quot; title=&quot;1&quot;&gt;
+                &lt;span class=&quot;kw&quot;&gt;print&lt;/span&gt;
+                (&lt;span class=&quot;st&quot;&gt;&amp;quot;hello&amp;quot;&lt;/span&gt;)
+            &lt;/a&gt;
+        &lt;/code&gt;
+    &lt;/pre&gt;
+&lt;/div&gt;</code></pre>
+<p>だったところ，<code>Pandoc 2.7.3</code> では</p>
+<pre class="html"><code>&lt;div class=&quot;sourceCode&quot; id=&quot;cb1&quot;&gt;
+    &lt;pre class=&quot;sourceCode r&quot;&gt;
+        &lt;code class=&quot;sourceCode r&quot;&gt;
+            &lt;span id=&quot;cb1-1&quot;&gt;
+                &lt;a href=&quot;#cb1-1&quot;&gt;&lt;/a&gt;
+                &lt;span class=&quot;kw&quot;&gt;print&lt;/span&gt;
+                (&lt;span class=&quot;st&quot;&gt;&amp;quot;hello&amp;quot;&lt;/span&gt;)
+            &lt;/span&gt;
+        &lt;/code&gt;
+    &lt;/pre&gt;
+&lt;/div&gt;</code></pre>
+<p>になった．</p>
+</div>
+<div id="bookdown-0.11.1-" class="section level2">
+<h2>bookdown 0.11.1 がエンバグされた</h2>
+<p><code>bookdown</code> が提供する HTML 系の出力 (<code>html_document2</code>, <code>html_book</code>, <code>html_chapters</code>, <code>gitbook</code>) では，内部で <code>clean_pandoc2_highlight_tags()</code> というものが実行される．これは，上述の HTML 出力されたコードブロックにおいて，一番外側の<code>&lt;div&gt;</code> タグと，各行を囲む <code>sourceLine</code> クラスの <code>&lt;a&gt;</code> タグを除去するものだ (<a href="https://github.com/rstudio/bookdown/blob/364092ad5c1baf6740711d4a3c4d68c024291bb3/R/html.R#L1012-L1018">ソースコード</a>)．</p>
+<p>おそらく <code>gitbook</code> 向けの機能らしいのだが，詳しいところは知らない．</p>
+<p>除去は正規表現を利用した置換により行われていたが， <code>Pandoc 2.7.2</code> 以前に合わせていたため， <code>Pandoc 2.7.3</code> では <code>&lt;/div&gt;</code> が除去されずに残ってしまった．</p>
+<p>この問題は YiHui が修正を <a href="https://github.com/rstudio/bookdown/commit/364092ad5c1baf6740711d4a3c4d68c024291bb3">commit</a> してくれた．</p>
+</div>
+<div id="bookdown--" class="section level2">
+<h2>bookdown (開発版) で行番号表示が簡単になりかけてる</h2>
+<div id="yaml-" class="section level3">
+<h3>YAML を弄ることなく行番号を表示できるようになった</h3>
+<p><code>Pandoc 2.7.2</code> 以前を使っている場合，行番号の表示には</p>
+<ol style="list-style-type: decimal">
+<li>YAML フロントマターで <code>clean_highlight_tags: false</code> を指定</li>
+<li>YAML フロントマターで <code>highlight: pygments</code> などを指定</li>
+<li>チャンクオプションで <code>class.source = "numberLines"</code> を指定</li>
+</ol>
+<p>が必要がだった．</p>
+<p>中でも<strong>1</strong>は行番号表示の根幹を担う <code>&lt;a&gt;</code> タグを内部関数 <code>clean_pandoc2_highlight_tags()</code> が除去してしまうのを役割があった．</p>
+<p>しかし，<code>Pandoc 2.7.3</code> では <code>&lt;a&gt;</code> タグが <code>sourceLine</code> クラスを持たないため，<code>clean_highlight_tags: true</code> でも <code>&lt;a&gt;</code> タグは除去されなくなった．</p>
+<p>というわけで，<strong>2</strong>と<strong>3</strong>を設定すれば，行番号を表示できるようになった．</p>
+<p>わざわざ <code>clean_highlight_tags: false</code> できる機能を PR したのにショックだが，まあこんなこともある (<a href="https://github.com/rstudio/bookdown/pull/706">#706</a>)．</p>
+</div>
+<div id="css-" class="section level3">
+<h3>行番号を使う場合，CSS の指定が必要な場合がある</h3>
+<p>チャンクオプションで一箇所でも <code>class.source = "numberLines"</code> を指定すると，<code>Pandoc</code> は行番号表示に関連する CSS を追加する．</p>
+<p>その中には</p>
+<pre class="css"><code>div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }</code></pre>
+<p>というものがあり，これが <code>html_document2</code> で使われている <code>bootstrap.min.css</code> の</p>
+<pre class="css"><code>pre {margin: 0 0 10px}</code></pre>
+<p>とバッティングする．</p>
+<p><code>clean_highlight_tags: false</code> を指定していれば，マージンの幅がちょっと変わったな，くらいで済む．</p>
+<p>しかし，既定値の <code>true</code> のまま，コードブロックに行番号を表示させようとすると， <code>clean_pandoc2_highlight_tags</code> により，<code>&lt;div&gt;</code> タグが除去されてしまうせいで，</p>
+<pre class="css"><code>pre.sourceCode { margin: 0; }</code></pre>
+<p>しか適用されず，結果として隣接する <code>&lt;pre&gt;&lt;/pre&gt;</code> が密着してしまう．</p>
+<p><img src="/images/posts/2019-07-03-rmd-line-num-in-pandoc-2-7-3/html-document2.png" /></p>
+<p>これを避けるには</p>
+<pre><code>```{css}
+pre.sourceCode {margin: 0 0 10px}
+```</code></pre>
+<p>といった具合に CSS をあてるチャンクを追加しておくが，外部に CSS を書いてYAMLフロントマターで取り込む必要がある．</p>
+<p>ユーザー指定の CSS は Pandoc が追加するものよりも後に読み込まれるので，優先度も高い．</p>
+<p>また，<code>gitbook</code> では行番号の表示位置が悪い問題があり，これも CSS でうまく直してやる必要がある．</p>
+<p><img src="/images/posts/2019-07-03-rmd-line-num-in-pandoc-2-7-3/gitbook.png" /></p>
+</div>
+</div>
+</div>
+<div id="pr-" class="section level1">
+<h1>PR の方針</h1>
+<p>長くなったが最近の bookdown におけるコードブロックの表示の変化をざっと振り返った．</p>
+<p><code>bookdown</code> における様々な HTML 出力において，CSS の更新が必要と分かったので，PR していきたいと考えている．</p>
+<p>トリッキーになりそうなのは<code>bookdown::html_document2</code> は <code>rmarkdown::html_document</code> とテンプレートを共有していることだ．
+<code>bookdown::html_document2</code> の時だけ CSS を変更するようにうまく調整しなければならない．</p>
+<p>それはそうと，CSS に手を出すなら先に <code>rmarkdown</code> パッケージにおける CSS を修正した方がいいところがある．これについてはまた後日語ろう……．</p>
+</div>
