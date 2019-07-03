@@ -1,0 +1,128 @@
+---
+title: R Markdown + Honoka の実用化は険しい
+author: ~
+date: '2019-07-03'
+slug: honokadown
+categories: [R]
+tags: [rmarkdown, bootstrap, honoka]
+highlightjs:
+  - yaml
+summary: |
+  `rmarkdown::html_document` に Honoka という 日本語表示を最適化した Bootstrap テーマをあてたかった．
+---
+
+`rmarkdown::html_document` に Honoka という 日本語表示を最適化した Bootstrap テーマをあてたかった．
+
+# Honoka について
+
+Honoka は日本語表示を最適化した Bootstrap テーマらしい (<https://honokak.osaka/>)．
+
+大きな違いは，ウェブフォントを使わず，ウェイトも見出しで太字，他で標準の段階しか使わないことらしい．
+開発者のじゅりあん氏 ([\@MITLicense](https://twitter.com/MITLicense)) による，[ブログ](https://windyakin.hateblo.jp/entry/2018/07/01/152712) を読んで知った．
+
+一応，公式ページでも
+
+> Bootstrapでは考慮されていない日本語のフォント指定やウェイトの変更を行っているので、美しく日本語を表示できます。
+
+と述べているが，これだけではどんな変更しているのか分からないのでちゃんと書いてあるといいなあ．
+
+フォント指定のソース該当部: [scss/honoka/_variables.scss#L274-L277](https://github.com/windyakin/Honoka/blob/5fedd2cb459d31af9e3e47d32446ccd5bf8811f4/scss/honoka/_variables.scss#L274-L277)
+
+ウェイト指定のソース該当部: [scss/honoka/_variables.scss#L284-L288](https://github.com/windyakin/Honoka/blob/5fedd2cb459d31af9e3e47d32446ccd5bf8811f4/scss/honoka/_variables.scss#L284-L288)
+
+Fork したテーマもいろいろあるようだ．
+
+- Umi
+    - Bootswatch Flatlyの配色を適用
+    - https://ysakasin.github.io/Umi/
+- Frendre
+    - Bootswatch Unitedの配色を適用
+    - Freandre: http://sairoutine.github.io/Frandre/
+- Nico
+    - ピンク系の配色を適用した
+    - http://nico.kubosho.com/
+- Rin
+    - マテリアルデザイン風
+    - https://rinhoshizo.la/
+
+# Honoka on R Markdown について
+
+R Markdown で html 文書を作成する時によく使われる html_document は Bootstrap を使っているので Honoka 化は簡単かと思った．
+
+しかし， rmarkdown に同梱されている Bootstrap は v3.3.5 と古く^[<https://github.com/rstudio/rmarkdown/blob/master/inst/rmd/h/bootstrap/js/bootstrap.js#L2>]，わざわざ旧版の Honoka を使わないといけない^[https://github.com/windyakin/Honoka/releases/tag/v3.3.5-d]．2019/7/3現在，Honoka は v4.3.1に対応ているのに勿体ないことだ．
+
+Bootstrap 本体やテーマは rmarkdown パッケージに同梱されていて^[<https://github.com/rstudio/rmarkdown/tree/master/inst/rmd/h/bootstrap>]，特定のバージョンを指定する方法はなさそうで，Bootstrap v4.3.1を単純に適用できるのか試すことは面倒そうだ．
+同様に [Honoka v3.3.5-d](https://github.com/windyakin/Honoka/releases/tag/v3.3.5-d) を指定するのも一苦労そうだ．
+
+`rmarkdown::html_document` では YAML フロントマターにて `theme` や追加の `css` が指定可能なので，
+この辺りを弄ってみた．
+
+## Honoka を使わない場合の出力の確認
+
+以下の YAML で `theme: default` と `theme: NULL` を切り替えた時に `html_document` がどのように `css` を取り込んでいるか見てみた．
+
+`<link href="rmd-bookdown_files/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />`
+が挿入されるか否かが大きな違いのようだ．
+
+```yaml
+output: 
+  html_document:
+    theme: default
+    sef_contained: FALSE
+```
+
+## theme: NULL で Honoka の CSS を取り込んでみる
+
+Honoka をダウンロードしておいて，以下の YAML にて Honoka の `bootstrap.min.css` を適用してみた．
+rmarkdown 内蔵の theme を指定した時はドキュメントに埋め込む形の CSS や Javascript がいくつかあり，
+想定していた出力と異なった．
+
+- 本文がページ表示領域の左右最大に広がるため読み難い
+- toc_float が使えない
+
+など．
+
+```yaml
+output: 
+  html_document:
+    theme: NULL
+    css: "honoka-3-3-5-d/css/bootstrap.min.css"
+    sef_contained: FALSE
+```
+
+## theme: default で Honoka の CSS を取り込んでみる
+
+上述の YAML における `theme: NULL` を `theme: default` に書き換えてみた．
+
+`css` フィールドで取り込んだ CSS は `theme` に必要な CSS よりも後で指定される．
+
+つまり，順番としてはこんな感じ
+
+```html
+<link href="rmd-bookdown_files/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<!-- シンタックスハイライト周りの CSS (pandoc が挿入) や JS -->
+<!-- 見出しの CSS (pandoc template に直打ち) -->
+<link rel="stylesheet" href="honoka-3-3-5-d/css/bootstrap.min.css" type="text/css" />
+<!-- theme を指定した時だけ利用可能な機能のための CSS/JS はこの後に入る (pandoc template に直打ち) -->
+```
+
+おかげで，大分思った通りの見た目に近付いたが，一方で `bootstrap.min.css` を二回読み込んでしまっていて無駄が大きい．
+
+`toc_float` も機能した．
+
+# 結論
+
+効率よく簡単に Honoka を R Markdown で利用するのは難しそうだ．
+
+honokadown パッケージを作る必要がありそうだが……どうしようかな．
+
+# おまけ: prettydoc パッケージについて
+
+R Markdown を用いた html レポートにオリジナルの Bootstrap テーマを適用した有名なパッケージは prettydoc パッケージだろう．
+
+こいつはドキュメントの軽量化を狙って `rmarkdown::html_document` ではなく `rmarkdown::html_vignette` をベースにしている．
+
+先日の Tokyo.R で prettydoc パッケージだと `toc_float` が使えないという話があったが，これは `rmarkdown::html_vignette` が `toc_float` をサポートしていないから．
+
+リッチな機能がいらないなら， `html_vignette` に Honoka をあててもいいが，結局，上述の問題にぶちあたりそう．
+

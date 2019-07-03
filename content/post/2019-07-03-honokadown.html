@@ -1,0 +1,116 @@
+---
+title: R Markdown + Honoka の実用化は険しい
+author: ~
+date: '2019-07-03'
+slug: honokadown
+categories: [R]
+tags: [rmarkdown, bootstrap, honoka]
+highlightjs:
+  - yaml
+summary: |
+  `rmarkdown::html_document` に Honoka という 日本語表示を最適化した Bootstrap テーマをあてたかった．
+---
+
+
+
+<p><code>rmarkdown::html_document</code> に Honoka という 日本語表示を最適化した Bootstrap テーマをあてたかった．</p>
+<div id="honoka-" class="section level1">
+<h1>Honoka について</h1>
+<p>Honoka は日本語表示を最適化した Bootstrap テーマらしい (<a href="https://honokak.osaka/" class="uri">https://honokak.osaka/</a>)．</p>
+<p>大きな違いは，ウェブフォントを使わず，ウェイトも見出しで太字，他で標準の段階しか使わないことらしい．開発者のじゅりあん氏 (<a href="https://twitter.com/MITLicense">@MITLicense</a>) による，<a href="https://windyakin.hateblo.jp/entry/2018/07/01/152712">ブログ</a> を読んで知った．</p>
+<p>一応，公式ページでも</p>
+<blockquote>
+<p>Bootstrapでは考慮されていない日本語のフォント指定やウェイトの変更を行っているので、美しく日本語を表示できます。</p>
+</blockquote>
+<p>と述べているが，これだけではどんな変更しているのか分からないのでちゃんと書いてあるといいなあ．</p>
+<p>フォント指定のソース該当部: <a href="https://github.com/windyakin/Honoka/blob/5fedd2cb459d31af9e3e47d32446ccd5bf8811f4/scss/honoka/_variables.scss#L274-L277">scss/honoka/_variables.scss#L274-L277</a></p>
+<p>ウェイト指定のソース該当部: <a href="https://github.com/windyakin/Honoka/blob/5fedd2cb459d31af9e3e47d32446ccd5bf8811f4/scss/honoka/_variables.scss#L284-L288">scss/honoka/_variables.scss#L284-L288</a></p>
+<p>Fork したテーマもいろいろあるようだ．</p>
+<ul>
+<li>Umi
+<ul>
+<li>Bootswatch Flatlyの配色を適用</li>
+<li><a href="https://ysakasin.github.io/Umi/" class="uri">https://ysakasin.github.io/Umi/</a></li>
+</ul></li>
+<li>Frendre
+<ul>
+<li>Bootswatch Unitedの配色を適用</li>
+<li>Freandre: <a href="http://sairoutine.github.io/Frandre/" class="uri">http://sairoutine.github.io/Frandre/</a></li>
+</ul></li>
+<li>Nico
+<ul>
+<li>ピンク系の配色を適用した</li>
+<li><a href="http://nico.kubosho.com/" class="uri">http://nico.kubosho.com/</a></li>
+</ul></li>
+<li>Rin
+<ul>
+<li>マテリアルデザイン風</li>
+<li><a href="https://rinhoshizo.la/" class="uri">https://rinhoshizo.la/</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="honoka-on-r-markdown-" class="section level1">
+<h1>Honoka on R Markdown について</h1>
+<p>R Markdown で html 文書を作成する時によく使われる html_document は Bootstrap を使っているので Honoka 化は簡単かと思った．</p>
+<p>しかし， rmarkdown に同梱されている Bootstrap は v3.3.5 と古く<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>，わざわざ旧版の Honoka を使わないといけない<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>．2019/7/3現在，Honoka は v4.3.1に対応ているのに勿体ないことだ．</p>
+<p>Bootstrap 本体やテーマは rmarkdown パッケージに同梱されていて<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>，特定のバージョンを指定する方法はなさそうで，Bootstrap v4.3.1を単純に適用できるのか試すことは面倒そうだ．同様に <a href="https://github.com/windyakin/Honoka/releases/tag/v3.3.5-d">Honoka v3.3.5-d</a> を指定するのも一苦労そうだ．</p>
+<p><code>rmarkdown::html_document</code> では YAML フロントマターにて <code>theme</code> や追加の <code>css</code> が指定可能なので，この辺りを弄ってみた．</p>
+<div id="honoka--1" class="section level2">
+<h2>Honoka を使わない場合の出力の確認</h2>
+<p>以下の YAML で <code>theme: default</code> と <code>theme: NULL</code> を切り替えた時に <code>html_document</code> がどのように <code>css</code> を取り込んでいるか見てみた．</p>
+<p><code>&lt;link href="rmd-bookdown_files/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" /&gt;</code>
+が挿入されるか否かが大きな違いのようだ．</p>
+<pre class="yaml"><code>output: 
+  html_document:
+    theme: default
+    sef_contained: FALSE</code></pre>
+</div>
+<div id="theme-null--honoka--css-" class="section level2">
+<h2>theme: NULL で Honoka の CSS を取り込んでみる</h2>
+<p>Honoka をダウンロードしておいて，以下の YAML にて Honoka の <code>bootstrap.min.css</code> を適用してみた．
+rmarkdown 内蔵の theme を指定した時はドキュメントに埋め込む形の CSS や Javascript がいくつかあり，想定していた出力と異なった．</p>
+<ul>
+<li>本文がページ表示領域の左右最大に広がるため読み難い</li>
+<li>toc_float が使えない</li>
+</ul>
+<p>など．</p>
+<pre class="yaml"><code>output: 
+  html_document:
+    theme: NULL
+    css: &quot;honoka-3-3-5-d/css/bootstrap.min.css&quot;
+    sef_contained: FALSE</code></pre>
+</div>
+<div id="theme-default--honoka--css-" class="section level2">
+<h2>theme: default で Honoka の CSS を取り込んでみる</h2>
+<p>上述の YAML における <code>theme: NULL</code> を <code>theme: default</code> に書き換えてみた．</p>
+<p><code>css</code> フィールドで取り込んだ CSS は <code>theme</code> に必要な CSS よりも後で指定される．</p>
+<p>つまり，順番としてはこんな感じ</p>
+<pre class="html"><code>&lt;link href=&quot;rmd-bookdown_files/bootstrap-3.3.5/css/bootstrap.min.css&quot; rel=&quot;stylesheet&quot; /&gt;
+&lt;!-- シンタックスハイライト周りの CSS (pandoc が挿入) や JS --&gt;
+&lt;!-- 見出しの CSS (pandoc template に直打ち) --&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;honoka-3-3-5-d/css/bootstrap.min.css&quot; type=&quot;text/css&quot; /&gt;
+&lt;!-- theme を指定した時だけ利用可能な機能のための CSS/JS はこの後に入る (pandoc template に直打ち) --&gt;</code></pre>
+<p>おかげで，大分思った通りの見た目に近付いたが，一方で <code>bootstrap.min.css</code> を二回読み込んでしまっていて無駄が大きい．</p>
+<p><code>toc_float</code> も機能した．</p>
+</div>
+</div>
+<div id="section" class="section level1">
+<h1>結論</h1>
+<p>効率よく簡単に Honoka を R Markdown で利用するのは難しそうだ．</p>
+<p>honokadown パッケージを作る必要がありそうだが……どうしようかな．</p>
+</div>
+<div id="prettydoc-" class="section level1">
+<h1>おまけ: prettydoc パッケージについて</h1>
+<p>R Markdown を用いた html レポートにオリジナルの Bootstrap テーマを適用した有名なパッケージは prettydoc パッケージだろう．</p>
+<p>こいつはドキュメントの軽量化を狙って <code>rmarkdown::html_document</code> ではなく <code>rmarkdown::html_vignette</code> をベースにしている．</p>
+<p>先日の Tokyo.R で prettydoc パッケージだと <code>toc_float</code> が使えないという話があったが，これは <code>rmarkdown::html_vignette</code> が <code>toc_float</code> をサポートしていないから．</p>
+<p>リッチな機能がいらないなら， <code>html_vignette</code> に Honoka をあててもいいが，結局，上述の問題にぶちあたりそう．</p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://github.com/rstudio/rmarkdown/blob/master/inst/rmd/h/bootstrap/js/bootstrap.js#L2" class="uri">https://github.com/rstudio/rmarkdown/blob/master/inst/rmd/h/bootstrap/js/bootstrap.js#L2</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p><a href="https://github.com/windyakin/Honoka/releases/tag/v3.3.5-d" class="uri">https://github.com/windyakin/Honoka/releases/tag/v3.3.5-d</a><a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p><a href="https://github.com/rstudio/rmarkdown/tree/master/inst/rmd/h/bootstrap" class="uri">https://github.com/rstudio/rmarkdown/tree/master/inst/rmd/h/bootstrap</a><a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
