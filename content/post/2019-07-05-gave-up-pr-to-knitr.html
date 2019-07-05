@@ -1,0 +1,54 @@
+---
+title: knitr はチャンクが掃き出すコードブロックにもっとクラス属性を与えるべきと思ったが PR を断念した
+author: ~
+date: '2019-07-05'
+slug: gave-up-pr-to-knitr
+categories: [R]
+tags: [rmarkdown, knitr]
+---
+
+
+
+<p>R Markdown ではチャンクオプションを利用して，ソースコード，出力，メッセージ，警告，エラーに対して，クラス属性などを付与できる．</p>
+<p>だったら最初から <code>chunk-source</code>, <code>chunk-output</code>, …って感じのクラス持たせておいた方がよくない？って思った．</p>
+<p>開発者もユーザーも CSS を厳格に運用できる．</p>
+<p>マニュアルでやるならこんな感じ．</p>
+<pre><code>```{r, class.source = &quot;chunk-source&quot;, class.output = &quot;chunk-output&quot;, class.message = &quot;chunk-message&quot;, class.warning = &quot;chunk-warning&quot;, class.error = &quot;chunk-error&quot;}</code></pre>
+<p><code>"numberLines"</code> クラスを与えておくと，コードブロックに行番号をつけることもできる．</p>
+<div id="section" class="section level1">
+<h1>で，何がしたかったの？</h1>
+<p><code>class.source</code> 以外に <code>numberLines</code> などのクラスを付与すると，コードブロックの背景が白色から灰色に変わってしまうことを防ぎたかった．</p>
+<p><code>rmarkdown::html_document</code> のテンプレートでは， <code>source</code> 以外のコードブロックはクラスを持たない時だけ白背景になる仕様だ<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>．</p>
+<pre class="css"><code>pre:note([class]) {background-color: white; }</code></pre>
+<p>これが原因で <code>numberLines</code> クラスを与えた途端，背景が <code>source</code> と同じになってしまう．しかし，<code>numberLines</code> クラスを持つコードブロックの内，どれが <code>source</code> でどれは違うか区別が付かない．コードブロックごとに <code>chunk-source</code>, <code>chunk-output</code> といった具合に適切なクラスを与えていればこれは簡単だ．</p>
+<p>ただし，連動して <code>rmarkdown</code> のテンプレートも更新しなければならない．</p>
+<p>とりあえず試してみたが，変更が大きい上に <code>html_document</code> が利用している Bootstrap とコンフリクトしてしまった．</p>
+<p>例えば， template の CSS で</p>
+<pre class="css"><code>.chunk-output {background-color: white;}</code></pre>
+<style type="text/css">
+.chunk-output {background-color: white;}
+</style>
+<p>を指定していると，Bootstrap の <code>bg-warning</code> クラスを利用したコードブロックの背景色変更ができなくなってしまう．</p>
+<p>というわけで <code>knitr</code> + <code>rmarkdown</code> の PR は断念した．</p>
+</div>
+<div id="section-1" class="section level1">
+<h1>じゃあどうする？</h1>
+<p>実は上述の問題， CSS セレクタで厳格なマッチングしていけば回避可能と気付いたので，<code>rmarkdown</code> に PR した．</p>
+<p><a href="https://github.com/rstudio/rmarkdown/pull/1596" class="uri">https://github.com/rstudio/rmarkdown/pull/1596</a></p>
+<p>マージされたらまた話したい．</p>
+</div>
+<div id="section-2" class="section level1">
+<h1>おまけ</h1>
+<p>knitr と戯れていたら，なぜか Travis CI によるテスト時に以下のエラーが返ることに気付いた．</p>
+<pre><code>configure: error: missing required header GL/gl.h
+ERROR: configuration failed for package ‘rgl’</code></pre>
+<p>これまでテストをパスしていたマスターブランチまで影響を受けていたので，これを修正する PR をした．</p>
+<p>これは一瞬でマージされた．</p>
+<p><a href="https://github.com/yihui/knitr/pull/1727" class="uri">https://github.com/yihui/knitr/pull/1727</a></p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>ソースコード該当部: <a href="https://github.com/rstudio/rmarkdown/blob/7b18786487a4798959dda959e1f68fa1baeae9a6/inst/rmd/h/default.html#L91-L93" class="uri">https://github.com/rstudio/rmarkdown/blob/7b18786487a4798959dda959e1f68fa1baeae9a6/inst/rmd/h/default.html#L91-L93</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>

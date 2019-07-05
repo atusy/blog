@@ -1,0 +1,77 @@
+---
+title: knitr はチャンクが掃き出すコードブロックにもっとクラス属性を与えるべきと思ったが PR を断念した
+author: ~
+date: '2019-07-05'
+slug: gave-up-pr-to-knitr
+categories: [R]
+tags: [rmarkdown, knitr]
+---
+
+R Markdown ではチャンクオプションを利用して，ソースコード，出力，メッセージ，警告，エラーに対して，クラス属性などを付与できる．
+
+だったら最初から `chunk-source`, `chunk-output`, ...って感じのクラス持たせておいた方がよくない？って思った．
+
+開発者もユーザーも CSS を厳格に運用できる．
+
+マニュアルでやるならこんな感じ．
+
+``````
+```{r, echo = FALSE, results='asis'}
+cat('```{r, class.source = "chunk-source", class.output = "chunk-output", class.message = "chunk-message", class.warning = "chunk-warning", class.error = "chunk-error"}')
+```
+``````
+
+`"numberLines"` クラスを与えておくと，コードブロックに行番号をつけることもできる．
+
+# で，何がしたかったの？
+
+`class.source` 以外に `numberLines` などのクラスを付与すると，コードブロックの背景が白色から灰色に変わってしまうことを防ぎたかった．
+
+`rmarkdown::html_document` のテンプレートでは， `source` 以外のコードブロックはクラスを持たない時だけ白背景になる仕様だ^[ソースコード該当部: <https://github.com/rstudio/rmarkdown/blob/7b18786487a4798959dda959e1f68fa1baeae9a6/inst/rmd/h/default.html#L91-L93>]．
+
+```css
+pre:note([class]) {background-color: white; }
+```
+
+これが原因で `numberLines` クラスを与えた途端，背景が `source` と同じになってしまう．
+しかし，`numberLines` クラスを持つコードブロックの内，どれが `source` でどれは違うか区別が付かない．
+コードブロックごとに `chunk-source`, `chunk-output` といった具合に適切なクラスを与えていればこれは簡単だ．
+
+ただし，連動して `rmarkdown` のテンプレートも更新しなければならない．
+
+とりあえず試してみたが，変更が大きい上に `html_document` が利用している Bootstrap とコンフリクトしてしまった．
+
+例えば， template の CSS で 
+
+```{css}
+.chunk-output {background-color: white;}
+```
+
+を指定していると，Bootstrap の `bg-warning` クラスを利用したコードブロックの背景色変更ができなくなってしまう．
+
+というわけで `knitr` + `rmarkdown` の PR は断念した．
+
+
+# じゃあどうする？
+
+実は上述の問題， CSS セレクタで厳格なマッチングしていけば回避可能と気付いたので，`rmarkdown` に PR した．
+
+<https://github.com/rstudio/rmarkdown/pull/1596>
+
+マージされたらまた話したい．
+
+# おまけ
+
+knitr と戯れていたら，なぜか Travis CI によるテスト時に以下のエラーが返ることに気付いた．
+
+```
+configure: error: missing required header GL/gl.h
+ERROR: configuration failed for package ‘rgl’
+```
+
+これまでテストをパスしていたマスターブランチまで影響を受けていたので，これを修正する PR をした．
+
+これは一瞬でマージされた．
+
+https://github.com/yihui/knitr/pull/1727
+
