@@ -22,9 +22,9 @@ output:
 <li><a href="#tibble">tibble</a></li>
 <li><a href="#tidyr">tidyr</a></li>
 </ul></li>
-<li><a href="#packed-data-frame--1">packed data frame を良い感じに表示用の表にする</a><ul>
-<li><a href="#data-frame--display-table-">通常の data frame で列の階層性を表現した Display table を作る</a></li>
-<li><a href="#packed-data-frame--display-table-">packed data frame で列の階層性を表現した Display table を作る</a></li>
+<li><a href="#gt-">gt で見せる用の表を作る</a><ul>
+<li><a href="#data-frame-gt-">通常の data frame + gt で列の階層性を表現する</a></li>
+<li><a href="#packed-data-frame-gt-">packed data frame + gt で列の階層性を表現する</a></li>
 </ul></li>
 <li><a href="#enjoy">Enjoy!</a></li>
 </ul>
@@ -37,7 +37,7 @@ output:
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#wgqltfauck .gt_table {
+#bodkoneonz .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -56,13 +56,13 @@ output:
   /* table.border.top.color */
 }
 
-#wgqltfauck .gt_heading {
+#bodkoneonz .gt_heading {
   background-color: #FFFFFF;
   /* heading.background.color */
   border-bottom-color: #FFFFFF;
 }
 
-#wgqltfauck .gt_title {
+#bodkoneonz .gt_title {
   color: #000000;
   font-size: 125%;
   /* heading.title.font.size */
@@ -73,7 +73,7 @@ output:
   border-bottom-width: 0;
 }
 
-#wgqltfauck .gt_subtitle {
+#bodkoneonz .gt_subtitle {
   color: #000000;
   font-size: 85%;
   /* heading.subtitle.font.size */
@@ -84,7 +84,7 @@ output:
   border-top-width: 0;
 }
 
-#wgqltfauck .gt_bottom_border {
+#bodkoneonz .gt_bottom_border {
   border-bottom-style: solid;
   /* heading.border.bottom.style */
   border-bottom-width: 2px;
@@ -93,7 +93,7 @@ output:
   /* heading.border.bottom.color */
 }
 
-#wgqltfauck .gt_column_spanner {
+#bodkoneonz .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #A8A8A8;
@@ -101,7 +101,7 @@ output:
   padding-bottom: 4px;
 }
 
-#wgqltfauck .gt_col_heading {
+#bodkoneonz .gt_col_heading {
   color: #000000;
   background-color: #FFFFFF;
   /* column_labels.background.color */
@@ -114,11 +114,11 @@ output:
   margin: 10px;
 }
 
-#wgqltfauck .gt_sep_right {
+#bodkoneonz .gt_sep_right {
   border-right: 5px solid #FFFFFF;
 }
 
-#wgqltfauck .gt_group_heading {
+#bodkoneonz .gt_group_heading {
   padding: 8px;
   color: #000000;
   background-color: #FFFFFF;
@@ -142,7 +142,7 @@ output:
   vertical-align: middle;
 }
 
-#wgqltfauck .gt_empty_group_heading {
+#bodkoneonz .gt_empty_group_heading {
   padding: 0.5px;
   color: #000000;
   background-color: #FFFFFF;
@@ -166,33 +166,33 @@ output:
   vertical-align: middle;
 }
 
-#wgqltfauck .gt_striped {
+#bodkoneonz .gt_striped {
   background-color: #f2f2f2;
 }
 
-#wgqltfauck .gt_from_md > :first-child {
+#bodkoneonz .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#wgqltfauck .gt_from_md > :last-child {
+#bodkoneonz .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#wgqltfauck .gt_row {
+#bodkoneonz .gt_row {
   padding: 8px;
   /* row.padding */
   margin: 10px;
   vertical-align: middle;
 }
 
-#wgqltfauck .gt_stub {
+#bodkoneonz .gt_stub {
   border-right-style: solid;
   border-right-width: 2px;
   border-right-color: #A8A8A8;
   padding-left: 12px;
 }
 
-#wgqltfauck .gt_summary_row {
+#bodkoneonz .gt_summary_row {
   color: #000000;
   background-color: #FFFFFF;
   /* summary_row.background.color */
@@ -202,7 +202,7 @@ output:
   /* summary_row.text_transform */
 }
 
-#wgqltfauck .gt_grand_summary_row {
+#bodkoneonz .gt_grand_summary_row {
   color: #000000;
   background-color: #FFFFFF;
   /* grand_summary_row.background.color */
@@ -212,19 +212,19 @@ output:
   /* grand_summary_row.text_transform */
 }
 
-#wgqltfauck .gt_first_summary_row {
+#bodkoneonz .gt_first_summary_row {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #A8A8A8;
 }
 
-#wgqltfauck .gt_first_grand_summary_row {
+#bodkoneonz .gt_first_grand_summary_row {
   border-top-style: double;
   border-top-width: 6px;
   border-top-color: #A8A8A8;
 }
 
-#wgqltfauck .gt_table_body {
+#bodkoneonz .gt_table_body {
   border-top-style: solid;
   /* table_body.border.top.style */
   border-top-width: 2px;
@@ -239,55 +239,55 @@ output:
   /* table_body.border.bottom.color */
 }
 
-#wgqltfauck .gt_footnote {
+#bodkoneonz .gt_footnote {
   font-size: 90%;
   /* footnote.font.size */
   padding: 4px;
   /* footnote.padding */
 }
 
-#wgqltfauck .gt_sourcenote {
+#bodkoneonz .gt_sourcenote {
   font-size: 90%;
   /* sourcenote.font.size */
   padding: 4px;
   /* sourcenote.padding */
 }
 
-#wgqltfauck .gt_center {
+#bodkoneonz .gt_center {
   text-align: center;
 }
 
-#wgqltfauck .gt_left {
+#bodkoneonz .gt_left {
   text-align: left;
 }
 
-#wgqltfauck .gt_right {
+#bodkoneonz .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#wgqltfauck .gt_font_normal {
+#bodkoneonz .gt_font_normal {
   font-weight: normal;
 }
 
-#wgqltfauck .gt_font_bold {
+#bodkoneonz .gt_font_bold {
   font-weight: bold;
 }
 
-#wgqltfauck .gt_font_italic {
+#bodkoneonz .gt_font_italic {
   font-style: italic;
 }
 
-#wgqltfauck .gt_super {
+#bodkoneonz .gt_super {
   font-size: 65%;
 }
 
-#wgqltfauck .gt_footnote_glyph {
+#bodkoneonz .gt_footnote_glyph {
   font-style: italic;
   font-size: 65%;
 }
 </style>
-<div id="wgqltfauck" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
+<div id="bodkoneonz" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
 <table class='gt_table'>
 <tr>
 <th class='gt_col_heading gt_center' rowspan='2' colspan='1'>X</th>
@@ -404,9 +404,9 @@ unpack(df, Y)
 <p>ただし，見栄えの問題で <code>as_tibble</code> しておくのが無難だ．</p>
 </div>
 </div>
-<div id="packed-data-frame--1" class="section level1">
-<h1>packed data frame を良い感じに表示用の表にする</h1>
-<p>Display table (表示用の表) は <code>gt</code> パッケージが定義している用語で，R 内部で扱うための表 (data frame) に対して，人に見せるための表くらいの認識でいいと思う．</p>
+<div id="gt-" class="section level1">
+<h1>gt で見せる用の表を作る</h1>
+<p>Display table (見せる用の表) は <code>gt</code> パッケージが定義している用語で，R 内部で扱うための表 (data frame) に対して，人に見せるための表くらいの認識でいいと思う．</p>
 <p><code>gt</code> は非常に優秀で，例えば grouped data frame を一発で良い感じにしてくれる．
 packed data frame もこれくらいのノリで扱えると最高だ．</p>
 <pre class="r"><code>library(gt)
@@ -421,7 +421,7 @@ gt(mini_iris)</code></pre>
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#zjtttegjxy .gt_table {
+#llkidaawgv .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -440,13 +440,13 @@ gt(mini_iris)</code></pre>
   /* table.border.top.color */
 }
 
-#zjtttegjxy .gt_heading {
+#llkidaawgv .gt_heading {
   background-color: #FFFFFF;
   /* heading.background.color */
   border-bottom-color: #FFFFFF;
 }
 
-#zjtttegjxy .gt_title {
+#llkidaawgv .gt_title {
   color: #000000;
   font-size: 125%;
   /* heading.title.font.size */
@@ -457,7 +457,7 @@ gt(mini_iris)</code></pre>
   border-bottom-width: 0;
 }
 
-#zjtttegjxy .gt_subtitle {
+#llkidaawgv .gt_subtitle {
   color: #000000;
   font-size: 85%;
   /* heading.subtitle.font.size */
@@ -468,7 +468,7 @@ gt(mini_iris)</code></pre>
   border-top-width: 0;
 }
 
-#zjtttegjxy .gt_bottom_border {
+#llkidaawgv .gt_bottom_border {
   border-bottom-style: solid;
   /* heading.border.bottom.style */
   border-bottom-width: 2px;
@@ -477,7 +477,7 @@ gt(mini_iris)</code></pre>
   /* heading.border.bottom.color */
 }
 
-#zjtttegjxy .gt_column_spanner {
+#llkidaawgv .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #A8A8A8;
@@ -485,7 +485,7 @@ gt(mini_iris)</code></pre>
   padding-bottom: 4px;
 }
 
-#zjtttegjxy .gt_col_heading {
+#llkidaawgv .gt_col_heading {
   color: #000000;
   background-color: #FFFFFF;
   /* column_labels.background.color */
@@ -498,11 +498,11 @@ gt(mini_iris)</code></pre>
   margin: 10px;
 }
 
-#zjtttegjxy .gt_sep_right {
+#llkidaawgv .gt_sep_right {
   border-right: 5px solid #FFFFFF;
 }
 
-#zjtttegjxy .gt_group_heading {
+#llkidaawgv .gt_group_heading {
   padding: 8px;
   color: #000000;
   background-color: #FFFFFF;
@@ -526,7 +526,7 @@ gt(mini_iris)</code></pre>
   vertical-align: middle;
 }
 
-#zjtttegjxy .gt_empty_group_heading {
+#llkidaawgv .gt_empty_group_heading {
   padding: 0.5px;
   color: #000000;
   background-color: #FFFFFF;
@@ -550,33 +550,33 @@ gt(mini_iris)</code></pre>
   vertical-align: middle;
 }
 
-#zjtttegjxy .gt_striped {
+#llkidaawgv .gt_striped {
   background-color: #f2f2f2;
 }
 
-#zjtttegjxy .gt_from_md > :first-child {
+#llkidaawgv .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#zjtttegjxy .gt_from_md > :last-child {
+#llkidaawgv .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#zjtttegjxy .gt_row {
+#llkidaawgv .gt_row {
   padding: 8px;
   /* row.padding */
   margin: 10px;
   vertical-align: middle;
 }
 
-#zjtttegjxy .gt_stub {
+#llkidaawgv .gt_stub {
   border-right-style: solid;
   border-right-width: 2px;
   border-right-color: #A8A8A8;
   padding-left: 12px;
 }
 
-#zjtttegjxy .gt_summary_row {
+#llkidaawgv .gt_summary_row {
   color: #000000;
   background-color: #FFFFFF;
   /* summary_row.background.color */
@@ -586,7 +586,7 @@ gt(mini_iris)</code></pre>
   /* summary_row.text_transform */
 }
 
-#zjtttegjxy .gt_grand_summary_row {
+#llkidaawgv .gt_grand_summary_row {
   color: #000000;
   background-color: #FFFFFF;
   /* grand_summary_row.background.color */
@@ -596,19 +596,19 @@ gt(mini_iris)</code></pre>
   /* grand_summary_row.text_transform */
 }
 
-#zjtttegjxy .gt_first_summary_row {
+#llkidaawgv .gt_first_summary_row {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #A8A8A8;
 }
 
-#zjtttegjxy .gt_first_grand_summary_row {
+#llkidaawgv .gt_first_grand_summary_row {
   border-top-style: double;
   border-top-width: 6px;
   border-top-color: #A8A8A8;
 }
 
-#zjtttegjxy .gt_table_body {
+#llkidaawgv .gt_table_body {
   border-top-style: solid;
   /* table_body.border.top.style */
   border-top-width: 2px;
@@ -623,55 +623,55 @@ gt(mini_iris)</code></pre>
   /* table_body.border.bottom.color */
 }
 
-#zjtttegjxy .gt_footnote {
+#llkidaawgv .gt_footnote {
   font-size: 90%;
   /* footnote.font.size */
   padding: 4px;
   /* footnote.padding */
 }
 
-#zjtttegjxy .gt_sourcenote {
+#llkidaawgv .gt_sourcenote {
   font-size: 90%;
   /* sourcenote.font.size */
   padding: 4px;
   /* sourcenote.padding */
 }
 
-#zjtttegjxy .gt_center {
+#llkidaawgv .gt_center {
   text-align: center;
 }
 
-#zjtttegjxy .gt_left {
+#llkidaawgv .gt_left {
   text-align: left;
 }
 
-#zjtttegjxy .gt_right {
+#llkidaawgv .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#zjtttegjxy .gt_font_normal {
+#llkidaawgv .gt_font_normal {
   font-weight: normal;
 }
 
-#zjtttegjxy .gt_font_bold {
+#llkidaawgv .gt_font_bold {
   font-weight: bold;
 }
 
-#zjtttegjxy .gt_font_italic {
+#llkidaawgv .gt_font_italic {
   font-style: italic;
 }
 
-#zjtttegjxy .gt_super {
+#llkidaawgv .gt_super {
   font-size: 65%;
 }
 
-#zjtttegjxy .gt_footnote_glyph {
+#llkidaawgv .gt_footnote_glyph {
   font-style: italic;
   font-size: 65%;
 }
 </style>
-<div id="zjtttegjxy" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
+<div id="llkidaawgv" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
 <table class='gt_table'>
 <tr>
 <th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Sepal.Length</th>
@@ -729,8 +729,8 @@ gt(mini_iris)</code></pre>
 </table>
 <!--gt table end-->
 </div>
-<div id="data-frame--display-table-" class="section level2">
-<h2>通常の data frame で列の階層性を表現した Display table を作る</h2>
+<div id="data-frame-gt-" class="section level2">
+<h2>通常の data frame + gt で列の階層性を表現する</h2>
 <p>これには <code>gt_tbl</code> オブジェクトを <code>tab_spanner()</code> 関数にパイプする．</p>
 <p>グループの数に応じて <code>tab_spanner</code> を呼ぶ必要があり，更に各グループに入る列を標準評価で (つまり文字列ベクトル) で指定しなければならないのが面倒だ．</p>
 <pre class="r"><code>mini_iris %&gt;%
@@ -741,7 +741,7 @@ gt(mini_iris)</code></pre>
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#sljdwedwhn .gt_table {
+#eerytioehb .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -760,13 +760,13 @@ gt(mini_iris)</code></pre>
   /* table.border.top.color */
 }
 
-#sljdwedwhn .gt_heading {
+#eerytioehb .gt_heading {
   background-color: #FFFFFF;
   /* heading.background.color */
   border-bottom-color: #FFFFFF;
 }
 
-#sljdwedwhn .gt_title {
+#eerytioehb .gt_title {
   color: #000000;
   font-size: 125%;
   /* heading.title.font.size */
@@ -777,7 +777,7 @@ gt(mini_iris)</code></pre>
   border-bottom-width: 0;
 }
 
-#sljdwedwhn .gt_subtitle {
+#eerytioehb .gt_subtitle {
   color: #000000;
   font-size: 85%;
   /* heading.subtitle.font.size */
@@ -788,7 +788,7 @@ gt(mini_iris)</code></pre>
   border-top-width: 0;
 }
 
-#sljdwedwhn .gt_bottom_border {
+#eerytioehb .gt_bottom_border {
   border-bottom-style: solid;
   /* heading.border.bottom.style */
   border-bottom-width: 2px;
@@ -797,7 +797,7 @@ gt(mini_iris)</code></pre>
   /* heading.border.bottom.color */
 }
 
-#sljdwedwhn .gt_column_spanner {
+#eerytioehb .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #A8A8A8;
@@ -805,7 +805,7 @@ gt(mini_iris)</code></pre>
   padding-bottom: 4px;
 }
 
-#sljdwedwhn .gt_col_heading {
+#eerytioehb .gt_col_heading {
   color: #000000;
   background-color: #FFFFFF;
   /* column_labels.background.color */
@@ -818,11 +818,11 @@ gt(mini_iris)</code></pre>
   margin: 10px;
 }
 
-#sljdwedwhn .gt_sep_right {
+#eerytioehb .gt_sep_right {
   border-right: 5px solid #FFFFFF;
 }
 
-#sljdwedwhn .gt_group_heading {
+#eerytioehb .gt_group_heading {
   padding: 8px;
   color: #000000;
   background-color: #FFFFFF;
@@ -846,7 +846,7 @@ gt(mini_iris)</code></pre>
   vertical-align: middle;
 }
 
-#sljdwedwhn .gt_empty_group_heading {
+#eerytioehb .gt_empty_group_heading {
   padding: 0.5px;
   color: #000000;
   background-color: #FFFFFF;
@@ -870,33 +870,33 @@ gt(mini_iris)</code></pre>
   vertical-align: middle;
 }
 
-#sljdwedwhn .gt_striped {
+#eerytioehb .gt_striped {
   background-color: #f2f2f2;
 }
 
-#sljdwedwhn .gt_from_md > :first-child {
+#eerytioehb .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#sljdwedwhn .gt_from_md > :last-child {
+#eerytioehb .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#sljdwedwhn .gt_row {
+#eerytioehb .gt_row {
   padding: 8px;
   /* row.padding */
   margin: 10px;
   vertical-align: middle;
 }
 
-#sljdwedwhn .gt_stub {
+#eerytioehb .gt_stub {
   border-right-style: solid;
   border-right-width: 2px;
   border-right-color: #A8A8A8;
   padding-left: 12px;
 }
 
-#sljdwedwhn .gt_summary_row {
+#eerytioehb .gt_summary_row {
   color: #000000;
   background-color: #FFFFFF;
   /* summary_row.background.color */
@@ -906,7 +906,7 @@ gt(mini_iris)</code></pre>
   /* summary_row.text_transform */
 }
 
-#sljdwedwhn .gt_grand_summary_row {
+#eerytioehb .gt_grand_summary_row {
   color: #000000;
   background-color: #FFFFFF;
   /* grand_summary_row.background.color */
@@ -916,19 +916,19 @@ gt(mini_iris)</code></pre>
   /* grand_summary_row.text_transform */
 }
 
-#sljdwedwhn .gt_first_summary_row {
+#eerytioehb .gt_first_summary_row {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #A8A8A8;
 }
 
-#sljdwedwhn .gt_first_grand_summary_row {
+#eerytioehb .gt_first_grand_summary_row {
   border-top-style: double;
   border-top-width: 6px;
   border-top-color: #A8A8A8;
 }
 
-#sljdwedwhn .gt_table_body {
+#eerytioehb .gt_table_body {
   border-top-style: solid;
   /* table_body.border.top.style */
   border-top-width: 2px;
@@ -943,55 +943,55 @@ gt(mini_iris)</code></pre>
   /* table_body.border.bottom.color */
 }
 
-#sljdwedwhn .gt_footnote {
+#eerytioehb .gt_footnote {
   font-size: 90%;
   /* footnote.font.size */
   padding: 4px;
   /* footnote.padding */
 }
 
-#sljdwedwhn .gt_sourcenote {
+#eerytioehb .gt_sourcenote {
   font-size: 90%;
   /* sourcenote.font.size */
   padding: 4px;
   /* sourcenote.padding */
 }
 
-#sljdwedwhn .gt_center {
+#eerytioehb .gt_center {
   text-align: center;
 }
 
-#sljdwedwhn .gt_left {
+#eerytioehb .gt_left {
   text-align: left;
 }
 
-#sljdwedwhn .gt_right {
+#eerytioehb .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#sljdwedwhn .gt_font_normal {
+#eerytioehb .gt_font_normal {
   font-weight: normal;
 }
 
-#sljdwedwhn .gt_font_bold {
+#eerytioehb .gt_font_bold {
   font-weight: bold;
 }
 
-#sljdwedwhn .gt_font_italic {
+#eerytioehb .gt_font_italic {
   font-style: italic;
 }
 
-#sljdwedwhn .gt_super {
+#eerytioehb .gt_super {
   font-size: 65%;
 }
 
-#sljdwedwhn .gt_footnote_glyph {
+#eerytioehb .gt_footnote_glyph {
   font-style: italic;
   font-size: 65%;
 }
 </style>
-<div id="sljdwedwhn" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
+<div id="eerytioehb" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
 <table class='gt_table'>
 <tr>
 <th class='gt_col_heading gt_column_spanner gt_sep_right gt_center' rowspan='1' colspan='2'>Sepal</th>
@@ -1054,8 +1054,8 @@ gt(mini_iris)</code></pre>
 <!--gt table end-->
 </div>
 </div>
-<div id="packed-data-frame--display-table-" class="section level2">
-<h2>packed data frame で列の階層性を表現した Display table を作る</h2>
+<div id="packed-data-frame-gt-" class="section level2">
+<h2>packed data frame + gt で列の階層性を表現する</h2>
 <p>packed data frame のどの列が data frame column か調べておき，data frame column の名前と，各 data frame column を構成する列の名前を元に <code>tab_spanner</code> を <code>for</code> で繰り返し呼べばいい．</p>
 <p>なんかごちゃごちゃした説明文になってしまったが，コードは非常にシンプルだ．</p>
 <pre class="r"><code>gt_packable &lt;- function(x) {
@@ -1078,7 +1078,7 @@ gt(mini_iris)</code></pre>
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#coqqysalql .gt_table {
+#ywnuyxmrzc .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -1097,13 +1097,13 @@ gt(mini_iris)</code></pre>
   /* table.border.top.color */
 }
 
-#coqqysalql .gt_heading {
+#ywnuyxmrzc .gt_heading {
   background-color: #FFFFFF;
   /* heading.background.color */
   border-bottom-color: #FFFFFF;
 }
 
-#coqqysalql .gt_title {
+#ywnuyxmrzc .gt_title {
   color: #000000;
   font-size: 125%;
   /* heading.title.font.size */
@@ -1114,7 +1114,7 @@ gt(mini_iris)</code></pre>
   border-bottom-width: 0;
 }
 
-#coqqysalql .gt_subtitle {
+#ywnuyxmrzc .gt_subtitle {
   color: #000000;
   font-size: 85%;
   /* heading.subtitle.font.size */
@@ -1125,7 +1125,7 @@ gt(mini_iris)</code></pre>
   border-top-width: 0;
 }
 
-#coqqysalql .gt_bottom_border {
+#ywnuyxmrzc .gt_bottom_border {
   border-bottom-style: solid;
   /* heading.border.bottom.style */
   border-bottom-width: 2px;
@@ -1134,7 +1134,7 @@ gt(mini_iris)</code></pre>
   /* heading.border.bottom.color */
 }
 
-#coqqysalql .gt_column_spanner {
+#ywnuyxmrzc .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #A8A8A8;
@@ -1142,7 +1142,7 @@ gt(mini_iris)</code></pre>
   padding-bottom: 4px;
 }
 
-#coqqysalql .gt_col_heading {
+#ywnuyxmrzc .gt_col_heading {
   color: #000000;
   background-color: #FFFFFF;
   /* column_labels.background.color */
@@ -1155,11 +1155,11 @@ gt(mini_iris)</code></pre>
   margin: 10px;
 }
 
-#coqqysalql .gt_sep_right {
+#ywnuyxmrzc .gt_sep_right {
   border-right: 5px solid #FFFFFF;
 }
 
-#coqqysalql .gt_group_heading {
+#ywnuyxmrzc .gt_group_heading {
   padding: 8px;
   color: #000000;
   background-color: #FFFFFF;
@@ -1183,7 +1183,7 @@ gt(mini_iris)</code></pre>
   vertical-align: middle;
 }
 
-#coqqysalql .gt_empty_group_heading {
+#ywnuyxmrzc .gt_empty_group_heading {
   padding: 0.5px;
   color: #000000;
   background-color: #FFFFFF;
@@ -1207,33 +1207,33 @@ gt(mini_iris)</code></pre>
   vertical-align: middle;
 }
 
-#coqqysalql .gt_striped {
+#ywnuyxmrzc .gt_striped {
   background-color: #f2f2f2;
 }
 
-#coqqysalql .gt_from_md > :first-child {
+#ywnuyxmrzc .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#coqqysalql .gt_from_md > :last-child {
+#ywnuyxmrzc .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#coqqysalql .gt_row {
+#ywnuyxmrzc .gt_row {
   padding: 8px;
   /* row.padding */
   margin: 10px;
   vertical-align: middle;
 }
 
-#coqqysalql .gt_stub {
+#ywnuyxmrzc .gt_stub {
   border-right-style: solid;
   border-right-width: 2px;
   border-right-color: #A8A8A8;
   padding-left: 12px;
 }
 
-#coqqysalql .gt_summary_row {
+#ywnuyxmrzc .gt_summary_row {
   color: #000000;
   background-color: #FFFFFF;
   /* summary_row.background.color */
@@ -1243,7 +1243,7 @@ gt(mini_iris)</code></pre>
   /* summary_row.text_transform */
 }
 
-#coqqysalql .gt_grand_summary_row {
+#ywnuyxmrzc .gt_grand_summary_row {
   color: #000000;
   background-color: #FFFFFF;
   /* grand_summary_row.background.color */
@@ -1253,19 +1253,19 @@ gt(mini_iris)</code></pre>
   /* grand_summary_row.text_transform */
 }
 
-#coqqysalql .gt_first_summary_row {
+#ywnuyxmrzc .gt_first_summary_row {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #A8A8A8;
 }
 
-#coqqysalql .gt_first_grand_summary_row {
+#ywnuyxmrzc .gt_first_grand_summary_row {
   border-top-style: double;
   border-top-width: 6px;
   border-top-color: #A8A8A8;
 }
 
-#coqqysalql .gt_table_body {
+#ywnuyxmrzc .gt_table_body {
   border-top-style: solid;
   /* table_body.border.top.style */
   border-top-width: 2px;
@@ -1280,55 +1280,55 @@ gt(mini_iris)</code></pre>
   /* table_body.border.bottom.color */
 }
 
-#coqqysalql .gt_footnote {
+#ywnuyxmrzc .gt_footnote {
   font-size: 90%;
   /* footnote.font.size */
   padding: 4px;
   /* footnote.padding */
 }
 
-#coqqysalql .gt_sourcenote {
+#ywnuyxmrzc .gt_sourcenote {
   font-size: 90%;
   /* sourcenote.font.size */
   padding: 4px;
   /* sourcenote.padding */
 }
 
-#coqqysalql .gt_center {
+#ywnuyxmrzc .gt_center {
   text-align: center;
 }
 
-#coqqysalql .gt_left {
+#ywnuyxmrzc .gt_left {
   text-align: left;
 }
 
-#coqqysalql .gt_right {
+#ywnuyxmrzc .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#coqqysalql .gt_font_normal {
+#ywnuyxmrzc .gt_font_normal {
   font-weight: normal;
 }
 
-#coqqysalql .gt_font_bold {
+#ywnuyxmrzc .gt_font_bold {
   font-weight: bold;
 }
 
-#coqqysalql .gt_font_italic {
+#ywnuyxmrzc .gt_font_italic {
   font-style: italic;
 }
 
-#coqqysalql .gt_super {
+#ywnuyxmrzc .gt_super {
   font-size: 65%;
 }
 
-#coqqysalql .gt_footnote_glyph {
+#ywnuyxmrzc .gt_footnote_glyph {
   font-style: italic;
   font-size: 65%;
 }
 </style>
-<div id="coqqysalql" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
+<div id="ywnuyxmrzc" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
 <table class='gt_table'>
 <tr>
 <th class='gt_col_heading gt_column_spanner gt_sep_right gt_center' rowspan='1' colspan='2'>Sepal</th>
