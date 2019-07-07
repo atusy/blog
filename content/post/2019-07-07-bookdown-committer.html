@@ -1,0 +1,69 @@
+---
+title: bookdown のコミッタになったのでこれまでの貢献を振り返る
+author: ~
+date: '2019-07-07'
+slug: bookdown-committer
+categories: [R]
+tags: [rmarkdown, bookdown]
+---
+
+
+
+<p>bookdown のコミッタになった．ほんまにええんかいなと思いつつ，貢献を続けていく上で励みになるので，ありがたく頂戴した次第．</p>
+<p>私が過去に出した PR が Pandoc の仕様変更に巻き込まれたので，どうするか相談していたところ，</p>
+<blockquote>
+<p>君の Issues や PRs はいつもわかりやすいから，書き込み権限が欲しくなったらいつでも言ってくれ．喜んで承認するよ．
+(原文: Since your issues and PRs are always so clear, just let me know if you want write access to this repo someday, and I’ll be happy to grant it to you)</p>
+</blockquote>
+<p>と言ってもらえた．嬉し過ぎでした (<a href="https://github.com/rstudio/bookdown/pull/706#issuecomment-508875390" class="uri">https://github.com/rstudio/bookdown/pull/706#issuecomment-508875390</a>)．</p>
+<p>ちなみに R Markdown 関係でこれまでにした PR は8件で内5件がマージ，2件がマージ待ち，1件がマージせずにクローズ．
+Issues は3件．ちなみにマージ待ちの案件が片付いたらやりたい PR がまだある．気負う気はないが，コミッタに相応わしい貢献をしたいところだ．</p>
+<p>以下，私の関わった PRs と Issues 一覧．チェックしてあるものは closed．</p>
+<ul>
+<li>knitr
+<ul>
+<li><input type="checkbox" disabled="" checked="" />
+<a href="https://github.com/yihui/knitr/issues/1703">#1703 Issue</a>:
+R チャンクで生成した画像に id 属性を与える機能が欲しいと言われたのでもうあると答えた，</li>
+<li><input type="checkbox" disabled="" checked="" />
+<a href="https://github.com/yihui/knitr/pull/1710">#1710 PR</a>:
+Pandoc の fenced code attribute をチャンクオプションから指定できるようにした．</li>
+<li><input type="checkbox" disabled="" checked="" />
+<a href="https://github.com/yihui/knitr/pull/1715">#1715 PR</a>:
+knitr のテスト方法は特殊なので，説明文を <code>CONTRIBUTING.md</code> に追加した．</li>
+<li><input type="checkbox" disabled="" checked="" />
+<a href="https://github.com/yihui/knitr/pull/1727">#1727 PR</a>:
+Travis CI でテストをパスできるように yaml を修正した．</li>
+</ul></li>
+<li>rmarkdown
+<ul>
+<li><input type="checkbox" disabled="" checked="" />
+<a href="https://github.com/rstudio/rmarkdown/issues/1557">#1557 Issue</a>:
+Pandoc 2 にするとチャンクオプションの <code>indent</code> を指定した時の挙動が正常化したという報告に対し，いつの更新によるものか調べて追加報告した．</li>
+<li><input type="checkbox" disabled="" />
+<a href="https://github.com/rstudio/rmarkdown/pull/1596">#1597 PR</a>
+<code>html_document</code> で，結果を示すコードブロックに行番号を与えると，背景色が白から灰色になってしまう問題を修正．</li>
+<li><input type="checkbox" disabled="" />
+<a href="https://github.com/rstudio/rmarkdown/pull/1598">#1598 PR</a>:
+<code>html_document</code> のコードブロックの背景色が適切に適用されない不具合を修正．</li>
+</ul></li>
+<li>bookdown
+<ul>
+<li><input type="checkbox" disabled="" checked="" />
+<a href="https://github.com/rstudio/bookdown/issues/705">#705 Issue</a>,
+<a href="https://github.com/rstudio/bookdown/pull/706">#706 PR</a>:
+<code>bookdown::html_document2</code> やそれに依存する <code>output</code> がコードブロックに行番号を与えられない問題を修正した．</li>
+<li><input type="checkbox" disabled="" checked="" />
+<del><a href="https://github.com/rstudio/bookdown/pull/738">PR #738</a></del>:
+様々な output でコードブロックの表示を改善したかったが，考え直したくなったので close.</li>
+</ul></li>
+<li>pagedown
+<ul>
+<li><input type="checkbox" disabled="" checked="" />
+<a href="https://github.com/rstudio/pagedown/pull/100">#100 PR</a>:
+コードブロックに行番号をつけると，折り返したコードの表示がおかしくなるのを修正した．</li>
+<li><input type="checkbox" disabled="" checked="" />
+<a href="https://github.com/rstudio/pagedown/pull/106">#106 PR</a>:
+推奨する Rstudio のバージョンが1.2系のプレビュー版のままだったので正式版に変更した．</li>
+</ul></li>
+</ul>
