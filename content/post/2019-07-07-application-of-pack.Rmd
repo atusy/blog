@@ -132,7 +132,7 @@ Display table (見せる用の表) は `gt` パッケージが定義している
 packed data frame もこれくらいのノリで扱えると最高だ．
 
 ```{r}
-library(gt)
+library(gt) # インストールするには source("https://install-github.me/rstudio/gt")
 library(dplyr)
 
 mini_iris <- iris %>%
