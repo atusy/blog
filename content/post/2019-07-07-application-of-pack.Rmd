@@ -129,6 +129,7 @@ iris[1:3, ] %>%
 Display table (表示用の表) は `gt` パッケージが定義している用語で，R 内部で扱うための表 (data frame) に対して，人に見せるための表くらいの認識でいいと思う．
 
 `gt` は非常に優秀で，例えば grouped data frame を一発で良い感じにしてくれる．
+packed data frame もこれくらいのノリで扱えると最高だ．
 
 ```{r}
 library(gt)
@@ -141,11 +142,12 @@ mini_iris <- iris %>%
 gt(mini_iris)
 ```
 
-packed data frame もこれくらいのノリで扱えると最高だ．
 
 ## 通常の data frame で列の階層性を表現した Display table を作る
 
 これには `gt_tbl` オブジェクトを `tab_spanner()` 関数にパイプする．
+
+グループの数に応じて `tab_spanner` を呼ぶ必要があり，更に各グループに入る列を標準評価で (つまり文字列ベクトル) で指定しなければならないのが面倒だ．
 
 ```{r}
 mini_iris %>%
@@ -153,8 +155,6 @@ mini_iris %>%
   tab_spanner("Sepal", c("Sepal.Length", "Sepal.Width")) %>%
   tab_spanner("Petal", c("Petal.Length", "Petal.Width"))
 ```
-
-グループの数に応じて `tab_spanner` を呼ぶ必要があり，更に各グループに入る列を標準評価で (つまり文字列ベクトル) で指定しなければならないのが面倒だ．
 
 ## packed data frame で列の階層性を表現した Display table を作る
 
