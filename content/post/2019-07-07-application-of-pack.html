@@ -1,0 +1,1397 @@
+---
+title: Tidyr 1.0.0 で追加される pack を使えば見せる用の表が簡単に作れるかも
+author: ~
+date: '2019-07-07'
+slug: application-of-pack
+categories: [R]
+tags: [tidyr]
+images:
+  - /images/posts/2019-07-07-application-of-pack/iris-gt.png
+summary: |
+  ![](/images/posts/2019-07-07-application-of-pack/iris-gt.png)
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#packed-data-frame-">packed data frame を作る</a><ul>
+<li><a href="#base">base</a></li>
+<li><a href="#tibble">tibble</a></li>
+<li><a href="#tidyr">tidyr</a></li>
+</ul></li>
+<li><a href="#packed-data-frame--1">packed data frame を良い感じに表示用の表にする</a><ul>
+<li><a href="#data-frame--display-table-">通常の data frame で列の階層性を表現した Display table を作る</a></li>
+<li><a href="#packed-data-frame--display-table-">packed data frame で列の階層性を表現した Display table を作る</a></li>
+</ul></li>
+<li><a href="#enjoy">Enjoy!</a></li>
+</ul>
+</div>
+
+<p>tidyr 1.0.0 では新たに <code>pack</code>, <code>unpack</code> という関数が追加される．</p>
+<p>これにより tidyverse で data frame column を扱えるようになる．</p>
+<p>イメージとしてはこんな感じの階層性のあるデータを表現できる．</p>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#fvllcfhmwm .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #000000;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  /* table.background.color */
+  width: auto;
+  /* table.width */
+  border-top-style: solid;
+  /* table.border.top.style */
+  border-top-width: 2px;
+  /* table.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table.border.top.color */
+}
+
+#fvllcfhmwm .gt_heading {
+  background-color: #FFFFFF;
+  /* heading.background.color */
+  border-bottom-color: #FFFFFF;
+}
+
+#fvllcfhmwm .gt_title {
+  color: #000000;
+  font-size: 125%;
+  /* heading.title.font.size */
+  padding-top: 4px;
+  /* heading.top.padding */
+  padding-bottom: 1px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#fvllcfhmwm .gt_subtitle {
+  color: #000000;
+  font-size: 85%;
+  /* heading.subtitle.font.size */
+  padding-top: 1px;
+  padding-bottom: 4px;
+  /* heading.bottom.padding */
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#fvllcfhmwm .gt_bottom_border {
+  border-bottom-style: solid;
+  /* heading.border.bottom.style */
+  border-bottom-width: 2px;
+  /* heading.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* heading.border.bottom.color */
+}
+
+#fvllcfhmwm .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#fvllcfhmwm .gt_col_heading {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* column_labels.background.color */
+  font-size: 16px;
+  /* column_labels.font.size */
+  font-weight: initial;
+  /* column_labels.font.weight */
+  vertical-align: middle;
+  padding: 10px;
+  margin: 10px;
+}
+
+#fvllcfhmwm .gt_sep_right {
+  border-right: 5px solid #FFFFFF;
+}
+
+#fvllcfhmwm .gt_group_heading {
+  padding: 8px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* row_group.background.color */
+  font-size: 16px;
+  /* row_group.font.size */
+  font-weight: initial;
+  /* row_group.font.weight */
+  border-top-style: solid;
+  /* row_group.border.top.style */
+  border-top-width: 2px;
+  /* row_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* row_group.border.top.color */
+  border-bottom-style: solid;
+  /* row_group.border.bottom.style */
+  border-bottom-width: 2px;
+  /* row_group.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* row_group.border.bottom.color */
+  vertical-align: middle;
+}
+
+#fvllcfhmwm .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* row_group.background.color */
+  font-size: 16px;
+  /* row_group.font.size */
+  font-weight: initial;
+  /* row_group.font.weight */
+  border-top-style: solid;
+  /* row_group.border.top.style */
+  border-top-width: 2px;
+  /* row_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* row_group.border.top.color */
+  border-bottom-style: solid;
+  /* row_group.border.bottom.style */
+  border-bottom-width: 2px;
+  /* row_group.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* row_group.border.bottom.color */
+  vertical-align: middle;
+}
+
+#fvllcfhmwm .gt_striped {
+  background-color: #f2f2f2;
+}
+
+#fvllcfhmwm .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#fvllcfhmwm .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#fvllcfhmwm .gt_row {
+  padding: 8px;
+  /* row.padding */
+  margin: 10px;
+  vertical-align: middle;
+}
+
+#fvllcfhmwm .gt_stub {
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #A8A8A8;
+  padding-left: 12px;
+}
+
+#fvllcfhmwm .gt_summary_row {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* summary_row.background.color */
+  padding: 8px;
+  /* summary_row.padding */
+  text-transform: inherit;
+  /* summary_row.text_transform */
+}
+
+#fvllcfhmwm .gt_grand_summary_row {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* grand_summary_row.background.color */
+  padding: 8px;
+  /* grand_summary_row.padding */
+  text-transform: inherit;
+  /* grand_summary_row.text_transform */
+}
+
+#fvllcfhmwm .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+}
+
+#fvllcfhmwm .gt_first_grand_summary_row {
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #A8A8A8;
+}
+
+#fvllcfhmwm .gt_table_body {
+  border-top-style: solid;
+  /* table_body.border.top.style */
+  border-top-width: 2px;
+  /* table_body.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table_body.border.top.color */
+  border-bottom-style: solid;
+  /* table_body.border.bottom.style */
+  border-bottom-width: 2px;
+  /* table_body.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* table_body.border.bottom.color */
+}
+
+#fvllcfhmwm .gt_footnote {
+  font-size: 90%;
+  /* footnote.font.size */
+  padding: 4px;
+  /* footnote.padding */
+}
+
+#fvllcfhmwm .gt_sourcenote {
+  font-size: 90%;
+  /* sourcenote.font.size */
+  padding: 4px;
+  /* sourcenote.padding */
+}
+
+#fvllcfhmwm .gt_center {
+  text-align: center;
+}
+
+#fvllcfhmwm .gt_left {
+  text-align: left;
+}
+
+#fvllcfhmwm .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#fvllcfhmwm .gt_font_normal {
+  font-weight: normal;
+}
+
+#fvllcfhmwm .gt_font_bold {
+  font-weight: bold;
+}
+
+#fvllcfhmwm .gt_font_italic {
+  font-style: italic;
+}
+
+#fvllcfhmwm .gt_super {
+  font-size: 65%;
+}
+
+#fvllcfhmwm .gt_footnote_glyph {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="fvllcfhmwm" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
+<table class='gt_table'>
+<tr>
+<th class='gt_col_heading gt_center' rowspan='2' colspan='1'>X</th>
+<th class='gt_col_heading gt_column_spanner gt_center' rowspan='1' colspan='2'>Y</th>
+</tr>
+<tr>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>y1</th>
+<th class='gt_col_heading gt_NA' rowspan='1' colspan='1'>y2</th>
+</tr>
+<tbody class='gt_table_body'>
+<tr>
+<td class='gt_row gt_right'>1</td>
+<td class='gt_row gt_right'>4</td>
+<td class='gt_row gt_right'>7</td>
+</tr>
+<tr>
+<td class='gt_row gt_right gt_striped'>2</td>
+<td class='gt_row gt_right gt_striped'>5</td>
+<td class='gt_row gt_right gt_striped'>8</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>3</td>
+<td class='gt_row gt_right'>6</td>
+<td class='gt_row gt_right'>9</td>
+</tr>
+</tbody>
+</table>
+<!--gt table end-->
+</div>
+<p>tidyr の <code>pack</code> 関数で簡単に作れるので， data frame column を持つデータフレームを packed data frame と呼ぶことにする，</p>
+<p>この <code>pack</code>，せっかく実装されるくせに，ドキュメントでは packed data frame を扱える関数がまだほとんどないから，使い道も特にないとされている．</p>
+<p>不憫だ．</p>
+<p>しかしまさに上述の表を作る時に役立つ．既に <code>gt</code> パッケージの issues で提案済みだ (<a href="https://github.com/rstudio/gt/issues/314">#314</a>)</p>
+<p>これまでは階層性のないデータフレームを <code>kable</code> や <code>gt</code> に与えてから弄くり回していたのに対し，これからは階層性のあるデータフレーム (= packed data frame) を関数に与えれば一撃になると素敵だ．</p>
+<p>これには2つのメリットがあると思っている．</p>
+<ul>
+<li>可視化したいデータと可視化した結果が同じ構造を持つので，可視化の段階でデータをこねくり回す<strong>ような</strong>操作がなくなる</li>
+<li>より上流側の関数を覚えておけば，同じことを実現するために用意された下流の関数を覚える必要が減る</li>
+</ul>
+<p>では実際に packded data frame の作り方と可視化方法を検討してみよう．</p>
+<div id="packed-data-frame-" class="section level1">
+<h1>packed data frame を作る</h1>
+<div id="base" class="section level2">
+<h2>base</h2>
+<p>base で作るならこんな感じで，データフレームを入れ子にする．親階層と子階層のデータフレームが同じ行数であることがポイントだ．</p>
+<pre class="r"><code>df &lt;- data.frame(X = 1:3)
+df$Y &lt;- data.frame(y1 = 4:6, y2 = 7:9)
+
+# 一見 flatten された data.frame に見えるが
+print(df)
+#&gt;   X Y.y1 Y.y2
+#&gt; 1 1    4    7
+#&gt; 2 2    5    8
+#&gt; 3 3    6    9
+
+# 構造状はデータフレームが入れ子になっている．
+str(df)
+#&gt; &#39;data.frame&#39;:    3 obs. of  2 variables:
+#&gt;  $ X: int  1 2 3
+#&gt;  $ Y:&#39;data.frame&#39;:   3 obs. of  2 variables:
+#&gt;   ..$ y1: int  4 5 6
+#&gt;   ..$ y2: int  7 8 9</code></pre>
+<p>ちなみに子階層に親階層と異なる行数のデータフレームを代入するとエラーになる．</p>
+<pre class="r"><code>df$A &lt;- data.frame(a = 1)
+#&gt; Error in `$&lt;-.data.frame`(`*tmp*`, A, value = structure(list(a = 1), class = &quot;data.frame&quot;, row.names = c(NA, : replacement has 1 row, data has 3</code></pre>
+</div>
+<div id="tibble" class="section level2">
+<h2>tibble</h2>
+<p><code>tibble</code> でも packed data frame を作ることができる．
+<code>base</code> と異なり，<code>tibble</code> 関数一発で作れる．また，親階層と子階層の名前は <code>$</code> で隔たれており， <code>.</code> よりも階層性が明瞭だ．</p>
+<pre class="r"><code>tibble(X = 1:3, Y = data.frame(y1  = 4:6, y2 = 7:9))
+#&gt; # A tibble: 3 x 2
+#&gt;       X  Y$y1   $y2
+#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;
+#&gt; 1     1     4     7
+#&gt; 2     2     5     8
+#&gt; 3     3     6     9</code></pre>
+</div>
+<div id="tidyr" class="section level2">
+<h2>tidyr</h2>
+<p>何もないところから packed data frame を作るなら <code>tibble</code> がいいだろうが，既存のデータフレームから指定した列ごとにグループに分けて packed data frame 化したい時は <code>tidyr</code> の出番だ．
+<code>tidyr</code> なら <code>unpack</code> により， packed data frame を通常のデータフレームに戻すこともできる．</p>
+<p>例えば先程の例なら，以下のように， <code>Y</code> 列に <code>pack</code> したい列を <a href="https://speakerdeck.com/yutannihilation/dplyrfalseselecttomutatefalsesemanteikusufalsewei-i"><code>select</code> のセマンティクス</a>で選べばいい．</p>
+<pre class="r"><code>library(tidyr)
+
+# pack
+df &lt;- data.frame(X = 1:3, y1 = 4:6, y2 = 7:9) %&gt;%
+  pack(Y = c(y1, y2))
+
+df
+#&gt;   X Y.y1 Y.y2
+#&gt; 1 1    4    7
+#&gt; 2 2    5    8
+#&gt; 3 3    6    9</code></pre>
+<p>元に戻す時は <code>unpack</code> 関数で， <code>unpack</code> したい列を選ぶ．</p>
+<pre class="r"><code># unpack
+unpack(df, Y)
+#&gt; # A tibble: 3 x 3
+#&gt;       X    y1    y2
+#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;
+#&gt; 1     1     4     7
+#&gt; 2     2     5     8
+#&gt; 3     3     6     9</code></pre>
+<p>select のセマンティクスが有効なので， <code>starts_with</code> などによるマッチングができる．また，複数の data frame column を作ることもできる．みんな大好き <code>iris</code> もこの通り．</p>
+<pre class="r"><code>iris[1:3, ] %&gt;%
+  pack(Sepal = starts_with(&quot;Sepal&quot;), Petal = starts_with(&quot;Petal&quot;)) %&gt;%
+  as_tibble
+#&gt; # A tibble: 3 x 3
+#&gt;   Species Sepal$Sepal.Length $Sepal.Width Petal$Petal.Length $Petal.Width
+#&gt;   &lt;fct&gt;                &lt;dbl&gt;        &lt;dbl&gt;              &lt;dbl&gt;        &lt;dbl&gt;
+#&gt; 1 setosa                 5.1          3.5                1.4          0.2
+#&gt; 2 setosa                 4.9          3                  1.4          0.2
+#&gt; 3 setosa                 4.7          3.2                1.3          0.2</code></pre>
+<p>ただし，見栄えの問題で <code>as_tibble</code> しておくのが無難だ．</p>
+</div>
+</div>
+<div id="packed-data-frame--1" class="section level1">
+<h1>packed data frame を良い感じに表示用の表にする</h1>
+<p>Display table (表示用の表) は <code>gt</code> パッケージが定義している用語で，R 内部で扱うための表 (data frame) に対して，人に見せるための表くらいの認識でいいと思う．</p>
+<p><code>gt</code> は非常に優秀で，例えば grouped data frame を一発で良い感じにしてくれる．</p>
+<pre class="r"><code>library(gt)
+library(dplyr)
+
+mini_iris &lt;- iris %&gt;%
+  group_by(Species) %&gt;%
+  slice(1:2)
+
+gt(mini_iris)</code></pre>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#qeoorhpdon .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #000000;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  /* table.background.color */
+  width: auto;
+  /* table.width */
+  border-top-style: solid;
+  /* table.border.top.style */
+  border-top-width: 2px;
+  /* table.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table.border.top.color */
+}
+
+#qeoorhpdon .gt_heading {
+  background-color: #FFFFFF;
+  /* heading.background.color */
+  border-bottom-color: #FFFFFF;
+}
+
+#qeoorhpdon .gt_title {
+  color: #000000;
+  font-size: 125%;
+  /* heading.title.font.size */
+  padding-top: 4px;
+  /* heading.top.padding */
+  padding-bottom: 1px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#qeoorhpdon .gt_subtitle {
+  color: #000000;
+  font-size: 85%;
+  /* heading.subtitle.font.size */
+  padding-top: 1px;
+  padding-bottom: 4px;
+  /* heading.bottom.padding */
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#qeoorhpdon .gt_bottom_border {
+  border-bottom-style: solid;
+  /* heading.border.bottom.style */
+  border-bottom-width: 2px;
+  /* heading.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* heading.border.bottom.color */
+}
+
+#qeoorhpdon .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#qeoorhpdon .gt_col_heading {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* column_labels.background.color */
+  font-size: 16px;
+  /* column_labels.font.size */
+  font-weight: initial;
+  /* column_labels.font.weight */
+  vertical-align: middle;
+  padding: 10px;
+  margin: 10px;
+}
+
+#qeoorhpdon .gt_sep_right {
+  border-right: 5px solid #FFFFFF;
+}
+
+#qeoorhpdon .gt_group_heading {
+  padding: 8px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* row_group.background.color */
+  font-size: 16px;
+  /* row_group.font.size */
+  font-weight: initial;
+  /* row_group.font.weight */
+  border-top-style: solid;
+  /* row_group.border.top.style */
+  border-top-width: 2px;
+  /* row_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* row_group.border.top.color */
+  border-bottom-style: solid;
+  /* row_group.border.bottom.style */
+  border-bottom-width: 2px;
+  /* row_group.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* row_group.border.bottom.color */
+  vertical-align: middle;
+}
+
+#qeoorhpdon .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* row_group.background.color */
+  font-size: 16px;
+  /* row_group.font.size */
+  font-weight: initial;
+  /* row_group.font.weight */
+  border-top-style: solid;
+  /* row_group.border.top.style */
+  border-top-width: 2px;
+  /* row_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* row_group.border.top.color */
+  border-bottom-style: solid;
+  /* row_group.border.bottom.style */
+  border-bottom-width: 2px;
+  /* row_group.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* row_group.border.bottom.color */
+  vertical-align: middle;
+}
+
+#qeoorhpdon .gt_striped {
+  background-color: #f2f2f2;
+}
+
+#qeoorhpdon .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#qeoorhpdon .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#qeoorhpdon .gt_row {
+  padding: 8px;
+  /* row.padding */
+  margin: 10px;
+  vertical-align: middle;
+}
+
+#qeoorhpdon .gt_stub {
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #A8A8A8;
+  padding-left: 12px;
+}
+
+#qeoorhpdon .gt_summary_row {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* summary_row.background.color */
+  padding: 8px;
+  /* summary_row.padding */
+  text-transform: inherit;
+  /* summary_row.text_transform */
+}
+
+#qeoorhpdon .gt_grand_summary_row {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* grand_summary_row.background.color */
+  padding: 8px;
+  /* grand_summary_row.padding */
+  text-transform: inherit;
+  /* grand_summary_row.text_transform */
+}
+
+#qeoorhpdon .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+}
+
+#qeoorhpdon .gt_first_grand_summary_row {
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #A8A8A8;
+}
+
+#qeoorhpdon .gt_table_body {
+  border-top-style: solid;
+  /* table_body.border.top.style */
+  border-top-width: 2px;
+  /* table_body.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table_body.border.top.color */
+  border-bottom-style: solid;
+  /* table_body.border.bottom.style */
+  border-bottom-width: 2px;
+  /* table_body.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* table_body.border.bottom.color */
+}
+
+#qeoorhpdon .gt_footnote {
+  font-size: 90%;
+  /* footnote.font.size */
+  padding: 4px;
+  /* footnote.padding */
+}
+
+#qeoorhpdon .gt_sourcenote {
+  font-size: 90%;
+  /* sourcenote.font.size */
+  padding: 4px;
+  /* sourcenote.padding */
+}
+
+#qeoorhpdon .gt_center {
+  text-align: center;
+}
+
+#qeoorhpdon .gt_left {
+  text-align: left;
+}
+
+#qeoorhpdon .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#qeoorhpdon .gt_font_normal {
+  font-weight: normal;
+}
+
+#qeoorhpdon .gt_font_bold {
+  font-weight: bold;
+}
+
+#qeoorhpdon .gt_font_italic {
+  font-style: italic;
+}
+
+#qeoorhpdon .gt_super {
+  font-size: 65%;
+}
+
+#qeoorhpdon .gt_footnote_glyph {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="qeoorhpdon" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
+<table class='gt_table'>
+<tr>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Sepal.Length</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Sepal.Width</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Petal.Length</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Petal.Width</th>
+</tr>
+<tbody class='gt_table_body'>
+<tr class='gt_group_heading_row'>
+<td colspan='4' class='gt_group_heading'>setosa</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>5.1</td>
+<td class='gt_row gt_right'>3.5</td>
+<td class='gt_row gt_right'>1.4</td>
+<td class='gt_row gt_right'>0.2</td>
+</tr>
+<tr>
+<td class='gt_row gt_right gt_striped'>4.9</td>
+<td class='gt_row gt_right gt_striped'>3.0</td>
+<td class='gt_row gt_right gt_striped'>1.4</td>
+<td class='gt_row gt_right gt_striped'>0.2</td>
+</tr>
+<tr class='gt_group_heading_row'>
+<td colspan='4' class='gt_group_heading'>versicolor</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>7.0</td>
+<td class='gt_row gt_right'>3.2</td>
+<td class='gt_row gt_right'>4.7</td>
+<td class='gt_row gt_right'>1.4</td>
+</tr>
+<tr>
+<td class='gt_row gt_right gt_striped'>6.4</td>
+<td class='gt_row gt_right gt_striped'>3.2</td>
+<td class='gt_row gt_right gt_striped'>4.5</td>
+<td class='gt_row gt_right gt_striped'>1.5</td>
+</tr>
+<tr class='gt_group_heading_row'>
+<td colspan='4' class='gt_group_heading'>virginica</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>6.3</td>
+<td class='gt_row gt_right'>3.3</td>
+<td class='gt_row gt_right'>6.0</td>
+<td class='gt_row gt_right'>2.5</td>
+</tr>
+<tr>
+<td class='gt_row gt_right gt_striped'>5.8</td>
+<td class='gt_row gt_right gt_striped'>2.7</td>
+<td class='gt_row gt_right gt_striped'>5.1</td>
+<td class='gt_row gt_right gt_striped'>1.9</td>
+</tr>
+</tbody>
+</table>
+<!--gt table end-->
+</div>
+<p>packed data frame もこれくらいのノリで扱えると最高だ．</p>
+<div id="data-frame--display-table-" class="section level2">
+<h2>通常の data frame で列の階層性を表現した Display table を作る</h2>
+<p>これには <code>gt_tbl</code> オブジェクトを <code>tab_spanner()</code> 関数にパイプする．</p>
+<pre class="r"><code>mini_iris %&gt;%
+  gt %&gt;%
+  tab_spanner(&quot;Sepal&quot;, c(&quot;Sepal.Length&quot;, &quot;Sepal.Width&quot;)) %&gt;%
+  tab_spanner(&quot;Petal&quot;, c(&quot;Petal.Length&quot;, &quot;Petal.Width&quot;))</code></pre>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#wjqjairyqi .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #000000;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  /* table.background.color */
+  width: auto;
+  /* table.width */
+  border-top-style: solid;
+  /* table.border.top.style */
+  border-top-width: 2px;
+  /* table.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table.border.top.color */
+}
+
+#wjqjairyqi .gt_heading {
+  background-color: #FFFFFF;
+  /* heading.background.color */
+  border-bottom-color: #FFFFFF;
+}
+
+#wjqjairyqi .gt_title {
+  color: #000000;
+  font-size: 125%;
+  /* heading.title.font.size */
+  padding-top: 4px;
+  /* heading.top.padding */
+  padding-bottom: 1px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#wjqjairyqi .gt_subtitle {
+  color: #000000;
+  font-size: 85%;
+  /* heading.subtitle.font.size */
+  padding-top: 1px;
+  padding-bottom: 4px;
+  /* heading.bottom.padding */
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#wjqjairyqi .gt_bottom_border {
+  border-bottom-style: solid;
+  /* heading.border.bottom.style */
+  border-bottom-width: 2px;
+  /* heading.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* heading.border.bottom.color */
+}
+
+#wjqjairyqi .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#wjqjairyqi .gt_col_heading {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* column_labels.background.color */
+  font-size: 16px;
+  /* column_labels.font.size */
+  font-weight: initial;
+  /* column_labels.font.weight */
+  vertical-align: middle;
+  padding: 10px;
+  margin: 10px;
+}
+
+#wjqjairyqi .gt_sep_right {
+  border-right: 5px solid #FFFFFF;
+}
+
+#wjqjairyqi .gt_group_heading {
+  padding: 8px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* row_group.background.color */
+  font-size: 16px;
+  /* row_group.font.size */
+  font-weight: initial;
+  /* row_group.font.weight */
+  border-top-style: solid;
+  /* row_group.border.top.style */
+  border-top-width: 2px;
+  /* row_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* row_group.border.top.color */
+  border-bottom-style: solid;
+  /* row_group.border.bottom.style */
+  border-bottom-width: 2px;
+  /* row_group.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* row_group.border.bottom.color */
+  vertical-align: middle;
+}
+
+#wjqjairyqi .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* row_group.background.color */
+  font-size: 16px;
+  /* row_group.font.size */
+  font-weight: initial;
+  /* row_group.font.weight */
+  border-top-style: solid;
+  /* row_group.border.top.style */
+  border-top-width: 2px;
+  /* row_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* row_group.border.top.color */
+  border-bottom-style: solid;
+  /* row_group.border.bottom.style */
+  border-bottom-width: 2px;
+  /* row_group.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* row_group.border.bottom.color */
+  vertical-align: middle;
+}
+
+#wjqjairyqi .gt_striped {
+  background-color: #f2f2f2;
+}
+
+#wjqjairyqi .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#wjqjairyqi .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#wjqjairyqi .gt_row {
+  padding: 8px;
+  /* row.padding */
+  margin: 10px;
+  vertical-align: middle;
+}
+
+#wjqjairyqi .gt_stub {
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #A8A8A8;
+  padding-left: 12px;
+}
+
+#wjqjairyqi .gt_summary_row {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* summary_row.background.color */
+  padding: 8px;
+  /* summary_row.padding */
+  text-transform: inherit;
+  /* summary_row.text_transform */
+}
+
+#wjqjairyqi .gt_grand_summary_row {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* grand_summary_row.background.color */
+  padding: 8px;
+  /* grand_summary_row.padding */
+  text-transform: inherit;
+  /* grand_summary_row.text_transform */
+}
+
+#wjqjairyqi .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+}
+
+#wjqjairyqi .gt_first_grand_summary_row {
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #A8A8A8;
+}
+
+#wjqjairyqi .gt_table_body {
+  border-top-style: solid;
+  /* table_body.border.top.style */
+  border-top-width: 2px;
+  /* table_body.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table_body.border.top.color */
+  border-bottom-style: solid;
+  /* table_body.border.bottom.style */
+  border-bottom-width: 2px;
+  /* table_body.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* table_body.border.bottom.color */
+}
+
+#wjqjairyqi .gt_footnote {
+  font-size: 90%;
+  /* footnote.font.size */
+  padding: 4px;
+  /* footnote.padding */
+}
+
+#wjqjairyqi .gt_sourcenote {
+  font-size: 90%;
+  /* sourcenote.font.size */
+  padding: 4px;
+  /* sourcenote.padding */
+}
+
+#wjqjairyqi .gt_center {
+  text-align: center;
+}
+
+#wjqjairyqi .gt_left {
+  text-align: left;
+}
+
+#wjqjairyqi .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#wjqjairyqi .gt_font_normal {
+  font-weight: normal;
+}
+
+#wjqjairyqi .gt_font_bold {
+  font-weight: bold;
+}
+
+#wjqjairyqi .gt_font_italic {
+  font-style: italic;
+}
+
+#wjqjairyqi .gt_super {
+  font-size: 65%;
+}
+
+#wjqjairyqi .gt_footnote_glyph {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="wjqjairyqi" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
+<table class='gt_table'>
+<tr>
+<th class='gt_col_heading gt_column_spanner gt_sep_right gt_center' rowspan='1' colspan='2'>Sepal</th>
+<th class='gt_col_heading gt_column_spanner gt_center' rowspan='1' colspan='2'>Petal</th>
+</tr>
+<tr>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Sepal.Length</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Sepal.Width</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Petal.Length</th>
+<th class='gt_col_heading gt_NA' rowspan='1' colspan='1'>Petal.Width</th>
+</tr>
+<tbody class='gt_table_body'>
+<tr class='gt_group_heading_row'>
+<td colspan='4' class='gt_group_heading'>setosa</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>5.1</td>
+<td class='gt_row gt_right'>3.5</td>
+<td class='gt_row gt_right'>1.4</td>
+<td class='gt_row gt_right'>0.2</td>
+</tr>
+<tr>
+<td class='gt_row gt_right gt_striped'>4.9</td>
+<td class='gt_row gt_right gt_striped'>3.0</td>
+<td class='gt_row gt_right gt_striped'>1.4</td>
+<td class='gt_row gt_right gt_striped'>0.2</td>
+</tr>
+<tr class='gt_group_heading_row'>
+<td colspan='4' class='gt_group_heading'>versicolor</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>7.0</td>
+<td class='gt_row gt_right'>3.2</td>
+<td class='gt_row gt_right'>4.7</td>
+<td class='gt_row gt_right'>1.4</td>
+</tr>
+<tr>
+<td class='gt_row gt_right gt_striped'>6.4</td>
+<td class='gt_row gt_right gt_striped'>3.2</td>
+<td class='gt_row gt_right gt_striped'>4.5</td>
+<td class='gt_row gt_right gt_striped'>1.5</td>
+</tr>
+<tr class='gt_group_heading_row'>
+<td colspan='4' class='gt_group_heading'>virginica</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>6.3</td>
+<td class='gt_row gt_right'>3.3</td>
+<td class='gt_row gt_right'>6.0</td>
+<td class='gt_row gt_right'>2.5</td>
+</tr>
+<tr>
+<td class='gt_row gt_right gt_striped'>5.8</td>
+<td class='gt_row gt_right gt_striped'>2.7</td>
+<td class='gt_row gt_right gt_striped'>5.1</td>
+<td class='gt_row gt_right gt_striped'>1.9</td>
+</tr>
+</tbody>
+</table>
+<!--gt table end-->
+</div>
+<p>グループの数に応じて <code>tab_spanner</code> を呼ぶ必要があり，更に各グループに入る列を標準評価で (つまり文字列ベクトル) で指定しなければならないのが面倒だ．</p>
+</div>
+<div id="packed-data-frame--display-table-" class="section level2">
+<h2>packed data frame で列の階層性を表現した Display table を作る</h2>
+<p>packed data frame のどの列が data frame column か調べておき，data frame column の名前と，各 data frame column を構成する列の名前を元に <code>tab_spanner</code> を <code>for</code> で繰り返し呼べばいい．</p>
+<p>なんかごちゃごちゃした説明文になってしまったが，コードは非常にシンプルだ．</p>
+<pre class="r"><code>gt_packable &lt;- function(x) {
+  df_col &lt;- names(x)[vapply(x, is.data.frame, TRUE)]
+  
+  .gt &lt;- gt(unpack(x, !!df_col))
+  
+  for (i in df_col) {
+    .gt &lt;- tab_spanner(.gt, label = i, names(x[[i]]))
+  }
+  
+  .gt
+}</code></pre>
+<p>これに列単位のグルーピングを <code>pack</code> で，行単位のグルーピングを <code>group_by</code> で表現してやれば，以下の表が簡単にできる．</p>
+<pre class="r"><code>mini_iris %&gt;%
+  pack(Sepal = starts_with(&quot;Sepal&quot;), Petal = starts_with(&quot;Petal&quot;)) %&gt;%
+  group_by(Species) %&gt;%
+  gt_packable</code></pre>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#ojhhhuyjix .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #000000;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  /* table.background.color */
+  width: auto;
+  /* table.width */
+  border-top-style: solid;
+  /* table.border.top.style */
+  border-top-width: 2px;
+  /* table.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table.border.top.color */
+}
+
+#ojhhhuyjix .gt_heading {
+  background-color: #FFFFFF;
+  /* heading.background.color */
+  border-bottom-color: #FFFFFF;
+}
+
+#ojhhhuyjix .gt_title {
+  color: #000000;
+  font-size: 125%;
+  /* heading.title.font.size */
+  padding-top: 4px;
+  /* heading.top.padding */
+  padding-bottom: 1px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#ojhhhuyjix .gt_subtitle {
+  color: #000000;
+  font-size: 85%;
+  /* heading.subtitle.font.size */
+  padding-top: 1px;
+  padding-bottom: 4px;
+  /* heading.bottom.padding */
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#ojhhhuyjix .gt_bottom_border {
+  border-bottom-style: solid;
+  /* heading.border.bottom.style */
+  border-bottom-width: 2px;
+  /* heading.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* heading.border.bottom.color */
+}
+
+#ojhhhuyjix .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#ojhhhuyjix .gt_col_heading {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* column_labels.background.color */
+  font-size: 16px;
+  /* column_labels.font.size */
+  font-weight: initial;
+  /* column_labels.font.weight */
+  vertical-align: middle;
+  padding: 10px;
+  margin: 10px;
+}
+
+#ojhhhuyjix .gt_sep_right {
+  border-right: 5px solid #FFFFFF;
+}
+
+#ojhhhuyjix .gt_group_heading {
+  padding: 8px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* row_group.background.color */
+  font-size: 16px;
+  /* row_group.font.size */
+  font-weight: initial;
+  /* row_group.font.weight */
+  border-top-style: solid;
+  /* row_group.border.top.style */
+  border-top-width: 2px;
+  /* row_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* row_group.border.top.color */
+  border-bottom-style: solid;
+  /* row_group.border.bottom.style */
+  border-bottom-width: 2px;
+  /* row_group.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* row_group.border.bottom.color */
+  vertical-align: middle;
+}
+
+#ojhhhuyjix .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* row_group.background.color */
+  font-size: 16px;
+  /* row_group.font.size */
+  font-weight: initial;
+  /* row_group.font.weight */
+  border-top-style: solid;
+  /* row_group.border.top.style */
+  border-top-width: 2px;
+  /* row_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* row_group.border.top.color */
+  border-bottom-style: solid;
+  /* row_group.border.bottom.style */
+  border-bottom-width: 2px;
+  /* row_group.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* row_group.border.bottom.color */
+  vertical-align: middle;
+}
+
+#ojhhhuyjix .gt_striped {
+  background-color: #f2f2f2;
+}
+
+#ojhhhuyjix .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#ojhhhuyjix .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#ojhhhuyjix .gt_row {
+  padding: 8px;
+  /* row.padding */
+  margin: 10px;
+  vertical-align: middle;
+}
+
+#ojhhhuyjix .gt_stub {
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #A8A8A8;
+  padding-left: 12px;
+}
+
+#ojhhhuyjix .gt_summary_row {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* summary_row.background.color */
+  padding: 8px;
+  /* summary_row.padding */
+  text-transform: inherit;
+  /* summary_row.text_transform */
+}
+
+#ojhhhuyjix .gt_grand_summary_row {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* grand_summary_row.background.color */
+  padding: 8px;
+  /* grand_summary_row.padding */
+  text-transform: inherit;
+  /* grand_summary_row.text_transform */
+}
+
+#ojhhhuyjix .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+}
+
+#ojhhhuyjix .gt_first_grand_summary_row {
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #A8A8A8;
+}
+
+#ojhhhuyjix .gt_table_body {
+  border-top-style: solid;
+  /* table_body.border.top.style */
+  border-top-width: 2px;
+  /* table_body.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table_body.border.top.color */
+  border-bottom-style: solid;
+  /* table_body.border.bottom.style */
+  border-bottom-width: 2px;
+  /* table_body.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* table_body.border.bottom.color */
+}
+
+#ojhhhuyjix .gt_footnote {
+  font-size: 90%;
+  /* footnote.font.size */
+  padding: 4px;
+  /* footnote.padding */
+}
+
+#ojhhhuyjix .gt_sourcenote {
+  font-size: 90%;
+  /* sourcenote.font.size */
+  padding: 4px;
+  /* sourcenote.padding */
+}
+
+#ojhhhuyjix .gt_center {
+  text-align: center;
+}
+
+#ojhhhuyjix .gt_left {
+  text-align: left;
+}
+
+#ojhhhuyjix .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#ojhhhuyjix .gt_font_normal {
+  font-weight: normal;
+}
+
+#ojhhhuyjix .gt_font_bold {
+  font-weight: bold;
+}
+
+#ojhhhuyjix .gt_font_italic {
+  font-style: italic;
+}
+
+#ojhhhuyjix .gt_super {
+  font-size: 65%;
+}
+
+#ojhhhuyjix .gt_footnote_glyph {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="ojhhhuyjix" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><!--gt table start-->
+<table class='gt_table'>
+<tr>
+<th class='gt_col_heading gt_column_spanner gt_sep_right gt_center' rowspan='1' colspan='2'>Sepal</th>
+<th class='gt_col_heading gt_column_spanner gt_center' rowspan='1' colspan='2'>Petal</th>
+</tr>
+<tr>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Sepal.Length</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Sepal.Width</th>
+<th class='gt_col_heading gt_right' rowspan='1' colspan='1'>Petal.Length</th>
+<th class='gt_col_heading gt_NA' rowspan='1' colspan='1'>Petal.Width</th>
+</tr>
+<tbody class='gt_table_body'>
+<tr class='gt_group_heading_row'>
+<td colspan='4' class='gt_group_heading'>setosa</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>5.1</td>
+<td class='gt_row gt_right'>3.5</td>
+<td class='gt_row gt_right'>1.4</td>
+<td class='gt_row gt_right'>0.2</td>
+</tr>
+<tr>
+<td class='gt_row gt_right gt_striped'>4.9</td>
+<td class='gt_row gt_right gt_striped'>3.0</td>
+<td class='gt_row gt_right gt_striped'>1.4</td>
+<td class='gt_row gt_right gt_striped'>0.2</td>
+</tr>
+<tr class='gt_group_heading_row'>
+<td colspan='4' class='gt_group_heading'>versicolor</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>7.0</td>
+<td class='gt_row gt_right'>3.2</td>
+<td class='gt_row gt_right'>4.7</td>
+<td class='gt_row gt_right'>1.4</td>
+</tr>
+<tr>
+<td class='gt_row gt_right gt_striped'>6.4</td>
+<td class='gt_row gt_right gt_striped'>3.2</td>
+<td class='gt_row gt_right gt_striped'>4.5</td>
+<td class='gt_row gt_right gt_striped'>1.5</td>
+</tr>
+<tr class='gt_group_heading_row'>
+<td colspan='4' class='gt_group_heading'>virginica</td>
+</tr>
+<tr>
+<td class='gt_row gt_right'>6.3</td>
+<td class='gt_row gt_right'>3.3</td>
+<td class='gt_row gt_right'>6.0</td>
+<td class='gt_row gt_right'>2.5</td>
+</tr>
+<tr>
+<td class='gt_row gt_right gt_striped'>5.8</td>
+<td class='gt_row gt_right gt_striped'>2.7</td>
+<td class='gt_row gt_right gt_striped'>5.1</td>
+<td class='gt_row gt_right gt_striped'>1.9</td>
+</tr>
+</tbody>
+</table>
+<!--gt table end-->
+</div>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>

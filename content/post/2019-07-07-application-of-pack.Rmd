@@ -1,0 +1,191 @@
+---
+title: Tidyr 1.0.0 で追加される pack を使えば見せる用の表が簡単に作れるかも
+author: ~
+date: '2019-07-07'
+slug: application-of-pack
+categories: [R]
+tags: [tidyr]
+images:
+  - /images/posts/2019-07-07-application-of-pack/iris-gt.png
+summary: |
+  ![](/images/posts/2019-07-07-application-of-pack/iris-gt.png)
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+pacman::p_load_gh("rstudio/gt")
+pacman::p_load(dplyr, tidyr)
+```
+
+
+tidyr 1.0.0 では新たに `pack`, `unpack` という関数が追加される．
+
+これにより tidyverse で data frame column を扱えるようになる．
+
+イメージとしてはこんな感じの階層性のあるデータを表現できる．
+
+```{r, echo = FALSE}
+gt(data.frame(X = 1:3, y1 = 4:6, y2 = 7:9)) %>%
+  tab_spanner(label = "Y", columns = c("y1", "y2"))
+```
+
+tidyr の `pack` 関数で簡単に作れるので， data frame column を持つデータフレームを packed data frame と呼ぶことにする，
+
+この `pack`，せっかく実装されるくせに，ドキュメントでは packed data frame を扱える関数がまだほとんどないから，使い道も特にないとされている．
+
+不憫だ．
+
+しかしまさに上述の表を作る時に役立つ．
+既に `gt` パッケージの issues で提案済みだ ([#314](https://github.com/rstudio/gt/issues/314))
+
+これまでは階層性のないデータフレームを `kable` や `gt` に与えてから弄くり回していたのに対し，
+これからは階層性のあるデータフレーム (= packed data frame) を関数に与えれば一撃になると素敵だ．
+
+これには2つのメリットがあると思っている．
+
+- 可視化したいデータと可視化した結果が同じ構造を持つので，可視化の段階でデータをこねくり回す**ような**操作がなくなる
+- より上流側の関数を覚えておけば，同じことを実現するために用意された下流の関数を覚える必要が減る
+
+では実際に packded data frame の作り方と可視化方法を検討してみよう．
+
+# packed data frame を作る
+
+## base
+
+base で作るならこんな感じで，データフレームを入れ子にする．
+親階層と子階層のデータフレームが同じ行数であることがポイントだ．
+
+```{r}
+df <- data.frame(X = 1:3)
+df$Y <- data.frame(y1 = 4:6, y2 = 7:9)
+
+# 一見 flatten された data.frame に見えるが
+print(df)
+
+# 構造状はデータフレームが入れ子になっている．
+str(df)
+```
+
+ちなみに子階層に親階層と異なる行数のデータフレームを代入するとエラーになる．
+
+```{r add-invalid-df, error = TRUE}
+df$A <- data.frame(a = 1)
+```
+
+## tibble
+
+`tibble` でも packed data frame を作ることができる．
+`base` と異なり，`tibble` 関数一発で作れる．
+また，親階層と子階層の名前は `$` で隔たれており， `.` よりも階層性が明瞭だ．
+
+```{r}
+tibble(X = 1:3, Y = data.frame(y1  = 4:6, y2 = 7:9))
+```
+
+
+## tidyr
+
+何もないところから packed data frame を作るなら `tibble` がいいだろうが，
+既存のデータフレームから指定した列ごとにグループに分けて packed data frame 化したい時は `tidyr` の出番だ．
+`tidyr` なら `unpack` により， packed data frame を通常のデータフレームに戻すこともできる．
+
+例えば先程の例なら，以下のように， `Y` 列に `pack` したい列を [`select` のセマンティクス](https://speakerdeck.com/yutannihilation/dplyrfalseselecttomutatefalsesemanteikusufalsewei-i)で選べばいい．
+
+```{r}
+library(tidyr)
+
+# pack
+df <- data.frame(X = 1:3, y1 = 4:6, y2 = 7:9) %>%
+  pack(Y = c(y1, y2))
+
+df
+```
+
+元に戻す時は `unpack` 関数で， `unpack` したい列を選ぶ．
+
+```{r}
+# unpack
+unpack(df, Y)
+```
+
+select のセマンティクスが有効なので， `starts_with` などによるマッチングができる．
+また，複数の data frame column を作ることもできる．
+みんな大好き `iris` もこの通り．
+
+
+```{r}
+iris[1:3, ] %>%
+  pack(Sepal = starts_with("Sepal"), Petal = starts_with("Petal")) %>%
+  as_tibble
+```
+
+ただし，見栄えの問題で `as_tibble` しておくのが無難だ．
+
+# packed data frame を良い感じに表示用の表にする
+
+Display table (表示用の表) は `gt` パッケージが定義している用語で，R 内部で扱うための表 (data frame) に対して，人に見せるための表くらいの認識でいいと思う．
+
+`gt` は非常に優秀で，例えば grouped data frame を一発で良い感じにしてくれる．
+
+```{r}
+library(gt)
+library(dplyr)
+
+mini_iris <- iris %>%
+  group_by(Species) %>%
+  slice(1:2)
+
+gt(mini_iris)
+```
+
+packed data frame もこれくらいのノリで扱えると最高だ．
+
+## 通常の data frame で列の階層性を表現した Display table を作る
+
+これには `gt_tbl` オブジェクトを `tab_spanner()` 関数にパイプする．
+
+```{r}
+mini_iris %>%
+  gt %>%
+  tab_spanner("Sepal", c("Sepal.Length", "Sepal.Width")) %>%
+  tab_spanner("Petal", c("Petal.Length", "Petal.Width"))
+```
+
+グループの数に応じて `tab_spanner` を呼ぶ必要があり，更に各グループに入る列を標準評価で (つまり文字列ベクトル) で指定しなければならないのが面倒だ．
+
+## packed data frame で列の階層性を表現した Display table を作る
+
+packed data frame のどの列が data frame column か調べておき，data frame column の名前と，各 data frame column を構成する列の名前を元に `tab_spanner` を `for` で繰り返し呼べばいい．
+
+なんかごちゃごちゃした説明文になってしまったが，コードは非常にシンプルだ．
+
+```{r}
+gt_packable <- function(x) {
+  df_col <- names(x)[vapply(x, is.data.frame, TRUE)]
+  
+  .gt <- gt(unpack(x, !!df_col))
+  
+  for (i in df_col) {
+    .gt <- tab_spanner(.gt, label = i, names(x[[i]]))
+  }
+  
+  .gt
+}
+```
+
+これに列単位のグルーピングを `pack` で，行単位のグルーピングを `group_by` で表現してやれば，以下の表が簡単にできる．
+
+```{r}
+mini_iris %>%
+  pack(Sepal = starts_with("Sepal"), Petal = starts_with("Petal")) %>%
+  group_by(Species) %>%
+  gt_packable
+```
+
+# Enjoy!
+
+
+
