@@ -1,0 +1,105 @@
+---
+title: "R Markdown でコードの折り畳みをチャンクごとに選択可能にした (rmarkdown 1.15)"
+author: ~
+date: '2019-07-24'
+slug: rmd-1-15-gh
+categories: [R]
+tags: [rmarkdown]
+---
+
+
+
+<p><code>html_document</code> ではコードの折り畳みができる．使い方は簡単で，YAMLフロントマターにて <code>code_folding</code> を指定するだけだ<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>．</p>
+<ul>
+<li><code>none</code>: <code>code_folding</code> を無効化する．</li>
+<li><code>show</code>: デフォルトで全て表示する．</li>
+<li><code>hide</code>: デフォルトで全て非表示にする．</li>
+</ul>
+<p><code>show</code>・<code>hide</code>の場合は，後からソースコードごとにボタンで表示を切り替えることができる．</p>
+<p>しかし，デフォルトで全て表示か非表示かではなく，特定のソースコードだけデフォルトで表示させてあとは隠す，あるいはその逆をやりたいという要望があった
+(<a href="https://github.com/rstudio/rmarkdown/issues/664">Issue #644</a>)．</p>
+<p>なんと2016年から塩漬けでいいねが36個もあったのでできるようにした
+(<a href="https://github.com/rstudio/rmarkdown/pull/1602">PR #1602</a>)．するとマージしてもらった上に <code>rmarkdown</code> の contributor に迎え入れてもらえた！</p>
+<p>というわけで以下で使い方を紹介する．
+GitHub 版の <code>rmarkdown</code> パッケージで利用可能だ．</p>
+<div id="section" class="section level1">
+<h1>使い方</h1>
+<div id="section-1" class="section level2">
+<h2>既定で全て非表示にして一部を表示する</h2>
+<p><code>code_folding: hide</code> により全てのチャンクのソースコードを既定で非表示にしつつ，表示したいソースコードは HTML 出力時に <code>fold-show</code> クラスを持つようにすればよい．例えばチャンクオプションに <code>class.source="fold-show"</code> と指定する．</p>
+<pre><code>---
+output:
+  html_document:
+    code_folding: hide
+---
+
+
+```{r}
+# このソースコードは非表示
+```
+
+
+```{r, class.source=&quot;fold-show&quot;}
+# このソースコードは表示される
+```</code></pre>
+</div>
+<div id="section-2" class="section level2">
+<h2>既定で全て表示して一部を非表示にする</h2>
+<p>これは若干トリッキー．</p>
+<p>先述の場合と同様に <code>code_folding: hide</code> しつつ，
+<code>knitr::opts_chunk()</code> を利用をして全てのチャンクのソースコードが既定で <code>fold-show</code> クラスを持つようにする．</p>
+<pre class="r"><code>knitr::opts_chunk$set(class.source = &quot;fold-show&quot;)</code></pre>
+<p>すると <code>code_folding: hide</code> にも拘らず，全てのチャンクのソースコードが既定で表示されるようになる．</p>
+<p>しかし，<code>fold-show</code> クラスを持たないソースコードは非表示にできるので，非表示にしたいソースコードを持つチャンクに対しては
+<code>class.source=NULL</code> としてクラス属性を初期化してやればよい．別に <code>NULL</code> でなくとも <code>fold-show</code> クラスを持たなければよいので，
+<code>class.source="fold-hide"</code> などとしてやると，明示的でいいかも知れない．</p>
+<pre><code>---
+output:
+  html_document:
+    code_folding: hide
+---
+
+
+```{r setup, opts.include=TRUE}
+knitr::opts_chunk$set(class.source = &quot;fold-show&quot;)
+```
+
+
+```{r}
+# このソースコードは表示される
+```
+
+
+```{r, class.source=NULL}
+# このソースコードは非表示
+```
+
+
+```{r, class.source=&quot;fold-hide&quot;}
+# このソースコードは非表示
+```</code></pre>
+</div>
+</div>
+<div id="pr-" class="section level1">
+<h1>PR 内容</h1>
+<p><code>fold-show</code> クラスを持つソースコードの扱いを変更するよう，JavaScriptを一行書き換えただけの簡単なお仕事
+(<a href="https://github.com/rstudio/rmarkdown/pull/1602">PR #1602</a>)．</p>
+<pre class="diff"><code>- if (show)
++ if (show || $(this)[0].classList.contains(&#39;fold-show&#39;))</code></pre>
+<p>そう見えるだけで JavaScript の知識がなくて，
+<code>console.log()</code> をソースコードに仕込んだ <code>rmarkdown</code> パッケージをインストールして <code>Rmd</code> ファイルを <code>knit</code> しまくるとう面倒な作業を繰り返しました．</p>
+<p>ブラウザの開発者ツールに直接 JavaScript をぶち込んでいけば挙動を確認できることに気付き，随分挙動の理解が楽になりました．</p>
+<p>変更は単純ながら実装には1時間ほど使ったと思います．</p>
+<p>もっと実力をあげねば．</p>
+<p>Yihui が PR を Approve してくれた後，<code>NEWS</code> を書いてくれと言われました．普段伝わればいいと思って適当な英語を書いている人間にはなかな大変でした．過去の <code>NEWS</code> を参考に書きましたが，
+<code>thanks, @atusy</code> と自演するのが照れ臭かったです．Push すると Yihui が修正を加えてくれました．感謝．</p>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><code>code_folding</code> が使えるチャンクはソースコードがR，Python，Bash，SQL，C++，Stan，Juliaで記述されている場合に限られる．<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>

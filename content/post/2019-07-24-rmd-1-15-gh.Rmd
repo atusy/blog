@@ -1,0 +1,138 @@
+---
+title: "R Markdown でコードの折り畳みをチャンクごとに選択可能にした (rmarkdown 1.15)"
+author: ~
+date: '2019-07-24'
+slug: rmd-1-15-gh
+categories: [R]
+tags: [rmarkdown]
+---
+
+```{r, include=FALSE}
+library(atusydown)
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+
+`html_document` ではコードの折り畳みができる．
+使い方は簡単で，YAMLフロントマターにて `code_folding` を指定するだけだ^[`code_folding` が使えるチャンクはソースコードがR，Python，Bash，SQL，C++，Stan，Juliaで記述されている場合に限られる．]．
+
+- `none`: `code_folding` を無効化する．
+- `show`: デフォルトで全て表示する．
+- `hide`: デフォルトで全て非表示にする．
+
+`show`・`hide`の場合は，後から
+ソースコードごとにボタンで表示を切り替えることができる．
+
+しかし，デフォルトで全て表示か非表示かではなく，特定のソースコードだけデフォルトで表示させてあとは隠す，あるいはその逆をやりたいという要望があった
+([Issue #644](https://github.com/rstudio/rmarkdown/issues/664))．
+
+なんと2016年から塩漬けでいいねが36個もあったのでできるようにした
+([PR #1602](https://github.com/rstudio/rmarkdown/pull/1602))．
+するとマージしてもらった上に `rmarkdown` の contributor に迎え入れてもらえた！
+
+というわけで以下で使い方を紹介する．
+GitHub 版の `rmarkdown` パッケージで利用可能だ．
+
+# 使い方
+
+## 既定で全て非表示にして一部を表示する
+
+`code_folding: hide` により全てのチャンクのソースコードを既定で非表示にしつつ，
+表示したいソースコードは HTML 出力時に `fold-show` クラスを持つようにすればよい．
+例えばチャンクオプションに `class.source="fold-show"` と指定する．
+
+````
+---
+output:
+  html_document:
+    code_folding: hide
+---
+
+
+`r ''````{r}
+# このソースコードは非表示
+`r ''````
+
+
+`r ''````{r, class.source="fold-show"}
+# このソースコードは表示される
+`r ''````
+````
+
+## 既定で全て表示して一部を非表示にする
+
+これは若干トリッキー．
+
+先述の場合と同様に `code_folding: hide` しつつ，
+`knitr::opts_chunk()` を利用をして全てのチャンクのソースコードが
+既定で `fold-show` クラスを持つようにする．
+
+```r
+knitr::opts_chunk$set(class.source = "fold-show")
+```
+
+すると `code_folding: hide` にも拘らず，
+全てのチャンクのソースコードが既定で表示されるようになる．
+
+しかし，`fold-show` クラスを持たないソースコードは非表示にできるので，
+非表示にしたいソースコードを持つチャンクに対しては
+`class.source=NULL` としてクラス属性を初期化してやればよい．
+別に `NULL` でなくとも `fold-show` クラスを持たなければよいので，
+`class.source="fold-hide"` などとしてやると，明示的でいいかも知れない．
+
+
+````
+---
+output:
+  html_document:
+    code_folding: hide
+---
+
+
+`r ''````{r setup, opts.include=TRUE}
+knitr::opts_chunk$set(class.source = "fold-show")
+`r ''````
+
+
+`r ''````{r}
+# このソースコードは表示される
+`r ''````
+
+
+`r ''````{r, class.source=NULL}
+# このソースコードは非表示
+`r ''````
+
+
+`r ''````{r, class.source="fold-hide"}
+# このソースコードは非表示
+`r ''````
+````
+
+# PR 内容
+
+`fold-show` クラスを持つソースコードの扱いを変更するよう，JavaScriptを一行書き換えただけの簡単なお仕事
+([PR #1602](https://github.com/rstudio/rmarkdown/pull/1602))．
+
+```diff
+- if (show)
++ if (show || $(this)[0].classList.contains('fold-show'))
+```
+
+そう見えるだけで JavaScript の知識がなくて，
+`console.log()` をソースコードに仕込んだ `rmarkdown` パッケージをインストールして `Rmd` ファイルを `knit` しまくるとう面倒な作業を繰り返しました．
+
+ブラウザの開発者ツールに直接 JavaScript をぶち込んでいけば
+挙動を確認できることに気付き，随分挙動の理解が楽になりました．
+
+変更は単純ながら実装には1時間ほど使ったと思います．
+
+もっと実力をあげねば．
+
+Yihui が PR を Approve してくれた後，`NEWS` を書いてくれと言われました．
+普段伝わればいいと思って適当な英語を書いている人間にはなかな大変でした．
+過去の `NEWS` を参考に書きましたが，
+`thanks, @atusy` と自演するのが照れ臭かったです．Push すると Yihui が修正を加えてくれました．
+感謝．
+
+# Enjoy!
