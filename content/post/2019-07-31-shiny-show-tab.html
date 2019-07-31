@@ -45,7 +45,7 @@ ui &lt;- fluidPage(
 )
 
 server &lt;- function(input, output, session) {
-  observeEvent(input$bar, shiny::showTab(&quot;tabset&quot;, target = &quot;bar&quot;, select = TRUE))
+  observeEvent(input$bar, showTab(&quot;tabset&quot;, target = &quot;bar&quot;, select = TRUE))
 }
 
 shinyApp(ui, server)</code></pre>
