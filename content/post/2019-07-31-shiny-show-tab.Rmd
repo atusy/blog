@@ -5,6 +5,8 @@ date: '2019-07-31'
 slug: shiny-show-tab
 categories: [R]
 tags: [shiny]
+summary: |
+  ![](/images/posts/2019-07-31-shiny-show-tab/tabset.gif)
 ---
 
 `shiny` の `tabsetPanel()` 内で表示しているタブや， `navbarPage()` 内で表示しているページを変更するためのリンクを貼る方法のメモ．
