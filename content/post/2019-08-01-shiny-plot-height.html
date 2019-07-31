@@ -26,6 +26,8 @@ summary: |
 <pre><code>height: calc(100vh - 100px)</code></pre>
 <p>などとして <code>calc</code> によって <code>100vh</code> より小さめの高さにしてやる必要がある．</p>
 <p><code>navbar</code> などの高さを知るにはブラウザの開発者ツールが便利だ (<code>Ctrl + Shift + I</code>)．</p>
+<p><code>plotOutput</code> に直接 <code>vh</code> 単位や <code>calc</code> が使えると便利だが，
+<code>shiny::validateCSSUnit</code> によって <code>invalid</code> 扱いされてしまうことに注意．</p>
 <p>以下は動画GIFの例を再現するソースコード．</p>
 <pre class="r"><code>library(shiny)
 library(ggplot2)

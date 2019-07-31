@@ -43,6 +43,9 @@ height: calc(100vh - 100px)
 
 `navbar` などの高さを知るにはブラウザの開発者ツールが便利だ (`Ctrl + Shift + I`)．
 
+`plotOutput` に直接 `vh` 単位や `calc` が使えると便利だが，
+`shiny::validateCSSUnit` によって `invalid` 扱いされてしまうことに注意．
+
 以下は動画GIFの例を再現するソースコード．
 
 ```{r, eval = FALSE}
