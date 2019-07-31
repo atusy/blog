@@ -1,0 +1,53 @@
+---
+title: Shiny で表示タブを変更するリンクを貼る
+author: ~
+date: '2019-07-31'
+slug: shiny-show-tab
+categories: [R]
+tags: [shiny]
+---
+
+`shiny` の `tabsetPanel()` 内で表示しているタブや， `navbarPage()` 内で表示しているページを変更するためのリンクを貼る方法のメモ．
+
+例えば以下のように，`Foo` タブ内に `Bar` タブに移動するためのリンクを貼りたいとしよう．
+
+![](/images/posts/2019-07-31-shiny-show-tab/tabset.gif)
+
+そのためには
+
+1. `ui` にて `actionLink()` を使って特定のリンクをクリックしたことをサーバーサイドに伝える．
+1. `server` にて `observeEvent()` を使い，
+    - `1` で作ったリンクがクリックされたことを検知し，
+    - `showTab()` で特定のタブを表示させる．
+    
+`showTab()` 関数を使う際のポイントは以下の三つ．
+
+- `showTab()` の第一引数は `tabsetPanel` ないし `navbarPage` の `id`．
+- `target` 引数は開きたい `tabPanel` の `title` 引数と同じ値．
+- `select` 引数は `TRUE` にする
+
+以下に先の例を実行するためのソースコードを示す．
+
+```{r, eval = FALSE}
+library(shiny)
+
+ui <- fluidPage(
+  tabsetPanel(
+    id = "tabset",
+    tabPanel(
+      "foo", 
+      p("This is 'Foo.'"),
+      p(actionLink("bar", "Let's go to 'Bar'"))
+    ),
+    tabPanel("bar", p("This is 'Bar'"))
+  )
+)
+
+server <- function(input, output, session) {
+  observeEvent(input$bar, shiny::showTab("tabset", target = "bar", select = TRUE))
+}
+
+shinyApp(ui, server)
+```
+
+Enjoy!!

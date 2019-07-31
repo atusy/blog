@@ -1,0 +1,50 @@
+---
+title: Shiny で表示タブを変更するリンクを貼る
+author: ~
+date: '2019-07-31'
+slug: shiny-show-tab
+categories: [R]
+tags: [shiny]
+---
+
+
+
+<p><code>shiny</code> の <code>tabsetPanel()</code> 内で表示しているタブや， <code>navbarPage()</code> 内で表示しているページを変更するためのリンクを貼る方法のメモ．</p>
+<p>例えば以下のように，<code>Foo</code> タブ内に <code>Bar</code> タブに移動するためのリンクを貼りたいとしよう．</p>
+<p><img src="/images/posts/2019-07-31-shiny-show-tab/tabset.gif" /></p>
+<p>そのためには</p>
+<ol style="list-style-type: decimal">
+<li><code>ui</code> にて <code>actionLink()</code> を使って特定のリンクをクリックしたことをサーバーサイドに伝える．</li>
+<li><code>server</code> にて <code>observeEvent()</code> を使い，
+<ul>
+<li><code>1</code> で作ったリンクがクリックされたことを検知し，</li>
+<li><code>showTab()</code> で特定のタブを表示させる．</li>
+</ul></li>
+</ol>
+<p><code>showTab()</code> 関数を使う際のポイントは以下の三つ．</p>
+<ul>
+<li><code>showTab()</code> の第一引数は <code>tabsetPanel</code> ないし <code>navbarPage</code> の <code>id</code>．</li>
+<li><code>target</code> 引数は開きたい <code>tabPanel</code> の <code>title</code> 引数と同じ値．</li>
+<li><code>select</code> 引数は <code>TRUE</code> にする</li>
+</ul>
+<p>以下に先の例を実行するためのソースコードを示す．</p>
+<pre class="r"><code>library(shiny)
+
+ui &lt;- fluidPage(
+  tabsetPanel(
+    id = &quot;tabset&quot;,
+    tabPanel(
+      &quot;foo&quot;, 
+      p(&quot;This is &#39;Foo.&#39;&quot;),
+      p(actionLink(&quot;bar&quot;, &quot;Let&#39;s go to &#39;Bar&#39;&quot;))
+    ),
+    tabPanel(&quot;bar&quot;, p(&quot;This is &#39;Bar&#39;&quot;))
+  )
+)
+
+server &lt;- function(input, output, session) {
+  observeEvent(input$bar, shiny::showTab(&quot;tabset&quot;, target = &quot;bar&quot;, select = TRUE))
+}
+
+shinyApp(ui, server)</code></pre>
+<p>Enjoy!!</p>
