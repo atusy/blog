@@ -5,6 +5,8 @@ date: '2019-08-01'
 slug: shiny-plot-height
 categories: [R]
 tags: [shiny]
+summary: |
+  ![](/images/posts/2019-08-01-shiny-plot-height/plot-full-height.gif)
 ---
 
 `shiny` でプロットの幅と高さを指定するには `plotOutput` の `width` 引数と `height` 引数を利用する．
