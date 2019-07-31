@@ -1,0 +1,52 @@
+---
+title: Shiny でプロットの高さをブラウザ画面のサイズに合わせて変更する
+author: ~
+date: '2019-08-01'
+slug: shiny-plot-height
+categories: [R]
+tags: [shiny]
+---
+
+
+
+<p><code>shiny</code> でプロットの幅と高さを指定するには <code>plotOutput</code> の <code>width</code> 引数と <code>height</code> 引数を利用する．</p>
+<p><code>width = "100%"</code> とするとプロットの幅は有効な範囲で最大になるが，
+<code>height = "100%"</code> としても (通常) そうはならず <code>figure margins too large</code> とエラーを返す．これは， Web ページが通常縦方向にスクロールするので縦幅が決まっていないことと関係している……のだと思う．</p>
+<p>というわけで，プロットを内包するブロック要素の縦方向のサイズを予め決めておいてやれば，その高さに対して <code>100%</code> なりなんなりを指定できるようになる．</p>
+<p><img src="/images/posts/2019-08-01-shiny-plot-height/plot-full-height.gif" /></p>
+<p>CSS には <code>vh</code> という単位があり，ブラウザの表示領域の高さを基準に100分率でサイズを与えられる．従って</p>
+<pre class="r"><code>div(plotOutput(&quot;plot&quot;, height = &quot;100%&quot;), style = &quot;height: 100vh&quot;)</code></pre>
+<p>とすれば，画面いっぱいのサイズの画像を作ることができる．</p>
+<p>ただしこれだけでは，例えば <code>navbar</code> あると <code>shinyApp</code> 全体の高さが <code>nabvar の高さ + plot の高さ</code> になってしまい，表示領域より大きくなってしまう．</p>
+<p>必要に応じて</p>
+<pre><code>height: calc(100vh - 100px)</code></pre>
+<p>などとして <code>calc</code> によって <code>100vh</code> より小さめの高さにしてやる必要がある．</p>
+<p><code>navbar</code> などの高さを知るにはブラウザの開発者ツールが便利だ (<code>Ctrl + Shift + I</code>)．</p>
+<p>以下は動画GIFの例を再現するソースコード．</p>
+<pre class="r"><code>library(shiny)
+library(ggplot2)
+
+ui &lt;- navbarPage(
+  &quot;navbarPage&quot;,
+  tabPanel(
+    &quot;Default&quot;,
+    plotOutput(&quot;d&quot;)
+  ),
+  tabPanel(
+    &quot;Full height&quot;, 
+    div(
+      plotOutput(&quot;f&quot;, height = &quot;100%&quot;),
+      style = &quot;height: calc(100vh  - 100px)&quot;
+    )
+  )
+)
+
+gg &lt;- qplot(wt, mpg, data = mtcars)
+
+server &lt;- function(input, output, session) {
+  output$d &lt;- renderPlot(gg)
+  output$f &lt;- renderPlot(gg)
+}
+
+shinyApp(ui, server)</code></pre>
+<p>Enjoy!!</p>
