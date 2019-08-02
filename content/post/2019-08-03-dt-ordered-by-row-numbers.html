@@ -1,0 +1,97 @@
+---
+title: DT::datatable の行番号を並べ変え可能にする (Shiny / 非Shiny)
+author: ~
+date: '2019-08-03'
+slug: dt-ordered-by-row-numbers
+categories: [R]
+tags: [shiny, DT]
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#dtdatatable-">DT::datatable とは</a></li>
+<li><a href="#section">行名 (行番号) で並べ変える</a><ul>
+<li><a href="#shiny">非 shiny</a></li>
+<li><a href="#shiny-1">shiny</a><ul>
+<li><a href="#renderdtserver-false-">renderDT(server = FALSE) にする</a></li>
+<li><a href="#section-1">行番号相当の列を用意する</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#enjoy">Enjoy!</a></li>
+</ul>
+</div>
+
+<div id="dtdatatable-" class="section level1">
+<h1>DT::datatable とは</h1>
+<p><code>DT::datatable</code> は jQuery 用の DataTables プラグインを R で使うための関数だ．これに <code>iris</code> などのデータフレームを与えると，対話的な表を簡単に作れる．</p>
+<p>どんなことができるかは，ぞうさんの記事が詳しい．<br />
+<a href="https://kazutan.github.io/SappoRoR5/DT_demo.html" class="uri">https://kazutan.github.io/SappoRoR5/DT_demo.html</a></p>
+</div>
+<div id="section" class="section level1">
+<h1>行名 (行番号) で並べ変える</h1>
+<div id="shiny" class="section level2">
+<h2>非 shiny</h2>
+<p>既定では1列目 (JSにとっては0列目) に行名を表示することになっているが，行名がないデータフレームを与えた場合は行番号を表示する．この1列目で並べ替えを有効にする基本的な方法としては以下のように <code>options</code> 引数を与えればよい．</p>
+<pre class="r"><code>dt &lt;- DT::datatable(
+  iris,
+  options = list(
+    columnDefs = list(list(orderable = TRUE, targets = 0))
+  )
+)
+dt</code></pre>
+<iframe seamless src="/widget/post/2019-08-03-dt-ordered-by-row-numbers/dt.html" style="width: 100%;  height: 700px;">
+</iframe>
+</div>
+<div id="shiny-1" class="section level2">
+<h2>shiny</h2>
+<p><code>shiny</code> では <code>renderDT</code> 関数の <code>server</code> 引数が既定の <code>TRUE</code> の場合，なぜか行名が文字列として扱われてしまう．このため並べ替えが正常に機能しない．</p>
+<pre class="r"><code>library(shiny)
+library(DT)
+
+ui &lt;- fluidPage(DTOutput(&quot;dt&quot;, height = &quot;500px&quot;))
+
+server &lt;- function(input, output, session) {
+  output$dt &lt;- renderDT(dt, server = TRUE)
+}
+
+runGadget( # runGadget すると RStudio の Viewer Pane で実行できる
+  shinyApp(ui, server)
+)</code></pre>
+<p><img src="/images/posts/2019-08-03-dt-ordered-by-row-numbers/dt-shiny.gif" /></p>
+<p>対処方法は2つ．</p>
+<div id="renderdtserver-false-" class="section level3">
+<h3>renderDT(server = FALSE) にする</h3>
+<p>簡単だが，クライアント側に表のデータを全て送ってしまうので，大規模なデータの取り扱いには不向き．</p>
+<pre class="r"><code>server2 &lt;- function(input, output, session) {
+  output$dt &lt;- renderDT(dt, server = FALSE)
+}
+
+runGadget(shinyApp(ui, server2))</code></pre>
+</div>
+<div id="section-1" class="section level3">
+<h3>行番号相当の列を用意する</h3>
+<p>以下のように行番号相当の列をデータフレームに用意しておき，行名を非表示にすると <code>server = TRUE</code> でも正常に並べ替えできる．</p>
+<p>ところで <code>DT::datatable</code> は行名の列には列名を表示しない．これと同じ見た目にしようとするには，データフレームの名前を後から <code>setNames</code> などで弄る必要がある．通常データフレームは列名のない列を作ることができないため，トリッキーな扱いが必要な形だ．</p>
+<pre class="r"><code>library(dplyr)
+
+dt3 &lt;- iris %&gt;%
+  mutate(rn = row_number()) %&gt;%
+  select(rn, everything()) %&gt;%
+  setNames(c(&quot;&quot;, names(.)[-1L])) %&gt;%
+  DT::datatable(rownames = FALSE)
+
+server3 &lt;- function(input, output, session) {
+  output$dt &lt;- renderDT(dt2)
+}
+
+runGadget(shinyApp(ui, server3))</code></pre>
+</div>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>

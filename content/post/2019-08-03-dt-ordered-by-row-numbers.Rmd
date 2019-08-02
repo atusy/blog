@@ -1,0 +1,114 @@
+---
+title: DT::datatable の行番号を並べ変え可能にする (Shiny / 非Shiny)
+author: ~
+date: '2019-08-03'
+slug: dt-ordered-by-row-numbers
+categories: [R]
+tags: [shiny, DT]
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+```{r setup, include = FALSE}
+pacman::p_load(magrittr, DT, fs, htmlwidgets)
+```
+
+# DT::datatable とは
+
+`DT::datatable` は jQuery 用の DataTables プラグインを R で使うための関数だ．
+これに `iris` などのデータフレームを与えると，対話的な表を簡単に作れる．
+
+どんなことができるかは，ぞうさんの記事が詳しい． \
+https://kazutan.github.io/SappoRoR5/DT_demo.html
+
+# 行名 (行番号) で並べ変える
+
+## 非 shiny
+
+既定では1列目 (JSにとっては0列目) に行名を表示することになっているが，
+行名がないデータフレームを与えた場合は行番号を表示する．
+この1列目で並べ替えを有効にする基本的な方法としては以下のように `options` 引数を与えればよい．
+
+```{r, results='hide'}
+dt <- DT::datatable(
+  iris,
+  options = list(
+    columnDefs = list(list(orderable = TRUE, targets = 0))
+  )
+)
+dt
+```
+
+```{r dt, include = FALSE, cache = TRUE}
+dir_widget <- "static/widget/post/2019-08-03-dt-ordered-by-row-numbers" %>%
+  here() %>%
+  fs::dir_create()
+
+htmlwidgets::saveWidget(dt, fs::file_create(file.path(dir_widget, "dt.html")))
+```
+
+<iframe seamless src="/widget/post/2019-08-03-dt-ordered-by-row-numbers/dt.html" style = "width: 100%;  height: 700px;"></iframe>
+
+## shiny
+
+`shiny` では `renderDT` 関数の `server` 引数が既定の `TRUE` の場合，なぜか行名が文字列として扱われてしまう．
+このため並べ替えが正常に機能しない．
+
+```{r, eval = FALSE}
+library(shiny)
+library(DT)
+
+ui <- fluidPage(DTOutput("dt", height = "500px"))
+
+server <- function(input, output, session) {
+  output$dt <- renderDT(dt, server = TRUE)
+}
+
+runGadget( # runGadget すると RStudio の Viewer Pane で実行できる
+  shinyApp(ui, server)
+)
+```
+
+![](/images/posts/2019-08-03-dt-ordered-by-row-numbers/dt-shiny.gif)
+
+対処方法は2つ．
+
+### renderDT(server = FALSE) にする
+
+簡単だが，クライアント側に表のデータを全て送ってしまうので，大規模なデータの取り扱いには不向き．
+
+```{r, eval = FALSE}
+server2 <- function(input, output, session) {
+  output$dt <- renderDT(dt, server = FALSE)
+}
+
+runGadget(shinyApp(ui, server2))
+```
+
+
+### 行番号相当の列を用意する
+
+以下のように行番号相当の列をデータフレームに用意しておき，行名を非表示にすると `server = TRUE` でも正常に並べ替えできる．
+
+ところで `DT::datatable` は行名の列には列名を表示しない．
+これと同じ見た目にしようとするには，データフレームの名前を後から `setNames` などで弄る必要がある．
+通常データフレームは列名のない列を作ることができないため，トリッキーな扱いが必要な形だ．
+
+```{r, eval = FALSE}
+library(dplyr)
+
+dt3 <- iris %>%
+  mutate(rn = row_number()) %>%
+  select(rn, everything()) %>%
+  setNames(c("", names(.)[-1L])) %>%
+  DT::datatable(rownames = FALSE)
+
+server3 <- function(input, output, session) {
+  output$dt <- renderDT(dt2)
+}
+
+runGadget(shinyApp(ui, server3))
+```
+
+# Enjoy!
