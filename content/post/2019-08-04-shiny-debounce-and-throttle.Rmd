@@ -62,8 +62,8 @@ runGadget(ui, server) # または shinyApp
 この返り値を他の `reactive expression` 内で使うことにより，
 他の `reactive expression` がタイマー動作中は実行されることを防いでくれる．
 
-```{r}
-debounce("debounce", 1000)
+```{r, comment = "", class.output = 'r'}
+print(debounce("debounce", 1000))
 ```
 
 Enjoy!!
