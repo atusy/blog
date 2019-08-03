@@ -1,0 +1,48 @@
+---
+title: Shiny で input の変更が反映されるまでの時間を調整する (debounce / throttle)
+author: ~
+date: '2019-08-04'
+slug: shiny-throttle-and-debounce
+categories: [R]
+tags: [shiny]
+summary: |
+  入力から一定時間の経過を待ってプログラムを実行するには `debounce` や `throttle` を使う．
+  
+  ![](/images/posts/2019-08-04-shiny-debounce-and-throttle/numericInput.gif)
+---
+
+
+
+<p>Shiny では数値の変更などの入力が即時反映されるのが基本だ．</p>
+<p>しかしこれでは，プロットの高さを変更したい時に <code>100</code> を <code>2000</code> と書き換えたとして，
+<code>2</code>, <code>20</code>, <code>200</code>, <code>2000</code> と少なくとも4種類の高さで順次レンダリングされてしまう．</p>
+<p>このような問題を防ぐには <code>debounce()</code> や <code>throttle()</code> を用いる．</p>
+<p><code>debounce()</code> は最後に入力してから一定の時間が経過するまで結果を反映しない．一定時間以内に入力を再開すると，タイマーはリセットされる．</p>
+<p><code>throttle()</code> は入力を開始してから一定の時間が経過するまで結果を反映しない．</p>
+<p>ドキュメントに掲載されている例は分かりにくいと思うのでオリジナルのものを用意してみた．</p>
+<p><img src="/images/posts/2019-08-04-shiny-debounce-and-throttle/numericInput.gif" /></p>
+<pre class="r"><code>library(shiny)
+
+ui &lt;- fluidPage(
+  numericInput(&quot;num&quot;, value = 0, label = NULL),
+  tableOutput(&quot;result&quot;)
+)
+
+server &lt;- function(input, output, session) {
+  num &lt;- reactive(input$num)
+  num_d &lt;- debounce(num, 1000)
+  num_t &lt;- throttle(num, 1000)
+
+  output$result &lt;- renderTable({
+    data.frame(
+      mode = c(&quot;raw&quot;, &quot;debounce&quot;, &quot;throttle&quot;),
+      x = c(num(), num_d(), num_t())
+    )
+  })
+}
+
+runGadget(ui, server) # または shinyApp</code></pre>
+<p><code>debounce()</code> や <code>throttle()</code> には第一引数に <code>reactive expression</code> を与え，第二引数に変更を反映するまでの時間をミリ秒で与える．返り値も <code>reactive expression</code> なところが特徴で，この返り値を他の <code>reactive expression</code> 内で使うことにより，他の <code>reactive expression</code> がタイマー動作中は実行されることを防いでくれる．</p>
+<pre class="r"><code>debounce(&quot;debounce&quot;, 1000)</code></pre>
+<pre id="out406a520fce39c603" class="shiny-text-output noplaceholder"></pre>
+<p>Enjoy!!</p>
