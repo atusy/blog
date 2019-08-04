@@ -59,8 +59,8 @@ runGadget(ui, server) # または shinyApp
 `debounce()` や `throttle()` には第一引数に `reactive expression` を与え，
 第二引数に変更を反映するまでの時間をミリ秒で与える．
 返り値も `reactive expression` なところが特徴で，
-この返り値を他の `reactive expression` 内で使うことにより，
-他の `reactive expression` がタイマー動作中は実行されることを防いでくれる．
+この返り値を他の `reactive expression` や `render*` 内で使うことにより，
+タイマー動作中の実行を防いでくれる．
 
 ```{r, comment = "", class.output = 'r'}
 print(debounce("debounce", 1000))

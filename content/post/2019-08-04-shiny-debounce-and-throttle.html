@@ -42,7 +42,7 @@ server &lt;- function(input, output, session) {
 }
 
 runGadget(ui, server) # または shinyApp</code></pre>
-<p><code>debounce()</code> や <code>throttle()</code> には第一引数に <code>reactive expression</code> を与え，第二引数に変更を反映するまでの時間をミリ秒で与える．返り値も <code>reactive expression</code> なところが特徴で，この返り値を他の <code>reactive expression</code> 内で使うことにより，他の <code>reactive expression</code> がタイマー動作中は実行されることを防いでくれる．</p>
+<p><code>debounce()</code> や <code>throttle()</code> には第一引数に <code>reactive expression</code> を与え，第二引数に変更を反映するまでの時間をミリ秒で与える．返り値も <code>reactive expression</code> なところが特徴で，この返り値を他の <code>reactive expression</code> や <code>render*</code> 内で使うことにより，タイマー動作中の実行を防いでくれる．</p>
 <pre class="r"><code>print(debounce(&quot;debounce&quot;, 1000))</code></pre>
 <pre class="r"><code>reactive({
     hybrid_chain(eventFunc(), function(value) {
