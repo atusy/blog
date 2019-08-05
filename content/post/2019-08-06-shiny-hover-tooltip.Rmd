@@ -4,7 +4,7 @@ author: ~
 date: '2019-08-06'
 slug: shiny-hover-tooltip
 categories: [R]
-tags: [plot]
+tags: [shiny, ggplot, plotly, jQuery]
 output:
   blogdown::html_page:
     toc: true
