@@ -231,6 +231,8 @@ CSS の `top` 属性と `left` 属性には `input$hover$coords_img$y` と `inpu
 
 # plotly パッケージを使う
 
+とても簡単．
+
 ```{r shiny-plotly, eval = FALSE}
 library(shiny)
 library(plotly)
@@ -239,11 +241,6 @@ server <- function(input, output, session) {
   output$plot <- renderPlotly(plot_ly(z = volcano, type = "heatmapgl"))
 }
 runGadget(ui, server)
-```
-
-```{r plotly-volcano, echo = FALSE, eval = TRUE}
-pacman::p_load(plotly)
-plot_ly(z = volcano, type = "heatmapgl")
 ```
 
 # jQuery を使う
