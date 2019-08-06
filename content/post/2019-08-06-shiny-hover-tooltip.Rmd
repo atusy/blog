@@ -60,8 +60,8 @@ server = function(input, output, session) {
         "y:", coords[2L],
         style = paste0(
           "position: absolute; ",
-          "top: ", input$hover$coords_img$y + 5, "px; ",
-          "left: ", input$hover$coords_img$x + 5, "px; ",
+          "top: ", input$hover$coords_css$y + 5, "px; ",
+          "left: ", input$hover$coords_css$x + 5, "px; ",
           "background: gray; ",
           "padding: 3px; ",
           "color: white; "
@@ -140,7 +140,7 @@ runGadget(
 
 ツールチップにしたい UI は動的な CSS を適用しやすい `htmlOutput` がお勧め．
 
-後々のことだが `top` と `left` にはプロット上におけるマウスの座標を示す `input$hover$coords_img$y` と `input$hover$coord_img$x` を利用する．
+後々のことだが `top` と `left` にはプロット上におけるマウスの座標を示す `input$hover$coords_css$y` と `input$hover$coord_css$x` を利用する．
 
 ```{r shiny-ui, eval = FALSE}
 ui = fluidPage(
@@ -180,8 +180,8 @@ output$tooltip <- renderText({
       "y:", coords[2L],
       style = paste0(
         "position: absolute; ",
-        "top: ", input$hover$coords_img$y + 5, "px; ",
-        "left: ", input$hover$coords_img$x + 5, "px; ",
+        "top: ", input$hover$coords_css$y + 5, "px; ",
+        "left: ", input$hover$coords_css$x + 5, "px; ",
         "background: gray; ",
         "padding: 3px; ",
         "color: white; "
@@ -220,7 +220,7 @@ coords <- signif(c(input$hover$x, input$hover$y))
 
 しておくことがポイントだ．
 
-CSS の `top` 属性と `left` 属性には `input$hover$coords_img$y` と `input$hover$coords_img$x` 由来の値を指定するが，
+CSS の `top` 属性と `left` 属性には `input$hover$coords_css$y` と `input$hover$coords_css$x` 由来の値を指定するが，
 `+ 5` などの値を足して，マウス位置からずらしておいてやることがポイント．
 これにより，マウスがツールチップに重んなってしまい
 

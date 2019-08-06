@@ -75,8 +75,8 @@ server = function(input, output, session) {
         &quot;y:&quot;, coords[2L],
         style = paste0(
           &quot;position: absolute; &quot;,
-          &quot;top: &quot;, input$hover$coords_img$y + 5, &quot;px; &quot;,
-          &quot;left: &quot;, input$hover$coords_img$x + 5, &quot;px; &quot;,
+          &quot;top: &quot;, input$hover$coords_css$y + 5, &quot;px; &quot;,
+          &quot;left: &quot;, input$hover$coords_css$x + 5, &quot;px; &quot;,
           &quot;background: gray; &quot;,
           &quot;padding: 3px; &quot;,
           &quot;color: white; &quot;
@@ -141,7 +141,7 @@ runGadget(ui, server)</code></pre>
 <p>これによりツールチップに対して CSS を適用し，
 <code>position: absolute</code> にした上で <code>top</code> と <code>left</code> を指定すると，親要素の左上を基準に位置を指定できるようになる．</p>
 <p>ツールチップにしたい UI は動的な CSS を適用しやすい <code>htmlOutput</code> がお勧め．</p>
-<p>後々のことだが <code>top</code> と <code>left</code> にはプロット上におけるマウスの座標を示す <code>input$hover$coords_img$y</code> と <code>input$hover$coord_img$x</code> を利用する．</p>
+<p>後々のことだが <code>top</code> と <code>left</code> にはプロット上におけるマウスの座標を示す <code>input$hover$coords_css$y</code> と <code>input$hover$coord_css$x</code> を利用する．</p>
 <pre class="r"><code>ui = fluidPage(
   &quot;Motor cars&quot;,
   tags$div(
@@ -171,8 +171,8 @@ runGadget(ui, server)</code></pre>
       &quot;y:&quot;, coords[2L],
       style = paste0(
         &quot;position: absolute; &quot;,
-        &quot;top: &quot;, input$hover$coords_img$y + 5, &quot;px; &quot;,
-        &quot;left: &quot;, input$hover$coords_img$x + 5, &quot;px; &quot;,
+        &quot;top: &quot;, input$hover$coords_css$y + 5, &quot;px; &quot;,
+        &quot;left: &quot;, input$hover$coords_css$x + 5, &quot;px; &quot;,
         &quot;background: gray; &quot;,
         &quot;padding: 3px; &quot;,
         &quot;color: white; &quot;
@@ -191,7 +191,7 @@ runGadget(ui, server)</code></pre>
 <p><code>input$hover</code> が返す座標はそのままでは桁数が多くで読み辛いので</p>
 <pre class="r"><code>coords &lt;- signif(c(input$hover$x, input$hover$y))</code></pre>
 <p>しておくことがポイントだ．</p>
-<p>CSS の <code>top</code> 属性と <code>left</code> 属性には <code>input$hover$coords_img$y</code> と <code>input$hover$coords_img$x</code> 由来の値を指定するが，
+<p>CSS の <code>top</code> 属性と <code>left</code> 属性には <code>input$hover$coords_css$y</code> と <code>input$hover$coords_css$x</code> 由来の値を指定するが，
 <code>+ 5</code> などの値を足して，マウス位置からずらしておいてやることがポイント．これにより，マウスがツールチップに重んなってしまい</p>
 <ul>
 <li>読み辛くなる</li>
