@@ -1,5 +1,5 @@
 ---
-title: Shiny でプロットを click したり brush したりした時に得られるデータについて
+title: Shiny でプロットを click したり brush したりした時に得られるデータまとめ
 author: ~
 date: '2019-08-07'
 slug: shiny-clickopts
