@@ -1,0 +1,262 @@
+---
+title: Shiny でプロットを click したり brush したりした時に得られるデータについて
+author: ~
+date: '2019-08-07'
+slug: shiny-clickopts
+categories: [R]
+tags: [shiny, javascript]
+---
+
+
+
+<style type="text/css">
+tr:nth-child(even) {
+    background: #eee;
+}
+</style>
+<p>Shiny では <code>plotOutput</code> の <code>click</code>, <code>dblclick</code>, <code>hover</code>, <code>brush</code> 引数を利用することで，プロットした画像からマウス操作で座標情報などを取得できる．</p>
+<p>この時得られるデータがドキュメントされていなかったので調査した．</p>
+<div id="section" class="section level1">
+<h1>調査結果</h1>
+<div id="section-1" class="section level2">
+<h2>概要</h2>
+<p>リストとして，<code>x</code>, <code>y</code> を始めとした様々な情報を返す．
+<code>domain</code>, <code>range</code>, <code>log</code> については要追加調査．</p>
+<div id="click-dblclick-hover" class="section level3">
+<h3>click / dblclick / hover</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">変数</th>
+<th align="left">概要</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">x, y</td>
+<td align="left">プロット領域におけるx座標とy座標</td>
+</tr>
+<tr class="even">
+<td align="left">coords_css</td>
+<td align="left">プロットにより出力された画像の左上を原点とした時の，CSSにおける座標 (x, y)</td>
+</tr>
+<tr class="odd">
+<td align="left">coords_img</td>
+<td align="left">プロットにより出力された画像の左上を原点とした時の，画像における座標 (x, y)</td>
+</tr>
+<tr class="even">
+<td align="left">img_css_ratio</td>
+<td align="left">プロットによる出力された画像の元サイズと表示サイズの比</td>
+</tr>
+<tr class="odd">
+<td align="left">panelvar1</td>
+<td align="left">ggplot2 でプロットしている場合の facet 変数</td>
+</tr>
+<tr class="even">
+<td align="left">mapping</td>
+<td align="left">ggplot2 でプロットしている場合の審美的属性の変数名</td>
+</tr>
+<tr class="odd">
+<td align="left">domain</td>
+<td align="left">不明</td>
+</tr>
+<tr class="even">
+<td align="left">range</td>
+<td align="left">不明</td>
+</tr>
+<tr class="odd">
+<td align="left">log</td>
+<td align="left">不明 (常に NULL ……？)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="brush" class="section level3">
+<h3>brush</h3>
+<p><code>click</code> が座標として <code>x</code>, <code>y</code> の点を返したのに対し，<code>brush</code> は <code>min</code>，<code>xmax</code>，<code>ymin</code>，<code>ymax</code> と範囲を返す．</p>
+<p>また，<code>click</code> にはなかった <code>direction</code>, <code>brushId</code>, <code>outputId</code> も返すようだ．</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">変数</th>
+<th align="left">概要</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">xmin, xmax, ymin, ymax</td>
+<td align="left">プロット領域における座標の範囲</td>
+</tr>
+<tr class="even">
+<td align="left">coords_css</td>
+<td align="left">プロットにより出力された画像の左上を原点とした時の，CSSにおける座標の範囲 (xmin, xmax, ymin, ymax)</td>
+</tr>
+<tr class="odd">
+<td align="left">coords_img</td>
+<td align="left">プロットにより出力された画像の左上を原点とした時の，画像における座標の範囲 (xmin, xmax, ymin, ymax)</td>
+</tr>
+<tr class="even">
+<td align="left">img_css_ratio</td>
+<td align="left">プロットによる出力された画像の元サイズと表示サイズの比</td>
+</tr>
+<tr class="odd">
+<td align="left">panelvar1</td>
+<td align="left">ggplot2 でプロットしている場合の facet 変数</td>
+</tr>
+<tr class="even">
+<td align="left">mapping</td>
+<td align="left">ggplot2 でプロットしている場合の審美的属性の変数名</td>
+</tr>
+<tr class="odd">
+<td align="left">domain</td>
+<td align="left">不明</td>
+</tr>
+<tr class="even">
+<td align="left">range</td>
+<td align="left">不明</td>
+</tr>
+<tr class="odd">
+<td align="left">log</td>
+<td align="left">不明 (常に NULL ……？)</td>
+</tr>
+<tr class="even">
+<td align="left">direction</td>
+<td align="left">brush をどの方向に行なったか．xy・x・y</td>
+</tr>
+<tr class="odd">
+<td align="left">brushId</td>
+<td align="left">plotOutput の brush 引数で指定した brush の ID</td>
+</tr>
+<tr class="even">
+<td align="left">outputId</td>
+<td align="left">renderPlot した結果を保存した時の ID (output$foo の foo の部分)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="section-2" class="section level2">
+<h2>生データの例</h2>
+<pre><code>List of
+ $ x            : num 2.65
+ $ y            : num 5.83
+ $ coords_css   :List of 2
+  ..$ x: int 77
+  ..$ y: int 218
+ $ coords_img   :List of 2
+  ..$ x: int 77
+  ..$ y: int 218
+ $ img_css_ratio:List of 2
+  ..$ x: int 1
+  ..$ y: int 1
+ $ panelvar1    : chr &quot;setosa&quot;
+ $ mapping      :List of 4
+  ..$ x        : chr &quot;Sepal.Width&quot;
+  ..$ y        : chr &quot;Sepal.Length&quot;
+  ..$ colour   : chr &quot;Species&quot;
+  ..$ panelvar1: chr &quot;Species&quot;
+ $ domain       :List of 4
+  ..$ left  : num 1.88
+  ..$ right : num 4.52
+  ..$ bottom: num 4.12
+  ..$ top   : num 8.08
+ $ range        :List of 4
+  ..$ left  : num 29.2
+  ..$ right : num 193
+  ..$ bottom: num 366
+  ..$ top   : num 24.2
+ $ log          :List of 2
+  ..$ x: NULL
+  ..$ y: NULL</code></pre>
+</div>
+<div id="shiny-app-" class="section level2">
+<h2>調査に用いた Shiny App のソース</h2>
+<pre class="r"><code>library(shiny)
+library(ggplot2)
+ui &lt;- fluidPage(
+  checkboxInput(&quot;facet&quot;, &quot;Facet&quot;),
+  plotOutput(&quot;plot&quot;, click = &quot;click&quot;, brush = &quot;brush&quot;),
+  verbatimTextOutput(&quot;mouse&quot;)
+)
+server &lt;- function(input, output, session) {
+  output$plot &lt;- renderPlot(
+    ggplot(iris) +
+      aes(Sepal.Width, Sepal.Length, color = Species) +
+      geom_point() +
+      if (input$facet) facet_wrap(~ Species)
+  )
+  output$mouse &lt;- renderPrint(
+    str(list(click = input$click, brush = input$brush))
+  )
+}
+runGadget(ui, server)</code></pre>
+</div>
+</div>
+<div id="section-3" class="section level1">
+<h1>調査過程</h1>
+<p>ドキュメント化されていないがために，調査するにはソースを追うしかなかった．</p>
+<p>特に <code>coords_css</code> と <code>coords_img</code> の違いが分からなかったので，その調査過程を記録しておく．</p>
+<p>プロットをクリックしたりした時に，<code>coords_css</code> と <code>coords_img</code> が得られるようになったのは
+<a href="https://github.com/rstudio/shiny/pull/2183/files#diff-a21c5d031e08050c8c0b2b9ca507d5ae">#2183</a>
+からだ．</p>
+<p>ソースを追うと，JavaScript で <code>coordmap.mouseCoordinateSender</code> という関数が定義されている．こいつは高階関数で <code>inputId</code>, <code>clip</code>, <code>nullOutside</code> を引数にとり，マウスの座標情報を返す関数を返すらしい．</p>
+<p><a href="https://github.com/rstudio/shiny/blob/6821ca623814148c61a207e17b3406777f5f7ddf/srcjs/output_binding_image.js#L547-L600" class="uri">https://github.com/rstudio/shiny/blob/6821ca623814148c61a207e17b3406777f5f7ddf/srcjs/output_binding_image.js#L547-L600</a></p>
+<p>返り値の関数ではこんな感じで座標を獲得するらしい．</p>
+<pre><code>const coords = {};
+coords.coords_css = coordmap.mouseOffsetCss(e);
+coords.coords_img = coordmap.scaleCssToImg(coords_css);</code></pre>
+<div id="coordmap.mouseoffsetcss-" class="section level2">
+<h2>coordmap.mouseOffsetCss 関数とは？</h2>
+<p>ページ上でのマウスの座標から画像の原点の座標を引いた値を返すようだ．つまり画像の原点を基準としたマウスの座標が返る．</p>
+<p><a href="https://github.com/rstudio/shiny/blob/6821ca623814148c61a207e17b3406777f5f7ddf/srcjs/output_binding_image.js#L401-L412" class="uri">https://github.com/rstudio/shiny/blob/6821ca623814148c61a207e17b3406777f5f7ddf/srcjs/output_binding_image.js#L401-L412</a></p>
+<pre class="js"><code>// This returns the offset of the mouse in CSS pixels relative to the img,
+// but not including the  padding or border, if present.
+coordmap.mouseOffsetCss = function(mouseEvent) {
+  const img_origin = findOrigin($img);
+
+  // The offset of the mouse from the upper-left corner of the img, in
+  // pixels.
+  return {
+    x: mouseEvent.pageX - img_origin.x,
+    y: mouseEvent.pageY - img_origin.y
+  };
+};</code></pre>
+</div>
+<div id="coordmap.scalecsstoimg-" class="section level2">
+<h2>coordmap.scaleCssToImg 関数とは？</h2>
+<p>プロットした画像が伸縮されている場合に，元のサイズを基準にして画像の左上を原点とした時の座標を返す．</p>
+<pre class="js"><code>// Given an offset in an img in CSS pixels, return the corresponding offset
+// in source image pixels. The offset_css can have properties like &quot;x&quot;,
+// &quot;xmin&quot;, &quot;y&quot;, and &quot;ymax&quot; -- anything that starts with &quot;x&quot; and &quot;y&quot;. If the
+// img content is 1000 pixels wide, but is scaled to 400 pixels on screen,
+// and the input is x:400, then this will return x:1000.
+coordmap.scaleCssToImg = function(offset_css) {
+  const pixel_scaling = coordmap.imgToCssScalingRatio();
+
+  const result = mapValues(offset_css, (value, key) =&gt; {
+    const prefix = key.substring(0, 1);
+
+    if (prefix === &quot;x&quot;) {
+      return offset_css[key] / pixel_scaling.x;
+    } else if (prefix === &quot;y&quot;) {
+      return offset_css[key] / pixel_scaling.y;
+    }
+    return null;
+  });
+
+  return result;
+};</code></pre>
+</div>
+<div id="e-" class="section level2">
+<h2>引数 e とは？</h2>
+<p>結局よくわからなかった</p>
+<p><code>e</code> には何が与えられるかを読むには，<code>coordmap.mouseCoordinateSender()</code> がどう使われているか終わなければならない．</p>
+<p>ややこしいことに，<code>coordmap.mouseCoordinateSender()</code> は <code>imageutils.createClickHandler()</code> などの中で，マウス操作に反応して情報を返す関数を返す高階関数を作るために使われている．まだ <code>e</code> が何者かは不明だ．</p>
+<p><a href="https://github.com/rstudio/shiny/blob/6821ca623814148c61a207e17b3406777f5f7ddf/srcjs/output_binding_image.js#L739-L758" class="uri">https://github.com/rstudio/shiny/blob/6821ca623814148c61a207e17b3406777f5f7ddf/srcjs/output_binding_image.js#L739-L758</a></p>
+<p><code>imageutils.createClickHandler()</code> は下記 URL で使われて，<code>dblclickHandler()</code> という関数を作る．</p>
+<p><a href="https://github.com/rstudio/shiny/blob/6821ca623814148c61a207e17b3406777f5f7ddf/srcjs/output_binding_image.js#L144" class="uri">https://github.com/rstudio/shiny/blob/6821ca623814148c61a207e17b3406777f5f7ddf/srcjs/output_binding_image.js#L144</a></p>
+<p>そして直後の</p>
+<pre class="js"><code>$el.on(&#39;mousedown2.image_output&#39;, clickHandler.mousedown);</code></pre>
+<p>みたいな操作で使っているっぽいのだが，結局 <code>e</code> が何か私の実力では分からなかった．</p>
+</div>
+</div>

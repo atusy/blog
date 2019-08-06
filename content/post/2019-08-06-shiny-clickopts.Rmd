@@ -1,0 +1,244 @@
+---
+title: Shiny でプロットを click したり brush したりした時に得られるデータについて
+author: ~
+date: '2019-08-07'
+slug: shiny-clickopts
+categories: [R]
+tags: [shiny, javascript]
+---
+
+```{r setup, include = FALSE}
+pacman::p_load(tibble, knitr, magrittr)
+opts_chunk$set(echo = FALSE)
+```
+
+```{css, echo = FALSE}
+tr:nth-child(even) {
+	background: #eee;
+}
+```
+
+
+Shiny では `plotOutput` の `click`, `dblclick`, `hover`, `brush` 引数を利用することで，
+プロットした画像からマウス操作で座標情報などを取得できる．
+
+この時得られるデータがドキュメントされていなかったので調査した．
+
+# 調査結果
+
+## 概要
+
+リストとして，`x`, `y` を始めとした様々な情報を返す．
+`domain`, `range`, `log` については要追加調査．
+
+### click / dblclick / hover
+
+```{r}
+tribble(
+  ~ 変数, ~ 概要,
+  "x, y",             "プロット領域におけるx座標とy座標",
+  "coords_css",    "プロットにより出力された画像の左上を原点とした時の，CSSにおける座標 (x, y)",
+  "coords_img",    "プロットにより出力された画像の左上を原点とした時の，画像における座標 (x, y)",
+  "img_css_ratio", "プロットによる出力された画像の元サイズと表示サイズの比",
+  "panelvar1",     "ggplot2 でプロットしている場合の facet 変数",
+  "mapping",       "ggplot2 でプロットしている場合の審美的属性の変数名",
+  "domain",        "不明",
+  "range",         "不明",
+  "log",           "不明 (常に NULL ……？)"
+) %>%
+  kable
+```
+
+### brush
+
+`click` が座標として `x`, `y` の点を返したのに対し，`brush` は `min`，`xmax`，`ymin`，`ymax` と範囲を返す．
+
+また，`click` にはなかった `direction`, `brushId`, `outputId` も返すようだ．
+
+```{r}
+tribble(
+  ~ 変数, ~ 概要,
+  "xmin, xmax, ymin, ymax", "プロット領域における座標の範囲",
+  "coords_css",    paste0("プロットにより出力された画像の左上を原点とした時の，",
+                          "CSSにおける座標の範囲 (xmin, xmax, ymin, ymax)"),
+  "coords_img",    paste0("プロットにより出力された画像の左上を原点とした時の，",
+                          "画像における座標の範囲 (xmin, xmax, ymin, ymax)"),
+  "img_css_ratio", "プロットによる出力された画像の元サイズと表示サイズの比",
+  "panelvar1",     "ggplot2 でプロットしている場合の facet 変数",
+  "mapping",       "ggplot2 でプロットしている場合の審美的属性の変数名",
+  "domain",        "不明",
+  "range",         "不明",
+  "log",           "不明 (常に NULL ……？)",
+  "direction",     "brush をどの方向に行なったか．xy・x・y",
+  "brushId",       "plotOutput の brush 引数で指定した brush の ID",
+  "outputId",      "renderPlot した結果を保存した時の ID (output$foo の foo の部分)"
+) %>%
+  kable
+```
+
+
+## 生データの例
+
+```
+List of
+ $ x            : num 2.65
+ $ y            : num 5.83
+ $ coords_css   :List of 2
+  ..$ x: int 77
+  ..$ y: int 218
+ $ coords_img   :List of 2
+  ..$ x: int 77
+  ..$ y: int 218
+ $ img_css_ratio:List of 2
+  ..$ x: int 1
+  ..$ y: int 1
+ $ panelvar1    : chr "setosa"
+ $ mapping      :List of 4
+  ..$ x        : chr "Sepal.Width"
+  ..$ y        : chr "Sepal.Length"
+  ..$ colour   : chr "Species"
+  ..$ panelvar1: chr "Species"
+ $ domain       :List of 4
+  ..$ left  : num 1.88
+  ..$ right : num 4.52
+  ..$ bottom: num 4.12
+  ..$ top   : num 8.08
+ $ range        :List of 4
+  ..$ left  : num 29.2
+  ..$ right : num 193
+  ..$ bottom: num 366
+  ..$ top   : num 24.2
+ $ log          :List of 2
+  ..$ x: NULL
+  ..$ y: NULL
+```
+
+## 調査に用いた Shiny App のソース
+
+```{r eval = FALSE, echo = TRUE}
+library(shiny)
+library(ggplot2)
+ui <- fluidPage(
+  checkboxInput("facet", "Facet"),
+  plotOutput("plot", click = "click", brush = "brush"),
+  verbatimTextOutput("mouse")
+)
+server <- function(input, output, session) {
+  output$plot <- renderPlot(
+    ggplot(iris) +
+      aes(Sepal.Width, Sepal.Length, color = Species) +
+      geom_point() +
+      if (input$facet) facet_wrap(~ Species)
+  )
+  output$mouse <- renderPrint(
+    str(list(click = input$click, brush = input$brush))
+  )
+}
+runGadget(ui, server)
+```
+
+# 調査過程
+
+ドキュメント化されていないがために，調査するにはソースを追うしかなかった．
+
+特に `coords_css` と `coords_img` の違いが分からなかったので，その調査過程を記録しておく．
+
+プロットをクリックしたりした時に，`coords_css` と `coords_img` が得られるようになったのは
+[#2183](https://github.com/rstudio/shiny/pull/2183/files#diff-a21c5d031e08050c8c0b2b9ca507d5ae)
+からだ．
+
+ソースを追うと，JavaScript で `coordmap.mouseCoordinateSender` という関数が定義されている．
+こいつは高階関数で `inputId`, `clip`, `nullOutside` を引数にとり，
+マウスの座標情報を返す関数を返すらしい．
+
+https://github.com/rstudio/shiny/blob/6821ca623814148c61a207e17b3406777f5f7ddf/srcjs/output_binding_image.js#L547-L600
+
+返り値の関数ではこんな感じで座標を獲得するらしい．
+
+```
+const coords = {};
+coords.coords_css = coordmap.mouseOffsetCss(e);
+coords.coords_img = coordmap.scaleCssToImg(coords_css);
+```
+
+## coordmap.mouseOffsetCss 関数とは？
+
+ページ上でのマウスの座標から画像の原点の座標を引いた値を返すようだ．
+つまり画像の原点を基準としたマウスの座標が返る．
+
+https://github.com/rstudio/shiny/blob/6821ca623814148c61a207e17b3406777f5f7ddf/srcjs/output_binding_image.js#L401-L412
+
+```js
+// This returns the offset of the mouse in CSS pixels relative to the img,
+// but not including the  padding or border, if present.
+coordmap.mouseOffsetCss = function(mouseEvent) {
+  const img_origin = findOrigin($img);
+
+  // The offset of the mouse from the upper-left corner of the img, in
+  // pixels.
+  return {
+    x: mouseEvent.pageX - img_origin.x,
+    y: mouseEvent.pageY - img_origin.y
+  };
+};
+```
+
+## coordmap.scaleCssToImg 関数とは？
+
+プロットした画像が伸縮されている場合に，元のサイズを基準にして画像の左上を原点とした時の座標を返す．
+
+```js
+// Given an offset in an img in CSS pixels, return the corresponding offset
+// in source image pixels. The offset_css can have properties like "x",
+// "xmin", "y", and "ymax" -- anything that starts with "x" and "y". If the
+// img content is 1000 pixels wide, but is scaled to 400 pixels on screen,
+// and the input is x:400, then this will return x:1000.
+coordmap.scaleCssToImg = function(offset_css) {
+  const pixel_scaling = coordmap.imgToCssScalingRatio();
+
+  const result = mapValues(offset_css, (value, key) => {
+    const prefix = key.substring(0, 1);
+
+    if (prefix === "x") {
+      return offset_css[key] / pixel_scaling.x;
+    } else if (prefix === "y") {
+      return offset_css[key] / pixel_scaling.y;
+    }
+    return null;
+  });
+
+  return result;
+};
+```
+
+## 引数 e とは？
+
+結局よくわからなかった
+
+`e` には何が与えられるかを読むには，`coordmap.mouseCoordinateSender()` がどう使われているか終わなければならない．
+
+ややこしいことに，`coordmap.mouseCoordinateSender()` は `imageutils.createClickHandler()` などの中で，マウス操作に反応して情報を返す関数を返す高階関数を作るために使われている．
+まだ `e` が何者かは不明だ． 
+
+https://github.com/rstudio/shiny/blob/6821ca623814148c61a207e17b3406777f5f7ddf/srcjs/output_binding_image.js#L739-L758
+
+`imageutils.createClickHandler()` は下記 URL で使われて，`dblclickHandler()` という関数を作る． 
+
+https://github.com/rstudio/shiny/blob/6821ca623814148c61a207e17b3406777f5f7ddf/srcjs/output_binding_image.js#L144
+
+そして直後の
+
+```js
+$el.on('mousedown2.image_output', clickHandler.mousedown);
+```
+
+みたいな操作で使っているっぽいのだが，結局 `e` が何か私の実力では分からなかった．
+
+
+
+
+
+
+
+
+
