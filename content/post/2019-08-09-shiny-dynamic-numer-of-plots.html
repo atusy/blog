@@ -1,0 +1,57 @@
+---
+title: Shiny で動的に図の数を変更する
+author: ~
+date: '2019-08-09'
+slug: shiny-dynamic-numer-of-plots
+categories: [R]
+tags: [Shiny]
+summary: |
+  ![](/images/posts/2019-08-09-shiny-dynamic-number-of-plots/shiny.gif)
+---
+
+
+
+<p>Shiny において動的にUIを生成するには，サーバーサイドで <code>renderUI</code> して作った UI を，UIサイドで <code>outputUI</code> すれば良い．</p>
+<p>この時，<code>renderUI</code> の中で作ることのできる UI は一つだけではなく <code>list</code> あるいは <code>htmltools::tagList</code> で束ねた複数の UI でもよい．</p>
+<p>この性質を利用すると，以下のように選択した変数の数に応じてプロットの数を変更できる．</p>
+<p><img src="/images/posts/2019-08-09-shiny-dynamic-number-of-plots/shiny.gif" /></p>
+<p>複数の図を作製するには，一つずつ異なる名前を与えて <code>output</code> に格納する必要がある．この操作を <code>observe</code> の中で <code>for</code> ループを回しながら <code>local</code> 環境で行うことがポイントだ．更に <code>local</code> の中では <code>for</code> を回すためのループ変数を別の変数にコピーしてやる必要がある．
+(<a href="https://gist.github.com/wch/5436415/" class="uri">https://gist.github.com/wch/5436415/</a>)．<code>local</code> や変数のコピーを行わなかった場合，同じプロットが大量に生成されてしまった．</p>
+<p>ちなみに，各プロットを <code>display: inline-block</code> な <code>div</code> で囲んでおくと，ページ幅に合わせて図を並べてくれる．</p>
+<pre class="r"><code>library(shiny)
+library(ggplot2)
+
+ui &lt;- pageWithSidebar(
+  tags$h1(&quot;Dynamic multiple plots&quot;),
+  sidebarPanel(
+    # shiny::selectInput より複数選択がしやすい
+    shinyWidgets::pickerInput(&quot;x&quot;, &quot;x&quot;, names(iris)),
+    shinyWidgets::pickerInput(&quot;y&quot;, &quot;y&quot;, names(iris), multiple = TRUE)
+  ),
+  mainPanel(uiOutput(&quot;plots&quot;))
+)
+
+server &lt;- function(input, output, session) {
+  
+  observe( # input$x, input$y が変更される度に処理を実行する
+    for(.y in input$y) {
+      local({ # local 環境にしておく必要あり
+        y &lt;- .y # .y を新しい変数にコピーしておく
+        output[[y]] &lt;- renderPlot( # 図はそれぞれ固有の ID を持つ
+          qplot(!!sym(input$x), !!sym(y), data = iris)
+        )
+      }
+    )}
+  )
+  
+  output$plots &lt;- renderUI(
+    lapply(
+      lapply(input$y, plotOutput, height = &quot;200&quot;, width = &quot;200&quot;),
+      div,
+      style = htmltools::css(display = &quot;inline-block&quot;)
+    )
+  )
+}
+
+runGadget(ui, server)</code></pre>
+<p>Enjoy!</p>
