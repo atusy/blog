@@ -14,7 +14,7 @@ summary: |
 ```{r setup, include = FALSE}
 pacman::p_load(ggplot2, magrittr, imager)
 pacman::p_load_gh("atusy/atusydown")
-knitr::opts_chunk$set(out.extra = "style='max-width: initial;'")
+knitr::opts_chunk$set(out.width = "auto")
 ```
 
 
