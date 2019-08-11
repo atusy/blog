@@ -1,5 +1,5 @@
 ---
-title: R Markdown で coord_fixed|equal な ggplot2 の余白を取り除く
+title: R Markdown で coord_fixed な ggplot2 の余白を取り除く
 author: ~
 date: '2019-08-12'
 slug: rmd-fig-crop-margin
