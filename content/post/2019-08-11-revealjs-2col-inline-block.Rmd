@@ -1,0 +1,174 @@
+---
+title: Rmd + Revealjs 簡単に印刷もできる で2カラムレイアウトを実現する (inline-block)
+author: ~
+date: '2019-08-11'
+slug: revealjs-2col-inline-block
+categories: [R]
+tags: [revealjs, CSS]
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+```{css, echo = FALSE}
+.col {
+  display: inline-block;
+  width: 48%;
+  vertical-align: top;
+}
+```
+
+R Markdown で Reveal.js を使ったスライド作りをする時、
+時々欲しくなるのが、2カラムレイアウトだ。
+
+これには
+
+- float を用いる方法 \
+  https://kazutan.github.io/SappoRoR6/rmd_slide.html#/15/3
+- flexbox を用いる方法 \
+  https://qiita.com/mokztk/items/df796add95c2ee065e52
+
+などが提案されてきたが、CSS や Rmd ファイルが  複雑になったり、印刷に問題があったりと、あと一歩感があった。
+
+そこで今回は `inline-block` プロパティを使ってもっと簡単にレイアウトを指定できるようにしてみた。
+
+# 出力例
+
+今回紹介する手法を応用することで、ブログ上でも2カラムにできる。
+
+::: col
+
+```{r ggplot-src, eval=FALSE}
+library(ggplot2)
+ggplot(mtcars) +
+  aes(mpg, wt) +
+  geom_point()
+```
+
+:::
+
+::: col
+
+```{r ggplot-eval, ref.label="ggplot-src", echo = FALSE, fig.width = 4, fig.height = 3}
+
+```
+
+:::
+
+
+# 実装
+
+## CSS
+
+```{css, eval = FALSE}
+.reveal .slides. section .col {
+  display: inline-block;
+  width: 48%;
+  vertical-align: top;
+}
+```
+
+以下の CSS を `.css` ファイルに保存して YAML フロントマターで読み込むか、 `css` チャンクを用いて実行すれば良い。
+
+### YAML フロントマター
+
+```yaml
+---
+output: 
+  revealjs::revealjs_presentation:
+    css: style.css
+---
+```
+
+ファイル名は随意。
+
+### CSS チャンク
+
+````css
+`r ''````{css, echo = FALSE}
+.reveal .slides. section .col {
+  display: inline-block;
+  width: 48%;
+  vertical-align: top;
+}
+`r ''````
+````
+
+通常、CSS をプレゼンする必要はないので、
+`echo = FALSE` にしておく。
+`include = FALSE` にすると、CSS が取り込まれなくなってしまうので注意。
+
+## マークダウン記法
+
+R Markdown は Pandoc's Markdown を基礎としているため、
+`<div>` ~ `</div>` を `:::` ～ `:::` と書くことができる。
+開始する `:::` に `{.col}` とすると、`div` に `col` クラスを与えることができる。
+
+よって以下のように `col` クラスの `div` 要素を二つ連続させると、2カラムレイアウトになる。
+複数連続させればマルチカラムにもできる。
+
+```
+::: {.col}
+
+左側のコンテンツ
+
+:::
+
+::: {.col}
+
+右側のコンテンツ
+
+:::
+```
+
+`{}` では `style` 属性も指定できるので、以下のように `width` などを指定すると、特定のカラムだけ幅を変更することも可能。
+
+```
+::: {.col style="width: 30%"}
+```
+
+# Rmd 例
+
+単一ファイルで例示できるよう、CSS チャンクを用いた例を示す。
+
+`````
+---
+title: 2 Column Layout
+output: revealjs::revealjs_presentation
+---
+
+`r ''````{css, echo = FALSE}
+.reveal .slides. section .col {
+  display: inline-block;
+  width: 48%;
+  vertical-align: top;
+}
+`r ''````
+
+## 2カラム
+
+::: {.col}
+
+`r ''````{r ggplot, eval=FALSE}
+library(ggplot2)
+ggplot(mtcars) +
+  aes(mpg, wt) +
+  geom_point()
+`r ''````
+
+:::
+
+::: {.col}
+
+`r ''````{r, ref.label="ggplot", echo = FALSE, fig.width = 4, fig.height = 3}
+
+`r ''```
+
+:::
+`````
+
+`revealjs::revealjs_presentation` が出力する図のサイズは既定で 8inch * 6inch だ。
+2カラムレイアウトの場合も同様だが、図が表示領域に収まるように、縮小される。
+これでは文字が読み難くなってしまうので、適宜 `fig.width` と `fig.height` を指定してやる必要がある。
+
+# Enjoy!

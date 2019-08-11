@@ -1,0 +1,153 @@
+---
+title: Rmd + Revealjs 簡単に印刷もできる で2カラムレイアウトを実現する (inline-block)
+author: ~
+date: '2019-08-11'
+slug: revealjs-2col-inline-block
+categories: [R]
+tags: [revealjs, CSS]
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#section">出力例</a></li>
+<li><a href="#section-1">実装</a><ul>
+<li><a href="#css">CSS</a><ul>
+<li><a href="#yaml-">YAML フロントマター</a></li>
+<li><a href="#css-">CSS チャンク</a></li>
+</ul></li>
+<li><a href="#section-2">マークダウン記法</a></li>
+</ul></li>
+<li><a href="#rmd-">Rmd 例</a></li>
+<li><a href="#enjoy">Enjoy!</a></li>
+</ul>
+</div>
+
+<style type="text/css">
+.col {
+  display: inline-block;
+  width: 48%;
+  vertical-align: top;
+}
+</style>
+<p>R Markdown で Reveal.js を使ったスライド作りをする時、時々欲しくなるのが、2カラムレイアウトだ。</p>
+<p>これには</p>
+<ul>
+<li>float を用いる方法<br />
+<a href="https://kazutan.github.io/SappoRoR6/rmd_slide.html#/15/3" class="uri">https://kazutan.github.io/SappoRoR6/rmd_slide.html#/15/3</a></li>
+<li>flexbox を用いる方法<br />
+<a href="https://qiita.com/mokztk/items/df796add95c2ee065e52" class="uri">https://qiita.com/mokztk/items/df796add95c2ee065e52</a></li>
+</ul>
+<p>などが提案されてきたが、CSS や Rmd ファイルが 複雑になったり、印刷に問題があったりと、あと一歩感があった。</p>
+<p>そこで今回は <code>inline-block</code> プロパティを使ってもっと簡単にレイアウトを指定できるようにしてみた。</p>
+<div id="section" class="section level1">
+<h1>出力例</h1>
+<p>今回紹介する手法を応用することで、ブログ上でも2カラムにできる。</p>
+<div class="col">
+<pre class="r"><code>library(ggplot2)
+ggplot(mtcars) +
+  aes(mpg, wt) +
+  geom_point()</code></pre>
+</div>
+<div class="col">
+<p><img src="/post/2019-08-11-revealjs-2col-inline-block_files/figure-html/ggplot-eval-1.png" width="384" /></p>
+</div>
+</div>
+<div id="section-1" class="section level1">
+<h1>実装</h1>
+<div id="css" class="section level2">
+<h2>CSS</h2>
+<pre class="css"><code>.reveal .slides. section .col {
+  display: inline-block;
+  width: 48%;
+  vertical-align: top;
+}</code></pre>
+<p>以下の CSS を <code>.css</code> ファイルに保存して YAML フロントマターで読み込むか、 <code>css</code> チャンクを用いて実行すれば良い。</p>
+<div id="yaml-" class="section level3">
+<h3>YAML フロントマター</h3>
+<pre class="yaml"><code>---
+output: 
+  revealjs::revealjs_presentation:
+    css: style.css
+---</code></pre>
+<p>ファイル名は随意。</p>
+</div>
+<div id="css-" class="section level3">
+<h3>CSS チャンク</h3>
+<pre class="css"><code>```{css, echo = FALSE}
+.reveal .slides. section .col {
+  display: inline-block;
+  width: 48%;
+  vertical-align: top;
+}
+```</code></pre>
+<p>通常、CSS をプレゼンする必要はないので、
+<code>echo = FALSE</code> にしておく。
+<code>include = FALSE</code> にすると、CSS が取り込まれなくなってしまうので注意。</p>
+</div>
+</div>
+<div id="section-2" class="section level2">
+<h2>マークダウン記法</h2>
+<p>R Markdown は Pandoc’s Markdown を基礎としているため、
+<code>&lt;div&gt;</code> ~ <code>&lt;/div&gt;</code> を <code>:::</code> ～ <code>:::</code> と書くことができる。開始する <code>:::</code> に <code>{.col}</code> とすると、<code>div</code> に <code>col</code> クラスを与えることができる。</p>
+<p>よって以下のように <code>col</code> クラスの <code>div</code> 要素を二つ連続させると、2カラムレイアウトになる。複数連続させればマルチカラムにもできる。</p>
+<pre><code>::: {.col}
+
+左側のコンテンツ
+
+:::
+
+::: {.col}
+
+右側のコンテンツ
+
+:::</code></pre>
+<p><code>{}</code> では <code>style</code> 属性も指定できるので、以下のように <code>width</code> などを指定すると、特定のカラムだけ幅を変更することも可能。</p>
+<pre><code>::: {.col style=&quot;width: 30%&quot;}</code></pre>
+</div>
+</div>
+<div id="rmd-" class="section level1">
+<h1>Rmd 例</h1>
+<p>単一ファイルで例示できるよう、CSS チャンクを用いた例を示す。</p>
+<pre><code>---
+title: 2 Column Layout
+output: revealjs::revealjs_presentation
+---
+
+```{css, echo = FALSE}
+.reveal .slides. section .col {
+  display: inline-block;
+  width: 48%;
+  vertical-align: top;
+}
+```
+
+## 2カラム
+
+::: {.col}
+
+```{r ggplot, eval=FALSE}
+library(ggplot2)
+ggplot(mtcars) +
+  aes(mpg, wt) +
+  geom_point()
+```
+
+:::
+
+::: {.col}
+
+```{r, ref.label=&quot;ggplot&quot;, echo = FALSE, fig.width = 4, fig.height = 3}
+
+``
+
+:::</code></pre>
+<p><code>revealjs::revealjs_presentation</code> が出力する図のサイズは既定で 8inch * 6inch だ。
+2カラムレイアウトの場合も同様だが、図が表示領域に収まるように、縮小される。これでは文字が読み難くなってしまうので、適宜 <code>fig.width</code> と <code>fig.height</code> を指定してやる必要がある。</p>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>
