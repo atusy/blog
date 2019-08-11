@@ -1,0 +1,68 @@
+---
+title: R Markdown で coord_fixed|equal な ggplot2 の余白を取り除く
+author: ~
+date: '2019-08-12'
+slug: rmd-fig-crop-margin
+categories: [R]
+tags: [rmarkdown, ggplot2]
+summary: |
+  不要な余白 (黒色部) ができてしまう時は、チャンクオプションの `fig.process` に画像処理を行う関数を指定しよう。
+  
+  ![](/post/2019-08-12-rmd-fig-crop-margin_files/figure-html/plot-1.png)
+---
+
+```{r setup, include = FALSE}
+pacman::p_load(ggplot2, magrittr, imager)
+pacman::p_load_gh("atusy/atusydown")
+knitr::opts_chunk$set(out.extra = "style='max-width: initial;'")
+```
+
+
+R Markdown ではグラフのサイズを `fig.width` と `fig.height` で指定できる。
+
+通常はここで指定したサイズを最大限に利用してグラフを描写するので、無駄な余白は生じない。
+
+ggplot2 の僅かな余白を消したければ `+ theme(plot.margin = unit(c(0, 0, 0, 0), "mm"))` とすればよい。
+
+ただし、`coord_fixed()` や `coord_equal()` を使って縦横比を固定すると、
+使い切れない領域が余白として残る (例えば下図の黒帯)。
+
+```{r plot, dev.args=list(bg="black"), fig.width = 2.5, fig.height = 2, opts.include = TRUE}
+library(ggplot2)
+qplot(1:3, 1:3) + coord_equal()
+```
+
+ちなみに、この黒帯部分は `theme(plot.background)` の外に見えるグラフィックデバイスの背景色である。
+
+余白をなくすために、サイズ調整を試行錯誤するのは非効率なので、Chunk オプションの `fig.process` を使おう。
+
+`fig.process` にはグラフを画像として加工するための関数を指定できる。
+関数は画像として保存されたグラフのファイルパスを引数として受け取り、新しいパスを返す必要がある。
+
+画像の加工に `imager` パッケージを使うなら、以下のように `画像読み込み` → `画像のクロップ` → `画像の保存` → `画像のパスを返す` という段階を踏めばよい。
+
+```{r}
+library(imager)
+library(magrittr)
+fig_crop <- function(x) {
+  x %>%
+    imager::load.image() %>%
+    imager::autocrop(c(0, 0, 0)) %>%
+    imager::save.image(x)
+  x
+}
+```
+
+余白を削除するための関数は `autocrop` で、ここには RGB の強度をそれぞれ0から1で表現した流さ3のベクトルを指定する。
+デバイスの背景色は通常白なので、 `c(1, 1, 1)` とするのが簡便だろう。
+うっかり `theme(plot.margin)` まで消してしまわないようするなら、
+チャンクオプションでプロットの背景色と異なる色をデバイスの背景に指定し (例えば `dev.arg=list(bg="black")`)、その色を `autocrop()` する色にも指定する (`c(0, 0, 0)`)。
+
+この関数を `fig.process=fig_crop` といった具合にチャンクオプションに指定すると、
+余分な余白が消えたグラフを得ることができる。
+
+```{r plot-cropped, dev.args=list(bg="black"), fig.width = 2.5, fig.height = 2, opts.include = TRUE, fig.process=fig_crop}
+qplot(1:3, 1:3) + coord_equal()
+```
+
+Enjoy!
