@@ -2,6 +2,7 @@
 title: roxygen2タグまとめ
 author: ~
 date: '2018-08-28'
+lastmod: '2019-08-16'
 slug: roxygen2matome
 categories: [R]
 tags: [package, Roxygen2, Rd]
@@ -34,27 +35,39 @@ Roxygen2を用いると、パッケージ内で定義した関数やデータセ
 ```{r matome}
 x <- fread('../../static/tbl/roxygen2_rd.csv')
 x %>%
-  mutate_at(
-    c('roxygen2', 'rd'), 
-    str_replace_all, 
-    c('^' = '`', '$' = '`', '``' = ' ')
-  ) %>%
   transmute(
     `Roxygen2タグ` = ifelse(
       url_roxygen2 == '', 
       roxygen2, 
-      paste0('[', roxygen2, '](', url_roxygen2, ')')
+      paste0('<a href="', url_roxygen2, '"><code>', roxygen2, '</code></a>')
     ),
     `Rdコマンド` = ifelse(
       url_rd == '', 
       rd, 
-      paste0('[', rd, '](', url_rd , ')')
+      paste0('<a href="', url_rd, '"><code>', rd, '</code></a>')
     ),
-    `主な使い方` = description
+    `主な使い方` = description %>%
+      purrr:::map_chr(commonmark::markdown_html)
   ) %>%
-  kable(format = 'html') %>%
-  kable_styling(bootstrap_options = 'striped') %>%
-  column_spec(1:2, extra_css = 'white-space: nowrap')
+  reactable::reactable(
+    pagination = FALSE,
+    striped = TRUE,
+    filterable = TRUE,
+    columns = list(
+      `Roxygen2タグ` = reactable::colDef(
+        minWidth = 16 * 15,
+        maxWidth = 16 * 15
+      ),
+      `Rdコマンド` = reactable::colDef(
+        minWidth = 16 * 10,
+        maxWidth = 16 * 10
+      )
+    ),
+    defaultColDef = reactable::colDef(
+      html = TRUE,
+      style = "white-space: unset;"
+    )
+  )
 ```
 
 
