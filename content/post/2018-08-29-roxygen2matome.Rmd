@@ -13,7 +13,8 @@ output:
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-pacman::p_load(data.table, dplyr, knitr, kableExtra, stringr)
+pacman::p_load(data.table, dplyr, knitr, kableExtra, stringr, purrr, commonmark)
+pacman::p_load_gh("glin/reactable")
 ```
 
 Roxygen2のタグについての情報が複数箇所に分散していて調べるのが大変なのでまとめた。
@@ -35,32 +36,37 @@ Roxygen2を用いると、パッケージ内で定義した関数やデータセ
 ```{r matome}
 x <- fread('../../static/tbl/roxygen2_rd.csv')
 x %>%
+  modify_at(
+    c("roxygen2", "rd"), 
+    str_replace,
+    "(.+)",
+    "`\\1`"
+  ) %>%
   transmute(
     `Roxygen2タグ` = ifelse(
       url_roxygen2 == '', 
       roxygen2, 
-      paste0('<a href="', url_roxygen2, '"><code>', roxygen2, '</code></a>')
+      paste0('[', roxygen2, '](', url_roxygen2, ')')
     ),
     `Rdコマンド` = ifelse(
       url_rd == '', 
       rd, 
-      paste0('<a href="', url_rd, '"><code>', rd, '</code></a>')
+      paste0('[', rd, '](', url_rd, ')')
     ),
-    `主な使い方` = description %>%
-      purrr:::map_chr(commonmark::markdown_html)
+    `主な使い方` = description
   ) %>%
+  purrr::modify_if(is.character, purrr::map_chr, commonmark::markdown_html) %>%
   reactable::reactable(
     pagination = FALSE,
     striped = TRUE,
     filterable = TRUE,
+    compact = TRUE,
     columns = list(
       `Roxygen2タグ` = reactable::colDef(
-        minWidth = 16 * 15,
-        maxWidth = 16 * 15
+        width = 16 * 15 * .8
       ),
       `Rdコマンド` = reactable::colDef(
-        minWidth = 16 * 10,
-        maxWidth = 16 * 10
+        width = 16 * 10 * .8
       )
     ),
     defaultColDef = reactable::colDef(
