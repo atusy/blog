@@ -6,9 +6,9 @@ slug: lemon-facet-rep
 categories: [R]
 tags: [ggplot2, lemon]
 images:
-  - /post/2019-08-18-lemon-facet-rep_files/figure-html/gg-classic-1.png
+  - /post/2019-08-18-lemon-facet-rep_files/figure-html/lemon-classic-1.png
 summary: |
-  ![](/post/2019-08-18-lemon-facet-rep_files/figure-html/gg-classic-1.png)
+  ![](/post/2019-08-18-lemon-facet-rep_files/figure-html/lemon-classic-1.png)
 ---
 
 ```{r setup, include = FALSE}
