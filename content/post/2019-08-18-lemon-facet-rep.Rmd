@@ -32,6 +32,8 @@ g + facet_rep_wrap(~ Species, repeat.tick.labels = TRUE)
 `facet_grid()` の場合は `scales` 引数の値に寄らず，軸は端の図にしか表示されない．
 従って，任意の `scales` に対し `facet_rep_grid()` が威力を発揮する．
 
+メリットは以下の通り．
+
 # 値が読み易い
 
 `ggplot2` パッケージによる通常の facet では以下のように，端にしか軸を表示しないため，

@@ -22,6 +22,7 @@ g + facet_rep_wrap(~ Species, repeat.tick.labels = TRUE)</code></pre>
 <p><code>facet_wrap()</code> も <code>scales = 'free'</code> であれば全ての図の軸を表示してくれる．
 <code>facet_wrap()</code> が威力を発揮する <code>scales</code> 引数が <code>'fixed'</code>，<code>'free_x'</code>，<code>'free_y'</code> な場面だろう．</p>
 <p><code>facet_grid()</code> の場合は <code>scales</code> 引数の値に寄らず，軸は端の図にしか表示されない．従って，任意の <code>scales</code> に対し <code>facet_rep_grid()</code> が威力を発揮する．</p>
+<p>メリットは以下の通り．</p>
 <div id="section" class="section level1">
 <h1>値が読み易い</h1>
 <p><code>ggplot2</code> パッケージによる通常の facet では以下のように，端にしか軸を表示しないため，一部の図が目盛から遠く，値を読み難い問題があった．
