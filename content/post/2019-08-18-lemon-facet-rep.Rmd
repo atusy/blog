@@ -1,0 +1,63 @@
+---
+title: lemon パッケージで facet した ggplot2 に軸を表示する
+author: ~
+date: '2019-08-18'
+slug: lemon-facet-rep
+categories: [R]
+tags: [ggplot2, lemon]
+images:
+  - /post/2019-08-18-lemon-facet-rep_files/figure-html/gg-classic-1.png
+summary: |
+  ![](/post/2019-08-18-lemon-facet-rep_files/figure-html/gg-classic-1.png)
+---
+
+```{r setup, include = FALSE}
+pacman::p_load(ggplot2, lemon)
+knitr::opts_chunk$set(fig.width = 6, fig.height = 3)
+```
+
+`lemon` パッケージを使うと facet した全ての図に軸の目盛 (ticks) と labels を表示できる．
+
+```{r facet-rep-wrap, fig.height = 3}
+g <- ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
+  geom_point()
+g + facet_rep_wrap(~ Species, repeat.tick.labels = TRUE)
+```
+
+`facet_wrap()` の拡張として `facet_rep_wrap()`，`facet_grid()` の拡張として `facet_rep_grid` が用意されている．`lemon` パッケージによる拡張は，既定では目盛 (ticks) のみを各パネルに表示するが，`repeat.tick.labels = TRUE` にすると label も表示してくれる．
+
+`facet_wrap()` も `scales = 'free'` であれば全ての図の軸を表示してくれる．
+`facet_wrap()` が威力を発揮する `scales` 引数が `'fixed'`，`'free_x'`，`'free_y'` な場面だろう．
+
+`facet_grid()` の場合は `scales` 引数の値に寄らず，軸は端の図にしか表示されない．
+従って，任意の `scales` に対し `facet_rep_grid()` が威力を発揮する．
+
+# 値が読み易い
+
+`ggplot2` パッケージによる通常の facet では以下のように，端にしか軸を表示しないため，
+一部の図が目盛から遠く，値を読み難い問題があった．
+`lemon` パッケージを使えばこの問題から解放される．
+
+```{r facet-wrap, fig.height=3}
+g + facet_wrap(~ Species)
+```
+
+# パネル内に目盛線を引かないテーマとの相性が良い
+
+例えば `theme_classic` で facet すると，以下のように，facet 間の境界が不明瞭になる．
+
+```{r gg-classic}
+g + 
+  facet_wrap(~ Species) + 
+  theme_classic()
+```
+
+`lemon` パッケージを使えばこの通り
+
+```{r lemon-classic}
+g + 
+  facet_rep_wrap(~ Species, repeat.tick.labels = TRUE) + 
+  theme_classic()
+```
+
+# Enjoy!

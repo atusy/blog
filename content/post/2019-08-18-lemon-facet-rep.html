@@ -1,0 +1,47 @@
+---
+title: lemon パッケージで facet した ggplot2 に軸を表示する
+author: ~
+date: '2019-08-18'
+slug: lemon-facet-rep
+categories: [R]
+tags: [ggplot2, lemon]
+images:
+  - /post/2019-08-18-lemon-facet-rep_files/figure-html/gg-classic-1.png
+summary: |
+  ![](/post/2019-08-18-lemon-facet-rep_files/figure-html/gg-classic-1.png)
+---
+
+
+
+<p><code>lemon</code> パッケージを使うと facet した全ての図に軸の目盛 (ticks) と labels を表示できる．</p>
+<pre class="r"><code>g &lt;- ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
+  geom_point()
+g + facet_rep_wrap(~ Species, repeat.tick.labels = TRUE)</code></pre>
+<p><img src="/post/2019-08-18-lemon-facet-rep_files/figure-html/facet-rep-wrap-1.png" width="576" /></p>
+<p><code>facet_wrap()</code> の拡張として <code>facet_rep_wrap()</code>，<code>facet_grid()</code> の拡張として <code>facet_rep_grid</code> が用意されている．<code>lemon</code> パッケージによる拡張は，既定では目盛 (ticks) のみを各パネルに表示するが，<code>repeat.tick.labels = TRUE</code> にすると label も表示してくれる．</p>
+<p><code>facet_wrap()</code> も <code>scales = 'free'</code> であれば全ての図の軸を表示してくれる．
+<code>facet_wrap()</code> が威力を発揮する <code>scales</code> 引数が <code>'fixed'</code>，<code>'free_x'</code>，<code>'free_y'</code> な場面だろう．</p>
+<p><code>facet_grid()</code> の場合は <code>scales</code> 引数の値に寄らず，軸は端の図にしか表示されない．従って，任意の <code>scales</code> に対し <code>facet_rep_grid()</code> が威力を発揮する．</p>
+<div id="section" class="section level1">
+<h1>値が読み易い</h1>
+<p><code>ggplot2</code> パッケージによる通常の facet では以下のように，端にしか軸を表示しないため，一部の図が目盛から遠く，値を読み難い問題があった．
+<code>lemon</code> パッケージを使えばこの問題から解放される．</p>
+<pre class="r"><code>g + facet_wrap(~ Species)</code></pre>
+<p><img src="/post/2019-08-18-lemon-facet-rep_files/figure-html/facet-wrap-1.png" width="576" /></p>
+</div>
+<div id="section-1" class="section level1">
+<h1>パネル内に目盛線を引かないテーマとの相性が良い</h1>
+<p>例えば <code>theme_classic</code> で facet すると，以下のように，facet 間の境界が不明瞭になる．</p>
+<pre class="r"><code>g + 
+  facet_wrap(~ Species) + 
+  theme_classic()</code></pre>
+<p><img src="/post/2019-08-18-lemon-facet-rep_files/figure-html/gg-classic-1.png" width="576" /></p>
+<p><code>lemon</code> パッケージを使えばこの通り</p>
+<pre class="r"><code>g + 
+  facet_rep_wrap(~ Species, repeat.tick.labels = TRUE) + 
+  theme_classic()</code></pre>
+<p><img src="/post/2019-08-18-lemon-facet-rep_files/figure-html/lemon-classic-1.png" width="576" /></p>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>
