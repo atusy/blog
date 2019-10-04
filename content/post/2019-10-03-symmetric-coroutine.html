@@ -125,22 +125,25 @@ A()</code></pre>
 <h1>一般化</h1>
 <p>コルーチン内の処理の数が増えるごとに、<code>if</code>文を書き連ねていくのは地獄だ。そこで、コルーチンを生成する関数<code>coroutine</code>を書いてみよう。
 <code>coroutine</code>関数の第一引数は、自身の名前、第二引数は呼び出すルーチンの名前、第三引数以降は呼び出しごとに実行したい処理の内容とする。処理内容は任意の個数書けるように、省略記号<code>...</code>を用いる。
-<code>rlang::enquos</code>関数を用いると、省略記号に指定した処理を表現式として保存しておくことができる。後は今が何度目のルーチン呼び出しかを管理し、<code>i</code>番目であれば、省略記号に指定した<code>i</code>番目の処理を<code>rlang::eval_tidy</code>によって実行すれば良い。
-<code>i</code>が省略記号に指定した</p>
+<code>rlang::enquos</code>関数を用いると、省略記号に指定した処理を表現式として保存しておくことができる。後は今が何度目のルーチン呼び出しかを管理し、<code>i</code>番目であれば、省略記号に指定した<code>i</code>番目の処理を<code>rlang::eval_tidy</code>によって実行すれば良い。</p>
 <pre class="r"><code>i &lt;- new.env()
 
 coroutine &lt;- function(self, resume, ...) {
   yield &lt;- rlang::enquos(...)
   i[[self]] &lt;- 1L
-  n &lt;- length(yield)
+  n &lt;- length(yield) # 最大処理回数
 
   function() {
+    # 全ての処理が完了している場合の操作
     if (i[[self]] &gt; n) {
       i[[self]] &lt;- i[[resume]] &lt;- 1L
       return(invisible())
     }
+    # 今回の処理の実行
     rlang::eval_tidy(yield[[i[[self]]]])
+    # 実行状況の更新
     i[[self]] &lt;- i[[self]] + 1L
+    # コルーチン呼び出し
     match.fun(resume)()
   }
 }</code></pre>
