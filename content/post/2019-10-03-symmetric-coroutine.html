@@ -21,8 +21,8 @@ n月刊ラムダノート Vol.1には疑似コードも含めて紹介されて�
 <p>の3本仕立てでお送りする。
 Rでコルーチンが活躍する場面はほとんどないだろう。
 Shinyには非同期プログラミングの需要があるが、こちらでは<code>future</code>や<code>promise</code>といったパッケージを利用した方が良いだろう (<a href="https://www.slideshare.net/hoxo_m/shiny-177170789">Shinyユーザのための非同期プログラミング入門</a> by hoxo_m氏)。</p>
-<div id="r" class="section level2">
-<h2>ラムダノートの疑似コードをRに実装</h2>
+<div id="r" class="section level1">
+<h1>ラムダノートの疑似コードをRに実装</h1>
 <p>さて、n月刊ラムダノート Vol.1にて紹介されている疑似コードをRで実装してみよう。関数<code>A</code>と<code>B</code>のどこまでを実行したか管理するために、環境を<code>i</code>に割り当てた。
 <code>i$A</code>や<code>i$B</code>が<code>NULL</code> (既定値) の時は、これらの値を<code>1</code>に書き換えた上で前半の処理を実行する。
 <code>NULL</code>以外の時は後半の処理を実行する。</p>
@@ -59,8 +59,8 @@ A()</code></pre>
 <pre class="r"><code>A()</code></pre>
 <pre><code>## [1] &quot;A-end&quot;</code></pre>
 </div>
-<div id="section" class="section level2">
-<h2>修正版の実装</h2>
+<div id="section" class="section level1">
+<h1>修正版の実装</h1>
 <p>上述のバグを修正するとやや複雑なコードが生まれる。ポイントは2点</p>
 <ul>
 <li>ルーチンの最初に、ルーチン末尾まで実行済みであるかを評価するコードを挿入する
