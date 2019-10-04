@@ -1,0 +1,161 @@
+---
+title: Rで作る対称コルーチン
+author: ~
+date: '2019-10-03'
+slug: symmetric-coroutine
+categories: [R]
+tags: [coroutine, metaprogramming]
+---
+
+
+
+<p><a href="https://www.lambdanote.com/products/nmonthly-vol-1-no-1-2019">n月刊ラムダノート Vol.1</a>の『「コルーチン」とは何だったのか』を読んでいる。せっかくなので勉強がてら、Rでコルーチンを実装してみることにした。今回は元祖コルーチンとして紹介されている対称コルーチンを扱う。</p>
+<p>対称コルーチンでは、関数<code>A</code>と<code>B</code>が互いを関数中で呼び合い、未実行な部分から次に相手を呼び出すところまでを順次実行していくものらしい。
+n月刊ラムダノート Vol.1には疑似コードも含めて紹介されているので、詳しくはそちらを参照して欲しい。</p>
+<p>本記事では、</p>
+<ul>
+<li>書中に紹介された疑似コードをRで実装</li>
+<li>疑似コードがわざと抱えているバグを修正</li>
+<li>コルーチンを簡単に書けるようにするメタプログラミング</li>
+</ul>
+<p>の3本仕立てでお送りする。
+Rでコルーチンが活躍する場面はほとんどないだろう。
+Shinyには非同期プログラミングの需要があるが、こちらでは<code>future</code>や<code>promise</code>といったパッケージを利用した方が良いだろう (<a href="https://www.slideshare.net/hoxo_m/shiny-177170789">Shinyユーザのための非同期プログラミング入門</a> by hoxo_m氏)。</p>
+<div id="r" class="section level2">
+<h2>ラムダノートの疑似コードをRに実装</h2>
+<p>さて、n月刊ラムダノート Vol.1にて紹介されている疑似コードをRで実装してみよう。関数<code>A</code>と<code>B</code>のどこまでを実行したか管理するために、環境を<code>i</code>に割り当てた。
+<code>i$A</code>や<code>i$B</code>が<code>NULL</code> (既定値) の時は、これらの値を<code>1</code>に書き換えた上で前半の処理を実行する。
+<code>NULL</code>以外の時は後半の処理を実行する。</p>
+<pre class="r"><code>i &lt;- new.env()
+
+A &lt;- function() {
+  # 初回のみ実行
+  if (is.null(i$A)) {
+    print(&quot;A-start&quot;) # 1回目の処理
+    i$A &lt;- 1 # 1回目の処理を完了したフラグ
+    return(B()) # コルーチン呼び出し
+  }
+  
+  # 二回目のみ実行
+  print(&quot;A-end&quot;)
+}
+
+# Aと同様に実装
+B &lt;- function() {
+  if (is.null(i$B)) {
+    print(&quot;B-start&quot;)
+    i$B &lt;- 1
+    return(A())
+  }
+  print(&quot;B-end&quot;)
+}
+
+A()</code></pre>
+<pre><code>## [1] &quot;A-start&quot;
+## [1] &quot;B-start&quot;
+## [1] &quot;A-end&quot;</code></pre>
+<p>ラムダノート上でも指摘されている通り、中断したコルーチンを再開し忘れているので、<code>"B-end"</code>が出力されない。</p>
+<p>また、ルーチン終了時に実行状況を初期化していないため、もう一度コルーチンを走らせると、<code>"A-end"</code>のみが出力されてしまう。</p>
+<pre class="r"><code>A()</code></pre>
+<pre><code>## [1] &quot;A-end&quot;</code></pre>
+</div>
+<div id="section" class="section level2">
+<h2>修正版の実装</h2>
+<p>上述のバグを修正するとやや複雑なコードが生まれる。ポイントは2点</p>
+<ul>
+<li>ルーチンの最初に、ルーチン末尾まで実行済みであるかを評価するコードを挿入する
+<ul>
+<li>末尾まで実行済みであれば、実行状況を初期化した上でコルーチンを終了する</li>
+</ul></li>
+<li>ルーチン末尾の処理が終わったら、コルーチンを呼び出す</li>
+</ul>
+<pre class="r"><code>i &lt;- new.env()
+
+A &lt;- function() {
+  # ルーチンの最後まで実行済みか確認
+  if (identical(i$A, 0)) {
+    i$A &lt;- i$B &lt;- NULL # ルーチンの実行状況を初期化
+    return(invisible()) # 何も出力せずに終了
+  }
+  
+  # 初回のみ実行
+  if (is.null(i$A)) {
+    print(&quot;A-start&quot;) # 1回目の処理内容
+    i$A &lt;- 1 # 1回目の処理を完了したフラグ
+    return(B()) # コルーチン呼び出し
+  }
+  
+  # 2回目に実行
+  ## 今回は3回目のルーチン呼び出しがないため、
+  ## i$Aを0に変更し、全処理が実施済みとのフラグを立てる
+  i$A &lt;- 0
+  print(&quot;A-end&quot;)
+  B()
+}
+
+# Aと同様に実装
+B &lt;- function() {
+  if (identical(i$B, 0)) {
+    i$A &lt;- i$B &lt;- NULL
+    return(invisible())
+  }
+  if (is.null(i$B)) {
+    print(&quot;B-start&quot;)
+    i$B &lt;- 1
+    return(A())
+  }
+  i$B &lt;- 0
+  print(&quot;B-end&quot;)
+  A()
+}
+
+A()</code></pre>
+<pre><code>## [1] &quot;A-start&quot;
+## [1] &quot;B-start&quot;
+## [1] &quot;A-end&quot;
+## [1] &quot;B-end&quot;</code></pre>
+<p>見事、<code>"B-end"</code>まで出力された。</p>
+<pre class="r"><code>A()</code></pre>
+<pre><code>## [1] &quot;A-start&quot;
+## [1] &quot;B-start&quot;
+## [1] &quot;A-end&quot;
+## [1] &quot;B-end&quot;</code></pre>
+</div>
+<div id="section-1" class="section level1">
+<h1>一般化</h1>
+<p>コルーチン内の処理の数が増えるごとに、<code>if</code>文を書き連ねていくのは地獄だ。そこで、コルーチンを生成する関数<code>coroutine</code>を書いてみよう。
+<code>coroutine</code>関数の第一引数は、自身の名前、第二引数は呼び出すルーチンの名前、第三引数以降は呼び出しごとに実行したい処理の内容とする。処理内容は任意の個数書けるように、省略記号<code>...</code>を用いる。
+<code>rlang::enquos</code>関数を用いると、省略記号に指定した処理を表現式として保存しておくことができる。後は今が何度目のルーチン呼び出しかを管理し、<code>i</code>番目であれば、省略記号に指定した<code>i</code>番目の処理を<code>rlang::eval_tidy</code>によって実行すれば良い。
+<code>i</code>が省略記号に指定した</p>
+<pre class="r"><code>i &lt;- new.env()
+
+coroutine &lt;- function(self, resume, ...) {
+  yield &lt;- rlang::enquos(...)
+  i[[self]] &lt;- 1L
+  n &lt;- length(yield)
+
+  function() {
+    if (i[[self]] &gt; n) {
+      i[[self]] &lt;- i[[resume]] &lt;- 1L
+      return(invisible())
+    }
+    rlang::eval_tidy(yield[[i[[self]]]])
+    i[[self]] &lt;- i[[self]] + 1L
+    match.fun(resume)()
+  }
+}</code></pre>
+<p><code>coroutine</code>関数を使ってラムダノートの例にあったコルーチンを実装してみよう。</p>
+<pre class="r"><code>A &lt;- coroutine(&quot;A&quot;, &quot;B&quot;, print(&quot;A_start&quot;), print(&quot;A_end&quot;))
+B &lt;- coroutine(&quot;B&quot;, &quot;A&quot;, print(&quot;B_start&quot;), print(&quot;B_end&quot;))
+A()</code></pre>
+<pre><code>## [1] &quot;A_start&quot;
+## [1] &quot;B_start&quot;
+## [1] &quot;A_end&quot;
+## [1] &quot;B_end&quot;</code></pre>
+<p><code>i</code>は適切に初期化されているので、二度目以降の呼出にも対応する。</p>
+<pre class="r"><code>A()</code></pre>
+<pre><code>## [1] &quot;A_start&quot;
+## [1] &quot;B_start&quot;
+## [1] &quot;A_end&quot;
+## [1] &quot;B_end&quot;</code></pre>
+</div>
