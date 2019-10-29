@@ -1,0 +1,151 @@
+---
+title: tidymodelsでもxgboostを解釈したい
+author: ~
+date: '2019-10-29'
+slug: interpret-tidymodels
+categories: [R]
+tags: [tidymodels, parsnip, xgboost, vip, pdp]
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+```{r opts, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE, collapse = TRUE, comment = "#>")
+```
+
+
+
+# はじめに
+
+tidymodelsに属するparsnipパッケージを用いて機械学習を行った場合、大本のパッケージで学習した場合と異なる構造のオブジェクトが返ります。
+例えば`xgboost::xgboost`関数で学習した結果は`xgb.Booster`クラスを持つオブジェクトです。
+一方で`parsnip::fit`関数を用いてXGBoostの学習を行った結果は、`_xgb.Booster`クラスと`model_fit`クラスを持つオブジェクトです。
+
+このため、後者は`xgb.Booster`クラス用に用意された様々な関数を適用することができません。
+利用できない関数には、変数重要度を計算する`xgboost::xgb.importance`関数や、Partial Dependence Plotを行う`pdp::partial`などがあります。
+これらはブラックボックスモデルなXGBoostの結果を解釈する上で非常に重要な関数です。
+簡単に使える方法を探ることにしました^[工夫すれば、`vip::vip`関数や`pdp::partial`関数を適用できるが、簡単ではない。([変数重要度とPartial Dependence Plotでブラックボックスモデルを解釈する | Dropout](https://dropout009.hatenablog.com/entry/2019/01/07/124214)]。
+
+結論としては学習結果の`"fit"`要素が、`xgboost`本来の学習結果ですので、これを取り出せば様々な関数を利用できます。
+というわけで試してみましょう。
+
+```{r setup}
+pacman::p_load(AmesHousing, tidymodels, xgboost, pdp, dplyr)
+```
+
+# XGBoostによる学習
+
+`ggplot2::diamonds`データセットについて、価格を予想するモデルを構築します。
+
+```{r learn}
+# 1割をテストデータにする
+i <- rsample::initial_split(ggplot2::diamonds, p = .9)
+
+# 前処理方法を定義
+rec <- ggplot2::diamonds %>%
+  recipes::recipe() %>%
+  recipes::step_ordinalscore(recipes::all_nominal()) %>%
+  recipes::step_log(price)
+
+prep <- recipes::prep(rec, train = training(i))
+
+# 前処理方法を元に訓練データとテストデータを作成
+tr <- juice(prep)
+te <- bake(prep, testing(i))
+
+# 学習
+fit_xgb <- boost_tree("regression") %>%
+  set_engine("xgboost") %>%
+  fit(price ~ ., data = tr)
+```
+
+ここで、`dplyr::glimpse(fit_xgb)`すると、学習結果の構造を見ることができます。
+
+xgboostパッケージ本来の出力結果と比較したい場合には、`parsnip::xgb_train(x = tr %>% select(-Price), y = tr$Price)`と比較してみて下さい。
+`fit_xgb$fit`と同じ構造をしていることが分かります。
+
+# Variable Importance Plot (VIP)
+
+学習結果を元に、変数重要度 (variable importance; VI) を計算してみましょう。
+これには`xgboost::xgb.importance`関数を用います。
+`xgboost::xgb.importance`関数は`xgb.Booster`クラスオブジェクトを受けとるように設計されているので、`fit_xgb`そのものではなく、`fit_xgb$fit`を食わせてやりましょう。
+
+すると、幅 (y) と、次いでカラット (carat) が価格に大きく影響することが分かります。
+
+```{r vip}
+vip <- fit_xgb$fit %>%
+  xgboost::xgb.importance(model = .) %>%
+  print
+xgboost::xgb.ggplot.importance(vip)
+```
+
+# Partial Dependence Plot (PDP)
+
+変数重要度が最も高いのは幅 (y) ですが、なんとなくカラット (carat) の方がイメージしやすいので、カラット (carat) についてPDPを可視化してみます。
+
+`pdp::partial`関数も`parsnip::fit`関数の結果を受け取れないので、`fit_xgb$fit`を食わせます。
+`train`引数には訓練データを与えても良いのですが、データのサイズに応じて時間がかかるので、ここではテストデータを与えます。
+`pred.var`には注目したい変数である`carat`を指定します。
+
+```{r pdp-carat}
+pdp::partial(
+  fit_xgb$fit, train = te %>% select(-price),
+  pred.var = "carat",
+  ice = TRUE, # 下図黒線としてIndividual Conditional Expectationを表示するか。
+  plot = TRUE,
+  plot.engine = "ggplot"
+)
+```
+
+どうやら、2カラット以上では、大きさだけで価格が決まらなくなるようです。
+
+yにも注目して2変量を用いたPDPを作成してみましょう。
+すると、同じ大きさでも幅広なダイヤモンドの方が高値になる傾向が伺えます。
+大きなダイヤモンドは指輪にする時に、楕円状のテーブルを持っていた方が良いのかも知れません。
+
+```{r pdp-carat-y}
+pdp::partial(
+  fit_xgb$fit, train = te %>% select(-price),
+  pred.var = c("carat", "y"),
+  ice = FALSE,
+  plot = TRUE,
+  plot.engine = "ggplot"
+)
+```
+
+# 可視化で得られた考察を反映する
+
+> 大きなダイヤモンドは指輪にする時に、楕円状のテーブルを持っていた方が良いのかも知れません。
+
+と考えたので、縦横比を特徴量として追加してみましょう。
+
+```{r learn2}
+prep2 <- rec %>%
+  recipes::step_mutate(y_per_x = y / x) %>%
+  recipes::prep(train = rsample::training(i))
+tr2 <- recipes::juice(prep2)
+te2 <- recipes::bake(prep2, rsample::testing(i))
+fit_xgb2 <- boost_tree("regression") %>%
+  set_engine("xgboost") %>%
+  fit(price ~ ., data = tr2)
+```
+
+そしてmetricsを計算し、前回の学習結果と比較してみます。
+
+```{r metrics2}
+# 今回の学習結果のmetrics
+predict(fit_xgb2, te2) %>%
+  mutate(truth = te2$price) %>%
+  metrics(.pred, truth)
+```
+
+```{r metrics1}
+# 前回の学習結果のmetrics
+predict(fit_xgb, te) %>%
+  mutate(truth = te2$price) %>%
+  metrics(.pred, truth)
+```
+
+僅かながら、rmseとmaeは減少し、rsqは上昇しました。
+読みがあたりましたね！

@@ -1,0 +1,145 @@
+---
+title: tidymodelsでもxgboostを解釈したい
+author: ~
+date: '2019-10-29'
+slug: interpret-tidymodels
+categories: [R]
+tags: [tidymodels, parsnip, xgboost, vip, pdp]
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#はじめに">はじめに</a></li>
+<li><a href="#xgboostによる学習">XGBoostによる学習</a></li>
+<li><a href="#variable-importance-plot-vip">Variable Importance Plot (VIP)</a></li>
+<li><a href="#partial-dependence-plot-pdp">Partial Dependence Plot (PDP)</a></li>
+<li><a href="#可視化で得られた考察を反映する">可視化で得られた考察を反映する</a></li>
+</ul>
+</div>
+
+<div id="はじめに" class="section level1">
+<h1>はじめに</h1>
+<p>tidymodelsに属するparsnipパッケージを用いて機械学習を行った場合、大本のパッケージで学習した場合と異なる構造のオブジェクトが返ります。例えば<code>xgboost::xgboost</code>関数で学習した結果は<code>xgb.Booster</code>クラスを持つオブジェクトです。一方で<code>parsnip::fit</code>関数を用いてXGBoostの学習を行った結果は、<code>_xgb.Booster</code>クラスと<code>model_fit</code>クラスを持つオブジェクトです。</p>
+<p>このため、後者は<code>xgb.Booster</code>クラス用に用意された様々な関数を適用することができません。利用できない関数には、変数重要度を計算する<code>xgboost::xgb.importance</code>関数や、Partial Dependence Plotを行う<code>pdp::partial</code>などがあります。これらはブラックボックスモデルなXGBoostの結果を解釈する上で非常に重要な関数です。簡単に使える方法を探ることにしました<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>。</p>
+<p>結論としては学習結果の<code>"fit"</code>要素が、<code>xgboost</code>本来の学習結果ですので、これを取り出せば様々な関数を利用できます。というわけで試してみましょう。</p>
+<pre class="r"><code>pacman::p_load(AmesHousing, tidymodels, xgboost, pdp, dplyr)</code></pre>
+</div>
+<div id="xgboostによる学習" class="section level1">
+<h1>XGBoostによる学習</h1>
+<p><code>ggplot2::diamonds</code>データセットについて、価格を予想するモデルを構築します。</p>
+<pre class="r"><code># 1割をテストデータにする
+i &lt;- rsample::initial_split(ggplot2::diamonds, p = .9)
+
+# 前処理方法を定義
+rec &lt;- ggplot2::diamonds %&gt;%
+  recipes::recipe() %&gt;%
+  recipes::step_ordinalscore(recipes::all_nominal()) %&gt;%
+  recipes::step_log(price)
+
+prep &lt;- recipes::prep(rec, train = training(i))
+
+# 前処理方法を元に訓練データとテストデータを作成
+tr &lt;- juice(prep)
+te &lt;- bake(prep, testing(i))
+
+# 学習
+fit_xgb &lt;- boost_tree(&quot;regression&quot;) %&gt;%
+  set_engine(&quot;xgboost&quot;) %&gt;%
+  fit(price ~ ., data = tr)</code></pre>
+<p>ここで、<code>dplyr::glimpse(fit_xgb)</code>すると、学習結果の構造を見ることができます。</p>
+<p>xgboostパッケージ本来の出力結果と比較したい場合には、<code>parsnip::xgb_train(x = tr %&gt;% select(-Price), y = tr$Price)</code>と比較してみて下さい。
+<code>fit_xgb$fit</code>と同じ構造をしていることが分かります。</p>
+</div>
+<div id="variable-importance-plot-vip" class="section level1">
+<h1>Variable Importance Plot (VIP)</h1>
+<p>学習結果を元に、変数重要度 (variable importance; VI) を計算してみましょう。これには<code>xgboost::xgb.importance</code>関数を用います。
+<code>xgboost::xgb.importance</code>関数は<code>xgb.Booster</code>クラスオブジェクトを受けとるように設計されているので、<code>fit_xgb</code>そのものではなく、<code>fit_xgb$fit</code>を食わせてやりましょう。</p>
+<p>すると、幅 (y) と、次いでカラット (carat) が価格に大きく影響することが分かります。</p>
+<pre class="r"><code>vip &lt;- fit_xgb$fit %&gt;%
+  xgboost::xgb.importance(model = .) %&gt;%
+  print
+#&gt;    Feature         Gain       Cover  Frequency
+#&gt; 1:       y 5.375962e-01 0.142391083 0.10899183
+#&gt; 2:   carat 3.732561e-01 0.190490249 0.11307902
+#&gt; 3:       x 3.296528e-02 0.111180338 0.08446866
+#&gt; 4:       z 2.525774e-02 0.064071017 0.04495913
+#&gt; 5: clarity 2.097092e-02 0.218256035 0.28201635
+#&gt; 6:   color 8.399916e-03 0.178143758 0.21389646
+#&gt; 7:     cut 1.105225e-03 0.050557495 0.05040872
+#&gt; 8:   depth 3.854991e-04 0.039586716 0.07084469
+#&gt; 9:   table 6.306348e-05 0.005323307 0.03133515
+xgboost::xgb.ggplot.importance(vip)</code></pre>
+<p><img src="/post/2019-10-29-interpret-tidymodels_files/figure-html/vip-1.png" width="672" /></p>
+</div>
+<div id="partial-dependence-plot-pdp" class="section level1">
+<h1>Partial Dependence Plot (PDP)</h1>
+<p>変数重要度が最も高いのは幅 (y) ですが、なんとなくカラット (carat) の方がイメージしやすいので、カラット (carat) についてPDPを可視化してみます。</p>
+<p><code>pdp::partial</code>関数も<code>parsnip::fit</code>関数の結果を受け取れないので、<code>fit_xgb$fit</code>を食わせます。
+<code>train</code>引数には訓練データを与えても良いのですが、データのサイズに応じて時間がかかるので、ここではテストデータを与えます。
+<code>pred.var</code>には注目したい変数である<code>carat</code>を指定します。</p>
+<pre class="r"><code>pdp::partial(
+  fit_xgb$fit, train = te %&gt;% select(-price),
+  pred.var = &quot;carat&quot;,
+  ice = TRUE, # 下図黒線としてIndividual Conditional Expectationを表示するか。
+  plot = TRUE,
+  plot.engine = &quot;ggplot&quot;
+)</code></pre>
+<p><img src="/post/2019-10-29-interpret-tidymodels_files/figure-html/pdp-carat-1.png" width="672" /></p>
+<p>どうやら、2カラット以上では、大きさだけで価格が決まらなくなるようです。</p>
+<p>yにも注目して2変量を用いたPDPを作成してみましょう。すると、同じ大きさでも幅広なダイヤモンドの方が高値になる傾向が伺えます。大きなダイヤモンドは指輪にする時に、楕円状のテーブルを持っていた方が良いのかも知れません。</p>
+<pre class="r"><code>pdp::partial(
+  fit_xgb$fit, train = te %&gt;% select(-price),
+  pred.var = c(&quot;carat&quot;, &quot;y&quot;),
+  ice = FALSE,
+  plot = TRUE,
+  plot.engine = &quot;ggplot&quot;
+)</code></pre>
+<p><img src="/post/2019-10-29-interpret-tidymodels_files/figure-html/pdp-carat-y-1.png" width="672" /></p>
+</div>
+<div id="可視化で得られた考察を反映する" class="section level1">
+<h1>可視化で得られた考察を反映する</h1>
+<blockquote>
+<p>大きなダイヤモンドは指輪にする時に、楕円状のテーブルを持っていた方が良いのかも知れません。</p>
+</blockquote>
+<p>と考えたので、縦横比を特徴量として追加してみましょう。</p>
+<pre class="r"><code>prep2 &lt;- rec %&gt;%
+  recipes::step_mutate(y_per_x = y / x) %&gt;%
+  recipes::prep(train = rsample::training(i))
+tr2 &lt;- recipes::juice(prep2)
+te2 &lt;- recipes::bake(prep2, rsample::testing(i))
+fit_xgb2 &lt;- boost_tree(&quot;regression&quot;) %&gt;%
+  set_engine(&quot;xgboost&quot;) %&gt;%
+  fit(price ~ ., data = tr2)</code></pre>
+<p>そしてmetricsを計算し、前回の学習結果と比較してみます。</p>
+<pre class="r"><code># 今回の学習結果のmetrics
+predict(fit_xgb2, te2) %&gt;%
+  mutate(truth = te2$price) %&gt;%
+  metrics(.pred, truth)
+#&gt; # A tibble: 3 x 3
+#&gt;   .metric .estimator .estimate
+#&gt;   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
+#&gt; 1 rmse    standard      0.103 
+#&gt; 2 rsq     standard      0.991 
+#&gt; 3 mae     standard      0.0759</code></pre>
+<pre class="r"><code># 前回の学習結果のmetrics
+predict(fit_xgb, te) %&gt;%
+  mutate(truth = te2$price) %&gt;%
+  metrics(.pred, truth)
+#&gt; # A tibble: 3 x 3
+#&gt;   .metric .estimator .estimate
+#&gt;   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
+#&gt; 1 rmse    standard      0.108 
+#&gt; 2 rsq     standard      0.990 
+#&gt; 3 mae     standard      0.0835</code></pre>
+<p>僅かながら、rmseとmaeは減少し、rsqは上昇しました。読みがあたりましたね！</p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>工夫すれば、<code>vip::vip</code>関数や<code>pdp::partial</code>関数を適用できるが、簡単ではない。(<a href="https://dropout009.hatenablog.com/entry/2019/01/07/124214">変数重要度とPartial Dependence Plotでブラックボックスモデルを解釈する | Dropout</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
