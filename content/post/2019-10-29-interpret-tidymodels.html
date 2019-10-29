@@ -32,11 +32,12 @@ output:
 <h1>XGBoostによる学習</h1>
 <p><code>ggplot2::diamonds</code>データセットについて、価格を予想するモデルを構築します。</p>
 <pre class="r"><code># 1割をテストデータにする
+set.seed(71)
 i &lt;- rsample::initial_split(ggplot2::diamonds, p = .9)
 
 # 前処理方法を定義
 rec &lt;- training(i) %&gt;%
-  recipes::recipe() %&gt;%
+  recipes::recipe(price ~ .) %&gt;%
   recipes::step_ordinalscore(recipes::all_nominal()) %&gt;%
   recipes::step_log(price)
 
@@ -47,6 +48,7 @@ tr &lt;- juice(prep)
 te &lt;- bake(prep, testing(i))
 
 # 学習
+set.seed(71)
 fit_xgb &lt;- boost_tree(&quot;regression&quot;) %&gt;%
   set_engine(&quot;xgboost&quot;) %&gt;%
   fit(price ~ ., data = tr)</code></pre>
@@ -59,29 +61,33 @@ fit_xgb &lt;- boost_tree(&quot;regression&quot;) %&gt;%
 <p>学習結果を元に、変数重要度 (variable importance; VI) を計算してみましょう。これには<code>xgboost::xgb.importance</code>関数を用います。
 <code>xgboost::xgb.importance</code>関数は<code>xgb.Booster</code>クラスオブジェクトを受けとるように設計されているので、<code>fit_xgb</code>そのものではなく、<code>fit_xgb$fit</code>を食わせてやりましょう。</p>
 <p>すると、幅 (y) と、次いでカラット (carat) が価格に大きく影響することが分かります。</p>
-<pre class="r"><code>vip &lt;- fit_xgb$fit %&gt;%
+<pre class="r"><code>vi &lt;- fit_xgb$fit %&gt;%
   xgboost::xgb.importance(model = .) %&gt;%
   print
-#&gt;    Feature         Gain       Cover  Frequency
-#&gt; 1:       y 5.375962e-01 0.142391083 0.10899183
-#&gt; 2:   carat 3.732561e-01 0.190490249 0.11307902
-#&gt; 3:       x 3.296528e-02 0.111180338 0.08446866
-#&gt; 4:       z 2.525774e-02 0.064071017 0.04495913
-#&gt; 5: clarity 2.097092e-02 0.218256035 0.28201635
-#&gt; 6:   color 8.399916e-03 0.178143758 0.21389646
-#&gt; 7:     cut 1.105225e-03 0.050557495 0.05040872
-#&gt; 8:   depth 3.854991e-04 0.039586716 0.07084469
-#&gt; 9:   table 6.306348e-05 0.005323307 0.03133515
-xgboost::xgb.ggplot.importance(vip)</code></pre>
+#&gt;    Feature         Gain      Cover  Frequency
+#&gt; 1:       y 5.411260e-01 0.13881580 0.11320755
+#&gt; 2:   carat 3.959879e-01 0.23607853 0.11725067
+#&gt; 3: clarity 2.185543e-02 0.20602836 0.27088949
+#&gt; 4:       x 1.798093e-02 0.10747288 0.09029650
+#&gt; 5:       z 1.301997e-02 0.04969059 0.04986523
+#&gt; 6:   color 8.731771e-03 0.16406459 0.21698113
+#&gt; 7:     cut 9.375364e-04 0.05300730 0.04312668
+#&gt; 8:   depth 3.103671e-04 0.03613783 0.07412399
+#&gt; 9:   table 5.006207e-05 0.00870413 0.02425876
+xgboost::xgb.ggplot.importance(vi)</code></pre>
 <p><img src="/post/2019-10-29-interpret-tidymodels_files/figure-html/vip-1.png" width="672" /></p>
 </div>
 <div id="partial-dependence-plot-pdp" class="section level1">
 <h1>Partial Dependence Plot (PDP)</h1>
 <p>変数重要度が最も高いのは幅 (y) ですが、なんとなくカラット (carat) の方がイメージしやすいので、カラット (carat) についてPDPを可視化してみます。</p>
-<p><code>pdp::partial</code>関数も<code>parsnip::fit</code>関数の結果を受け取れないので、<code>fit_xgb$fit</code>を食わせます。
-<code>train</code>引数には訓練データを与えても良いのですが、データのサイズに応じて時間がかかるので、ここではテストデータを与えます。
+<p><code>pdp::partial</code>関数も<code>parsnip::fit</code>関数の結果を受け取れないので、<code>fit_xgb$fit</code>を食わせます。計算時間を節約するため、<code>train</code>引数には訓練データの2割を与えることにしました。
 <code>pred.var</code>には注目したい変数である<code>carat</code>を指定します。</p>
-<pre class="r"><code>pdp::partial(
+<pre class="r"><code>set.seed(71)
+tr_mini &lt;- tr %&gt;%
+  select(-price) %&gt;%
+  initial_split(.2) %&gt;%
+  training()
+pdp::partial(
   fit_xgb$fit, train = te %&gt;% select(-price),
   pred.var = &quot;carat&quot;,
   ice = TRUE, # 下図黒線としてIndividual Conditional Expectationを表示するか。
@@ -92,7 +98,7 @@ xgboost::xgb.ggplot.importance(vip)</code></pre>
 <p>どうやら、2カラット以上では、大きさだけで価格が決まらなくなるようです。</p>
 <p>yにも注目して2変量を用いたPDPを作成してみましょう。すると、同じ大きさでも幅広なダイヤモンドの方が高値になる傾向が伺えます。大きなダイヤモンドは指輪にする時に、楕円状のテーブルを持っていた方が良いのかも知れません。</p>
 <pre class="r"><code>pdp::partial(
-  fit_xgb$fit, train = te %&gt;% select(-price),
+  fit_xgb$fit, train = tr_mini,
   pred.var = c(&quot;carat&quot;, &quot;y&quot;),
   ice = FALSE,
   plot = TRUE,

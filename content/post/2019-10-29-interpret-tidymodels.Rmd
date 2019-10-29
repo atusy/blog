@@ -44,11 +44,12 @@ pacman::p_load(tidymodels, xgboost, pdp, dplyr)
 
 ```{r learn}
 # 1割をテストデータにする
+set.seed(71)
 i <- rsample::initial_split(ggplot2::diamonds, p = .9)
 
 # 前処理方法を定義
 rec <- training(i) %>%
-  recipes::recipe() %>%
+  recipes::recipe(price ~ .) %>%
   recipes::step_ordinalscore(recipes::all_nominal()) %>%
   recipes::step_log(price)
 
@@ -59,6 +60,7 @@ tr <- juice(prep)
 te <- bake(prep, testing(i))
 
 # 学習
+set.seed(71)
 fit_xgb <- boost_tree("regression") %>%
   set_engine("xgboost") %>%
   fit(price ~ ., data = tr)
@@ -78,10 +80,10 @@ xgboostパッケージ本来の出力結果と比較したい場合には、`par
 すると、幅 (y) と、次いでカラット (carat) が価格に大きく影響することが分かります。
 
 ```{r vip}
-vip <- fit_xgb$fit %>%
+vi <- fit_xgb$fit %>%
   xgboost::xgb.importance(model = .) %>%
   print
-xgboost::xgb.ggplot.importance(vip)
+xgboost::xgb.ggplot.importance(vi)
 ```
 
 # Partial Dependence Plot (PDP)
@@ -89,10 +91,15 @@ xgboost::xgb.ggplot.importance(vip)
 変数重要度が最も高いのは幅 (y) ですが、なんとなくカラット (carat) の方がイメージしやすいので、カラット (carat) についてPDPを可視化してみます。
 
 `pdp::partial`関数も`parsnip::fit`関数の結果を受け取れないので、`fit_xgb$fit`を食わせます。
-`train`引数には訓練データを与えても良いのですが、データのサイズに応じて時間がかかるので、ここではテストデータを与えます。
+計算時間を節約するため、`train`引数には訓練データの2割を与えることにしました。
 `pred.var`には注目したい変数である`carat`を指定します。
 
 ```{r pdp-carat}
+set.seed(71)
+tr_mini <- tr %>%
+  select(-price) %>%
+  initial_split(.2) %>%
+  training()
 pdp::partial(
   fit_xgb$fit, train = te %>% select(-price),
   pred.var = "carat",
@@ -110,7 +117,7 @@ yにも注目して2変量を用いたPDPを作成してみましょう。
 
 ```{r pdp-carat-y}
 pdp::partial(
-  fit_xgb$fit, train = te %>% select(-price),
+  fit_xgb$fit, train = tr_mini,
   pred.var = c("carat", "y"),
   ice = FALSE,
   plot = TRUE,
