@@ -29,7 +29,7 @@ tidymodelsに属するparsnipパッケージを用いて機械学習を行った
 このため、後者は`xgb.Booster`クラス用に用意された様々な関数を適用することができません。
 利用できない関数には、変数重要度を計算する`xgboost::xgb.importance`関数や、Partial Dependence Plotを行う`pdp::partial`などがあります。
 これらはブラックボックスモデルなXGBoostの結果を解釈する上で非常に重要な関数です。
-簡単に使える方法を探ることにしました^[工夫すれば、`vip::vip`関数や`pdp::partial`関数を適用できるが、簡単ではない。([変数重要度とPartial Dependence Plotでブラックボックスモデルを解釈する | Dropout](https://dropout009.hatenablog.com/entry/2019/01/07/124214)]。
+簡単に使える方法を探ることにしました^[工夫すれば、`vip::vip`関数や`pdp::partial`関数を適用できるが、簡単ではない。([変数重要度とPartial Dependence Plotでブラックボックスモデルを解釈する | Dropout](https://dropout009.hatenablog.com/entry/2019/01/07/124214))]。
 
 結論としては学習結果の`"fit"`要素が、`xgboost`本来の学習結果ですので、これを取り出せば様々な関数を利用できます。
 というわけで試してみましょう。
