@@ -26,7 +26,7 @@ output:
 <p>tidymodelsに属するparsnipパッケージを用いて機械学習を行った場合、大本のパッケージで学習した場合と異なる構造のオブジェクトが返ります。例えば<code>xgboost::xgboost</code>関数で学習した結果は<code>xgb.Booster</code>クラスを持つオブジェクトです。一方で<code>parsnip::fit</code>関数を用いてXGBoostの学習を行った結果は、<code>_xgb.Booster</code>クラスと<code>model_fit</code>クラスを持つオブジェクトです。</p>
 <p>このため、後者は<code>xgb.Booster</code>クラス用に用意された様々な関数を適用することができません。利用できない関数には、変数重要度を計算する<code>xgboost::xgb.importance</code>関数や、Partial Dependence Plotを行う<code>pdp::partial</code>などがあります。これらはブラックボックスモデルなXGBoostの結果を解釈する上で非常に重要な関数です。簡単に使える方法を探ることにしました<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>。</p>
 <p>結論としては学習結果の<code>"fit"</code>要素が、<code>xgboost</code>本来の学習結果ですので、これを取り出せば様々な関数を利用できます。というわけで試してみましょう。</p>
-<pre class="r"><code>pacman::p_load(AmesHousing, tidymodels, xgboost, pdp, dplyr)</code></pre>
+<pre class="r"><code>pacman::p_load(tidymodels, xgboost, pdp, dplyr)</code></pre>
 </div>
 <div id="xgboostによる学習" class="section level1">
 <h1>XGBoostによる学習</h1>
