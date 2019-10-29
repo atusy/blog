@@ -35,12 +35,12 @@ output:
 i &lt;- rsample::initial_split(ggplot2::diamonds, p = .9)
 
 # 前処理方法を定義
-rec &lt;- ggplot2::diamonds %&gt;%
+rec &lt;- training(i) %&gt;%
   recipes::recipe() %&gt;%
   recipes::step_ordinalscore(recipes::all_nominal()) %&gt;%
   recipes::step_log(price)
 
-prep &lt;- recipes::prep(rec, train = training(i))
+prep &lt;- recipes::prep(rec)
 
 # 前処理方法を元に訓練データとテストデータを作成
 tr &lt;- juice(prep)
@@ -127,8 +127,9 @@ predict(fit_xgb2, te2) %&gt;%
 #&gt; 3 mae     standard      0.0759</code></pre>
 <pre class="r"><code># 前回の学習結果のmetrics
 predict(fit_xgb, te) %&gt;%
-  mutate(truth = te2$price) %&gt;%
+  mutate(truth = te$price) %&gt;%
   metrics(.pred, truth)
+#&gt; [00:58:56] WARNING: amalgamation/../src/objective/regression_obj.cu:152: reg:linear is now deprecated in favor of reg:squarederror.
 #&gt; # A tibble: 3 x 3
 #&gt;   .metric .estimator .estimate
 #&gt;   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;

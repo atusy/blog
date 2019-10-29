@@ -11,7 +11,11 @@ output:
 ---
 
 ```{r opts, include=FALSE}
-knitr::opts_chunk$set(cache = TRUE, collapse = TRUE, comment = "#>")
+knitr::opts_chunk$set(
+  cache = TRUE,
+  collapse = TRUE,
+  comment = "#>"
+)
 ```
 
 
@@ -43,12 +47,12 @@ pacman::p_load(AmesHousing, tidymodels, xgboost, pdp, dplyr)
 i <- rsample::initial_split(ggplot2::diamonds, p = .9)
 
 # 前処理方法を定義
-rec <- ggplot2::diamonds %>%
+rec <- training(i) %>%
   recipes::recipe() %>%
   recipes::step_ordinalscore(recipes::all_nominal()) %>%
   recipes::step_log(price)
 
-prep <- recipes::prep(rec, train = training(i))
+prep <- recipes::prep(rec)
 
 # 前処理方法を元に訓練データとテストデータを作成
 tr <- juice(prep)
@@ -143,7 +147,7 @@ predict(fit_xgb2, te2) %>%
 ```{r metrics1}
 # 前回の学習結果のmetrics
 predict(fit_xgb, te) %>%
-  mutate(truth = te2$price) %>%
+  mutate(truth = te$price) %>%
   metrics(.pred, truth)
 ```
 
