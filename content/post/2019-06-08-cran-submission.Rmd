@@ -164,7 +164,7 @@ There are currently no downstream dependencies for this package
 
 
 ```{fn fn-revdep}
-revdep とは 自身のパッケージを `Depends`, `Imports`, `Suggests`, `LinkingTo` に含むパッケージ．`devtools::revdep_check()` で探す．
+revdep とは 自身のパッケージを `Depends`, `Imports`, `Suggests`, `LinkingTo` に含むパッケージ．`revdepcheck::revdep_check()` で探す．または CRAN 上のパッケージのページから確認する．
 ```
 
 

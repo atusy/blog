@@ -16,20 +16,20 @@ summary: |
 
 <div id="TOC">
 <ul>
-<li><a href="#cran-policies-">CRAN Policies を確認</a></li>
-<li><a href="#section">重要なファイルの更新</a></li>
-<li><a href="#section-1">スペルチェックする</a></li>
-<li><a href="#r-cmd-check-">異なるプラットフォームで R CMD check する</a></li>
-<li><a href="#r-cmd-check--1">R CMD check 結果の要約</a><ul>
-<li><a href="#section-2">記録内容</a><ul>
-<li><a href="#section-3">テスト環境</a></li>
-<li><a href="#check-">Check 結果</a></li>
-<li><a href="#revdep-">revdep (被依存)</a></li>
+<li><a href="#cran-policies-を確認">CRAN Policies を確認</a></li>
+<li><a href="#重要なファイルの更新">重要なファイルの更新</a></li>
+<li><a href="#スペルチェックする">スペルチェックする</a></li>
+<li><a href="#異なるプラットフォームで-r-cmd-check-する">異なるプラットフォームで R CMD check する</a></li>
+<li><a href="#r-cmd-check-結果の要約">R CMD check 結果の要約</a><ul>
+<li><a href="#記録内容">記録内容</a><ul>
+<li><a href="#テスト環境">テスト環境</a></li>
+<li><a href="#check-結果">Check 結果</a></li>
+<li><a href="#revdep-被依存">revdep (被依存)</a></li>
 </ul></li>
 </ul></li>
-<li><a href="#section-4">投稿</a></li>
-<li><a href="#section-5">再投稿</a></li>
-<li><a href="#section-6">公開</a></li>
+<li><a href="#投稿">投稿</a></li>
+<li><a href="#再投稿">再投稿</a></li>
+<li><a href="#公開">公開</a></li>
 <li><a href="#enjoy">Enjoy!</a></li>
 </ul>
 </div>
@@ -37,7 +37,7 @@ summary: |
 
 <p>R のヘルプをもっと便利にする <a href="https://felp.atusy.net">felp</a> パッケージが CRAN
 からリリースされた．
-<a href="https://felp.atusy.net"><img src="https://felp.atusy.net/reference/figures/logo.png" alt="felp" align="right" width="120" /></a></p>
+<a href="https://felp.atusy.net"><img src="https://felp.atusy.net/reference/figures/logo.png" align="right" width="120" alt="felp" /></a></p>
 <p>そこで，投稿にあたって参考にした “<a href="http://r-pkgs.had.co.nz/">R packages</a>” の
 “<a href="http://r-pkgs.had.co.nz/release.html">Releasing a package</a>”
 と自身の経験を振り返りつつ，
@@ -45,7 +45,7 @@ CRAN 投稿を初挑戦する人向けに最小限の手順を纏めた．</p>
 <p>“<a href="http://r-pkgs.had.co.nz/release.html">Releasing a package</a>” は良い資料だが，初投稿に限らずパッケージを更新する場合についての言及や，思想語り，古い情報がある．おかげで初挑戦するには読む量が多く，試行錯誤させられたので，情報を整理した次第だ．</p>
 <p>上から下に実行していけばいいように纏めたつもりだ．</p>
 <p>R パッケージの作りかたそのものには触れない．</p>
-<div id="cran-policies-" class="section level1">
+<div id="cran-policies-を確認" class="section level1">
 <h1>CRAN Policies を確認</h1>
 <p><a href="https://cran.r-project.org/web/packages/policies.html" class="uri">https://cran.r-project.org/web/packages/policies.html</a></p>
 <p>CRAN Policies の変更を追うために Twitter アカウント <a href="https://twitter.com/CRANPolicyWatch">@CRANPolicyWatch</a> をフォローしておくとよい．</p>
@@ -67,7 +67,7 @@ CRAN 投稿を初挑戦する人向けに最小限の手順を纏めた．</p>
 <li>更新は1-2ヵ月に1回まで</li>
 </ul>
 </div>
-<div id="section" class="section level1">
+<div id="重要なファイルの更新" class="section level1">
 <h1>重要なファイルの更新</h1>
 <ul>
 <li><code>README.md</code> にパッケージ本体の概要を記す</li>
@@ -79,13 +79,13 @@ CRAN 投稿を初挑戦する人向けに最小限の手順を纏めた．</p>
 </ul></li>
 </ul>
 </div>
-<div id="section-1" class="section level1">
+<div id="スペルチェックする" class="section level1">
 <h1>スペルチェックする</h1>
 <p><code>devtools::spell_check()</code> によりスペルチェックを行い，適宜修正する．</p>
 <p>言語は既定で <code>en_US</code> を採用するが， <code>DESCRIPTION</code> ファイルの <code>Language</code> フィールドに明示しておくと良い．</p>
 <p>辞書にない単語は <code>inst/WORDLIST</code> に追加する．</p>
 </div>
-<div id="r-cmd-check-" class="section level1">
+<div id="異なるプラットフォームで-r-cmd-check-する" class="section level1">
 <h1>異なるプラットフォームで R CMD check する</h1>
 <p>CRAN でリリースする前には，以下のコマンドにより異なるプラットフォームで <code>R CMD check</code> しておく．</p>
 <ul>
@@ -107,15 +107,15 @@ NOTES は最小限を旨とし CRAN 側の確認の負担を減らす．</p>
 <p>といった情報をエラー・警告・NOTES いずれにも属さない形で提示してくる．初回投稿であることを示す NOTES が必ずつくがこれは無視してよい．</p>
 <p>日常的には Travis CI (Linux / macOS) や AppVeyor (Windows) といった CI サービスを用いて，異なる OS と異なるバージョンの R で <code>R CMD check</code> しておくと良い．</p>
 </div>
-<div id="r-cmd-check--1" class="section level1">
+<div id="r-cmd-check-結果の要約" class="section level1">
 <h1>R CMD check 結果の要約</h1>
 <p><code>cran-comments.md</code> にテスト環境，チェック結果，revdep 結果などを記録する．パッケージのビルドには不要なファイルなので，<code>.Rbuildignore</code> に加えておくこと．</p>
 <p>例えば httr パッケージの例はこちら
 <a href="https://github.com/r-lib/httr/blob/master/cran-comments.md" class="uri">https://github.com/r-lib/httr/blob/master/cran-comments.md</a>
 ．</p>
-<div id="section-2" class="section level2">
+<div id="記録内容" class="section level2">
 <h2>記録内容</h2>
-<div id="section-3" class="section level3">
+<div id="テスト環境" class="section level3">
 <h3>テスト環境</h3>
 <p>どの OS や R バージョンでテストしたか記す．</p>
 <p>httr パッケージの例 (<a href="https://github.com/r-lib/httr/blob/436d97fe9fc6d3c59e4971913f17d98741d22701/cran-comments.md#test-environments" class="uri">https://github.com/r-lib/httr/blob/436d97fe9fc6d3c59e4971913f17d98741d22701/cran-comments.md#test-environments</a>)</p>
@@ -126,7 +126,7 @@ NOTES は最小限を旨とし CRAN 側の確認の負担を減らす．</p>
 * r-hub: windows-x86_64-devel, ubuntu-gcc-release, fedora-clang-devel
 * win-builder: windows-x86_64-devel</code></pre>
 </div>
-<div id="check-" class="section level3">
+<div id="check-結果" class="section level3">
 <h3>Check 結果</h3>
 <ul>
 <li>エラー・警告共に0であることを記す</li>
@@ -141,7 +141,7 @@ NOTES は最小限を旨とし CRAN 側の確認の負担を減らす．</p>
 <pre><code>## R CMD check results
 0 errors | 0 warnings | 0 notes</code></pre>
 </div>
-<div id="revdep-" class="section level3">
+<div id="revdep-被依存" class="section level3">
 <h3>revdep (被依存)</h3>
 <p>初リリース時は revdep<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> がないので以下のように記す．</p>
 <pre><code>## revdepcheck results
@@ -170,7 +170,7 @@ There are currently no downstream dependencies for this package</code></pre>
 </div>
 </div>
 </div>
-<div id="section-4" class="section level1">
+<div id="投稿" class="section level1">
 <h1>投稿</h1>
 <ul>
 <li><code>devtools::release()</code> を実行
@@ -182,7 +182,7 @@ There are currently no downstream dependencies for this package</code></pre>
 <li>最短24時間以内，最長5日で CRAN から結果を知らされる <a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></li>
 </ul>
 </div>
-<div id="section-5" class="section level1">
+<div id="再投稿" class="section level1">
 <h1>再投稿</h1>
 <p>CRAN に再投稿を要求された場合，<code>Resubmission</code> という見出しを作って，修正点を記す．</p>
 <pre><code>## Resubmission
@@ -200,7 +200,7 @@ This is a resubmission. In this version I have:
 <p>もし CRAN から感情的なコメントがあっても無視して技術的な話に焦点を絞ろう……とわざわざ Hadley が書いているのが気になるところ．</p>
 <p>もし devtools に問題があった結果 CRAN 管理者があれこれ言ってきてあああって時はハドリーに住所知らせたら，手書きの謝罪文を送ってくれるらしいぞ．</p>
 </div>
-<div id="section-6" class="section level1">
+<div id="公開" class="section level1">
 <h1>公開</h1>
 <p>CRAN から “Thanks, on its way to CRAN” と手短な連絡があって間も無く公開されるようだ．</p>
 <p>公開されたら，GitHub でも CRAN に投稿した段階のコミットに対してリリースをしておこう．Watch してくれている人に連絡が行く．</p>
@@ -213,12 +213,12 @@ This is a resubmission. In this version I have:
 <hr />
 <ol>
 <li id="fn1"><p>Win builder は時々，調子が悪いようで FTP 通信がうまくいかなかったという趣旨のエラーが返ることがあるが，しばらくしてから再挑戦するといいらしい (<a href="https://github.com/r-lib/devtools/issues/1435" class="uri">https://github.com/r-lib/devtools/issues/1435</a>)．
-Win builder は過去には <code>devtools::build_win()</code> によって利用していたが，今では deprecate され，<code>devtools::check_win_*</code> を利用することが望ましい．<a href="#fnref1" class="footnote-back">↩</a></p></li>
-<li id="fn2"><p>revdep とは 自身のパッケージを <code>Depends</code>, <code>Imports</code>, <code>Suggests</code>, <code>LinkingTo</code> に含むパッケージ．<code>devtools::revdep_check()</code> で探す．<a href="#fnref2" class="footnote-back">↩</a></p></li>
+Win builder は過去には <code>devtools::build_win()</code> によって利用していたが，今では deprecate され，<code>devtools::check_win_*</code> を利用することが望ましい．<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>revdep とは 自身のパッケージを <code>Depends</code>, <code>Imports</code>, <code>Suggests</code>, <code>LinkingTo</code> に含むパッケージ．<code>revdepcheck::revdep_check()</code> で探す．または CRAN 上のパッケージのページから確認する．<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
 <li id="fn3"><p>私のが felp パッケージを初投稿した時は 3日で返事があった．
-Hadley は5日以内に返事があると言うが，CRAN 公式にはおよそ10日以内としている．<a href="#fnref3" class="footnote-back">↩</a></p></li>
+Hadley は5日以内に返事があると言うが，CRAN 公式にはおよそ10日以内としている．<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
 <li id="fn4"><p>返事が遅くても基本的には待つしかないらしい．
 r-package-devel のメーリングリストで聞いてみると返事が得られるかも知れないとのこと
-(<a href="https://twitter.com/yutannihilation/status/1141907124563263489" class="uri">https://twitter.com/yutannihilation/status/1141907124563263489</a>)．<a href="#fnref4" class="footnote-back">↩</a></p></li>
+(<a href="https://twitter.com/yutannihilation/status/1141907124563263489" class="uri">https://twitter.com/yutannihilation/status/1141907124563263489</a>)．<a href="#fnref4" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
