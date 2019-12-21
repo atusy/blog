@@ -1,0 +1,82 @@
+---
+title: importasパッケージでPython風にパッケージを使おう
+author: ~
+date: '2019-12-21'
+slug: importas
+categories: [R]
+tags: [importas, package]
+---
+
+
+
+<p><a href="https://qiita.com/advent-calendar/2019/rlang">Rアドベントカレンダー</a>、12/21の記事です。
+Rmd関連のつもりでしたが、時間がないので、最近作った<strong>importas</strong>パッケージのネタに走ることにしました。</p>
+<p><strong>importas</strong>パッケージでは、Pythonにおける<code>import numpy as np</code>みたいなことが、Rでできるようになります。
+Pythonではimportしたライブラリにドットを繋ぐ形で、関数の呼び出しを行います（例えば<code>np.mean</code>）。同様に、<strong>importas</strong>パッケージでは<code>ggplot2 %as% gg</code>などとパッケージ名を省略し、<code>$</code>演算子を用いて関数を呼び出します（例えば<code>gg$ggplot</code>）。</p>
+<p>Rには関数の名前が衝突しないように、<code>パッケージ::関数</code>という記法を愛用する一派がいます。しかし、パッケージ名が長いと行が長くなりがち……。そんな問題を<code>importas</code>パッケージで解決しましょう！</p>
+<div id="インストール" class="section level1">
+<h1>インストール</h1>
+<p>GitHubからインストールして下さい。
+CRANには投稿済みですが、なかなかお返事が来ません。</p>
+<pre class="r"><code>remotes::install_github(&quot;atusy/importas&quot;)</code></pre>
+</div>
+<div id="使ってみる" class="section level1">
+<h1>使ってみる</h1>
+<div id="一つずつimportする" class="section level2">
+<h2>一つずつimportする</h2>
+<p><code>%as%</code>演算子を使うと、パッケージ名の略称を定義できます。例えば<strong>ggplot2</strong>パッケージを<strong>gg</strong>と省略してみましょう。</p>
+<pre class="r"><code>library(importas)
+ggplot2 %as% gg
+
+gg$ggplot(mtcars) +
+  gg$aes(wt, mpg) +
+  gg$geom_point()</code></pre>
+<p><img src="/post/2019-12-21-importas_files/figure-html/gg-1.png" width="672" /></p>
+<p><strong>ggplot2</strong>パッケージの略称を定義しているだけで、読み込んでいるわけではないことに注意して下さい。例えば単に<code>ggplot</code>関数を呼び出すとエラーになります。</p>
+<pre class="r"><code>ggplot</code></pre>
+<pre><code>## Error in eval(expr, envir, enclos): object &#39;ggplot&#39; not found</code></pre>
+</div>
+<div id="複数を一度にimportする" class="section level2">
+<h2>複数を一度にimportする</h2>
+<p><code>importas</code>関数を用いると、複数のパッケージの略称を一度に定義できます。例えば<strong>dplyr</strong>パッケージを<strong>dp</strong>、<strong>tidyr</strong>パッケージを<strong>td</strong>などと略してみましょう。</p>
+<pre class="r"><code>importas(dp = dplyr, td = tidyr, ts = tidyselect)
+
+# dplyrを読み込んだわけではないので、
+# パイプ演算子を明示的に読み込む必要がある
+`%&gt;%` &lt;- magrittr::`%&gt;%`
+
+iris %&gt;%
+  head %&gt;%
+  dp$select(-Species) %&gt;%
+  td$pivot_longer(ts$everything())</code></pre>
+<pre><code>## # A tibble: 24 x 2
+##    name         value
+##    &lt;chr&gt;        &lt;dbl&gt;
+##  1 Sepal.Length   5.1
+##  2 Sepal.Width    3.5
+##  3 Petal.Length   1.4
+##  4 Petal.Width    0.2
+##  5 Sepal.Length   4.9
+##  6 Sepal.Width    3  
+##  7 Petal.Length   1.4
+##  8 Petal.Width    0.2
+##  9 Sepal.Length   4.7
+## 10 Sepal.Width    3.2
+## # … with 14 more rows</code></pre>
+</div>
+</div>
+<div id="実はexportされていない関数も使えちゃう" class="section level1">
+<h1>実はexportされていない関数も使えちゃう</h1>
+<p>従って、<code>::</code>の代替というよりは<code>:::</code>の代替に近いところがあります。ちょっと注意が必要かも。</p>
+<pre class="r"><code>dp$mutate.tbl_df</code></pre>
+<pre><code>## function (.data, ...) 
+## {
+##     dots &lt;- enquos(..., .named = TRUE)
+##     mutate_impl(.data, dots, caller_env())
+## }
+## &lt;bytecode: 0x5562b3cbd6e8&gt;
+## &lt;environment: namespace:dplyr&gt;</code></pre>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy</h1>
+</div>

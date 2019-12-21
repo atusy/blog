@@ -1,0 +1,83 @@
+---
+title: importasパッケージでPython風にパッケージを使おう
+author: ~
+date: '2019-12-21'
+slug: importas
+categories: [R]
+tags: [importas, package]
+---
+
+[Rアドベントカレンダー](https://qiita.com/advent-calendar/2019/rlang)、12/21の記事です。
+Rmd関連のつもりでしたが、時間がないので、最近作った**importas**パッケージのネタに走ることにしました。
+
+**importas**パッケージでは、Pythonにおける`import numpy as np`みたいなことが、Rでできるようになります。
+Pythonではimportしたライブラリにドットを繋ぐ形で、関数の呼び出しを行います（例えば`np.mean`）。
+同様に、**importas**パッケージでは`ggplot2 %as% gg`などとパッケージ名を省略し、`$`演算子を用いて関数を呼び出します（例えば`gg$ggplot`）。
+
+Rには関数の名前が衝突しないように、`パッケージ::関数`という記法を愛用する一派がいます。
+しかし、パッケージ名が長いと行が長くなりがち……。
+そんな問題を`importas`パッケージで解決しましょう！
+
+# インストール
+ 
+GitHubからインストールして下さい。
+CRANには投稿済みですが、なかなかお返事が来ません。
+
+```{r, eval=interactive() && "importas" %in% rownames(installed.packages())}
+remotes::install_github("atusy/importas")
+```
+
+# 使ってみる
+
+## 一つずつimportする
+
+`%as%`演算子を使うと、パッケージ名の略称を定義できます。
+例えば**ggplot2**パッケージを**gg**と省略してみましょう。
+
+```{r gg}
+library(importas)
+ggplot2 %as% gg
+
+gg$ggplot(mtcars) +
+  gg$aes(wt, mpg) +
+  gg$geom_point()
+```
+
+**ggplot2**パッケージの略称を定義しているだけで、
+読み込んでいるわけではないことに注意して下さい。
+例えば単に`ggplot`関数を呼び出すとエラーになります。
+
+```{r gg-err, error=TRUE}
+ggplot
+```
+
+
+## 複数を一度にimportする
+
+`importas`関数を用いると、複数のパッケージの略称を一度に定義できます。
+例えば**dplyr**パッケージを**dp**、**tidyr**パッケージを**td**などと略してみましょう。
+
+```{r importas}
+importas(dp = dplyr, td = tidyr, ts = tidyselect)
+
+# dplyrを読み込んだわけではないので、
+# パイプ演算子を明示的に読み込む必要がある
+`%>%` <- magrittr::`%>%`
+
+iris %>%
+  head %>%
+  dp$select(-Species) %>%
+  td$pivot_longer(ts$everything())
+```
+
+# 実はexportされていない関数も使えちゃう
+
+従って、`::`の代替というよりは`:::`の代替に近いところがあります。
+ちょっと注意が必要かも。
+
+```{r internal-functions}
+dp$mutate.tbl_df
+```
+
+
+# Enjoy
