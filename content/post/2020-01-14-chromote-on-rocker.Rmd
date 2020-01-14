@@ -1,0 +1,79 @@
+---
+title: docker (rocker) でheadless Chromeを動かす
+author: ~
+date: '2020-01-14'
+slug: chromote-on-rocker
+categories: [R, docker]
+tags: [chromote, webshot, webshot2]
+---
+
+# RでWebページのスクリーンショットを撮るにはheadless Chromeが今風？
+
+従来、RでWebページのスクリーンショットを撮るには[webshot](https://wch.github.io/webshot/)パッケージが活躍してきました。
+しかし、webshotパッケージの内部で動く[PhantomJS](https://phantomjs.org/)は開発が停止して久しいです。
+
+そんな中、webshotパッケージの開発者であるwchは、headless Chromeを使ってスクリーンショットを撮影する[webshot2](https://github.com/rstudio/webshot2)パッケージをRStudio製OSSとして開発開始しました。
+
+現段階ではCRANに上がっていないので、インストールするには`remotes::install_github("rstudio/webshot2")`を実行して下さい。
+
+開発者が同じなだけあって`webshot2::webshot`関数と`webshot::webshot`関数の引数は同じです。
+と言うわけで使い方はぞうさんのページを参照して下さい（<https://kazutan.github.io/kazutanR/webshot_demo.html>）。
+
+# Dockerでheadless Chromeが動かない……！
+
+さて、webshot2パッケージではchromoteパッケージを通じてheadless Chromeを動作させているわけですが、docker上で適当なページを撮影しようとすると、以下のようにエラーが返ります。
+
+```r
+webshot2::webshot("https://google.com")
+#> Error in launch_chrome(path, args) : 
+#>  Failed to start chrome. Error: [0808/182701.557515:ERROR:zygote_host_impl_linux.cc(89)] Running asroot without --no-sandbox is not supported. Seehttps://crbug.com/638180.
+```
+
+どうやら`--no-sandbox`を指定すればよさそうですが、[セキュリティを低下させる](https://chromium.googlesource.com/chromium/src/+/master/docs/design/sandbox.md)のでお勧めできません[^no-sandbox]。
+
+[^no-sandbox]: 無理矢理`--no-sandbox`する方法はこちらに記述しました（https://github.com/rstudio/chromote/issues/20）。アイディアを提供して下さったyutannihilation氏に感謝します。
+
+# docker run時にsecurity_optを弄れば良いらしい
+
+[Issue](https://github.com/rstudio/chromote/issues/20)にて解決を図ったところ、pagedownパッケージのドキュメントに記載されている通り、
+<https://raw.githubusercontent.com/jessfraz/dotfiles/master/etc/docker/seccomp/chrome.json>
+からJSONをダウンロードして、以下のようにdocker runすれば良いと教えてもらいました[^pagedown]。
+
+[^pagedown]: pagedownの[issue](https://github.com/rstudio/pagedown/issues/143#issuecomment-539982822)を置いかけると、headless Chromeを動かしてる既存のDockerイメージを参考にすれば良いという当たり前なことがわかり、リサーチ不足っぷりを反省しました（[justinribeiro/chrome-headless
+](https://hub.docker.com/r/justinribeiro/chrome-headless/)）。
+
+> ```sh
+  docker run -e PASSWORD=yourpassword --rm -p 8787:8787 --security-opt seccomp="$(pwd)/chrome.json" myimages/pagedown
+  ```
+
+# docker-composeでできるようにしよう
+
+上述の方法で解決できましたが、コマンド入力が面倒なので、
+`docker-compose`でできるようにしました。
+
+1. 先述のJSONを`chrome.json`として保存
+1. 同ディレクトリに`docker-compose.yml`を用意（適宜編集して下さい）
+
+    ```yaml
+    version: "3"
+    services:
+      r:
+        image: atusy/atusydown
+        ports:
+          "8787:8787"
+        environment:
+          - ROOT=TRUE
+          - USER=rstudio
+          - PASSWORD=password
+        security_opt:
+          - seccomp:chrome.json
+    ```
+
+1. `sudo docker-compose up -d`を実行
+
+Docker imageとしてオリジナルの`atusy/atusydown`を用いていますが、
+webshot2パッケージ以外にも色々入っていて重いです。
+任意のものを用意して頂いて結構ですが、
+chromiumとwebshot2パッケージをインストールした上で、`Renviron`に`CHROMOTE_CHROME=/usr/bin/chromium`などと記述して下さい。
+
+# Enjoy!

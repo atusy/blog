@@ -1,0 +1,70 @@
+---
+title: docker (rocker) でheadless Chromeを動かす
+author: ~
+date: '2020-01-14'
+slug: chromote-on-rocker
+categories: [R, docker]
+tags: [chromote, webshot, webshot2]
+---
+
+
+
+<div id="rでwebページのスクリーンショットを撮るにはheadless-chromeが今風" class="section level1">
+<h1>RでWebページのスクリーンショットを撮るにはheadless Chromeが今風？</h1>
+<p>従来、RでWebページのスクリーンショットを撮るには<a href="https://wch.github.io/webshot/">webshot</a>パッケージが活躍してきました。しかし、webshotパッケージの内部で動く<a href="https://phantomjs.org/">PhantomJS</a>は開発が停止して久しいです。</p>
+<p>そんな中、webshotパッケージの開発者であるwchは、headless Chromeを使ってスクリーンショットを撮影する<a href="https://github.com/rstudio/webshot2">webshot2</a>パッケージをRStudio製OSSとして開発開始しました。</p>
+<p>現段階ではCRANに上がっていないので、インストールするには<code>remotes::install_github("rstudio/webshot2")</code>を実行して下さい。</p>
+<p>開発者が同じなだけあって<code>webshot2::webshot</code>関数と<code>webshot::webshot</code>関数の引数は同じです。と言うわけで使い方はぞうさんのページを参照して下さい（<a href="https://kazutan.github.io/kazutanR/webshot_demo.html" class="uri">https://kazutan.github.io/kazutanR/webshot_demo.html</a>）。</p>
+</div>
+<div id="dockerでheadless-chromeが動かない" class="section level1">
+<h1>Dockerでheadless Chromeが動かない……！</h1>
+<p>さて、webshot2パッケージではchromoteパッケージを通じてheadless Chromeを動作させているわけですが、docker上で適当なページを撮影しようとすると、以下のようにエラーが返ります。</p>
+<pre class="r"><code>webshot2::webshot(&quot;https://google.com&quot;)
+#&gt; Error in launch_chrome(path, args) : 
+#&gt;  Failed to start chrome. Error: [0808/182701.557515:ERROR:zygote_host_impl_linux.cc(89)] Running asroot without --no-sandbox is not supported. Seehttps://crbug.com/638180.</code></pre>
+<p>どうやら<code>--no-sandbox</code>を指定すればよさそうですが、<a href="https://chromium.googlesource.com/chromium/src/+/master/docs/design/sandbox.md">セキュリティを低下させる</a>のでお勧めできません<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>。</p>
+</div>
+<div id="docker-run時にsecurity_optを弄れば良いらしい" class="section level1">
+<h1>docker run時にsecurity_optを弄れば良いらしい</h1>
+<p><a href="https://github.com/rstudio/chromote/issues/20">Issue</a>にて解決を図ったところ、pagedownパッケージのドキュメントに記載されている通り、
+<a href="https://raw.githubusercontent.com/jessfraz/dotfiles/master/etc/docker/seccomp/chrome.json" class="uri">https://raw.githubusercontent.com/jessfraz/dotfiles/master/etc/docker/seccomp/chrome.json</a>
+からJSONをダウンロードして、以下のようにdocker runすれば良いと教えてもらいました<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>。</p>
+<blockquote>
+<pre class="sh"><code>docker run -e PASSWORD=yourpassword --rm -p 8787:8787 --security-opt seccomp=&quot;$(pwd)/chrome.json&quot; myimages/pagedown</code></pre>
+</blockquote>
+</div>
+<div id="docker-composeでできるようにしよう" class="section level1">
+<h1>docker-composeでできるようにしよう</h1>
+<p>上述の方法で解決できましたが、コマンド入力が面倒なので、
+<code>docker-compose</code>でできるようにしました。</p>
+<ol style="list-style-type: decimal">
+<li><p>先述のJSONを<code>chrome.json</code>として保存</p></li>
+<li><p>同ディレクトリに<code>docker-compose.yml</code>を用意（適宜編集して下さい）</p>
+<pre class="yaml"><code>version: &quot;3&quot;
+services:
+  r:
+    image: atusy/atusydown
+    ports:
+      &quot;8787:8787&quot;
+    environment:
+      - ROOT=TRUE
+      - USER=rstudio
+      - PASSWORD=password
+    security_opt:
+      - seccomp:chrome.json</code></pre></li>
+<li><p><code>sudo docker-compose up -d</code>を実行</p></li>
+</ol>
+<p>Docker imageとしてオリジナルの<code>atusy/atusydown</code>を用いていますが、
+webshot2パッケージ以外にも色々入っていて重いです。任意のものを用意して頂いて結構ですが、
+chromiumとwebshot2パッケージをインストールした上で、<code>Renviron</code>に<code>CHROMOTE_CHROME=/usr/bin/chromium</code>などと記述して下さい。</p>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>無理矢理<code>--no-sandbox</code>する方法はこちらに記述しました（<a href="https://github.com/rstudio/chromote/issues/20" class="uri">https://github.com/rstudio/chromote/issues/20</a>）。アイディアを提供して下さったyutannihilation氏に感謝します。<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>pagedownの<a href="https://github.com/rstudio/pagedown/issues/143#issuecomment-539982822">issue</a>を置いかけると、headless Chromeを動かしてる既存のDockerイメージを参考にすれば良いという当たり前なことがわかり、リサーチ不足っぷりを反省しました（<a href="https://hub.docker.com/r/justinribeiro/chrome-headless/">justinribeiro/chrome-headless</a>）。<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
