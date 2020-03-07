@@ -1,0 +1,177 @@
+---
+title: "Pandoc lua filter手習い: detailクラス付きのコードブロックを折り畳む"
+author: ~
+date: '2020-03-07'
+slug: pandoc-lua-detailed-codeblock
+categories: [Pandoc]
+tags: [Lua, R Markdown]
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+```{r opts-chunk, include=FALSE}
+knitr::opts_chunk$set(eval=FALSE)
+```
+
+R Markdownの`html_document`でソースコードだけじゃなくて結果も折り畳みたいようとの声があった。
+レッスン時にコードの実行結果を受講者に予想させてから見せたい場合を想定しているようだ。
+そこで`knitr::knit_hooks`を使う忍術を紹介した。
+<https://github.com/rstudio/rmarkdown/issues/1453#issuecomment-595797200>
+
+
+しかし、忍術はチャンクにしか使えない。コードブロックに一般化するにはlua filterが必要だ、ということで手習いにやってみた。
+
+
+# 実装
+
+簡単なところから徐々にやっていこう。
+
+## 関数を書く
+
+引数`x`をそのまま返す関数`f`は以下の通り。
+
+```lua
+function f(x)
+  return x
+end
+```
+
+
+## コードブロックをそのまま返す
+
+Pandoc's Markdown（というよりはASTによる内部表現）の要素名と一致する関数を用意してやると、
+該当する要素がフィルタに送り込まれる。
+ドキュメントにはPandocにおける様々な種類の要素が一覧されている
+（<https://pandoc.org/lua-filters.html#module-pandoc>）。
+今回はコードブロックを対象としたいので、`CodeBlock`だ。
+
+関数の引数は1つだけ。第二引数以降は用意しても`nil`が入る。
+そして引数をそのまま`return`してやれば、コードブロックを編集せずにそのまま返す。
+
+```lua
+function CodeBlock(elem)
+  return elem
+end
+```
+
+ちなみに`return`せずに終わった場合も入力はそのまま維持される。
+文字数を数えるとか内容の変更を伴わないフィルタに使うようだ。
+今回の最終目的は入力を置換していくことなので、`return`した。
+
+## コードブロックを`<detals>`タグで囲む
+
+PandocにおいてHTMLはコードブロックではなく`RawBlock`なので、
+`pandoc.RawBlock`で作成してやる。
+`pandoc.RawBlock`は第一引数が言語名（今回は`"html"`）で、第二引数がスクリプトである。
+例えばPandoc本家へのリンクを`pandoc.Rawblock`で表現すると以下の通りである。
+
+```lua
+pandoc.RawBlock("html", "<a href=https://pandoc.org/>Pandoc</a>") 
+```
+
+ところで今回は、CodeBlockを`<details>`と`</details>`で挟まなければならない。
+
+従って
+
+  - RawBlock
+  - CodeBlock
+  - RawBlock
+
+の順に3要素を返す必要がある。
+複数の値を返すには、`return 1, 2`や`return{1, 2}`とすればよい。
+後者であれば途中で改行できるので、今回は後者を利用する。
+
+すると以下のようになる。
+せっかくなので、`<summary>`タグも入れておいた。
+
+```lua
+function CodeBlock(elem)
+  return{
+    pandoc.RawBlock("html", "<details><summary>Code</summary>"),
+    elem,
+    pandoc.RawBlock("html", "</details>")
+  }
+end
+```
+
+## detailsクラスを持つコードブロックだけ`<details>`タグで囲う。
+
+既に述べた通り、Lua Filterでは返り値がなかった場合、入力はそのままになる。
+従ってコードブロックがdetailsクラスを持つ時だけ`return`が発生するよう`if`文を記述すれば良い。
+
+`CodeBlock`のクラスは`変数名.classes`で取り出せる（<https://pandoc.org/lua-filters.html#type-codeblock>）。
+なお、`classes`フィールドは、コードブロックがクラスを持たない場合は`nil`で、クラスを持つ場合は[`pandoc.List`](https://pandoc.org/lua-filters.html#module-pandoc.list)である。
+`pandoc.List`は`:find`メソッドを持ち、ある要素と一致するリスト中の要素のインデックスを返す。
+見つからなければ`nil`を返す。
+
+従って`elem.classes`も`elem.classes:find("details")`も`nil`ではない場合に`return`すれば良い。
+lua言語のif文では、論理値以外が与えられると、`nil`なら偽、さもなければ真として扱われるようだ。
+よって以下のように書ける。
+
+```lua
+function CodeBlock(elem)
+  if elem.classes and elem.classes:find("details") then
+    return{
+      pandoc.RawBlock("html", "<details><summary>Code</summary>"),
+      elem,
+      pandoc.RawBlock("html", "</details>")
+    }
+  end
+end
+```
+
+## detailsクラスを持つコードブロックだけ`<details>`タグで囲い、summary要素が指定されていれば、`<summary>`タグに記述する
+
+疲れたので説明を割愛するがこんな感じ。
+
+```lua
+function CodeBlock(elem)
+  if elem.classes and elem.classes:find("details") then
+    local summary = "Code"
+    if elem.attributes.summary then
+      summary = elem.attributes.summary
+    end
+    return{
+      pandoc.RawBlock(
+        "html", "<details><summary>" .. summary .. "</summary>"
+      ),
+      elem,
+      pandoc.RawBlock("html", "</details>")
+    }
+  end
+end
+```
+
+# R Markdownで使ってみる
+
+上述のフィルタを`foldableCodeBlock.lua`として保存しよう。
+そして、折り畳みたいコードブロックに`details`クラスを与える。
+チャンクの場合、
+`attr.output='.details summary="Output"'`とすると実行結果を折り畳めるようになる。
+
+## Rmdファイル
+
+````md
+---
+output:
+  html_document:
+    self_contained: false
+    pandoc_args: [
+        "--lua-filter", "test.lua"
+      ]
+---
+
+`r ''````{r, class.source='details'}
+set.seed(1)
+rnorm(10)
+`r ''````
+````
+
+## デモ: 折り畳み時
+
+![](/images/posts/2020-03-07-pandoc-lua-detailed-codeblock/code-close.png)
+
+## デモ: 展開時
+
+![](/images/posts/2020-03-07-pandoc-lua-detailed-codeblock/code-open.png)

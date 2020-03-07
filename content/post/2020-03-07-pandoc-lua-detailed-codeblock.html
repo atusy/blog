@@ -1,0 +1,141 @@
+---
+title: "Pandoc lua filter手習い: detailクラス付きのコードブロックを折り畳む"
+author: ~
+date: '2020-03-07'
+slug: pandoc-lua-detailed-codeblock
+categories: [Pandoc]
+tags: [Lua, R Markdown]
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#実装">実装</a><ul>
+<li><a href="#関数を書く">関数を書く</a></li>
+<li><a href="#コードブロックをそのまま返す">コードブロックをそのまま返す</a></li>
+<li><a href="#コードブロックをdetalsタグで囲む">コードブロックを<code>&lt;detals&gt;</code>タグで囲む</a></li>
+<li><a href="#detailsクラスを持つコードブロックだけdetailsタグで囲う">detailsクラスを持つコードブロックだけ<code>&lt;details&gt;</code>タグで囲う。</a></li>
+<li><a href="#detailsクラスを持つコードブロックだけdetailsタグで囲いsummary要素が指定されていればsummaryタグに記述する">detailsクラスを持つコードブロックだけ<code>&lt;details&gt;</code>タグで囲い、summary要素が指定されていれば、<code>&lt;summary&gt;</code>タグに記述する</a></li>
+</ul></li>
+<li><a href="#r-markdownで使ってみる">R Markdownで使ってみる</a><ul>
+<li><a href="#rmdファイル">Rmdファイル</a></li>
+<li><a href="#デモ-折り畳み時">デモ: 折り畳み時</a></li>
+<li><a href="#デモ-展開時">デモ: 展開時</a></li>
+</ul></li>
+</ul>
+</div>
+
+<p>R Markdownの<code>html_document</code>でソースコードだけじゃなくて結果も折り畳みたいようとの声があった。レッスン時にコードの実行結果を受講者に予想させてから見せたい場合を想定しているようだ。そこで<code>knitr::knit_hooks</code>を使う忍術を紹介した。
+<a href="https://github.com/rstudio/rmarkdown/issues/1453#issuecomment-595797200" class="uri">https://github.com/rstudio/rmarkdown/issues/1453#issuecomment-595797200</a></p>
+<p>しかし、忍術はチャンクにしか使えない。コードブロックに一般化するにはlua filterが必要だ、ということで手習いにやってみた。</p>
+<div id="実装" class="section level1">
+<h1>実装</h1>
+<p>簡単なところから徐々にやっていこう。</p>
+<div id="関数を書く" class="section level2">
+<h2>関数を書く</h2>
+<p>引数<code>x</code>をそのまま返す関数<code>f</code>は以下の通り。</p>
+<pre class="lua"><code>function f(x)
+  return x
+end</code></pre>
+</div>
+<div id="コードブロックをそのまま返す" class="section level2">
+<h2>コードブロックをそのまま返す</h2>
+<p>Pandoc’s Markdown（というよりはASTによる内部表現）の要素名と一致する関数を用意してやると、該当する要素がフィルタに送り込まれる。ドキュメントにはPandocにおける様々な種類の要素が一覧されている（<a href="https://pandoc.org/lua-filters.html#module-pandoc" class="uri">https://pandoc.org/lua-filters.html#module-pandoc</a>）。今回はコードブロックを対象としたいので、<code>CodeBlock</code>だ。</p>
+<p>関数の引数は1つだけ。第二引数以降は用意しても<code>nil</code>が入る。そして引数をそのまま<code>return</code>してやれば、コードブロックを編集せずにそのまま返す。</p>
+<pre class="lua"><code>function CodeBlock(elem)
+  return elem
+end</code></pre>
+<p>ちなみに<code>return</code>せずに終わった場合も入力はそのまま維持される。文字数を数えるとか内容の変更を伴わないフィルタに使うようだ。今回の最終目的は入力を置換していくことなので、<code>return</code>した。</p>
+</div>
+<div id="コードブロックをdetalsタグで囲む" class="section level2">
+<h2>コードブロックを<code>&lt;detals&gt;</code>タグで囲む</h2>
+<p>PandocにおいてHTMLはコードブロックではなく<code>RawBlock</code>なので、
+<code>pandoc.RawBlock</code>で作成してやる。
+<code>pandoc.RawBlock</code>は第一引数が言語名（今回は<code>"html"</code>）で、第二引数がスクリプトである。例えばPandoc本家へのリンクを<code>pandoc.Rawblock</code>で表現すると以下の通りである。</p>
+<pre class="lua"><code>pandoc.RawBlock(&quot;html&quot;, &quot;&lt;a href=https://pandoc.org/&gt;Pandoc&lt;/a&gt;&quot;) </code></pre>
+<p>ところで今回は、CodeBlockを<code>&lt;details&gt;</code>と<code>&lt;/details&gt;</code>で挟まなければならない。</p>
+<p>従って</p>
+<ul>
+<li>RawBlock</li>
+<li>CodeBlock</li>
+<li>RawBlock</li>
+</ul>
+<p>の順に3要素を返す必要がある。複数の値を返すには、<code>return 1, 2</code>や<code>return{1, 2}</code>とすればよい。後者であれば途中で改行できるので、今回は後者を利用する。</p>
+<p>すると以下のようになる。せっかくなので、<code>&lt;summary&gt;</code>タグも入れておいた。</p>
+<pre class="lua"><code>function CodeBlock(elem)
+  return{
+    pandoc.RawBlock(&quot;html&quot;, &quot;&lt;details&gt;&lt;summary&gt;Code&lt;/summary&gt;&quot;),
+    elem,
+    pandoc.RawBlock(&quot;html&quot;, &quot;&lt;/details&gt;&quot;)
+  }
+end</code></pre>
+</div>
+<div id="detailsクラスを持つコードブロックだけdetailsタグで囲う" class="section level2">
+<h2>detailsクラスを持つコードブロックだけ<code>&lt;details&gt;</code>タグで囲う。</h2>
+<p>既に述べた通り、Lua Filterでは返り値がなかった場合、入力はそのままになる。従ってコードブロックがdetailsクラスを持つ時だけ<code>return</code>が発生するよう<code>if</code>文を記述すれば良い。</p>
+<p><code>CodeBlock</code>のクラスは<code>変数名.classes</code>で取り出せる（<a href="https://pandoc.org/lua-filters.html#type-codeblock" class="uri">https://pandoc.org/lua-filters.html#type-codeblock</a>）。なお、<code>classes</code>フィールドは、コードブロックがクラスを持たない場合は<code>nil</code>で、クラスを持つ場合は<a href="https://pandoc.org/lua-filters.html#module-pandoc.list"><code>pandoc.List</code></a>である。
+<code>pandoc.List</code>は<code>:find</code>メソッドを持ち、ある要素と一致するリスト中の要素のインデックスを返す。見つからなければ<code>nil</code>を返す。</p>
+<p>従って<code>elem.classes</code>も<code>elem.classes:find("details")</code>も<code>nil</code>ではない場合に<code>return</code>すれば良い。
+lua言語のif文では、論理値以外が与えられると、<code>nil</code>なら偽、さもなければ真として扱われるようだ。よって以下のように書ける。</p>
+<pre class="lua"><code>function CodeBlock(elem)
+  if elem.classes and elem.classes:find(&quot;details&quot;) then
+    return{
+      pandoc.RawBlock(&quot;html&quot;, &quot;&lt;details&gt;&lt;summary&gt;Code&lt;/summary&gt;&quot;),
+      elem,
+      pandoc.RawBlock(&quot;html&quot;, &quot;&lt;/details&gt;&quot;)
+    }
+  end
+end</code></pre>
+</div>
+<div id="detailsクラスを持つコードブロックだけdetailsタグで囲いsummary要素が指定されていればsummaryタグに記述する" class="section level2">
+<h2>detailsクラスを持つコードブロックだけ<code>&lt;details&gt;</code>タグで囲い、summary要素が指定されていれば、<code>&lt;summary&gt;</code>タグに記述する</h2>
+<p>疲れたので説明を割愛するがこんな感じ。</p>
+<pre class="lua"><code>function CodeBlock(elem)
+  if elem.classes and elem.classes:find(&quot;details&quot;) then
+    local summary = &quot;Code&quot;
+    if elem.attributes.summary then
+      summary = elem.attributes.summary
+    end
+    return{
+      pandoc.RawBlock(
+        &quot;html&quot;, &quot;&lt;details&gt;&lt;summary&gt;&quot; .. summary .. &quot;&lt;/summary&gt;&quot;
+      ),
+      elem,
+      pandoc.RawBlock(&quot;html&quot;, &quot;&lt;/details&gt;&quot;)
+    }
+  end
+end</code></pre>
+</div>
+</div>
+<div id="r-markdownで使ってみる" class="section level1">
+<h1>R Markdownで使ってみる</h1>
+<p>上述のフィルタを<code>foldableCodeBlock.lua</code>として保存しよう。そして、折り畳みたいコードブロックに<code>details</code>クラスを与える。チャンクの場合、
+<code>attr.output='.details summary="Output"'</code>とすると実行結果を折り畳めるようになる。</p>
+<div id="rmdファイル" class="section level2">
+<h2>Rmdファイル</h2>
+<pre class="md"><code>---
+output:
+  html_document:
+    self_contained: false
+    pandoc_args: [
+        &quot;--lua-filter&quot;, &quot;test.lua&quot;
+      ]
+---
+
+```{r, class.source=&#39;details&#39;}
+set.seed(1)
+rnorm(10)
+```</code></pre>
+</div>
+<div id="デモ-折り畳み時" class="section level2">
+<h2>デモ: 折り畳み時</h2>
+<p><img src="/images/posts/2020-03-07-pandoc-lua-detailed-codeblock/code-close.png" /></p>
+</div>
+<div id="デモ-展開時" class="section level2">
+<h2>デモ: 展開時</h2>
+<p><img src="/images/posts/2020-03-07-pandoc-lua-detailed-codeblock/code-open.png" /></p>
+</div>
+</div>
