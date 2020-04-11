@@ -1,0 +1,163 @@
+
+<div id="TOC">
+<ul>
+<li><a href="#ループせずに済む処理はforの外に出せ">ループせずに済む処理は<code>for</code>の外に出せ</a><ul>
+<li><a href="#ループ前">ループ前</a><ul>
+<li><a href="#要旨">要旨</a></li>
+<li><a href="#パッケージ読み込み">パッケージ読み込み</a></li>
+<li><a href="#関数定義">関数定義</a></li>
+<li><a href="#データ読み込み整形">データ読み込み・整形</a></li>
+</ul></li>
+<li><a href="#ループ内">ループ内</a><ul>
+<li><a href="#小規模なデータ整形">小規模なデータ整形</a></li>
+<li><a href="#分析可視化">分析・可視化</a></li>
+<li><a href="#解釈">解釈</a></li>
+</ul></li>
+<li><a href="#ループ後">ループ後</a></li>
+</ul></li>
+</ul>
+</div>
+
+<p>データ分析は大きく</p>
+<ul>
+<li>読み込み・整形</li>
+<li>分析</li>
+<li>可視化</li>
+<li>解釈</li>
+</ul>
+<p>の4つの要素で成り立つと思う。できればこの順に1サイクルして終わりたいが、現実的には何サイクルも回す。そしてメンテナンス不能で読む気も失せる巨大ノートブックができあがることは、想像に難くない。</p>
+<p>サイクルはつまり<code>for</code>文だ。
+RでもPythonでも<strong>ノートブックでも</strong><code>for</code>文を最適化するコツは共通している。</p>
+<div id="ループせずに済む処理はforの外に出せ" class="section level1">
+<h1>ループせずに済む処理は<code>for</code>の外に出せ</h1>
+<p>巨大な<code>for</code>文を読みたくないのはノートブックでも同じ。ループごとの差分がどこか確認することに疲れてしまって肝心な分析結果やグラフを読む時間が失なわれては悲しい。私は今のところ以下のように構造化している。</p>
+<ol style="list-style-type: upper-alpha">
+<li>ループ前
+<ol style="list-style-type: decimal">
+<li>要旨</li>
+<li>パッケージ読み込み</li>
+<li>関数定義</li>
+<li>データ読み込み・整形</li>
+</ol></li>
+<li>ループ内
+<ol style="list-style-type: decimal">
+<li>小規模なデータ整形</li>
+<li>分析・可視化</li>
+<li>解釈</li>
+</ol></li>
+<li>ループ後
+<ol style="list-style-type: decimal">
+<li>まとめ</li>
+</ol></li>
+</ol>
+<div id="ループ前" class="section level2">
+<h2>ループ前</h2>
+<div id="要旨" class="section level3">
+<h3>要旨</h3>
+<p>ノートブックの目的や、どんなことが見えたかを簡単に書く。後からノートを見返す時のためのものだから、タイミングとしては最初に書く必要はないが、結果的にはノートブックの最初に書く。</p>
+</div>
+<div id="パッケージ読み込み" class="section level3">
+<h3>パッケージ読み込み</h3>
+<p>モジュールが必要になったタイミングで読み込んでいるなら、すぐに先頭にまとめよう。同じモジュール読んだか定かじゃないから読み込み直す、なんてことしていたらどんどん行数が増える。</p>
+</div>
+<div id="関数定義" class="section level3">
+<h3>関数定義</h3>
+<p>関数もできるだけ最初に定義しておこう。せっかく作った関数はループ内の任意のタイミングで使いたいものだ。ループごとに少しずつ関数を変えたい?
+だったら関数を返す関数を書こう (高階関数)。</p>
+<p>勿論、最初から完璧な関数を書く必要はない。ループ内などで同じような処理を3回したなと思ったら、関数に纏めてノートブックを整理しよう。</p>
+<p>また、ループ内外で複雑な処理を行う場合は、1度きりのコードであっても関数として名前をつけておこう。すると、関数の名前でどんな処理をしているかが読者に伝わる。多くの場合、読者はまずどんな処理をしているか掴みたいだけで、細かいところまで求めていない。</p>
+<p>関数定義自体もシンプルにしたいが、これは訓練が必要だと思う。折に触れてコードゴルフしつつベンチマークをして、可読性と高速化のバランスを養うことを勧める。</p>
+<p>同じデータに対して引数を変えながら同じ関数を適用したい場合は、次のデータ読み込み・整形を先にしても良いかも知れない。しかし、データ整形時のための関数定義が発生するので、関数定義 → データ読み込み・整形 → 関数定義という流れになり、ノートブックの見通しが悪くなる。</p>
+</div>
+<div id="データ読み込み整形" class="section level3">
+<h3>データ読み込み・整形</h3>
+<p>ループ内でのデータ整形が最小限になるように、ここでできるだけデータを整備しておこう。
+<code>for</code>文で変数を作る時、<code>for</code>文の前にリストを初期化するのと同じだ。</p>
+<div id="ループ内で同じ操作があったらループ前に出す" class="section level4">
+<h4>ループ内で同じ操作があったらループ前に出す</h4>
+<p>同じ操作を繰り返すのはハイコストですね。例えばこんな感じで修正しましょう。</p>
+<div id="before" class="section level5">
+<h5>Before</h5>
+<pre class="python"><code># ループ前
+import pandas as pd
+df = pd.read_csv(&quot;hoge.csv&quot;)
+
+# ループ内
+
+df.assign(A_centered = lambda df: df[&#39;A&#39;] - df[&#39;A&#39;].mean()) \
+    .pipe(lambda x: f(x, &#39;foo&#39;))
+## 解釈
+
+df.assign(A_centered = lambda df: df[&#39;A&#39;] - df[&#39;A&#39;].mean()) \
+    .pipe(lambda x: f(x, &#39;bar&#39;))
+## 解釈</code></pre>
+</div>
+<div id="after" class="section level5">
+<h5>After</h5>
+<pre class="python"><code># ループ前
+import pandas as pd
+df = pd.read_csv(&quot;hoge.csv&quot;) \
+    .assign(A_centered = lambda df: df[&#39;A&#39;] - df[&#39;A&#39;].mean())
+
+# ループ内
+
+f(df, &#39;foo&#39;)
+## 解釈
+
+f(df, &#39;bar&#39;)
+## 解釈</code></pre>
+<p>ループ前に処理を纏めると、例えば<code>assign</code>を繰り返しているから一つに纏めようなどと、更なる単純化が可能になります。</p>
+</div>
+</div>
+<div id="変数の再代入を避ける" class="section level4">
+<h4>変数の再代入を避ける</h4>
+<p>変数の再代入は、</p>
+<ul>
+<li>変数名が変わった時の置換対象が増える</li>
+<li>参照透過性が失われるためバグの温床になる
+(参考: <a href="https://qiita.com/Yametaro/items/1de3c2b76b8a4dc2d30d">純粋関数型言語と参照透過性 @Yametaro</a></li>
+</ul>
+<p>といった問題を孕む。ノートブックをシンプルにするためには再代入を忌避しよう。</p>
+<p>例えば</p>
+<ol style="list-style-type: decimal">
+<li>A列から平均値を引いたA_centered列を作り</li>
+<li>A_centered列が正の値をとる部分を抽出した</li>
+</ol>
+<p>データフレームを作りたいとする。</p>
+<p>変数の再代入を許すなら以下の通り。</p>
+<pre class="python"><code>df = pd.read_csv(&quot;hoge.csv&quot;)
+df[&#39;A_centered&#39;] = df[&#39;A&#39;] - df[&#39;A&#39;].mean()
+df = df[df[&#39;A_centered&#39;] &gt; 0]</code></pre>
+<p>再代入を撲滅するならパイプする (参考: <a href="https://qiita.com/U25CE/items/6a464865759231aa888d#%E3%83%91%E3%82%A4%E3%83%97-magrittr">dplyr のアレを Pandas でやる @U25CE</a>)。</p>
+<pre class="python"><code>df1 = pd.read_csv(&quot;hoge.csv&quot;) \
+    .assign(A_centered = lambda df: df[&#39;A&#39;] - df[&#39;A&#39;].mean()) \
+    .filter()</code></pre>
+<p>特にループ内で再代入したくなったら、ループ前に戻って処理を書き直そう。後続するループでどんな処理をしたか忘れてしまった時、ノートブックを上から全て読むよりは、冒頭だけを読んで済む方が低コストだ。</p>
+</div>
+</div>
+</div>
+<div id="ループ内" class="section level2">
+<h2>ループ内</h2>
+<div id="小規模なデータ整形" class="section level3">
+<h3>小規模なデータ整形</h3>
+<p>ループ内ではデータ整形を最小限に行います。以下のルールを心掛けましょう。</p>
+<ul>
+<li>整形した結果を変数に代入しない</li>
+<li>変数に代入する場合も、変数はループ内でのみ使用する</li>
+<li>ループ内でも再代入しない</li>
+</ul>
+</div>
+<div id="分析可視化" class="section level3">
+<h3>分析・可視化</h3>
+<p>ループ前にちゃんと関数を定義しておけば、ここは自然とシンプルになっているはずです。</p>
+</div>
+<div id="解釈" class="section level3">
+<h3>解釈</h3>
+<p>シンプルさを心掛けつつも好きなだけ解釈を書き連ねましょう。</p>
+</div>
+</div>
+<div id="ループ後" class="section level2">
+<h2>ループ後</h2>
+<p>分析結果のまとめを書きます。要旨よりも詳しく書きます。</p>
+</div>
+</div>
