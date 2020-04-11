@@ -61,7 +61,7 @@ ggplot(mtcars) +
 ## CSS
 
 ```{css, eval = FALSE}
-.reveal .slides. section .col {
+.reveal .slides section .col {
   display: inline-block;
   width: 48%;
   vertical-align: top;
