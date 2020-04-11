@@ -1,7 +1,7 @@
 ---
 title: ノートブックの最適化はfor文の最適化に通ず
 author: ~
-date: '2020-02-28'
+date: '2020-02-27'
 slug: simple-notebook
 categories: [R, Python]
 tags: [R Markdown, Jupyter Notebook]
