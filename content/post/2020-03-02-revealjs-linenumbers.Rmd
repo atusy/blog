@@ -1,0 +1,59 @@
+---
+title: revealjs_presentationでコードブロックに行番号を付与する
+author: ~
+date: '2020-03-02'
+slug: revealjs-linenumbers
+categories: [R]
+tags: [R Markdown, revealjs]
+output:
+  blogdown::html_page:
+    highlight: pygments
+---
+
+R Markdownでは、コードブロックに`numberLines`クラスを与えると、Pandocが行番号を付与してくれます。
+例えば以下のコードブロックをblogdownでレンダリングすると、ちゃんと行番号が付与されます[^html-document]。
+
+[^html-document]:
+    `html_document`やその派生ではYAMLフロントマターにて`highlight`に`default`以外の値を与える必要があります。例えば
+  
+    ```yaml
+    output:
+      html_document:
+        highlight: pygments
+    ```
+
+````
+```{.python .numberLines}
+import pandas as pd
+```
+````
+
+```{.python .numberLines}
+import pandas as pd
+```
+
+チャンクに行番号をつけるには`class.source`などを指定します。
+
+````
+`r ''````{r, class.source='numberLines', class.output='numberLines'}
+rnrom(10)
+`r ''````
+````
+
+```{r, class.source='numberLines', class.output='numberLines'}
+rnorm(5)
+```
+
+しかし、revealjsではこれらを実行しても行番号が表示されません。
+これは、CSSでコードブロックの外にはみ出た文字列が非表示にされているため。
+というわけで、以下のCSSチャンクをRmdファイルに仕込むか、cssファイルに記述してYAMLフロントマターから取り込めばOK。
+
+````
+`r ''````{css, echo = FALSE}
+.reveal pre code {
+  overflow: visible
+}
+`r ''````
+````
+
+Enjoy!
