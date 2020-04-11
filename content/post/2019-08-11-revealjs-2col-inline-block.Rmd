@@ -86,7 +86,7 @@ output:
 
 ````css
 `r ''````{css, echo = FALSE}
-.reveal .slides. section .col {
+.reveal .slides section .col {
   display: inline-block;
   width: 48%;
   vertical-align: top;
@@ -138,7 +138,7 @@ output: revealjs::revealjs_presentation
 ---
 
 `r ''````{css, echo = FALSE}
-.reveal .slides. section .col {
+.reveal .slides section .col {
   display: inline-block;
   width: 48%;
   vertical-align: top;
