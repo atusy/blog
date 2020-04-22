@@ -1,0 +1,154 @@
+---
+title: R MarkdownでKaTeXを使う
+author: ~
+date: '2020-04-23'
+slug: katex-in-html-doc
+categories: [R]
+tags: [R Markdown]
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+# はじめに
+
+今、Rmdから出力できるHTML5でJavaScript控え目で軽量で高速なHTML文書フォーマットとして、`minidown::mini_document`を開発しています。
+割と実用段階に入ったと思うので、以下のサンプルページを見て見てください。
+https://minidown-example.atusy.net/
+
+この`minidown::mini_document`ではKaTeXを採用しています。
+`rmarkdown::html_document`が採用するMathJaxより軽量で高速な素敵な数式レンダリングエンジンです。
+MathJaxもバージョン3で軽量化・高速化を図っていますが、まだKaTeXには及ばない。
+一応MathJaxにも対応するつもりでしたが、なぜか表示が崩れるのでお蔵入りしました。
+
+KaTeXをRmdで使う試みは既にぞうさんがされています <https://qiita.com/kazutan/items/c07d317dde68b90ef118>。
+しかし、`self_contained`を有効にすると、KaTeX本体をダウンロードしてHTMLファイル内に取り込もうとするので、レンダリングに時間がかかってしまいます。
+
+しかし、本気でフォーマットとしてKaTeXをサポートするなら、この問題は避けて通れません。
+
+# アイディア
+
+ではどうするかということで、
+`rmarkdown::html_document`
+のヘルプを参照すると、「MathJaxはself_containedを例外的に回避しているよ」とあります。
+
+> Note that even for self contained documents MathJax is still loaded externally (this is necessary because of its size).
+
+しかし、ソースを読んでもどうやってるか理解するのが難しいので、オレオレな方法で挑みました。
+
+やっていることはシンプルで、基本は
+
+* PandocにKaTeXを挿入したい場所にキーワードを仕込ませる
+* R Markdownのpost_processorでキーワードをKaTeXで置換する
+
+これだけです。
+
+# 実装
+
+## プレースホルダの作成
+
+以下の一行だけのファイルを`math.html`として保存しました。
+
+```html
+<!--math placeholder-->
+```
+
+## KaTeXスクリプトの用意
+
+以下の内容を`katex.html`として保存しました。
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js" integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$", right: "$$", display: false}
+      ],
+      displayMode: true
+    });
+  });
+</script>
+```
+
+## フォーマット関数の用意
+
+心臓部を作っていきます。
+
+### ベースフォーマットの用意
+
+1からフォーマットを作るのは大変なので、`rmarkdown::html_document`を改変しましょう。
+`rmarkdown::html_document`に必要な引数を指定しておきます。
+
+* ヘッダに`math.html`を挿入するため、`list(in_header = 'math.html')`を指定
+* MathJaxを使わないので、`mathjax = NULL`を指定
+* Pandocは、数式レンダリングエンジン未使用時に数式を可能な範囲で変換する素敵機能を持っているので、`pandoc_args = '--mathjax'`を指定して無効化。
+    * 通常はこれだけでは無効化できませんが、`rmarkdown::html_document`のPandoc用テンプレートファイルの仕様上、これが可能です。
+
+```{r}
+base_format <- rmarkdown::html_document(
+  includes = list(in_header = 'math.html'),
+  mathjax = NULL,
+  pandoc_args = '--mathjax'
+)
+```
+
+## ベースフォーマットを改変する関数の用意
+
+今回はKaTeXを使うので`katex_document`と仮称します。
+R Markdownには`post_processor`という機能があり、
+Pandoc実行後に、出力ファイルのパスなどの様々な引数を受け取る関数を用いて後処理を実行できます。
+こいつを使って出力に挿入されている`math.html`の内容の直後に`katex.html`を挿入します。
+`self_contained`の処理は、Pandocの段階で済んでいるので、ここで`katex.html`を挿入しても大丈夫です。
+やっていることはコードを見れば分かると思います。
+注意点は以下の3点です。
+
+* `katex_document`の返り値を改変したフォーマットにすること
+* `base_format`が持つ`post_processor`もちゃんと実行されるよにすること
+* `math.html`の内容はPandocによってインデントされてしまうので、正規表現で見つけてやること
+
+```{r, eval=FALSE}
+katex_document <- function(...) {
+  format <- base_format
+  post <- base_format$post_processor
+  post_new <- function(metadata, input_file, output_file, clean, verbose) {
+    output <- readLines(output_file)
+    output <- append(
+      output
+      readLines('katex.html'),
+      which(grepl(' *<!--math placeholder-->', output))
+    )
+    writeLines(output, output_file)
+    post(metadata, input_file, output_file, clean, verbose)
+  }
+  format
+}
+```
+
+## レンダリング
+
+`rmarkdown::render`でレンダリングしてみましょう。
+上記の関数を`.Rprofile`に記述すればYAMLフロントマターからも使えるかも知れません。
+
+```{r, eval=FALSE}
+rmarkdown::render(
+  'index.Rmd',
+  output_format = katex_document()
+)
+```
+
+# 実用化に向けて
+
+簡単に利用しようと思うと、パッケージ化が必須になります。
+そうすると、フォーマットを適切に設定できるように引数を調整するとか、
+プレースホルダはいらなくなるので除去してあげるとか、
+色々な工夫が必要になます。
+そのあたりは[atusy/minidown](https://github.com/atusy/minidown/)の実装を参考にして頂ければと思います。
+
+# Enjoy!
+
+私のOSS活動を支援して頂けるスポンサーを募集しています。 \
+<https://github.com/sponsors/atusy>
