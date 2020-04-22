@@ -96,7 +96,7 @@ base_format <- rmarkdown::html_document(
 )
 ```
 
-## ベースフォーマットを改変する関数の用意
+### ベースフォーマットを改変する関数の用意
 
 今回はKaTeXを使うので`katex_document`と仮称します。
 R Markdownには`post_processor`という機能があり、

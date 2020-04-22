@@ -20,8 +20,8 @@ output:
 <li><a href="#katexスクリプトの用意">KaTeXスクリプトの用意</a></li>
 <li><a href="#フォーマット関数の用意">フォーマット関数の用意</a><ul>
 <li><a href="#ベースフォーマットの用意">ベースフォーマットの用意</a></li>
-</ul></li>
 <li><a href="#ベースフォーマットを改変する関数の用意">ベースフォーマットを改変する関数の用意</a></li>
+</ul></li>
 <li><a href="#レンダリング">レンダリング</a></li>
 </ul></li>
 <li><a href="#実用化に向けて">実用化に向けて</a></li>
@@ -101,9 +101,8 @@ MathJaxもバージョン3で軽量化・高速化を図っていますが、ま
   pandoc_args = &#39;--mathjax&#39;
 )</code></pre>
 </div>
-</div>
-<div id="ベースフォーマットを改変する関数の用意" class="section level2">
-<h2>ベースフォーマットを改変する関数の用意</h2>
+<div id="ベースフォーマットを改変する関数の用意" class="section level3">
+<h3>ベースフォーマットを改変する関数の用意</h3>
 <p>今回はKaTeXを使うので<code>katex_document</code>と仮称します。
 R Markdownには<code>post_processor</code>という機能があり、
 Pandoc実行後に、出力ファイルのパスなどの様々な引数を受け取る関数を用いて後処理を実行できます。こいつを使って出力に挿入されている<code>math.html</code>の内容の直後に<code>katex.html</code>を挿入します。
@@ -128,6 +127,7 @@ Pandoc実行後に、出力ファイルのパスなどの様々な引数を受�
   }
   format
 }</code></pre>
+</div>
 </div>
 <div id="レンダリング" class="section level2">
 <h2>レンダリング</h2>
