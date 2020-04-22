@@ -113,9 +113,9 @@ Pandoc実行後に、出力ファイルのパスなどの様々な引数を受�
 <li><code>math.html</code>の内容はPandocによってインデントされてしまうので、正規表現で見つけてやること</li>
 </ul>
 <pre class="r"><code>katex_document &lt;- function(...) {
-  format &lt;- base_format
   post &lt;- base_format$post_processor
-  post_new &lt;- function(metadata, input_file, output_file, clean, verbose) {
+  format &lt;- base_format
+  format$post_processor &lt;- function(metadata, input_file, output_file, clean, verbose) {
     output &lt;- readLines(output_file)
     output &lt;- append(
       output

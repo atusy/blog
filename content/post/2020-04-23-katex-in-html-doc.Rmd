@@ -112,9 +112,9 @@ Pandoc実行後に、出力ファイルのパスなどの様々な引数を受�
 
 ```{r, eval=FALSE}
 katex_document <- function(...) {
-  format <- base_format
   post <- base_format$post_processor
-  post_new <- function(metadata, input_file, output_file, clean, verbose) {
+  format <- base_format
+  format$post_processor <- function(metadata, input_file, output_file, clean, verbose) {
     output <- readLines(output_file)
     output <- append(
       output
