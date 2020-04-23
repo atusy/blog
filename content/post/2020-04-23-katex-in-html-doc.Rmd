@@ -4,7 +4,7 @@ author: ~
 date: '2020-04-23'
 slug: katex-in-html-doc
 categories: [R]
-tags: [R Markdown]
+tags: ["R Markdown", "minidown"]
 output:
   blogdown::html_page:
     toc: true
