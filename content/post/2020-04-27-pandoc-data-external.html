@@ -1,0 +1,69 @@
+---
+title: 'Pandocにself containedさせたくないデータには`data-external="1"`を属性付与しよう'
+author: ~
+date: '2020-04-27'
+slug: pandoc-data-external
+categories: [Pandoc]
+tags: [Pandoc, R Markdown]
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#self-containedなドキュメントでも数式を使う">self containedなドキュメントでも数式を使う</a><ul>
+<li><a href="#r-markdownの場合">R Markdownの場合</a></li>
+</ul></li>
+<li><a href="#enjoy">Enjoy</a></li>
+</ul>
+</div>
+
+<p><a href="https://blog.atusy.net/2020/04/23/katex-in-html-doc/">先日の記事</a>では
+R MarkdownでKaTeXをCDNから読み込む際に、
+Pandocが出力にKaTeXを埋め込まないようにするハックを紹介しました。</p>
+<p>しかし、Pandocのドキュメントを読むと、埋め込みを回避したい場合は属性として
+<code>data-external="1"</code>
+をつけよと書いています。</p>
+<blockquote>
+<p>Elements with the attribute data-external=“1” will be left alone; the documents they link to will not be incorporated in the document.
+<a href="https://pandoc.org/MANUAL.html#option--self-contained" class="uri">https://pandoc.org/MANUAL.html#option--self-contained</a></p>
+</blockquote>
+<p>これ、Pandoc 2.0から追加されていたとのこと。</p>
+<blockquote>
+<p>don’t incorporate elements with data-external=“1” (#2656)
+<a href="https://pandoc.org/releases.html#behavior-changes-1" class="uri">https://pandoc.org/releases.html#behavior-changes-1</a></p>
+</blockquote>
+<div id="self-containedなドキュメントでも数式を使う" class="section level1">
+<h1>self containedなドキュメントでも数式を使う</h1>
+<p>例えばKaTeXを使いたい場合、以下の内容を<code>katex.html</code>などに保存し、<code>--include-in-header katex.html --mathjax</code>などと指定すればOK。数式レンダリングエンジン未指定時には、Pandocが数式をユニコード文字で頑張って表現しようとするので<code>--mathjax</code>の空打ちが必要になる。多分<code>--katex</code>なんかの空打ちでも良いはず。</p>
+<pre class="html"><code>&lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css&quot; integrity=&quot;sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq&quot; crossorigin=&quot;anonymous&quot; data-external=&quot;1&quot;&gt;
+&lt;script defer src=&quot;https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js&quot; integrity=&quot;sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz&quot; crossorigin=&quot;anonymous&quot; data-external=&quot;1&quot;&gt;&lt;/script&gt;
+&lt;script defer src=&quot;https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js&quot; integrity=&quot;sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI&quot; crossorigin=&quot;anonymous&quot; onload=&quot;renderMathInElement(document.body);&quot; data-external=&quot;1&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+  document.addEventListener(&quot;DOMContentLoaded&quot;, function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: &quot;$$&quot;, right: &quot;$$&quot;, display: true},
+        {left: &quot;$&quot;, right: &quot;$$&quot;, display: false}
+      ],
+      displayMode: true
+    });
+  });
+&lt;/script&gt;</code></pre>
+<div id="r-markdownの場合" class="section level2">
+<h2>R Markdownの場合</h2>
+<p>上述のHTMLを保存した上で以下のようなYAMLフロントマターを指定する。</p>
+<pre class="yaml"><code>output:
+  html_document:
+    includes:
+      in_header: katex.html
+    mathjax: null
+    pandoc_args: &quot;--mathjax&quot;</code></pre>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy</h1>
+<p><code>rmarkdown</code>パッケージはこれを使わない方法を採用している。多分、Pandoc 1.xに対応するためだけど、そろそろ更新してあげたいですね。</p>
+</div>
