@@ -1,0 +1,104 @@
+---
+title: html_document(self_contained = FALSE) で出力した時の携帯性をあげるextra_dependencies引数
+author: ~
+date: '2020-05-03'
+slug: rmd-extra-dependencies
+categories: [R]
+tags: [R Markdown]
+output:
+  blogdown::html_page:
+    toc: true
+summary: |
+  `rmarkdown::html_document`関数には、
+  `self_contained`引数が`FALSE`な時でも依存しているJavaScriptやCSSをポータブルにするために、
+  `extra_dependencies`引数が用意されています。
+  本記事ではこの引数の使い方について紹介します。
+---
+
+`rmarkdown::html_document`関数には、`self_contained`引数が`FALSE`な時でも依存しているJavaScriptやCSSをポータブルにするために、`extra_dependencies`引数が用意されています。
+本記事ではこの引数の使い方について紹介します。
+
+# 使い方と何が起きるか
+
+`htmltools::htmlDependency`関数が返す`html_dependency`クラスオブジェクトを束ねた`list`を指定します。
+`htmltools::htmlDependency`の使い方については、ドキュメントを参照してください。
+
+`htmltools::htmlDependency`関数に指定したJavaScriptファイルやCSSファイル、meta情報は出力されるHTMLファイルの`<head>`〜`</head>`の間に記述されます。
+`self_contained = FALSE`時は、依存対象をRmdファイルと同じディレクトリ下に配置した子ディレクトリの中にコピーし、出力されたHTMLファイルから相対パスで参照できるようにします。
+
+子ディレクトリ名の既定値はRmdファイルの名前に`_files`とサフィックスしたものです。
+変更するには`rmarkdown::html_document`関数の`lib_dir`引数を指定してください。
+
+# どういう時に使うのか
+
+主に`rmarkdown::html_document`を拡張するフォーマットをパッケージ化する時、
+JavaScriptライブラリやCSSフレームワークをパッケージに同梱し、
+オフラインでも利用できるようにするために用います。
+
+# どういう時に使わないのか
+
+- `self_contained = TRUE`な運用しかしない時。
+- `self_contained = FALSE`な運用をするが、
+    - 依存対象がRmdファイルから相対パスで参照しやすい範囲に依存対象が配置されている時。
+    - `includes`引数を設定すれば十分な時。
+        - HTMLファイルにJavaScriptやCSSをべた書きしていて、
+          強制的にself_containedされても問題ない
+        - 依存対象はネットワーク接続時にCDN経由で利用できれば十分
+            - たとえばMathJaxやKaTeXなどの数式レンダリングエンジン
+              (参考: [先日の記事](https://blog.atusy.net/2020/04/27/pandoc-data-external/))
+
+# メモ
+
+以下は個人的なメモ書き。
+
+## 経緯
+
+minidownパッケージを作り過程で、パッケージに同梱したCSSフレームワークをポータブルに利用できるようにしたかった。
+そこで、`rmarkdown::html_document(self_contained = FALSE)`出力時に、
+出力先と同じディレクトリツリー下にBootstrap関連のファイルをコピーする方法が知りたかった。
+
+## 調べ方
+
+経緯について`rmarkdown::html_document`のソースを見ると、`extra_dependencies`を利用しているとすぐわかりました。
+
+そこで引数の使い方を調べるべく、
+`?rmarkdown::html_document`を参照したところ、
+`rmarkdown::html_document_base`に引き渡すとあります。
+遡って参照すると`Extra dependencies`との説明があります。
+これでは引数名以上の情報が一切得られません[^pr]。
+
+しかたがないので、`rmarkdown::html_document`の[ソースコード](https://github.com/rstudio/rmarkdown/blob/master/R/html_document.R#L240-L243)を見てみましょう。
+すると、`extra_dependencies`引数は以下のような追加処理をうけた上で、
+`rmarkdown::html_document_base`の`extra_dependencies`引数に渡されます。
+
+```r
+extra_dependencies <- append(extra_dependencies,
+                             list(html_dependency_jquery(),
+                                  html_dependency_jqueryui(),
+                                  html_dependency_tocify()))
+```
+
+`extra_dependencies`に`append`している`list`は以下の通り、
+`html_dependency`クラスオブジェクトの集まりです。
+
+```{r, collapse=TRUE, comment="#>"}
+library(rmarkdown)
+appended_dependencies <-
+  list(html_dependency_jquery(),
+       html_dependency_jqueryui(),
+       html_dependency_tocify())
+str(lapply(appended_dependencies, class))
+```
+
+`html_dependency`クラスオブジェクトの作り方を見るため
+`rmarkdown::html_dependency_jquery`のソースコードを覗いてみましょう。
+すると、`htmltools::htmlDependency`を使えばいいとがわかります。
+
+```{r, collapse=TRUE, comment="#>"}
+rmarkdown::html_dependency_jquery
+```
+
+
+
+[^pr]: 改善案を[PR #1818](https://github.com/rstudio/rmarkdown/pull/1818)しておいた。
+

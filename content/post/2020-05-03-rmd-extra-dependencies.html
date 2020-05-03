@@ -1,0 +1,115 @@
+---
+title: html_document(self_contained = FALSE) で出力した時の携帯性をあげるextra_dependencies引数
+author: ~
+date: '2020-05-03'
+slug: rmd-extra-dependencies
+categories: [R]
+tags: [R Markdown]
+output:
+  blogdown::html_page:
+    toc: true
+summary: |
+  `rmarkdown::html_document`関数には、
+  `self_contained`引数が`FALSE`な時でも依存しているJavaScriptやCSSをポータブルにするために、
+  `extra_dependencies`引数が用意されています。
+  本記事ではこの引数の使い方について紹介します。
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#使い方と何が起きるか">使い方と何が起きるか</a></li>
+<li><a href="#どういう時に使うのか">どういう時に使うのか</a></li>
+<li><a href="#どういう時に使わないのか">どういう時に使わないのか</a></li>
+<li><a href="#メモ">メモ</a><ul>
+<li><a href="#経緯">経緯</a></li>
+<li><a href="#調べ方">調べ方</a></li>
+</ul></li>
+</ul>
+</div>
+
+<p><code>rmarkdown::html_document</code>関数には、<code>self_contained</code>引数が<code>FALSE</code>な時でも依存しているJavaScriptやCSSをポータブルにするために、<code>extra_dependencies</code>引数が用意されています。本記事ではこの引数の使い方について紹介します。</p>
+<div id="使い方と何が起きるか" class="section level1">
+<h1>使い方と何が起きるか</h1>
+<p><code>htmltools::htmlDependency</code>関数が返す<code>html_dependency</code>クラスオブジェクトを束ねた<code>list</code>を指定します。
+<code>htmltools::htmlDependency</code>の使い方については、ドキュメントを参照してください。</p>
+<p><code>htmltools::htmlDependency</code>関数に指定したJavaScriptファイルやCSSファイル、meta情報は出力されるHTMLファイルの<code>&lt;head&gt;</code>〜<code>&lt;/head&gt;</code>の間に記述されます。
+<code>self_contained = FALSE</code>時は、依存対象をRmdファイルと同じディレクトリ下に配置した子ディレクトリの中にコピーし、出力されたHTMLファイルから相対パスで参照できるようにします。</p>
+<p>子ディレクトリ名の既定値はRmdファイルの名前に<code>_files</code>とサフィックスしたものです。変更するには<code>rmarkdown::html_document</code>関数の<code>lib_dir</code>引数を指定してください。</p>
+</div>
+<div id="どういう時に使うのか" class="section level1">
+<h1>どういう時に使うのか</h1>
+<p>主に<code>rmarkdown::html_document</code>を拡張するフォーマットをパッケージ化する時、
+JavaScriptライブラリやCSSフレームワークをパッケージに同梱し、オフラインでも利用できるようにするために用います。</p>
+</div>
+<div id="どういう時に使わないのか" class="section level1">
+<h1>どういう時に使わないのか</h1>
+<ul>
+<li><code>self_contained = TRUE</code>な運用しかしない時。</li>
+<li><code>self_contained = FALSE</code>な運用をするが、
+<ul>
+<li>依存対象がRmdファイルから相対パスで参照しやすい範囲に依存対象が配置されている時。</li>
+<li><code>includes</code>引数を設定すれば十分な時。
+<ul>
+<li>HTMLファイルにJavaScriptやCSSをべた書きしていて、強制的にself_containedされても問題ない</li>
+<li>依存対象はネットワーク接続時にCDN経由で利用できれば十分
+<ul>
+<li>たとえばMathJaxやKaTeXなどの数式レンダリングエンジン
+(参考: <a href="https://blog.atusy.net/2020/04/27/pandoc-data-external/">先日の記事</a>)</li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+<div id="メモ" class="section level1">
+<h1>メモ</h1>
+<p>以下は個人的なメモ書き。</p>
+<div id="経緯" class="section level2">
+<h2>経緯</h2>
+<p>minidownパッケージを作り過程で、パッケージに同梱したCSSフレームワークをポータブルに利用できるようにしたかった。そこで、<code>rmarkdown::html_document(self_contained = FALSE)</code>出力時に、出力先と同じディレクトリツリー下にBootstrap関連のファイルをコピーする方法が知りたかった。</p>
+</div>
+<div id="調べ方" class="section level2">
+<h2>調べ方</h2>
+<p>経緯について<code>rmarkdown::html_document</code>のソースを見ると、<code>extra_dependencies</code>を利用しているとすぐわかりました。</p>
+<p>そこで引数の使い方を調べるべく、
+<code>?rmarkdown::html_document</code>を参照したところ、
+<code>rmarkdown::html_document_base</code>に引き渡すとあります。遡って参照すると<code>Extra dependencies</code>との説明があります。これでは引数名以上の情報が一切得られません<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>。</p>
+<p>しかたがないので、<code>rmarkdown::html_document</code>の<a href="https://github.com/rstudio/rmarkdown/blob/master/R/html_document.R#L240-L243">ソースコード</a>を見てみましょう。すると、<code>extra_dependencies</code>引数は以下のような追加処理をうけた上で、
+<code>rmarkdown::html_document_base</code>の<code>extra_dependencies</code>引数に渡されます。</p>
+<pre class="r"><code>extra_dependencies &lt;- append(extra_dependencies,
+                             list(html_dependency_jquery(),
+                                  html_dependency_jqueryui(),
+                                  html_dependency_tocify()))</code></pre>
+<p><code>extra_dependencies</code>に<code>append</code>している<code>list</code>は以下の通り、
+<code>html_dependency</code>クラスオブジェクトの集まりです。</p>
+<pre class="r"><code>library(rmarkdown)
+appended_dependencies &lt;-
+  list(html_dependency_jquery(),
+       html_dependency_jqueryui(),
+       html_dependency_tocify())
+str(lapply(appended_dependencies, class))
+#&gt; List of 3
+#&gt;  $ : chr &quot;html_dependency&quot;
+#&gt;  $ : chr &quot;html_dependency&quot;
+#&gt;  $ : chr &quot;html_dependency&quot;</code></pre>
+<p><code>html_dependency</code>クラスオブジェクトの作り方を見るため
+<code>rmarkdown::html_dependency_jquery</code>のソースコードを覗いてみましょう。すると、<code>htmltools::htmlDependency</code>を使えばいいとがわかります。</p>
+<pre class="r"><code>rmarkdown::html_dependency_jquery
+#&gt; function()  {
+#&gt; 
+#&gt;   htmlDependency(
+#&gt;     name = &quot;jquery&quot;,
+#&gt;     version = &quot;1.11.3&quot;,
+#&gt;     src = pkg_file(&quot;rmd/h/jquery&quot;),
+#&gt;     script = &quot;jquery.min.js&quot;)
+#&gt; }
+#&gt; &lt;bytecode: 0x5615ce6001c8&gt;
+#&gt; &lt;environment: namespace:rmarkdown&gt;</code></pre>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>改善案を<a href="https://github.com/rstudio/rmarkdown/pull/1818">PR #1818</a>しておいた。<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
