@@ -1,0 +1,25 @@
+---
+title: オリジナルなR Markdownの出力形式を作る`output_format`関数の罠
+author: ~
+date: '2020-05-11'
+slug: rmd-output-fromat-function
+categories: [R]
+tags: [R Markdown]
+---
+
+`rmarkdown::output_format`関数は、新規に、あるいは既存の出力形式を上書きして
+オリジナルなR Markdownのの出力形式を作成するための関数です。
+
+```{r}
+str(formals(rmarkdown::output_format))
+```
+
+```{r}
+bf <- rmarkdown::html_document(keep_md = TRUE)
+rmarkdown::output_format(
+  NULL, NULL, keep_md = NULL,
+  base_format = bf
+)$keep_md
+
+```
+
