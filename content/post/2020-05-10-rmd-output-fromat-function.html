@@ -1,0 +1,188 @@
+---
+title: オリジナルなR Markdownの出力形式を作る`output_format`関数事始め
+author: ~
+date: '2020-05-11'
+slug: rmd-output-fromat-function
+categories: [R]
+tags: [R Markdown]
+---
+
+
+
+<p><code>rmarkdown::output_format</code>関数は、新規に、あるいは既存の出力形式を上書きしてオリジナルなR Markdownのの出力形式を作成するための関数です。
+<code>rmarkdown::render</code>関数を実行する際に、レンダリングに必要な情報をリストで渡します。リストの内容は、自身の<code>base_format</code>引数を除く引数の名前です。詳しくはドキュメントを参照して頂くか、その内解説する日を待って頂きたいところ。</p>
+<pre class="r"><code>str(formals(rmarkdown::output_format))
+#&gt; Dotted pair list of 12
+#&gt;  $ knitr                  : symbol 
+#&gt;  $ pandoc                 : symbol 
+#&gt;  $ keep_md                : logi FALSE
+#&gt;  $ clean_supporting       : logi TRUE
+#&gt;  $ df_print               : NULL
+#&gt;  $ pre_knit               : NULL
+#&gt;  $ post_knit              : NULL
+#&gt;  $ pre_processor          : NULL
+#&gt;  $ intermediates_generator: NULL
+#&gt;  $ post_processor         : NULL
+#&gt;  $ on_exit                : NULL
+#&gt;  $ base_format            : NULL</code></pre>
+<p>例えば、<code>output_format</code>関数によって作られる<code>rmarkdown::html_document</code>の返り値の名前を見てみましょう。</p>
+<pre class="r"><code>base_html_format &lt;- rmarkdown::html_document(keep_md = TRUE)
+names(base_html_format)
+#&gt;  [1] &quot;knitr&quot;                   &quot;pandoc&quot;                 
+#&gt;  [3] &quot;keep_md&quot;                 &quot;clean_supporting&quot;       
+#&gt;  [5] &quot;df_print&quot;                &quot;pre_knit&quot;               
+#&gt;  [7] &quot;post_knit&quot;               &quot;pre_processor&quot;          
+#&gt;  [9] &quot;intermediates_generator&quot; &quot;post_processor&quot;         
+#&gt; [11] &quot;on_exit&quot;</code></pre>
+<p>そしてリストの内容は、base_formatを指定しない限りは引数に指定した通りのものです。</p>
+<pre class="r"><code>str(rmarkdown::output_format(NULL, NULL))
+#&gt; List of 11
+#&gt;  $ knitr                  : NULL
+#&gt;  $ pandoc                 : NULL
+#&gt;  $ keep_md                : logi FALSE
+#&gt;  $ clean_supporting       : logi TRUE
+#&gt;  $ df_print               : NULL
+#&gt;  $ pre_knit               : NULL
+#&gt;  $ post_knit              : NULL
+#&gt;  $ pre_processor          : NULL
+#&gt;  $ intermediates_generator: NULL
+#&gt;  $ post_processor         : NULL
+#&gt;  $ on_exit                : NULL
+#&gt;  - attr(*, &quot;class&quot;)= chr &quot;rmarkdown_output_format&quot;</code></pre>
+<div id="改変してみる" class="section level1">
+<h1>改変してみる</h1>
+<p><code>output_format</code>関数の<code>base_format</code>引数に、
+<code>rmarkdown::html_document()</code>など既存の書式情報を入力しておくと、他の引数に<code>NULL</code>以外が与えられていれば上書きします。ただし、上書き対象がリストの場合は再帰的に名前を比較し、最小限に上書きします。また、<code>output_format</code>関数の<code>keep_md</code>引数と<code>clean_supporting</code>引数には<code>NULL</code>を指定できません。</p>
+<div id="keep_md編" class="section level2">
+<h2>keep_md編</h2>
+<p>先の例から<code>base_html_format$keep_md</code>は<code>TRUE</code>です。</p>
+<pre class="r"><code>base_html_format$keep_md
+#&gt; [1] TRUE</code></pre>
+<p><code>rmarkdown::output_format</code>関数の<code>base_format</code>に<code>base_html_format</code>を指定した上で、
+<code>keep_md</code>引数に<code>FALSE</code>を指定すると、返り値の<code>$keep_md</code>は<code>FALSE</code>に改変されます。</p>
+<pre class="r"><code>modified_html_format &lt;- rmarkdown::output_format(
+  knitr = NULL,
+  pandoc = NULL,
+  keep_md = FALSE,
+  base_format = base_html_format
+)
+
+modified_html_format$keep_md
+#&gt; [1] FALSE</code></pre>
+<p>では他の値はどうでしょうか？それぞれの要素がbaseとmodifiedとで<code>identical</code>か確認してみましょう。すると、<code>clean_supporting</code>と<code>on_exit</code>も改変されているようです。</p>
+<pre class="r"><code>str(Map(identical, base_html_format, modified_html_format))
+#&gt; List of 11
+#&gt;  $ knitr                  : logi TRUE
+#&gt;  $ pandoc                 : logi TRUE
+#&gt;  $ keep_md                : logi FALSE
+#&gt;  $ clean_supporting       : logi FALSE
+#&gt;  $ df_print               : logi TRUE
+#&gt;  $ pre_knit               : logi TRUE
+#&gt;  $ post_knit              : logi TRUE
+#&gt;  $ pre_processor          : logi TRUE
+#&gt;  $ intermediates_generator: logi TRUE
+#&gt;  $ post_processor         : logi TRUE
+#&gt;  $ on_exit                : logi FALSE</code></pre>
+<p><code>output_format</code>の<code>clean_supporting</code>引数はレンダリングに際して出力した画像ファイルなどを掃除するか決めます。
+<code>rmarkdown::html_document</code>の場合、<code>self_contained</code>引数の値がそのまま<code>clean_supporting</code>引数に渡されます。これにより、<code>self_contained = FALSE</code>で参照すべき画像ファイルを残す必要があれば、<code>clean_supporting = FALSE</code>が指定されます。
+<code>self_contained</code>引数の既定値は<code>TRUE</code>ですが、<code>clean_supporting</code>引数の既定値は<code>FALSE</code>なので、上書きされてしまったわけですね。</p>
+<pre class="r"><code>c(
+  formals(rmarkdown::output_format)$clean_supporting,
+  formals(rmarkdown::html_document)$self_contained
+)
+#&gt; [1] TRUE TRUE</code></pre>
+<p><code>on_exit</code>については環境が変わっただけで、基本的には同じものと思って頂いてOKです。もし、<code>rmarkdown::output_format</code>関数の<code>on_exit</code>引数に関数を指定していた場合は、レンダリング終了時に<code>base_format</code>の<code>on_exit</code>要素を実行したあとで、追加指定された<code>on_exit</code>を実行します
+<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>。</p>
+<pre class="r"><code>modified_html_format$base_format
+#&gt; NULL</code></pre>
+<pre class="r"><code>modified_html_format$on_exit
+#&gt; function () 
+#&gt; {
+#&gt;     if (is.function(base)) 
+#&gt;         base()
+#&gt;     if (is.function(overlay)) 
+#&gt;         overlay()
+#&gt; }
+#&gt; &lt;bytecode: 0x55e41fbfc0e0&gt;
+#&gt; &lt;environment: 0x55e41f5d3d20&gt;</code></pre>
+</div>
+<div id="knitr編" class="section level2">
+<h2>knitr編</h2>
+<p><code>base_html_format</code>変数の<code>knitr</code>要素は以下のようになっています。</p>
+<pre class="r"><code>str(base_html_format$knitr)
+#&gt; List of 5
+#&gt;  $ opts_knit    : NULL
+#&gt;  $ opts_chunk   :List of 4
+#&gt;   ..$ dev       : chr &quot;png&quot;
+#&gt;   ..$ dpi       : num 96
+#&gt;   ..$ fig.width : num 7
+#&gt;   ..$ fig.height: num 5
+#&gt;  $ knit_hooks   : NULL
+#&gt;  $ opts_hooks   : NULL
+#&gt;  $ opts_template: NULL</code></pre>
+<p>では、<code>output_format</code>に以下の<code>new_knitr</code>を与えるとどうなるでしょうか？</p>
+<pre class="r"><code>new_knitr &lt;- list(
+  opts_chunk = list(dev = &quot;jpeg&quot;)
+)
+
+html_format_with_jpeg &lt;- rmarkdown::output_format(
+  knitr = new_knitr,
+  pandoc = NULL,
+  base_format = base_html_format
+)</code></pre>
+<ol style="list-style-type: decimal">
+<li><code>knitr</code>要素が完全に<code>new_knitr</code>に置き換えられる</li>
+<li><code>knitr</code>要素の<code>opts_chunk</code>要素だけが置き換えられる</li>
+<li><code>knitr</code>要素の<code>opts_chunk</code>要素の<code>dev</code>要素だけが置き換えられる</li>
+</ol>
+<p>答えを見てみましょう。</p>
+<pre class="r"><code>str(html_format_with_jpeg$knitr)
+#&gt; List of 5
+#&gt;  $ opts_knit    : NULL
+#&gt;  $ opts_chunk   :List of 4
+#&gt;   ..$ dpi       : num 96
+#&gt;   ..$ fig.width : num 7
+#&gt;   ..$ fig.height: num 5
+#&gt;   ..$ dev       : chr &quot;jpeg&quot;
+#&gt;  $ knit_hooks   : NULL
+#&gt;  $ opts_hooks   : NULL
+#&gt;  $ opts_template: NULL</code></pre>
+<p>3の</p>
+<blockquote>
+<p><code>knitr</code>要素の<code>opts_chunk</code>要素の<code>dev</code>要素だけが置き換えられる</p>
+</blockquote>
+<p>でした！</p>
+</div>
+</div>
+<div id="まとめとtips" class="section level1">
+<h1>まとめとTips</h1>
+<p><code>rmarkdown::output_format</code>関数を利用すると、オリジナルフォーマットを作ることができます。特に既存のものを弄るのは結構簡単です。
+<code>keep_md</code>と<code>clean_supporting</code>については親のものを単純には引き継げないのでご注意。無理矢理やるなら、以下のように明示的に引き継ぎましょう。</p>
+<pre class="r"><code>identical_format &lt;- rmarkdown::output_format(
+  knitr = NULL,
+  pandoc = NULL,
+  keep_md = base_html_format$keep_md,
+  clean_supporting = base_html_format$clean_supporting,
+  base_format = base_html_format
+)</code></pre>
+<p>すると<code>on_exit</code>以外は完全に同じになりますね。</p>
+<pre class="r"><code>str(Map(identical, identical_format, base_html_format))
+#&gt; List of 11
+#&gt;  $ knitr                  : logi TRUE
+#&gt;  $ pandoc                 : logi TRUE
+#&gt;  $ keep_md                : logi TRUE
+#&gt;  $ clean_supporting       : logi TRUE
+#&gt;  $ df_print               : logi TRUE
+#&gt;  $ pre_knit               : logi TRUE
+#&gt;  $ post_knit              : logi TRUE
+#&gt;  $ pre_processor          : logi TRUE
+#&gt;  $ intermediates_generator: logi TRUE
+#&gt;  $ post_processor         : logi TRUE
+#&gt;  $ on_exit                : logi FALSE</code></pre>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://github.com/rstudio/rmarkdown/blob/d7e1bdab6f851bd92f17b431d612e21ce297a255/R/output_format.R#L179-L186" class="uri">https://github.com/rstudio/rmarkdown/blob/d7e1bdab6f851bd92f17b431d612e21ce297a255/R/output_format.R#L179-L186</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>

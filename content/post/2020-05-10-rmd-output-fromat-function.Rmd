@@ -1,0 +1,169 @@
+---
+title: オリジナルなR Markdownの出力形式を作る`output_format`関数事始め
+author: ~
+date: '2020-05-11'
+slug: rmd-output-fromat-function
+categories: [R]
+tags: [R Markdown]
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+arguments <- knitr::combine_words(
+    formals(rmarkdown::output_format), sep = "、", and = "", before = "`"
+  )
+```
+
+
+`rmarkdown::output_format`関数は、新規に、あるいは既存の出力形式を上書きして
+オリジナルなR Markdownのの出力形式を作成するための関数です。
+`rmarkdown::render`関数を実行する際に、
+レンダリングに必要な情報をリストで渡します。
+リストの内容は、自身の`base_format`引数を除く引数の名前です。
+詳しくはドキュメントを参照して頂くか、その内解説する日を待って頂きたいところ。
+
+```{r}
+str(formals(rmarkdown::output_format))
+```
+
+例えば、`output_format`関数によって作られる`rmarkdown::html_document`の返り値の名前を見てみましょう。
+
+```{r}
+base_html_format <- rmarkdown::html_document(keep_md = TRUE)
+names(base_html_format)
+```
+
+そしてリストの内容は、base_formatを指定しない限りは引数に指定した通りのものです。
+
+```{r}
+str(rmarkdown::output_format(NULL, NULL))
+```
+
+
+# 改変してみる
+
+`output_format`関数の`base_format`引数に、
+`rmarkdown::html_document()`など既存の書式情報を入力しておくと、
+他の引数に`NULL`以外が与えられていれば上書きします。
+ただし、上書き対象がリストの場合は再帰的に名前を比較し、最小限に上書きします。
+また、`output_format`関数の`keep_md`引数と`clean_supporting`引数には`NULL`を指定できません。
+
+## keep_md編
+
+先の例から`base_html_format$keep_md`は`` `r base_html_format$keep_md` ``です。
+
+```{r}
+base_html_format$keep_md
+```
+
+`rmarkdown::output_format`関数の`base_format`に`base_html_format`を指定した上で、
+`keep_md`引数に`FALSE`を指定すると、返り値の`$keep_md`は`FALSE`に改変されます。
+
+```{r}
+modified_html_format <- rmarkdown::output_format(
+  knitr = NULL,
+  pandoc = NULL,
+  keep_md = FALSE,
+  base_format = base_html_format
+)
+
+modified_html_format$keep_md
+```
+
+では他の値はどうでしょうか？
+それぞれの要素がbaseとmodifiedとで`identical`か確認してみましょう。
+すると、`clean_supporting`と`on_exit`も改変されているようです。
+
+```{r}
+str(Map(identical, base_html_format, modified_html_format))
+```
+
+`output_format`の`clean_supporting`引数はレンダリングに際して出力した画像ファイルなどを掃除するか決めます。
+`rmarkdown::html_document`の場合、`self_contained`引数の値がそのまま`clean_supporting`引数に渡されます。
+これにより、`self_contained = FALSE`で参照すべき画像ファイルを残す必要があれば、`clean_supporting = FALSE`が指定されます。
+`self_contained`引数の既定値は`TRUE`ですが、`clean_supporting`引数の既定値は`FALSE`なので、上書きされてしまったわけですね。
+
+```{r}
+c(
+  formals(rmarkdown::output_format)$clean_supporting,
+  formals(rmarkdown::html_document)$self_contained
+)
+```
+
+`on_exit`については環境が変わっただけで、基本的には同じものと思って頂いてOKです。
+もし、`rmarkdown::output_format`関数の`on_exit`引数に関数を指定していた場合は、
+レンダリング終了時に`base_format`の`on_exit`要素を実行したあとで、追加指定された`on_exit`を実行します
+^[<https://github.com/rstudio/rmarkdown/blob/d7e1bdab6f851bd92f17b431d612e21ce297a255/R/output_format.R#L179-L186>]。
+
+```{r}
+modified_html_format$base_format
+```
+
+
+```{r}
+modified_html_format$on_exit
+```
+
+
+## knitr編
+
+`base_html_format`変数の`knitr`要素は以下のようになっています。
+
+```{r}
+str(base_html_format$knitr)
+```
+
+では、`output_format`に以下の`new_knitr`を与えるとどうなるでしょうか？
+
+```{r}
+new_knitr <- list(
+  opts_chunk = list(dev = "jpeg")
+)
+
+html_format_with_jpeg <- rmarkdown::output_format(
+  knitr = new_knitr,
+  pandoc = NULL,
+  base_format = base_html_format
+)
+```
+
+1. `knitr`要素が完全に`new_knitr`に置き換えられる
+1. `knitr`要素の`opts_chunk`要素だけが置き換えられる
+1. `knitr`要素の`opts_chunk`要素の`dev`要素だけが置き換えられる
+
+答えを見てみましょう。
+
+```{r}
+str(html_format_with_jpeg$knitr)
+```
+
+3の
+
+> `knitr`要素の`opts_chunk`要素の`dev`要素だけが置き換えられる
+
+でした！
+
+# まとめとTips
+
+`rmarkdown::output_format`関数を利用すると、
+オリジナルフォーマットを作ることができます。
+特に既存のものを弄るのは結構簡単です。
+`keep_md`と`clean_supporting`については親のものを単純には引き継げないのでご注意。
+無理矢理やるなら、以下のように明示的に引き継ぎましょう。
+
+```{r}
+identical_format <- rmarkdown::output_format(
+  knitr = NULL,
+  pandoc = NULL,
+  keep_md = base_html_format$keep_md,
+  clean_supporting = base_html_format$clean_supporting,
+  base_format = base_html_format
+)
+```
+
+すると`on_exit`以外は完全に同じになりますね。
+
+```{r}
+str(Map(identical, identical_format, base_html_format))
+```
+
