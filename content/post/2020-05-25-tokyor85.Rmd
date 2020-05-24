@@ -1,0 +1,38 @@
+---
+title: "Tokyo.R 85で「R Markdownのオリジナルフォーマットを作ろう」の話をしてきました"
+author: ~
+date: '2020-05-25'
+slug: tokyor85
+categories: [R, Tokyo.R]
+tags: [R Markdown]
+---
+
+毎週月曜日はブログ更新の日！と決めつつ、
+土曜に発表頑張ったからいいよなあと言う気分に。
+
+なので発表しましたとの記録だけ残しておきます。
+
+# 成果
+
+* [minidown](https://minidown.atusy.net/)パッケージを不況できた^[`rmarkdown::html_document`の軽量高機能版っぽいやつ]
+* オリジナルフォーマット作りに興味を持つ人が出てくれた^[<https://twitter.com/Magna_Spes_Est/status/1264101272560431104>]
+* 想定ターゲットとマッチする参加者がいた^[<https://twitter.com/nm_k_mn/status/1264105845752659968>]
+    * 肥大化したYAMLフロントマターをなんとかしたい
+    * 依存ファイルの関係を整理したい
+* Lua Filterの有効性を実感頂けた^[<https://twitter.com/kotaku08/status/1264120249365872642>]
+
+# 課題
+
+Pandocの処理のお話はまだあまり詳しくR界隈で知られていないように思う。
+今回のテーマと関連するところでは以下あたり。
+
+* YAMLフロントマターの`output`以外のところをどう関数側で既定するか
+* Pandocテンプレートの書き方
+* Lua Filterについてもうちょっと
+
+いくらでも発表のネタがありますね！
+誰か代わりにゼヒ！！
+
+# 次回？
+
+今回は準備にとっても疲れたので、次も発表するならR Markdown以外のことでLTしたいと思う。
