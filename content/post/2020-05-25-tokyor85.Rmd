@@ -12,6 +12,8 @@ tags: [R Markdown]
 
 なので発表しましたとの記録だけ残しておきます。
 
+スライドは[こちら](https://atusy.github.io/tokyor85-original-rmd-format/#/)
+
 # 成果
 
 * [minidown](https://minidown.atusy.net/)パッケージを不況できた^[`rmarkdown::html_document`の軽量高機能版っぽいやつ]
