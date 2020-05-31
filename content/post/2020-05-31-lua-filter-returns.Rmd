@@ -1,0 +1,185 @@
+---
+title: Pandoc Lua Filtersのreturnの挙動と複数のフィルタを書くときの用例
+author: ~
+date: '2020-05-31'
+slug: lua-filter-returns
+categories: [Pandoc, Lua]
+tags: [Lua Filter]
+---
+
+PandocのLua Filterでは、
+Lua Type Referenceに載っている型と同じ名前の関数を作成すると、
+その型の要素を見つけて順々に関数を適用してくれる。
+たとえば、`Pandoc`関数を作成すると、ドキュメント全体のASTを受けとって処理を実行できる。
+以下は、Luaフィルタを実行していると教えてくれる例。
+
+```lua
+function Pandoc(x) print("running a lua filter") end
+```
+
+本記事では複数のフィルタを適用する場合の記述方法についてまとめる。
+特に複数のluaフィルタを書いて一斉に適用したい場合、`--lua-filters`オプションを何度も書く苦痛から免れるには`require`の上手な使い方を考える必要があった。
+
+
+# Luaフィルタの実行順序
+
+複数の型の関数を定義すると、以下の順に実行してくれる^[<https://pandoc.org/lua-filters.html#exectuion-order>]。
+
+1. Inlineの要素を対象とする関数
+1. Inlineを対象とする関数
+1. Blockの要素を対象とする関数
+1. Blockを対象とする関数
+1. Metaを対象とする関数
+1. Pandocを対象とする関数
+
+従って、以下のフィルタは、`Pandoc`、`Meta`の順に定義しているが、
+実行順序は`Meta`、`Pandoc`の順になる。
+すると、「Metaをフィルタリングしています」の知らせの後に「Luaフィルタを実行しています」の知らせが来てしまう。
+
+```
+function Pandoc(x) print("running a lua filter") end
+function Meta(x) print("filtering Meta") end
+```
+
+順番を変えるには、フィルタの最後で関数の`table`を返せば良い。
+それぞれの関数には何をフィルタリングするか示す名前をつけておく。
+
+```
+return {
+    {Meta = Meta},
+    {Pandoc = Pandoc}
+}
+```
+
+この場合、関数の名前は自由に変更できる。
+luaファイルの最後を読むだけで、各要素に対し、どんな目的の関数を適用しているか一読できるので便利だ。
+
+```lua
+function inform_running_filter(x) print("running a lua filter") end
+function inform_filtering_meta(x) print("filtering Meta") end
+
+return {
+    {Pandoc = inform_running_filter},
+    {Meta = inform_filtering_meta}
+}
+```
+
+
+# 同種の要素に様々なフィルタを適用する
+
+`table`を用いるとフィルタの実行順序を制御できるのは既に示した通りだ。
+更には以下のようにして、同種の要素に対して複数
+
+```lua
+-- example.lua
+function f1(x) print(1) end
+function f2(x) print(2) end
+
+return {
+    {Str = f1},
+    {Str = f2}
+}
+```
+
+注意点は、`"foo bar"`という文字列に対し、
+
+> `f1("foo")`->`f2("foo")`->`f1("bar")`->`f2("bar")`
+
+の順ではなく、
+
+> `f1("foo")`->`f1("bar")`->`f2("foo")`->`f2("bar")`
+
+の順に適用されるということだ。
+
+```bash
+echo "foo bar" | pandoc -f markdown --lua-filter example2.lua 
+# 1
+# 1
+# 2
+# 2
+# <p>foo bar</p>
+```
+
+# フィルタからフィルタを読み込む
+
+他のluaファイルを読み込むには`require`を用いて、拡張子を省略したファイル名を指定する。
+
+```lua
+require "filename" -- 拡張子不要
+```
+
+勿論、他のluaフィルタを読み込むこともできる。
+
+以下のようにすると、`example2.lua`から`example.lua`の`Pandoc`関数を利用できる。
+
+```lua
+-- example.lua
+function Pandoc(x) print("running a lua filter") end
+```
+
+```lua
+-- example2.lua`
+require "example"
+```
+
+## 安全なフィルタの継承
+
+より安全を期すには、`example.lua`の段階で暗黙なフィルタの適用を避ける。
+この場合、`example2.lua`の`return`を省略すると、一切フィルタリングされなくなる。
+つまり読み込んだファイルの`return`は無視される。
+
+```lua
+-- example.lua
+function inform_running_filter(x) print("running a lua filter") end
+
+return {
+    {Pandoc = inform_running_filter}
+}
+```
+
+```lua
+-- example2.lua
+requre "example"
+return {
+    {Pandoc = inform_running_filter}
+}
+```
+
+## フィルタの実行順序を継承する
+
+フィルタの実行順序が大事な場合は、実行順序を`example.lua`の段階で決めておけば良い。
+
+```lua
+-- example.lua
+function inform_running_filter(x) print("running a lua filter") end
+function inform_filtering_meta(x) print("filtering Meta") end
+
+example_filters = {
+    {Pandoc = inform_running_filter},
+    {Meta = inform_filtering_meta}
+}
+return example_filters
+```
+
+```lua
+-- example2.lua
+require 'example'
+return example_filters
+```
+
+## 継承したフィルタの実行順序を更新
+
+複数のフィルタを結合するには、`pandoc.List:__concat`が便利だ。
+
+```lua
+-- example2.lua
+require 'example'
+
+function inform_filtering_para(x) print("filtering Para") end
+
+example2_filters = {
+    {Para = inform_filtering_para}
+}
+
+return pandoc.List(example_filters):__concat(example2_filters)
+```

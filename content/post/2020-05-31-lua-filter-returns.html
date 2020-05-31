@@ -1,0 +1,133 @@
+---
+title: Pandoc Lua Filtersのreturnの挙動と複数のフィルタを書くときの用例
+author: ~
+date: '2020-05-31'
+slug: lua-filter-returns
+categories: [Pandoc, Lua]
+tags: [Lua Filter]
+---
+
+
+
+<p>PandocのLua Filterでは、
+Lua Type Referenceに載っている型と同じ名前の関数を作成すると、その型の要素を見つけて順々に関数を適用してくれる。たとえば、<code>Pandoc</code>関数を作成すると、ドキュメント全体のASTを受けとって処理を実行できる。以下は、Luaフィルタを実行していると教えてくれる例。</p>
+<pre class="lua"><code>function Pandoc(x) print(&quot;running a lua filter&quot;) end</code></pre>
+<p>本記事では複数のフィルタを適用する場合の記述方法についてまとめる。特に複数のluaフィルタを書いて一斉に適用したい場合、<code>--lua-filters</code>オプションを何度も書く苦痛から免れるには<code>require</code>の上手な使い方を考える必要があった。</p>
+<div id="luaフィルタの実行順序" class="section level1">
+<h1>Luaフィルタの実行順序</h1>
+<p>複数の型の関数を定義すると、以下の順に実行してくれる<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>。</p>
+<ol style="list-style-type: decimal">
+<li>Inlineの要素を対象とする関数</li>
+<li>Inlineを対象とする関数</li>
+<li>Blockの要素を対象とする関数</li>
+<li>Blockを対象とする関数</li>
+<li>Metaを対象とする関数</li>
+<li>Pandocを対象とする関数</li>
+</ol>
+<p>従って、以下のフィルタは、<code>Pandoc</code>、<code>Meta</code>の順に定義しているが、実行順序は<code>Meta</code>、<code>Pandoc</code>の順になる。すると、「Metaをフィルタリングしています」の知らせの後に「Luaフィルタを実行しています」の知らせが来てしまう。</p>
+<pre><code>function Pandoc(x) print(&quot;running a lua filter&quot;) end
+function Meta(x) print(&quot;filtering Meta&quot;) end</code></pre>
+<p>順番を変えるには、フィルタの最後で関数の<code>table</code>を返せば良い。それぞれの関数には何をフィルタリングするか示す名前をつけておく。</p>
+<pre><code>return {
+    {Meta = Meta},
+    {Pandoc = Pandoc}
+}</code></pre>
+<p>この場合、関数の名前は自由に変更できる。
+luaファイルの最後を読むだけで、各要素に対し、どんな目的の関数を適用しているか一読できるので便利だ。</p>
+<pre class="lua"><code>function inform_running_filter(x) print(&quot;running a lua filter&quot;) end
+function inform_filtering_meta(x) print(&quot;filtering Meta&quot;) end
+
+return {
+    {Pandoc = inform_running_filter},
+    {Meta = inform_filtering_meta}
+}</code></pre>
+</div>
+<div id="同種の要素に様々なフィルタを適用する" class="section level1">
+<h1>同種の要素に様々なフィルタを適用する</h1>
+<p><code>table</code>を用いるとフィルタの実行順序を制御できるのは既に示した通りだ。更には以下のようにして、同種の要素に対して複数</p>
+<pre class="lua"><code>-- example.lua
+function f1(x) print(1) end
+function f2(x) print(2) end
+
+return {
+    {Str = f1},
+    {Str = f2}
+}</code></pre>
+<p>注意点は、<code>"foo bar"</code>という文字列に対し、</p>
+<blockquote>
+<p><code>f1("foo")</code>-&gt;<code>f2("foo")</code>-&gt;<code>f1("bar")</code>-&gt;<code>f2("bar")</code></p>
+</blockquote>
+<p>の順ではなく、</p>
+<blockquote>
+<p><code>f1("foo")</code>-&gt;<code>f1("bar")</code>-&gt;<code>f2("foo")</code>-&gt;<code>f2("bar")</code></p>
+</blockquote>
+<p>の順に適用されるということだ。</p>
+<pre class="bash"><code>echo &quot;foo bar&quot; | pandoc -f markdown --lua-filter example2.lua 
+# 1
+# 1
+# 2
+# 2
+# &lt;p&gt;foo bar&lt;/p&gt;</code></pre>
+</div>
+<div id="フィルタからフィルタを読み込む" class="section level1">
+<h1>フィルタからフィルタを読み込む</h1>
+<p>他のluaファイルを読み込むには<code>require</code>を用いて、拡張子を省略したファイル名を指定する。</p>
+<pre class="lua"><code>require &quot;filename&quot; -- 拡張子不要</code></pre>
+<p>勿論、他のluaフィルタを読み込むこともできる。</p>
+<p>以下のようにすると、<code>example2.lua</code>から<code>example.lua</code>の<code>Pandoc</code>関数を利用できる。</p>
+<pre class="lua"><code>-- example.lua
+function Pandoc(x) print(&quot;running a lua filter&quot;) end</code></pre>
+<pre class="lua"><code>-- example2.lua`
+require &quot;example&quot;</code></pre>
+<div id="安全なフィルタの継承" class="section level2">
+<h2>安全なフィルタの継承</h2>
+<p>より安全を期すには、<code>example.lua</code>の段階で暗黙なフィルタの適用を避ける。この場合、<code>example2.lua</code>の<code>return</code>を省略すると、一切フィルタリングされなくなる。つまり読み込んだファイルの<code>return</code>は無視される。</p>
+<pre class="lua"><code>-- example.lua
+function inform_running_filter(x) print(&quot;running a lua filter&quot;) end
+
+return {
+    {Pandoc = inform_running_filter}
+}</code></pre>
+<pre class="lua"><code>-- example2.lua
+requre &quot;example&quot;
+return {
+    {Pandoc = inform_running_filter}
+}</code></pre>
+</div>
+<div id="フィルタの実行順序を継承する" class="section level2">
+<h2>フィルタの実行順序を継承する</h2>
+<p>フィルタの実行順序が大事な場合は、実行順序を<code>example.lua</code>の段階で決めておけば良い。</p>
+<pre class="lua"><code>-- example.lua
+function inform_running_filter(x) print(&quot;running a lua filter&quot;) end
+function inform_filtering_meta(x) print(&quot;filtering Meta&quot;) end
+
+example_filters = {
+    {Pandoc = inform_running_filter},
+    {Meta = inform_filtering_meta}
+}
+return example_filters</code></pre>
+<pre class="lua"><code>-- example2.lua
+require &#39;example&#39;
+return example_filters</code></pre>
+</div>
+<div id="継承したフィルタの実行順序を更新" class="section level2">
+<h2>継承したフィルタの実行順序を更新</h2>
+<p>複数のフィルタを結合するには、<code>pandoc.List:__concat</code>が便利だ。</p>
+<pre class="lua"><code>-- example2.lua
+require &#39;example&#39;
+
+function inform_filtering_para(x) print(&quot;filtering Para&quot;) end
+
+example2_filters = {
+    {Para = inform_filtering_para}
+}
+
+return pandoc.List(example_filters):__concat(example2_filters)</code></pre>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://pandoc.org/lua-filters.html#exectuion-order" class="uri">https://pandoc.org/lua-filters.html#exectuion-order</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
