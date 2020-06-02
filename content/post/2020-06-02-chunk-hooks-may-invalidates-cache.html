@@ -35,8 +35,11 @@ knitr::opts_current$get(&quot;fig.cap&quot;)
 <h2>フックがキャッシュを初期化する例</h2>
 <p>ではフックでチャンクオプションをランダムな値に書き換えた場合、<code>cache</code>は初期化されるか見てみましょう。</p>
 <p>ただ、書くのに疲れてしまったので以下の実験結果だけを貼っておきます。本記事をR Markdownを利用して書いている都合上、<code>knitr::knit</code>を用いた実験には<code>callr</code>パッケージを用いて再現性を確保したくなり、想像以上に実験が複雑なものとなってしまいました。</p>
-<pre class="r"><code>knit_without_hooks &lt;- function(cache = FALSE, hook = NULL) {
+<pre class="r"><code>knit_without_hooks &lt;- function(
+  cache = FALSE, hook = NULL
+) {
   temp_files &lt;- tempfile(fileext = c(&quot;.Rmd&quot;, &quot;.md&quot;))
+  cache_dir &lt;- file.path(tempdir(), &quot;&quot;)
   writeLines(
     c(
       &quot;```{r}&quot;,
@@ -45,25 +48,37 @@ knitr::opts_current$get(&quot;fig.cap&quot;)
     ),
     temp_files[1]
   )
-  knitr::opts_chunk$set(cache = cache)
-  knitr::opts_hooks$set(engine = hook)
-  c(
-    readLines(knitr::knit(temp_files[1], temp_files[2]))[7L],
-    readLines(knitr::knit(temp_files[1], temp_files[2]))[7L]
+  knitr::opts_chunk$set(
+    cache = cache, cache.path = cache_dir
   )
+  knitr::opts_hooks$set(engine = hook)
+  f = function() {
+    readLines(
+      knitr::knit(temp_files[1], temp_files[2])
+    )[7L]
+  }
+  set.seed(1)
+  c(f(), f())
 }
 
-hook &lt;- function(option) append(option, list(foo = rnorm(1)))
-
-reprex_knit &lt;- function(cache = FALSE, hook = NULL) {
-  callr::r_vanilla(knit_without_hooks, list(cache = cache, hook = hook))
+hook &lt;- function(option) {
+  append(option, list(foo = rnorm(1)))
 }
 
-reprex_knit(cache = FALSE, hook = NULL)
-## [1] &quot;## [1] 1.348021&quot;   &quot;## [1] -0.5908497&quot;
-reprex_knit(cache = TRUE, hook = NULL)
-## [1] &quot;## [1] 1.253294&quot; &quot;## [1] 1.253294&quot;
-reprex_knit(cache = TRUE, hook = hook)
-## [1] &quot;## [1] -0.01917254&quot; &quot;## [1] 0.9297162&quot;</code></pre>
+reprex &lt;- function(cache = FALSE, hook = NULL) {
+  callr::r_vanilla(
+    knit_without_hooks,
+    list(cache = cache, hook = hook)
+  )
+}</code></pre>
+<p>キャッシュを使わないと、2回のknitの出力が異なる。</p>
+<pre class="r"><code>reprex(cache = FALSE, hook = NULL)
+## [1] &quot;## [1] -0.6264538&quot; &quot;## [1] 0.1836433&quot;</code></pre>
+<p>キャッシュを使うと、2回のknitの出力が同じ。</p>
+<pre class="r"><code>reprex(cache = TRUE, hook = NULL)
+## [1] &quot;## [1] -0.6264538&quot; &quot;## [1] -0.6264538&quot;</code></pre>
+<p>キャッシュを使ってもhookがチャンクオプションを書き換えると2回のknitの出力は変わる。</p>
+<pre class="r"><code>reprex(cache = TRUE, hook = hook)
+## [1] &quot;## [1] 0.1836433&quot; &quot;## [1] 1.595281&quot;</code></pre>
 <p>Enjoy!!</p>
 </div>

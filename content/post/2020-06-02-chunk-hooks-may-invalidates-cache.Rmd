@@ -57,9 +57,12 @@ knitr::opts_current$get("fig.cap")
 ただ、書くのに疲れてしまったので以下の実験結果だけを貼っておきます。
 本記事をR Markdownを利用して書いている都合上、`knitr::knit`を用いた実験には`callr`パッケージを用いて再現性を確保したくなり、想像以上に実験が複雑なものとなってしまいました。
 
-```{r foo}
-knit_without_hooks <- function(cache = FALSE, hook = NULL) {
+```{r}
+knit_without_hooks <- function(
+  cache = FALSE, hook = NULL
+) {
   temp_files <- tempfile(fileext = c(".Rmd", ".md"))
+  cache_dir <- file.path(tempdir(), "")
   writeLines(
     c(
       "```{r}",
@@ -68,23 +71,48 @@ knit_without_hooks <- function(cache = FALSE, hook = NULL) {
     ),
     temp_files[1]
   )
-  knitr::opts_chunk$set(cache = cache)
+  knitr::opts_chunk$set(
+    cache = cache, cache.path = cache_dir
+  )
   knitr::opts_hooks$set(engine = hook)
-  c(
-    readLines(knitr::knit(temp_files[1], temp_files[2]))[7L],
-    readLines(knitr::knit(temp_files[1], temp_files[2]))[7L]
+  f = function() {
+    readLines(
+      knitr::knit(temp_files[1], temp_files[2])
+    )[7L]
+  }
+  set.seed(1)
+  c(f(), f())
+}
+
+hook <- function(option) {
+  append(option, list(foo = rnorm(1)))
+}
+
+reprex <- function(cache = FALSE, hook = NULL) {
+  callr::r_vanilla(
+    knit_without_hooks,
+    list(cache = cache, hook = hook)
   )
 }
+```
 
-hook <- function(option) append(option, list(foo = rnorm(1)))
+キャッシュを使わないと、2回のknitの出力が異なる。
 
-reprex_knit <- function(cache = FALSE, hook = NULL) {
-  callr::r_vanilla(knit_without_hooks, list(cache = cache, hook = hook))
-}
+```{r}
+reprex(cache = FALSE, hook = NULL)
+```
 
-reprex_knit(cache = FALSE, hook = NULL)
-reprex_knit(cache = TRUE, hook = NULL)
-reprex_knit(cache = TRUE, hook = hook)
+キャッシュを使うと、2回のknitの出力が同じ。
+
+```{r}
+reprex(cache = TRUE, hook = NULL)
+```
+
+キャッシュを使ってもhookがチャンクオプションを書き換えると2回のknitの出力は変わる。
+
+
+```{r}
+reprex(cache = TRUE, hook = hook)
 ```
 
 Enjoy!!
