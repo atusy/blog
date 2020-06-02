@@ -1,0 +1,69 @@
+---
+title: knitr::chunk_hooksを設定するとチャンクキャッシュが更新されうる
+author: ~
+date: '2020-06-02'
+slug: chunk-hooks-may-invalidates-cache
+categories: [R]
+tags: [R Markdown, knitr]
+---
+
+
+
+<p>R Markdownのチャンクのキャッシュは、チャンクオプションかコメント以外のコードに変更が加わった場合に更新されます。</p>
+<p>またR Markdownの背後で動いているknitrパッケージにはフックという概念があり、例えば特定のチャンクオプションが<code>NULL</code>以外の値の場合に発火する関数を仕込むことができます。この場合、関数はチャンクオプションを引数で受け取り、新しいチャンクオプションを返します。</p>
+<p>本記事ではフックを利用するとチャンクオプションが書き換えると、チャンクのキャッシュが無効化される場合があることを示します。</p>
+<div id="フックの簡単な例" class="section level2">
+<h2>フックの簡単な例</h2>
+<p>たとえばせっかく書いたフィギュアキャプションをどこかへやってしまうフックは以下の通りです。</p>
+<pre class="r"><code># フック関数の定義
+remove_fig_cap &lt;- function(option) {
+  option$fig.cap = &quot;Caption is gone!&quot;
+  option
+}
+
+# フック関数の登録
+knitr::opts_hooks$set(fig.cap = remove_fig_cap)</code></pre>
+<p>これが実行された後では、以下のように<code>fig.cap</code>を指定したとしても、</p>
+<pre><code>```{r, fig.cap=&quot;foo&quot;}
+knitr::opts_current$get(&quot;fig.cap&quot;)
+```</code></pre>
+<p>いざチャンクを評価すると<code>fig.cap</code>が別の値に置き換えられていることがわかりますね。</p>
+<pre class="r"><code>knitr::opts_current$get(&quot;fig.cap&quot;)
+## [1] &quot;Caption is gone!&quot;</code></pre>
+</div>
+<div id="フックがキャッシュを初期化する例" class="section level2">
+<h2>フックがキャッシュを初期化する例</h2>
+<p>ではフックでチャンクオプションをランダムな値に書き換えた場合、<code>cache</code>は初期化されるか見てみましょう。</p>
+<p>ただ、書くのに疲れてしまったので以下の実験結果だけを貼っておきます。本記事をR Markdownを利用して書いている都合上、<code>knitr::knit</code>を用いた実験には<code>callr</code>パッケージを用いて再現性を確保したくなり、想像以上に実験が複雑なものとなってしまいました。</p>
+<pre class="r"><code>knit_without_hooks &lt;- function(cache = FALSE, hook = NULL) {
+  input_file = tempfile(fileext = &quot;.Rmd&quot;)
+  writeLines(
+    c(
+      &quot;```{r}&quot;,
+      &quot;rnorm(1)&quot;,
+      &quot;```&quot;
+    ),
+    input_file
+  )
+  knitr::opts_chunk$set(cache = cache)
+  knitr::opts_hooks$set(engine = hook)
+  c(
+    readLines(knitr::knit(input_file))[7L],
+    readLines(knitr::knit(input_file))[7L]
+  )
+}
+
+hook &lt;- function(option) append(option, list(foo = rnorm(1)))
+
+reprex_knit &lt;- function(cache = FALSE, hook = NULL) {
+  callr::r_vanilla(knit_without_hooks, list(cache = cache, hook = hook))
+}
+
+reprex_knit(cache = FALSE, hook = NULL)
+## [1] &quot;## [1] -0.1435248&quot; &quot;## [1] 0.05760313&quot;
+reprex_knit(cache = TRUE, hook = NULL)
+## [1] &quot;## [1] 0.8550681&quot; &quot;## [1] 0.8550681&quot;
+reprex_knit(cache = TRUE, hook = hook)
+## [1] &quot;## [1] -1.020705&quot; &quot;## [1] 0.3050696&quot;</code></pre>
+<p>Enjoy!!</p>
+</div>

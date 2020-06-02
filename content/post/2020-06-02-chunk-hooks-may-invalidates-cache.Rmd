@@ -1,0 +1,90 @@
+---
+title: knitr::chunk_hooksを設定するとチャンクキャッシュが更新されうる
+author: ~
+date: '2020-06-02'
+slug: chunk-hooks-may-invalidates-cache
+categories: [R]
+tags: [R Markdown, knitr]
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(collapse=TRUE)
+```
+
+R Markdownのチャンクのキャッシュは、
+チャンクオプションかコメント以外のコードに変更が加わった場合に更新されます。
+
+またR Markdownの背後で動いているknitrパッケージにはフックという概念があり、
+例えば特定のチャンクオプションが`NULL`以外の値の場合に発火する関数を仕込むことができます。
+この場合、関数はチャンクオプションを引数で受け取り、新しいチャンクオプションを返します。
+
+本記事ではフックを利用するとチャンクオプションが書き換えると、
+チャンクのキャッシュが無効化される場合があることを示します。
+
+## フックの簡単な例
+
+たとえばせっかく書いたフィギュアキャプションをどこかへやってしまうフックは以下の通りです。
+
+```{r}
+# フック関数の定義
+remove_fig_cap <- function(option) {
+  option$fig.cap = "Caption is gone!"
+  option
+}
+
+# フック関数の登録
+knitr::opts_hooks$set(fig.cap = remove_fig_cap)
+```
+
+これが実行された後では、以下のように`fig.cap`を指定したとしても、
+
+````
+`r ''````{r, fig.cap="foo"}
+knitr::opts_current$get("fig.cap")
+`r ''````
+````
+
+いざチャンクを評価すると`fig.cap`が別の値に置き換えられていることがわかりますね。
+
+```{r, fig.cap="foo"}
+knitr::opts_current$get("fig.cap")
+```
+
+## フックがキャッシュを初期化する例
+
+ではフックでチャンクオプションをランダムな値に書き換えた場合、`cache`は初期化されるか見てみましょう。
+
+ただ、書くのに疲れてしまったので以下の実験結果だけを貼っておきます。
+本記事をR Markdownを利用して書いている都合上、`knitr::knit`を用いた実験には`callr`パッケージを用いて再現性を確保したくなり、想像以上に実験が複雑なものとなってしまいました。
+
+```{r foo}
+knit_without_hooks <- function(cache = FALSE, hook = NULL) {
+  input_file = tempfile(fileext = ".Rmd")
+  writeLines(
+    c(
+      "```{r}",
+      "rnorm(1)",
+      "```"
+    ),
+    input_file
+  )
+  knitr::opts_chunk$set(cache = cache)
+  knitr::opts_hooks$set(engine = hook)
+  c(
+    readLines(knitr::knit(input_file))[7L],
+    readLines(knitr::knit(input_file))[7L]
+  )
+}
+
+hook <- function(option) append(option, list(foo = rnorm(1)))
+
+reprex_knit <- function(cache = FALSE, hook = NULL) {
+  callr::r_vanilla(knit_without_hooks, list(cache = cache, hook = hook))
+}
+
+reprex_knit(cache = FALSE, hook = NULL)
+reprex_knit(cache = TRUE, hook = NULL)
+reprex_knit(cache = TRUE, hook = hook)
+```
+
+Enjoy!!
