@@ -36,20 +36,20 @@ knitr::opts_current$get(&quot;fig.cap&quot;)
 <p>ではフックでチャンクオプションをランダムな値に書き換えた場合、<code>cache</code>は初期化されるか見てみましょう。</p>
 <p>ただ、書くのに疲れてしまったので以下の実験結果だけを貼っておきます。本記事をR Markdownを利用して書いている都合上、<code>knitr::knit</code>を用いた実験には<code>callr</code>パッケージを用いて再現性を確保したくなり、想像以上に実験が複雑なものとなってしまいました。</p>
 <pre class="r"><code>knit_without_hooks &lt;- function(cache = FALSE, hook = NULL) {
-  input_file = tempfile(fileext = &quot;.Rmd&quot;)
+  temp_files &lt;- tempfile(fileext = c(&quot;.Rmd&quot;, &quot;.md&quot;))
   writeLines(
     c(
       &quot;```{r}&quot;,
       &quot;rnorm(1)&quot;,
       &quot;```&quot;
     ),
-    input_file
+    temp_files[1]
   )
   knitr::opts_chunk$set(cache = cache)
   knitr::opts_hooks$set(engine = hook)
   c(
-    readLines(knitr::knit(input_file))[7L],
-    readLines(knitr::knit(input_file))[7L]
+    readLines(knitr::knit(temp_files[1], temp_files[2]))[7L],
+    readLines(knitr::knit(temp_files[1], temp_files[2]))[7L]
   )
 }
 
@@ -60,10 +60,10 @@ reprex_knit &lt;- function(cache = FALSE, hook = NULL) {
 }
 
 reprex_knit(cache = FALSE, hook = NULL)
-## [1] &quot;## [1] -0.1435248&quot; &quot;## [1] 0.05760313&quot;
+## [1] &quot;## [1] 1.348021&quot;   &quot;## [1] -0.5908497&quot;
 reprex_knit(cache = TRUE, hook = NULL)
-## [1] &quot;## [1] 0.8550681&quot; &quot;## [1] 0.8550681&quot;
+## [1] &quot;## [1] 1.253294&quot; &quot;## [1] 1.253294&quot;
 reprex_knit(cache = TRUE, hook = hook)
-## [1] &quot;## [1] -1.020705&quot; &quot;## [1] 0.3050696&quot;</code></pre>
+## [1] &quot;## [1] -0.01917254&quot; &quot;## [1] 0.9297162&quot;</code></pre>
 <p>Enjoy!!</p>
 </div>

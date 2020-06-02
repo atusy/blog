@@ -59,20 +59,20 @@ knitr::opts_current$get("fig.cap")
 
 ```{r foo}
 knit_without_hooks <- function(cache = FALSE, hook = NULL) {
-  input_file = tempfile(fileext = ".Rmd")
+  temp_files <- tempfile(fileext = c(".Rmd", ".md"))
   writeLines(
     c(
       "```{r}",
       "rnorm(1)",
       "```"
     ),
-    input_file
+    temp_files[1]
   )
   knitr::opts_chunk$set(cache = cache)
   knitr::opts_hooks$set(engine = hook)
   c(
-    readLines(knitr::knit(input_file))[7L],
-    readLines(knitr::knit(input_file))[7L]
+    readLines(knitr::knit(temp_files[1], temp_files[2]))[7L],
+    readLines(knitr::knit(temp_files[1], temp_files[2]))[7L]
   )
 }
 
