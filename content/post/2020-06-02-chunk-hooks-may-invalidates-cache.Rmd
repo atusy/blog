@@ -1,5 +1,5 @@
 ---
-title: knitr::chunk_hooksを設定するとチャンクキャッシュが更新されうる
+title: knitr::opts_hooksを設定するとチャンクキャッシュが更新されうる
 author: ~
 date: '2020-06-02'
 slug: chunk-hooks-may-invalidates-cache
