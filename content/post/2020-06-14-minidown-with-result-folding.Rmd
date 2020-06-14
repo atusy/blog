@@ -1,0 +1,119 @@
+---
+title: R Markdownで出力結果を隠せるようにしてみた (minidownパッケージ)
+author: ~
+date: '2020-06-14'
+slug: minidown-with-result-folding
+categories: [R]
+tags: [R Markdown, minidown]
+---
+
+minidownパッケージを使うと以下のような感じのことができるようになります。
+Resultsの部分をクリックすると図が現れます。
+
+```{r plot, eval=FALSE}
+plot(iris)
+```
+
+`<details><summary>Results</summary>`{=html}
+
+```{r, ref.label='plot', echo=FALSE}
+
+```
+
+
+`</details>`{=html}
+
+実例は <http://minidown.atusy.net/#results-folding> を参照してください。
+
+使いたい人は今すぐ`remotes::install_github('atusy/minidown')`を実行しましょう！
+
+バグレポお待ちしています！
+
+# 使い方
+
+YAMLを指定するだけ。
+
+```yaml
+output:
+  minidown::mini_document:
+    results_folding: hide
+```
+
+その上で個別に状態を弄りたければ、
+チャンクオプションの`results.folding`に`NULL` (無効)、`"show"` (表示)、`"hide"` (隠す) を指定します。
+
+応用編として、以下のように全体的に`results.folding`を`NULL`にしておくと、
+機能としては使えるようにしつつデフォルトで無効化できるので、
+ピンポイントに必要なところだけ折り畳みを許可できます。
+
+```r
+knitr::opts_chunk$set(results.folding=NULL)
+```
+
+また、チャンクオプションの`summary.results`に好きな文字列を指定すると、
+折り畳み部分の文字列を変更できます。
+
+`<details><summary>何かが隠れているよ</summary>`{=html}
+
+```{r, echo=FALSE}
+head(iris)
+```
+
+`</deitails>`{=html}
+
+# 実装方法の概観
+
+ざっくり言うと、`knitr::knit_hooks`という機能を使います。
+
+1. ソースコードのコードブロックの出力が完了したら、HTMLの`<details>`要素を挿入
+1. ソースコードの評価結果の出力が完了したら、HTMLの`</details>`要素を挿入
+
+1と2ではそれぞれ`source`と`folding.results`という別々の要素に注目します。
+
+これを素朴に実装すると、
+一つのチャンクで複数の出力がある場合に、`<details>`と`</details>`を正しく対にできません。
+たとえば
+
+```r
+'foo'
+'bar'
+```
+
+が以下のようになってしまいます。
+
+~~~
+```r
+'foo'
+```
+
+<details>
+
+```
+## 'foo'
+```
+
+```r
+'bar'
+```
+
+<details>
+
+```
+## 'bar'
+```
+
+</details>
+~~~
+
+そこで、チャンクラベルを調査し、`source`に対するhookが発動した時は、
+チャンクラベルを調査して、現在のチャンクラベルと直前のチャンクラベルが同じであれば、
+ソースコードの直前に `</details>` を挿入するようにしました。
+
+実際には`<details>`の後に`<summary>Results</results>`というのも挿入していて
+Resultsの部分はチャンクオプションで制御できるように工夫しています。
+
+まあここでは概観だけということで詳しくはソースコード読んでください。
+
+<https://github.com/atusy/minidown>
+
+# Enjoy!

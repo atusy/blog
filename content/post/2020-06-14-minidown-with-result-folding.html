@@ -1,0 +1,82 @@
+---
+title: R Markdownで出力結果を隠せるようにしてみた (minidownパッケージ)
+author: ~
+date: '2020-06-14'
+slug: minidown-with-result-folding
+categories: [R]
+tags: [R Markdown, minidown]
+---
+
+
+
+<p>minidownパッケージを使うと以下のような感じのことができるようになります。
+Resultsの部分をクリックすると図が現れます。</p>
+<pre class="r"><code>plot(iris)</code></pre>
+<p><details><summary>Results</summary></p>
+<p><img src="/post/2020-06-14-minidown-with-result-folding_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p></details></p>
+<p>実例は <a href="http://minidown.atusy.net/#results-folding" class="uri">http://minidown.atusy.net/#results-folding</a> を参照してください。</p>
+<p>使いたい人は今すぐ<code>remotes::install_github('atusy/minidown')</code>を実行しましょう！</p>
+<p>バグレポお待ちしています！</p>
+<div id="使い方" class="section level1">
+<h1>使い方</h1>
+<p>YAMLを指定するだけ。</p>
+<pre class="yaml"><code>output:
+  minidown::mini_document:
+    results_folding: hide</code></pre>
+<p>その上で個別に状態を弄りたければ、チャンクオプションの<code>results.folding</code>に<code>NULL</code> (無効)、<code>"show"</code> (表示)、<code>"hide"</code> (隠す) を指定します。</p>
+<p>応用編として、以下のように全体的に<code>results.folding</code>を<code>NULL</code>にしておくと、機能としては使えるようにしつつデフォルトで無効化できるので、ピンポイントに必要なところだけ折り畳みを許可できます。</p>
+<pre class="r"><code>knitr::opts_chunk$set(results.folding=NULL)</code></pre>
+<p>また、チャンクオプションの<code>summary.results</code>に好きな文字列を指定すると、折り畳み部分の文字列を変更できます。</p>
+<p><details><summary>何かが隠れているよ</summary></p>
+<pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1          5.1         3.5          1.4         0.2  setosa
+## 2          4.9         3.0          1.4         0.2  setosa
+## 3          4.7         3.2          1.3         0.2  setosa
+## 4          4.6         3.1          1.5         0.2  setosa
+## 5          5.0         3.6          1.4         0.2  setosa
+## 6          5.4         3.9          1.7         0.4  setosa</code></pre>
+<p></deitails></p>
+</div>
+<div id="実装方法の概観" class="section level1">
+<h1>実装方法の概観</h1>
+<p>ざっくり言うと、<code>knitr::knit_hooks</code>という機能を使います。</p>
+<ol style="list-style-type: decimal">
+<li>ソースコードのコードブロックの出力が完了したら、HTMLの<code>&lt;details&gt;</code>要素を挿入</li>
+<li>ソースコードの評価結果の出力が完了したら、HTMLの<code>&lt;/details&gt;</code>要素を挿入</li>
+</ol>
+<p>1と2ではそれぞれ<code>source</code>と<code>folding.results</code>という別々の要素に注目します。</p>
+<p>これを素朴に実装すると、一つのチャンクで複数の出力がある場合に、<code>&lt;details&gt;</code>と<code>&lt;/details&gt;</code>を正しく対にできません。たとえば</p>
+<pre class="r"><code>&#39;foo&#39;
+&#39;bar&#39;</code></pre>
+<p>が以下のようになってしまいます。</p>
+<pre><code>```r
+&#39;foo&#39;
+```
+
+&lt;details&gt;
+
+```
+## &#39;foo&#39;
+```
+
+```r
+&#39;bar&#39;
+```
+
+&lt;details&gt;
+
+```
+## &#39;bar&#39;
+```
+
+&lt;/details&gt;</code></pre>
+<p>そこで、チャンクラベルを調査し、<code>source</code>に対するhookが発動した時は、チャンクラベルを調査して、現在のチャンクラベルと直前のチャンクラベルが同じであれば、ソースコードの直前に <code>&lt;/details&gt;</code> を挿入するようにしました。</p>
+<p>実際には<code>&lt;details&gt;</code>の後に<code>&lt;summary&gt;Results&lt;/results&gt;</code>というのも挿入していて
+Resultsの部分はチャンクオプションで制御できるように工夫しています。</p>
+<p>まあここでは概観だけということで詳しくはソースコード読んでください。</p>
+<p><a href="https://github.com/atusy/minidown" class="uri">https://github.com/atusy/minidown</a></p>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>
