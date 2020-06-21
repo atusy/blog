@@ -1,0 +1,55 @@
+---
+title: R Markdownでhtml_documentを拡張する時の注意点 (self_contained)
+author: ~
+date: '2020-06-22'
+slug: extending-rmarkdown-without-self-contained
+categories: [R]
+tags: [R Markdown]
+---
+
+
+
+<p><code>rmarkdown::html_document</code>を<code>rmarkdown::output_format</code>で拡張する時、引数の指定方法を注意しないと、<code>self_contained</code>引数や<code>keep_md</code>引数がうまく機能しなくなります（参考: <a href="https://blog.atusy.net/2020/05/11/rmd-output-fromat-function/">オリジナルなR Markdownの出力形式を作るoutput_format関数事始め</a>）。</p>
+<div id="rmarkdown-2.2" class="section level1">
+<h1>rmarkdown ≧ 2.2</h1>
+<p>私が出した<a href="https://github.com/rstudio/rmarkdown/pull/1823">PR 1823</a>により、
+<code>rmarkdown::html_document</code>の<code>self_contained</code>や<code>keep_md</code>の状態を、
+<code>rmarkdown::output_format</code>が引き継げるようになりました。他の引数と同様に、<code>base_format</code>の内容を引き継ぐには<code>clean_supporting</code>と<code>keep_md</code>を<code>NULL</code>にしましょう。</p>
+<pre class="r"><code>my_html_document &lt;- function(
+  self_contained = TRUE, keep_md = FALSE, ...
+) {
+  rmarkdown::output_format(
+    clean_supporting = NULL,
+    keep_md = NULL,
+    base_format = rmarkdown::html_document(
+      self_contained = self_contained,
+      keep_md = keep_md,
+      ...
+    )
+  )
+}</code></pre>
+</div>
+<div id="rmarkdown-2.2-1" class="section level1">
+<h1>rmarkdown &lt; 2.2</h1>
+<p><code>rmarkdown::html_document</code>の<code>self_contained</code>引数と<code>keep_md</code>引数に与えた値を、それぞれ<code>rmarkdown::output_format</code>の<code>clean_supporting</code>引数と<code>keep_md</code>引数に<strong>も</strong>与えておきます。両方に与えるのがポイントです。
+<code>rmarkdown::html_document</code>に与えず、<code>rmarkdown::output_format</code>にだけ与えておくと、
+<code>rmarkdown::html_document</code>がそれぞれの引数に対して内部で行う処理を無視してしまいます。特に、<code>self_contained</code>は<code>TRUE</code>か<code>FALSE</code>かでPandocに与える引数が変わります。私はこれを知らずに<code>minidown</code>パッケージを実装したがために、
+<code>self_contained = FALSE</code>にすると画像ファイルなどを別フォルダにも出力しつつ、
+<code>self_contained = TRUE</code>なHTMLファイルを出力するフォーマットを作ってしまいました。この問題は開発版で修正済みで、CRANには0.0.2として近い内にアップする予定です。</p>
+<pre class="r"><code>my_html_document &lt;- function(
+  self_contained = TRUE, keep_md = FALSE, ...
+) {
+  rmarkdown::output_format(
+    clean_supporting = self_contained,
+    keep_md = keep_md,
+    base_format = rmarkdown::html_document(
+      self_contained = self_contained,
+      keep_md = keep_md,
+      ...
+    )
+  )
+}</code></pre>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>

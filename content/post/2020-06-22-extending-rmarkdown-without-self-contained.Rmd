@@ -1,0 +1,67 @@
+---
+title: R Markdownでhtml_documentを拡張する時の注意点 (self_contained)
+author: ~
+date: '2020-06-22'
+slug: extending-rmarkdown-without-self-contained
+categories: [R]
+tags: [R Markdown]
+---
+
+`rmarkdown::html_document`を`rmarkdown::output_format`で拡張する時、
+引数の指定方法を注意しないと、`self_contained`引数や`keep_md`引数がうまく機能しなくなります（参考: [オリジナルなR Markdownの出力形式を作るoutput_format関数事始め
+](https://blog.atusy.net/2020/05/11/rmd-output-fromat-function/)）。
+
+
+# rmarkdown ≧ 2.2
+
+私が出した[PR 1823](https://github.com/rstudio/rmarkdown/pull/1823)により、
+`rmarkdown::html_document`の`self_contained`や`keep_md`の状態を、
+`rmarkdown::output_format`が引き継げるようになりました。
+他の引数と同様に、`base_format`の内容を引き継ぐには`clean_supporting`と`keep_md`を`NULL`にしましょう。
+
+```{r, eval=FALSE}
+my_html_document <- function(
+  self_contained = TRUE, keep_md = FALSE, ...
+) {
+  rmarkdown::output_format(
+    clean_supporting = NULL,
+    keep_md = NULL,
+    base_format = rmarkdown::html_document(
+      self_contained = self_contained,
+      keep_md = keep_md,
+      ...
+    )
+  )
+}
+```
+
+# rmarkdown < 2.2
+
+`rmarkdown::html_document`の`self_contained`引数と`keep_md`引数に与えた値を、
+それぞれ`rmarkdown::output_format`の`clean_supporting`引数と`keep_md`引数に**も**与えておきます。
+両方に与えるのがポイントです。
+`rmarkdown::html_document`に与えず、`rmarkdown::output_format`にだけ与えておくと、
+`rmarkdown::html_document`がそれぞれの引数に対して内部で行う処理を無視してしまいます。
+特に、`self_contained`は`TRUE`か`FALSE`かでPandocに与える引数が変わります。
+私はこれを知らずに`minidown`パッケージを実装したがために、
+`self_contained = FALSE`にすると画像ファイルなどを別フォルダにも出力しつつ、
+`self_contained = TRUE`なHTMLファイルを出力するフォーマットを作ってしまいました。
+この問題は開発版で修正済みで、CRANには0.0.2として近い内にアップする予定です。
+
+```{r, eval=FALSE}
+my_html_document <- function(
+  self_contained = TRUE, keep_md = FALSE, ...
+) {
+  rmarkdown::output_format(
+    clean_supporting = self_contained,
+    keep_md = keep_md,
+    base_format = rmarkdown::html_document(
+      self_contained = self_contained,
+      keep_md = keep_md,
+      ...
+    )
+  )
+}
+```
+
+# Enjoy!
