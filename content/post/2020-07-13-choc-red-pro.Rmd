@@ -1,5 +1,5 @@
 ---
-title: 自作キーボードLily 58 ProのスィッチをChoc Red Proに歓送した
+title: 自作キーボードLily 58 ProのスィッチをChoc Red Proに換装した
 author: ~
 date: '2020-07-13'
 slug: choc-red-pro
