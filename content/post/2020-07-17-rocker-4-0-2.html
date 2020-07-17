@@ -1,0 +1,17 @@
+---
+title: 'rocker/verse:4.0.2を使おうとして躓いた'
+author: ~
+date: '2020-07-17'
+slug: 'rocker-verse-4-0-2'
+categories: [R, Docker]
+tags: [rocker, verse]
+---
+
+
+
+<p>RをDockerで簡単に使えるようにするプロジェクトとしてrockerがあります。こいつ、R 3.x.x系とR 4.x.x系でDockerfileの書き方が結構変わったので、拡張イメージを作っている人は要注意です。</p>
+<p>たとえばrocker/verse:3.6.3まではTinyTexを用いてtexliveを<code>opt/TinyTeX</code>下にインストールしていました（<a href="https://github.com/rocker-org/rocker-versioned/blob/16761663273579cd18f713695f31faf1ca8e49f9/verse/3.6.3.Dockerfile#L46">ソース</a>）。ところがrocker/verse:4.0.0以後はTinyTeXを用いず<code>/usr/local/texlive/bin/x86_64-linux/</code>にインストールしているようです（<a href="https://github.com/rocker-org/rocker-versioned2/blob/master/scripts/install_texlive.sh#L13">ソース</a>）。</p>
+<p>これの何が問題かというと、
+LaTeXの追加パッケージの導入のためにDockerfile内で<code>tlmgr install</code>した場合には、パッケージのインストール先のディレクトリの権限を再設定しておく必要がるのです（<a href="https://github.com/rocker-org/rocker-versioned/blob/16761663273579cd18f713695f31faf1ca8e49f9/verse/3.6.3.Dockerfile#L61-L63">3.6.3</a>、<a href="https://github.com/rocker-org/rocker-versioned2/blob/93ded8614fc6edba8e646116bffabe9c33607ec2/scripts/install_texlive.sh#L34-L37">4.x.x</a>）。本家のDockerfileのように、拡張Dockerfileを書くときも権限を修正しなければなりません。で、3.6.3系のつもりで4.x.x系を拡張しようとすると、権限を変更したいディレクトリのパスを間違ってしまって、イメージをビルドできなくなるわけですね。</p>
+<p>というわけで、本家の更新に合わせて解決。</p>
+<p>R 3.6.3までのDockerfileは、インストールするRパッケージなどをDockerfile内に直接書き込んでいる感じでした。これがR 4.x.xからは、<code>install_verse.sh</code>とか<code>install_texlive.sh</code>とか、おおまかに何をインストールするかによってシェルスクリプトを切り出し、モジュール化しているようですね。シェルスクリプトを更新すれば、過去の各バージョンのDockerfileを一括して変更できるので、妥当な進化をたどっていると思います。</p>
