@@ -1,0 +1,20 @@
+---
+title: テスト駆動開発してCRANに投げるの大事ネ
+author: ~
+date: '2020-07-20'
+slug: cran-package-with-tests
+categories: [R]
+tags: [testthat, ftExtra]
+---
+
+
+
+<p>CRANに登録済みのftExtraパッケージはPandocのASTを扱ったりする都合上、内部のデータ操作が結構複雑なので、自分の意図した動作が実現するか随時確認できるように、単体テストを重視していました。</p>
+<p>するとある日、dplyrパッケージの開発者であるRomain FrançoisからPRが飛んできました。</p>
+<p><a href="https://github.com/atusy/ftExtra/pull/11" class="uri">https://github.com/atusy/ftExtra/pull/11</a></p>
+<p>リストを<code>bind_rows</code>した時は<code>tibble</code>じゃなくて<code>data.frame</code>を返すことにするから、テストが通らなくなるところ修正したったでーという話ですね。ありがたや。</p>
+<p>CRANにパッケージを登録していると、そのパッケージに依存するパッケージが動かなくなることを防ぐために、
+revdep checkなるものを行うことになっています。そしてテストをパスしないパッケージが出てきたら、そのパッケージの開発者に連絡をとって適宜修正を入れてもらうわけです。なんならGitHubで開発していれば今回のように、修正をPRすることも可能。</p>
+<p>今回はしてもらう側だったわけですね。私のテスト書いていない野良パッケージの中にはtidyverseの変更についていけずに死んでいるものもあります今回はテスト書いてCRANに投げてよかったなあと思ったのでした。</p>
+<p>ちなみに、dplyrパッケージ側でもう一度変更があって、このPRは不要になってしまいました。</p>
+<p>Enjoy!!</p>
