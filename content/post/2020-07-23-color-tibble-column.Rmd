@@ -1,0 +1,48 @@
+---
+title: tibbleでカラーコードを示す列を色付けてみる
+author: ~
+date: '2020-07-23'
+slug: color-tibble-column
+categories: [R]
+tags: [tibble, pillar, crayon]
+---
+
+にすぜっとさんのツィートを見かけて挑戦してみました (<https://twitter.com/niszet0/status/1286245706504708101>)。
+まっとうな人は`formattable`とかそーゆーの使った方がいいんじゃないかな。
+
+以下のコードをRStudioのコンソールにでもコピペしてみてくださいな。
+
+ちなみにR MarkdownではRStudio IDEのpreview画面にも、HTMLなどの出力にも反映されない。
+
+```{r, eval=FALSE}
+# メソッド開発のために要読み込み
+library(pillar)
+
+# 1つのカラーコードを受け取ってその文字列を`crayon`パッケージで色付けする関数
+format_colorcode <- function(x) {
+  crayon::make_style(do.call(
+    rgb,
+    lapply(c(1L, 3L, 5L), function(i) strtoi(substr(x, i, i + 1L), 16L) / 255L)
+  ))(x)
+}
+
+# formatのcolorcodeクラス用メソッド
+# カラーコードのベクトルに対して`format_colorcode`を実行する
+format.colorcode <- function(x, ...) {
+  vapply(x, format_colorcode, NA_character_)
+}
+
+# tibbleの中に`colorcode`クラスの列がある時に、
+# その表示方法を指定する関数
+pillar_shaft.colorcode <- function(x, ...) {
+  pillar::new_pillar_shaft_simple(format(x))
+}
+
+# テスト
+# RStudioのコンソールで確認してネ
+tibble::tibble(
+  x = structure(c("ff0000", "aaddbe", "efefef"), class = "colorcode")
+)
+```
+
+# Enjoy!!

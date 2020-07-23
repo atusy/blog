@@ -1,0 +1,45 @@
+---
+title: tibbleでカラーコードを示す列を色付けてみる
+author: ~
+date: '2020-07-23'
+slug: color-tibble-column
+categories: [R]
+tags: [tibble, pillar, crayon]
+---
+
+
+
+<p>にすぜっとさんのツィートを見かけて挑戦してみました (<a href="https://twitter.com/niszet0/status/1286245706504708101" class="uri">https://twitter.com/niszet0/status/1286245706504708101</a>)。まっとうな人は<code>formattable</code>とかそーゆーの使った方がいいんじゃないかな。</p>
+<p>以下のコードをRStudioのコンソールにでもコピペしてみてくださいな。</p>
+<p>ちなみにR MarkdownではRStudio IDEのpreview画面にも、HTMLなどの出力にも反映されない。</p>
+<pre class="r"><code># メソッド開発のために要読み込み
+library(pillar)
+
+# 1つのカラーコードを受け取ってその文字列を`crayon`パッケージで色付けする関数
+format_colorcode &lt;- function(x) {
+  crayon::make_style(do.call(
+    rgb,
+    lapply(c(1L, 3L, 5L), function(i) strtoi(substr(x, i, i + 1L), 16L) / 255L)
+  ))(x)
+}
+
+# formatのcolorcodeクラス用メソッド
+# カラーコードのベクトルに対して`format_colorcode`を実行する
+format.colorcode &lt;- function(x, ...) {
+  vapply(x, format_colorcode, NA_character_)
+}
+
+# tibbleの中に`colorcode`クラスの列がある時に、
+# その表示方法を指定する関数
+pillar_shaft.colorcode &lt;- function(x, ...) {
+  pillar::new_pillar_shaft_simple(format(x))
+}
+
+# テスト
+# RStudioのコンソールで確認してネ
+tibble::tibble(
+  x = structure(c(&quot;ff0000&quot;, &quot;aaddbe&quot;, &quot;efefef&quot;), class = &quot;colorcode&quot;)
+)</code></pre>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!!</h1>
+</div>
