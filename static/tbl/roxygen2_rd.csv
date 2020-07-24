@@ -8,7 +8,7 @@ roxygen2,rd,description,url_roxygen2,url_rd
 @docType,\doctype,`package` `data` `methods` `class` についてのドキュメントを作る時に該当するものを指定。 packageの場合、 `@name` にドキュメント名を指定する。,https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html,https://cran.r-project.org/doc/manuals/R-exts.html#Documenting-data-sets
 @evalRd,,Roxygen2 6.1.0の新機能。パッケージで定義した関数の実行結果を挿入する,https://github.com/klutometis/roxygen/blob/master/NEWS.md#new-features,
 @example,,用例を記した外部ファイルを指定する,http://r-pkgs.had.co.nz/man.html#man-functions,
-@examples,\examples,用例を `#’ ` で始まる次行以降に記す,http://r-pkgs.had.co.nz/man.html#man-functions,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cexamples
+@examples,\examples,用例を `#’ ` で始まる次行以降に記す。この用例はR CMD checkの確認対象。故あってcheck時の実行を控えたい場合については[後述](#dontrun-examples)。,http://r-pkgs.had.co.nz/man.html#man-functions,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005cexamples
 @export,,タグの有無でオブジェクトをユーザーが直接扱えるか決める。タグが有ると `pkg::name` の形でもアクセス可できる。ない場合は `pkg:::name` としてアクセス。S3やS4のクラスに対するインスタンスの作成可否も決められる。,https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html,
 @exportClass,,S4クラスの拡張やインスタンスの生成をコントロールするために `@export` と使い分ける。,https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html,
 @exportMethod,,S4クラスの拡張やインスタンスの生成をコントロールするために `@export` と使い分ける。,https://cran.r-project.org/web/packages/roxygen2/vignettes/namespace.html,
@@ -22,7 +22,7 @@ roxygen2,rd,description,url_roxygen2,url_rd
 @include,,.Rファイルの名前をスペース区切りで指定すると、該当ファイルを読み込んだ後に、 `@include` 以降を読む。ファイル冒頭で `NULL` に対して用いるのが便利。,http://r-pkgs.had.co.nz/man.html#man-classes,
 @inherit,,`@inherit ドキュメント名` で指定したドキュメントから `@params` `@return` `@references` `@description` `@detaills` `@sections` の内容を転載。 `@inherit ドキュメント名 return` などとして部分的に転載することも可能。,https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html,
 @inheritDotParams,,`...` のドキュメント作成に利用。 `@inheritParams` と違い関数に該当しない引数でも転載できる。 `@inheritDotParams f` で関数fの全ての引数を、 `a b e:h` と続けることで引数 `a` と `b` に加え `e` から `h` までを、 `-c` と続けることで`c` 以外の引数を転載できる。,https://blog.rstudio.com/2017/02/01/roxygen2-6-0-0/,
-@inheritParams,,記載すべき `@param` の内、未記載の引数をが指定したドキュメントで説明されている場合、転載する。相続権があるのは子まで。孫は不可。,https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html,
+@inheritParams,,記載すべき `@param` の内、未記載の引数が指定したドキュメントで説明されている場合、転載する。相続権があるのは子まで。孫は不可。,https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html,
 @inheritSection,,`@inheritSection ドキュメント名 セクション名` の形で他のドキュメントのセクションを転載する。,https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html,
 @keywords,\keyword,"`RshowDoc(""KEYWORDS"")` で一覧できるkeywordを指定。その他のkeywordっぽいものは `@concepts` で指定する方がいい。",http://r-pkgs.had.co.nz/man.html,https://cran.r-project.org/doc/manuals/R-exts.html#index-_005ckeyword
 @md,,Globalにmarkdownが有効化されてない時に、あるチャンク内でのみ有効化したい時に使用,https://cran.r-project.org/web/packages/roxygen2/vignettes/markdown.html,

@@ -130,6 +130,37 @@ x %>%
 #'   fuga
 ```
 
+## `@examples`をcheckしたくない時 {#dontrun-examples}
+
+`@examples`の内容は`R CMD check`時に実行される。
+check時に実行不可な内容があるとエラーになる。
+これを避ける方法は2つ。
+できれば1つ目を、それも無理なら2つ目を採用しよう。
+`check`をパスしたいという理由で乱用しないように注意。
+
+### `if (interactive()) {}`でコードを囲む
+
+対話的なセッションでのみ有効な用例は、`if (interactive()) {}`でコードを囲む。
+たとえば、指定のURLをブラウザで開くような操作は、対話的なセッションで行うべきだ。
+
+```{r}
+if (interactive()) {
+  browseURL("https://example.com")
+}
+```
+
+### `\dontrun{}`でコードを囲む
+
+例えば、存在しないファイル`foo.txt`を読み込む例は対話的なセッションであってもErrorになる。
+そんな時は`\dontrun{}`でコードを囲む。
+
+```r
+#' @examples
+#' \dontrun {
+#' readLines("foo.txt")
+#' }
+```
+
 ## その他 {#and-more}
 
 - [Rdコマンドは上述のもの以外にもいっぱいあり、Markupに用いるものもあるので是非確認してみて欲しい](https://cran.r-project.org/doc/manuals/R-exts.html)
@@ -172,3 +203,6 @@ x %>%
     - 目次の追加
         - 変更履歴が細かく目次に載らないよう、
           見出しをやめ、アイテム化
+- 2020-07-24 20:10
+    - typo修正
+    - `@examples`に関するTipの追加
