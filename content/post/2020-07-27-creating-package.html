@@ -1,0 +1,62 @@
+---
+title: パッケージの機能が最小限の内にCRANに送ってしまえ
+author: ~
+date: '2020-07-27'
+slug: creating-package
+categories: [R]
+tags: [package]
+---
+
+
+
+<p>金曜日にchunkhooksパッケージをCRANに送りだしました。コードブロックに行番号をつけたり、<code>fig.width</code>の単位をインチからミリメートルに変換したり、そんなおお役立ちフックをちょこちょこ盛り込んでいます。</p>
+<p>最近は最小限の機能を入れたらさっさとリリースするようにしています。今回はたった3つのフックで0.0.1とすることにしました。</p>
+<p>パッケージの規模の小さいうちに抑えるべきところを抑えたいからです。</p>
+<ol style="list-style-type: decimal">
+<li>ドキュメントの充実</li>
+<li>テストの充実</li>
+<li>CRANによるチェックのパス</li>
+<li>達成感</li>
+</ol>
+<p>最初からパッケージの規模を大きくしようとすると、ついついドキュメントやテストが後回になります。すると、これらが面倒になり、後回しになり、CRANにも送れなくなる。悪循環ですね。テストはなくてもCRANに送れますが、書いておくに越したことはありません。特に依存パッケージがある場合は、依存関係によるコードの破綻を素早く検知できるようになります。</p>
+<p>そして、パッケージの規模が小さい内にCRANに送ると、指摘される箇所も少なく済みます。最初のリリース時点での指摘を覚えておけば、次回以降のリリースでも注意すべき要領が分かります。</p>
+<p>最後に達成感は非常に大事です。CRANに載ると成果物感が出ます。次のやる気に繋がります。ええ、抑えるべきところですとも！</p>
+<p>デメリットとしては、メンテナンスしないといけない感が増すところでしょうか。この点は最近も話題になりましたね。まあやりたいと思える範囲でやっていくしかないのが現状だと思います。</p>
+<blockquote>
+<p><a href="http://blog.livedoor.jp/k_urushima/archives/1865811.html">jsrsasignの寄付金を募ることにしてみました(やりがいって何だっけ？)</a></p>
+</blockquote>
+<p>というわけで、誰にでも勧められるわけではありませんが、最近私が意識しているパッケージ開発方針でした。</p>
+<p>余談ですが、パッケージを作る時にライセンスやバッジやらの設定が面倒なので、そのあたりを自分向けに関数としてカスタムし始めました。</p>
+<blockquote>
+<p><a href="https://github.com/atusy/templater/blob/master/R/init_package.R" class="uri">https://github.com/atusy/templater/blob/master/R/init_package.R</a></p>
+</blockquote>
+<p>雰囲気的には以下のことをやってます。本気で開発しようとするとここまで設定するべきことがあるのかと思うとちょっとだるくなりますなー。</p>
+<pre class="r"><code># パッケージ作成
+usethis::create_package()
+
+# GitHubに作ったレポジトリにpush
+
+# 細かい設定
+usethis::use_news_md()
+download.file(&#39;https://raw.githubusercontent.com/github/gitignore/master/R.gitignore&#39;, &#39;.gitignore&#39;)
+unlink(c(&#39;DESCRIPTION&#39;, &#39;README.md&#39;))
+usethis::use_description(list(
+      `Authors@R` = &#39;person(given = &quot;Atsushi&quot;,
+                                family = &quot;Yasumoto&quot;,
+                                role = c(&quot;aut&quot;, &quot;cph&quot;, &quot;cre&quot;),
+                                email = &quot;atusy.rpkg@gmail.com&quot;,
+                                comment = c(ORCID = &quot;0000-0002-8335-495X&quot;))&#39;,
+      Maintainer = &#39;Atsushi Yasumoto &lt;atusy.rpkg@gmail.com&gt;&#39;,
+      URL = sprintf(&#39;https://%s.atusy.net, https://github.com/atusy/%s&#39;,
+                    package, package),
+      Language = &quot;en-US&quot;
+    ))
+usethis::use_mit_license(&quot;Atsushi Yasumoto&quot;)
+usethis::use_readme_md()
+usethis::use_cran_badge()
+usethis::use_mit_license()
+usethis::use_spell_check()
+usethis::use_roxygen_md()
+usethis::use_testthat()
+usethis::use_pkgdown()
+usethis::use_github_action_check_full()</code></pre>

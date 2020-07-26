@@ -1,0 +1,85 @@
+---
+title: パッケージの機能が最小限の内にCRANに送ってしまえ
+author: ~
+date: '2020-07-27'
+slug: creating-package
+categories: [R]
+tags: [package]
+---
+
+金曜日にchunkhooksパッケージをCRANに送りだしました。
+コードブロックに行番号をつけたり、`fig.width`の単位をインチからミリメートルに変換したり、そんなおお役立ちフックをちょこちょこ盛り込んでいます。
+
+最近は最小限の機能を入れたらさっさとリリースするようにしています。
+今回はたった3つのフックで0.0.1とすることにしました。
+
+パッケージの規模の小さいうちに抑えるべきところを抑えたいからです。
+
+1. ドキュメントの充実
+2. テストの充実
+3. CRANによるチェックのパス
+4. 達成感
+
+最初からパッケージの規模を大きくしようとすると、ついついドキュメントやテストが後回になります。
+すると、これらが面倒になり、後回しになり、CRANにも送れなくなる。
+悪循環ですね。
+テストはなくてもCRANに送れますが、書いておくに越したことはありません。
+特に依存パッケージがある場合は、依存関係によるコードの破綻を素早く検知できるようになります。
+
+そして、パッケージの規模が小さい内にCRANに送ると、
+指摘される箇所も少なく済みます。
+最初のリリース時点での指摘を覚えておけば、次回以降のリリースでも注意すべき要領が分かります。
+
+最後に達成感は非常に大事です。CRANに載ると成果物感が出ます。
+次のやる気に繋がります。
+ええ、抑えるべきところですとも！
+
+デメリットとしては、メンテナンスしないといけない感が増すところでしょうか。
+この点は最近も話題になりましたね。
+まあやりたいと思える範囲でやっていくしかないのが現状だと思います。
+
+> [jsrsasignの寄付金を募ることにしてみました(やりがいって何だっけ？)](http://blog.livedoor.jp/k_urushima/archives/1865811.html)
+
+というわけで、誰にでも勧められるわけではありませんが、
+最近私が意識しているパッケージ開発方針でした。
+
+余談ですが、パッケージを作る時にライセンスやバッジやらの設定が面倒なので、
+そのあたりを自分向けに関数としてカスタムし始めました。
+
+> https://github.com/atusy/templater/blob/master/R/init_package.R
+
+雰囲気的には以下のことをやってます。
+本気で開発しようとするとここまで設定するべきことがあるのかと思うとちょっとだるくなりますなー。
+
+```{r, eval=FALSE}
+# パッケージ作成
+usethis::create_package()
+
+# GitHubに作ったレポジトリにpush
+
+# 細かい設定
+usethis::use_news_md()
+download.file('https://raw.githubusercontent.com/github/gitignore/master/R.gitignore', '.gitignore')
+unlink(c('DESCRIPTION', 'README.md'))
+usethis::use_description(list(
+      `Authors@R` = 'person(given = "Atsushi",
+                                family = "Yasumoto",
+                                role = c("aut", "cph", "cre"),
+                                email = "atusy.rpkg@gmail.com",
+                                comment = c(ORCID = "0000-0002-8335-495X"))',
+      Maintainer = 'Atsushi Yasumoto <atusy.rpkg@gmail.com>',
+      URL = sprintf('https://%s.atusy.net, https://github.com/atusy/%s',
+                    package, package),
+      Language = "en-US"
+    ))
+usethis::use_mit_license("Atsushi Yasumoto")
+usethis::use_readme_md()
+usethis::use_cran_badge()
+usethis::use_mit_license()
+usethis::use_spell_check()
+usethis::use_roxygen_md()
+usethis::use_testthat()
+usethis::use_pkgdown()
+usethis::use_github_action_check_full()
+```
+
