@@ -1,5 +1,5 @@
 ---
-title: パッケージの機能が最小限の内にCRANに送ってしまえ
+title: CRANを見据えるならパッケージの機能が最小限の内に送ってしまえ
 author: ~
 date: '2020-07-27'
 slug: creating-package
@@ -10,7 +10,7 @@ tags: [package]
 
 
 <p>金曜日にchunkhooksパッケージをCRANに送りだしました。コードブロックに行番号をつけたり、<code>fig.width</code>の単位をインチからミリメートルに変換したり、そんなおお役立ちフックをちょこちょこ盛り込んでいます。</p>
-<p>最近は最小限の機能を入れたらさっさとリリースするようにしています。今回はたった3つのフックで0.0.1とすることにしました。</p>
+<p>最近は、CRANに登録を考えているパッケージは、最小限に実装して早々にリリースするようにしています。今回はたった3つのフックで0.0.1とすることにしました。</p>
 <p>パッケージの規模の小さいうちに抑えるべきところを抑えたいからです。</p>
 <ol style="list-style-type: decimal">
 <li>ドキュメントの充実</li>
@@ -60,3 +60,15 @@ usethis::use_roxygen_md()
 usethis::use_testthat()
 usethis::use_pkgdown()
 usethis::use_github_action_check_full()</code></pre>
+<div id="追記" class="section level2">
+<h2>追記</h2>
+<div id="section" class="section level3">
+<h3>2020-07-28</h3>
+<p>Uryuさんからコメントを頂きました。</p>
+<blockquote class="twitter-tweet" data-partner="tweetdeck"><p lang="ja" dir="ltr">CRANだけが選択肢ではない。パッケージとして提供できて、ソースコードも公開できるGitHubがある。<br>書かれているけどCRANにあげることはコストでもある。一度登録されると同一名のパッケージは登録できないので将来の誰かにとって害悪になるおそれも。<br>何でもかんでもというのには同意できない。 <a href="https://t.co/g8r5p6RCcH">https://t.co/g8r5p6RCcH</a></p>&mdash; Uryu Shinya (@u_ribo) <a href="https://twitter.com/u_ribo/status/1287739335979098112?ref_src=twsrc%5Etfw">July 27, 2020</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>私もこのコメントには同意するところで、初稿に「CRANを見据えるなら」という前提が欠けていたことを反省しております。というわけで改題し、内容もちょこっとだけ変えました。</p>
+<p>私の場合、たとえばatusydownやatusyverseといった個人用パッケージはCRANに登録しません。また、便利なパッケージながら似たテーマのパッケージが既に存在しているから、そちらにマージしてもらって私がCRANにパッケージを登録するのは避けたいと思っているものもあります。後者についてもとりあえず私が使えれば私は困らないので。。</p>
+<p>このパッケージはぜひ人々に使って欲しい！と思えるようなものをCRANに登録するよう心掛けます。</p>
+</div>
+</div>
