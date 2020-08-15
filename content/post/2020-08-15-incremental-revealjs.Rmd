@@ -1,0 +1,86 @@
+---
+title: R Markdownとrevealjsでチャンクやブロック要素をincrementalに表示する
+author: ~
+date: '2020-08-15'
+slug: incremental-revealjs
+categories: [R, lua]
+tags: [R Markdown, revealjs]
+---
+
+`revealjs::revealjs_presentation`関数では、`incremental`引数に`TRUE`を指定すると、
+箇条書きを一つずつ表示することができます。
+これと同じことを、チャンクとかその他のブロック要素（段落など）を一つずつ表示したいという需要があるようです。
+
+# 基本的な仕組み
+
+これを実現するには、段階的に表示したいアイテムに`fragment`クラスと表示したい順序を示す`data-fragment-index`要素を指定します。
+例えば以下の通り。
+
+```html
+<div class=fragment data-fragment-index=1>
+<p>foo</p>
+</div>
+```
+
+# Rだけでやる
+
+R Markdownでこれを実現するには、hook関数を設定する手もありますが、複雑になりがちです。
+以下の2つの例はどちらも`knitr::knit_hooks`を用いています。
+フックは便利ですが、意図しない挙動が起きないか怖い。
+
+- [revealjsでincrementalに図を表示する (R](https://keachmurakami.github.io/2018/03/19/frame_by_frame_fig_in_reveal.html)
+- [Issue #70 (comment): Reveal.js incremental option doesn't apply to code chunks](https://github.com/rstudio/revealjs/issues/70#issuecomment-674101011)
+
+# luaフィルタでやる
+
+R MarkdownはRmd -> md -> HTMLといった具合に段階的にファイルを変換しており、mdファイルから目的の形式に変換する際にはPandocというソフトウェアを使っています。
+このPandocが備えるLuaフィルタ機能を使うと、ブロック要素の段階的な表示がとても簡単になります。
+Pandoc's Markdownの`Divs`記法を用いて、`incremental-blocks`クラスを作成し、その中にチャンクやブロック要素を記述するだけです。
+たとえば冒頭の動画GIFを作成するには以下のようなRmdファイルを作成します。
+
+````
+---
+title: incremental blocks
+output:
+  revealjs::revealjs_presentation
+    pandoc_args:
+      - '--lua-filter'
+      - 'incremental-blocks.lua'
+---
+
+# Iris
+
+::: {.incremental-blocks}
+
+`r ''````{r, fig.height=2}
+names(iris)
+ggplot2::qplot(iris$Sepal.Length)
+`r ''```
+
+:::
+````
+
+## luaフィルタ
+
+先の例で指定したLuaフィルタはの内容は以下の通りです。
+`Divs`が`incremental-blocks`を持っている場合に子要素をそれぞれ`Divs`で囲っていきます。
+子`Divs`には、`fragment`クラスと、`data-fragment-index`を与えています。
+
+```lua
+function Div(div)
+  incremental = false
+  for _, class in ipairs(div.classes) do
+    incremental = incremental or (class == 'incremental-blocks')
+  end
+  if incremental then
+    for i,content in ipairs(div.content) do
+      div.content[i] = pandoc.Div(content)
+      div.content[i].classes = {'fragment'}
+      div.content[i].attributes = {['data-fragment-index'] = i}
+    end
+  end
+  return(div)
+end
+```
+
+# Enjoy!
