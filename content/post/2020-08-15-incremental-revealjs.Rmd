@@ -7,9 +7,9 @@ categories: [R, lua]
 tags: [R Markdown, revealjs]
 highlightjs: [lua]
 images:
-  - '/images/posts/2020-08-15-incremental-revealjs/example.gif'
+  - /images/posts/2020-08-15-incremental-revealjs/example.gif
 summary: |
-  ![revealjsでチャンクをincrementalに表示した例]('/images/posts/2020-08-15-incremental-revealjs/example.gif')
+  ![revealjsでチャンクをincrementalに表示した例](/images/posts/2020-08-15-incremental-revealjs/example.gif)
 ---
 
 `revealjs::revealjs_presentation`関数では、`incremental`引数に`TRUE`を指定すると、
@@ -99,6 +99,6 @@ end
 
 ##  結果
 
-![revealjsでチャンクをincrementalに表示した例]('/images/posts/2020-08-15-incremental-revealjs/example.gif')
+![revealjsでチャンクをincrementalに表示した例](/images/posts/2020-08-15-incremental-revealjs/example.gif)
 
 # Enjoy!
