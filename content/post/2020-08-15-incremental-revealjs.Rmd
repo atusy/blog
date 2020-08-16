@@ -43,6 +43,7 @@ R MarkdownはRmd -> md -> HTMLといった具合に段階的にファイルを�
 
 # 実装
 
+後述のLuaフィルターさえ書いてしまえば、
 Pandoc's Markdownの`Divs`記法を用いて、`incremental-blocks`クラスを作成し、その中にチャンクやブロック要素を記述するだけです。
 たとえば冒頭の動画GIFを作成するには以下のようなRmdファイルを作成します。
 
