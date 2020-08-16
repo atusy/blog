@@ -1,0 +1,96 @@
+---
+title: R Markdownとrevealjsとluaフィルタでチャンクやブロック要素をincrementalに表示する
+author: ~
+date: '2020-08-15'
+slug: incremental-revealjs
+categories: [R, lua]
+tags: [R Markdown, revealjs]
+highlightjs: [lua]
+---
+
+`revealjs::revealjs_presentation`関数では、`incremental`引数に`TRUE`を指定すると、
+箇条書きを一つずつ表示することができます。
+これと同じことを、チャンクとかその他のブロック要素（段落など）を一つずつ表示したいという需要があるようです。
+
+- [revealjsでincrementalに図を表示する (R](https://keachmurakami.github.io/2018/03/19/frame_by_frame_fig_in_reveal.html)
+- [Issue #70 (comment): Reveal.js incremental option doesn't apply to code chunks](https://github.com/rstudio/revealjs/issues/70#issuecomment-674101011)
+
+上述のリンク先ではRで解決しようと、`knitr::knit_hooks`を駆使しています。
+しかし、コードが複雑にな上に、フック故の意図せぬ副作用の恐れがあります。
+また、htmlwidgetsクラスなど、独自に`knitr::knit_print`関数のメソッドを定義しているクラスへの対応が大変です。
+
+そこでLuaフィルタを使ってみましょう。
+R MarkdownはRmd -> md -> HTMLといった具合に段階的にファイルを変換しており、mdファイルから目的の形式に変換する際にはPandocというソフトウェアを使っています。
+このPandocが備えるLuaフィルタ機能を使うと、ブロック要素の段階的な表示がとても簡単にできます。
+
+# incremental表示の仕組み
+
+これを実現するには、段階的に表示したいアイテムに`fragment`クラスを与えます。
+例えば以下の通り。
+
+```html
+<div class=fragment>
+<p>foo</p>
+</div>
+```
+
+`fragment`クラスを持つ要素はデフォルトでフェードインしますが、
+オプションでハイライトを変更する、フェードアウトするなどと挙動を変えることも可能です（<https://revealjs.com/fragments/>）。
+
+# 実装
+
+Pandoc's Markdownの`Divs`記法を用いて、`incremental-blocks`クラスを作成し、その中にチャンクやブロック要素を記述するだけです。
+たとえば冒頭の動画GIFを作成するには以下のようなRmdファイルを作成します。
+
+````
+---
+title: incremental blocks
+output:
+  revealjs::revealjs_presentation
+    pandoc_args:
+      - '--lua-filter'
+      - 'incremental-blocks.lua'
+---
+
+# Iris
+
+::: {.incremental-blocks}
+
+`r ''````{r, fig.height=2}
+names(iris)
+ggplot2::qplot(iris$Sepal.Length, iris$Sepal.Width)
+`r ''```
+
+:::
+````
+
+## luaフィルタ
+
+先の例で指定したLuaフィルタはの内容は以下の通りです。
+`Divs`が`incremental-blocks`を持っている場合には、
+子要素をそれぞれ`fragment`クラスを持つ`Divs`で囲っていきます。
+
+```lua
+-- 'incremental-blocks.lua'
+
+function Div(div)
+  -- Divがincremental-blocksを持っているか判定
+  local incremental = false
+  for _, class in ipairs(div.classes) do
+    incremental = incremental or (class == 'incremental-blocks')
+  end
+  
+  -- incrementalがtrueなら、Divのcontentをfragmentクラスを持つDivで囲う
+  if incremental then
+    for i,content in ipairs(div.content) do
+      div.content[i] = pandoc.Div(content)
+      div.content[i].classes = {'fragment'}
+    end
+  end
+  
+  -- 新しいdivを返す
+  return(div)
+end
+```
+
+# Enjoy!
