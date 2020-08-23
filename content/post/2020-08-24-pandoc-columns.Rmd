@@ -1,0 +1,69 @@
+---
+title: PandocやR Markdownでマルチカラムレイアウト
+author: ~
+date: '2020-08-24'
+slug: pandoc-columns
+categories: [Pandoc]
+tags: []
+---
+
+スライドを筆頭にしばしば2カラム以上のレイアウトなどを利用したくなりますね。
+R Markdownの場合、revealjsパッケージでマルチカラムを利用する方法が、私を含め複数の人によって提案されてきました。
+
+- [Rmd + Revealjs で簡単に印刷もできる2カラムレイアウトを実現する (inline-block)](https://blog.atusy.net/2019/08/11/revealjs-2col-inline-block/) (Atusy's blog)
+- [R Markdownによるスライド生成 SappoRo.R #6](https://kazutan.github.io/SappoRoR6/rmd_slide.html#/15/3) (\@kazutan氏)
+- [[Reveal.js] CSS Grid LayoutでMarkdownにもレイアウトを](https://qiita.com/vimyum/items/a8377a76dac101024ae2)
+
+私は印刷できて利用も簡単な自説の`inline-block`を推しています。
+と、そんなところにPandocのマニュアル上でマルチカラムレイアウトを利用する方法の記載を見つけました。
+
+> ```md
+  :::::::::::::: {.columns}
+  ::: {.column width="40%"}
+  contents...
+  :::
+  ::: {.column width="60%"}
+  contents...
+  :::
+  ::::::::::::::
+  ```
+>
+> <https://pandoc.org/MANUAL.html#columns>
+
+HTML（スライドに限らず）やbeamer、ひょっとしたらpptxあたりでも利用できるようです。
+じゃあHTMLでの実装はどうなっているのか除いてみましょう。
+
+> ```css
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  ```
+>
+> https://github.com/jgm/pandoc-templates/blob/490c564f068b65b79bf94119259cbd78bc43f961/styles.html#L4
+
+`inline-block`が使われていますね！
+ソースを見ると、下線やハンギングインデントの書式も定義されていて、ほっほうってなりますね。
+あまり使いませんが。
+
+Pandoc内部で工夫されているのか`{.column width="40%"}`とした時に、`width`がCSS化するのも嬉しいところ。
+オレオレテクニックだと`{.column styles='width: 40%'}`とか真面目にCSSの書式に則るため読みにくかった。
+
+というわけで今後はPandocの流儀に従いたいですね。
+このスタイルが利用可能な書式は、GitHub上で`styles.html`を含むファイルを検索すればOK（<https://github.com/jgm/pandoc-templates/search?q=styles.html&unscoped_q=styles.html>）。
+
+- slidy
+- html4
+- html5
+- s5
+- slideous
+- dzslides
+- revealjs
+
+R Markdownには上述のスタイルが割り当てられていないので、ひとまず上述のCSSを外部ファイルに書くか、チャンクとして記述しましょう。
+revealjsには既に[PR](https://github.com/rstudio/revealjs/pull/82)していて、rmarkdownにも近々PRするつもりなので、もっと手軽に利用できる未来が来るはず！
+
+````
+`r ''````{css, echo=FALSE}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+`r ''````
+````
+
+Enjoy!!
