@@ -12,7 +12,7 @@ R Markdownの場合、revealjsパッケージでマルチカラムを利用す�
 
 - [Rmd + Revealjs で簡単に印刷もできる2カラムレイアウトを実現する (inline-block)](https://blog.atusy.net/2019/08/11/revealjs-2col-inline-block/) (Atusy's blog)
 - [R Markdownによるスライド生成 SappoRo.R #6](https://kazutan.github.io/SappoRoR6/rmd_slide.html#/15/3) (\@kazutan氏)
-- [[Reveal.js] CSS Grid LayoutでMarkdownにもレイアウトを](https://qiita.com/vimyum/items/a8377a76dac101024ae2)
+- [[Reveal.js] CSS Grid LayoutでMarkdownにもレイアウトを](https://qiita.com/vimyum/items/a8377a76dac101024ae2) (\@vimyum氏)
 
 私は印刷できて利用も簡単な自説の`inline-block`を推しています。
 と、そんなところにPandocのマニュアル上でマルチカラムレイアウトを利用する方法の記載を見つけました。
@@ -58,7 +58,8 @@ Pandoc内部で工夫されているのか`{.column width="40%"}`とした時に
 - revealjs
 
 R Markdownには上述のスタイルが割り当てられていないので、ひとまず上述のCSSを外部ファイルに書くか、チャンクとして記述しましょう。
-revealjsには既に[PR](https://github.com/rstudio/revealjs/pull/82)していて、rmarkdownにも近々PRするつもりなので、もっと手軽に利用できる未来が来るはず！
+revealjsには既に変更を提案していて（[PR #82](https://github.com/rstudio/revealjs/pull/82)）、rmarkdownにも近々提案予定です。
+受け入れられればもっと手軽に利用できる未来が来るぞ！
 
 ````
 `r ''````{css, echo=FALSE}
