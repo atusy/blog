@@ -1,0 +1,62 @@
+---
+title: ftExtra 0.0.2、0.0.3をリリースしました
+author: ~
+date: '2020-08-30'
+slug: ftextra-0-0-3
+categories: [R]
+tags: [ftExtra, flextable, R Markdown]
+---
+
+ftExtra 0.0.3をリリースしました。
+0.0.2をリリースしたらCRANにSolarisでうまくvignetteをビルドできねえんだけど、なんとかしないとCRANから消すねって言われて、慌てて0.0.3をリリースしました^[SolarisのPandocが入っていないせいで、チャンクを評価できていなかったので、`eval=rmarkdown::pandoc_available()`と指定することで問題を回避しました。Rmdファイル自体はknitrで評価するのでPandocは不要ですが、ftExtraパッケージが内部でPandocを呼び出すせいでこの罠にかかりました。珍しいケースだと思いますが、怒るならサブミットした段階でチェックして欲しいですね。リリース後に文句言われると本当に疲れます。これがCRANの闇と理解したできごとでした。]。
+ユーザーレベルで認識できる変更は0.0.2のものです。
+
+R Markdownで表を出力できるパッケージは数あれど、
+HTMLやPDFに加えWordに対応するものはflextableパッケージくらいなものでしょう。
+一方でflextableパッケージは文字の装飾方法が独特で、大変です。
+そこでR Markdownユーザーなら誰でも使えるマークダウン記法を導入したのがftExtraパッケージです。
+他にもヘッダーの取り扱いを楽にする関数など色々備えていますが、メインはマークダウン記法のパースです。
+詳しくは以下のスライドをご覧ください。
+flextableパッケージだけのコードと比較しているので、いかにftExtraパッケージが便利か理解頂けると思います。
+
+https://atusy.github.io/tokyor84/#/
+
+さて、マークダウンに関して、ftExtra 0.0.1ではインラインの装飾のみに対応していました。
+太字、斜体、上付き、下付き、否定、下線あたりですね。
+加えてftExtra 0.0.2ではハイパーリンク、画像の挿入、ソフト/ハードな改行に対応しました。
+Pandocのマークダウン拡張機能を使って絵文字を入力することもできます。
+デモは以下よりご覧ください。
+
+https://ftextra.atusy.net/articles/format_columns.html
+
+ftExtraパッケージはflextableパッケージのヘルパー的な立ち位置なので、flextableパッケージの仕様の範囲で色々頑張っています。
+flextableパッケージではチャンクという区切りで文字列の書式を管理しています。
+
+```{r}
+flextable::as_chunk('文字列')
+```
+
+そしてチャンクを複数纏めたパラグラフがセルの構成要素となります。
+
+```{r}
+flextable::as_paragraph(
+  flextable::as_chunk('文字列')
+)
+```
+
+というわけでセルあたり1段落しか管理できませんし、インラインコードやコードブロックにも対応していません。
+あ、インラインコードに関しては、`font.family`で等幅フォントを指定する、くらいならできそうですね。
+
+現状、ftExtraは`font.size`、`shading.color`、`font.family`、`vertical.align`に対応できていませんが、
+Span記法のattributeを使って対応できるようにしたいと考えています。
+
+```
+[文字列]{font.size=10 shading.color=gray font.family=Cica vertical.align=top}
+```
+
+みたいな。
+
+あと、flextableの脚注を、Pandoc's Markdownの脚注記法で実現できるようにしたいですね。
+PandocのASTをflextableのチャンクに落とし込む必要があるので中々大変なんですが、まあぼちぼちやっていきましょう。
+
+というわけでftExtraの未来にも期待していてください！

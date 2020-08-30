@@ -1,0 +1,53 @@
+---
+title: ftExtra 0.0.2、0.0.3をリリースしました
+author: ~
+date: '2020-08-30'
+slug: ftextra-0-0-3
+categories: [R]
+tags: [ftExtra, flextable, R Markdown]
+---
+
+
+
+<p>ftExtra 0.0.3をリリースしました。
+0.0.2をリリースしたらCRANにSolarisでうまくvignetteをビルドできねえんだけど、なんとかしないとCRANから消すねって言われて、慌てて0.0.3をリリースしました<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>。ユーザーレベルで認識できる変更は0.0.2のものです。</p>
+<p>R Markdownで表を出力できるパッケージは数あれど、
+HTMLやPDFに加えWordに対応するものはflextableパッケージくらいなものでしょう。一方でflextableパッケージは文字の装飾方法が独特で、大変です。そこでR Markdownユーザーなら誰でも使えるマークダウン記法を導入したのがftExtraパッケージです。他にもヘッダーの取り扱いを楽にする関数など色々備えていますが、メインはマークダウン記法のパースです。詳しくは以下のスライドをご覧ください。
+flextableパッケージだけのコードと比較しているので、いかにftExtraパッケージが便利か理解頂けると思います。</p>
+<p><a href="https://atusy.github.io/tokyor84/#/" class="uri">https://atusy.github.io/tokyor84/#/</a></p>
+<p>さて、マークダウンに関して、ftExtra 0.0.1ではインラインの装飾のみに対応していました。太字、斜体、上付き、下付き、否定、下線あたりですね。加えてftExtra 0.0.2ではハイパーリンク、画像の挿入、ソフト/ハードな改行に対応しました。
+Pandocのマークダウン拡張機能を使って絵文字を入力することもできます。デモは以下よりご覧ください。</p>
+<p><a href="https://ftextra.atusy.net/articles/format_columns.html" class="uri">https://ftextra.atusy.net/articles/format_columns.html</a></p>
+<p>ftExtraパッケージはflextableパッケージのヘルパー的な立ち位置なので、flextableパッケージの仕様の範囲で色々頑張っています。
+flextableパッケージではチャンクという区切りで文字列の書式を管理しています。</p>
+<pre class="r"><code>flextable::as_chunk(&#39;文字列&#39;)</code></pre>
+<pre><code>##      txt font.size italic bold underlined color shading.color font.family
+## 1 文字列        NA     NA   NA         NA  &lt;NA&gt;          &lt;NA&gt;        &lt;NA&gt;
+##   vertical.align width height  url img_data
+## 1           &lt;NA&gt;    NA     NA &lt;NA&gt;     NULL</code></pre>
+<p>そしてチャンクを複数纏めたパラグラフがセルの構成要素となります。</p>
+<pre class="r"><code>flextable::as_paragraph(
+  flextable::as_chunk(&#39;文字列&#39;)
+)</code></pre>
+<pre><code>## [[1]]
+##      txt font.size italic bold underlined color shading.color font.family
+## 1 文字列        NA     NA   NA         NA  &lt;NA&gt;          &lt;NA&gt;        &lt;NA&gt;
+##   vertical.align width height  url img_data seq_index
+## 1           &lt;NA&gt;    NA     NA &lt;NA&gt;     NULL         1
+## 
+## attr(,&quot;class&quot;)
+## [1] &quot;paragraph&quot;</code></pre>
+<p>というわけでセルあたり1段落しか管理できませんし、インラインコードやコードブロックにも対応していません。あ、インラインコードに関しては、<code>font.family</code>で等幅フォントを指定する、くらいならできそうですね。</p>
+<p>現状、ftExtraは<code>font.size</code>、<code>shading.color</code>、<code>font.family</code>、<code>vertical.align</code>に対応できていませんが、
+Span記法のattributeを使って対応できるようにしたいと考えています。</p>
+<pre><code>[文字列]{font.size=10 shading.color=gray font.family=Cica vertical.align=top}</code></pre>
+<p>みたいな。</p>
+<p>あと、flextableの脚注を、Pandoc’s Markdownの脚注記法で実現できるようにしたいですね。
+PandocのASTをflextableのチャンクに落とし込む必要があるので中々大変なんですが、まあぼちぼちやっていきましょう。</p>
+<p>というわけでftExtraの未来にも期待していてください！</p>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>SolarisのPandocが入っていないせいで、チャンクを評価できていなかったので、<code>eval=rmarkdown::pandoc_available()</code>と指定することで問題を回避しました。Rmdファイル自体はknitrで評価するのでPandocは不要ですが、ftExtraパッケージが内部でPandocを呼び出すせいでこの罠にかかりました。珍しいケースだと思いますが、怒るならサブミットした段階でチェックして欲しいですね。リリース後に文句言われると本当に疲れます。これがCRANの闇と理解したできごとでした。<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
