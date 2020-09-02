@@ -1,0 +1,106 @@
+---
+title: UMAPを異常検知の前処理に使う時に、異常データの一部もUMAPに学習させるとよさそう
+author: ~
+date: '2020-09-02'
+slug: umap-outlier
+categories: [R, Machine learning]
+tags: [UMAP]
+---
+
+
+
+<p>UMAPは高次元データを似たもの同士が近くなるように次元縮約してくれる便利な手法だ。
+t-SNEよりも高速なことに加え、訓練しておいたモデルを新規データに適用できることも魅力。</p>
+<p>そんなUMAPを異常検知の前処理に使うと、UMAPを使わない場合よりもうまく異常検知できるそうだ。例えば以下のリンクはPythonでMNISTデータセットに対してUMAP+LOFした例だ。</p>
+<blockquote>
+<p><a href="https://umap-learn.readthedocs.io/en/latest/outliers.html">Outlier detection using UMAP</a></p>
+</blockquote>
+<p>One-class SVMやLOFといった異常検知モデルでは正常データだけを学習し似ていないものは異常と判定する。その文脈からいくと、ついUMAPも正常データだけで学習させたくなってしまう。しかし、異常データのいくらかを学習に使えるなら使った方が、うまい縮約ができるのではないか、というのが今回の話題だ。</p>
+<p>irisデータセットにおいて、setosa、versicolor、virginicaのいずれかを正常データとした時に、</p>
+<ol style="list-style-type: decimal">
+<li>正常データのみをUMAPで学習した場合</li>
+<li>正常データに加え、もう一種をUMAPで学習した場合
+<ul>
+<li>たとえばsetosaが正常データな場合はsetosa + versicolor、もしくはsetosa + virginicaで学習する</li>
+</ul></li>
+</ol>
+<p>の各場合について、2次元に縮約した結果を可視化してみよう。実際には1000次元とかで次元の呪いの影響を受けて異常検知アルゴリズムがまともに機能しない場合を想定している。</p>
+<p><img src="/post/2020-09-02-umap-outlier_files/figure-html/iris-1.png" width="672" /><img src="/post/2020-09-02-umap-outlier_files/figure-html/iris-2.png" width="672" /><img src="/post/2020-09-02-umap-outlier_files/figure-html/iris-3.png" width="672" /></p>
+<p>すると、いずれの種を正常データとした場合でも、いくらかNGデータも学習させてやった方がよさそうな見た目をしている。そこら辺は定量的に語れよって話ですが、力尽きたのでここまで。</p>
+<ol style="list-style-type: decimal">
+<li>正常データだけで学習すると、正常データ内の相違を要約してしまうため、正常データが分散してしまう
+<ul>
+<li>なんだか数珠繋ぎになった正常データの一部に異常データが重なっている感じ</li>
+<li>パラメータ調整して局所?大局?構造を保つようにすれば良いかもしれない</li>
+</ul></li>
+<li>異常データも学習すると、分解能が改善する
+<ul>
+<li>setosaで顕著。元の次元でもsetosaはSepal.LengthとSepal.Widthの2次元プロットをするだけで他と識別できるので宜なるかな。</li>
+</ul></li>
+</ol>
+<p>ちなみにversicolorとvirginicaは全データから2次元に縮約した場合でも識別は難しい。</p>
+<p><img src="/post/2020-09-02-umap-outlier_files/figure-html/iris-all-1.png" width="672" /></p>
+<div id="ソース" class="section level1">
+<h1>ソース</h1>
+<pre class="r"><code>library(dplyr)
+library(ggplot2)
+library(purrr)
+library(umap)
+library(stringr)
+
+set.seed(1)
+
+# 選択した種においてUMAPを実施し
+# すべての種を含めて可視化
+plot_umap &lt;- function(train) {
+  umap_fit &lt;- umap::umap(iris[iris$Species %in% train, -5])
+  predict(umap_fit, iris[-5]) %&gt;%
+  as.data.frame() %&gt;%
+  mutate(
+    Species = iris$Species,
+    Status = ifelse(Species == train[1], &#39;normal&#39;, &#39;abnormal&#39;)
+  ) %&gt;%
+  ggplot() +
+    aes(V1, V2, color = Species, shape = Status) +
+    geom_point() +
+    scale_shape_manual(values = c(normal = &quot;circle open&quot;, abnormal = &quot;cross&quot;)) +
+    ggtitle(
+      if (length(train) == 1) {
+        NULL
+      } else {
+        paste(&#39;+&#39;, train[2])
+      }
+    ) +
+    theme_classic() +
+    theme(axis.title = element_blank(), axis.text = element_blank())
+}
+
+# 正常データ扱いする種を指定し
+# 単独でumapを学習した場合と、
+# 異常値扱いの種を一つ加えて学習した場合を
+# 比較
+compare_train &lt;- function(normal) {
+  species &lt;- levels(iris$Species) %&gt;% str_subset(normal, negate = TRUE)
+  patchwork::wrap_plots(
+    plot_umap(normal),
+    plot_umap(c(normal, species[1])),
+    plot_umap(c(normal, species[2]))
+  ) +
+    patchwork::plot_annotation(title = paste(normal, &quot;is normal&quot;)) +
+    patchwork::plot_layout(guides = &quot;collect&quot;)
+}
+
+# compare_trainをirisの種ごとに実行
+iris$Species %&gt;%
+  levels %&gt;%
+  map(compare_train) %&gt;%
+  walk(print)</code></pre>
+<pre class="r"><code>set.seed(1)
+umap::umap(iris[-5]) %&gt;%
+  predict(., .$data) %&gt;%
+  as.data.frame() %&gt;%
+  mutate(Species = iris$Species) %&gt;%
+  ggplot() +
+  aes(V1, V2, color = Species) +
+  geom_point()</code></pre>
+</div>
