@@ -18,6 +18,8 @@ knitr::opts_chunk$set(collapse = TRUE)
 rhub::check_for_cran(platforms = rhub::platforms()$name)
 ```
 
+負担かけすぎるのもよくないのでほどほどに。
+
 # 背景から
 
 CRANに投稿する際、2つ以上のプラットフォームでパッケージをチェックすることが推奨されている。
@@ -59,11 +61,9 @@ rhub::check_for_cran(platforms = rhub::platforms()$name)
 
 ちなみにプラットフォームの一覧は以下の通り。
 CRANがチェックしないプラットフォームも含まれているので、過剰かもしれない。
-個人的にはデフォルトで良い感じにして欲しいな。
-`rhubL::check_for_cran_full`とかでもPRしてみようか知らん？
+少なくとも、サーバーの負荷を考えるとむやみに実行しない方がいいだろう。
+それでも需要はあると思うので`rhub::check_for_cran_full`とかでもPRしてみようか知らん？
 
 ```{r}
 rhub::platforms()$name
 ```
-  
-  

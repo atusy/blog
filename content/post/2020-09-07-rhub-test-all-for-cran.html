@@ -12,6 +12,7 @@ tags: [rhub]
 <div id="結論" class="section level1">
 <h1>結論</h1>
 <pre class="r"><code>rhub::check_for_cran(platforms = rhub::platforms()$name)</code></pre>
+<p>負担かけすぎるのもよくないのでほどほどに。</p>
 </div>
 <div id="背景から" class="section level1">
 <h1>背景から</h1>
@@ -36,8 +37,7 @@ ftExtra 0.0.2の場合、r-patched-solaris-x86がpandocを同梱しない影響�
 <code>rhub::platforms()</code>の返り値を調べ、以下のコードを実行すればいいとわかった。</p>
 <pre class="r"><code>rhub::check_for_cran(platforms = rhub::platforms()$name)</code></pre>
 <p>ちなみにプラットフォームの一覧は以下の通り。
-CRANがチェックしないプラットフォームも含まれているので、過剰かもしれない。個人的にはデフォルトで良い感じにして欲しいな。
-<code>rhubL::check_for_cran_full</code>とかでもPRしてみようか知らん？</p>
+CRANがチェックしないプラットフォームも含まれているので、過剰かもしれない。少なくとも、サーバーの負荷を考えるとむやみに実行しない方がいいだろう。それでも需要はあると思うので<code>rhub::check_for_cran_full</code>とかでもPRしてみようか知らん？</p>
 <pre class="r"><code>rhub::platforms()$name
 ##  [1] &quot;debian-clang-devel&quot;            &quot;debian-gcc-devel&quot;             
 ##  [3] &quot;debian-gcc-devel-nold&quot;         &quot;debian-gcc-patched&quot;           
