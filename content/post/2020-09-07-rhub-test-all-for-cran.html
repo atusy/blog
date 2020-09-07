@@ -1,0 +1,53 @@
+---
+title: パッケージのチェックをR-hubのあらゆるプラットフォームで実行し通す
+author: ~
+date: '2020-09-07'
+slug: rhub-test-all-for-cran
+categories: [R]
+tags: [rhub]
+---
+
+
+
+<div id="結論" class="section level1">
+<h1>結論</h1>
+<pre class="r"><code>rhub::check_for_cran(platforms = rhub::platforms()$name)</code></pre>
+</div>
+<div id="背景から" class="section level1">
+<h1>背景から</h1>
+<p>CRANに投稿する際、2つ以上のプラットフォームでパッケージをチェックすることが推奨されている。</p>
+<blockquote>
+<p><a href="https://blog.atusy.net/2019/06/28/cran-submission/">CRAN にパッケージを初投稿する手順</a></p>
+</blockquote>
+<p>rhubパッケージならクラウドの力を借りて推奨条件を達成できる。
+CRAN投稿時用にカスタムされた<code>rhub::check_for_cran</code>関数を使おう。この関数には<code>platforms</code>引数がある。既定値の<code>NULL</code>の場合は内部で<code>rhub:::default_cran_check_platforms</code>関数を呼んで以下の3種類のプラットフォームを試してくれる。</p>
+<pre class="r"><code>rhub:::default_cran_check_platforms(&#39;.&#39;)
+## [1] &quot;windows-x86_64-devel&quot; &quot;ubuntu-gcc-release&quot;   &quot;fedora-clang-devel&quot;</code></pre>
+<p>これで投稿準備は万端だと思いきや、そうとも限らない。
+CRANのチェック体制にはdebian、fedora、solaris、macosなども含まれている。</p>
+<blockquote>
+<p><a href="https://cran.r-project.org/web/checks/check_results_ftExtra.html" class="uri">https://cran.r-project.org/web/checks/check_results_ftExtra.html</a></p>
+</blockquote>
+<p>そしてこれらのチェックは、リリース<strong>後</strong>に行なわれる。
+ftExtra 0.0.2の場合、r-patched-solaris-x86がpandocを同梱しない影響でエラーを生じた。このためせっかくリリースしたのに1日と待たずに修正の要請が届いた。期限は2週間。</p>
+<p>参った。solarisの環境を持っていないので<code>rhub::check_for_cran</code>関数が便りだ。利用可能な環境の一覧は<code>rhub::platforms</code>関数で得られる。
+<code>solaris-x86-patched</code>を指定してチェックが通るまで修正を試みた。私の場合、R Markdownファイル内でpandocを呼び出す操作をしていたのが原因だったので、チャンクオプションに<code>eval=rmarkdown::pandoc_available()</code>を指定して事なきを得た。</p>
+<p>もうリリース後のエラーでぬか喜びなんて羽目に遭いたくない。だったら全部試そう。
+<code>rhub::platforms()</code>の返り値を調べ、以下のコードを実行すればいいとわかった。</p>
+<pre class="r"><code>rhub::check_for_cran(platforms = rhub::platforms()$name)</code></pre>
+<p>ちなみにプラットフォームの一覧は以下の通り。
+CRANがチェックしないプラットフォームも含まれているので、過剰かもしれない。個人的にはデフォルトで良い感じにして欲しいな。
+<code>rhubL::check_for_cran_full</code>とかでもPRしてみようか知らん？</p>
+<pre class="r"><code>rhub::platforms()$name
+##  [1] &quot;debian-clang-devel&quot;            &quot;debian-gcc-devel&quot;             
+##  [3] &quot;debian-gcc-devel-nold&quot;         &quot;debian-gcc-patched&quot;           
+##  [5] &quot;debian-gcc-release&quot;            &quot;fedora-clang-devel&quot;           
+##  [7] &quot;fedora-gcc-devel&quot;              &quot;linux-x86_64-centos6-epel&quot;    
+##  [9] &quot;linux-x86_64-centos6-epel-rdt&quot; &quot;linux-x86_64-rocker-gcc-san&quot;  
+## [11] &quot;macos-highsierra-release&quot;      &quot;macos-highsierra-release-cran&quot;
+## [13] &quot;solaris-x86-patched&quot;           &quot;solaris-x86-patched-ods&quot;      
+## [15] &quot;ubuntu-gcc-devel&quot;              &quot;ubuntu-gcc-release&quot;           
+## [17] &quot;ubuntu-rchk&quot;                   &quot;windows-x86_64-devel&quot;         
+## [19] &quot;windows-x86_64-oldrel&quot;         &quot;windows-x86_64-patched&quot;       
+## [21] &quot;windows-x86_64-release&quot;</code></pre>
+</div>

@@ -1,0 +1,69 @@
+---
+title: パッケージのチェックをR-hubのあらゆるプラットフォームで実行し通す
+author: ~
+date: '2020-09-07'
+slug: rhub-test-all-for-cran
+categories: [R]
+tags: [rhub]
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+```
+
+
+# 結論
+
+```r
+rhub::check_for_cran(platforms = rhub::platforms()$name)
+```
+
+# 背景から
+
+CRANに投稿する際、2つ以上のプラットフォームでパッケージをチェックすることが推奨されている。
+
+> [CRAN にパッケージを初投稿する手順](https://blog.atusy.net/2019/06/28/cran-submission/)
+
+rhubパッケージならクラウドの力を借りて推奨条件を達成できる。
+CRAN投稿時用にカスタムされた`rhub::check_for_cran`関数を使おう。
+この関数には`platforms`引数がある。
+既定値の`NULL`の場合は内部で`rhub:::default_cran_check_platforms`関数を呼んで以下の3種類のプラットフォームを試してくれる。
+
+```{r}
+rhub:::default_cran_check_platforms('.')
+```
+
+これで投稿準備は万端だと思いきや、そうとも限らない。
+CRANのチェック体制にはdebian、fedora、solaris、macosなども含まれている。
+
+> https://cran.r-project.org/web/checks/check_results_ftExtra.html
+
+そしてこれらのチェックは、リリース**後**に行なわれる。
+ftExtra 0.0.2の場合、r-patched-solaris-x86がpandocを同梱しない影響でエラーを生じた。
+このためせっかくリリースしたのに1日と待たずに修正の要請が届いた。
+期限は2週間。
+
+参った。solarisの環境を持っていないので`rhub::check_for_cran`関数が便りだ。
+利用可能な環境の一覧は`rhub::platforms`関数で得られる。
+`solaris-x86-patched`を指定してチェックが通るまで修正を試みた。
+私の場合、R Markdownファイル内でpandocを呼び出す操作をしていたのが原因だったので、
+チャンクオプションに`eval=rmarkdown::pandoc_available()`を指定して事なきを得た。
+
+もうリリース後のエラーでぬか喜びなんて羽目に遭いたくない。
+だったら全部試そう。
+`rhub::platforms()`の返り値を調べ、以下のコードを実行すればいいとわかった。
+
+```r
+rhub::check_for_cran(platforms = rhub::platforms()$name)
+```
+
+ちなみにプラットフォームの一覧は以下の通り。
+CRANがチェックしないプラットフォームも含まれているので、過剰かもしれない。
+個人的にはデフォルトで良い感じにして欲しいな。
+`rhubL::check_for_cran_full`とかでもPRしてみようか知らん？
+
+```{r}
+rhub::platforms()$name
+```
+  
+  
