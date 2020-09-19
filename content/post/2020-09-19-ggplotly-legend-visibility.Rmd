@@ -1,0 +1,40 @@
+---
+title: ggplot2とplotlyで作成したグラフから凡例を残してデータを非表示にする
+author: ~
+date: '2020-09-19'
+slug: ggplotly-legend-visibility
+categories: [R]
+tags: [ggplot2, plotly]
+---
+
+plotlyで作成したグラフは凡例をクリックすると、
+データの表示・非表示を変更できます。
+ではデフォルトで一部の凡例を非表示にする方法はあるでしょうか。
+
+調べたところ、該当するデータ部分の`visibility`属性として`legendonly`を指定すれば良いようです^[https://codepen.io/etpinard/pen/WNNxMmm]。
+
+ggplot2で作成したグラフを`ggplotly`関数でplotly化した場合も、`visibility`を変更できます。
+まず`plotly_build`関数を適用して生成されるリストを編集すれば良いようです^[https://stackoverflow.com/questions/57257887/in-ggplotly-how-can-deselect-legend-entries-with-code]。
+
+StackOverflowの例をパイプで書き直すと以下のようになります。
+データ構造も見て頑張れば表示したい系列をうまく選択できる関数を作れそうですね。
+
+```{r}
+library(ggplot2)
+library(purrr)
+library(plotly, warn.conflicts = FALSE)
+
+gg <- mtcars %>%
+  mutate(am = ifelse(am == 1, "automatic", "manual")) %>%
+  ggplot() +
+  aes(wt, mpg, color = am) +
+  geom_point()
+
+gg %>%
+  ggplotly() %>%
+  plotly_build() %>%
+  {
+    .$x$data[[2L]]$visible <- "legendonly"
+    .
+  }
+```
