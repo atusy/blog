@@ -1,0 +1,29 @@
+---
+title: ggplot2で列の値をそのまま色の値にしつつレジェンドも表示する（`scale_*_identity`関数）
+author: ~
+date: '2020-09-21'
+slug: ggplot-scale-identity-with-legend
+categories: [R]
+tags: [ggplot2]
+---
+
+
+
+<p>ggplot2パッケージでは<code>scale_*_identity</code>という名前の関数を使うと、審美的属性にマッピングした列の値をそのまま色やサイズ、透明度に反映できます。ただし、デフォルトでは凡例が表示されません。</p>
+<p>表示するには<code>guide</code>引数に<code>"legend"</code>とか<code>"colorbar"</code>とか指定すればOK！</p>
+<pre class="r"><code>library(ggplot2)
+ggplot(data.frame(x=1,color=&quot;red&quot;)) +
+  aes(x, x, color=color) +
+  geom_point() +
+  scale_color_identity(guide = &quot;legend&quot;)</code></pre>
+<p><img src="/post/2020-09-21-ggplot-scale-identity-with-legend_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<pre class="r"><code>set.seed(1L)
+
+ggplot(data.frame(x = rnorm(100),
+                  y = rnorm(100),
+                  alpha = runif(100))) +
+  aes(x, y, alpha = alpha) +
+  geom_point() +
+  scale_color_identity(guide = &quot;legend&quot;)</code></pre>
+<p><img src="/post/2020-09-21-ggplot-scale-identity-with-legend_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>服の色ごとの売り上げとか、グループごとの重要度とか、予め値が決まっている場合に便利ですね！もっと早く知りたかったなあ。</p>

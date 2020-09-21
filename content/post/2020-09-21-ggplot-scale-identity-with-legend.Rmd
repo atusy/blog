@@ -1,0 +1,35 @@
+---
+title: ggplot2で列の値をそのまま色の値にしつつレジェンドも表示する（`scale_*_identity`関数）
+author: ~
+date: '2020-09-21'
+slug: ggplot-scale-identity-with-legend
+categories: [R]
+tags: [ggplot2]
+---
+
+ggplot2パッケージでは`scale_*_identity`という名前の関数を使うと、審美的属性にマッピングした列の値をそのまま色やサイズ、透明度に反映できます。
+ただし、デフォルトでは凡例が表示されません。
+
+表示するには`guide`引数に`"legend"`とか`"colorbar"`とか指定すればOK！
+
+```{r}
+library(ggplot2)
+ggplot(data.frame(x=1,color="red")) +
+  aes(x, x, color=color) +
+  geom_point() +
+  scale_color_identity(guide = "legend")
+```
+
+```{r}
+set.seed(1L)
+
+ggplot(data.frame(x = rnorm(100),
+                  y = rnorm(100),
+                  alpha = runif(100))) +
+  aes(x, y, alpha = alpha) +
+  geom_point() +
+  scale_color_identity(guide = "legend")
+```
+
+服の色ごとの売り上げとか、グループごとの重要度とか、予め値が決まっている場合に便利ですね！
+もっと早く知りたかったなあ。
