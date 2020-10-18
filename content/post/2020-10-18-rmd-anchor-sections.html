@@ -1,0 +1,69 @@
+---
+title: R MarkdownでHTML出力時に見出しのURLを簡単に取得できるようにした
+author: ~
+date: '2020-10-18'
+slug: rmd-anchor-sections
+categories: [R]
+tags: [R Markdown]
+highlightjs:
+  - yaml
+  - css
+---
+
+<link href="/rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
+
+
+<p>このブログでも使えてます。</p>
+<div id="ここにマウスを重ねると" class="section level1">
+<h1>ここにマウスを重ねると</h1>
+<p><code>#</code>記号が見出しの最後に現れ、クリックするとブラウザのURL覧から見出しのURLを取得できるようにしました（<a href="https://github.com/rstudio/rmarkdown/pull/1884">PR #1884</a>）。
+<code>#</code>記号を右クリックしてメニューから<code>Copy link location</code>とかしてもOK。</p>
+<p>多分来月くらいにリリースされるrmarkdown 2.5の機能になります。早速使いたい人はGitHub版をインストールしましょう。</p>
+<p><code>html_document</code>とその派生型で利用などで利用でき、デフォルトで有効です。つまり、<code>bookdown::html_document2</code>や<code>blogdown::html_paged</code>などでも利用可能。無効にする場合はYAMLフロントマターで以下のように指定します。</p>
+<pre class="yaml"><code>output:
+  html_document:
+    anchor_sections: false</code></pre>
+<p>JavaScriptとCSSで実装していて、<code>#</code>以外の文字を利用することもできます。</p>
+<div id="url取得用の文字を変える" class="section level2 change-content">
+<h2>URL取得用の文字を変える</h2>
+<p>↑の見出しにマウスを重ねると<code>#</code>の代わりに<code>⫘</code>が出現します。これには以下のようにCSSを指定します。
+<code>content</code>の内容を変えるだけなので簡単ですね。</p>
+<style type="text/css">
+.change-content a.anchor-section::before {content: '⫘';}
+</style>
+<pre class="css"><code>a.anchor-section::before {content: &#39;⫘&#39;;}</code></pre>
+<p>R MarkdownなのでCSSチャンクを使うととってもカンタンです。</p>
+<pre><code>```{css, echo=FALSE}
+a.anchor-section::before {content: &#39;⫘&#39;;}
+```</code></pre>
+</div>
+<div id="url取得用の文字を画像に変える" class="section level2 anchor-image">
+<h2>URL取得用の文字を画像に変える</h2>
+<p>↑の見出しにマウスを重ねると<code>#</code>の代わりに<img src="/images/atusy.jpg" style="width:1em" alt="atusy" />が出現します。これには以下のようにCSSを記述します。やや複雑ですね。</p>
+<style type="text/css">
+.anchor-image a.anchor-section::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: url(https://blog.atusy.net/images/atusy.jpg) no-repeat;
+  background-size: contain;
+  background-position: left bottom;
+}
+</style>
+<pre class="css"><code>a.anchor-section::before {
+  content: &#39;&#39;;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: url(https://blog.atusy.net/images/atusy.jpg) no-repeat;
+  background-size: contain;
+  background-position: left bottom;
+}</code></pre>
+<p>先の例で<code>content</code>の内容を別の文字列にしたように、<code>content</code>に画像を指定することも可能です。しかし、画像のサイズを指定するためには、画像を背景として挿入してやる必要があります。</p>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>

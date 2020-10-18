@@ -1,0 +1,91 @@
+---
+title: R MarkdownでHTML出力時に見出しのURLを簡単に取得できるようにした
+author: ~
+date: '2020-10-18'
+slug: rmd-anchor-sections
+categories: [R]
+tags: [R Markdown]
+highlightjs:
+  - yaml
+  - css
+---
+
+このブログでも使えてます。
+
+# ここにマウスを重ねると
+
+`#`記号が見出しの最後に現れ、クリックするとブラウザのURL覧から見出しのURLを取得できるようにしました（[PR #1884](https://github.com/rstudio/rmarkdown/pull/1884)）。
+`#`記号を右クリックしてメニューから`Copy link location`とかしてもOK。
+
+多分来月くらいにリリースされるrmarkdown 2.5の機能になります。
+早速使いたい人はGitHub版をインストールしましょう。
+
+`html_document`とその派生型で利用などで利用でき、デフォルトで有効です。
+つまり、`bookdown::html_document2`や`blogdown::html_paged`などでも利用可能。
+無効にする場合はYAMLフロントマターで以下のように指定します。
+
+```yaml
+output:
+  html_document:
+    anchor_sections: false
+```
+
+JavaScriptとCSSで実装していて、`#`以外の文字を利用することもできます。
+
+
+## URL取得用の文字を変える {.change-content}
+
+↑の見出しにマウスを重ねると`#`の代わりに`⫘`が出現します。
+これには以下のようにCSSを指定します。
+`content`の内容を変えるだけなので簡単ですね。
+
+```{css, echo=FALSE}
+.change-content a.anchor-section::before {content: '⫘';}
+```
+
+```css
+a.anchor-section::before {content: '⫘';}
+```
+
+R MarkdownなのでCSSチャンクを使うととってもカンタンです。
+
+````
+`r ''````{css, echo=FALSE}
+a.anchor-section::before {content: '⫘';}
+`r ''````
+````
+
+## URL取得用の文字を画像に変える {.anchor-image}
+
+↑の見出しにマウスを重ねると`#`の代わりに![atusy](/images/atusy.jpg){width=1em}が出現します。
+これには以下のようにCSSを記述します。
+やや複雑ですね。
+
+```{css, echo=FALSE}
+.anchor-image a.anchor-section::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: url(https://blog.atusy.net/images/atusy.jpg) no-repeat;
+  background-size: contain;
+  background-position: left bottom;
+}
+```
+
+```css
+a.anchor-section::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: url(https://blog.atusy.net/images/atusy.jpg) no-repeat;
+  background-size: contain;
+  background-position: left bottom;
+}
+```
+
+先の例で`content`の内容を別の文字列にしたように、`content`に画像を指定することも可能です。
+しかし、画像のサイズを指定するためには、画像を背景として挿入してやる必要があります。
+
+# Enjoy!
