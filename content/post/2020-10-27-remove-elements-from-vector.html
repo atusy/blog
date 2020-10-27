@@ -1,0 +1,42 @@
+---
+title: ベクトルから要素を除去する方法とsetdiffの罠
+author: ~
+date: '2020-10-27'
+slug: remove-elements-from-vector
+categories: [R]
+tags: []
+---
+
+<link href="/rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
+
+
+<p>以下の<code>x</code>から<code>y</code>を除去してみましょう。</p>
+<pre class="r"><code>x &lt;- c(&#39;banana&#39;, &#39;banana&#39;, &#39;apple&#39;, &#39;grape&#39;)
+y &lt;- c(&#39;apple&#39;, &#39;grape&#39;)</code></pre>
+<p><code>%in%</code>演算子を使えば<code>x</code>の要素が<code>y</code>に含まれているか判定できるので、簡単ですね。</p>
+<pre class="r"><code>x[!x %in% y]
+#&gt; [1] &quot;banana&quot; &quot;banana&quot;</code></pre>
+<p>もっと簡単「そう」な方法に、<code>setdiff</code>関数があります。ただしこいつは中で<code>unique</code>関数をかけている点に注意が必要です。</p>
+<pre class="r"><code>setdiff(x, y)
+#&gt; [1] &quot;banana&quot;</code></pre>
+<p>そうとは知らずrmarkdownへのPRで、提案通りに<code>setdiff</code>関数を使ったところ、大失敗を生んでしまいました（
+<a href="https://github.com/rstudio/rmarkdown/pull/1932" class="uri">https://github.com/rstudio/rmarkdown/pull/1932</a>）。レビュアー2人いて気付かずにマージされてしまったくらいなので、皆さんも注意しましょう……。</p>
+<p>ちなみに、<code>setdiff</code>関数は内部で色々面倒なことをしているのもあって速度も遅めです。場合によっては<code>x[!x %in% y]</code>やそれに<code>unique</code>関数を加える方が良いかもしれませんね。
+<code>setdiff</code>はbaseに含まれていて、バイトコンパイルされているので、他の方法も明示的にバイトコンパイルしてからベンチマークしています。</p>
+<pre class="r"><code>x &lt;- sample(letters, 1000, TRUE)
+y &lt;- sample(letters, 10, FALSE)
+drop &lt;- compiler::cmpfun(function(x, y) x[!x %in% y])
+drop_and_unique &lt;- compiler::cmpfun(function(x, y) {
+  x &lt;- unique(x)
+  x[!x %in% y]
+})
+ggplot2::autoplot(bench::mark(
+  drop(x, y),
+  drop_and_unique(x, y),
+  setdiff(x, y),
+  check = FALSE
+))
+#&gt; Loading required namespace: tidyr</code></pre>
+<p><img src="/post/2020-10-27-remove-elements-from-vector_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>Enjoy!</p>

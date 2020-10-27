@@ -1,0 +1,60 @@
+---
+title: ベクトルから要素を除去する方法とsetdiffの罠
+author: ~
+date: '2020-10-27'
+slug: remove-elements-from-vector
+categories: [R]
+tags: []
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+
+以下の`x`から`y`を除去してみましょう。
+
+```{r}
+x <- c('banana', 'banana', 'apple', 'grape')
+y <- c('apple', 'grape')
+```
+
+`%in%`演算子を使えば`x`の要素が`y`に含まれているか判定できるので、簡単ですね。
+
+```{r}
+x[!x %in% y]
+```
+
+もっと簡単「そう」な方法に、`setdiff`関数があります。
+ただしこいつは中で`unique`関数をかけている点に注意が必要です。
+
+```{r}
+setdiff(x, y)
+```
+
+そうとは知らずrmarkdownへのPRで、提案通りに`setdiff`関数を使ったところ、大失敗を生んでしまいました（
+<https://github.com/rstudio/rmarkdown/pull/1932>）。
+レビュアー2人いて気付かずにマージされてしまったくらいなので、皆さんも注意しましょう……。
+
+ちなみに、`setdiff`関数は内部で色々面倒なことをしているのもあって速度も遅めです。
+場合によっては`x[!x %in% y]`やそれに`unique`関数を加える方が良いかもしれませんね。
+`setdiff`はbaseに含まれていて、バイトコンパイルされているので、他の方法も明示的にバイトコンパイルしてからベンチマークしています。
+
+```{r}
+x <- sample(letters, 1000, TRUE)
+y <- sample(letters, 10, FALSE)
+drop <- compiler::cmpfun(function(x, y) x[!x %in% y])
+drop_and_unique <- compiler::cmpfun(function(x, y) {
+  x <- unique(x)
+  x[!x %in% y]
+})
+ggplot2::autoplot(bench::mark(
+  drop(x, y),
+  drop_and_unique(x, y),
+  setdiff(x, y),
+  check = FALSE
+))
+```
+
+
+Enjoy!
