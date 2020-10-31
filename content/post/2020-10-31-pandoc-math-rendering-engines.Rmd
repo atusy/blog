@@ -1,0 +1,80 @@
+---
+title: PandocでHTML出力する時の数式の扱い
+author: ~
+date: '2020-10-31'
+slug: pandoc-math-rendering-engines
+categories: []
+tags: []
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+```
+
+基本は[Math rendering in HTML](https://pandoc.org/MANUAL.html#math-rendering-in-html)に記載の通り。
+
+`--mathjax`や`--katex`はJavaScriptやCSSの読み込みをするだけで数式部分の出力は変わらないと思ってたけど、そうでもなかったのでメモがてら全パターンを試す。
+
+# エンジン指定なし
+
+ユニコード文字に置換して頑張ってからSpanに入れる。
+
+```{bash}
+pandoc -t html <<< "$\alpha$"
+pandoc -t html <<< "\$$\alpha\$$"
+```
+
+ただし複雑な数式になるとうまくいかないことも。
+
+```{bash}
+pandoc -t html <<< "$\sum_{i=0}{i}$"
+pandoc -t html <<< "$\sum_{i=0}^{10}{i}$"
+```
+
+
+# mathjax
+
+数式を`\(\)`とか`\[\]`で囲んでからSpanに入れる。
+
+```{bash}
+pandoc -t html --mathjax <<< "$\alpha$"
+pandoc -t html --mathjax <<< "\$$\alpha\$$"
+```
+
+# mathml
+
+ユニコード文字に置換したり、`math`要素に入れたり、何かと異色。
+
+```{bash}
+pandoc -t html --mathml <<< "$\alpha$"
+pandoc -t html --mathml <<< "\$$\alpha\$$"
+```
+
+# webtex
+
+数式をURLエンコードしてWeb API経由で画像化する。
+アクセシビリティの観点から、代替文に数式が文字列として入る。
+
+```{bash}
+pandoc -t html --webtex <<< "$\alpha$"
+pandoc -t html --webtex <<< "\$$\alpha\$$"
+```
+
+# katex
+
+数式をそのままSpanで囲う
+
+```{bash}
+pandoc -t html --katex <<< "$\alpha$"
+pandoc -t html --katex <<< "\$$\alpha\$$"
+```
+
+# gladtex
+
+数式を`eq`要素で囲う。
+
+```{bash}
+pandoc -t html --gladtex <<< "$\alpha$"
+pandoc -t html --gladtex <<< "\$$\alpha\$$"
+```
+

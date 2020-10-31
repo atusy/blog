@@ -1,0 +1,69 @@
+---
+title: PandocでHTML出力する時の数式の扱い
+author: ~
+date: '2020-10-31'
+slug: pandoc-math-rendering-engines
+categories: []
+tags: []
+---
+
+<link href="/rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
+
+
+<p>基本は<a href="https://pandoc.org/MANUAL.html#math-rendering-in-html">Math rendering in HTML</a>に記載の通り。</p>
+<p><code>--mathjax</code>や<code>--katex</code>はJavaScriptやCSSの読み込みをするだけで数式部分の出力は変わらないと思ってたけど、そうでもなかったのでメモがてら全パターンを試す。</p>
+<div id="エンジン指定なし" class="section level1">
+<h1>エンジン指定なし</h1>
+<p>ユニコード文字に置換して頑張ってからSpanに入れる。</p>
+<pre class="bash"><code>pandoc -t html &lt;&lt;&lt; &quot;$\alpha$&quot;
+pandoc -t html &lt;&lt;&lt; &quot;\$$\alpha\$$&quot;
+## &lt;p&gt;&lt;span class=&quot;math inline&quot;&gt;&lt;em&gt;α&lt;/em&gt;&lt;/span&gt;&lt;/p&gt;
+## &lt;p&gt;&lt;br /&gt;&lt;span class=&quot;math display&quot;&gt;&lt;em&gt;α&lt;/em&gt;&lt;/span&gt;&lt;br /&gt;&lt;/p&gt;</code></pre>
+<p>ただし複雑な数式になるとうまくいかないことも。</p>
+<pre class="bash"><code>pandoc -t html &lt;&lt;&lt; &quot;$\sum_{i=0}{i}$&quot;
+pandoc -t html &lt;&lt;&lt; &quot;$\sum_{i=0}^{10}{i}$&quot;
+## &lt;p&gt;&lt;span class=&quot;math inline&quot;&gt;∑&lt;sub&gt;&lt;em&gt;i&lt;/em&gt; = 0&lt;/sub&gt;&lt;em&gt;i&lt;/em&gt;&lt;/span&gt;&lt;/p&gt;
+## [WARNING] Could not convert TeX math &#39;\sum_{i=0}^{10}{i}&#39;, rendering as TeX
+## &lt;p&gt;&lt;span class=&quot;math inline&quot;&gt;$\sum_{i=0}^{10}{i}$&lt;/span&gt;&lt;/p&gt;</code></pre>
+</div>
+<div id="mathjax" class="section level1">
+<h1>mathjax</h1>
+<p>数式を<code>\(\)</code>とか<code>\[\]</code>で囲んでからSpanに入れる。</p>
+<pre class="bash"><code>pandoc -t html --mathjax &lt;&lt;&lt; &quot;$\alpha$&quot;
+pandoc -t html --mathjax &lt;&lt;&lt; &quot;\$$\alpha\$$&quot;
+## &lt;p&gt;&lt;span class=&quot;math inline&quot;&gt;\(\alpha\)&lt;/span&gt;&lt;/p&gt;
+## &lt;p&gt;&lt;span class=&quot;math display&quot;&gt;\[\alpha\]&lt;/span&gt;&lt;/p&gt;</code></pre>
+</div>
+<div id="mathml" class="section level1">
+<h1>mathml</h1>
+<p>ユニコード文字に置換したり、<code>math</code>要素に入れたり、何かと異色。</p>
+<pre class="bash"><code>pandoc -t html --mathml &lt;&lt;&lt; &quot;$\alpha$&quot;
+pandoc -t html --mathml &lt;&lt;&lt; &quot;\$$\alpha\$$&quot;
+## &lt;p&gt;&lt;math display=&quot;inline&quot; xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot;&gt;&lt;semantics&gt;&lt;mi&gt;α&lt;/mi&gt;&lt;annotation encoding=&quot;application/x-tex&quot;&gt;\alpha&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/p&gt;
+## &lt;p&gt;&lt;math display=&quot;block&quot; xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot;&gt;&lt;semantics&gt;&lt;mi&gt;α&lt;/mi&gt;&lt;annotation encoding=&quot;application/x-tex&quot;&gt;\alpha&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/p&gt;</code></pre>
+</div>
+<div id="webtex" class="section level1">
+<h1>webtex</h1>
+<p>数式をURLエンコードしてWeb API経由で画像化する。アクセシビリティの観点から、代替文に数式が文字列として入る。</p>
+<pre class="bash"><code>pandoc -t html --webtex &lt;&lt;&lt; &quot;$\alpha$&quot;
+pandoc -t html --webtex &lt;&lt;&lt; &quot;\$$\alpha\$$&quot;
+## &lt;p&gt;&lt;img style=&quot;vertical-align:middle&quot; src=&quot;https://latex.codecogs.com/png.latex?%5Calpha&quot; alt=&quot;\alpha&quot; title=&quot;\alpha&quot; /&gt;&lt;/p&gt;
+## &lt;p&gt;&lt;br /&gt;&lt;img style=&quot;vertical-align:middle&quot; src=&quot;https://latex.codecogs.com/png.latex?%5Calpha&quot; alt=&quot;\alpha&quot; title=&quot;\alpha&quot; /&gt;&lt;br /&gt;&lt;/p&gt;</code></pre>
+</div>
+<div id="katex" class="section level1">
+<h1>katex</h1>
+<p>数式をそのままSpanで囲う</p>
+<pre class="bash"><code>pandoc -t html --katex &lt;&lt;&lt; &quot;$\alpha$&quot;
+pandoc -t html --katex &lt;&lt;&lt; &quot;\$$\alpha\$$&quot;
+## &lt;p&gt;&lt;span class=&quot;math inline&quot;&gt;\alpha&lt;/span&gt;&lt;/p&gt;
+## &lt;p&gt;&lt;span class=&quot;math display&quot;&gt;\alpha&lt;/span&gt;&lt;/p&gt;</code></pre>
+</div>
+<div id="gladtex" class="section level1">
+<h1>gladtex</h1>
+<p>数式を<code>eq</code>要素で囲う。</p>
+<pre class="bash"><code>pandoc -t html --gladtex &lt;&lt;&lt; &quot;$\alpha$&quot;
+pandoc -t html --gladtex &lt;&lt;&lt; &quot;\$$\alpha\$$&quot;
+## &lt;p&gt;&lt;eq env=&quot;math&quot;&gt;\alpha&lt;/eq&gt;&lt;/p&gt;
+## &lt;p&gt;&lt;eq env=&quot;displaymath&quot;&gt;\alpha&lt;/eq&gt;&lt;/p&gt;</code></pre>
+</div>
