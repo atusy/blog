@@ -1,0 +1,51 @@
+---
+title: RStudio PBCのテーブルコンテストに投稿しました
+author: ~
+date: '2020-11-01'
+slug: rstudio-table-contest
+categories: [R]
+tags: [ftExtra]
+---
+
+<link href="/rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
+
+
+<p>2019年のShinyコンテストに続き、2020年は表コンテストが開催されました（<a href="https://blog.rstudio.com/2020/09/15/announcing-the-2020-rstudio-table-contest/">開催案内</a>）。実用的なのからネタなものまで幅広くテーブルを募るもので、投稿期間は9/15から10/31でした。大枠としては、</p>
+<ol style="list-style-type: decimal">
+<li><strong>Single Table Example</strong>: 面白い構造をした表、便利な機能や特殊な機能を使った表、特定の分野で用いられる表など</li>
+<li><strong>Tutorial</strong>: パッケージの機能紹介を通して素敵な表を組む方法をまとめる</li>
+<li><strong>Other</strong></li>
+</ol>
+<p>で、更に表の形式として</p>
+<ul>
+<li>静的なHTML</li>
+<li>動的なHTML (JavaScriptを使ったもの)</li>
+<li>印刷物</li>
+<li>shiny</li>
+</ul>
+<p>という分類もあり、組み合わせれば12通りの枠があります。</p>
+<p>私は<strong>ftExtra</strong>パッケージの宣伝を兼ねて、vignetteを<strong>Tutorial</strong>の<strong>静的なHTML</strong>枠で投稿しました。
+<strong>ftExtra</strong>パッケージの最大のウリは、<strong>flextable</strong>パッケージで表を組む時にマークダウンを利用可能にするものです。しかし、マークダウン記法のサポート範囲に不満があったので、機能強化から始めました。間に合うか冷や冷やしましたが、10/31にOsaka.Rとしてもくもく会を開催することで、追い込みをかけました。</p>
+<p>投稿すると↓のように、RStudio Communityへの投稿という扱いになるようです。</p>
+<blockquote>
+<p><a href="https://community.rstudio.com/t/format-columns-as-markdown-with-the-flextable-and-ftextra-packages-table-contest-submission/86497" class="uri">https://community.rstudio.com/t/format-columns-as-markdown-with-the-flextable-and-ftextra-packages-table-contest-submission/86497</a></p>
+</blockquote>
+<p>掲示板形式で他のユーザーからの反応が貰えるのが嬉しいですね。私はShinyコンテストの受賞者から賞賛を受けてめっちゃテンションがあがってます。もっとLikeが増えると嬉しいな！</p>
+<p>コンテストの結果がいつ出るかは不明。開催案内によると景品は以下の通り。</p>
+<ul>
+<li>優秀賞
+<ul>
+<li>shinyapps.ioのベーシックプランまたはRStudio.Cloud Premiumを1年無料で利用する権利</li>
+<li>RStudioのグッズ$200分。Tシャツ、書籍、マグが選べるもののアメリカ国内限定らしい</li>
+</ul></li>
+<li>佳作
+<ul>
+<li>RStudioのパッケージと、表作りに便利なパッケージのhex stickerなど</li>
+</ul></li>
+</ul>
+<p>優秀賞の景品は持て余すものや、もらえないものがあるので、佳作をとれると嬉しいなあ（笑）</p>
+<blockquote>
+<p>表作りに便利なパッケージ</p>
+</blockquote>
+<p>とはおそらく、<strong>DT</strong>、<strong>gt</strong>、<strong>reactable</strong>、<strong>flextable</strong>、<strong>huxtable</strong>のこと。これらのパッケージの作者は本コンテストの審査員をしているそうです。</p>
