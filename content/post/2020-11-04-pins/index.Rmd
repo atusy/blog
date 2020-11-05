@@ -1,0 +1,85 @@
+---
+title: pinsパッケージならリモートファイルをローカルと別のリモートキャッシュできる
+author: ~
+date: '2020-11-04'
+slug: pins
+categories: [R]
+tags: [pins]
+---
+
+さわりのさわりなので、詳しくは[公式](https://pins.rstudio.com/)を参照してね。
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+`pins::pin`関数を使うと、Web上のリソースをキャッシュできる。
+デフォルトではローカルにキャッシュする。
+使い方は簡単で、関数に与えるURLを`pins::pin`関数でラッピングしておくだけ。
+
+```{r}
+url_penguins <- file.path(
+  "https://raw.githubusercontent.com",
+  "allisonhorst/palmerpenguins",
+  "master/inst/extdata/penguins.csv"
+)
+
+data.table::fread(pins::pin(url_penguins))
+```
+
+`pins::pin`関数はローカル上のキャッシュへのパスを返す。
+
+```{r}
+pins::pin(url_penguins)
+```
+
+2回目以降に同じURLに対して`pins::pin`関数を実行すると、
+
+- キャッシュがあるか
+- オンラインか
+- キャッシュが最新か
+
+を確認して、適宜キャッシュを更新してくれる。
+キャッシュを使える場合はダウンロードしない分高速。
+オフラインでも作業を継続できるのも便利ですね。
+
+また、リモートに「も」キャッシュしておけます。
+これにより、
+
+- キャッシュの共有
+- ソース消滅対策
+
+ができます。
+公式なキャッシュ先としては以下に対応。
+
+- Azure
+- DigitalOcean
+- GitHub
+- Google Cloud
+- Kaggle
+- RStudio Connect
+- S3
+
+GitHubの場合は
+
+1. キャッシュ保存用のレポジトリを作成
+    - 分析用のレポジトリとは分けておくといい。
+        - どうせ`pins::pin`関数でキャッシュする
+        - `git`の差分の重さに悩まずに済む
+1. Personal Access Tokenを発行して、Rに登録
+    - 登録は`Sys.setenv(GITHUB_PAT="<PAT>")`が簡単
+1. 以下のようにしてキャッシュする
+    - この場合も`pins::pin`関数はローカルキャッシュのパスを返すことに注目
+
+```{r}
+pins::board_register("github", repo = "atusy/pins-cache-example")
+
+url_penguins <- file.path(
+  "https://raw.githubusercontent.com",
+  "allisonhorst/palmerpenguins",
+  "master/inst/extdata/penguins.csv"
+)
+print(pins::pin(url_penguins, board="github"))
+```
+
+Enjoy!!
