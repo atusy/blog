@@ -1,0 +1,105 @@
+---
+title: pinsパッケージならリモートファイルをローカルと別のリモートキャッシュできる
+author: ~
+date: '2020-11-04'
+slug: pins
+categories: [R]
+tags: [pins]
+---
+
+<link href="index_files/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="index_files/anchor-sections/anchor-sections.js"></script>
+
+
+<p>さわりのさわりなので、詳しくは<a href="https://pins.rstudio.com/">公式</a>を参照してね。</p>
+<p><code>pins::pin</code>関数を使うと、Web上のリソースをキャッシュできる。
+デフォルトではローカルにキャッシュする。
+使い方は簡単で、関数に与えるURLを<code>pins::pin</code>関数でラッピングしておくだけ。</p>
+<pre class="r"><code>url_penguins &lt;- file.path(
+  &quot;https://raw.githubusercontent.com&quot;,
+  &quot;allisonhorst/palmerpenguins&quot;,
+  &quot;master/inst/extdata/penguins.csv&quot;
+)
+
+data.table::fread(pins::pin(url_penguins))
+#&gt;        species    island bill_length_mm bill_depth_mm flipper_length_mm
+#&gt;   1:    Adelie Torgersen           39.1          18.7               181
+#&gt;   2:    Adelie Torgersen           39.5          17.4               186
+#&gt;   3:    Adelie Torgersen           40.3          18.0               195
+#&gt;   4:    Adelie Torgersen             NA            NA                NA
+#&gt;   5:    Adelie Torgersen           36.7          19.3               193
+#&gt;  ---                                                                   
+#&gt; 340: Chinstrap     Dream           55.8          19.8               207
+#&gt; 341: Chinstrap     Dream           43.5          18.1               202
+#&gt; 342: Chinstrap     Dream           49.6          18.2               193
+#&gt; 343: Chinstrap     Dream           50.8          19.0               210
+#&gt; 344: Chinstrap     Dream           50.2          18.7               198
+#&gt;      body_mass_g    sex year
+#&gt;   1:        3750   male 2007
+#&gt;   2:        3800 female 2007
+#&gt;   3:        3250 female 2007
+#&gt;   4:          NA   &lt;NA&gt; 2007
+#&gt;   5:        3450 female 2007
+#&gt;  ---                        
+#&gt; 340:        4000   male 2009
+#&gt; 341:        3400 female 2009
+#&gt; 342:        3775   male 2009
+#&gt; 343:        4100   male 2009
+#&gt; 344:        3775 female 2009</code></pre>
+<p><code>pins::pin</code>関数はローカル上のキャッシュへのパスを返す。</p>
+<pre class="r"><code>pins::pin(url_penguins)</code></pre>
+<p>2回目以降に同じURLに対して<code>pins::pin</code>関数を実行すると、</p>
+<ul>
+<li>キャッシュがあるか</li>
+<li>オンラインか</li>
+<li>キャッシュが最新か</li>
+</ul>
+<p>を確認して、適宜キャッシュを更新してくれる。
+キャッシュを使える場合はダウンロードしない分高速。
+オフラインでも作業を継続できるのも便利ですね。</p>
+<p>また、リモートに「も」キャッシュしておけます。
+これにより、</p>
+<ul>
+<li>キャッシュの共有</li>
+<li>ソース消滅対策</li>
+</ul>
+<p>ができます。
+公式なキャッシュ先としては以下に対応。</p>
+<ul>
+<li>Azure</li>
+<li>DigitalOcean</li>
+<li>GitHub</li>
+<li>Google Cloud</li>
+<li>Kaggle</li>
+<li>RStudio Connect</li>
+<li>S3</li>
+</ul>
+<p>GitHubの場合は</p>
+<ol style="list-style-type: decimal">
+<li>キャッシュ保存用のレポジトリを作成
+<ul>
+<li>分析用のレポジトリとは分けておくといい。
+<ul>
+<li>どうせ<code>pins::pin</code>関数でキャッシュする</li>
+<li><code>git</code>の差分の重さに悩まずに済む</li>
+</ul></li>
+</ul></li>
+<li>Personal Access Tokenを発行して、Rに登録
+<ul>
+<li>登録は<code>Sys.setenv(GITHUB_PAT="&lt;PAT&gt;")</code>が簡単</li>
+</ul></li>
+<li>以下のようにしてキャッシュする
+<ul>
+<li>この場合も<code>pins::pin</code>関数はローカルキャッシュのパスを返すことに注目</li>
+</ul></li>
+</ol>
+<pre class="r"><code>pins::board_register(&quot;github&quot;, repo = &quot;atusy/pins-cache-example&quot;)
+
+url_penguins &lt;- file.path(
+  &quot;https://raw.githubusercontent.com&quot;,
+  &quot;allisonhorst/palmerpenguins&quot;,
+  &quot;master/inst/extdata/penguins.csv&quot;
+)
+print(pins::pin(url_penguins, board=&quot;github&quot;))
+#&gt; [1] &quot;/home/rstudio/.cache/pins/github/penguins/penguins.csv&quot;</code></pre>
+<p>Enjoy!!</p>
