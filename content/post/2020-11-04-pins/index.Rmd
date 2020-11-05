@@ -24,13 +24,13 @@ url_penguins <- file.path(
   "master/inst/extdata/penguins.csv"
 )
 
-data.table::fread(pins::pin(url_penguins))
+str(data.table::fread(pins::pin(url_penguins)))
 ```
 
 `pins::pin`関数はローカル上のキャッシュへのパスを返す。
 
 ```{r}
-pins::pin(url_penguins)
+print(pins::pin(url_penguins))
 ```
 
 2回目以降に同じURLに対して`pins::pin`関数を実行すると、

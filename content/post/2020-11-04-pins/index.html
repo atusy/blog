@@ -21,33 +21,20 @@ tags: [pins]
   &quot;master/inst/extdata/penguins.csv&quot;
 )
 
-data.table::fread(pins::pin(url_penguins))
-#&gt;        species    island bill_length_mm bill_depth_mm flipper_length_mm
-#&gt;   1:    Adelie Torgersen           39.1          18.7               181
-#&gt;   2:    Adelie Torgersen           39.5          17.4               186
-#&gt;   3:    Adelie Torgersen           40.3          18.0               195
-#&gt;   4:    Adelie Torgersen             NA            NA                NA
-#&gt;   5:    Adelie Torgersen           36.7          19.3               193
-#&gt;  ---                                                                   
-#&gt; 340: Chinstrap     Dream           55.8          19.8               207
-#&gt; 341: Chinstrap     Dream           43.5          18.1               202
-#&gt; 342: Chinstrap     Dream           49.6          18.2               193
-#&gt; 343: Chinstrap     Dream           50.8          19.0               210
-#&gt; 344: Chinstrap     Dream           50.2          18.7               198
-#&gt;      body_mass_g    sex year
-#&gt;   1:        3750   male 2007
-#&gt;   2:        3800 female 2007
-#&gt;   3:        3250 female 2007
-#&gt;   4:          NA   &lt;NA&gt; 2007
-#&gt;   5:        3450 female 2007
-#&gt;  ---                        
-#&gt; 340:        4000   male 2009
-#&gt; 341:        3400 female 2009
-#&gt; 342:        3775   male 2009
-#&gt; 343:        4100   male 2009
-#&gt; 344:        3775 female 2009</code></pre>
+str(data.table::fread(pins::pin(url_penguins)))
+#&gt; Classes &#39;data.table&#39; and &#39;data.frame&#39;:   344 obs. of  8 variables:
+#&gt;  $ species          : chr  &quot;Adelie&quot; &quot;Adelie&quot; &quot;Adelie&quot; &quot;Adelie&quot; ...
+#&gt;  $ island           : chr  &quot;Torgersen&quot; &quot;Torgersen&quot; &quot;Torgersen&quot; &quot;Torgersen&quot; ...
+#&gt;  $ bill_length_mm   : num  39.1 39.5 40.3 NA 36.7 39.3 38.9 39.2 34.1 42 ...
+#&gt;  $ bill_depth_mm    : num  18.7 17.4 18 NA 19.3 20.6 17.8 19.6 18.1 20.2 ...
+#&gt;  $ flipper_length_mm: int  181 186 195 NA 193 190 181 195 193 190 ...
+#&gt;  $ body_mass_g      : int  3750 3800 3250 NA 3450 3650 3625 4675 3475 4250 ...
+#&gt;  $ sex              : chr  &quot;male&quot; &quot;female&quot; &quot;female&quot; NA ...
+#&gt;  $ year             : int  2007 2007 2007 2007 2007 2007 2007 2007 2007 2007 ...
+#&gt;  - attr(*, &quot;.internal.selfref&quot;)=&lt;externalptr&gt;</code></pre>
 <p><code>pins::pin</code>関数はローカル上のキャッシュへのパスを返す。</p>
-<pre class="r"><code>pins::pin(url_penguins)</code></pre>
+<pre class="r"><code>print(pins::pin(url_penguins))
+#&gt; [1] &quot;/home/rstudio/.cache/pins/local/penguins/penguins.csv&quot;</code></pre>
 <p>2回目以降に同じURLに対して<code>pins::pin</code>関数を実行すると、</p>
 <ul>
 <li>キャッシュがあるか</li>
