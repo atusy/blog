@@ -82,4 +82,8 @@ url_penguins <- file.path(
 print(pins::pin(url_penguins, board="github"))
 ```
 
+GitHubではここにキャッシュされてます。
+
+> https://github.com/atusy/pins-cache-example/tree/master/penguins
+
 Enjoy!!
