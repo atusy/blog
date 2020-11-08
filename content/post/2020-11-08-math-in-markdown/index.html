@@ -1,0 +1,51 @@
+---
+title: R MarkdownやPandocでMarkdown出力する時に数式をレンダリングする
+author: ~
+date: '2020-11-08'
+slug: math-in-markdown
+categories: [R, Pandoc]
+tags: []
+output:
+  blogdown::html_page:
+    mathjax: null
+    pandoc_args: ["--webtex"]
+---
+
+<link href="index_files/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="index_files/anchor-sections/anchor-sections.js"></script>
+
+
+<p>R MarkdownやPandocは数式をレンダリングする方法をいくつか提供しています<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>。
+代表的な方法にMathJaxやKaTeXがありますが、これらはJavaScriptで実装されているため、
+出力形式がマークダウンで、ビューアーがGitHubのような場合、利用できません。</p>
+<p>そこでWebTexです。
+これなら数式を画像として挿入するため、マークダウン形式であろうと数式をレンダリングできます。</p>
+<p>たとえば1から10までの総和の式をLaTeX記法で記述しておくと、続く画像のようにレンダリングされます。
+レンダリングされた数式を右クリックすると、画像として保存できるので確かめてみてください。</p>
+<pre class="markdown"><code>$$
+\sum_{i=1}^{10}{i}
+$$</code></pre>
+<p><br /><img style="vertical-align:middle" src="https://latex.codecogs.com/png.latex?%0A%5Csum_%7Bi%3D1%7D%5E%7B10%7D%7Bi%7D%0A" alt="
+\sum_{i=1}^{10}{i}
+" title="
+\sum_{i=1}^{10}{i}
+" /><br /></p>
+<p>使い方は簡単です。
+Pandocを直接実行する場合はコマンドオプションに<code>--webtex</code>を足します。</p>
+<pre class="bash"><code>pandoc -t markdown --webtex &lt;&lt;&lt; &quot;$\sum_{i=1}^{10}{i}$&quot;</code></pre>
+<p>R Markdownも内部ではPandocを呼んでいるので、Pandocに<code>--webtex</code>オプションが渡るようにします。
+たとえば<code>github_document</code>関数を用いてマークダウンを出力する際は、
+<code>pandoc_args</code>引数に<code>"--webtex"</code>を指定します。
+<code>md_document</code>関数などを用いる場合も同様です。</p>
+<pre class="yaml"><code>output:
+  github_document:
+    pandoc_args: &quot;--webtex&quot;</code></pre>
+<p>この機能、PandocのドキュメントではHTMLにおける数式レンダリング方法として紹介されています。
+マークダウン形式でも利用可能と補足されているものの、ミスリーディングな感が否めません。</p>
+<p>Enjoy!!</p>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://www.pandoc.org/MANUAL.html#math-rendering-in-html" class="uri">https://www.pandoc.org/MANUAL.html#math-rendering-in-html</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
