@@ -1,0 +1,39 @@
+---
+title: R MarkdownやPandocでMarkdown出力する時に数式をベクター画像化する
+author: ~
+date: '2020-11-15'
+slug: pandoc-webtex-svg
+categories: []
+tags: []
+---
+
+`--webtex=https://latex.codecogs.com/svg.latex?`と指定するとSVG画像化した高品質な数式を得られるよ。
+
+## 詳細
+
+先日、R MarkdownやPandocで数式を画像化するには、`--webtex`オプションを使うと紹介しました。
+
+> ![R MarkdownやPandocでMarkdown出力する時に数式をPNG画像化する](https://blog.atusy.net/2020/11/08/math-in-markdown/)
+
+ただし、先日の方法では画質がよくありません。
+
+![](https://latex.codecogs.com/png.latex?\alpha&space;+&space;\frac{2\beta}{\gamma})
+
+Pandocのドキュメントを見直すと、`--webtex=https://latex.codecogs.com/png.latex?`といった書き方をすることで、
+画像化するエンジンを変更できるようです^[<https://www.pandoc.org/MANUAL.html#math-rendering-in-html>
+]。
+つまり、これを良い感じのものに変更すればいい。
+
+ドキュメントの例を頼りに<https://latex.codecogs.com>にアクセスしてみると、ヒントが得られます。
+以下のようにオプションの末尾を`svg.latex?`に変えると、画像がSVG（ベクター画像）になり、拡大縮小も安心してできるようですね。
+
+> `--webtex=https://latex.codecogs.com/svg.latex?`
+
+![<https://latex.codecogs.com/svg.latex?\alpha&space;+&space;\frac{2\beta}{\gamma}>](https://latex.codecogs.com/svg.latex?\alpha&space;+&space;\frac{2\beta}{\gamma})
+
+ちなみに、`gif.latex`でGIF画像にしたり、LaTeXコマンド風に`\dpi{400}`などとして解像度を調整することも可能。
+ただ、画像そのものが大きくなってしまうので、調整が必要です。
+
+![<https://latex.codecogs.com/gif.latex?\dpi{400}\alpha&space;+&space;\frac{2\beta}{\gamma}>](https://latex.codecogs.com/gif.latex?\dpi{400}\alpha&space;+&space;\frac{2\beta}{\gamma})
+
+Enjoy!

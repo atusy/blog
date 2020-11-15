@@ -1,0 +1,51 @@
+---
+title: R MarkdownやPandocでMarkdown出力する時に数式をベクター画像化する
+author: ~
+date: '2020-11-15'
+slug: pandoc-webtex-svg
+categories: []
+tags: []
+---
+
+<link href="index_files/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="index_files/anchor-sections/anchor-sections.js"></script>
+
+
+<p><code>--webtex=https://latex.codecogs.com/svg.latex?</code>と指定するとSVG画像化した高品質な数式を得られるよ。</p>
+<div id="詳細" class="section level2">
+<h2>詳細</h2>
+<p>先日、R MarkdownやPandocで数式を画像化するには、<code>--webtex</code>オプションを使うと紹介しました。</p>
+<blockquote>
+<div class="figure">
+<img src="https://blog.atusy.net/2020/11/08/math-in-markdown/" alt="" />
+<p class="caption">R MarkdownやPandocでMarkdown出力する時に数式をPNG画像化する</p>
+</div>
+</blockquote>
+<p>ただし、先日の方法では画質がよくありません。</p>
+<p><img src="https://latex.codecogs.com/png.latex?\alpha&amp;space;+&amp;space;\frac%7B2\beta%7D%7B\gamma%7D" /></p>
+<p>Pandocのドキュメントを見直すと、<code>--webtex=https://latex.codecogs.com/png.latex?</code>といった書き方をすることで、
+画像化するエンジンを変更できるようです<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>。
+つまり、これを良い感じのものに変更すればいい。</p>
+<p>ドキュメントの例を頼りに<a href="https://latex.codecogs.com" class="uri">https://latex.codecogs.com</a>にアクセスしてみると、ヒントが得られます。
+以下のようにオプションの末尾を<code>svg.latex?</code>に変えると、画像がSVG（ベクター画像）になり、拡大縮小も安心してできるようですね。</p>
+<blockquote>
+<p><code>--webtex=https://latex.codecogs.com/svg.latex?</code></p>
+</blockquote>
+<div class="figure">
+<img src="https://latex.codecogs.com/svg.latex?\alpha&amp;space;+&amp;space;\frac%7B2\beta%7D%7B\gamma%7D" alt="" />
+<p class="caption"><a href="https://latex.codecogs.com/svg.latex?\alpha&amp;space;+&amp;space;\frac%7B2\beta%7D%7B\gamma%7D" class="uri">https://latex.codecogs.com/svg.latex?\alpha&amp;space;+&amp;space;\frac{2\beta}{\gamma}</a></p>
+</div>
+<p>ちなみに、<code>gif.latex</code>でGIF画像にしたり、LaTeXコマンド風に<code>\dpi{400}</code>などとして解像度を調整することも可能。
+ただ、画像そのものが大きくなってしまうので、調整が必要です。</p>
+<div class="figure">
+<img src="https://latex.codecogs.com/gif.latex?\dpi%7B400%7D\alpha&amp;space;+&amp;space;\frac%7B2\beta%7D%7B\gamma%7D" alt="" />
+<p class="caption"><a href="https://latex.codecogs.com/gif.latex?\dpi%7B400%7D\alpha&amp;space;+&amp;space;\frac%7B2\beta%7D%7B\gamma%7D" class="uri">https://latex.codecogs.com/gif.latex?\dpi{400}\alpha&amp;space;+&amp;space;\frac{2\beta}{\gamma}</a></p>
+</div>
+<p>Enjoy!</p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://www.pandoc.org/MANUAL.html#math-rendering-in-html" class="uri">https://www.pandoc.org/MANUAL.html#math-rendering-in-html</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
