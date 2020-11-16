@@ -1,0 +1,124 @@
+---
+title: lambda-scan
+author: ~
+date: '2020-11-16'
+slug: lambda-scan
+categories: []
+tags: []
+---
+
+LASSO
+
+λスキャン
+
+```{r}
+set.seed(0)
+n_dense <- 10
+n_sparse <- 90
+n_features <- n_dense + n_sparse
+n_instance <- 50
+weights <- runif(n_features) * sample(c(rep(1, n_dense), rep(0, n_sparse)))
+X <- matrix(rnorm(n_features * n_instance), nrow = n_instance, ncol = n_features)
+y <- colSums(t(X) * weights)
+fit_lasso <- glmnet::cv.glmnet(X, y, standardize = FALSE)
+plot(fit_lasso)
+```
+
+
+```{r}
+data_df <- as.data.frame(cbind(X, y))
+cv_df <- rsample::vfold_cv(data_df, v = 10)
+cv_df
+```
+```{r}
+linear_model <- parsnip::linear_reg() %>%
+  parsnip::set_engine("lm") %>%
+  parsnip::set_mode("regression") %>%
+  parsnip::translate()
+
+l1_linear_model <- parsnip::linear_reg() %>%
+  parsnip::set_engine("lasso") %>%
+  parsnip::set_mode("regression") %>%
+  parsnip::translate()
+
+write_recipe <- function(
+  data = data_df,
+  weights = fit_lasso$glmnet.fit$beta[, 1]
+) {
+  names_sparse <- names(weights)[weights == 0]
+  recipes::recipe(data, y ~ .) %>%
+    recipes::step_mutate_at(
+      names_sparse,
+      fn = function(...) NULL
+    )
+}
+
+fit_fold <- function(fold = cv_df$splits[[1L]]) {
+  parsnip::fit(linear_model, y ~ ., data = rsample::analysis(fold))
+}
+
+predict_fold <- function(fitting, fold = cv_df$splits[[1L]]) {
+  predict(fitting, rsample::assessment(fold))
+}
+
+evaluate_fold <- function(fold, prediction) {
+  prediction %>%
+    mutate(.truth = rsample::assessment(fold)$y) %>%
+    metrics(".truth", ".pred")
+}
+
+cv_result <- tune::fit_resamples(
+  linear_model,
+  write_recipe(),
+  resamples = cv_df,
+  metrics = yardstick::metric_set(yardstick::rmse)
+)
+```
+
+```{r}
+pipeline <- function(lambda = fit_lasso$lambda[1], weights = fit_lasso$glmnet.fit$beta[, 1]) {
+  tune::fit_resamples(
+    linear_model,
+    write_recipe(weights = weights),
+    resamples = cv_df,
+    metrics = yardstick::metric_set(yardstick::rmse)
+  ) %>%
+    mutate(
+      rmse = map_dbl(.metrics, ".estimate"),
+      lambda = lambda
+    )
+}
+
+lambda_scan <- function(fit_lasso) {
+  fit_lasso$lambda %>%
+    seq_along %>%
+    map_dfr(
+      function(i) pipeline(fit_lasso$lambda[i], fit_lasso$glmnet.fit$beta[, i])
+    )
+}
+```
+
+```{r}
+scanned <- lambda_scan(fit_lasso)
+```
+
+```{r}
+ggplot(scanned) +
+  aes(log(lambda), rmse) +
+  geom_point()
+```
+
+```{r}
+summary_scanned <- scanned %>%
+  transmute(lambda = lambda, mse = rmse * rmse) %>%
+  group_by(lambda) %>%
+  summarise(cvm = mean(mse), cvsd = rev(sd(mse)), .groups = "drop") %>%
+  mutate(cvup = cvm + cvsd, cvlo = cvm - cvsd) %>%
+  arrange(-lambda) %>%
+  as.list()
+fit_lambdascan <- fit_lasso
+fit_lambdascan[names(summary_scanned)] <- summary_scanned
+plot(fit_lambdascan)
+```
+
+
