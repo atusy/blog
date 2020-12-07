@@ -1,0 +1,134 @@
+---
+title: "Luaフィルタがアツイ2020"
+author: ~
+date: '2020-12-07'
+slug: lua-filter-is-hot
+categories: [Pandoc]
+tags: [Lua]
+---
+
+<link href="index_files/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="index_files/anchor-sections/anchor-sections.js"></script>
+
+
+<p><a href="https://adventar.org/calendars/4963">Pandoc Advent Calendar 2020</a>の12/7の記事です。</p>
+<p>多様なドキュメントフォーマット間を変換できるPandocでは、
+「フィルター」という機能を使って、変換処理に割り込みをかけることができます。</p>
+<ul>
+<li>特定の文字列を置換</li>
+<li>画像の中央寄せ</li>
+<li>変換日時のメタデータ化</li>
+</ul>
+<p>などなど、<a href="https://pandoc.org/lua-filters.html">公式ドキュメント</a>にも用例がいっぱいです。</p>
+<p>Luaフィルタと言うくらいなので、Luaじゃない言語でフィルタを書くこともできますが、
+Luaフィルタは</p>
+<ol style="list-style-type: decimal">
+<li>環境依存しにくい
+<ul>
+<li>PandocがLuaインタプリタを内蔵しているので、実行環境をユーザーが用意する必要なし。</li>
+</ul></li>
+<li>高速
+<ul>
+<li>PandocにJSONを中間出力させてJSONを編集しPandocに入力し直す。</li>
+<li>Luaフィルタでは中間処理におけるファイルの入出力が不要。</li>
+</ul></li>
+</ol>
+<p>と2大特典がついてきます。
+これは使うしかないですね。</p>
+<p>Pandoc 2.xから使えるようになった機能ですが、こなれてきたからか、最近はどんどんフィルタ集が出てますね。
+公式は勿論、オレオレフィルタ集や、フィルタを書きやすくするVS codeアドインなんかも出てます。</p>
+<ul>
+<li>Lua filter
+<ul>
+<li>公式 <a href="https://github.com/pandoc/lua-filters" class="uri">https://github.com/pandoc/lua-filters</a></li>
+<li>sky-y式 <a href="https://github.com/sky-y/sky-y-lua-filters" class="uri">https://github.com/sky-y/sky-y-lua-filters</a></li>
+<li>atusy式 <a href="https://github.com/atusy/lua-filters" class="uri">https://github.com/atusy/lua-filters</a></li>
+</ul></li>
+<li>VS codeアドイン
+<ul>
+<li>Luaフィルタスニペット by niszet氏
+<a href="https://github.com/niszet/pandoc-lua-snippet" class="uri">https://github.com/niszet/pandoc-lua-snippet</a></li>
+</ul></li>
+</ul>
+<p>やはり使うしかないですね。
+使い方は簡単。
+Luaフィルタ集から使いたいフィルタを探してきて、<code>pandoc</code>を唱える時に、</p>
+<pre><code>--lua-filter filter.lua</code></pre>
+<p>と<code>--lua-filter</code>オプションにフィルタのファイルパスを与えましょう。</p>
+<div id="atusy式luaフィルタ集" class="section level1">
+<h1>atusy式Luaフィルタ集</h1>
+<p>公式とか、sky-yさんのとか置いといて、とりあえず私のオレオレフィルタを紹介しよう。
+アドカレ空いてるし、誰か他のも紹介してよ。</p>
+<p>ここ（<a href="https://github.com/atusy/lua-filters/tree/master/lua" class="uri">https://github.com/atusy/lua-filters/tree/master/lua</a>）に溜め込んでるからStarしてね。</p>
+<div id="脚注たくさん書きたいならarrange-footnotes.lua" class="section level2">
+<h2>脚注たくさん書きたいなら<code>arrange-footnotes.lua</code></h2>
+<p>複数の脚注を連続してつけたい時、間の読点を上付きにするの、面倒ですよね。
+そもそも入力も面倒ですよね。</p>
+<pre><code>text[^foo]^, ^[^bar]</code></pre>
+<p>このフィルタを使うと、↓のようにスペース区切りにしておくだけでOK。
+自動的に上付きの読点を挟んでくれます。</p>
+<pre><code>text[^foo] [^bar].</code></pre>
+<p>カンマじゃなくて、点がいいよー、という人は、<code>sep-footnotes</code>メタデータを指定しましょう。</p>
+</div>
+<div id="コードに自動で行番号を振りたいならauto-number-lines.lua" class="section level2">
+<h2>コードに自動で行番号を振りたいなら<code>auto-number-lines.lua</code></h2>
+<p>markdownのコードブロックに<code>numberLines</code>クラスを与え、HTMLやPDFに出力すると、行番号が表示されます。
+自動化したい人はLuaフィルタ使おう。</p>
+</div>
+<div id="同じ文章を使い周したいならbookdown-reference-text.lua" class="section level2">
+<h2>同じ文章を使い周したいなら<code>bookdown-reference-text.lua</code></h2>
+<p>文字を変数に保存しておいて、好きな場所に埋め込む代物。
+使い方はこんな感じ。</p>
+<pre><code>(ref:text) うんたらかんたら &lt;!--ここは出力されない--&gt;
+
+Aくんが「(ref:text)」言ってたよ。
+&lt;!--ここの`(ref:text)`は`うんたらかんたら`に置換される--&gt;</code></pre>
+<p>なんか未完成だった気がするけど、忘れた。
+名前はRのbookdownパッケージによるマークダウンの拡張機能<code>reference text</code>に由来。
+Rでの実装をLuaフィルタ化した。</p>
+</div>
+<div id="相互参照したいならcrossref.luaは忘れておけ" class="section level2">
+<h2>相互参照したいなら<code>crossref.lua</code>は忘れておけ</h2>
+<p>Rのbookdownパッケージによる相互参照をLuaに移植してみようとしてるやつ。
+とりあえず忘れて、<code>pandoc-crossref</code>っていうLuaじゃないフィルタを使おう。</p>
+</div>
+<div id="コードブロックを折り畳みしたいならfold-code-blocks.lua" class="section level2">
+<h2>コードブロックを折り畳みしたいなら<code>fold-code-blocks.lua</code></h2>
+<p>コードブロックに<code>details</code>クラスを与えておくと、折り畳み可能になるやつ。
+デフォルトで折り畳む。
+<code>show</code>クラスを追加すると、表示状態で開始する。
+<code>summary</code>属性に値を指定すると、折り畳んだ時に表示する文字列を変えられる。</p>
+<p>HTMLの<a href="https://developer.mozilla.org/ja/docs/Web/HTML/Element/details">詳細折りたたみ要素</a>ってやつを使ってるよ。</p>
+</div>
+<div id="数式を画像に出力したいならmath-github.luaは忘れておけ" class="section level2">
+<h2>数式を画像に出力したいなら<code>math-github.lua</code>は忘れておけ</h2>
+<p>数式を画像化したいなら、<code>--webtex</code>オプションを使うといいことは、</p>
+<ul>
+<li><a href="https://blog.atusy.net/2020/11/08/math-in-markdown/">R MarkdownやPandocでMarkdown出力する時に数式をPNG画像化する</a></li>
+<li><a href="https://blog.atusy.net/2020/11/15/pandoc-webtex-svg/">R MarkdownやPandocでMarkdown出力する時に数式をベクター画像化する</a></li>
+</ul>
+<p>あたりで紹介したぞ。</p>
+<p>この存在を知らない時に、GitHubの非公式数式レンダリングエンジンを使うネタを思いついたから使ってみただけだぞ。
+数式をURLエンコードするためにRを呼び出してるから、R使いじゃないとオプション弄らないといけなくて、面倒だぞ。
+忘れていいぞ。</p>
+<p>その内消す。</p>
+</div>
+<div id="数式を無理矢理ユニコード文字で表現したいならmath.lua" class="section level2">
+<h2>数式を無理矢理ユニコード文字で表現したいなら<code>math.lua</code></h2>
+<p>Pandocでマークダウンとか出力する時に、数式をユニコード文字化したい、みたいなニッチな需要向け。
+このフィルタ使うより、<code>--webtex</code>オプション使って画像化するのが素直で良いと思う。</p>
+</div>
+<div id="章番号をつけたいならnumber-sections.lua" class="section level2">
+<h2>章番号をつけたいなら<code>number-sections.lua</code></h2>
+<p>章番号をつけられないフォーマット（マークダウンとか）に章番号をつけたいならこれ。
+rmarkdownパッケージ内では、このフィルタを使って、章番号機能のないフォーマットをなくしたぞ。</p>
+</div>
+<div id="スマートな引用符を使いたいならsmart.lua" class="section level2">
+<h2>スマートな引用符を使いたいなら<code>smart.lua</code></h2>
+<p>smartな出力をできないフォーマット向け。</p>
+<p><code>''</code>が<code>‘’</code>になったり、<code>""</code>が<code>“”</code>になるよ。</p>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>
