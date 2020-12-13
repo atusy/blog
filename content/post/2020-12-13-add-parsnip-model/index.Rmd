@@ -1,0 +1,428 @@
+---
+title: Tidymodelsで使えるモデルの紹介とモデルの追加方法
+author: ~
+date: '2020-12-13'
+slug: add-parsnip-model
+categories: [R]
+tags: [tidymodels, parsnip]
+output:
+  blogdown::html_page:
+    toc: true
+summary: |
+  Tidymodelsが標準で提供するモデルと追加で提供するモデルについて軽く紹介し、更に自前でモデルを組んでみます。
+  [Rアドベントカレンダー](https://qiita.com/advent-calendar/2020/rlang)、12/14の記事です。
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+```
+
+
+[Rアドベントカレンダー](https://qiita.com/advent-calendar/2020/rlang)、12/14の記事です。
+
+# はじめに
+
+**tidymodels**パッケージはTidyverseの流儀に従ってモデリングする環境を提供します。
+魅力は色々とありますが、
+
+1. データの前処理からモデル構築、パラメータチューニング、評価まで、関数・ドキュメント共に充実
+2. パッケージごとに異なるモデルのパラメータを統一
+    - 入力をデータフレームで統一
+    - モデル式をフォーミュラで統一
+    - など
+
+あたりが大きいでしょう。
+
+ただし、現状tidymodelsで扱えるモデルはそう多くはありません。
+足りないモデルがあれば、他のパッケージによるtidymodels用のインターフェース提供を期待するか、自分で用意しなければなりません。
+自分で用意する場合は以下のドキュメントが参考になります。
+
+> How to build a parsnip model \
+> <https://www.tidymodels.org/learn/develop/models>
+
+そこで、本記事では、Tidymodelsが標準で提供するモデルと追加で提供するモデルについて軽く紹介し、
+更に自前でモデルを組んでみます。
+
+今回は試しにhorseshoe回帰を実装してみました。
+これは線型回帰の重みの事前分布に馬蹄分布を用いることで、正則化を行うものです。
+LASSOに比べると、選択された特徴量の重みが小さくなりにくいのが魅力ですね。
+私は以下のスライドで知りました。
+
+> 馬に蹴られるモデリング by [\@NSushi](https://twitter.com/NSushi)氏
+> <https://www.slideshare.net/ShushiNamba/ss-77431488>
+
+実装結果は、
+
+https://github.com/atusy/tidyhorseshoe
+
+にあるます。
+
+# Tidymodelsで利用可能なモデル一覧
+
+**tidymodels**パッケージは複数のパッケージを寄せ集めたメタパッケージです。
+各モデルは、**parsnip**パッケージが提供しています。
+2020年12月13日時点では、以下の表にまとめた範囲のモデルを利用できます。
+
+モデル | 関数 | エンジン
+:-|:-|:-
+勾配ブースト木 | `boost_tree` | xgboost, C5.0, spark
+決定木 | `decision_tree` | rpart, C5.0, spark, 
+線型回帰 | `linear_reg` | lm, glmnet, stan, spark, keras
+ロジスティック回帰 | `logistic_reg` | glm, glmnet, stan, spark, keras
+多変量適応型回帰スプライン法 | `mars` | earth
+単層ニューラルネットワーク | `mlp` | nnet, keras
+多項ロジスティック回帰 | `multinom_reg` | glmnet, nnet, stan, keras
+最近傍法 | `nearest_neighbor` | kknn
+帰無モデル | `null_model` | parsnip
+ランダムフォレスト | `rand_forest` | ranger, randomForest, spark
+生存分析 | `surve_reg` | flexsurv, survival
+SVM (多項式カーネル) | `svm_poly` | kernlab
+SVM (RBFカーネル) | `svm_rbf` | kernlab, liquidSVM
+
+この分け方、個人的には若干の突っ込み所を感じます。
+
+- ロジスティック回帰、多項ロジスティック回帰も線型だろ。kerasを使うと違うのか……？
+- SVM、モデル分ける必要あった？パラメータで分けようよ。
+
+まあ、それは置いておいて、
+
+- 異常検知系のモデルがないなあ
+- glmで使えるの正規分布と二項分布だけだなあ
+- 分位点回帰がないなあ
+
+とか色々と物足りなさを覚えます。
+
+# Tidymodelsのエキストラパッケージで利用可能なモデル
+
+パッケージのメンテナンス性を重視しているのか、
+物足りなさは他パッケージで補うようですね。
+GitHubを見る限り、以下のパッケージを見つけることができました。
+
+モデル | パッケージ
+:-|:-
+混合モデル、階層ベイズ | [multilevelmod](https://github.com/tidymodels/multilevelmod)
+部分的最小二乗回帰 | [plsmod](https://github.com/tidymodels/plsmod)
+ルールベース | [rules](https://github.com/tidymodels/rules)
+ポアソン回帰 | [poissonreg](https://github.com/tidymodels/poissonreg)
+バギング | [bagging](https://github.com/tidymodels/baguette)
+判別分析やナイーブベイズ | [discrim](https://github.com/tidymodels/discrim)
+
+Tidymodels以外からもこういったパッケージは出ているかも知れません（未調査）。
+
+# 自分でモデルのエンジンを用意する
+
+tidymodelsにおいて作成可能な「モデル」は、
+
+- 線型回帰などの枠組みレベル
+- 最小二乗法などの手法レベル
+
+の二段階があります。
+tidymodelsにおいては前者をモデル、後者をエンジンと呼んでいるようです。
+粒度が小さいものの方が考えることが少ないので、今回はエンジン作りに挑戦してみましょう。
+
+ちなみに公式ドキュメントではモデル、エンジンの順で紹介してます。
+
+> How to build a parsnip model \
+> <https://www.tidymodels.org/learn/develop/models>
+
+今回は
+
+1. ドキュメントに沿ってロバスト線型回帰（`MASS::rlm`）の実装
+2. horseshoe回帰（`horseshoe::horseshoe`）の実装
+
+を行います。
+horseshoeを選んだ理由は
+
+- 線型回帰なので、考えることがシンプルそう
+- 引数が`y`（ベクトル）と`X`（行列）なので、フォーミュラで扱えるようにする方法を学べる
+
+です。
+
+## 実装前の注意点
+
+- パッケージ化されている必要あり
+- 関数によってはラッパー関数をパッケージ化する必要あり
+    - `horseshoe::horseshoe`関数がまさにそれだった
+
+## 基本的な手順
+
+実装には最低限、以下の4段階を踏みます。
+
+1. 既存のモデルに新しいエンジンの名前を登録（`set_model_engine`）
+2. エンジンが依存するパッケージを指定（`set_dependency`）
+3. 学習方法の定義（`set_fit`）
+4. 予測方法の定義（`set_pred`）
+
+## ロバスト線型回帰（`MASS::rlm`）
+
+コードはMITライセンスで提供されている公式ドキュメントに由来します。
+
+> https://github.com/tidymodels/tidymodels.org/blob/61031df0a4b6a3531e2aca55db4a0bb814ea4628/content/learn/develop/models/index.Rmarkdown
+
+### 1. エンジン名定義
+
+今回は線型回帰（linear_reg）にロバスト線型回帰（rlm）を追加したいので、
+以下のように引数を指定します。
+
+```{r}
+parsnip::set_model_engine(
+  model = "linear_reg",
+  mode = "regression",
+  eng = "rlm"
+)
+```
+
+`mode`引数は回帰の目的が連続値（`"regression"`）かクラス（`"classification"`）かを指定します。
+
+### 2. 依存関係定義
+
+`rlm`関数はMASSパッケージが提供しているので、以下のように定義します。
+
+```{r}
+parsnip::set_dependency(
+  model = "linear_reg",
+  eng = "rlm",
+  pkg = "MASS"
+)
+```
+
+### 3. 学習方法定義
+
+これまでと同様に`model`、`eng`、`mode`の引数を指定します。
+
+特殊なのは`value`引数でしょう。
+ここには、interface, protect, func, defaultsの4つの名前を持つリストを与えます^[https://www.tidymodels.org/learn/develop/models/#step-3-add-a-fit-module]。
+
+- interface
+    - オリジナル実装の学習用関数が、データをどのように受け取るか指定します。
+        - formula: `formula`引数にモデル式を、`data`引数にデータフレームを入力する場合
+        - data.frame: `x`引数に特徴量のデータフレームを、`y`引数にベクトルを指定する場合
+        - matrix: `x`引数に計画行列を、`y`にベクトルを指定する場合
+    - いずれのinterfaceも引数の名前と順序が固定されている点に注意してください。
+      たとえば引数が`y`と`X`の順であれば、いずれのインターフェースにも摘要しません。
+      その場合、オリジナルの関数をいずれかのインターフェースに適合する関数でラップし、パッケージ化が必要です。
+- protect
+    - ユーザーが指定不能な引数
+        - interfaceが利用する引数
+        - `weights`など重みを指定する引数
+            - 現段階では重み付けに対応していないため
+            - https://github.com/tidymodels/parsnip/issues/136
+        - その他
+    - 例: `c("formula", "data", "weights")`
+- func
+    - オリジナルの実装がどこで定義されているか、パッケージ名と関数名を文字列で指定。
+    - 例: `c(pkg = "MASS", fun = "rlm")`
+- defaults
+    - 引数の既定値を変更したい場合、引数の名前と値をリストで与える
+    - 例: `list()`
+        - 何も変更しない
+
+```{r}
+parsnip::set_fit(
+  model = "linear_reg",
+  eng = "rlm",
+  mode = "regression",
+  value = list(
+    interface = "formula",
+    protect = c("formula", "data", "weights"),
+    func = c(pkg = "MASS", fun = "rlm"),
+    defaults = list()
+  )
+)
+```
+
+### 4. 予測方法定義
+
+くどいですが、予測の定義にも`model`、`eng`、`mode`引数を指定します。
+加えて
+
+- `type`引数
+    - 返り値の型を指定
+    - 例: `"numeric"`
+- `value`引数
+    - 内部での挙動を名前付きリストで指定
+        - `pre`: 前処理用関数または`NULL`
+        - `post`: 後処理用関数または`NULL`
+        - `func`: 予測に使う関数の名前
+            - 例: `c(fun = "predict")`
+        - `args`: tidymodelsから`predict`関数に渡る引数のリスト
+            - `rlang::expr`関数を用いることで、`tidymodels`の内部変数を利用できる。
+                - とりあえず`object = expr(object$fit)`と`newdata = expr(new_data)`はそういうものと思っておこう
+            - 例: `list(object = expr(object$fit), newdata = expr(new_data), type = "response")`
+
+```{r}
+parsnip::set_pred(
+  model = "linear_reg",
+  eng = "rlm",
+  mode = "regression",
+  type = "numeric",
+  value = list(
+    pre = NULL,
+    post = NULL,
+    func = c(fun = "predict"),
+    args =
+      list(
+        object = rlang::expr(object$fit),
+        newdata = rlang::expr(new_data),
+        type = "response"
+      )
+  )
+)
+```
+
+### 5. テスト
+
+```{r}
+library(magrittr)
+parsnip::linear_reg() %>% 
+  parsnip::set_engine("rlm") %>% 
+  parsnip::fit(mpg ~ ., data = mtcars)
+```
+
+## horseshoe回帰（`horseshoe::horseshoe`関数）
+
+前述の通り、
+
+- 線型回帰なので、考えることがシンプルそう
+- 引数が`y`（ベクトル）と`X`（行列）なので、フォーミュラで扱えるようにする方法を学べる
+
+という理由から、`horseshoe::horseshoe`関数のtidymodels化に挑戦しました。
+
+### ハマりポイント
+
+いきなりですが、以下の点でハマりました。
+
+1. interfaceがtidymodelsと整合しないため、オリジナルパッケージでラッパー関数を定義する必要がある
+2. `predict`メソッドが定義されていないため、自前で用意する必要がある
+3. "predictor_indicators"がどうのこうのと言ってエラーを吐くので、`parsnip::set_encoding`関数が必要になった
+4. パッケージ読み込み時にモデルをtidymodelsに登録するには、`.onLoad`関数を使う
+5. パッケージ開発中に`devtools::load`や`devtools::document`すると、その度に`.onLoad`が走って登録済みのモデルを上書きできないとtidymodelsに怒られる。`parsnip::show_engines("linear_reg")`を見て、登録済みなら警告しつつ、登録をスキップする処理を入れておくと良い。
+
+### 実装
+
+説明性重視で、パッケージのコードに比べ、一部簡略化してます。
+
+#### tidymodelsの`interface = "matrix"`に整合するラッパー関数の定義
+
+`horseshoe::horseshoe`関数とtidymodelsのinterfaceは以下のように対立しています。
+
+- `horseshoe::horseshoe`関数は`y`, `X`の順でベクトルと行列を入力する。
+- tidymodelsの`interface = "matrix"`は`x`, `y`の順で行列とベクトルを要求。
+
+そこで、tidymodelsに合わせるために以下のようにラッパー関数を定義します。
+また、`horseshoe::horseshoe`の返り値は`list`で、`predict`総称関数のメソッドを定義しにくいので、`"horseshoe"`クラスを追加しておきます。
+
+```{r}
+horseshoe <- function(x, y, ...) {
+  structure(
+    horseshoe::horseshoe(y = y, X = x, ...),
+    class = c("horseshoe", "list")
+  )
+}
+```
+
+#### predictメソッドの定義
+
+horseshoeクラスオブジェクトに対応する`predict`メソッドを定義します。
+`?horseshoe::horsesho`でExamplesを見ると、`X %*% res$BetaHat`といった具合に予測できるようなので、従います。
+
+```{r}
+predict.horseshoe <- function(object, newdata, ...) {
+  newdata %*% object$BetaHat
+}
+```
+
+BetaHatはパラメータの事後平均値です。
+事後中央値のBetaMedianも利用できます。
+tidyhorseshoeパッケージ内ではBetaMedianをデフォルトとしつつ、BetaHatも利用できるようにしました。
+以下の論文で、Bayesian lassoでは事後中央値を使うのが一般的と知ったためです。
+
+> 保科 (2013) Bayesian lassoによるスパース回帰モデリング \
+> https://www.jstage.jst.go.jp/article/jscswabun/25/2/25_KJ00008761723/_article/-char/ja/
+
+#### Tidymodelsにhorseshoe回帰を追加するための関数を定義
+
+linear_regモデルにhorseshoeエンジンとしてhorseshoe回帰を追加できるようにします。
+`tidyhorseshoe::add_horseshoe`関数として定義しています。
+長いのでコードはリンクを参照してください。
+
+> https://github.com/atusy/tidyhorseshoe/blob/52459f128980b5f2239f5b3ac815be4166fb05cf/R/horseshoe.R#L42-L93
+
+ポイントは
+
+1. エンジンが登録済みなら登録をスキップする
+    - `.onLoad`で自動登録する際、登録済みのエンジンの上書きはエラーになる
+    - `.onDetach`で登録解除する手段が欲しいけどなさそう……
+2. `MASS::rlm`の時と同じ要領で以下を定義する
+    1. エンジン名
+    2. 依存関係
+    3. 学習方法
+    4. 予測方法
+3. 追加で、カテゴリカル変数のエンコーディング方法を定義する
+    - `parsnip::set_encoding`関数を使うらしい。`options`の指定方法が正しいかはよくわかってない。
+    - 例:
+      
+      ```r
+        parsnip::set_encoding(
+          model = "linear_reg",
+          eng = eng,
+          mode = "regression",
+          options = list(
+            predictor_indicators = "traditional",
+            compute_intercept = FALSE,
+            remove_intercept = FALSE,
+            allow_sparse_x = TRUE
+          )
+        )
+      }
+      ```
+
+### テスト
+
+$y = 3x + 3$に従うデータを乱数で用意し、$y = a_0 + a_1 x + a_2 x^2 + a_3 x^3$で回帰してみる。
+
+```{r}
+library(tidyhorseshoe)
+library(magrittr)
+set.seed(0)
+
+x <- runif(4, 0, 5)
+y <- 3 * x + rnorm(length(x), 0, 0.1) + 3
+d <- data.frame(y, x = x, x2 = x * x, x3 = x * x * x)
+
+fitted <- parsnip::linear_reg() %>% 
+  parsnip::set_engine("horseshoe") %>% 
+  parsnip::fit(y ~ ., data = d)
+
+fitted$fit$BetaMedian
+
+cbind(y, predict(fitted, d))
+```
+
+よさそう。
+
+ちなみに、モデル式を `y ~ 0 + .`とすると、y切片が0になる。
+`parsnip::set_encoding`関数で`compute_intercept = FALSE`をよくわからず指定してるけれど、とりあえずはこれでよさそう。
+
+```{r}
+fitted_without_intercept <- 
+  parsnip::linear_reg() %>%
+  parsnip::set_engine("horseshoe") %>% 
+  parsnip::fit(y ~ 0 + ., data = d)
+
+fitted$fit$BetaMedian
+```
+
+# まとめ
+
+Tidymodelsで利用可能なモデルの紹介と、既存のモデルにエンジンを追加する方法を紹介した。
+現状、
+
+- パッケージ化されている関数しか登録できなさそう
+- 結局interfaceの整合性問題に悩まされる場合あり
+
+で、後者にハマるとパッケージを書くところからになって敷居が高い。
+
+
+
+**Enjoy!**

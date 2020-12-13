@@ -1,0 +1,584 @@
+---
+title: Tidymodelsで使えるモデルの紹介とモデルの追加方法
+author: ~
+date: '2020-12-13'
+slug: add-parsnip-model
+categories: [R]
+tags: [tidymodels, parsnip]
+output:
+  blogdown::html_page:
+    toc: true
+summary: |
+  Tidymodelsが標準で提供するモデルと追加で提供するモデルについて軽く紹介し、更に自前でモデルを組んでみます。
+  [Rアドベントカレンダー](https://qiita.com/advent-calendar/2020/rlang)、12/14の記事です。
+---
+
+<link href="index_files/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="index_files/anchor-sections/anchor-sections.js"></script>
+
+<div id="TOC">
+<ul>
+<li><a href="#はじめに">はじめに</a></li>
+<li><a href="#tidymodelsで利用可能なモデル一覧">Tidymodelsで利用可能なモデル一覧</a></li>
+<li><a href="#tidymodelsのエキストラパッケージで利用可能なモデル">Tidymodelsのエキストラパッケージで利用可能なモデル</a></li>
+<li><a href="#自分でモデルのエンジンを用意する">自分でモデルのエンジンを用意する</a><ul>
+<li><a href="#実装前の注意点">実装前の注意点</a></li>
+<li><a href="#基本的な手順">基本的な手順</a></li>
+<li><a href="#ロバスト線型回帰massrlm">ロバスト線型回帰（<code>MASS::rlm</code>）</a><ul>
+<li><a href="#エンジン名定義">1. エンジン名定義</a></li>
+<li><a href="#依存関係定義">2. 依存関係定義</a></li>
+<li><a href="#学習方法定義">3. 学習方法定義</a></li>
+<li><a href="#予測方法定義">4. 予測方法定義</a></li>
+<li><a href="#テスト">5. テスト</a></li>
+</ul></li>
+<li><a href="#horseshoe回帰horseshoehorseshoe関数">horseshoe回帰（<code>horseshoe::horseshoe</code>関数）</a><ul>
+<li><a href="#ハマりポイント">ハマりポイント</a></li>
+<li><a href="#実装">実装</a></li>
+<li><a href="#テスト-1">テスト</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#まとめ">まとめ</a></li>
+</ul>
+</div>
+
+<p><a href="https://qiita.com/advent-calendar/2020/rlang">Rアドベントカレンダー</a>、12/14の記事です。</p>
+<div id="はじめに" class="section level1">
+<h1>はじめに</h1>
+<p><strong>tidymodels</strong>パッケージはTidyverseの流儀に従ってモデリングする環境を提供します。
+魅力は色々とありますが、</p>
+<ol style="list-style-type: decimal">
+<li>データの前処理からモデル構築、パラメータチューニング、評価まで、関数・ドキュメント共に充実</li>
+<li>パッケージごとに異なるモデルのパラメータを統一
+<ul>
+<li>入力をデータフレームで統一</li>
+<li>モデル式をフォーミュラで統一</li>
+<li>など</li>
+</ul></li>
+</ol>
+<p>あたりが大きいでしょう。</p>
+<p>ただし、現状tidymodelsで扱えるモデルはそう多くはありません。
+足りないモデルがあれば、他のパッケージによるtidymodels用のインターフェース提供を期待するか、自分で用意しなければなりません。
+自分で用意する場合は以下のドキュメントが参考になります。</p>
+<blockquote>
+<p>How to build a parsnip model<br />
+<a href="https://www.tidymodels.org/learn/develop/models" class="uri">https://www.tidymodels.org/learn/develop/models</a></p>
+</blockquote>
+<p>そこで、本記事では、Tidymodelsが標準で提供するモデルと追加で提供するモデルについて軽く紹介し、
+更に自前でモデルを組んでみます。</p>
+<p>今回は試しにhorseshoe回帰を実装してみました。
+これは線型回帰の重みの事前分布に馬蹄分布を用いることで、正則化を行うものです。
+LASSOに比べると、選択された特徴量の重みが小さくなりにくいのが魅力ですね。
+私は以下のスライドで知りました。</p>
+<blockquote>
+<p>馬に蹴られるモデリング by <a href="https://twitter.com/NSushi">@NSushi</a>氏
+<a href="https://www.slideshare.net/ShushiNamba/ss-77431488" class="uri">https://www.slideshare.net/ShushiNamba/ss-77431488</a></p>
+</blockquote>
+<p>実装結果は、</p>
+<p><a href="https://github.com/atusy/tidyhorseshoe" class="uri">https://github.com/atusy/tidyhorseshoe</a></p>
+<p>にあるます。</p>
+</div>
+<div id="tidymodelsで利用可能なモデル一覧" class="section level1">
+<h1>Tidymodelsで利用可能なモデル一覧</h1>
+<p><strong>tidymodels</strong>パッケージは複数のパッケージを寄せ集めたメタパッケージです。
+各モデルは、<strong>parsnip</strong>パッケージが提供しています。
+2020年12月13日時点では、以下の表にまとめた範囲のモデルを利用できます。</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">モデル</th>
+<th align="left">関数</th>
+<th align="left">エンジン</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">勾配ブースト木</td>
+<td align="left"><code>boost_tree</code></td>
+<td align="left">xgboost, C5.0, spark</td>
+</tr>
+<tr class="even">
+<td align="left">決定木</td>
+<td align="left"><code>decision_tree</code></td>
+<td align="left">rpart, C5.0, spark,</td>
+</tr>
+<tr class="odd">
+<td align="left">線型回帰</td>
+<td align="left"><code>linear_reg</code></td>
+<td align="left">lm, glmnet, stan, spark, keras</td>
+</tr>
+<tr class="even">
+<td align="left">ロジスティック回帰</td>
+<td align="left"><code>logistic_reg</code></td>
+<td align="left">glm, glmnet, stan, spark, keras</td>
+</tr>
+<tr class="odd">
+<td align="left">多変量適応型回帰スプライン法</td>
+<td align="left"><code>mars</code></td>
+<td align="left">earth</td>
+</tr>
+<tr class="even">
+<td align="left">単層ニューラルネットワーク</td>
+<td align="left"><code>mlp</code></td>
+<td align="left">nnet, keras</td>
+</tr>
+<tr class="odd">
+<td align="left">多項ロジスティック回帰</td>
+<td align="left"><code>multinom_reg</code></td>
+<td align="left">glmnet, nnet, stan, keras</td>
+</tr>
+<tr class="even">
+<td align="left">最近傍法</td>
+<td align="left"><code>nearest_neighbor</code></td>
+<td align="left">kknn</td>
+</tr>
+<tr class="odd">
+<td align="left">帰無モデル</td>
+<td align="left"><code>null_model</code></td>
+<td align="left">parsnip</td>
+</tr>
+<tr class="even">
+<td align="left">ランダムフォレスト</td>
+<td align="left"><code>rand_forest</code></td>
+<td align="left">ranger, randomForest, spark</td>
+</tr>
+<tr class="odd">
+<td align="left">生存分析</td>
+<td align="left"><code>surve_reg</code></td>
+<td align="left">flexsurv, survival</td>
+</tr>
+<tr class="even">
+<td align="left">SVM (多項式カーネル)</td>
+<td align="left"><code>svm_poly</code></td>
+<td align="left">kernlab</td>
+</tr>
+<tr class="odd">
+<td align="left">SVM (RBFカーネル)</td>
+<td align="left"><code>svm_rbf</code></td>
+<td align="left">kernlab, liquidSVM</td>
+</tr>
+</tbody>
+</table>
+<p>この分け方、個人的には若干の突っ込み所を感じます。</p>
+<ul>
+<li>ロジスティック回帰、多項ロジスティック回帰も線型だろ。kerasを使うと違うのか……？</li>
+<li>SVM、モデル分ける必要あった？パラメータで分けようよ。</li>
+</ul>
+<p>まあ、それは置いておいて、</p>
+<ul>
+<li>異常検知系のモデルがないなあ</li>
+<li>glmで使えるの正規分布と二項分布だけだなあ</li>
+<li>分位点回帰がないなあ</li>
+</ul>
+<p>とか色々と物足りなさを覚えます。</p>
+</div>
+<div id="tidymodelsのエキストラパッケージで利用可能なモデル" class="section level1">
+<h1>Tidymodelsのエキストラパッケージで利用可能なモデル</h1>
+<p>パッケージのメンテナンス性を重視しているのか、
+物足りなさは他パッケージで補うようですね。
+GitHubを見る限り、以下のパッケージを見つけることができました。</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">モデル</th>
+<th align="left">パッケージ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">混合モデル、階層ベイズ</td>
+<td align="left"><a href="https://github.com/tidymodels/multilevelmod">multilevelmod</a></td>
+</tr>
+<tr class="even">
+<td align="left">部分的最小二乗回帰</td>
+<td align="left"><a href="https://github.com/tidymodels/plsmod">plsmod</a></td>
+</tr>
+<tr class="odd">
+<td align="left">ルールベース</td>
+<td align="left"><a href="https://github.com/tidymodels/rules">rules</a></td>
+</tr>
+<tr class="even">
+<td align="left">ポアソン回帰</td>
+<td align="left"><a href="https://github.com/tidymodels/poissonreg">poissonreg</a></td>
+</tr>
+<tr class="odd">
+<td align="left">バギング</td>
+<td align="left"><a href="https://github.com/tidymodels/baguette">bagging</a></td>
+</tr>
+<tr class="even">
+<td align="left">判別分析やナイーブベイズ</td>
+<td align="left"><a href="https://github.com/tidymodels/discrim">discrim</a></td>
+</tr>
+</tbody>
+</table>
+<p>Tidymodels以外からもこういったパッケージは出ているかも知れません（未調査）。</p>
+</div>
+<div id="自分でモデルのエンジンを用意する" class="section level1">
+<h1>自分でモデルのエンジンを用意する</h1>
+<p>tidymodelsにおいて作成可能な「モデル」は、</p>
+<ul>
+<li>線型回帰などの枠組みレベル</li>
+<li>最小二乗法などの手法レベル</li>
+</ul>
+<p>の二段階があります。
+tidymodelsにおいては前者をモデル、後者をエンジンと呼んでいるようです。
+粒度が小さいものの方が考えることが少ないので、今回はエンジン作りに挑戦してみましょう。</p>
+<p>ちなみに公式ドキュメントではモデル、エンジンの順で紹介してます。</p>
+<blockquote>
+<p>How to build a parsnip model<br />
+<a href="https://www.tidymodels.org/learn/develop/models" class="uri">https://www.tidymodels.org/learn/develop/models</a></p>
+</blockquote>
+<p>今回は</p>
+<ol style="list-style-type: decimal">
+<li>ドキュメントに沿ってロバスト線型回帰（<code>MASS::rlm</code>）の実装</li>
+<li>horseshoe回帰（<code>horseshoe::horseshoe</code>）の実装</li>
+</ol>
+<p>を行います。
+horseshoeを選んだ理由は</p>
+<ul>
+<li>線型回帰なので、考えることがシンプルそう</li>
+<li>引数が<code>y</code>（ベクトル）と<code>X</code>（行列）なので、フォーミュラで扱えるようにする方法を学べる</li>
+</ul>
+<p>です。</p>
+<div id="実装前の注意点" class="section level2">
+<h2>実装前の注意点</h2>
+<ul>
+<li>パッケージ化されている必要あり</li>
+<li>関数によってはラッパー関数をパッケージ化する必要あり
+<ul>
+<li><code>horseshoe::horseshoe</code>関数がまさにそれだった</li>
+</ul></li>
+</ul>
+</div>
+<div id="基本的な手順" class="section level2">
+<h2>基本的な手順</h2>
+<p>実装には最低限、以下の4段階を踏みます。</p>
+<ol style="list-style-type: decimal">
+<li>既存のモデルに新しいエンジンの名前を登録（<code>set_model_engine</code>）</li>
+<li>エンジンが依存するパッケージを指定（<code>set_dependency</code>）</li>
+<li>学習方法の定義（<code>set_fit</code>）</li>
+<li>予測方法の定義（<code>set_pred</code>）</li>
+</ol>
+</div>
+<div id="ロバスト線型回帰massrlm" class="section level2">
+<h2>ロバスト線型回帰（<code>MASS::rlm</code>）</h2>
+<p>コードはMITライセンスで提供されている公式ドキュメントに由来します。</p>
+<blockquote>
+<p><a href="https://github.com/tidymodels/tidymodels.org/blob/61031df0a4b6a3531e2aca55db4a0bb814ea4628/content/learn/develop/models/index.Rmarkdown" class="uri">https://github.com/tidymodels/tidymodels.org/blob/61031df0a4b6a3531e2aca55db4a0bb814ea4628/content/learn/develop/models/index.Rmarkdown</a></p>
+</blockquote>
+<div id="エンジン名定義" class="section level3">
+<h3>1. エンジン名定義</h3>
+<p>今回は線型回帰（linear_reg）にロバスト線型回帰（rlm）を追加したいので、
+以下のように引数を指定します。</p>
+<pre class="r"><code>parsnip::set_model_engine(
+  model = &quot;linear_reg&quot;,
+  mode = &quot;regression&quot;,
+  eng = &quot;rlm&quot;
+)</code></pre>
+<p><code>mode</code>引数は回帰の目的が連続値（<code>"regression"</code>）かクラス（<code>"classification"</code>）かを指定します。</p>
+</div>
+<div id="依存関係定義" class="section level3">
+<h3>2. 依存関係定義</h3>
+<p><code>rlm</code>関数はMASSパッケージが提供しているので、以下のように定義します。</p>
+<pre class="r"><code>parsnip::set_dependency(
+  model = &quot;linear_reg&quot;,
+  eng = &quot;rlm&quot;,
+  pkg = &quot;MASS&quot;
+)</code></pre>
+</div>
+<div id="学習方法定義" class="section level3">
+<h3>3. 学習方法定義</h3>
+<p>これまでと同様に<code>model</code>、<code>eng</code>、<code>mode</code>の引数を指定します。</p>
+<p>特殊なのは<code>value</code>引数でしょう。
+ここには、interface, protect, func, defaultsの4つの名前を持つリストを与えます<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>。</p>
+<ul>
+<li>interface
+<ul>
+<li>オリジナル実装の学習用関数が、データをどのように受け取るか指定します。
+<ul>
+<li>formula: <code>formula</code>引数にモデル式を、<code>data</code>引数にデータフレームを入力する場合</li>
+<li>data.frame: <code>x</code>引数に特徴量のデータフレームを、<code>y</code>引数にベクトルを指定する場合</li>
+<li>matrix: <code>x</code>引数に計画行列を、<code>y</code>にベクトルを指定する場合</li>
+</ul></li>
+<li>いずれのinterfaceも引数の名前と順序が固定されている点に注意してください。
+たとえば引数が<code>y</code>と<code>X</code>の順であれば、いずれのインターフェースにも摘要しません。
+その場合、オリジナルの関数をいずれかのインターフェースに適合する関数でラップし、パッケージ化が必要です。</li>
+</ul></li>
+<li>protect
+<ul>
+<li>ユーザーが指定不能な引数
+<ul>
+<li>interfaceが利用する引数</li>
+<li><code>weights</code>など重みを指定する引数
+<ul>
+<li>現段階では重み付けに対応していないため</li>
+<li><a href="https://github.com/tidymodels/parsnip/issues/136" class="uri">https://github.com/tidymodels/parsnip/issues/136</a></li>
+</ul></li>
+<li>その他</li>
+</ul></li>
+<li>例: <code>c("formula", "data", "weights")</code></li>
+</ul></li>
+<li>func
+<ul>
+<li>オリジナルの実装がどこで定義されているか、パッケージ名と関数名を文字列で指定。</li>
+<li>例: <code>c(pkg = "MASS", fun = "rlm")</code></li>
+</ul></li>
+<li>defaults
+<ul>
+<li>引数の既定値を変更したい場合、引数の名前と値をリストで与える</li>
+<li>例: <code>list()</code>
+<ul>
+<li>何も変更しない</li>
+</ul></li>
+</ul></li>
+</ul>
+<pre class="r"><code>parsnip::set_fit(
+  model = &quot;linear_reg&quot;,
+  eng = &quot;rlm&quot;,
+  mode = &quot;regression&quot;,
+  value = list(
+    interface = &quot;formula&quot;,
+    protect = c(&quot;formula&quot;, &quot;data&quot;, &quot;weights&quot;),
+    func = c(pkg = &quot;MASS&quot;, fun = &quot;rlm&quot;),
+    defaults = list()
+  )
+)</code></pre>
+</div>
+<div id="予測方法定義" class="section level3">
+<h3>4. 予測方法定義</h3>
+<p>くどいですが、予測の定義にも<code>model</code>、<code>eng</code>、<code>mode</code>引数を指定します。
+加えて</p>
+<ul>
+<li><code>type</code>引数
+<ul>
+<li>返り値の型を指定</li>
+<li>例: <code>"numeric"</code></li>
+</ul></li>
+<li><code>value</code>引数
+<ul>
+<li>内部での挙動を名前付きリストで指定
+<ul>
+<li><code>pre</code>: 前処理用関数または<code>NULL</code></li>
+<li><code>post</code>: 後処理用関数または<code>NULL</code></li>
+<li><code>func</code>: 予測に使う関数の名前
+<ul>
+<li>例: <code>c(fun = "predict")</code></li>
+</ul></li>
+<li><code>args</code>: tidymodelsから<code>predict</code>関数に渡る引数のリスト
+<ul>
+<li><code>rlang::expr</code>関数を用いることで、<code>tidymodels</code>の内部変数を利用できる。
+<ul>
+<li>とりあえず<code>object = expr(object$fit)</code>と<code>newdata = expr(new_data)</code>はそういうものと思っておこう</li>
+</ul></li>
+<li>例: <code>list(object = expr(object$fit), newdata = expr(new_data), type = "response")</code></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+<pre class="r"><code>parsnip::set_pred(
+  model = &quot;linear_reg&quot;,
+  eng = &quot;rlm&quot;,
+  mode = &quot;regression&quot;,
+  type = &quot;numeric&quot;,
+  value = list(
+    pre = NULL,
+    post = NULL,
+    func = c(fun = &quot;predict&quot;),
+    args =
+      list(
+        object = rlang::expr(object$fit),
+        newdata = rlang::expr(new_data),
+        type = &quot;response&quot;
+      )
+  )
+)</code></pre>
+</div>
+<div id="テスト" class="section level3">
+<h3>5. テスト</h3>
+<pre class="r"><code>library(magrittr)
+parsnip::linear_reg() %&gt;% 
+  parsnip::set_engine(&quot;rlm&quot;) %&gt;% 
+  parsnip::fit(mpg ~ ., data = mtcars)
+## parsnip model object
+## 
+## Fit time:  6ms 
+## Call:
+## rlm(formula = mpg ~ ., data = data)
+## Converged in 8 iterations
+## 
+## Coefficients:
+## (Intercept)         cyl        disp          hp        drat          wt 
+## 17.82250038 -0.27878615  0.01593890 -0.02536343  0.46391132 -4.14355431 
+##        qsec          vs          am        gear        carb 
+##  0.65307203  0.24975463  1.43412689  0.85943158 -0.01078897 
+## 
+## Degrees of freedom: 32 total; 21 residual
+## Scale estimate: 2.15</code></pre>
+</div>
+</div>
+<div id="horseshoe回帰horseshoehorseshoe関数" class="section level2">
+<h2>horseshoe回帰（<code>horseshoe::horseshoe</code>関数）</h2>
+<p>前述の通り、</p>
+<ul>
+<li>線型回帰なので、考えることがシンプルそう</li>
+<li>引数が<code>y</code>（ベクトル）と<code>X</code>（行列）なので、フォーミュラで扱えるようにする方法を学べる</li>
+</ul>
+<p>という理由から、<code>horseshoe::horseshoe</code>関数のtidymodels化に挑戦しました。</p>
+<div id="ハマりポイント" class="section level3">
+<h3>ハマりポイント</h3>
+<p>いきなりですが、以下の点でハマりました。</p>
+<ol style="list-style-type: decimal">
+<li>interfaceがtidymodelsと整合しないため、オリジナルパッケージでラッパー関数を定義する必要がある</li>
+<li><code>predict</code>メソッドが定義されていないため、自前で用意する必要がある</li>
+<li>“predictor_indicators”がどうのこうのと言ってエラーを吐くので、<code>parsnip::set_encoding</code>関数が必要になった</li>
+<li>パッケージ読み込み時にモデルをtidymodelsに登録するには、<code>.onLoad</code>関数を使う</li>
+<li>パッケージ開発中に<code>devtools::load</code>や<code>devtools::document</code>すると、その度に<code>.onLoad</code>が走って登録済みのモデルを上書きできないとtidymodelsに怒られる。<code>parsnip::show_engines("linear_reg")</code>を見て、登録済みなら警告しつつ、登録をスキップする処理を入れておくと良い。</li>
+</ol>
+</div>
+<div id="実装" class="section level3">
+<h3>実装</h3>
+<p>説明性重視で、パッケージのコードに比べ、一部簡略化してます。</p>
+<div id="tidymodelsのinterface-matrixに整合するラッパー関数の定義" class="section level4">
+<h4>tidymodelsの<code>interface = "matrix"</code>に整合するラッパー関数の定義</h4>
+<p><code>horseshoe::horseshoe</code>関数とtidymodelsのinterfaceは以下のように対立しています。</p>
+<ul>
+<li><code>horseshoe::horseshoe</code>関数は<code>y</code>, <code>X</code>の順でベクトルと行列を入力する。</li>
+<li>tidymodelsの<code>interface = "matrix"</code>は<code>x</code>, <code>y</code>の順で行列とベクトルを要求。</li>
+</ul>
+<p>そこで、tidymodelsに合わせるために以下のようにラッパー関数を定義します。
+また、<code>horseshoe::horseshoe</code>の返り値は<code>list</code>で、<code>predict</code>総称関数のメソッドを定義しにくいので、<code>"horseshoe"</code>クラスを追加しておきます。</p>
+<pre class="r"><code>horseshoe &lt;- function(x, y, ...) {
+  structure(
+    horseshoe::horseshoe(y = y, X = x, ...),
+    class = c(&quot;horseshoe&quot;, &quot;list&quot;)
+  )
+}</code></pre>
+</div>
+<div id="predictメソッドの定義" class="section level4">
+<h4>predictメソッドの定義</h4>
+<p>horseshoeクラスオブジェクトに対応する<code>predict</code>メソッドを定義します。
+<code>?horseshoe::horsesho</code>でExamplesを見ると、<code>X %*% res$BetaHat</code>といった具合に予測できるようなので、従います。</p>
+<pre class="r"><code>predict.horseshoe &lt;- function(object, newdata, ...) {
+  newdata %*% object$BetaHat
+}</code></pre>
+<p>BetaHatはパラメータの事後平均値です。
+事後中央値のBetaMedianも利用できます。
+tidyhorseshoeパッケージ内ではBetaMedianをデフォルトとしつつ、BetaHatも利用できるようにしました。
+以下の論文で、Bayesian lassoでは事後中央値を使うのが一般的と知ったためです。</p>
+<blockquote>
+<p>保科 (2013) Bayesian lassoによるスパース回帰モデリング<br />
+<a href="https://www.jstage.jst.go.jp/article/jscswabun/25/2/25_KJ00008761723/_article/-char/ja/" class="uri">https://www.jstage.jst.go.jp/article/jscswabun/25/2/25_KJ00008761723/_article/-char/ja/</a></p>
+</blockquote>
+</div>
+<div id="tidymodelsにhorseshoe回帰を追加するための関数を定義" class="section level4">
+<h4>Tidymodelsにhorseshoe回帰を追加するための関数を定義</h4>
+<p>linear_regモデルにhorseshoeエンジンとしてhorseshoe回帰を追加できるようにします。
+<code>tidyhorseshoe::add_horseshoe</code>関数として定義しています。
+長いのでコードはリンクを参照してください。</p>
+<blockquote>
+<p><a href="https://github.com/atusy/tidyhorseshoe/blob/52459f128980b5f2239f5b3ac815be4166fb05cf/R/horseshoe.R#L42-L93" class="uri">https://github.com/atusy/tidyhorseshoe/blob/52459f128980b5f2239f5b3ac815be4166fb05cf/R/horseshoe.R#L42-L93</a></p>
+</blockquote>
+<p>ポイントは</p>
+<ol style="list-style-type: decimal">
+<li>エンジンが登録済みなら登録をスキップする
+<ul>
+<li><code>.onLoad</code>で自動登録する際、登録済みのエンジンの上書きはエラーになる</li>
+<li><code>.onDetach</code>で登録解除する手段が欲しいけどなさそう……</li>
+</ul></li>
+<li><code>MASS::rlm</code>の時と同じ要領で以下を定義する
+<ol style="list-style-type: decimal">
+<li>エンジン名</li>
+<li>依存関係</li>
+<li>学習方法</li>
+<li>予測方法</li>
+</ol></li>
+<li>追加で、カテゴリカル変数のエンコーディング方法を定義する
+<ul>
+<li><p><code>parsnip::set_encoding</code>関数を使うらしい。<code>options</code>の指定方法が正しいかはよくわかってない。</p></li>
+<li><p>例:</p>
+<pre class="r"><code>  parsnip::set_encoding(
+    model = &quot;linear_reg&quot;,
+    eng = eng,
+    mode = &quot;regression&quot;,
+    options = list(
+      predictor_indicators = &quot;traditional&quot;,
+      compute_intercept = FALSE,
+      remove_intercept = FALSE,
+      allow_sparse_x = TRUE
+    )
+  )
+}</code></pre></li>
+</ul></li>
+</ol>
+</div>
+</div>
+<div id="テスト-1" class="section level3">
+<h3>テスト</h3>
+<p><span class="math inline">\(y = 3x + 3\)</span>に従うデータを乱数で用意し、<span class="math inline">\(y = a_0 + a_1 x + a_2 x^2 + a_3 x^3\)</span>で回帰してみる。</p>
+<pre class="r"><code>library(tidyhorseshoe)
+## 
+## Attaching package: &#39;tidyhorseshoe&#39;
+## The following object is masked _by_ &#39;.GlobalEnv&#39;:
+## 
+##     horseshoe
+library(magrittr)
+set.seed(0)
+
+x &lt;- runif(4, 0, 5)
+y &lt;- 3 * x + rnorm(length(x), 0, 0.1) + 3
+d &lt;- data.frame(y, x = x, x2 = x * x, x3 = x * x * x)
+
+fitted &lt;- parsnip::linear_reg() %&gt;% 
+  parsnip::set_engine(&quot;horseshoe&quot;) %&gt;% 
+  parsnip::fit(y ~ ., data = d)
+## [1] 1000
+## [1] 2000
+## [1] 3000
+## [1] 4000
+## [1] 5000
+## [1] 6000
+
+fitted$fit$BetaMedian
+## [1]  2.384374255  2.966487234  0.051657307 -0.008521586
+
+cbind(y, predict(fitted, d))
+##           y  .pred_V1
+## 1 16.583438 16.584077
+## 2  7.109873  6.768883
+## 3  8.623323  8.403944
+## 4 11.438805 11.547175</code></pre>
+<p>よさそう。</p>
+<p>ちなみに、モデル式を <code>y ~ 0 + .</code>とすると、y切片が0になる。
+<code>parsnip::set_encoding</code>関数で<code>compute_intercept = FALSE</code>をよくわからず指定してるけれど、とりあえずはこれでよさそう。</p>
+<pre class="r"><code>fitted_without_intercept &lt;- 
+  parsnip::linear_reg() %&gt;%
+  parsnip::set_engine(&quot;horseshoe&quot;) %&gt;% 
+  parsnip::fit(y ~ 0 + ., data = d)
+## [1] 1000
+## [1] 2000
+## [1] 3000
+## [1] 4000
+## [1] 5000
+## [1] 6000
+
+fitted$fit$BetaMedian
+## [1]  2.384374255  2.966487234  0.051657307 -0.008521586</code></pre>
+</div>
+</div>
+</div>
+<div id="まとめ" class="section level1">
+<h1>まとめ</h1>
+<p>Tidymodelsで利用可能なモデルの紹介と、既存のモデルにエンジンを追加する方法を紹介した。
+現状、</p>
+<ul>
+<li>パッケージ化されている関数しか登録できなさそう</li>
+<li>結局interfaceの整合性問題に悩まされる場合あり</li>
+</ul>
+<p>で、後者にハマるとパッケージを書くところからになって敷居が高い。</p>
+<p><strong>Enjoy!</strong></p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://www.tidymodels.org/learn/develop/models/#step-3-add-a-fit-module" class="uri">https://www.tidymodels.org/learn/develop/models/#step-3-add-a-fit-module</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
