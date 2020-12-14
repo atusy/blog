@@ -312,7 +312,7 @@ parsnip::linear_reg() %>%
 そこで、tidymodelsに合わせるために以下のようにラッパー関数を定義します。
 また、`horseshoe::horseshoe`の返り値は`list`で、`predict`総称関数のメソッドを定義しにくいので、`"horseshoe"`クラスを追加しておきます。
 
-```{r}
+```{r, eval=FALSE}
 horseshoe <- function(x, y, ...) {
   structure(
     horseshoe::horseshoe(y = y, X = x, ...),
@@ -326,7 +326,7 @@ horseshoe <- function(x, y, ...) {
 horseshoeクラスオブジェクトに対応する`predict`メソッドを定義します。
 `?horseshoe::horsesho`でExamplesを見ると、`X %*% res$BetaHat`といった具合に予測できるようなので、従います。
 
-```{r}
+```{r, eval=FALSE}
 predict.horseshoe <- function(object, newdata, ...) {
   newdata %*% object$BetaHat
 }
@@ -405,12 +405,11 @@ cbind(y, predict(fitted, d))
 `parsnip::set_encoding`関数で`compute_intercept = FALSE`をよくわからず指定してるけれど、とりあえずはこれでよさそう。
 
 ```{r}
-fitted_without_intercept <- 
-  parsnip::linear_reg() %>%
+fitted_without_intercept <- parsnip::linear_reg() %>% 
   parsnip::set_engine("horseshoe") %>% 
   parsnip::fit(y ~ 0 + ., data = d)
 
-fitted$fit$BetaMedian
+fitted_without_intercept$fit$BetaMedian
 ```
 
 # まとめ

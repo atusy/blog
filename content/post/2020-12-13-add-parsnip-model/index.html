@@ -515,11 +515,6 @@ tidyhorseshoeパッケージ内ではBetaMedianをデフォルトとしつつ、
 <h3>テスト</h3>
 <p><span class="math inline">\(y = 3x + 3\)</span>に従うデータを乱数で用意し、<span class="math inline">\(y = a_0 + a_1 x + a_2 x^2 + a_3 x^3\)</span>で回帰してみる。</p>
 <pre class="r"><code>library(tidyhorseshoe)
-## 
-## Attaching package: &#39;tidyhorseshoe&#39;
-## The following object is masked _by_ &#39;.GlobalEnv&#39;:
-## 
-##     horseshoe
 library(magrittr)
 set.seed(0)
 
@@ -549,8 +544,7 @@ cbind(y, predict(fitted, d))
 <p>よさそう。</p>
 <p>ちなみに、モデル式を <code>y ~ 0 + .</code>とすると、y切片が0になる。
 <code>parsnip::set_encoding</code>関数で<code>compute_intercept = FALSE</code>をよくわからず指定してるけれど、とりあえずはこれでよさそう。</p>
-<pre class="r"><code>fitted_without_intercept &lt;- 
-  parsnip::linear_reg() %&gt;%
+<pre class="r"><code>fitted_without_intercept &lt;- parsnip::linear_reg() %&gt;% 
   parsnip::set_engine(&quot;horseshoe&quot;) %&gt;% 
   parsnip::fit(y ~ 0 + ., data = d)
 ## [1] 1000
@@ -560,8 +554,8 @@ cbind(y, predict(fitted, d))
 ## [1] 5000
 ## [1] 6000
 
-fitted$fit$BetaMedian
-## [1]  2.384374255  2.966487234  0.051657307 -0.008521586</code></pre>
+fitted_without_intercept$fit$BetaMedian
+## [1]  4.87120134 -0.14234623 -0.01764793</code></pre>
 </div>
 </div>
 </div>
