@@ -1,0 +1,152 @@
+---
+title: "PandocでHTML出力時に見出し番号を第1章とか第1.1節とかしたい"
+author: ~
+date: '2020-12-23'
+slug: decorate-section-numbers-on-pandoc
+categories: [Pandoc]
+tags: [Lua, CSS, Java Script]
+output:
+  blogdown::html_page:
+    toc: true
+    number_sections: true
+summary: |
+  Pandoc単体では見出し番号を装飾してくれません。
+  HTML出力の場合、Luaフィルタ、CSS、JavaScriptと3つほど選択肢があるので、
+  それぞれの方法とメリット・デメリットを紹介します。
+---
+
+[Pandocアドベントカレンダー](https://adventar.org/calendars/4963)12月23日の記事です。
+
+# はじめに
+
+PandocでたとえばmarkdownをHTMLに出力する時、`--number-sections`オプションを与えると、
+見出しに番号が付きます。
+
+雰囲気的には
+
+```md
+# 見出し1
+
+## 見出し1-1
+```
+
+が
+
+```
+1 見出し1
+
+1.1 見出し1-1
+```
+
+になる感じ。
+
+ただし、「第1章」とか「第1.1節」みたいなことはできません。
+
+どうする？
+
+選択肢としては大きく3つあるでしょう。
+自身が使える言語とかに合わせて選択してください。
+本記事ではJavaScriptを採用してます。
+
+| 方法 | Luaフィルタ | CSS | JavaScript |
+|:-----|:-----------:|:---:|:----------:|
+| 目次対応 | ○ | △ | △ |
+| 出力形式 | 任意 | HTML | HTML |
+| 番号操作 | ○ | × | ○ |
+| `--number-offset` | × | ○ | ○ |
+
+
+# 実装
+
+## Luaフィルタ
+
+もっとも簡単な方法は、ZRさんのLuaフィルタを使うことでしょう。
+
+> https://gist.github.com/zr-tex8r/16967b9f3ed414bb8ceeca2962a7a9c2
+
+```{bash, cache=TRUE}
+wget --quiet https://gist.githubusercontent.com/zr-tex8r/16967b9f3ed414bb8ceeca2962a7a9c2/raw/56398449fa2f554de3937e7c7727d02385eda2bb/numbering.lua
+echo -e "# foo\n\n## bar" | pandoc -t html --number-sections --lua-filter numbering.lua
+```
+
+Luaを使うメリット・デメリットは以下の通り。
+
+- メリット
+    - 目次にも章・節の番号が反映される
+    - 改造すれば`--number-sections`オプションに非対応なフォーマットもサポート可能
+    - 改造すれば節番号が`1.1`の時`1`になってしまうのを防げる
+- デメリット
+    - `--number-offset`オプションで章番号をずらすことができなくなる
+
+```{r, include=FALSE}
+unlink("numbering.lua")
+```
+
+## CSS
+
+以下のCSSを`<style>`要素内に書くか、外部ファイルに記述して`--css`オプションで取り込む。
+これも簡単。
+
+```{css, eval=FALSE}
+:not(.unnumbered) h1:not(.unnumbered) .header-section-number:before,
+:not(.unnumbered) h2:not(.unnumbered) .header-section-number:before {
+  content: '第'
+}
+:not(.unnumbered) h1:not(.unnumbered) .header-section-number:after {
+  content: '章'
+}
+:not(.unnumbered) h2:not(.unnumbered) .header-section-number:after {
+  content: '節'
+}
+```
+
+`:not(.unnumbered)`が2回登場するのは`--section-divs`対策です。
+
+- メリット
+    - 目次にも章・節の番号が反映できる（が大変）
+    - `--number-offset`オプションに対応
+- デメリット
+    - 節番号を`1.1`から`1`に変換できない
+    - HTMLにしか使えない
+
+## JavaScript
+
+JavaScriptを使うとCSSではできない節番号の操作も可能になります。
+あと、CSSにおける`:before`と`:after`の使い分けも不要になります。
+たぶんパフォーマンスはCSSに軍配が上がるでしょうが、無視できるほどのものでしょう。
+
+```{js}
+document.addEventListener('DOMContentLoaded', function() {
+  const h1 = document.querySelectorAll(
+    ':not(.unnumbered) h1:not(.unnumbered) .header-section-number,' +
+    '#TOC>ul>li>a>.toc-section-number');
+  
+  h1.forEach(function(x) {
+      x.textContent = '第' + x.textContent + '章';
+  });
+
+  const h2 = document.querySelectorAll(
+    ':not(.unnumbered) h2:not(.unnumbered) .header-section-number,' +
+    '#TOC>ul>li>ul>li>a>.toc-section-number');
+
+  h2.forEach(function(x) {
+      x.textContent = '第' + x.textContent + '節';
+  });
+});
+```
+
+- メリット
+    - 目次にも章・節の番号が反映できる
+    - `--number-offset`オプションに対応
+    - 節番号を`1.1`から`1`に変換できる
+- デメリット
+    - HTMLにしか使えない
+
+# どれがいいのか
+
+見出し番号の装飾方法を3通り紹介しました。
+基本はフォーマットに依存せず使えるLuaフィルタが便利だと思います。
+`--number-offset`オプションも使いたい場合で出力がHTMLなら、CSSやJavaScriptを検討しても良いでしょう。
+あるいは、`--number-offset`を使うのをやめて、メタデータ経由で章番号をずらすよう、Luaフィルタに伝えるという手もありますね。
+
+Enjoy!!

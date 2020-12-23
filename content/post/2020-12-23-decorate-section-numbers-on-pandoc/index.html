@@ -1,0 +1,205 @@
+---
+title: "PandocでHTML出力時に見出し番号を第1章とか第1.1節とかしたい"
+author: ~
+date: '2020-12-23'
+slug: decorate-section-numbers-on-pandoc
+categories: [Pandoc]
+tags: [Lua, CSS, Java Script]
+output:
+  blogdown::html_page:
+    toc: true
+    number_sections: true
+summary: |
+  Pandoc単体では見出し番号を装飾してくれません。
+  HTML出力の場合、Luaフィルタ、CSS、JavaScriptと3つほど選択肢があるので、
+  それぞれの方法とメリット・デメリットを紹介します。
+---
+
+<script src="index_files/header-attrs/header-attrs.js"></script>
+
+<div id="TOC">
+<ul>
+<li><a href="#はじめに"><span class="toc-section-number">1</span> はじめに</a></li>
+<li><a href="#実装"><span class="toc-section-number">2</span> 実装</a>
+<ul>
+<li><a href="#luaフィルタ"><span class="toc-section-number">2.1</span> Luaフィルタ</a></li>
+<li><a href="#css"><span class="toc-section-number">2.2</span> CSS</a></li>
+<li><a href="#javascript"><span class="toc-section-number">2.3</span> JavaScript</a></li>
+</ul></li>
+<li><a href="#どれがいいのか"><span class="toc-section-number">3</span> どれがいいのか</a></li>
+</ul>
+</div>
+
+<p><a href="https://adventar.org/calendars/4963">Pandocアドベントカレンダー</a>12月23日の記事です。</p>
+<div id="はじめに" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> はじめに</h1>
+<p>PandocでたとえばmarkdownをHTMLに出力する時、<code>--number-sections</code>オプションを与えると、
+見出しに番号が付きます。</p>
+<p>雰囲気的には</p>
+<pre class="md"><code># 見出し1
+
+## 見出し1-1</code></pre>
+<p>が</p>
+<pre><code>1 見出し1
+
+1.1 見出し1-1</code></pre>
+<p>になる感じ。</p>
+<p>ただし、「第1章」とか「第1.1節」みたいなことはできません。</p>
+<p>どうする？</p>
+<p>選択肢としては大きく3つあるでしょう。
+自身が使える言語とかに合わせて選択してください。
+本記事ではJavaScriptを採用してます。</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">方法</th>
+<th align="center">Luaフィルタ</th>
+<th align="center">CSS</th>
+<th align="center">JavaScript</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">目次対応</td>
+<td align="center">○</td>
+<td align="center">△</td>
+<td align="center">△</td>
+</tr>
+<tr class="even">
+<td align="left">出力形式</td>
+<td align="center">任意</td>
+<td align="center">HTML</td>
+<td align="center">HTML</td>
+</tr>
+<tr class="odd">
+<td align="left">番号操作</td>
+<td align="center">○</td>
+<td align="center">×</td>
+<td align="center">○</td>
+</tr>
+<tr class="even">
+<td align="left"><code>--number-offset</code></td>
+<td align="center">×</td>
+<td align="center">○</td>
+<td align="center">○</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="実装" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> 実装</h1>
+<div id="luaフィルタ" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Luaフィルタ</h2>
+<p>もっとも簡単な方法は、ZRさんのLuaフィルタを使うことでしょう。</p>
+<blockquote>
+<p><a href="https://gist.github.com/zr-tex8r/16967b9f3ed414bb8ceeca2962a7a9c2" class="uri">https://gist.github.com/zr-tex8r/16967b9f3ed414bb8ceeca2962a7a9c2</a></p>
+</blockquote>
+<pre class="bash"><code>wget --quiet https://gist.githubusercontent.com/zr-tex8r/16967b9f3ed414bb8ceeca2962a7a9c2/raw/56398449fa2f554de3937e7c7727d02385eda2bb/numbering.lua
+echo -e &quot;# foo\n\n## bar&quot; | pandoc -t html --number-sections --lua-filter numbering.lua</code></pre>
+<pre><code>## &lt;h1 data-number=&quot;第1章&quot; id=&quot;foo&quot;&gt;&lt;span class=&quot;header-section-number&quot;&gt;第1章&lt;/span&gt; foo&lt;/h1&gt;
+## &lt;h2 data-number=&quot;第1節&quot; id=&quot;bar&quot;&gt;&lt;span class=&quot;header-section-number&quot;&gt;第1節&lt;/span&gt; bar&lt;/h2&gt;</code></pre>
+<p>Luaを使うメリット・デメリットは以下の通り。</p>
+<ul>
+<li>メリット
+<ul>
+<li>目次にも章・節の番号が反映される</li>
+<li>改造すれば<code>--number-sections</code>オプションに非対応なフォーマットもサポート可能</li>
+<li>改造すれば節番号が<code>1.1</code>の時<code>1</code>になってしまうのを防げる</li>
+</ul></li>
+<li>デメリット
+<ul>
+<li><code>--number-offset</code>オプションで章番号をずらすことができなくなる</li>
+</ul></li>
+</ul>
+</div>
+<div id="css" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> CSS</h2>
+<p>以下のCSSを<code>&lt;style&gt;</code>要素内に書くか、外部ファイルに記述して<code>--css</code>オプションで取り込む。
+これも簡単。</p>
+<pre class="css"><code>:not(.unnumbered) h1:not(.unnumbered) .header-section-number:before,
+:not(.unnumbered) h2:not(.unnumbered) .header-section-number:before {
+  content: &#39;第&#39;
+}
+:not(.unnumbered) h1:not(.unnumbered) .header-section-number:after {
+  content: &#39;章&#39;
+}
+:not(.unnumbered) h2:not(.unnumbered) .header-section-number:after {
+  content: &#39;節&#39;
+}</code></pre>
+<p><code>:not(.unnumbered)</code>が2回登場するのは<code>--section-divs</code>対策です。</p>
+<ul>
+<li>メリット
+<ul>
+<li>目次にも章・節の番号が反映できる（が大変）</li>
+<li><code>--number-offset</code>オプションに対応</li>
+</ul></li>
+<li>デメリット
+<ul>
+<li>節番号を<code>1.1</code>から<code>1</code>に変換できない</li>
+<li>HTMLにしか使えない</li>
+</ul></li>
+</ul>
+</div>
+<div id="javascript" class="section level2" number="2.3">
+<h2><span class="header-section-number">2.3</span> JavaScript</h2>
+<p>JavaScriptを使うとCSSではできない節番号の操作も可能になります。
+あと、CSSにおける<code>:before</code>と<code>:after</code>の使い分けも不要になります。
+たぶんパフォーマンスはCSSに軍配が上がるでしょうが、無視できるほどのものでしょう。</p>
+<pre class="js"><code>document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+  const h1 = document.querySelectorAll(
+    &#39;:not(.unnumbered) h1:not(.unnumbered) .header-section-number,&#39; +
+    &#39;#TOC&gt;ul&gt;li&gt;a&gt;.toc-section-number&#39;);
+  
+  h1.forEach(function(x) {
+      x.textContent = &#39;第&#39; + x.textContent + &#39;章&#39;;
+  });
+
+  const h2 = document.querySelectorAll(
+    &#39;:not(.unnumbered) h2:not(.unnumbered) .header-section-number,&#39; +
+    &#39;#TOC&gt;ul&gt;li&gt;ul&gt;li&gt;a&gt;.toc-section-number&#39;);
+
+  h2.forEach(function(x) {
+      x.textContent = &#39;第&#39; + x.textContent + &#39;節&#39;;
+  });
+});</code></pre>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+  const h1 = document.querySelectorAll(
+    ':not(.unnumbered) h1:not(.unnumbered) .header-section-number,' +
+    '#TOC>ul>li>a>.toc-section-number');
+  
+  h1.forEach(function(x) {
+      x.textContent = '第' + x.textContent + '章';
+  });
+
+  const h2 = document.querySelectorAll(
+    ':not(.unnumbered) h2:not(.unnumbered) .header-section-number,' +
+    '#TOC>ul>li>ul>li>a>.toc-section-number');
+
+  h2.forEach(function(x) {
+      x.textContent = '第' + x.textContent + '節';
+  });
+});
+</script>
+<ul>
+<li>メリット
+<ul>
+<li>目次にも章・節の番号が反映できる</li>
+<li><code>--number-offset</code>オプションに対応</li>
+<li>節番号を<code>1.1</code>から<code>1</code>に変換できる</li>
+</ul></li>
+<li>デメリット
+<ul>
+<li>HTMLにしか使えない</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="どれがいいのか" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> どれがいいのか</h1>
+<p>見出し番号の装飾方法を3通り紹介しました。
+基本はフォーマットに依存せず使えるLuaフィルタが便利だと思います。
+<code>--number-offset</code>オプションも使いたい場合で出力がHTMLなら、CSSやJavaScriptを検討しても良いでしょう。
+あるいは、<code>--number-offset</code>を使うのをやめて、メタデータ経由で章番号をずらすよう、Luaフィルタに伝えるという手もありますね。</p>
+<p>Enjoy!!</p>
+</div>
