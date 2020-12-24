@@ -46,6 +46,8 @@ cat(readLines("example.md"), sep = "\n")
 `%s`とした部分が見出し番号で置換される点に注意してください。
 省略したレベルに関してはそのままの値が出力されます。
 
+`number_sections_with_decorations`って長いので将来的には名前変わるかも？
+
 ## Pandocを実行
 
 先程の文書が`example.md`に保存されているとし、`gfm`に出力してみましょう。
