@@ -1,0 +1,264 @@
+---
+title: "Pandocで出力形式に依存せず見出し番号をつけたり、第1章とか第1.1節とか装飾したい"
+author: ~
+date: '2020-12-24'
+slug: decorate-section-numbers-on-any-format-with-pandoc
+categories: [Pandoc]
+tags: [Lua]
+---
+
+<script src="index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>昨日はHTML出力の場合に限って、見出し番号の装飾方法を紹介しました。</p>
+<blockquote>
+<p><a href="https://blog.atusy.net/2020/12/23/decorate-section-numbers-on-pandoc/">PandocでHTML出力時に見出し番号を第1章とか第1.1節とかしたい</a></p>
+</blockquote>
+<p>ただ、昨日の段階ではどの方法も一長一短だったので、
+今日は任意の出力に対応するLuaフィルタを用意しました。</p>
+<p>Luaフィルタが何ものかは↓でも読んでください。</p>
+<blockquote>
+<p><a href="https://blog.atusy.net/2020/12/07/lua-filter-is-hot/">Luaフィルタがアツイ2020</a></p>
+</blockquote>
+<div id="やり方" class="section level1">
+<h1>やり方</h1>
+<div id="luaフィルタをダウンロード" class="section level2">
+<h2>Luaフィルタをダウンロード</h2>
+<p>↓からダウンロードできます</p>
+<blockquote>
+<p><a href="https://raw.githubusercontent.com/atusy/lua-filters/master/lua/number-sections.lua" class="uri">https://raw.githubusercontent.com/atusy/lua-filters/master/lua/number-sections.lua</a></p>
+</blockquote>
+<p>コマンドを使うなら</p>
+<pre class="bash"><code>wget -qO number-sections.lua https://raw.githubusercontent.com/atusy/lua-filters/master/lua/number-sections.lua</code></pre>
+</div>
+<div id="変換したい文章を用意" class="section level2">
+<h2>変換したい文章を用意</h2>
+<p>Markdownの場合、章番号を装飾したり、章番号をずらしたりするのも簡単です。
+↓のようにYAMLを指定しましょう。</p>
+<pre><code>---
+number_sections_with_decorations:
+    - &#39;第%s章&#39;
+    - &#39;第%s節&#39;
+number_offset: 3
+---
+
+# A
+
+## A-1
+
+# B
+
+## B-1</code></pre>
+<p><code>number_sections_with_decorations</code>には
+見出しレベル順にフォーマットを記述します。
+<code>%s</code>とした部分が見出し番号で置換される点に注意してください。
+省略したレベルに関してはそのままの値が出力されます。</p>
+</div>
+<div id="pandocを実行" class="section level2">
+<h2>Pandocを実行</h2>
+<p>先程の文書が<code>example.md</code>に保存されているとし、<code>gfm</code>に出力してみましょう。</p>
+<pre class="bash"><code>pandoc example.md \
+       -t gfm \
+       --lua-filter number-sections.lua</code></pre>
+</div>
+<div id="結果" class="section level2">
+<h2>結果</h2>
+<p>ちゃんとmarkdown出力であっても章番号がついてますね。</p>
+<pre><code># 第3章 A
+
+## 第3.1節 A-1
+
+# 第4章 B
+
+## 第4.1節 B-1</code></pre>
+</div>
+<div id="おまけ" class="section level2">
+<h2>おまけ</h2>
+<details>
+<summary>
+HTML出力で目次をつけてみる
+</summary>
+<pre class="bash"><code>pandoc example.md \
+       -t html \
+       --standalone \
+       --toc \
+       --metadata=&quot;title: example&quot; \
+       --lua-filter number-sections.lua</code></pre>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot; lang=&quot;&quot; xml:lang=&quot;&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot; /&gt;
+  &lt;meta name=&quot;generator&quot; content=&quot;pandoc&quot; /&gt;
+  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0, user-scalable=yes&quot; /&gt;
+  &lt;title&gt; example&lt;/title&gt;
+  &lt;style&gt;
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      word-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li &gt; ol, li &gt; ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, &#39;Lucida Console&#39;, Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  &lt;/style&gt;
+  &lt;!--[if lt IE 9]&gt;
+    &lt;script src=&quot;//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js&quot;&gt;&lt;/script&gt;
+  &lt;![endif]--&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;header id=&quot;title-block-header&quot;&gt;
+&lt;h1 class=&quot;title&quot;&gt; example&lt;/h1&gt;
+&lt;/header&gt;
+&lt;nav id=&quot;TOC&quot; role=&quot;doc-toc&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;#a&quot;&gt;&lt;span class=&quot;header-section-number&quot;&gt;第3章&lt;/span&gt; A&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;#a-1&quot;&gt;&lt;span class=&quot;header-section-number&quot;&gt;第3.1節&lt;/span&gt; A-1&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#b&quot;&gt;&lt;span class=&quot;header-section-number&quot;&gt;第4章&lt;/span&gt; B&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;#b-1&quot;&gt;&lt;span class=&quot;header-section-number&quot;&gt;第4.1節&lt;/span&gt; B-1&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/nav&gt;
+&lt;h1 data-number=&quot;第3章&quot; id=&quot;a&quot;&gt;&lt;span class=&quot;header-section-number&quot;&gt;第3章&lt;/span&gt; A&lt;/h1&gt;
+&lt;h2 data-number=&quot;第3.1節&quot; id=&quot;a-1&quot;&gt;&lt;span class=&quot;header-section-number&quot;&gt;第3.1節&lt;/span&gt; A-1&lt;/h2&gt;
+&lt;h1 data-number=&quot;第4章&quot; id=&quot;b&quot;&gt;&lt;span class=&quot;header-section-number&quot;&gt;第4章&lt;/span&gt; B&lt;/h1&gt;
+&lt;h2 data-number=&quot;第4.1節&quot; id=&quot;b-1&quot;&gt;&lt;span class=&quot;header-section-number&quot;&gt;第4.1節&lt;/span&gt; B-1&lt;/h2&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+</details>
+</div>
+</div>
+<div id="enjoy" class="section level1 unlisted unnumbered">
+<h1>Enjoy!</h1>
+</div>

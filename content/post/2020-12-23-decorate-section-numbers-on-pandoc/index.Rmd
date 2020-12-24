@@ -5,6 +5,7 @@ date: '2020-12-23'
 slug: decorate-section-numbers-on-pandoc
 categories: [Pandoc]
 tags: [Lua, CSS, Java Script]
+output_yaml: "../_output.yml"
 output:
   blogdown::html_page:
     toc: true

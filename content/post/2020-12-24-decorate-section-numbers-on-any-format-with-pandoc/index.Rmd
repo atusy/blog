@@ -1,0 +1,83 @@
+---
+title: "Pandocで出力形式に依存せず見出し番号をつけたり、第1章とか第1.1節とか装飾したい"
+author: ~
+date: '2020-12-24'
+slug: decorate-section-numbers-on-any-format-with-pandoc
+categories: [Pandoc]
+tags: [Lua]
+---
+
+昨日はHTML出力の場合に限って、見出し番号の装飾方法を紹介しました。
+
+> [PandocでHTML出力時に見出し番号を第1章とか第1.1節とかしたい](https://blog.atusy.net/2020/12/23/decorate-section-numbers-on-pandoc/)
+
+ただ、昨日の段階ではどの方法も一長一短だったので、
+今日は任意の出力に対応するLuaフィルタを用意しました。
+
+Luaフィルタが何ものかは↓でも読んでください。
+
+> [Luaフィルタがアツイ2020](https://blog.atusy.net/2020/12/07/lua-filter-is-hot/)
+
+# やり方
+
+## Luaフィルタをダウンロード
+
+↓からダウンロードできます
+
+> https://raw.githubusercontent.com/atusy/lua-filters/master/lua/number-sections.lua
+
+コマンドを使うなら
+
+```{bash}
+wget -qO number-sections.lua https://raw.githubusercontent.com/atusy/lua-filters/master/lua/number-sections.lua
+```
+
+## 変換したい文章を用意
+
+Markdownの場合、章番号を装飾したり、章番号をずらしたりするのも簡単です。
+↓のようにYAMLを指定しましょう。
+
+```{r, echo=FALSE, comment=""}
+cat(readLines("example.md"), sep = "\n")
+```
+
+`number_sections_with_decorations`には
+見出しレベル順にフォーマットを記述します。
+`%s`とした部分が見出し番号で置換される点に注意してください。
+省略したレベルに関してはそのままの値が出力されます。
+
+## Pandocを実行
+
+先程の文書が`example.md`に保存されているとし、`gfm`に出力してみましょう。
+
+```{bash pandoc, eval=FALSE}
+pandoc example.md \
+       -t gfm \
+       --lua-filter number-sections.lua
+```
+
+## 結果
+
+ちゃんとmarkdown出力であっても章番号がついてますね。
+
+```{bash, ref.label="pandoc", comment="", echo=FALSE}
+
+```
+
+## おまけ
+
+<details><summary>HTML出力で目次をつけてみる</summary>
+
+```{bash pandoc-html, comment="", eval=TRUE}
+pandoc example.md \
+       -t html \
+       --standalone \
+       --toc \
+       --metadata="title: example" \
+       --lua-filter number-sections.lua
+```
+
+</details>
+
+
+# Enjoy! {.unlisted .unnumbered}

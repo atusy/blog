@@ -5,6 +5,7 @@ date: '2020-12-23'
 slug: decorate-section-numbers-on-pandoc
 categories: [Pandoc]
 tags: [Lua, CSS, Java Script]
+output_yaml: "../_output.yml"
 output:
   blogdown::html_page:
     toc: true
@@ -33,8 +34,7 @@ summary: |
 <p><a href="https://adventar.org/calendars/4963">Pandocアドベントカレンダー</a>12月23日の記事です。</p>
 <div id="はじめに" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> はじめに</h1>
-<p>PandocでたとえばmarkdownをHTMLに出力する時、<code>--number-sections</code>オプションを与えると、
-見出しに番号が付きます。</p>
+<p>PandocでたとえばmarkdownをHTMLに出力する時、<code>--number-sections</code>オプションを与えると、見出しに番号が付きます。</p>
 <p>雰囲気的には</p>
 <pre class="md"><code># 見出し1
 
@@ -46,9 +46,7 @@ summary: |
 <p>になる感じ。</p>
 <p>ただし、「第1章」とか「第1.1節」みたいなことはできません。</p>
 <p>どうする？</p>
-<p>選択肢としては大きく3つあるでしょう。
-自身が使える言語とかに合わせて選択してください。
-本記事ではJavaScriptを採用してます。</p>
+<p>選択肢としては大きく3つあるでしょう。自身が使える言語とかに合わせて選択してください。本記事ではJavaScriptを採用してます。</p>
 <table>
 <thead>
 <tr class="header">
@@ -114,8 +112,7 @@ echo -e &quot;# foo\n\n## bar&quot; | pandoc -t html --number-sections --lua-fil
 </div>
 <div id="css" class="section level2" number="2.2">
 <h2><span class="header-section-number">2.2</span> CSS</h2>
-<p>以下のCSSを<code>&lt;style&gt;</code>要素内に書くか、外部ファイルに記述して<code>--css</code>オプションで取り込む。
-これも簡単。</p>
+<p>以下のCSSを<code>&lt;style&gt;</code>要素内に書くか、外部ファイルに記述して<code>--css</code>オプションで取り込む。これも簡単。</p>
 <pre class="css"><code>:not(.unnumbered) h1:not(.unnumbered) .header-section-number:before,
 :not(.unnumbered) h2:not(.unnumbered) .header-section-number:before {
   content: &#39;第&#39;
@@ -142,9 +139,7 @@ echo -e &quot;# foo\n\n## bar&quot; | pandoc -t html --number-sections --lua-fil
 </div>
 <div id="javascript" class="section level2" number="2.3">
 <h2><span class="header-section-number">2.3</span> JavaScript</h2>
-<p>JavaScriptを使うとCSSではできない節番号の操作も可能になります。
-あと、CSSにおける<code>:before</code>と<code>:after</code>の使い分けも不要になります。
-たぶんパフォーマンスはCSSに軍配が上がるでしょうが、無視できるほどのものでしょう。</p>
+<p>JavaScriptを使うとCSSではできない節番号の操作も可能になります。あと、CSSにおける<code>:before</code>と<code>:after</code>の使い分けも不要になります。たぶんパフォーマンスはCSSに軍配が上がるでしょうが、無視できるほどのものでしょう。</p>
 <pre class="js"><code>document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
   const h1 = document.querySelectorAll(
     &#39;:not(.unnumbered) h1:not(.unnumbered) .header-section-number,&#39; +
@@ -197,9 +192,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div id="どれがいいのか" class="section level1" number="3">
 <h1><span class="header-section-number">3</span> どれがいいのか</h1>
-<p>見出し番号の装飾方法を3通り紹介しました。
-基本はフォーマットに依存せず使えるLuaフィルタが便利だと思います。
-<code>--number-offset</code>オプションも使いたい場合で出力がHTMLなら、CSSやJavaScriptを検討しても良いでしょう。
-あるいは、<code>--number-offset</code>を使うのをやめて、メタデータ経由で章番号をずらすよう、Luaフィルタに伝えるという手もありますね。</p>
+<p>見出し番号の装飾方法を3通り紹介しました。基本はフォーマットに依存せず使えるLuaフィルタが便利だと思います。
+<code>--number-offset</code>オプションも使いたい場合で出力がHTMLなら、CSSやJavaScriptを検討しても良いでしょう。あるいは、<code>--number-offset</code>を使うのをやめて、メタデータ経由で章番号をずらすよう、Luaフィルタに伝えるという手もありますね。</p>
 <p>Enjoy!!</p>
 </div>

@@ -1,2 +1,3 @@
 blogdown::html_page:
+  toc: true
   md_extensions: +east_asian_line_breaks+task_lists
