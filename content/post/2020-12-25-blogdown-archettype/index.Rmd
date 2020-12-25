@@ -36,6 +36,8 @@ blogdownではR Markdownを使ったウェブサイトの作成ができます�
 というわけで、pandocの`east_asian_line_breaks`オプションを使えるように、
 こんな`default.md`を用意してみました。
 
+> https://github.com/atusy/blog/tree/master/archetypes
+
 ```
 ---
 title: ''
