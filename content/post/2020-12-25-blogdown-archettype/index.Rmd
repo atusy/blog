@@ -12,6 +12,11 @@ output:
 
 blogdownではR Markdownを使ったウェブサイトの作成ができます。
 名前の通り、ブログを念頭に置いたパッケージです。
+ドキュメントは以下にあります。
+ググると日本語の記事もそれなりに出てきます。
+
+> blogdown: Creating Websites with R Markdown \
+> https://bookdown.org/yihui/blogdown/
 
 記事の作成には`blogdown::new_post`関数を使います。
 すると引数の内容に応じて、タイトルや作成日時などが自動でYAMLフロントマターに入力され、
