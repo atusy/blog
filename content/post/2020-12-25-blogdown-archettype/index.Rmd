@@ -1,0 +1,58 @@
+---
+title: blogdownで記事のテンプレートを用意する
+author: ~
+date: '2020-12-25'
+slug: blogdown-archettype
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+blogdownではR Markdownを使ったウェブサイトの作成ができます。
+名前の通り、ブログを念頭に置いたパッケージです。
+
+記事の作成には`blogdown::new_post`関数を使います。
+すると引数の内容に応じて、タイトルや作成日時などが自動でYAMLフロントマターに入力され、
+本文は空白なRmdファイルが作成されます。
+
+この時作成されるRmdファイルの内容を変更するには、
+`archetypes/default.md`というファイルを用意しましょう。
+
+私の場合、段落内で改行した時に、改行の前後が
+
+- 改行の前後が全角文字なら半角スペースを除去
+- それ以外なら半角スペースを挿入する
+
+という設定をテンプレートで有効にしたいです。
+既定値では前後が半角スペース区切りになってしまいます。
+
+というわけで、pandocの`east_asian_line_breaks`オプションを使えるように、
+こんな`default.md`を用意してみました。
+
+```
+---
+title: ''
+author: ~
+date: ''
+slug: ''
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks
+---
+```
+
+YAMLのフィールドには、最低限、`blogdown::new_post`関数の引数の内、YAMLフロントマターに利用される引数に対応するものは含めておくと良いでしょう。
+今回は更に`output`フィールドを追加しました。
+もちろん、定型文などがあれば、本文に挿入しておいても良いですね。
+
+```{r, collapse=TRUE}
+str(formals(blogdown::new_post))
+```
+
+上記の内、`title`、`author`、`categories`、`tags`、`date`、`slug`はYAMLに入れておいた方が良い内容です。
+
+Enjoy!!

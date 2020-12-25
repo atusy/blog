@@ -1,0 +1,54 @@
+---
+title: blogdownで記事のテンプレートを用意する
+author: ~
+date: '2020-12-25'
+slug: blogdown-archettype
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+<script src="index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>blogdownではR Markdownを使ったウェブサイトの作成ができます。名前の通り、ブログを念頭に置いたパッケージです。</p>
+<p>記事の作成には<code>blogdown::new_post</code>関数を使います。すると引数の内容に応じて、タイトルや作成日時などが自動でYAMLフロントマターに入力され、本文は空白なRmdファイルが作成されます。</p>
+<p>この時作成されるRmdファイルの内容を変更するには、
+<code>archetypes/default.md</code>というファイルを用意しましょう。</p>
+<p>私の場合、段落内で改行した時に、改行の前後が</p>
+<ul>
+<li>改行の前後が全角文字なら半角スペースを除去</li>
+<li>それ以外なら半角スペースを挿入する</li>
+</ul>
+<p>という設定をテンプレートで有効にしたいです。既定値では前後が半角スペース区切りになってしまいます。</p>
+<p>というわけで、pandocの<code>east_asian_line_breaks</code>オプションを使えるように、こんな<code>default.md</code>を用意してみました。</p>
+<pre><code>---
+title: &#39;&#39;
+author: ~
+date: &#39;&#39;
+slug: &#39;&#39;
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks
+---</code></pre>
+<p>YAMLのフィールドには、最低限、<code>blogdown::new_post</code>関数の引数の内、YAMLフロントマターに利用される引数に対応するものは含めておくと良いでしょう。今回は更に<code>output</code>フィールドを追加しました。もちろん、定型文などがあれば、本文に挿入しておいても良いですね。</p>
+<pre class="r"><code>str(formals(blogdown::new_post))
+## Dotted pair list of 12
+##  $ title     : symbol 
+##  $ kind      : chr &quot;&quot;
+##  $ open      : language interactive()
+##  $ author    : language getOption(&quot;blogdown.author&quot;)
+##  $ categories: NULL
+##  $ tags      : NULL
+##  $ date      : language Sys.Date()
+##  $ file      : NULL
+##  $ slug      : NULL
+##  $ title_case: language getOption(&quot;blogdown.title_case&quot;)
+##  $ subdir    : language getOption(&quot;blogdown.subdir&quot;, &quot;post&quot;)
+##  $ ext       : language getOption(&quot;blogdown.ext&quot;, &quot;.md&quot;)</code></pre>
+<p>上記の内、<code>title</code>、<code>author</code>、<code>categories</code>、<code>tags</code>、<code>date</code>、<code>slug</code>はYAMLに入れておいた方が良い内容です。</p>
+<p>Enjoy!!</p>
