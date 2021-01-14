@@ -1,0 +1,74 @@
+---
+title: minidownで目次をハイライトできるようにした
+author: ~
+date: '2021-01-14'
+slug: minidown-toc-highlight
+categories: [R, JavaScript]
+tags: [minidown, R Markdown, pandoc]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+images: [images/toc-highlight.gif]
+---
+
+<script src="index_files/header-attrs/header-attrs.js"></script>
+
+
+<p><code>minidown::mini_document</code>は<code>rmarkdown::html_document</code>を軽量化しつつ同等以上の機能提供を目指すR Markdown用HTMLフォーマットです。</p>
+<p>どんなことができるかは以下を参照してください。実際に<code>minidown::mini_document</code>を使ってレンダリングした結果なので、雰囲気がよくわかると思います。</p>
+<blockquote>
+<p><a href="https://minidown.atusy.net/" class="uri">https://minidown.atusy.net/</a></p>
+</blockquote>
+<p>また、インストールは以下のコマンドで行います。
+CRANからもインストールできますが、本記事の内容はまだ反映されていません。</p>
+<pre class="r"><code>require(devtools)
+install_github(&quot;atusy/minidown&quot;)</code></pre>
+<p>さて、本題です。今回、下図のようにクリックした目次やスクロール先のセクションに追随して、目次をハイライトする機能を実装しました。</p>
+<p><img src="images/toc-highlight.gif" style="width:100%" />
+<code>rmarkdown::html_document(toc = TRUE, toc_float = TRUE)</code>と同等の機能ですね。利用するには以下のようにYAMLフロントマターを記述します。</p>
+<pre class="yaml"><code>output:
+  minidown::mini_document:
+    toc: true
+    toc_float: true
+    toc_highlight: true</code></pre>
+<p>Enjoy!</p>
+<div id="実装の話" class="section level1">
+<h1>実装の話</h1>
+<p><code>rmarkdown::html_document</code>の<code>floating_toc</code>は<a href="http://gregfranko.com/jquery.tocify.js/">Tocify</a>というJavaScript製プラグインを用いています。</p>
+<p><code>minidown::mini_document</code>では目次のfloatingをHTMLとCSSだけで行っています。主要な技術は2つでしょうか。</p>
+<ul>
+<li>CSS Grid Layoutにより、ウィンドウ幅に応じたレイアウトの変更</li>
+<li>CSSの<code>position: sticky</code>により、目次を左側に固定</li>
+</ul>
+<p><code>rmarkdown::html_document</code>に倣ってfloating tocと称していますが、実態はsticky tocと言った方が妥当かも知れませんね。
+CSS Grid Layoutをうまく使えるよう、Pandocのテンプレートにも手を加えてあります。</p>
+<blockquote>
+<p>CSSのソースコード<br />
+<a href="https://github.com/atusy/minidown/blob/41e4b5122fce4aae0b2d1224ee5c393a5e8dc82e/inst/rmarkdown/html/styles/feat-toc-float.css" class="uri">https://github.com/atusy/minidown/blob/41e4b5122fce4aae0b2d1224ee5c393a5e8dc82e/inst/rmarkdown/html/styles/feat-toc-float.css</a></p>
+</blockquote>
+<p>minidown版floating tocは軽量な一方、所詮はHTML+CSSなので、レスポンシブにも限度があります。仕方ないのでハイライト部分はJavaScriptでフルスクラッチしました。</p>
+<ol style="list-style-type: decimal">
+<li>目次のリンクから各セクションのIDを取得する</li>
+<li>目次をハイライトする時の書式をCSSルールとして追加
+<ol style="list-style-type: decimal">
+<li>目次の先頭にあるリンクの背景色と文字色を取得</li>
+<li><code>highlight</code>クラスに背景色と文字色を反転させるルールをDOMに追加</li>
+</ol></li>
+<li>IDを元に各セクションの現在位置を取得し、画面最上部にあるセクションに<code>highlight</code>クラスを付与する。他のリンクからは同クラスを削除する。
+<ol style="list-style-type: decimal">
+<li>関数として定義し、一度は実行して初期化しておく</li>
+<li><code>window.addEventListner("scroll", ...)</code>といった具合にページスクロールに反応して関数を実行しハイライト箇所を随時更新する。</li>
+</ol></li>
+</ol>
+<blockquote>
+<p>JavaScriptのソースコード<br />
+<a href="https://github.com/atusy/minidown/blob/41e4b5122fce4aae0b2d1224ee5c393a5e8dc82e/inst/rmarkdown/html/highlightToC/highlightToC.js" class="uri">https://github.com/atusy/minidown/blob/41e4b5122fce4aae0b2d1224ee5c393a5e8dc82e/inst/rmarkdown/html/highlightToC/highlightToC.js</a></p>
+</blockquote>
+<p>ちなみにスクロールイベントは大量に発生し、パフォーマンスに影響しやすいので、</p>
+<blockquote>
+<p>Intersection Observer API<br />
+<a href="https://developer.mozilla.org/ja/docs/Web/API/Intersection_Observer_API" class="uri">https://developer.mozilla.org/ja/docs/Web/API/Intersection_Observer_API</a></p>
+</blockquote>
+<p>なるものを使うと良いそうです。その内こちらで再実装したいですね。</p>
+<p>今度こそEnjoy!!</p>
+</div>
