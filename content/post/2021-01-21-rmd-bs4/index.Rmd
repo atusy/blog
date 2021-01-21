@@ -14,9 +14,9 @@ GitHub版の**rmarkdown**パッケージの`html_document`関数がBootstrap 4�
 本記事ではどんなことができるのか紹介します。
 が、同じ内容を`html_document`でBootstrap 4を使ってレンダリングしてみたので、そちらを参考にして下さい。
 
-> [Bootstrap 4での出力例](./examples/index.html)
+> [Bootstrap 4での出力例](/examples/2021-01-21-rmd-bs4/index.html)
 
-```{r child="examples/index.Rmd"}
+```{r child="../../../static/examples/2021-01-21-rmd-bs4/index.Rmd"}
 
 ```
 
