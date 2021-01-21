@@ -1,0 +1,183 @@
+---
+title: "R MarkdownでBootstrap 4を使う"
+author: Atusy
+date: "2021-01-21"
+output:
+  html_document:
+    theme:
+      version: 4
+      bootswatch: darkly
+    toc: true
+    toc_float: true
+    code_download: true
+---
+
+<script src="index_files/header-attrs/header-attrs.js"></script>
+
+
+<div id="bootstrap-4って" class="section level1">
+<h1>Bootstrap 4って？</h1>
+<p>Bootstrapはレスポンシブデザインといって、PC・スマホなど閲覧デバイスの違い、ウィンドウサイズの変更に応じて最適なレイアウトを提供できるフレームワークです。
+従来rmarkdownパッケージが提供しているBootstrapのバージョンは3で今回は4です。
+主な変更点に関しては以下に纏められています。</p>
+<blockquote>
+<p>Migrating to v4<br />
+<a href="https://getbootstrap.com/docs/4.0/migration/" class="uri">https://getbootstrap.com/docs/4.0/migration/</a></p>
+</blockquote>
+<p>R Markdownユーザーが主に影響を受けそうなところは後ほど説明します。</p>
+</div>
+<div id="基本の使い方" class="section level1">
+<h1>基本の使い方</h1>
+<p>今のところオプション機能なので、使用するには必要なパッケージを入れて、YAMLフロントマターで利用を宣言する必要があります。</p>
+<p>2021/1/21現在、Bootstrap 4はGitHub版の<strong>rmarkdown</strong>パッケージで利用可能です。
+また、利用には追加で<strong>bslib</strong>というパッケージが必要です。
+以下のコマンドでインストールしましょう。</p>
+<pre class="r"><code>remotes::install_github(c(&quot;rstudio/rmarkdown&quot;, &quot;rstudio/bslib&quot;))</code></pre>
+<p>インストールできたら、
+Rmdファイルのフロントマターの<code>output</code>フィールドに<code>html_document</code>を指定し、
+<code>theme</code>引数を適宜指定するだけです<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>。
+最低限必要なものに<code>version: 4</code>があります<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>。
+<code>version</code>を省略するか<code>3</code>にすると従来のBootstrap 3が適用されます。</p>
+<pre class="yaml"><code>output:
+  html_document:
+    theme:
+      version: 4</code></pre>
+<div id="theming" class="section level2">
+<h2>テーマの指定</h2>
+<p>Bootstrap 3でよければ従来通り、<code>theme</code>引数に<code>"cosmo"</code>などの文字列を指定できます。
+Bootstrap 4では更にテーマを指定するには以下のように<code>bootswatch</code>要素を指定します。</p>
+<pre class="yaml"><code>output:
+  html_document:
+    theme:
+      version: 4
+      bootswatch: darkly</code></pre>
+<p>ちなみにこれが、このページの設定です。
+従来の<code>theme</code>引数に指定していた私が<code>bootswatch</code>要素にそのまま指定できます。
+ただし、<strong>bslib</strong>パッケージの活躍により、利用可能なテーマは以下の通り増えました。
+<code>bootswatch</code>要素を指定すればBootstrap 3利用時もすべてのテーマを利用できます。</p>
+<pre class="r"><code>bslib::bootswatch_themes()</code></pre>
+<pre><code>##  [1] &quot;cerulean&quot;  &quot;cosmo&quot;     &quot;cyborg&quot;    &quot;darkly&quot;    &quot;flatly&quot;    &quot;journal&quot;  
+##  [7] &quot;litera&quot;    &quot;lumen&quot;     &quot;lux&quot;       &quot;materia&quot;   &quot;minty&quot;     &quot;pulse&quot;    
+## [13] &quot;sandstone&quot; &quot;simplex&quot;   &quot;sketchy&quot;   &quot;slate&quot;     &quot;solar&quot;     &quot;spacelab&quot; 
+## [19] &quot;superhero&quot; &quot;united&quot;    &quot;yeti&quot;</code></pre>
+</div>
+</div>
+<div id="何が変わったの" class="section level1">
+<h1>何が変わったの？</h1>
+<div id="フォント周りが色々変わった" class="section level2">
+<h2>フォント周りが色々変わった</h2>
+<div id="デフォルトフォントが変わった" class="section level3">
+<h3>デフォルトフォントが変わった</h3>
+<p>適用するテーマによってフォントが変わりますが以下のように、使用候補となるフォントが増えました。
+ブラウザはCSSの<code>font-family</code><a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>プロパティに指定されたフォントリストから利用するフォントを選択します。
+先頭にあるほど優先度が高く、</p>
+<ul>
+<li>インストールされているか</li>
+<li>文字をレンダリング可能か</li>
+</ul>
+<p>の2点を基準に1文字ずつ使うフォントを決定します。
+沢山指定しておけば、良い感じの表示を実現できる可能性があがりそうですね。</p>
+<p>具体的には以下のように変更されています（<code>rmarkdown::html_document</code>の標準的な出力で比較）。
+Robotoのようにモダンなフォント、Noto Sansのように多くの文字をレンダリング可能なフォント、Segoe UI Emojiのように絵文字に特価したフォント、色々とありますね。</p>
+<ul>
+<li>Bootstrap 3
+<ul>
+<li>Helvetica Neue</li>
+<li>Helvetica</li>
+<li>Arial</li>
+<li>sans-serif</li>
+</ul></li>
+<li>Bootstrap 4
+<ul>
+<li>-apple-system</li>
+<li>BlinkMacSystemFont</li>
+<li>Segoe UI</li>
+<li>Roboto</li>
+<li>Helvetica Neue</li>
+<li>Arial</li>
+<li>Noto Sans</li>
+<li>sans-serif</li>
+<li>Apple Color Emoji</li>
+<li>Segoe UI Emoji</li>
+<li>Segoe UI Symbol</li>
+<li>Noto Color Emoji</li>
+</ul></li>
+</ul>
+</div>
+<div id="フォントサイズが大きくなった" class="section level3">
+<h3>フォントサイズが大きくなった</h3>
+<p>基準となる文字サイズが<code>14px</code>から<code>16px</code>になりました。</p>
+</div>
+<div id="フォントサイズが調整しやすくなった" class="section level3">
+<h3>フォントサイズが調整しやすくなった</h3>
+<p>また、見出しや段落などの各要素のフォントサイズは基準サイズの16pxからの相対値になりました（<code>rem</code>単位）。
+たとえば、<code>2rem</code>なら<code>32px</code>ですね。
+以下のように<code>html</code>要素に対してフォントサイズを変更してやれば、ページ内の各要素のフォントサイズも相対的に変更されます。</p>
+<pre class="css"><code>html {font-size: 18px;}</code></pre>
+<p>Rmdファイル上ではcssチャンクを使うだけで簡単にフォントサイズを変更できますね。</p>
+<pre><code>```{css, echo=FALSE}
+html {font-size: 18px;}
+``</code></pre>
+<p>Bootstrap 3ではフォントサイズが<code>px</code>という絶対的な単位だったので、こういった変更が困難でした。</p>
+</div>
+</div>
+<div id="テーマが増えカスタマイズも簡単になった" class="section level2">
+<h2>テーマが増え、カスタマイズも簡単になった</h2>
+<p>使えるテーマが増えた点は既に<a href="#theming">紹介</a>した通りです。
+実は、YAMLフロントマターにおて<code>html_document</code>関数の<code>theme</code>引数に名前付きリストを指定すると、
+リストは更に<code>bslib::bs_theme</code>関数の引数化します。
+そしてこの関数は引数に応じてテーマの調整を可能としています。</p>
+<pre class="yaml"><code>output:
+  html_document:
+    theme:
+      version: 4   # 3も可能。
+      bootswatch: darkly
+      bg: beige # 背景色。fgの指定が必須。
+      fg: black # 表面色。文字色のことっぽい。</code></pre>
+<p>ちなみに<code>bslib::bs_theme</code>関数の引数は以下の通り。</p>
+<pre class="r"><code>names(formals(bslib::bs_theme))</code></pre>
+<pre><code>##  [1] &quot;version&quot;      &quot;bootswatch&quot;   &quot;...&quot;          &quot;bg&quot;           &quot;fg&quot;          
+##  [6] &quot;primary&quot;      &quot;secondary&quot;    &quot;success&quot;      &quot;info&quot;         &quot;warning&quot;     
+## [11] &quot;danger&quot;       &quot;base_font&quot;    &quot;code_font&quot;    &quot;heading_font&quot;</code></pre>
+<p>可変長引数（<code>...</code>）以降がテーマ調整用の引数ですね。
+これらの引数はCSSを動的に生成するためのフレームワークに引数として渡されています。
+可変長引数もちゃんと渡されるので、他にも色々な調整が可能です。</p>
+<p>利用可能な引数は以下のリンクから確認してください。
+なお、<code>html_document</code>関数で指定するには<code>-</code>を<code>_</code>に置換してください。</p>
+<blockquote>
+<p><a href="https://github.com/twbs/bootstrap-sass/blob/master/assets/stylesheets/bootstrap/_variables.scss" class="uri">https://github.com/twbs/bootstrap-sass/blob/master/assets/stylesheets/bootstrap/_variables.scss</a></p>
+</blockquote>
+<p>たとえば<code>font_size_base</code>要素を指定すれば、基準となるフォントのサイズを変更可能です。
+この方法ならBootstrap 3であってもフォントサイズを一元的に変更できます。
+ただし、使える単位がBootstrap 4の<code>rem</code>に対し、Bootstrap 3の場合は<code>px</code>です。</p>
+</div>
+</div>
+<div id="感想と展望" class="section level1">
+<h1>感想と展望</h1>
+<p>従来の<code>rmarkdown::html_document</code>関数でテーマをカスタマイズするには、<code>css</code>引数にCSSファイルを指定する必要がありました。
+これが減らせるのはとっても簡便で良いですね。
+実は<code>theme</code>引数には文字列、リストの他に<code>bslib::bs_theme</code>の実行結果を与えることも可能です。</p>
+<pre class="yaml"><code>output:
+  html_document:
+    theme: !expr bslib::bs_theme(version = 4)</code></pre>
+<p><code>!expr</code>はR言語として評価してね、というキーワードです。
+これ、言い変えると<code>bslib::bs_theme</code>関数の返り値に準拠したカスタム関数を利用できます。
+パッケージとしてカスタムテーマを提供する時とっても便利そうですよね。
+私は前からHonokaという日本語向けのBootstrapテーマを使ってみたいと思っていました。</p>
+<blockquote>
+<p><a href="https://honokak.osaka/" class="uri">https://honokak.osaka/</a></p>
+</blockquote>
+<p><strong>bslib</strong>パッケージの挙動を参考に実装したいと思います。
+パッケージ化するとしたら<code>honokadown::honoka_document</code>とかかなあ？</p>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!!</h1>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><code>html_document</code>は<code>rmarkdown::html_document</code>関数です。YAMLフロントマターで、<code>html_document</code>の下の階層に指定した値は、<code>html_document</code>関数の引数扱いになるため、<code>theme</code><strong>引数</strong>と呼んでいます。<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>YAMLフロントマターにおいて、<code>html_document</code>の引数の値として、<code>名前: 値</code>のペアを指定すると、名前付きリストになります。このため、<code>theme</code>引数の下に<code>version: 4</code>とあればリストの<code>version</code><strong>要素</strong>を記述した扱いになります。<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p><a href="https://developer.mozilla.org/ja/docs/Web/CSS/font-family" class="uri">https://developer.mozilla.org/ja/docs/Web/CSS/font-family</a><a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
