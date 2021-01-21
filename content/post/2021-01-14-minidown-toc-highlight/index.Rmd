@@ -8,7 +8,7 @@ tags: [minidown, R Markdown, pandoc]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists
-images: [images/toc-highlight.gif]
+images: ["2021/01/14/minidown-toc-highlight/images/toc-highlight.gif"]
 ---
 
 `minidown::mini_document`は`rmarkdown::html_document`を軽量化しつつ同等以上の機能提供を目指すR Markdown用HTMLフォーマットです。
