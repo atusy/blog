@@ -1,0 +1,199 @@
+---
+title: "R MarkdownでBootstrap 4を使う"
+author: Atusy
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme:
+      version: 4
+      bootswatch: darkly
+    toc: true
+    toc_float: true
+    code_download: true
+---
+
+# Bootstrap 4って？
+
+Bootstrapはレスポンシブデザインといって、PC・スマホなど閲覧デバイスの違い、ウィンドウサイズの変更に応じて最適なレイアウトを提供できるフレームワークです。
+従来rmarkdownパッケージが提供しているBootstrapのバージョンは3で今回は4です。
+主な変更点に関しては以下に纏められています。
+
+> Migrating to v4 \
+> https://getbootstrap.com/docs/4.0/migration/
+
+R Markdownユーザーが主に影響を受けそうなところは後ほど説明します。
+
+# 基本の使い方
+
+今のところオプション機能なので、使用するには必要なパッケージを入れて、YAMLフロントマターで利用を宣言する必要があります。
+
+2021/1/21現在、Bootstrap 4はGitHub版の**rmarkdown**パッケージで利用可能です。
+また、利用には追加で**bslib**というパッケージが必要です。
+以下のコマンドでインストールしましょう。
+
+```{r, eval=FALSE}
+remotes::install_github(c("rstudio/rmarkdown", "rstudio/bslib"))
+```
+
+インストールできたら、
+Rmdファイルのフロントマターの`output`フィールドに`html_document`を指定し、
+`theme`引数を適宜指定するだけです[^arg]。
+最低限必要なものに`version: 4`があります[^list]。
+`version`を省略するか`3`にすると従来のBootstrap 3が適用されます。
+
+```yaml
+output:
+  html_document:
+    theme:
+      version: 4
+```
+
+[^arg]: `html_document`は`rmarkdown::html_document`関数です。YAMLフロントマターで、`html_document`の下の階層に指定した値は、`html_document`関数の引数扱いになるため、`theme`**引数**と呼んでいます。
+
+[^list]: YAMLフロントマターにおいて、`html_document`の引数の値として、`名前: 値`のペアを指定すると、名前付きリストになります。このため、`theme`引数の下に`version: 4`とあればリストの`version`**要素**を記述した扱いになります。
+
+## テーマの指定 {#theming}
+
+Bootstrap 3でよければ従来通り、`theme`引数に`"cosmo"`などの文字列を指定できます。
+Bootstrap 4では更にテーマを指定するには以下のように`bootswatch`要素を指定します。
+
+```yaml
+output:
+  html_document:
+    theme:
+      version: 4
+      bootswatch: darkly
+```
+
+ちなみにこれが、このページの設定です。
+従来の`theme`引数に指定していた私が`bootswatch`要素にそのまま指定できます。
+ただし、**bslib**パッケージの活躍により、利用可能なテーマは以下の通り増えました。
+`bootswatch`要素を指定すればBootstrap 3利用時もすべてのテーマを利用できます。
+
+```{r}
+bslib::bootswatch_themes()
+```
+
+# 何が変わったの？
+
+## フォント周りが色々変わった
+
+### デフォルトフォントが変わった
+
+適用するテーマによってフォントが変わりますが以下のように、使用候補となるフォントが増えました。
+ブラウザはCSSの`font-family`^[https://developer.mozilla.org/ja/docs/Web/CSS/font-family
+]プロパティに指定されたフォントリストから利用するフォントを選択します。
+先頭にあるほど優先度が高く、
+
+- インストールされているか
+- 文字をレンダリング可能か
+
+の2点を基準に1文字ずつ使うフォントを決定します。
+沢山指定しておけば、良い感じの表示を実現できる可能性があがりそうですね。
+
+具体的には以下のように変更されています（`rmarkdown::html_document`の標準的な出力で比較）。
+Robotoのようにモダンなフォント、Noto Sansのように多くの文字をレンダリング可能なフォント、Segoe UI Emojiのように絵文字に特価したフォント、色々とありますね。
+
+- Bootstrap 3
+    - Helvetica Neue
+    - Helvetica
+    - Arial
+    - sans-serif
+- Bootstrap 4
+    - -apple-system
+    - BlinkMacSystemFont
+    - Segoe UI
+    - Roboto
+    - Helvetica Neue
+    - Arial
+    - Noto Sans
+    - sans-serif
+    - Apple Color Emoji
+    - Segoe UI Emoji
+    - Segoe UI Symbol
+    - Noto Color Emoji
+
+
+### フォントサイズが大きくなった
+
+基準となる文字サイズが`14px`から`16px`になりました。
+
+### フォントサイズが調整しやすくなった
+
+また、見出しや段落などの各要素のフォントサイズは基準サイズの16pxからの相対値になりました（`rem`単位）。
+たとえば、`2rem`なら`32px`ですね。
+以下のように`html`要素に対してフォントサイズを変更してやれば、ページ内の各要素のフォントサイズも相対的に変更されます。
+
+```css
+html {font-size: 18px;}
+```
+
+Rmdファイル上ではcssチャンクを使うだけで簡単にフォントサイズを変更できますね。
+
+````
+`r ''````{css, echo=FALSE}
+html {font-size: 18px;}
+`r ''```
+````
+
+Bootstrap 3ではフォントサイズが`px`という絶対的な単位だったので、こういった変更が困難でした。
+
+## テーマが増え、カスタマイズも簡単になった
+
+使えるテーマが増えた点は既に[紹介](#theming)した通りです。
+実は、YAMLフロントマターにおて`html_document`関数の`theme`引数に名前付きリストを指定すると、
+リストは更に`bslib::bs_theme`関数の引数化します。
+そしてこの関数は引数に応じてテーマの調整を可能としています。
+
+```yaml
+output:
+  html_document:
+    theme:
+      version: 4   # 3も可能。
+      bootswatch: darkly
+      bg: beige # 背景色。fgの指定が必須。
+      fg: black # 表面色。文字色のことっぽい。
+```
+
+ちなみに`bslib::bs_theme`関数の引数は以下の通り。
+
+```{r}
+names(formals(bslib::bs_theme))
+```
+
+可変長引数（`...`）以降がテーマ調整用の引数ですね。
+これらの引数はCSSを動的に生成するためのフレームワークに引数として渡されています。
+可変長引数もちゃんと渡されるので、他にも色々な調整が可能です。
+
+利用可能な引数は以下のリンクから確認してください。
+なお、`html_document`関数で指定するには`-`を`_`に置換してください。
+
+> <https://github.com/twbs/bootstrap-sass/blob/master/assets/stylesheets/bootstrap/_variables.scss>
+
+たとえば`font_size_base`要素を指定すれば、基準となるフォントのサイズを変更可能です。
+この方法ならBootstrap 3であってもフォントサイズを一元的に変更できます。
+ただし、使える単位がBootstrap 4の`rem`に対し、Bootstrap 3の場合は`px`です。
+
+# 感想と展望
+
+従来の`rmarkdown::html_document`関数でテーマをカスタマイズするには、`css`引数にCSSファイルを指定する必要がありました。
+これが減らせるのはとっても簡便で良いですね。
+実は`theme`引数には文字列、リストの他に`bslib::bs_theme`の実行結果を与えることも可能です。
+
+```yaml
+output:
+  html_document:
+    theme: !expr bslib::bs_theme(version = 4)
+```
+
+`!expr`はR言語として評価してね、というキーワードです。
+これ、言い変えると`bslib::bs_theme`関数の返り値に準拠したカスタム関数を利用できます。
+パッケージとしてカスタムテーマを提供する時とっても便利そうですよね。
+私は前からHonokaという日本語向けのBootstrapテーマを使ってみたいと思っていました。
+
+> <https://honokak.osaka/>
+
+**bslib**パッケージの挙動を参考に実装したいと思います。
+パッケージ化するとしたら`honokadown::honoka_document`とかかなあ？
+
+# Enjoy!!

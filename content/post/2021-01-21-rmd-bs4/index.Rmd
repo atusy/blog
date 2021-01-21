@@ -1,0 +1,22 @@
+---
+title: "R MarkdownでBootstrap 4を使えるようになった"
+author: ~
+date: '2021-01-21'
+slug: rmd-bs4
+categories: [R]
+tags: [R Markdown]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+GitHub版の**rmarkdown**パッケージの`html_document`関数がBootstrap 4に対応しました。
+本記事ではどんなことができるのか紹介します。
+が、同じ内容を`html_document`でBootstrap 4を使ってレンダリングしてみたので、そちらを参考にして下さい。
+
+> [Bootstrap 4での出力例](./examples/index.html)
+
+```{r child="examples/index.Rmd"}
+
+```
+
