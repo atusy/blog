@@ -1,0 +1,120 @@
+---
+title: dplyrで効率にjoinするなら比較対象を1列にまとめよう
+author: ~
+date: '2021-01-25'
+slug: efficient-join
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+<script src="index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>dplyrでjoinしようとしたらメモリが足りなかった……という話を見て思い出したネタ<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>。</p>
+<p>100行1000列のデータこら100行950列のデータを2つ作り、内5列を比較して<code>left_join</code>してみましょう。この時、</p>
+<ol style="list-style-type: decimal">
+<li>単純に比較対象に5列を指定する</li>
+<li>比較対象を一時的に1列にまとめておく</li>
+</ol>
+<p>の2パターンでは後者が有利そう、という話を紹介します。</p>
+<div id="ダミーデータの用意" class="section level1">
+<h1>ダミーデータの用意</h1>
+<pre class="r"><code>library(magrittr)
+
+# 大本のデータの作成
+orig &lt;- as.data.frame(matrix(
+  sample.int(1e2, size = 1e5, replace = TRUE),
+  nrow = 1e2
+))
+
+
+# joinしたいデータとしてxとyを作成
+x &lt;- orig %&gt;%
+  dplyr::select(!101:150)
+
+y &lt;- orig %&gt;%
+  dplyr::select(!201:250) %&gt;%
+  dplyr::sample_frac(1)
+
+# joinしたい列として、xの最初の5列を選択
+by &lt;- names(x)[1:5]</code></pre>
+</div>
+<div id="プロファイリング" class="section level1">
+<h1>プロファイリング</h1>
+<p><strong>lineprof</strong>パッケージを使います。
+CRANにはないので<strong>remotes</strong>パッケージを使ってGitHubからインストールしてください。</p>
+<pre class="r"><code>remotes::install_github(&quot;hadley/lineprof&quot;)</code></pre>
+<div id="単純に比較対象に5列を指定してjoin" class="section level2">
+<h2>単純に比較対象に5列を指定してjoin</h2>
+<pre class="r"><code>prof_raw &lt;- lineprof::lineprof(
+  dplyr::left_join(x, y, by = by)
+)
+prof_raw
+#&gt; Reducing depth to 2 (from 11)
+#&gt;    time  alloc release  dups                                      ref
+#&gt; 1 0.019 18.559       0 17059 c(&quot;left_join.data.frame&quot;, &quot;join_mutate&quot;)
+#&gt;                                src
+#&gt; 1 left_join.data.frame/join_mutate</code></pre>
+</div>
+<div id="比較対象の5列を一時的に1列にまとめてjoin" class="section level2">
+<h2>比較対象の5列を一時的に1列にまとめてjoin</h2>
+<p><code>tidyr::unite</code>で5列を1列にまとめ、<code>dplyr::left_join</code>した後に<code>tidyr::separate</code>して戻します。</p>
+<pre class="r"><code>prof_preprocessed &lt;- lineprof::lineprof(
+  tidyr::separate(
+    dplyr::left_join(
+      tidyr::unite(x, &quot;by&quot;, all_of(by)),
+      tidyr::unite(y, &quot;by&quot;, all_of(by)),
+      by = all_of(by)
+    ),
+    &quot;by&quot;,
+    by
+  )
+)
+
+prof_preprocessed
+#&gt; Reducing depth to 2 (from 24)
+#&gt;    time alloc release dups                                           ref
+#&gt; 1 0.003 2.530       0 1676          c(&quot;getExportedValue&quot;, &quot;asNamespace&quot;)
+#&gt; 2 0.001 1.464       0  210         c(&quot;dplyr::left_join&quot;, &quot;tidyr::unite&quot;)
+#&gt; 3 0.003 1.081       0  657 c(&quot;dplyr::left_join&quot;, &quot;left_join.data.frame&quot;)
+#&gt;                                     src
+#&gt; 1 getExportedValue/asNamespace         
+#&gt; 2 dplyr::left_join/tidyr::unite        
+#&gt; 3 dplyr::left_join/left_join.data.frame</code></pre>
+</div>
+</div>
+<div id="比較" class="section level1">
+<h1>比較</h1>
+<p>プロファイリングの結果は関数内でかかった処理内容に応じて複数の行にわかれるので、所要時間と所要メモリがわかるよう、和をとります。せっかくなので、2つのプロファイリング結果を1つのデータフレームにまとめてから集計することで、比較しやすくしましょう。</p>
+<pre class="r"><code>prof_summary &lt;- 
+  list(
+    raw = prof_raw,
+    preprocessed = prof_preprocessed
+  ) %&gt;%
+    dplyr::bind_rows(.id = &quot;method&quot;) %&gt;%
+    dplyr::group_by(method) %&gt;%
+    dplyr::summarize(
+      dplyr::across(where(is.numeric), sum),
+      .groups = &quot;drop&quot;
+    )
+
+prof_summary
+#&gt; # A tibble: 2 x 5
+#&gt;   method        time alloc release  dups
+#&gt;   &lt;chr&gt;        &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
+#&gt; 1 preprocessed 0.007  5.08       0  2543
+#&gt; 2 raw          0.019 18.6        0 17059</code></pre>
+<p>未処理状態でjoinすると、時間にして2.71倍、メモリにして3.66倍を要しました。データの規模によっては無視できるでしょうが、joinに時間がかかるなあというときは意識してみてはいかがでしょうか。</p>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>ちなみに今回の方法ではどうしようもない話でした。<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>

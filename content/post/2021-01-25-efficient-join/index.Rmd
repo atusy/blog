@@ -1,0 +1,128 @@
+---
+title: dplyrで効率にjoinするなら比較対象を1列にまとめよう
+author: ~
+date: '2021-01-25'
+slug: efficient-join
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>")
+```
+
+dplyrでjoinしようとしたらメモリが足りなかった……という話を見て思い出したネタ^[ちなみに今回の方法ではどうしようもない話でした。]。
+
+100行1000列のデータこら100行950列のデータを2つ作り、内5列を比較して`left_join`してみましょう。
+この時、
+
+1. 単純に比較対象に5列を指定する
+1. 比較対象を一時的に1列にまとめておく
+
+の2パターンでは後者が有利そう、という話を紹介します。
+
+# ダミーデータの用意
+
+```{r}
+library(magrittr)
+
+# 大本のデータの作成
+orig <- as.data.frame(matrix(
+  sample.int(1e2, size = 1e5, replace = TRUE),
+  nrow = 1e2
+))
+
+
+# joinしたいデータとしてxとyを作成
+x <- orig %>%
+  dplyr::select(!101:150)
+
+y <- orig %>%
+  dplyr::select(!201:250) %>%
+  dplyr::sample_frac(1)
+
+# joinしたい列として、xの最初の5列を選択
+by <- names(x)[1:5]
+```
+
+# プロファイリング
+
+**lineprof**パッケージを使います。
+CRANにはないので**remotes**パッケージを使ってGitHubからインストールしてください。
+
+```{r, eval=FALSE}
+remotes::install_github("hadley/lineprof")
+```
+
+
+## 単純に比較対象に5列を指定してjoin
+
+```{r}
+prof_raw <- lineprof::lineprof(
+  dplyr::left_join(x, y, by = by)
+)
+prof_raw
+```
+
+## 比較対象の5列を一時的に1列にまとめてjoin
+
+`tidyr::unite`で5列を1列にまとめ、`dplyr::left_join`した後に`tidyr::separate`して戻します。
+
+```{r}
+prof_preprocessed <- lineprof::lineprof(
+  tidyr::separate(
+    dplyr::left_join(
+      tidyr::unite(x, "by", all_of(by)),
+      tidyr::unite(y, "by", all_of(by)),
+      by = all_of(by)
+    ),
+    "by",
+    by
+  )
+)
+
+prof_preprocessed
+```
+
+# 比較
+
+プロファイリングの結果は関数内でかかった処理内容に応じて複数の行にわかれるので、
+所要時間と所要メモリがわかるよう、和をとります。
+せっかくなので、2つのプロファイリング結果を1つのデータフレームにまとめてから集計することで、比較しやすくしましょう。
+
+```{r}
+prof_summary <- 
+  list(
+    raw = prof_raw,
+    preprocessed = prof_preprocessed
+  ) %>%
+    dplyr::bind_rows(.id = "method") %>%
+    dplyr::group_by(method) %>%
+    dplyr::summarize(
+      dplyr::across(where(is.numeric), sum),
+      .groups = "drop"
+    )
+
+prof_summary
+```
+
+```{r, include=FALSE}
+compare <- function(key) {
+  prof_summary %>%
+    dplyr::select(method, {{key}}) %>%
+    tibble::deframe() %>%
+    as.list %>%
+    (function(x) x$raw / x$preprocessed)() %>%
+    round(2)
+}
+time <- compare(time)
+alloc <- compare(alloc)
+```
+
+未処理状態でjoinすると、時間にして`r time`倍、メモリにして`r alloc`倍を要しました。
+データの規模によっては無視できるでしょうが、joinに時間がかかるなあというときは意識してみてはいかがでしょうか。
+
+# Enjoy!
