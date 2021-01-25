@@ -1,5 +1,5 @@
 ---
-title: dplyrで効率にjoinするなら比較対象を1列にまとめよう
+title: dplyrで効率的にjoinするなら比較対象を1列にまとめよう
 author: ~
 date: '2021-01-25'
 slug: efficient-join
@@ -56,7 +56,7 @@ CRANにはないので<strong>remotes</strong>パッケージを使ってGitHub�
 prof_raw
 #&gt; Reducing depth to 2 (from 12)
 #&gt;    time  alloc release  dups                                      ref
-#&gt; 1 0.022 19.418       0 17059 c(&quot;left_join.data.frame&quot;, &quot;join_mutate&quot;)
+#&gt; 1 0.019 18.197       0 17060 c(&quot;left_join.data.frame&quot;, &quot;join_mutate&quot;)
 #&gt;                                src
 #&gt; 1 left_join.data.frame/join_mutate</code></pre>
 </div>
@@ -76,10 +76,10 @@ prof_raw
 )
 
 prof_preprocessed
-#&gt; Reducing depth to 2 (from 14)
+#&gt; Reducing depth to 2 (from 11)
 #&gt;    time alloc release dups                                   ref
-#&gt; 1 0.003 4.289       0 1808  c(&quot;getExportedValue&quot;, &quot;asNamespace&quot;)
-#&gt; 2 0.001 0.000       0  366 c(&quot;dplyr::left_join&quot;, &quot;tidyr::unite&quot;)
+#&gt; 1 0.003 4.207       0 1810  c(&quot;getExportedValue&quot;, &quot;asNamespace&quot;)
+#&gt; 2 0.001 0.000       0  360 c(&quot;dplyr::left_join&quot;, &quot;tidyr::unite&quot;)
 #&gt;                             src
 #&gt; 1 getExportedValue/asNamespace 
 #&gt; 2 dplyr::left_join/tidyr::unite</code></pre>
@@ -104,9 +104,9 @@ prof_summary
 #&gt; # A tibble: 2 x 5
 #&gt;   method        time alloc release  dups
 #&gt;   &lt;chr&gt;        &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
-#&gt; 1 preprocessed 0.004  4.29       0  2174
-#&gt; 2 raw          0.022 19.4        0 17059</code></pre>
-<p>未処理状態でjoinすると、時間にして5.5倍、メモリにして4.53倍を要しました。データの規模によっては無視できるでしょうが、joinに時間がかかるなあというときは意識してみてはいかがでしょうか。</p>
+#&gt; 1 preprocessed 0.004  4.21       0  2170
+#&gt; 2 raw          0.019 18.2        0 17060</code></pre>
+<p>未処理状態でjoinすると、時間にして4.75倍、メモリにして4.33倍を要しました。データの規模によっては無視できるでしょうが、joinに時間がかかるなあというときは意識してみてはいかがでしょうか。</p>
 </div>
 <div id="enjoy" class="section level1">
 <h1>Enjoy!</h1>

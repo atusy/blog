@@ -1,5 +1,5 @@
 ---
-title: dplyrで効率にjoinするなら比較対象を1列にまとめよう
+title: dplyrで効率的にjoinするなら比較対象を1列にまとめよう
 author: ~
 date: '2021-01-25'
 slug: efficient-join
