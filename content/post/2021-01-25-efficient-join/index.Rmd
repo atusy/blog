@@ -27,6 +27,8 @@ dplyrでjoinしようとしたらメモリが足りなかった……という�
 # ダミーデータの用意
 
 ```{r}
+set.seed(0L)
+
 library(magrittr)
 
 # 大本のデータの作成
@@ -34,7 +36,6 @@ orig <- as.data.frame(matrix(
   sample.int(1e2, size = 1e5, replace = TRUE),
   nrow = 1e2
 ))
-
 
 # joinしたいデータとしてxとyを作成
 x <- orig %>%
