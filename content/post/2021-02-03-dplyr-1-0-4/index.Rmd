@@ -1,0 +1,77 @@
+---
+title: "dplyr 1.0.4で複数列を対象としたfilterが簡単になった"
+author: ~
+date: '2021-02-03'
+slug: dplyr-1-0-4
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+
+**dplyr** 1.0.0から導入された`across`関数は、`mutate`関数や`summarize`関数を複数列に簡単に適用できる便利な道具です。
+`*_at`や`*_if`といった関数を過去のものにした他、`group_by`でも使えるなど、使いどころは多いです。
+
+- [dplyr Version 1.0.0 新機能 2 列操作 : > across](https://qiita.com/shunido113/items/701844f03163ec413eb8) by \@shunido113さん
+- [dplyr 1.0.0を使ってみる: across(), rename_with()](https://notchained.hatenablog.com/entry/2020/07/11/161433) by \@yutannihilationさん
+
+ただし、\@yutannihilationさんも指摘している通り、`filter`関数内での`across`の利用はお世辞にも直感的ではありませんでした。
+たとえば、numericな列のいずれかが0.1未満な行を抽出するならこんな感じ。
+
+```{r}
+library(magrittr)
+
+set.seed(9)
+d <- data.frame(x = runif(20), y = runif(20), z = letters[1:20])
+
+d %>%
+  dplyr::filter(
+    rowSums(dplyr::across(where(is.numeric), function(x) x < 0.1)) > 0
+  )
+```
+
+`across`の返り値はデータフレームであることを利用し、各行の総和をとれば、1つでも`TRUE`な行は1以上の値をとるわけですね。
+ということは、**すべて**が0.1未満な行を抽出しようとすると、行の積をとらなければなりません。
+rowProdがないので面倒ですね。
+あと、括弧が多過ぎてわけわからない……。
+
+**dplyr** 1.0.4では新たに`if_any`関数と`if_all`関数を導入し、この問題に対処します。
+たとえば先の例を`if_any`で書き直すとこんな感じ。
+
+```{r}
+d %>%
+  dplyr::filter(
+    dplyr::if_any(where(is.numeric), function(x) x < 0.1)
+  )
+```
+
+`across`関数に代わりに`if_any`関数を使い、`rowSums`関数や`>`演算子とはおさらばです。
+すべての列が条件を満たす場合も、`if_any`関数を`if_all`関数に書き直すだけ。
+
+```{r}
+d %>%
+  dplyr::filter(
+    dplyr::if_all(where(is.numeric), function(x) x < 0.1)
+  )
+```
+
+ちなみに本機能を紹介するTidyverseのBlog記事「[dplyr 1.0.4: if_any() and if_all()](https://www.tidyverse.org/blog/2021/02/dplyr-1-0-4-if-any/)」で紹介されている通り、`if_any`や`if_all`は`mutate`や`summarize`の中でも使えます。
+
+```{r}
+d %>%
+  head() %>%
+  dplyr::mutate(
+    all_low = dplyr::if_all(where(is.numeric), function(x) x < 0.1)
+  )
+```
+
+他にも**dplyr** 1.0.4では`across`関数使用時のパフォーマンスが改善されたらしいですね。
+素晴らしい！
+
+**Enjoy!**

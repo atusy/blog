@@ -1,0 +1,70 @@
+---
+title: "dplyr 1.0.4で複数列を対象としたfilterが簡単になった"
+author: ~
+date: '2021-02-03'
+slug: dplyr-1-0-4
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+<script src="index_files/header-attrs/header-attrs.js"></script>
+<link href="index_files/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="index_files/anchor-sections/anchor-sections.js"></script>
+
+
+<p><strong>dplyr</strong> 1.0.0から導入された<code>across</code>関数は、<code>mutate</code>関数や<code>summarize</code>関数を複数列に簡単に適用できる便利な道具です。
+<code>*_at</code>や<code>*_if</code>といった関数を過去のものにした他、<code>group_by</code>でも使えるなど、使いどころは多いです。</p>
+<ul>
+<li><a href="https://qiita.com/shunido113/items/701844f03163ec413eb8">dplyr Version 1.0.0 新機能 2 列操作 : &gt; across</a> by @shunido113さん</li>
+<li><a href="https://notchained.hatenablog.com/entry/2020/07/11/161433">dplyr 1.0.0を使ってみる: across(), rename_with()</a> by @yutannihilationさん</li>
+</ul>
+<p>ただし、@yutannihilationさんも指摘している通り、<code>filter</code>関数内での<code>across</code>の利用はお世辞にも直感的ではありませんでした。たとえば、numericな列のいずれかが0.1未満な行を抽出するならこんな感じ。</p>
+<pre class="r"><code>library(magrittr)
+
+set.seed(9)
+d &lt;- data.frame(x = runif(20), y = runif(20), z = letters[1:20])
+
+d %&gt;%
+  dplyr::filter(
+    rowSums(dplyr::across(where(is.numeric), function(x) x &lt; 0.1)) &gt; 0
+  )
+#&gt;             x           y z
+#&gt; 1 0.024233910 0.020831235 b
+#&gt; 2 0.008471164 0.972864807 l
+#&gt; 3 0.492743506 0.004426156 o</code></pre>
+<p><code>across</code>の返り値はデータフレームであることを利用し、各行の総和をとれば、1つでも<code>TRUE</code>な行は1以上の値をとるわけですね。ということは、<strong>すべて</strong>が0.1未満な行を抽出しようとすると、行の積をとらなければなりません。
+rowProdがないので面倒ですね。あと、括弧が多過ぎてわけわからない……。</p>
+<p><strong>dplyr</strong> 1.0.4では新たに<code>if_any</code>関数と<code>if_all</code>関数を導入し、この問題に対処します。たとえば先の例を<code>if_any</code>で書き直すとこんな感じ。</p>
+<pre class="r"><code>d %&gt;%
+  dplyr::filter(
+    dplyr::if_any(where(is.numeric), function(x) x &lt; 0.1)
+  )
+#&gt;             x           y z
+#&gt; 1 0.024233910 0.020831235 b
+#&gt; 2 0.008471164 0.972864807 l
+#&gt; 3 0.492743506 0.004426156 o</code></pre>
+<p><code>across</code>関数に代わりに<code>if_any</code>関数を使い、<code>rowSums</code>関数や<code>&gt;</code>演算子とはおさらばです。すべての列が条件を満たす場合も、<code>if_any</code>関数を<code>if_all</code>関数に書き直すだけ。</p>
+<pre class="r"><code>d %&gt;%
+  dplyr::filter(
+    dplyr::if_all(where(is.numeric), function(x) x &lt; 0.1)
+  )
+#&gt;            x          y z
+#&gt; 1 0.02423391 0.02083123 b</code></pre>
+<p>ちなみに本機能を紹介するTidyverseのBlog記事「<a href="https://www.tidyverse.org/blog/2021/02/dplyr-1-0-4-if-any/">dplyr 1.0.4: if_any() and if_all()</a>」で紹介されている通り、<code>if_any</code>や<code>if_all</code>は<code>mutate</code>や<code>summarize</code>の中でも使えます。</p>
+<pre class="r"><code>d %&gt;%
+  head() %&gt;%
+  dplyr::mutate(
+    all_low = dplyr::if_all(where(is.numeric), function(x) x &lt; 0.1)
+  )
+#&gt;            x          y z all_low
+#&gt; 1 0.22160140 0.89929956 a   FALSE
+#&gt; 2 0.02423391 0.02083123 b    TRUE
+#&gt; 3 0.20711902 0.31957158 c   FALSE
+#&gt; 4 0.21573355 0.11292940 d   FALSE
+#&gt; 5 0.44372359 0.52832265 e   FALSE
+#&gt; 6 0.13407615 0.91291264 f   FALSE</code></pre>
+<p>他にも<strong>dplyr</strong> 1.0.4では<code>across</code>関数使用時のパフォーマンスが改善されたらしいですね。素晴らしい！</p>
+<p><strong>Enjoy!</strong></p>
