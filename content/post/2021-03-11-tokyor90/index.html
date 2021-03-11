@@ -1,0 +1,65 @@
+---
+title: "Tokyo.R 90でRStudio PBCに転職しようとした時の話をした"
+author: ~
+date: '2021-03-11'
+slug: tokyor90
+categories: [R]
+tags: [TokyoR]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+  Tokyo.R 90でもBoothの頒布物でも語っていない裏話。
+---
+
+<script src="index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>Tokyo.R 90でRStudio PBCに転職しようとした時の話をしました。その時の資料 (無料) とその詳細版+応募書類の実例 (100円) はBoothで頒布してます。</p>
+<blockquote>
+<p><a href="https://atusy.booth.pm/items/2796523" class="uri">https://atusy.booth.pm/items/2796523</a></p>
+</blockquote>
+<p>そういえば給料の話をTokyo.Rでしたところ、懇親会で高いのか安いのか分からんと言われました。私も分かりません。誰か教えてください。</p>
+<p>さて、この記事では発表や頒布物で語らなかったところを少し書こうと思います。</p>
+<div id="なぜこの話題をtokyo.rにもっていったのか" class="section level1">
+<h1>なぜこの話題をTokyo.Rにもっていったのか</h1>
+<p>肝心なところを語りませんでした。</p>
+<ol style="list-style-type: decimal">
+<li>CJK（Chinese Japanese and Korean Language）ユーザーの多いRStudio製品にはCJK民が参加した方がいい</li>
+<li>珍しい話題で興味のある人がいそう</li>
+</ol>
+<p>この2つが理由です。特に1つ目は結構大事です。パッケージにしろRStudio IDEにしろ、非欧文文化圏故の問題に遭遇することは珍しくありません。
+RStudio IDEの場合、エディタ上での日本語変換に困ったなんて話はよく聞きましたね。尚、私はRStudio Serverを使っているおかげでこの問題を回避できているので、RStudio Desktopの現状を把握できていません。それでもスペルチェック機能を使うとひらがなとカタカナに波線が表示されて辟易しています。</p>
+<p>というわけで自分の発表でRStudioに挑戦してみようって人が現れると良いなと。私にできる範囲でしたらアドバイスしますよ。応募書類のレビューなどに付き合ってくれたホクソエムの面々もきっと協力してくれるはず。</p>
+</div>
+<div id="なぜ詳細版は有料で頒布することにしたのか" class="section level1">
+<h1>なぜ詳細版は有料で頒布することにしたのか</h1>
+<p>応募書類を筆頭に個人情報の塊なので、無料で誰でもアクセスできる状況はちょっと気がひけました。</p>
+</div>
+<div id="なぜ詳細版をboothで頒布することにしたのか" class="section level1">
+<h1>なぜ詳細版をBoothで頒布することにしたのか</h1>
+<p>今時、この手の資料を有料公開する方法としては&lt;note.com&gt;や&lt;zenn.dev&gt;など、いろいろとあります。そんな中、なぜBoothを選んだのか。</p>
+<div id="書式の自由度" class="section level2">
+<h2>書式の自由度</h2>
+<p>noteやZennはブラウザ上で閲覧可能な記事の形をとります。一部を無料公開することもでき、支払ったらすぐに読める点が高いUXを提供すると思います。一方でBoothはPDFやzipなどをダウンロードしてもらう手間が生じます。この点でnoteやZennを最初に考えました。</p>
+<p>しかし、noteは階層的な章構成を作れません。そこそこの文章だったことと、プラットフォーム選出前にMarkdownで下書きして既に階層化していたこともあり、noteを候補から外しました。書式の自由度と引き換えのシンプルさが魅力だと思うので、ここは使い道の問題です。</p>
+<p>ZennはMarkdown記法が使え、本レベルのものを有料公開しようというスタンスなので、自由度としてはマッチしました。応募書類やそのソースファイルであるRmdファイルを共有する機能はありませんが、GistやDropboxなどと組み合わせれば間に合う話です。というわけで候補に残りました。</p>
+<p>この時点でBoothは候補から外すほどではないが、Zennの方が優勢でした。ただ、Boothでは商品ページにSlideShareの内容を埋め込める点に多少の魅力を感じていました。無料版と有料版の入口を統一できます。</p>
+</div>
+<div id="最低価格" class="section level2">
+<h2>最低価格</h2>
+<p>有料公開の場合、note、Boothは100円、Zennは200円からです。今回、有料にしたのは、読者のフィルタリング程度の意識だったので、安く公開できる方がいいなと思いました。とはいえ、200円でも全然惜しくない内容だろうと思っています。</p>
+<p>この時点でBoothとZennが拮抗しました。</p>
+</div>
+<div id="著者の負担" class="section level2">
+<h2>著者の負担</h2>
+<p>大々的に稼ぐ目的でもないので、私の負担は最小限にしようと思いました。</p>
+<p>実はBoothとZennが拮抗したところで、使ったことないからZennにしてみようかなとも思いました。
+zenn-cliをインストールしたりGitHubレポジトリと連携したりと手も動かしました。しかし色々と調べるのが面倒になってしまいました。</p>
+<p>そこでふと、SlideShareも使ったことがないなと思い、
+Boothで商品ページにSlideShareの内容を埋め込むのを試すことにしました。</p>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>
