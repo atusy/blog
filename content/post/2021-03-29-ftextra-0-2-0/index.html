@@ -1,0 +1,231 @@
+---
+title: "ftExtra 0.2.0をリリース！"
+author: ~
+date: '2021-03-29'
+slug: ftextra-0-2-0
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary:
+  脚注、引用文献、段落の扱いを改善しつつ、処理速度も大幅改善
+---
+
+<script src="index_files/header-attrs/header-attrs.js"></script>
+<link href="index_files/tabwid/tabwid.css" rel="stylesheet" />
+
+
+<p><strong>ftExtra</strong> 0.2.0をCRANにリリースしました。</p>
+<pre class="r"><code>install.packages(&quot;ftExtra&quot;)</code></pre>
+<p><strong>ftExtra</strong>パッケージは<strong>flextable</strong>パッケージによる表組みを支援するパッケージです。
+R Markdownユーザー必携ですね。</p>
+<ul>
+<li>セル中のマークダウン記法の処理</li>
+<li>列名の結合</li>
+<li><code>dplyr::group_by()</code>した列の値の行方向の結合</li>
+</ul>
+<p>など様々な機能が簡単に使えます（参考:Tokyo.R 84での発表資料 <a href="https://atusy.github.io/tokyor84/#/" class="uri">https://atusy.github.io/tokyor84/#/</a>）。</p>
+<p>たとえばマークダウン記法の処理ならこんな感じ。</p>
+<pre class="r"><code>library(ftExtra)
+data.frame(
+  x = c(&quot;**bold**&quot;, &quot;*italic*&quot;),
+  y = c(&quot;^superscript^&quot;, &quot;~subscript~&quot;),
+  z = c(&quot;***~ft~^Extra^** is*&quot;, &quot;*Cool*&quot;),
+  stringsAsFactors = FALSE
+) %&gt;%
+  as_flextable() %&gt;%
+  colformat_md()</code></pre>
+<template id="1f2f2217-6a5e-4705-8b47-50c2d63396cf"><style>
+.tabwid table{
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  margin-top: 1.275em;
+  margin-bottom: 1.275em;
+  border-spacing: 0;
+  border-color: transparent;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+</style><div class="tabwid"><style>.cl-79b8ebd8{border-collapse:collapse;}.cl-79b3b438{font-family:'DejaVu Sans';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-79b3b456{font-family:'DejaVu Sans';font-size:11pt;font-weight:bold;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-79b3b460{font-family:'DejaVu Sans';font-size:11pt;font-weight:normal;font-style:italic;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-79b3b46a{font-family:'DejaVu Sans';font-size:6.6pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;position: relative;bottom:3.3pt;}.cl-79b3b474{font-family:'DejaVu Sans';font-size:6.6pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;position: relative;top:3.3pt;}.cl-79b3b47e{font-family:'DejaVu Sans';font-size:6.6pt;font-weight:bold;font-style:italic;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;position: relative;top:3.3pt;}.cl-79b3b488{font-family:'DejaVu Sans';font-size:6.6pt;font-weight:bold;font-style:italic;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;position: relative;bottom:3.3pt;}.cl-79b3c694{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-79b3ef5c{width:54pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-79b3ef70{width:54pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-79b3ef7a{width:54pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}</style><table class='cl-79b8ebd8'>
+<thead><tr style="overflow-wrap:break-word;"><td class="cl-79b3ef7a"><p class="cl-79b3c694"><span class="cl-79b3b438">x</span></p></td><td class="cl-79b3ef7a"><p class="cl-79b3c694"><span class="cl-79b3b438">y</span></p></td><td class="cl-79b3ef7a"><p class="cl-79b3c694"><span class="cl-79b3b438">z</span></p></td></tr></thead><tbody><tr style="overflow-wrap:break-word;"><td class="cl-79b3ef5c"><p class="cl-79b3c694"><span class="cl-79b3b456">bold</span></p></td><td class="cl-79b3ef5c"><p class="cl-79b3c694"><span class="cl-79b3b46a">superscript</span></p></td><td class="cl-79b3ef5c"><p class="cl-79b3c694"><span class="cl-79b3b47e">ft</span><span class="cl-79b3b488">Extra</span><span class="cl-79b3b460"> </span><span class="cl-79b3b460">is</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-79b3ef70"><p class="cl-79b3c694"><span class="cl-79b3b460">italic</span></p></td><td class="cl-79b3ef70"><p class="cl-79b3c694"><span class="cl-79b3b474">subscript</span></p></td><td class="cl-79b3ef70"><p class="cl-79b3c694"><span class="cl-79b3b460">Cool</span></p></td></tr></tbody></table></div></template>
+<div class="flextable-shadow-host" id="9cca9ffd-a751-4c61-85b5-24eeaacceec8"></div>
+<script>
+var dest = document.getElementById("9cca9ffd-a751-4c61-85b5-24eeaacceec8");
+var template = document.getElementById("1f2f2217-6a5e-4705-8b47-50c2d63396cf");
+var caption = template.content.querySelector("caption");
+if(caption) {
+  caption.style.cssText = "display:block;text-align:center;";
+  var newcapt = document.createElement("p");
+  newcapt.appendChild(caption)
+  dest.parentNode.insertBefore(newcapt, dest.previousSibling);
+}
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+</script>
+
+<p><strong>flextable</strong>パッケージ + <strong>ftExtra</strong>パッケージ以外にもマークダウン記法を使った表組みを可能とする方法はありますが、この組み合わせでは</p>
+<ol style="list-style-type: decimal">
+<li>複雑なレイアウトの表をHTML、Wordなど様々な出力できる</li>
+<li>表中で文献を引用できる</li>
+<li>セル内に脚注を記述できる</li>
+</ol>
+<p>あたりが強力な機能でしょう。</p>
+<p>特に0.2.0では表中で文献を引用する場合、引用文献が自動的に文献リストに反映されるよう工夫を施しました。
+<strong>gt</strong>パッケージも複雑な表組みとマークダウン記法をサポートしますが、引用文献を処理できません。これは、<strong>gt</strong>パッケージがマークダウンの処理に<strong>commonmark</strong>パッケージを利用していることに起因します。
+<strong>ftExtra</strong>パッケージではR Markdownと同じくPandocをマークダウンの変換処理に利用することで、<strong>commonmark</strong>にない様々な機能を利用できます。詳しくはこちらの<a href="https://ftextra.atusy.net/articles/format_columns.html">ドキュメント</a>をご覧ください。</p>
+<p>同じく0.2.0で強化された脚注機能もPandocを利用すればこそのものです。以下のように<code>^[脚注の内容]</code>といった記法を使うと、簡単に脚注を追加できます。ということは、エクセルなどの表計算ソフト上でもこの記法で書いておけば、<code>readr::read_csv()</code>で読み込んだ表を簡単に表組みできるわけです。</p>
+<pre class="r"><code>data.frame(
+  package = &quot;ftExtra&quot;,
+  description = &quot;Extensions for &#39;Flextable&#39;^[Supports of footnotes]&quot;,
+  stringsAsFactors = FALSE
+) %&gt;%
+  as_flextable() %&gt;%
+  colformat_md() %&gt;%
+  flextable::autofit(add_w = 0.5)</code></pre>
+<template id="457935d2-f120-44c6-ab63-0c57ed6a6c39"><style>
+.tabwid table{
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  margin-top: 1.275em;
+  margin-bottom: 1.275em;
+  border-spacing: 0;
+  border-color: transparent;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+</style><div class="tabwid"><style>.cl-79e6da3e{border-collapse:collapse;}.cl-79e2ac20{font-family:'DejaVu Sans';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-79e2ac3e{font-family:'DejaVu Sans';font-size:6.6pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;position: relative;bottom:3.3pt;}.cl-79e2b7ec{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-79e2d704{width:192.2pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-79e2d718{width:96pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-79e2d72c{width:192.2pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-79e2d72d{width:96pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-79e2d736{width:192.2pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-79e2d740{width:96pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}</style><table class='cl-79e6da3e'>
+<thead><tr style="overflow-wrap:break-word;"><td class="cl-79e2d740"><p class="cl-79e2b7ec"><span class="cl-79e2ac20">package</span></p></td><td class="cl-79e2d736"><p class="cl-79e2b7ec"><span class="cl-79e2ac20">description</span></p></td></tr></thead><tbody><tr style="overflow-wrap:break-word;"><td class="cl-79e2d718"><p class="cl-79e2b7ec"><span class="cl-79e2ac20">ftExtra</span><span class="cl-79e2ac3e"></span></p></td><td class="cl-79e2d704"><p class="cl-79e2b7ec"><span class="cl-79e2ac20">Extensions</span><span class="cl-79e2ac20"> </span><span class="cl-79e2ac20">for</span><span class="cl-79e2ac20"> </span><span class="cl-79e2ac20">‘</span><span class="cl-79e2ac20">Flextable</span><span class="cl-79e2ac20">’</span><span class="cl-79e2ac3e">1</span></p></td></tr></tbody><tfoot><tr style="overflow-wrap:break-word;"><td  colspan="2"class="cl-79e2d72d"><p class="cl-79e2b7ec"><span class="cl-79e2ac3e"></span><span class="cl-79e2ac3e">1</span><span class="cl-79e2ac20">Supports</span><span class="cl-79e2ac20"> </span><span class="cl-79e2ac20">of</span><span class="cl-79e2ac20"> </span><span class="cl-79e2ac20">footnotes</span></p></td></tr></tfoot></table></div></template>
+<div class="flextable-shadow-host" id="894e5fd7-a06f-409f-aeec-3620e6ab212d"></div>
+<script>
+var dest = document.getElementById("894e5fd7-a06f-409f-aeec-3620e6ab212d");
+var template = document.getElementById("457935d2-f120-44c6-ab63-0c57ed6a6c39");
+var caption = template.content.querySelector("caption");
+if(caption) {
+  caption.style.cssText = "display:block;text-align:center;";
+  var newcapt = document.createElement("p");
+  newcapt.appendChild(caption)
+  dest.parentNode.insertBefore(newcapt, dest.previousSibling);
+}
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+</script>
+
+<p>0.2.0では1セルあたりに複数の脚注を記述する機能を追加しました。先と比べるとやや複雑な記法が必要な点に注意してください。</p>
+<pre class="r"><code>data.frame(x = 
+&quot;foo[^a]^,^ [^b]
+
+[^a]: aaa
+
+[^b]: bbb&quot;,
+stringsAsFactors = FALSE
+) %&gt;%
+  as_flextable() %&gt;%
+  colformat_md()</code></pre>
+<template id="159e25cd-c8ef-4318-a8c3-3e7b0776deda"><style>
+.tabwid table{
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  margin-top: 1.275em;
+  margin-bottom: 1.275em;
+  border-spacing: 0;
+  border-color: transparent;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+</style><div class="tabwid"><style>.cl-7a13141e{border-collapse:collapse;}.cl-7a0e1252{font-family:'DejaVu Sans';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-7a0e128e{font-family:'DejaVu Sans';font-size:6.6pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;position: relative;bottom:3.3pt;}.cl-7a0e1f72{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-7a0e3fb6{width:54pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7a0e3fd4{width:54pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7a0e3fde{width:54pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}</style><table class='cl-7a13141e'>
+<thead><tr style="overflow-wrap:break-word;"><td class="cl-7a0e3fde"><p class="cl-7a0e1f72"><span class="cl-7a0e1252">x</span></p></td></tr></thead><tbody><tr style="overflow-wrap:break-word;"><td class="cl-7a0e3fb6"><p class="cl-7a0e1f72"><span class="cl-7a0e1252">foo</span><span class="cl-7a0e128e">1</span><span class="cl-7a0e128e">,</span><span class="cl-7a0e1252"> </span><span class="cl-7a0e128e">2</span><span class="cl-7a0e128e"></span></p></td></tr></tbody><tfoot><tr style="overflow-wrap:break-word;"><td class="cl-7a0e3fd4"><p class="cl-7a0e1f72"><span class="cl-7a0e128e"></span><span class="cl-7a0e128e">1</span><span class="cl-7a0e1252">aaa</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-7a0e3fd4"><p class="cl-7a0e1f72"><span class="cl-7a0e128e"></span><span class="cl-7a0e128e">2</span><span class="cl-7a0e1252">bbb</span></p></td></tr></tfoot></table></div></template>
+<div class="flextable-shadow-host" id="47f33ada-79bb-4a6a-a8fc-8277da64d0c3"></div>
+<script>
+var dest = document.getElementById("47f33ada-79bb-4a6a-a8fc-8277da64d0c3");
+var template = document.getElementById("159e25cd-c8ef-4318-a8c3-3e7b0776deda");
+var caption = template.content.querySelector("caption");
+if(caption) {
+  caption.style.cssText = "display:block;text-align:center;";
+  var newcapt = document.createElement("p");
+  newcapt.appendChild(caption)
+  dest.parentNode.insertBefore(newcapt, dest.previousSibling);
+}
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+</script>
+
+<p><code>ftExtra::colformat_md</code>関数に弱点があるとすると、セルの数だけPandocを呼び出すため処理にやや時間がかかることでした。
+0.2.0からは、各セルの内容を一つのマークダウンファイルとして変換し、後にR上で再分割することで15倍以上の高速化を図っています。</p>
+<blockquote>
+<p><a href="https://github.com/atusy/ftExtra/pull/46" class="uri">https://github.com/atusy/ftExtra/pull/46</a></p>
+</blockquote>
+<p>その他、詳しい更新履歴は<a href="https://ftextra.atusy.net/news/index.html">Changelog</a>を参照下さい。破壊的変更として、Pandoc &lt; 2.0.6のサポートを打ち切っていますが、そもそも前のバージョンでも動作していなかったっぽいので、既存ユーザーには影響がないかと思います。</p>
+<p>Enjoy!!</p>

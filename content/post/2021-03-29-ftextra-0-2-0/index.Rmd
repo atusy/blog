@@ -1,0 +1,99 @@
+---
+title: "ftExtra 0.2.0をリリース！"
+author: ~
+date: '2021-03-29'
+slug: ftextra-0-2-0
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary:
+  脚注、引用文献、段落の扱いを改善しつつ、処理速度も大幅改善
+---
+
+
+
+**ftExtra** 0.2.0をCRANにリリースしました。
+
+```{r, eval=FALSE}
+install.packages("ftExtra")
+```
+
+**ftExtra**パッケージは**flextable**パッケージによる表組みを支援するパッケージです。
+R Markdownユーザー必携ですね。
+
+- セル中のマークダウン記法の処理
+- 列名の結合
+- `dplyr::group_by()`した列の値の行方向の結合
+
+など様々な機能が簡単に使えます（参考:Tokyo.R 84での発表資料 https://atusy.github.io/tokyor84/#/）。
+
+たとえばマークダウン記法の処理ならこんな感じ。
+
+```{r}
+library(ftExtra)
+data.frame(
+  x = c("**bold**", "*italic*"),
+  y = c("^superscript^", "~subscript~"),
+  z = c("***~ft~^Extra^** is*", "*Cool*"),
+  stringsAsFactors = FALSE
+) %>%
+  as_flextable() %>%
+  colformat_md()
+```
+
+**flextable**パッケージ + **ftExtra**パッケージ以外にもマークダウン記法を使った表組みを可能とする方法はありますが、この組み合わせでは
+
+1. 複雑なレイアウトの表をHTML、Wordなど様々な出力できる
+2. 表中で文献を引用できる
+3. セル内に脚注を記述できる
+
+あたりが強力な機能でしょう。
+
+特に0.2.0では表中で文献を引用する場合、引用文献が自動的に文献リストに反映されるよう工夫を施しました。
+**gt**パッケージも複雑な表組みとマークダウン記法をサポートしますが、引用文献を処理できません。
+これは、**gt**パッケージがマークダウンの処理に**commonmark**パッケージを利用していることに起因します。
+**ftExtra**パッケージではR Markdownと同じくPandocをマークダウンの変換処理に利用することで、**commonmark**にない様々な機能を利用できます。
+詳しくはこちらの[ドキュメント](https://ftextra.atusy.net/articles/format_columns.html)をご覧ください。
+
+同じく0.2.0で強化された脚注機能もPandocを利用すればこそのものです。
+以下のように`^[脚注の内容]`といった記法を使うと、簡単に脚注を追加できます。
+ということは、エクセルなどの表計算ソフト上でもこの記法で書いておけば、`readr::read_csv()`で読み込んだ表を簡単に表組みできるわけです。
+
+```{r}
+data.frame(
+  package = "ftExtra",
+  description = "Extensions for 'Flextable'^[Supports of footnotes]",
+  stringsAsFactors = FALSE
+) %>%
+  as_flextable() %>%
+  colformat_md() %>%
+  flextable::autofit(add_w = 0.5)
+```
+
+0.2.0では1セルあたりに複数の脚注を記述する機能を追加しました。
+先と比べるとやや複雑な記法が必要な点に注意してください。
+
+```{r}
+data.frame(x = 
+"foo[^a]^,^ [^b]
+
+[^a]: aaa
+
+[^b]: bbb",
+stringsAsFactors = FALSE
+) %>%
+  as_flextable() %>%
+  colformat_md()
+```
+
+`ftExtra::colformat_md`関数に弱点があるとすると、セルの数だけPandocを呼び出すため処理にやや時間がかかることでした。
+0.2.0からは、各セルの内容を一つのマークダウンファイルとして変換し、後にR上で再分割することで15倍以上の高速化を図っています。
+
+> https://github.com/atusy/ftExtra/pull/46
+
+その他、詳しい更新履歴は[Changelog](https://ftextra.atusy.net/news/index.html)を参照下さい。
+破壊的変更として、Pandoc < 2.0.6のサポートを打ち切っていますが、そもそも前のバージョンでも動作していなかったっぽいので、既存ユーザーには影響がないかと思います。
+
+Enjoy!!
