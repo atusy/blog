@@ -10,7 +10,7 @@ output:
     md_extensions: +east_asian_line_breaks+task_lists
     toc: true
 summary: |
-  minidown 0.1.0をCRANにリリースしました。特に大きな変更はhtml_documentより便利なタブセット機能の追加、サイドバーに目次を表示した時にコンテンツを読み易くするレイアウトの改善です。
+  minidown 0.1.0をCRANにリリース。タブセット機能の追加、サイドバーに目次を表示した時のレイアウト改善などが主な変更です。
 ---
 
 minidownパッケージは、R Markdown向けに`rmarkdown::html_document`より便利で軽量なHTMLフォーマットの提供を目指すパッケージです。
