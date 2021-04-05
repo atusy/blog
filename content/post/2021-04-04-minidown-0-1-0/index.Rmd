@@ -1,0 +1,83 @@
+---
+title: "minidown 0.1.0をリリース"
+author: ~
+date: '2021-04-04'
+slug: minidown-0-1-0
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+    toc: true
+summary: |
+  minidown 0.1.0をCRANにリリースしました。特に大きな変更はhtml_documentより便利なタブセット機能の追加、サイドバーに目次を表示した時にコンテンツを読み易くするレイアウトの改善です。
+---
+
+minidownパッケージは、R Markdown向けに`rmarkdown::html_document`より便利で軽量なHTMLフォーマットの提供を目指すパッケージです。
+
+目次のサイドバー表示、タブセット、コードの折り畳みなど`html_document`が対応する機能には概ね対応しつつ、結果の折り畳みなど追加機能もあります。
+後述の通り既存機能にも強化が図られています。
+そして見た目の調整には幅広いテーマを選択可能。
+以下のデモページから一通りの機能を試せます。
+
+> https://minidown.atusy.net/
+
+これだけ便利な`mini_document`ですが、`html_document`より600KBほど軽いです（[ベンチマーク結果](https://minidown.atusy.net/pkgdown/articles/Writing-vignettes-with-minidown.html#light-weight-1)）。
+
+ゼヒ使って感想お聞かせください。
+
+```r
+install.packages("minidown")
+```
+
+# 0.1.0での追加機能
+
+大小様々な変更がありますが、目玉となるのは以下の3点でしょう。
+詳細は[Changelog](https://minidown.atusy.net/pkgdown/news/index.html)をご覧ください。
+
+## タブセット機能
+
+`rmarkdown::html_document`では、見出しの末尾に `{.tabset}` とつけると、
+一段階だけ下の見出しの項目をタブにまとめることができます。
+この機能を`minidown::mini_document`にも追加しました。
+
+ただまねをしたわけではなく、以下の機能追加を図っています。
+
+- タブを展開するとブラウザのURLが変わるので、現在のタブをURLとして共有可能
+- 目次にタブを表示。目次をクリックすると目的のタブが開く。
+
+YAMLフロントマターを利用して機能を有効にする必要があります。
+この点は`rmarkdown::html_document`と異なるので注意してください。
+
+```yaml
+output:
+  minidown::mini_document:
+    tabset: true
+```
+
+## サイドバーの目次のハイライト
+
+サイドバーに目次を表示する時、現在のスクロール位置に相当する項目をハイライトするようにしました。以下のYAMLフロントマターで利用できます。
+
+```yaml
+output:
+  minidown::mini_document:
+    toc: true
+    toc_float: true
+    toc_highlight: true
+```
+
+## サイドバーの目次のレイアウト調整
+
+従来のレイアウトでは、サイドバーに目次を表示した場合に、目次とコンテンツの両脇の余白が対称でした。
+つまり、目次を表示すると本文がページ中央よりやや右側にずれていました。
+また幅も狭く読み難かったです。
+そこで、余白を非対称とし、本文がページ中央に表示されるよう調整しました。
+余白はウィンドウ幅に依存し、幅が不十分な場合は余白がなくなります。
+更にウィンドウ幅を小さくすると、目次はサイドバーからページ上部に移動します。
+ここは`html_document`と同じ挙動ですね。
+
+また、目次をページの縦幅一杯に表示するよう変更しました。
+従来は`html_document`の目次に合わせて縦幅を制限していましたが、特にメリットがないとの判断です。
+
+**ENJOY!**
