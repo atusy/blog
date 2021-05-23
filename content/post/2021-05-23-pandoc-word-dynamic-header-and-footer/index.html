@@ -1,0 +1,50 @@
+---
+title: PandocでWord出力する時にヘッダーやフッターの内容を動的に変更する
+author: ''
+date: '2021-05-23'
+slug: pandoc-word-dynamic-header-and-footer
+categories: [R]
+tags: [pandoc]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>Pandocで出力するdocxファイルに好みの書式設定などを反映するには、スタイルを設定済みのdocxファイルを用意しておき、そのファイルのパスを<code>--reference-doc</code>オプションに指定します（以下リファレンスファイル）。スタイルのカスタマイズや作成方法は以下を参考にしてください。</p>
+<blockquote>
+<p><a href="https://support.microsoft.com/ja-jp/office/%E6%96%B0%E3%81%97%E3%81%84%E3%82%B9%E3%82%BF%E3%82%A4%E3%83%AB%E3%82%92%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%9E%E3%82%A4%E3%82%BA%E3%81%BE%E3%81%9F%E3%81%AF%E4%BD%9C%E6%88%90%E3%81%99%E3%82%8B-d38d6e47-f6fc-48eb-a607-1eb120dec563">新しいスタイルをカスタマイズまたは作成する</a>
+by microsoft</p>
+</blockquote>
+<p>このリファレンスファイルには書式に限らず、ヘッダーやフッターの設定も保存できます。たとえばリファレンスファイルのヘッダーに「ここはヘッダー」と書いておくと、
+Pandocで出力した他のdocxファイルのヘッダーにも「ここはヘッダー」が入ります。ヘッダーやフッターの挿入方法は以下の通り。</p>
+<blockquote>
+<p><a href="https://support.microsoft.com/ja-jp/office/%E3%83%98%E3%83%83%E3%83%80%E3%83%BC%E3%81%BE%E3%81%9F%E3%81%AF%E3%83%95%E3%83%83%E3%82%BF%E3%83%BC%E3%82%92%E6%8C%BF%E5%85%A5%E3%81%99%E3%82%8B-b87ee4df-abc1-41f8-995b-b39f6d99c7ed">ヘッダーまたはフッターを挿入する</a>
+by microsoft</p>
+</blockquote>
+<p>この方法で固定の文字列を挿入できました。更にPandocに入力するファイル側でヘッダーやフッターの内容を制御するには、ドキュメントプロパティという機能を使います。ドキュメントプロパティは文字通り、文書の属性情報で、著者名やタイトルなどを指します。ドキュメントプロパティは更にフィールドという形でdocxファイル内の任意箇所に挿入できます。大元のドキュメントプロパティを変更すると各フィールドの値も更新されて便利です。以下の手順に従うとヘッダーやフッターにも挿入できます。</p>
+<blockquote>
+<p><a href="https://support.microsoft.com/ja-jp/office/%E3%83%98%E3%83%83%E3%83%80%E3%83%BC%E3%81%BE%E3%81%9F%E3%81%AF%E3%83%95%E3%83%83%E3%82%BF%E3%83%BC%E3%81%AB%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E5%90%8D%E3%80%81%E6%97%A5%E4%BB%98%E3%80%81%E4%BD%9C%E6%88%90%E8%80%85%E3%80%81%E3%81%9D%E3%81%AE%E4%BB%96%E3%81%AE%E3%83%89%E3%82%AD%E3%83%A5%E3%83%A1%E3%83%B3%E3%83%88-%E3%83%97%E3%83%AD%E3%83%91%E3%83%86%E3%82%A3%E3%82%92%E8%BF%BD%E5%8A%A0%E3%81%99%E3%82%8B-dc62245f-b6af-45b2-a521-17753fc3539e">ヘッダーまたはフッターにファイル名、日付、作成者、その他のドキュメント プロパティを追加する</a>
+by microsoft</p>
+</blockquote>
+<p>Pandocでは<code>--metadata</code>や<code>--metadata-file</code>オプション、を利用してドキュメントにメタデータを付与でき、
+docx出力時にはメタデータがドキュメントプロパティ化します。入力がmarkdownの場合はYAMLメタデータブロック（フロントマター）の内容もドキュメントプロパティ化します。
+Wordにプリセットされたドキュメントプロパティ以外はカスタムプロパティになります。</p>
+<blockquote>
+<p><a href="https://support.microsoft.com/ja-jp/office/office-%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%81%AE%E3%83%97%E3%83%AD%E3%83%91%E3%83%86%E3%82%A3%E3%82%92%E8%A1%A8%E7%A4%BA%E3%81%BE%E3%81%9F%E3%81%AF%E5%A4%89%E6%9B%B4%E3%81%99%E3%82%8B-21d604c2-481e-4379-8e54-1dd4622c6b75#viewcreate16">現在のファイルのカスタムプロパティを表示または作成する</a>
+by microsoft</p>
+</blockquote>
+<p>何がカスタムプロパティになるかとか考えるのはしんどいと思うので、最初はヘッダ・フッタのことを考えずにdocxに出力するといいでしょう。</p>
+<ol style="list-style-type: decimal">
+<li>メタデータを含めた原稿を作成しdocxに出力する（<code>--reference-doc</code>オプションは任意）</li>
+<li>出力したdocxを編集しヘッダやフッタにドキュメントプロパティを挿入し、別名で保存しリファレンスファイル化する
+<ul>
+<li>ついでにスタイルなども設定するとよい</li>
+</ul></li>
+<li>原稿を更新し、リファレンスファイルを<code>--reference-doc</code>オプションに指定してdocxに出力する</li>
+</ol>
+<p>ちなみにdocx -&gt; mdなどの逆変換時にはドキュメントプロパティの一部しか反映されないので注意が必要です。
+docxをunzipして中のxmlを読んでメタデータ化するといったトリックが必要になります。</p>
+<p><strong>Enjoy</strong></p>
