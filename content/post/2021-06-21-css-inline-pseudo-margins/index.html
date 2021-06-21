@@ -1,0 +1,151 @@
+---
+title: HTML+CSSでaとかcodeとかの前後に空白を入れつつ、段落の左端を揃える
+author: ''
+date: '2021-06-21'
+slug: css-inline-pseudo-margins
+categories: [CSS]
+tags: [vimjp]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+
+
+<style type="text/css">
+p a.normal::before,
+p a.normal::after {
+  content: none;
+}
+</style>
+<p>日本語の場合、単語の間にスペースを入れないため、<a href="" class="normal">リンク</a>や<code>コード</code>と平文が地続きになりがちです。ちょっと空白を入れたい時は以下のようなCSSが活躍します。</p>
+<p>リンクを例にとってみましょう。</p>
+<pre class="css"><code>p a::before,
+p a::after {
+  content: &quot; &quot;; 
+  font-size: 0;
+  word-spacing: 1rem;
+}</code></pre>
+<style type="text/css">
+p a::before,
+p a::after {
+  content: " "; 
+  font-size: 0;
+  word-spacing: 1rem;
+}
+</style>
+<p>リンクの前後に余白ではなく空白（半角スペース）を使うところがミソです。また、ここではあえて大袈裟に1remの空白を入れて、以下の例でわかりやすくしています。</p>
+<div id="メリット" class="section level1">
+<h1>メリット</h1>
+<ol style="list-style-type: decimal">
+<li>空白の大きさを<code>word-spacing</code>で調整可能
+<ul>
+<li><code>font-size: 0</code>にしているところがポイント。空白の大きさは半角スペースの幅+<code>word-spacing</code>。</li>
+</ul></li>
+<li>段落の頭や折り返し、強制改行で段落の左端に<code>a</code>要素が来ても、禁則処理で<strong>行頭のスペースは消える</strong></li>
+<li><code>&lt;a&gt;</code>要素が2連続しても<code>white-space: normal</code>（既定値）で空白の幅は倍にならない</li>
+</ol>
+<div id="例" class="section level2">
+<h2>例</h2>
+<pre class="html"><code>&lt;p&gt;
+&lt;a&gt;あいうえお&lt;/a&gt;かきくけこ&lt;br&gt;
+&lt;a&gt;さしすせそ&lt;/a&gt;&lt;a&gt;たちつてと&lt;/a&gt;
+&lt;/p&gt;</code></pre>
+<p><a>あいうえお</a>かきくけこ<br>
+<a>さしすせそ</a><a>たちつてと</a></p>
+</div>
+</div>
+<div id="デメリット" class="section level1">
+<h1>デメリット</h1>
+<p>メリット3点目の<code>white-space: normal</code>は時に悪さもします。</p>
+<ol style="list-style-type: decimal">
+<li>HTMLファイル内で<code>&lt;a&gt;</code>要素の直前で改行すると、通常の半角スペース扱いになる</li>
+<li>英文内など<code>&lt;a&gt;</code>要素の前後に明示的に半角スペースを挿入した場合、左側は半角スペースの幅、右側はword-spacingの幅になる</li>
+</ol>
+<p>ちなみに1については<code>&lt;a&gt;</code>とか<code>&lt;code&gt;</code>とか関係なしに、
+<code>white-space: normal</code>な状態でソース上で改行すると半角スペース1つ入ります。日本語の途中に半角スペースが入ると気持ち悪いので避けるか、<a href="#デメリット対策" class="normal">対策</a>が必要です。</p>
+<div id="例-1" class="section level2">
+<h2>例</h2>
+<p>「そ」と「た」の間、「efg」の前後に注目です。</p>
+<pre class="html"><code>&lt;p&gt;
+あいうえお&lt;a&gt;かきくけこ&lt;/a&gt;さしすせそ
+&lt;a&gt;たちつてと&lt;/a&gt;abcd &lt;a&gt;efg&lt;/a&gt; hijk
+&lt;/p&gt;</code></pre>
+<p>あいうえお<a>かきくけこ</a>さしすせそ
+<a>たちつてと</a> abcd <a>efg</a> hijk</p>
+</div>
+</div>
+<div id="デメリット対策" class="section level1">
+<h1>デメリット対策</h1>
+<ol style="list-style-type: decimal">
+<li>改行問題はコメントで繋ぐ by <a href="https://t.co/XI3ctW3q1p?amp=1">Tomoyaさん</a></li>
+<li>和英の不整合は
+<ol style="list-style-type: lower-alpha">
+<li><code>lang</code>属性などを使ってルールの適用範囲をコントロールする</li>
+<li>空白のサイズ調整を諦めて、半角スペースの挿入に留める
+<code>css     p a::before, p a::after {content: " ";}</code></li>
+</ol></li>
+</ol>
+<div id="例-2" class="section level2">
+<h2>例</h2>
+<p>ここでは和英の不整合を<code>lang</code>属性で回避してみます。
+<code>a</code>要素と<code>lang</code>属性が隣接する場合のルールも追加してもよさそうですね。</p>
+<pre class="html"><code>&lt;style&gt;
+:lang(en) a::before,
+:lang(en) a::after {
+  content: none;
+}
+&lt;/style&gt;
+
+&lt;p&gt;
+あいうえお&lt;a&gt;かきくけこ&lt;/a&gt;さしすせそ&lt;!--
+--&gt;&lt;a&gt;たちつてと&lt;/a&gt;&lt;span lang=&quot;en&quot;&gt;abcd &lt;a&gt;efg&lt;/a&gt; hijk&lt;/span&gt;
+&lt;/p&gt;</code></pre>
+<style>
+:lang(en) a::before,
+:lang(en) a::after {
+  content: none;
+}
+</style>
+
+<p>
+あいうえお<a>かきくけこ</a>さしすせそ<!--
+--><a>たちつてと</a><span lang="en">abcd <a>efg</a> hijk</span>
+</p>
+</div>
+</div>
+<div id="他のアイディア" class="section level1">
+<h1>他のアイディア</h1>
+<ul>
+<li>アリ
+<ul>
+<li>JavaScriptを使う
+<ul>
+<li>より詳細なコントロールを得られる一方、spanだらけになる</li>
+<li>例: <a href="https://jsfiddle.net/koron/fptnro89/4/" class="uri">https://jsfiddle.net/koron/fptnro89/4/</a> by Taro Muraokaさん</li>
+</ul></li>
+</ul></li>
+<li>ナシ
+<ul>
+<li>CSSのmarginで頑張る
+<ul>
+<li>marginは相殺するので、<code>&lt;a&gt;</code>要素同士が並んでもいたずらに余白が広がらない</li>
+<li>一方で段落の頭や折り返した頭など、段落左端に<code>&lt;a&gt;</code>要素が来た時の例外処理が難しい
+<ul>
+<li><code>first-letter</code>、<code>first-child</code>などで段落頭のmargin制御がせいぜい</li>
+</ul></li>
+</ul></li>
+<li>CSSのpaddingで頑張る
+<ul>
+<li>paddingは相殺しない上に、marginと同じく左端が揃わない。</li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+<div id="終わりに" class="section level1">
+<h1>終わりに</h1>
+<p>元ネタは、<a href="https://vim-jp.org/docs/chat.html" class="normal">vim-jpのslack</a>で<a href="https://emacs-jp.github.io/packages/ddskk-posframe" class="normal">emacs-jp</a>のウェブページのスタイルを改善したいという質問とそれに続く議論です。禁則処理のような、普段意識しない黒魔術もといテクニックを駆使したため、エッジケースを踏みまくりました。皆さんで議論したおかげで記事化前に実装の穴を突けたとも言えます。この場をお借りしてお礼申し上げます。</p>
+<p>たのしかったぞー！</p>
+<p>ちなみに私はHTMLをもっぱらPandoc’s markdownから出力する派であり、east_asian_line_breaksエクステンションにより、改行時の空白に悩まされずに澄んでいます。</p>
+</div>

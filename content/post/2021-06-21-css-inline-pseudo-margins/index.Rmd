@@ -1,0 +1,151 @@
+---
+title: HTML+CSSでaとかcodeとかの前後に空白を入れつつ、段落の左端を揃える
+author: ''
+date: '2021-06-21'
+slug: css-inline-pseudo-margins
+categories: [CSS]
+tags: [vimjp]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+```{css, echo=FALSE}
+p a.normal::before,
+p a.normal::after {
+  content: none;
+}
+```
+
+
+日本語の場合、単語の間にスペースを入れないため、[リンク](){.normal}や`コード`と平文が地続きになりがちです。
+ちょっと空白を入れたい時は以下のようなCSSが活躍します。
+
+リンクを例にとってみましょう。
+
+```{css}
+p a::before,
+p a::after {
+  content: " "; 
+  font-size: 0;
+  word-spacing: 1rem;
+}
+```
+
+リンクの前後に余白ではなく空白（半角スペース）を使うところがミソです。
+また、ここではあえて大袈裟に1remの空白を入れて、以下の例でわかりやすくしています。
+
+# メリット
+
+1. 空白の大きさを`word-spacing`で調整可能
+    - `font-size: 0`にしているところがポイント。空白の大きさは半角スペースの幅+`word-spacing`。
+1. 段落の頭や折り返し、強制改行で段落の左端に`a`要素が来ても、禁則処理で**行頭のスペースは消える**
+1. `<a>`要素が2連続しても`white-space: normal`（既定値）で空白の幅は倍にならない
+
+## 例
+
+```html
+<p>
+<a>あいうえお</a>かきくけこ<br>
+<a>さしすせそ</a><a>たちつてと</a>
+</p>
+```
+
+<a>あいうえお</a>かきくけこ<br>
+<a>さしすせそ</a><a>たちつてと</a>
+
+
+# デメリット
+
+メリット3点目の`white-space: normal`は時に悪さもします。
+
+1. HTMLファイル内で`<a>`要素の直前で改行すると、通常の半角スペース扱いになる
+2. 英文内など`<a>`要素の前後に明示的に半角スペースを挿入した場合、左側は半角スペースの幅、右側はword-spacingの幅になる
+
+ちなみに1については`<a>`とか`<code>`とか関係なしに、
+`white-space: normal`な状態でソース上で改行すると半角スペース1つ入ります。
+日本語の途中に半角スペースが入ると気持ち悪いので避けるか、[対策](#デメリット対策){.normal}が必要です。
+
+## 例
+
+「そ」と「た」の間、「efg」の前後に注目です。
+
+```html
+<p>
+あいうえお<a>かきくけこ</a>さしすせそ
+<a>たちつてと</a>abcd <a>efg</a> hijk
+</p>
+```
+
+あいうえお<a>かきくけこ</a>さしすせそ
+<a>たちつてと</a> abcd <a>efg</a> hijk
+
+# デメリット対策
+
+1. 改行問題はコメントで繋ぐ by [Tomoyaさん](https://t.co/XI3ctW3q1p?amp=1)
+1. 和英の不整合は
+    a. `lang`属性などを使ってルールの適用範囲をコントロールする
+    b. 空白のサイズ調整を諦めて、半角スペースの挿入に留める
+       ```css
+       p a::before, p a::after {content: " ";}
+       ```
+
+## 例
+
+ここでは和英の不整合を`lang`属性で回避してみます。
+`a`要素と`lang`属性が隣接する場合のルールも追加してもよさそうですね。
+
+
+```html
+<style>
+:lang(en) a::before,
+:lang(en) a::after {
+  content: none;
+}
+</style>
+
+<p>
+あいうえお<a>かきくけこ</a>さしすせそ<!--
+--><a>たちつてと</a><span lang="en">abcd <a>efg</a> hijk</span>
+</p>
+```
+
+```{=html}
+<style>
+:lang(en) a::before,
+:lang(en) a::after {
+  content: none;
+}
+</style>
+
+<p>
+あいうえお<a>かきくけこ</a>さしすせそ<!--
+--><a>たちつてと</a><span lang="en">abcd <a>efg</a> hijk</span>
+</p>
+```
+
+
+# 他のアイディア
+
+- アリ
+  - JavaScriptを使う
+      - より詳細なコントロールを得られる一方、spanだらけになる
+      - 例: https://jsfiddle.net/koron/fptnro89/4/ by Taro Muraokaさん
+- ナシ
+  - CSSのmarginで頑張る
+      - marginは相殺するので、`<a>`要素同士が並んでもいたずらに余白が広がらない
+      - 一方で段落の頭や折り返した頭など、段落左端に`<a>`要素が来た時の例外処理が難しい
+          - `first-letter`、`first-child`などで段落頭のmargin制御がせいぜい
+  - CSSのpaddingで頑張る
+      - paddingは相殺しない上に、marginと同じく左端が揃わない。
+
+# 終わりに
+
+元ネタは、[vim-jpのslack](https://vim-jp.org/docs/chat.html){.normal}で[emacs-jp](https://emacs-jp.github.io/packages/ddskk-posframe){.normal}のウェブページのスタイルを改善したいという質問とそれに続く議論です。
+禁則処理のような、普段意識しない黒魔術もといテクニックを駆使したため、エッジケースを踏みまくりました。
+皆さんで議論したおかげで記事化前に実装の穴を突けたとも言えます。
+この場をお借りしてお礼申し上げます。
+
+たのしかったぞー！
+
+ちなみに私はHTMLをもっぱらPandoc's markdownから出力する派であり、east_asian_line_breaksエクステンションにより、改行時の空白に悩まされずに澄んでいます。
