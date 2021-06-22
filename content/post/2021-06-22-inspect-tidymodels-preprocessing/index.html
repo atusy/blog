@@ -1,0 +1,145 @@
+---
+title: Tidymodelsでデータの前処理内容を確認する
+author: ''
+date: '2021-06-22'
+slug: inspect-tidymodels-preprocessing
+categories: [R]
+tags: [tidymodels, recipes]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>tidymodelsはRにおける統計モデリングや機械学習を便利にするためのフレームワークです。
+tidymodelsを利用すると</p>
+<ul>
+<li>パイプ演算子による処理の流れが明瞭なモデリング</li>
+<li>パッケージごとに異なる学習・予測インターフェースの統一</li>
+</ul>
+<p>といったメリットを享受でき、徐々にはやってきている印象です。</p>
+<p>tidymodelsはパッケージでもあります。
+tidyverseのように複数のパッケージの集合体で、特徴量エンジニアリング担当のrecipesパッケージ、学習・予測担当のparsnipパッケージなどが属します。</p>
+<p>もっと詳しい概要や、実際の分析の流れはUryuさんのスライドを参考にしてください。</p>
+<blockquote>
+<p><a href="https://speakerdeck.com/s_uryu/tidymodels2020">tidymodelsで覚えるRでのモデル構築と運用</a></p>
+</blockquote>
+<p>ここではrecipesパッケージで前処理を行った後、前処理の内容を調査する方法を紹介します。たとえば、</p>
+<ul>
+<li>中心化した時の平均値ってどんなもんだったんだろ？</li>
+<li>PCAかけたけど、固有ベクトルってどんな感じだったのかなあ？</li>
+</ul>
+<p>といったことを確認する方法を紹介します。</p>
+<p>例として、ダイヤモンドの価格のデータセット（<code>ggplot2::diamonds</code>）を使ってみましょう。簡単のため、数値の列だけを扱います。</p>
+<p>前処理までのざっとした流れは以下のとおり。実際に則すようにデータ分割から始めていますが、本質的なところは、<code>recipes::recipe</code>関数から始まる前処理方法の定義と、続く<code>recipes::prep</code>関数による前処理定義の学習です。</p>
+<p><strong>重要</strong>: 後で前処理の各ステップの検証をしやすくするため、<code>step_*</code>関数の<code>id</code>引数に、<code>step</code>ごとに固有の名前を指定してください。検証不要なステップのidは省略可能です。</p>
+<pre class="r"><code># パイプ演算子の読み込み
+`%&gt;%` &lt;- magrittr::`%&gt;%`
+
+# シード固定
+set.seed(71)
+
+# データ分割
+split &lt;- ggplot2::diamonds %&gt;%
+  dplyr::select(where(is.numeric)) %&gt;%
+  rsample::initial_split(p = .9)
+
+# 訓練データの取り出し
+tr &lt;- rsample::training(split)
+
+# 前処理方法を定義
+rec &lt;- recipes::recipe(tr, price ~ .) %&gt;%
+  recipes::step_center(-price, id = &#39;center&#39;) %&gt;%
+  recipes::step_scale(-price, id = &#39;scale&#39;) %&gt;%
+  recipes::step_pca(-price, id = &#39;pca&#39;) %&gt;%
+  recipes::step_log(price)
+
+# 前処理方法を学習
+prep &lt;- recipes::prep(rec)</code></pre>
+<p>前処理方法の学習が完了したら、<code>prep</code>オブジェクトの中身を除いてみましょう。大きなリストなので、ここでは名前だけを表示してみます。</p>
+<pre class="r"><code>names(prep)
+#&gt; [1] &quot;var_info&quot;       &quot;term_info&quot;      &quot;steps&quot;          &quot;template&quot;      
+#&gt; [5] &quot;retained&quot;       &quot;tr_info&quot;        &quot;orig_lvls&quot;      &quot;last_term_info&quot;</code></pre>
+<p><code>"steps"</code>といういかにも怪しげな要素がありますね。では<code>prep$steps</code>の1番目の要素の構造を<code>str</code>関数で覗いてみましょう。</p>
+<pre class="r"><code>str(prep$steps[1L])
+#&gt; List of 1
+#&gt;  $ :List of 7
+#&gt;   ..$ terms  :List of 1
+#&gt;   .. ..$ : language ~-price
+#&gt;   .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x562acefa2100&gt; 
+#&gt;   .. ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;quosures&quot; &quot;list&quot;
+#&gt;   ..$ role   : logi NA
+#&gt;   ..$ trained: logi TRUE
+#&gt;   ..$ means  : Named num [1:6] 0.799 61.752 57.456 5.733 5.736 ...
+#&gt;   .. ..- attr(*, &quot;names&quot;)= chr [1:6] &quot;carat&quot; &quot;depth&quot; &quot;table&quot; &quot;x&quot; ...
+#&gt;   ..$ na_rm  : logi TRUE
+#&gt;   ..$ skip   : logi FALSE
+#&gt;   ..$ id     : chr &quot;center&quot;
+#&gt;   ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;step_center&quot; &quot;step&quot;</code></pre>
+<p>どうやら<code>prep$steps</code>はリストで、1番目の内容を見ると、<code>id</code>という要素があり、<code>"center"</code>という文字列が入っています。前処理を定義した時、最初のステップに<code>recipes::step_center</code>を引数<code>id = "center"</code>と共に使ったことと対応していますね。また、<code>means</code>という要素もあり、ここには中心化に使った平均値が入っているようです。</p>
+<pre class="r"><code>prep$steps[[1L]]$means
+#&gt;      carat      depth      table          x          y          z 
+#&gt;  0.7985464 61.7516324 57.4559705  5.7325532  5.7360282  3.5391435</code></pre>
+<p>念のため、トレーニングデータである<code>tr</code>の各列の平均値を見てみましょう。</p>
+<pre class="r"><code>colMeans(tr)
+#&gt;        carat        depth        table        price            x            y 
+#&gt;    0.7985464   61.7516324   57.4559705 3937.0699734    5.7325532    5.7360282 
+#&gt;            z 
+#&gt;    3.5391435</code></pre>
+<p><code>price</code>の平均値の有無こそ違いますが、他は一致しています。一安心ですね。
+<code>price</code>の有無は中心化では予測対象なので対象外としましたが、<code>colMeans</code>関数は全変数を対象としていることに由来します。</p>
+<p>さて、もう少し汎用的に検証できるよう、<code>inspect_step</code>関数を定義してみます。これは第一引数に学習済みの定義、第二引数に任意の前処理ステップのidをとります。</p>
+<pre class="r"><code>inspect_step &lt;- function(recipe, step_id) {
+  recipe$steps[
+    purrr::map_chr(recipe$steps, &quot;id&quot;) == step_id
+  ][[1L]]
+}</code></pre>
+<p>実際にPCAの結果を取り出して<code>str</code>関数で構造を見てみます。
+idに<code>"pca"</code>が入っていることを確認できます。</p>
+<pre class="r"><code>str(inspect_step(prep, &quot;pca&quot;))
+#&gt; List of 10
+#&gt;  $ terms    :List of 1
+#&gt;   ..$ : language ~-price
+#&gt;   .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x562acefa2250&gt; 
+#&gt;   ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;quosures&quot; &quot;list&quot;
+#&gt;  $ role     : chr &quot;predictor&quot;
+#&gt;  $ trained  : logi TRUE
+#&gt;  $ num_comp : num 5
+#&gt;  $ threshold: logi NA
+#&gt;  $ options  : list()
+#&gt;  $ res      :List of 4
+#&gt;   ..$ sdev    : num [1:6] 1.988 1.133 0.827 0.222 0.162 ...
+#&gt;   ..$ rotation: num [1:6, 1:6] 0.494469 -0.000991 0.120718 0.500085 0.493796 ...
+#&gt;   .. ..- attr(*, &quot;dimnames&quot;)=List of 2
+#&gt;   .. .. ..$ : chr [1:6] &quot;carat&quot; &quot;depth&quot; &quot;table&quot; &quot;x&quot; ...
+#&gt;   .. .. ..$ : chr [1:6] &quot;PC1&quot; &quot;PC2&quot; &quot;PC3&quot; &quot;PC4&quot; ...
+#&gt;   ..$ center  : logi FALSE
+#&gt;   ..$ scale   : logi FALSE
+#&gt;   ..- attr(*, &quot;class&quot;)= chr &quot;prcomp&quot;
+#&gt;  $ prefix   : chr &quot;PC&quot;
+#&gt;  $ skip     : logi FALSE
+#&gt;  $ id       : chr &quot;pca&quot;
+#&gt;  - attr(*, &quot;class&quot;)= chr [1:2] &quot;step_pca&quot; &quot;step&quot;</code></pre>
+<p>せっかくなので各主成分の固有ベクトルを取り出してみましょう。</p>
+<pre class="r"><code>inspect_step(prep, &quot;pca&quot;)$res$rotation
+#&gt;                 PC1          PC2          PC3         PC4          PC5
+#&gt; carat  0.4944690257 -0.045142961  0.027733335 -0.69872947  0.503950252
+#&gt; depth -0.0009910619 -0.734418543 -0.670622228  0.04053755  0.045526726
+#&gt; table  0.1207179046  0.669542455 -0.732751827  0.01440279  0.001342399
+#&gt; x      0.5000854569 -0.008609363  0.070109159 -0.06174404 -0.429135337
+#&gt; y      0.4937960687 -0.009923418  0.087127512  0.70974748  0.494690171
+#&gt; z      0.4969975516 -0.100656952 -0.008059259  0.04870922 -0.561323575
+#&gt;                PC6
+#&gt; carat  0.102492101
+#&gt; depth -0.084724689
+#&gt; table  0.002367648
+#&gt; x     -0.746294618
+#&gt; y     -0.003989857
+#&gt; z      0.652180892</code></pre>
+<p>現状、recipesパッケージではこの手の痒いところに手が届く関数が整備されていないようです。とはいえ、オブジェクトの内部構造はよく練られているので、困ったら<code>str</code>関数を使って検証してみると良いでしょう。これはモデル解釈の時にも同じことが言えます。</p>
+<blockquote>
+<p><a href="https://blog.atusy.net/2019/10/29/interpret-tidymodels/">tidymodelsでもxgboostを解釈したい</a></p>
+</blockquote>
+<p>Enjoy!</p>

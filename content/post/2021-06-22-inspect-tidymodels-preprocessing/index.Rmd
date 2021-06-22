@@ -1,0 +1,140 @@
+---
+title: Tidymodelsでデータの前処理内容を確認する
+author: ''
+date: '2021-06-22'
+slug: inspect-tidymodels-preprocessing
+categories: [R]
+tags: [tidymodels, recipes]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+tidymodelsはRにおける統計モデリングや機械学習を便利にするためのフレームワークです。
+tidymodelsを利用すると
+
+- パイプ演算子による処理の流れが明瞭なモデリング
+- パッケージごとに異なる学習・予測インターフェースの統一
+
+といったメリットを享受でき、徐々にはやってきている印象です。
+
+tidymodelsはパッケージでもあります。
+tidyverseのように複数のパッケージの集合体で、
+特徴量エンジニアリング担当のrecipesパッケージ、学習・予測担当のparsnipパッケージなどが属します。
+
+もっと詳しい概要や、実際の分析の流れはUryuさんのスライドを参考にしてください。
+
+> [tidymodelsで覚えるRでのモデル構築と運用](https://speakerdeck.com/s_uryu/tidymodels2020)
+
+ここではrecipesパッケージで前処理を行った後、前処理の内容を調査する方法を紹介します。
+たとえば、
+
+- 中心化した時の平均値ってどんなもんだったんだろ？
+- PCAかけたけど、固有ベクトルってどんな感じだったのかなあ？
+
+といったことを確認する方法を紹介します。
+
+例として、ダイヤモンドの価格のデータセット（`ggplot2::diamonds`）を使ってみましょう。
+簡単のため、数値の列だけを扱います。
+
+前処理までのざっとした流れは以下のとおり。
+実際に則すようにデータ分割から始めていますが、
+本質的なところは、`recipes::recipe`関数から始まる前処理方法の定義と、
+続く`recipes::prep`関数による前処理定義の学習です。
+
+**重要**: 後で前処理の各ステップの検証をしやすくするため、`step_*`関数の`id`引数に、`step`ごとに固有の名前を指定してください。検証不要なステップのidは省略可能です。
+
+```{r}
+# パイプ演算子の読み込み
+`%>%` <- magrittr::`%>%`
+
+# シード固定
+set.seed(71)
+
+# データ分割
+split <- ggplot2::diamonds %>%
+  dplyr::select(where(is.numeric)) %>%
+  rsample::initial_split(p = .9)
+
+# 訓練データの取り出し
+tr <- rsample::training(split)
+
+# 前処理方法を定義
+rec <- recipes::recipe(tr, price ~ .) %>%
+  recipes::step_center(-price, id = 'center') %>%
+  recipes::step_scale(-price, id = 'scale') %>%
+  recipes::step_pca(-price, id = 'pca') %>%
+  recipes::step_log(price)
+
+# 前処理方法を学習
+prep <- recipes::prep(rec)
+```
+
+前処理方法の学習が完了したら、`prep`オブジェクトの中身を除いてみましょう。
+大きなリストなので、ここでは名前だけを表示してみます。
+
+```{r}
+names(prep)
+```
+
+`"steps"`といういかにも怪しげな要素がありますね。
+では`prep$steps`の1番目の要素の構造を`str`関数で覗いてみましょう。
+
+```{r}
+str(prep$steps[1L])
+```
+
+どうやら`prep$steps`はリストで、1番目の内容を見ると、`id`という要素があり、`"center"`という文字列が入っています。
+前処理を定義した時、最初のステップに`recipes::step_center`を引数`id = "center"`と共に使ったことと対応していますね。
+また、`means`という要素もあり、ここには中心化に使った平均値が入っているようです。
+
+```{r}
+prep$steps[[1L]]$means
+```
+
+念のため、トレーニングデータである`tr`の各列の平均値を見てみましょう。
+
+
+```{r}
+colMeans(tr)
+```
+
+`price`の平均値の有無こそ違いますが、他は一致しています。
+一安心ですね。
+`price`の有無は中心化では予測対象なので対象外としましたが、`colMeans`関数は全変数を対象としていることに由来します。
+
+さて、もう少し汎用的に検証できるよう、`inspect_step`関数を定義してみます。
+これは第一引数に学習済みの定義、第二引数に任意の前処理ステップのidをとります。
+
+```{r}
+inspect_step <- function(recipe, step_id) {
+  recipe$steps[
+    purrr::map_chr(recipe$steps, "id") == step_id
+  ][[1L]]
+}
+```
+
+実際にPCAの結果を取り出して`str`関数で構造を見てみます。
+idに`"pca"`が入っていることを確認できます。
+
+```{r}
+str(inspect_step(prep, "pca"))
+```
+
+せっかくなので各主成分の固有ベクトルを取り出してみましょう。
+
+```{r}
+inspect_step(prep, "pca")$res$rotation
+```
+
+現状、recipesパッケージではこの手の痒いところに手が届く関数が整備されていないようです。
+とはいえ、オブジェクトの内部構造はよく練られているので、困ったら`str`関数を使って検証してみると良いでしょう。
+これはモデル解釈の時にも同じことが言えます。
+
+> [tidymodelsでもxgboostを解釈したい](https://blog.atusy.net/2019/10/29/interpret-tidymodels/)
+
+Enjoy!
