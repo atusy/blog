@@ -1,0 +1,81 @@
+---
+title: "Tidymodelsでデータの前処理内容を**tidy**に確認する（公式手順）"
+author: ''
+date: '2021-06-23'
+slug: tidy-inspect-tidymodels-preprocessing
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+昨日の[投稿](https://blog.atusy.net/2021/06/22/inspect-tidymodels-preprocessing/)で、tidymodelsのrecipesパッケージによる特徴量エンジニアリングを行った歳に、
+
+- 中心化につかった平均値はいくつか
+- PCAの固有ベクトルはなにか
+
+をnot tidyに確認する方法を紹介しました。
+
+後から気付いたのですが、recipesパッケージは`broom::tidy`関数を使って確認する方法を提供しています。
+`tidy`じゃ何を`tidy`にするかわからんし、もうちょい良い名前をつけて欲しいですね。
+さておき、試してみましょう。
+
+まずは昨日と同様に、前処理を定義し学習します。
+
+```{r}
+# パイプ演算子の読み込み
+`%>%` <- magrittr::`%>%`
+
+# シード固定
+set.seed(71)
+
+# データ分割
+split <- ggplot2::diamonds %>%
+  dplyr::select(where(is.numeric)) %>%
+  rsample::initial_split(p = .9)
+
+# 訓練データの取り出し
+tr <- rsample::training(split)
+
+# 前処理方法を定義
+rec <- recipes::recipe(tr, price ~ .) %>%
+  recipes::step_center(-price, id = 'center') %>%
+  recipes::step_scale(-price, id = 'scale') %>%
+  recipes::step_pca(-price, id = 'pca') %>%
+  recipes::step_log(price)
+
+# 前処理方法を学習
+prep <- recipes::prep(rec)
+```
+
+前処理の内容を確認するには、以下のように、確認したい前処理が何番目か、あるいはidが何か指定します。
+
+```{r}
+broom::tidy(prep, 1)
+broom::tidy(prep, id = 'center')
+```
+
+PCAの内容も勿論確認可能。ただ、ちょっと見辛いですね。
+
+```{r}
+broom::tidy(prep, id = 'pca')
+```
+
+なんでもかんでもtidyにすればいいってもんじゃない典型だと思います。
+状況に応じて自前で`tidyr::pivot_wider`関数に食わせるなり、生の値を取り出すなりしたいところ。
+
+```{r}
+prep$steps[[3]]$res$rotation
+```
+
+
+また、確認対象によってはtidyのS3メソッドとしてオプション引数が定義されています。
+たとえば `recipes:::tidy.step_pca` であれば、`type`引数でデフォルト値は`"coef"`、因子負荷量ですね。
+`type = "variance"`にすると、各主成分の寄与率を確認できます。
+
+```{r}
+broom::tidy(prep, id = 'pca', type = "variance")
+```
+
+Enjoy!

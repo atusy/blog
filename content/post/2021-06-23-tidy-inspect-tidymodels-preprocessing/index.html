@@ -1,0 +1,118 @@
+---
+title: "Tidymodelsでデータの前処理内容を**tidy**に確認する（公式手順）"
+author: ''
+date: '2021-06-23'
+slug: tidy-inspect-tidymodels-preprocessing
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>昨日の<a href="https://blog.atusy.net/2021/06/22/inspect-tidymodels-preprocessing/">投稿</a>で、tidymodelsのrecipesパッケージによる特徴量エンジニアリングを行った歳に、</p>
+<ul>
+<li>中心化につかった平均値はいくつか</li>
+<li>PCAの固有ベクトルはなにか</li>
+</ul>
+<p>をnot tidyに確認する方法を紹介しました。</p>
+<p>後から気付いたのですが、recipesパッケージは<code>broom::tidy</code>関数を使って確認する方法を提供しています。
+<code>tidy</code>じゃ何を<code>tidy</code>にするかわからんし、もうちょい良い名前をつけて欲しいですね。さておき、試してみましょう。</p>
+<p>まずは昨日と同様に、前処理を定義し学習します。</p>
+<pre class="r"><code># パイプ演算子の読み込み
+`%&gt;%` &lt;- magrittr::`%&gt;%`
+
+# シード固定
+set.seed(71)
+
+# データ分割
+split &lt;- ggplot2::diamonds %&gt;%
+  dplyr::select(where(is.numeric)) %&gt;%
+  rsample::initial_split(p = .9)
+
+# 訓練データの取り出し
+tr &lt;- rsample::training(split)
+
+# 前処理方法を定義
+rec &lt;- recipes::recipe(tr, price ~ .) %&gt;%
+  recipes::step_center(-price, id = &#39;center&#39;) %&gt;%
+  recipes::step_scale(-price, id = &#39;scale&#39;) %&gt;%
+  recipes::step_pca(-price, id = &#39;pca&#39;) %&gt;%
+  recipes::step_log(price)
+
+# 前処理方法を学習
+prep &lt;- recipes::prep(rec)</code></pre>
+<p>前処理の内容を確認するには、以下のように、確認したい前処理が何番目か、あるいはidが何か指定します。</p>
+<pre class="r"><code>broom::tidy(prep, 1)</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   terms  value id    
+##   &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt; 
+## 1 carat  0.799 center
+## 2 depth 61.8   center
+## 3 table 57.5   center
+## 4 x      5.73  center
+## 5 y      5.74  center
+## 6 z      3.54  center</code></pre>
+<pre class="r"><code>broom::tidy(prep, id = &#39;center&#39;)</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   terms  value id    
+##   &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt; 
+## 1 carat  0.799 center
+## 2 depth 61.8   center
+## 3 table 57.5   center
+## 4 x      5.73  center
+## 5 y      5.74  center
+## 6 z      3.54  center</code></pre>
+<p>PCAの内容も勿論確認可能。ただ、ちょっと見辛いですね。</p>
+<pre class="r"><code>broom::tidy(prep, id = &#39;pca&#39;)</code></pre>
+<pre><code>## # A tibble: 36 x 4
+##    terms     value component id   
+##    &lt;chr&gt;     &lt;dbl&gt; &lt;chr&gt;     &lt;chr&gt;
+##  1 carat  0.494    PC1       pca  
+##  2 depth -0.000991 PC1       pca  
+##  3 table  0.121    PC1       pca  
+##  4 x      0.500    PC1       pca  
+##  5 y      0.494    PC1       pca  
+##  6 z      0.497    PC1       pca  
+##  7 carat -0.0451   PC2       pca  
+##  8 depth -0.734    PC2       pca  
+##  9 table  0.670    PC2       pca  
+## 10 x     -0.00861  PC2       pca  
+## # … with 26 more rows</code></pre>
+<p>なんでもかんでもtidyにすればいいってもんじゃない典型だと思います。状況に応じて自前で<code>tidyr::pivot_wider</code>関数に食わせるなり、生の値を取り出すなりしたいところ。</p>
+<pre class="r"><code>prep$steps[[3]]$res$rotation</code></pre>
+<pre><code>##                 PC1          PC2          PC3         PC4          PC5
+## carat  0.4944690257 -0.045142961  0.027733335 -0.69872947  0.503950252
+## depth -0.0009910619 -0.734418543 -0.670622228  0.04053755  0.045526726
+## table  0.1207179046  0.669542455 -0.732751827  0.01440279  0.001342399
+## x      0.5000854569 -0.008609363  0.070109159 -0.06174404 -0.429135337
+## y      0.4937960687 -0.009923418  0.087127512  0.70974748  0.494690171
+## z      0.4969975516 -0.100656952 -0.008059259  0.04870922 -0.561323575
+##                PC6
+## carat  0.102492101
+## depth -0.084724689
+## table  0.002367648
+## x     -0.746294618
+## y     -0.003989857
+## z      0.652180892</code></pre>
+<p>また、確認対象によってはtidyのS3メソッドとしてオプション引数が定義されています。たとえば <code>recipes:::tidy.step_pca</code> であれば、<code>type</code>引数でデフォルト値は<code>"coef"</code>、因子負荷量ですね。
+<code>type = "variance"</code>にすると、各主成分の寄与率を確認できます。</p>
+<pre class="r"><code>broom::tidy(prep, id = &#39;pca&#39;, type = &quot;variance&quot;)</code></pre>
+<pre><code>## # A tibble: 24 x 4
+##    terms                 value component id   
+##    &lt;chr&gt;                 &lt;dbl&gt;     &lt;int&gt; &lt;chr&gt;
+##  1 variance            3.95            1 pca  
+##  2 variance            1.28            2 pca  
+##  3 variance            0.683           3 pca  
+##  4 variance            0.0494          4 pca  
+##  5 variance            0.0264          5 pca  
+##  6 variance            0.00624         6 pca  
+##  7 cumulative variance 3.95            1 pca  
+##  8 cumulative variance 5.23            2 pca  
+##  9 cumulative variance 5.92            3 pca  
+## 10 cumulative variance 5.97            4 pca  
+## # … with 14 more rows</code></pre>
+<p>Enjoy!</p>
