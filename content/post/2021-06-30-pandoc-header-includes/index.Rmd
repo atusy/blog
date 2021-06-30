@@ -1,0 +1,62 @@
+---
+title: Pandocでは--include-in-header引数とheader-includes変数は共存できない
+author: ''
+date: '2021-06-30'
+slug: pandoc-header-includes
+categories: [pandoc]
+tags: [pandoc]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+ちょっとハマった。
+Pandocでマークダウンファイルを変換する場合、YAMLフロントマターの設定と引数を用いた設定では、引数が優先権を持つ。
+で、HTMLファイルの`head`要素内に記述を追加する場合は
+
+1. 引数に`--include-in-header`を使って**ファイル**を指定する
+1. YAMLフロントマターに`header-includes`を使って**内容**を指定する
+
+の2パターンがある。
+ファイルを指定するか、内容を指定するか、ベツモノっぽいなと思いきや、マニュアルには
+
+```
+header-includes
+    contents specified by -H/--include-in-header (may have multiple values) 
+```
+
+とあってどうやら、引数の方が強いらしい。
+
+確かめてみよう。
+
+まずは`header-includes`を使って`<script></script>`を追加する。
+
+```{bash}
+MD=$(mktemp --suffix=".md")
+echo -e \
+"---
+title: test
+header-includes: |
+  <script></script>
+---" >> "$MD"
+pandoc $MD --standalone
+```
+
+うまくいった。
+次に、追加で`--include-in-header`に空ファイルを指定してみる。
+
+```{bash}
+HEADER=$(mktemp --suffix=".html")
+MD=$(mktemp --suffix=".md")
+echo -e \
+"---
+title: test
+header-includes: |
+  <script></script>
+---" >> "$MD"
+pandoc $MD --standalone --include-in-header="$HEADER"
+```
+
+`<script></script>`が消えた。
+
+Pandocムツカシイ。

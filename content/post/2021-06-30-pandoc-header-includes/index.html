@@ -1,0 +1,95 @@
+---
+title: Pandocでは--include-in-header引数とheader-includes変数は共存できない
+author: ''
+date: '2021-06-30'
+slug: pandoc-header-includes
+categories: [pandoc]
+tags: [pandoc]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p>ちょっとハマった。
+Pandocでマークダウンファイルを変換する場合、YAMLフロントマターの設定と引数を用いた設定では、引数が優先権を持つ。で、HTMLファイルの<code>head</code>要素内に記述を追加する場合は</p>
+<ol style="list-style-type: decimal">
+<li>引数に<code>--include-in-header</code>を使って<strong>ファイル</strong>を指定する</li>
+<li>YAMLフロントマターに<code>header-includes</code>を使って<strong>内容</strong>を指定する</li>
+</ol>
+<p>の2パターンがある。ファイルを指定するか、内容を指定するか、ベツモノっぽいなと思いきや、マニュアルには</p>
+<pre><code>header-includes
+    contents specified by -H/--include-in-header (may have multiple values) </code></pre>
+<p>とあってどうやら、引数の方が強いらしい。</p>
+<p>確かめてみよう。</p>
+<p>まずは<code>header-includes</code>を使って<code>&lt;script&gt;&lt;/script&gt;</code>を追加する。</p>
+<pre class="bash"><code>MD=$(mktemp --suffix=&quot;.md&quot;)
+echo -e \
+&quot;---
+title: test
+header-includes: |
+  &lt;script&gt;&lt;/script&gt;
+---&quot; &gt;&gt; &quot;$MD&quot;
+pandoc $MD --standalone</code></pre>
+<pre><code>## &lt;!DOCTYPE html&gt;
+## &lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot; lang=&quot;&quot; xml:lang=&quot;&quot;&gt;
+## &lt;head&gt;
+##   &lt;meta charset=&quot;utf-8&quot; /&gt;
+##   &lt;meta name=&quot;generator&quot; content=&quot;pandoc&quot; /&gt;
+##   &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0, user-scalable=yes&quot; /&gt;
+##   &lt;title&gt;test&lt;/title&gt;
+##   &lt;style&gt;
+##       code{white-space: pre-wrap;}
+##       span.smallcaps{font-variant: small-caps;}
+##       span.underline{text-decoration: underline;}
+##       div.column{display: inline-block; vertical-align: top; width: 50%;}
+##   &lt;/style&gt;
+##   &lt;!--[if lt IE 9]&gt;
+##     &lt;script src=&quot;//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js&quot;&gt;&lt;/script&gt;
+##   &lt;![endif]--&gt;
+##   &lt;script&gt;&lt;/script&gt;
+## &lt;/head&gt;
+## &lt;body&gt;
+## &lt;header id=&quot;title-block-header&quot;&gt;
+## &lt;h1 class=&quot;title&quot;&gt;test&lt;/h1&gt;
+## &lt;/header&gt;
+## 
+## &lt;/body&gt;
+## &lt;/html&gt;</code></pre>
+<p>うまくいった。次に、追加で<code>--include-in-header</code>に空ファイルを指定してみる。</p>
+<pre class="bash"><code>HEADER=$(mktemp --suffix=&quot;.html&quot;)
+MD=$(mktemp --suffix=&quot;.md&quot;)
+echo -e \
+&quot;---
+title: test
+header-includes: |
+  &lt;script&gt;&lt;/script&gt;
+---&quot; &gt;&gt; &quot;$MD&quot;
+pandoc $MD --standalone --include-in-header=&quot;$HEADER&quot;</code></pre>
+<pre><code>## &lt;!DOCTYPE html&gt;
+## &lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot; lang=&quot;&quot; xml:lang=&quot;&quot;&gt;
+## &lt;head&gt;
+##   &lt;meta charset=&quot;utf-8&quot; /&gt;
+##   &lt;meta name=&quot;generator&quot; content=&quot;pandoc&quot; /&gt;
+##   &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0, user-scalable=yes&quot; /&gt;
+##   &lt;title&gt;test&lt;/title&gt;
+##   &lt;style&gt;
+##       code{white-space: pre-wrap;}
+##       span.smallcaps{font-variant: small-caps;}
+##       span.underline{text-decoration: underline;}
+##       div.column{display: inline-block; vertical-align: top; width: 50%;}
+##   &lt;/style&gt;
+##   &lt;!--[if lt IE 9]&gt;
+##     &lt;script src=&quot;//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js&quot;&gt;&lt;/script&gt;
+##   &lt;![endif]--&gt;
+## &lt;/head&gt;
+## &lt;body&gt;
+## &lt;header id=&quot;title-block-header&quot;&gt;
+## &lt;h1 class=&quot;title&quot;&gt;test&lt;/h1&gt;
+## &lt;/header&gt;
+## 
+## &lt;/body&gt;
+## &lt;/html&gt;</code></pre>
+<p><code>&lt;script&gt;&lt;/script&gt;</code>が消えた。</p>
+<p>Pandocムツカシイ。</p>
