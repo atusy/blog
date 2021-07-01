@@ -1,5 +1,5 @@
 ---
-title: tidymodelsのrecipesパッケージがworkflowsパッケージの使用を推奨し始めたがまだやめておいた方がいい
+title: tidymodelsのrecipesパッケージがworkflowsパッケージの使用を推奨し始めた
 author: ''
 date: '2021-07-01'
 slug: tidymodels
@@ -33,7 +33,7 @@ output:
 <p>If you are using a recipe as a preprocessor for modeling, we <strong>highly recommend</strong> that you use a <code>workflow()</code> instead of manually estimating a recipe (see the example in [recipe()]).
 <a href="https://github.com/tidymodels/recipes/blame/39bc4e8b0084bcdbaf3844be9cc00762510f49ab/R/recipe.R#L284%3E">2021-06-29の更新</a></p>
 </blockquote>
-<p>これは早急にworkflowsの使い方を学ばねばなりませんね。と思って使い方を書き始めたのですが、どうにもバグがある気がします……。どうもrecipesパッケージ単体を使った場合と結果が違います。</p>
+<p>これは早急にworkflowsの使い方を学ばねばなりませんね。</p>
 <div id="tidymodelsを使って線型モデルを学習する例" class="section level1">
 <h1>tidymodelsを使って線型モデルを学習する例</h1>
 <p>基本の流れはこんな感じ。</p>
@@ -100,18 +100,10 @@ broom::tidy(trained, &quot;recipe&quot;)
 #&gt; 1      1 step      center TRUE    FALSE center_bZ3xW
 #&gt; 2      2 step      scale  TRUE    FALSE scale_pTXgd</code></pre>
 <p>特徴量エンジニアリングについて詳しく見たい場合は<code>workflows::pull_workflow_preprocessor</code>関数を使うらしい。返り値はrecipeクラスオブジェクト。</p>
-<pre class="r"><code>workflows::pull_workflow_preprocessor(trained) %&gt;% class
+<pre class="r"><code>workflows::pull_workflow_prepped_recipe(trained) %&gt;% class
 #&gt; [1] &quot;recipe&quot;</code></pre>
 <p>というわけで従来、recipesパッケージでやっていたように、<code>broom::tidy</code>関数で<code>id</code>引数を指定してやれば、たとえば中心化に使ったパラメータ（訓練データの各特徴量の平均値）が見れるはず。</p>
-<pre class="r"><code>workflows::pull_workflow_preprocessor(trained) %&gt;%
-  broom::tidy(id = &quot;center_bZ3xW&quot;)
-#&gt; # A tibble: 1 x 3
-#&gt;   terms                             value id          
-#&gt;   &lt;chr&gt;                             &lt;dbl&gt; &lt;chr&gt;       
-#&gt; 1 recipes::all_numeric_predictors()    NA center_bZ3xW</code></pre>
-<p>あれ……？なんか<code>recipes::prep</code>関数で学習した結果と違いますね……。</p>
-<pre class="r"><code>preprocessor %&gt;%
-  recipes::prep() %&gt;%
+<pre class="r"><code>workflows::pull_workflow_prepped_recipe(trained) %&gt;%
   broom::tidy(id = &quot;center_bZ3xW&quot;)
 #&gt; # A tibble: 6 x 3
 #&gt;   terms  value id          
@@ -122,6 +114,7 @@ broom::tidy(trained, &quot;recipe&quot;)
 #&gt; 4 x      5.73  center_bZ3xW
 #&gt; 5 y      5.73  center_bZ3xW
 #&gt; 6 z      3.54  center_bZ3xW</code></pre>
+<p>似たような名前の<code>workflows::pull_workflow_preprocessor</code>もあるが、こいつは学習前の定義を取り出すだけなので注意。こいつ、いる……？</p>
 </div>
 <div id="session-info" class="section level1">
 <h1>Session Info</h1>

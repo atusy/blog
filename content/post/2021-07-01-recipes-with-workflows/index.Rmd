@@ -1,5 +1,5 @@
 ---
-title: tidymodelsのrecipesパッケージがworkflowsパッケージの使用を推奨し始めたがまだやめておいた方がいい
+title: tidymodelsのrecipesパッケージがworkflowsパッケージの使用を推奨し始めた
 author: ''
 date: '2021-07-01'
 slug: tidymodels
@@ -36,8 +36,6 @@ tidymodelsを使ったモデリングにおいて、recipesパッケージは特
 > [2021-06-29の更新](https://github.com/tidymodels/recipes/blame/39bc4e8b0084bcdbaf3844be9cc00762510f49ab/R/recipe.R#L284>)
 
 これは早急にworkflowsの使い方を学ばねばなりませんね。
-と思って使い方を書き始めたのですが、どうにもバグがある気がします……。
-どうもrecipesパッケージ単体を使った場合と結果が違います。
 
 # tidymodelsを使って線型モデルを学習する例
 
@@ -107,23 +105,20 @@ broom::tidy(trained, "recipe")
 返り値はrecipeクラスオブジェクト。
 
 ```{r}
-workflows::pull_workflow_preprocessor(trained) %>% class
+workflows::pull_workflow_prepped_recipe(trained) %>% class
 ```
+
 というわけで従来、recipesパッケージでやっていたように、`broom::tidy`関数で`id`引数を指定してやれば、
 たとえば中心化に使ったパラメータ（訓練データの各特徴量の平均値）が見れるはず。
 
 ```{r}
-workflows::pull_workflow_preprocessor(trained) %>%
+workflows::pull_workflow_prepped_recipe(trained) %>%
   broom::tidy(id = "center_bZ3xW")
 ```
-あれ……？
-なんか`recipes::prep`関数で学習した結果と違いますね……。
+似たような名前の`workflows::pull_workflow_preprocessor`もあるが、
+こいつは学習前の定義を取り出すだけなので注意。
+こいつ、いる……？
 
-```{r}
-preprocessor %>%
-  recipes::prep() %>%
-  broom::tidy(id = "center_bZ3xW")
-```
 # Session Info
 
 
