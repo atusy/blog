@@ -1,0 +1,133 @@
+---
+title: tidymodelsのrecipesパッケージがworkflowsパッケージの使用を推奨し始めたがまだやめておいた方がいい
+author: ''
+date: '2021-07-01'
+slug: tidymodels
+categories: [R]
+tags: [tidymodels, recipes, parsnip, workflows]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment="#>")
+```
+
+
+tidymodelsを使ったモデリングにおいて、recipesパッケージは特徴量エンジニアリングを担います。
+従来、recipesパッケージは単体で、特徴量抽エンジニアリング方法の
+
+1. **定義**
+    - `recipe`関数 + `step_*`関数群
+2. **学習**
+    - `prep`関数
+3. **適用**
+    - `bake`関数（汎用）
+    - `juice`関数（学習データ専用）
+
+の一連の流れを担っていました。
+学習と適用の分割は、テストへのリークが発生対策です。
+標準化やPCAを行うとして、そのパラメータは学習データから決めようというわけですね。
+しかし、学習と適用はworkflowsパッケージに任せるのが最新式なようです。
+
+
+> If you are using a recipe as a preprocessor for modeling, we **highly recommend** that you use a `workflow()` instead of manually estimating a recipe (see the example in [recipe()]).
+> [2021-06-29の更新](https://github.com/tidymodels/recipes/blame/39bc4e8b0084bcdbaf3844be9cc00762510f49ab/R/recipe.R#L284>)
+
+これは早急にworkflowsの使い方を学ばねばなりませんね。
+と思って使い方を書き始めたのですが、どうにもバグがある気がします……。
+どうもrecipesパッケージ単体を使った場合と結果が違います。
+
+# tidymodelsを使って線型モデルを学習する例
+
+基本の流れはこんな感じ。
+
+1. 訓練データとテストデータの分割方法の**定義**と**実行**（rsampleパッケージ）
+2. 前処理方法の**定義**（recipesパッケージ）
+3. モデルの**定義**（parsnipパッケージ）
+4. 前処理・モデルの統合と**実行**（workflowsパッケージ）
+
+なんとなくですが、詳細な定義はrecipesやparsnipでやって、実行はworkflowsっていう流れみたいです。
+将来的には、2値分類の閾値変更などの後処理も担うそうです。
+一方でデータの分割は実行も自身でやるのが気になるところですが、今のところ、workflowsパッケージが分割の実行を担うことはなさそうです（[検索結果](https://github.com/tidymodels/workflows/search?q=rsample+is%3Apr&type=issues)）。
+
+```{r}
+library(magrittr)
+
+set.seed(1L)
+
+# データの分割
+split <- ggplot2::diamonds %>%
+  dplyr::select(where(is.numeric)) %>%
+  rsample::initial_split(prop = .9)
+training_data <-rsample::training(split)
+testing_data <- rsample::testing(split)
+
+# 特徴量エンジニアリング方法の定義
+preprocessor <- recipes::recipe(training_data, price ~ .) %>%
+  recipes::step_center(recipes::all_numeric_predictors()) %>%
+  recipes::step_scale(recipes::all_numeric_predictors())
+
+# モデルの定義
+spec <- parsnip::linear_reg() %>%
+  parsnip::set_engine("lm")
+
+# ワークフローの定義
+wf <- workflows::workflow() %>%
+  workflows::add_recipe(preprocessor) %>%
+  workflows::add_model(spec)
+
+# ワークフローの学習
+trained <- generics::fit(wf, training_data)
+```
+
+ワークフローに特徴量エンジニアリングとモデリングの両方を追加していますが、
+どちらか一方でもいいですし、順序も問いません。
+自動的に特徴量エンジニアリング、モデリングの順になります。
+
+学習に使った`generics::fit`関数は内部的には`workflows:::fit.workflow`を呼んでいます。
+tidymodelsにおいてはparsnipパッケージが`fit`関数をエクスポートしていて、`parsnip::fit`関数でも同様に処理できます。
+しかし、workflowsパッケージとparsnipパッケージの役割が混ざるので、genericsパッケージから呼びました。
+workflowsパッケージに`fit`をエクスポートしてもらった方がいい気がしますね。
+
+# 学習結果の調査
+
+tidy関数を使うとモデルの学習結果や、特徴量エンジニアリングの概要を見れます。
+
+```{r}
+# 学習結果
+broom::tidy(trained, "model")
+
+# 特徴量エンジニアリングの概要
+broom::tidy(trained, "recipe")
+```
+
+特徴量エンジニアリングについて詳しく見たい場合は`workflows::pull_workflow_preprocessor`関数を使うらしい。
+返り値はrecipeクラスオブジェクト。
+
+```{r}
+workflows::pull_workflow_preprocessor(trained) %>% class
+```
+というわけで従来、recipesパッケージでやっていたように、`broom::tidy`関数で`id`引数を指定してやれば、
+たとえば中心化に使ったパラメータ（訓練データの各特徴量の平均値）が見れるはず。
+
+```{r}
+workflows::pull_workflow_preprocessor(trained) %>%
+  broom::tidy(id = "center_bZ3xW")
+```
+あれ……？
+なんか`recipes::prep`関数で学習した結果と違いますね……。
+
+```{r}
+preprocessor %>%
+  recipes::prep() %>%
+  broom::tidy(id = "center_bZ3xW")
+```
+# Session Info
+
+
+```{r}
+sessioninfo::session_info(c("recipes", "parsnip", "workflows"))
+```
+

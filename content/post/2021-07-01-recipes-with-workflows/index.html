@@ -1,0 +1,191 @@
+---
+title: tidymodelsのrecipesパッケージがworkflowsパッケージの使用を推奨し始めたがまだやめておいた方がいい
+author: ''
+date: '2021-07-01'
+slug: tidymodels
+categories: [R]
+tags: [tidymodels, recipes, parsnip, workflows]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p>tidymodelsを使ったモデリングにおいて、recipesパッケージは特徴量エンジニアリングを担います。従来、recipesパッケージは単体で、特徴量抽エンジニアリング方法の</p>
+<ol style="list-style-type: decimal">
+<li><strong>定義</strong>
+<ul>
+<li><code>recipe</code>関数 + <code>step_*</code>関数群</li>
+</ul></li>
+<li><strong>学習</strong>
+<ul>
+<li><code>prep</code>関数</li>
+</ul></li>
+<li><strong>適用</strong>
+<ul>
+<li><code>bake</code>関数（汎用）</li>
+<li><code>juice</code>関数（学習データ専用）</li>
+</ul></li>
+</ol>
+<p>の一連の流れを担っていました。学習と適用の分割は、テストへのリークが発生対策です。標準化やPCAを行うとして、そのパラメータは学習データから決めようというわけですね。しかし、学習と適用はworkflowsパッケージに任せるのが最新式なようです。</p>
+<blockquote>
+<p>If you are using a recipe as a preprocessor for modeling, we <strong>highly recommend</strong> that you use a <code>workflow()</code> instead of manually estimating a recipe (see the example in [recipe()]).
+<a href="https://github.com/tidymodels/recipes/blame/39bc4e8b0084bcdbaf3844be9cc00762510f49ab/R/recipe.R#L284%3E">2021-06-29の更新</a></p>
+</blockquote>
+<p>これは早急にworkflowsの使い方を学ばねばなりませんね。と思って使い方を書き始めたのですが、どうにもバグがある気がします……。どうもrecipesパッケージ単体を使った場合と結果が違います。</p>
+<div id="tidymodelsを使って線型モデルを学習する例" class="section level1">
+<h1>tidymodelsを使って線型モデルを学習する例</h1>
+<p>基本の流れはこんな感じ。</p>
+<ol style="list-style-type: decimal">
+<li>訓練データとテストデータの分割方法の<strong>定義</strong>と<strong>実行</strong>（rsampleパッケージ）</li>
+<li>前処理方法の<strong>定義</strong>（recipesパッケージ）</li>
+<li>モデルの<strong>定義</strong>（parsnipパッケージ）</li>
+<li>前処理・モデルの統合と<strong>実行</strong>（workflowsパッケージ）</li>
+</ol>
+<p>なんとなくですが、詳細な定義はrecipesやparsnipでやって、実行はworkflowsっていう流れみたいです。将来的には、2値分類の閾値変更などの後処理も担うそうです。一方でデータの分割は実行も自身でやるのが気になるところですが、今のところ、workflowsパッケージが分割の実行を担うことはなさそうです（<a href="https://github.com/tidymodels/workflows/search?q=rsample+is%3Apr&amp;type=issues">検索結果</a>）。</p>
+<pre class="r"><code>library(magrittr)
+
+set.seed(1L)
+
+# データの分割
+split &lt;- ggplot2::diamonds %&gt;%
+  dplyr::select(where(is.numeric)) %&gt;%
+  rsample::initial_split(prop = .9)
+training_data &lt;-rsample::training(split)
+testing_data &lt;- rsample::testing(split)
+
+# 特徴量エンジニアリング方法の定義
+preprocessor &lt;- recipes::recipe(training_data, price ~ .) %&gt;%
+  recipes::step_center(recipes::all_numeric_predictors()) %&gt;%
+  recipes::step_scale(recipes::all_numeric_predictors())
+
+# モデルの定義
+spec &lt;- parsnip::linear_reg() %&gt;%
+  parsnip::set_engine(&quot;lm&quot;)
+
+# ワークフローの定義
+wf &lt;- workflows::workflow() %&gt;%
+  workflows::add_recipe(preprocessor) %&gt;%
+  workflows::add_model(spec)
+
+# ワークフローの学習
+trained &lt;- generics::fit(wf, training_data)</code></pre>
+<p>ワークフローに特徴量エンジニアリングとモデリングの両方を追加していますが、どちらか一方でもいいですし、順序も問いません。自動的に特徴量エンジニアリング、モデリングの順になります。</p>
+<p>学習に使った<code>generics::fit</code>関数は内部的には<code>workflows:::fit.workflow</code>を呼んでいます。
+tidymodelsにおいてはparsnipパッケージが<code>fit</code>関数をエクスポートしていて、<code>parsnip::fit</code>関数でも同様に処理できます。しかし、workflowsパッケージとparsnipパッケージの役割が混ざるので、genericsパッケージから呼びました。
+workflowsパッケージに<code>fit</code>をエクスポートしてもらった方がいい気がしますね。</p>
+</div>
+<div id="学習結果の調査" class="section level1">
+<h1>学習結果の調査</h1>
+<p>tidy関数を使うとモデルの学習結果や、特徴量エンジニアリングの概要を見れます。</p>
+<pre class="r"><code># 学習結果
+broom::tidy(trained, &quot;model&quot;)
+#&gt; # A tibble: 7 x 5
+#&gt;   term        estimate std.error statistic   p.value
+#&gt;   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+#&gt; 1 (Intercept)   3928.       6.76    581.   0        
+#&gt; 2 carat         5067.      31.3     162.   0        
+#&gt; 3 depth         -294.       8.18    -36.0  6.99e-280
+#&gt; 4 table         -229.       7.23    -31.8  4.01e-219
+#&gt; 5 x            -1474.      49.0     -30.1  7.82e-197
+#&gt; 6 y               60.4     29.1       2.07 3.80e-  2
+#&gt; 7 z               34.3     31.2       1.10 2.71e-  1
+
+# 特徴量エンジニアリングの概要
+broom::tidy(trained, &quot;recipe&quot;)
+#&gt; # A tibble: 2 x 6
+#&gt;   number operation type   trained skip  id          
+#&gt;    &lt;int&gt; &lt;chr&gt;     &lt;chr&gt;  &lt;lgl&gt;   &lt;lgl&gt; &lt;chr&gt;       
+#&gt; 1      1 step      center TRUE    FALSE center_bZ3xW
+#&gt; 2      2 step      scale  TRUE    FALSE scale_pTXgd</code></pre>
+<p>特徴量エンジニアリングについて詳しく見たい場合は<code>workflows::pull_workflow_preprocessor</code>関数を使うらしい。返り値はrecipeクラスオブジェクト。</p>
+<pre class="r"><code>workflows::pull_workflow_preprocessor(trained) %&gt;% class
+#&gt; [1] &quot;recipe&quot;</code></pre>
+<p>というわけで従来、recipesパッケージでやっていたように、<code>broom::tidy</code>関数で<code>id</code>引数を指定してやれば、たとえば中心化に使ったパラメータ（訓練データの各特徴量の平均値）が見れるはず。</p>
+<pre class="r"><code>workflows::pull_workflow_preprocessor(trained) %&gt;%
+  broom::tidy(id = &quot;center_bZ3xW&quot;)
+#&gt; # A tibble: 1 x 3
+#&gt;   terms                             value id          
+#&gt;   &lt;chr&gt;                             &lt;dbl&gt; &lt;chr&gt;       
+#&gt; 1 recipes::all_numeric_predictors()    NA center_bZ3xW</code></pre>
+<p>あれ……？なんか<code>recipes::prep</code>関数で学習した結果と違いますね……。</p>
+<pre class="r"><code>preprocessor %&gt;%
+  recipes::prep() %&gt;%
+  broom::tidy(id = &quot;center_bZ3xW&quot;)
+#&gt; # A tibble: 6 x 3
+#&gt;   terms  value id          
+#&gt;   &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;       
+#&gt; 1 carat  0.798 center_bZ3xW
+#&gt; 2 depth 61.8   center_bZ3xW
+#&gt; 3 table 57.5   center_bZ3xW
+#&gt; 4 x      5.73  center_bZ3xW
+#&gt; 5 y      5.73  center_bZ3xW
+#&gt; 6 z      3.54  center_bZ3xW</code></pre>
+</div>
+<div id="session-info" class="section level1">
+<h1>Session Info</h1>
+<pre class="r"><code>sessioninfo::session_info(c(&quot;recipes&quot;, &quot;parsnip&quot;, &quot;workflows&quot;))
+#&gt; ─ Session info ───────────────────────────────────────────────────────────────
+#&gt;  setting  value                       
+#&gt;  version  R version 4.1.0 (2021-05-18)
+#&gt;  os       Ubuntu 20.04.2 LTS          
+#&gt;  system   x86_64, linux-gnu           
+#&gt;  ui       X11                         
+#&gt;  language (EN)                        
+#&gt;  collate  en_US.UTF-8                 
+#&gt;  ctype    en_US.UTF-8                 
+#&gt;  tz       Etc/UTC                     
+#&gt;  date     2021-07-01                  
+#&gt; 
+#&gt; ─ Packages ───────────────────────────────────────────────────────────────────
+#&gt;  package     * version     date       lib source                               
+#&gt;  class         7.3-19      2021-05-03 [2] CRAN (R 4.1.0)                       
+#&gt;  cli           2.5.0       2021-04-26 [1] RSPM (R 4.1.0)                       
+#&gt;  codetools     0.2-18      2020-11-04 [2] CRAN (R 4.1.0)                       
+#&gt;  cpp11         0.3.1       2021-06-25 [1] RSPM (R 4.1.0)                       
+#&gt;  crayon        1.4.1       2021-02-08 [1] RSPM (R 4.1.0)                       
+#&gt;  dplyr         1.0.7       2021-06-18 [1] RSPM (R 4.1.0)                       
+#&gt;  ellipsis      0.3.2       2021-04-29 [1] RSPM (R 4.1.0)                       
+#&gt;  fansi         0.5.0       2021-05-25 [1] RSPM (R 4.1.0)                       
+#&gt;  generics      0.1.0       2020-10-31 [1] RSPM (R 4.1.0)                       
+#&gt;  globals       0.14.0      2020-11-22 [1] RSPM (R 4.1.0)                       
+#&gt;  glue          1.4.2       2020-08-27 [1] RSPM (R 4.1.0)                       
+#&gt;  gower         0.2.2       2020-06-23 [1] RSPM (R 4.1.0)                       
+#&gt;  hardhat       0.1.5       2020-11-09 [1] RSPM (R 4.1.0)                       
+#&gt;  ipred         0.9-11      2021-03-12 [1] RSPM (R 4.1.0)                       
+#&gt;  KernSmooth    2.23-20     2021-05-03 [2] CRAN (R 4.1.0)                       
+#&gt;  lattice       0.20-44     2021-05-02 [2] CRAN (R 4.1.0)                       
+#&gt;  lava          1.6.9       2021-03-11 [1] RSPM (R 4.1.0)                       
+#&gt;  lifecycle     1.0.0       2021-02-15 [1] RSPM (R 4.1.0)                       
+#&gt;  lubridate     1.7.10      2021-02-26 [1] RSPM (R 4.1.0)                       
+#&gt;  magrittr    * 2.0.1       2020-11-17 [1] RSPM (R 4.1.0)                       
+#&gt;  MASS          7.3-54      2021-05-03 [2] CRAN (R 4.1.0)                       
+#&gt;  Matrix        1.3-3       2021-05-04 [2] CRAN (R 4.1.0)                       
+#&gt;  nnet          7.3-16      2021-05-03 [2] CRAN (R 4.1.0)                       
+#&gt;  numDeriv      2016.8-1.1  2019-06-06 [1] RSPM (R 4.1.0)                       
+#&gt;  parsnip       0.1.6.9000  2021-07-01 [1] Github (tidymodels/parsnip@89f8f93)  
+#&gt;  pillar        1.6.1       2021-05-16 [1] RSPM (R 4.1.0)                       
+#&gt;  pkgconfig     2.0.3       2019-09-22 [1] RSPM (R 4.1.0)                       
+#&gt;  prettyunits   1.1.1       2020-01-24 [1] RSPM (R 4.1.0)                       
+#&gt;  prodlim       2019.11.13  2019-11-17 [1] RSPM (R 4.1.0)                       
+#&gt;  purrr         0.3.4       2020-04-17 [1] RSPM (R 4.1.0)                       
+#&gt;  R6            2.5.0       2020-10-28 [1] RSPM (R 4.1.0)                       
+#&gt;  Rcpp          1.0.6       2021-01-15 [1] RSPM (R 4.1.0)                       
+#&gt;  recipes       0.1.16.9000 2021-07-01 [1] Github (tidymodels/recipes@39bc4e8)  
+#&gt;  rlang         0.4.11      2021-04-30 [1] RSPM (R 4.1.0)                       
+#&gt;  rpart         4.1-15      2019-04-12 [2] CRAN (R 4.1.0)                       
+#&gt;  SQUAREM       2021.1      2021-01-13 [1] RSPM (R 4.1.0)                       
+#&gt;  survival      3.2-11      2021-04-26 [2] CRAN (R 4.1.0)                       
+#&gt;  tibble        3.1.2       2021-05-16 [1] RSPM (R 4.1.0)                       
+#&gt;  tidyr         1.1.3       2021-03-03 [1] RSPM (R 4.1.0)                       
+#&gt;  tidyselect    1.1.1       2021-04-30 [1] RSPM (R 4.1.0)                       
+#&gt;  timeDate      3043.102    2018-02-21 [1] RSPM (R 4.1.0)                       
+#&gt;  utf8          1.2.1       2021-03-12 [1] RSPM (R 4.1.0)                       
+#&gt;  vctrs         0.3.8       2021-04-29 [1] RSPM (R 4.1.0)                       
+#&gt;  withr         2.4.2       2021-04-18 [1] RSPM (R 4.1.0)                       
+#&gt;  workflows     0.2.2.9000  2021-07-01 [1] Github (tidymodels/workflows@8ad5a9d)
+#&gt; 
+#&gt; [1] /usr/local/lib/R/site-library
+#&gt; [2] /usr/local/lib/R/library</code></pre>
+</div>
