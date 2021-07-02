@@ -1,6 +1,6 @@
 baseurl = "https://blog.atusy.net/"
 relativeurls = true
-publishDir = "netlify"
+publishDir = "public"
 hasCJKLanguage = true
 languageCode = "ja-jp"
 title = "Atusy's blog"
