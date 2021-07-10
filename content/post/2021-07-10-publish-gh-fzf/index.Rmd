@@ -1,0 +1,61 @@
+---
+title: GitHub CLI（`gh`）に曖昧検索の力を加えるghfコマンドを作ってzshプラグイン化した
+author: ''
+date: '2021-07-10'
+slug: publish-gh-fzf
+categories: [shell, git]
+tags: [gh, fzf]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+端末上でレポジトリやissueを曖昧検索して内容をプレビューし、確定したらブラウザで開くなどの操作ができる`ghf`コマンドを作りました。
+
+詳しい利用方法やインストール方法は→<https://github.com/atusy/gh-fzf>。
+zshプラグイン化しているのでzinitなどのユーザーは導入しやすいと思います。
+
+下図のように`ghf repo`とか`ghf issue`とかすると検索が始まってブラウザを開けます。
+
+![`ghf repo --public`の実行結果。](https://raw.githubusercontent.com/atusy/gh-fzf/master/demo.gif){style="width:100%"}
+
+
+GitHub CLIの`gh`コマンドはターミナルからレポジトリやissue、PRを操作できる便利なプログラムです。
+ただ、あのissueのページ開きたいけどなんだったっけ……となると、
+
+- `gh issue list`でissue一覧を確認。目的のissueの番号を記録
+- `gh issue view`にissue番号を与えて内容を見る
+- 必要なら`gh issue view --web`でブラウザを開く、`close`、`reopen`などの操作を追加する
+
+といった処理が必要です。
+しかもissue listではissueのタイトルくらいしか見れないし、検索も面倒……。
+
+そこでfzfを組み合わせると曖昧検索したり、内容をpreviewしたり、色々できるようになります。
+で、できたのが先のデモ動画です。
+
+デフォルトでは`gh repo`、`gh issue`などとするとサブコマンドのヘルプが表示されますが、
+`list`を曖昧検索してブラウザで開くようにパワーアップさせました。
+元のヘルプを見たい場合も`gh repo --help`すればいいので、不都合はないと思います。
+
+また、ブラウザで開く以外にも、検索したレポジトリをクローンしたいとか、PRをマージしたいといった場合もあるかと思います。
+そんな場合用に、`gh repo fzf`といった形で、`fzf`サブサブコマンドを追加しました。
+`list`サブサブコマンドと同じ引数を受け付けるので、以下のようにrstudioのレポジトリを検索してクローン、みたいな使い方ができます。
+
+```bash
+# rstudioのレポジトリを検索してクローン
+ghf repo fzf rstudio | ghf repo clone
+```
+
+また、`ghf`コマンドの動作は`gh`コマンドと整合的なので、以下のようにエイリアスを貼ってしまっても便利だと思います。
+
+```bash
+alias gh=ghf
+```
+
+最後に、今回の開発は**はす**さんの記事に影響を受けています。
+
+> 生産性向上間違いなし!!fzfを使ったコマンド効率化tips \
+> https://zenn.dev/hasu_83/articles/4eacd5f0f701fcf16087
+
+また、vim-jpのslackではMillyさんに叩き台のソースコードに対して色々と御助言頂きました。
+この場をお借りして皆さんに感謝申し上げます。
