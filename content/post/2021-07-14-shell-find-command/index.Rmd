@@ -1,0 +1,89 @@
+---
+title: シェルでエイリアスを無視してコマンドを見つける
+author: ''
+date: '2021-07-14'
+slug: shell-find-command
+categories: [shell]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+
+```{bash, eval=FALSE}
+CMD="foo"
+echo "$(
+  unalias $CMD &> /dev/null
+  command -v $CMD
+)"
+```
+
+でいい。
+
+# 詳細
+
+POSIXには`command`コマンドがあり、引数を**コマンドとして**実行してくれます。
+
+
+```{bash}
+command git config --get user.name
+```
+
+
+aliasを無視してくれる点が魅力ですね。
+
+じゃあこの`git`コマンドはどこにあるの？と思ったら`-v`オプションをつけます。
+
+```{bash}
+command -v git
+```
+
+ただし、エイリアスを設定している場合はそうもいきません。
+
+```{bash, echo=-1}
+shopt -s expand_aliases
+alias git=foo
+command -v git
+```
+
+`-p`オプションをつけると、デフォルトのサーチパスからコマンドを探してくれるのでよさげですが、
+bashではうまくいきません。
+zshならエイリアスを無視してくれますが、ユーザーが追加したサーチパスを無視してしまいます。
+たとえば`git`コマンドが`/home/user/.local/bin/git`にあると見つかりません。
+
+```{bash, echo=-1}
+shopt -s expand_aliases
+alias git=foo
+command -p -v git
+```
+
+無難な解決方法はエイリアスを一時解除することでしょう。
+サブシェルでできます。
+もしもエイリアスがなくても機能するように、`unalias git &> /dev/null`としてアンエイリアスした時の結果をすべて`/dev/null`にリダイレクトしてしまうといいでしょう。
+
+```{bash, echo=-1}
+shopt -s expand_aliases
+alias git=foo
+
+# サブシェルでエイリアスを一時解除してコマンドを探す
+echo "$(
+  unalias git &> /dev/null
+  command -v git
+)"
+```
+
+ちなみにですが、bashを`-c`で呼びつつエイリアスも使うには
+
+```bash
+shopt -s expand_aliases
+```
+
+を実行しておくみたいです。
+この記事をR Markdownで書いたところ、エイリアスが展開されなくて困って解決策を探しました。
+
+

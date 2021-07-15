@@ -1,0 +1,53 @@
+---
+title: シェルでエイリアスを無視してコマンドを見つける
+author: ''
+date: '2021-07-14'
+slug: shell-find-command
+categories: [shell]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+
+
+<pre class="bash"><code>CMD=&quot;foo&quot;
+echo &quot;$(
+  unalias $CMD &amp;&gt; /dev/null
+  command -v $CMD
+)&quot;</code></pre>
+<p>でいい。</p>
+<div id="詳細" class="section level1">
+<h1>詳細</h1>
+<p>POSIXには<code>command</code>コマンドがあり、引数を<strong>コマンドとして</strong>実行してくれます。</p>
+<pre class="bash"><code>command git config --get user.name
+#&gt; atusy</code></pre>
+<p>aliasを無視してくれる点が魅力ですね。</p>
+<p>じゃあこの<code>git</code>コマンドはどこにあるの？と思ったら<code>-v</code>オプションをつけます。</p>
+<pre class="bash"><code>command -v git
+#&gt; /usr/bin/git</code></pre>
+<p>ただし、エイリアスを設定している場合はそうもいきません。</p>
+<pre class="bash"><code>alias git=foo
+command -v git
+#&gt; alias git=&#39;foo&#39;</code></pre>
+<p><code>-p</code>オプションをつけると、デフォルトのサーチパスからコマンドを探してくれるのでよさげですが、
+bashではうまくいきません。
+zshならエイリアスを無視してくれますが、ユーザーが追加したサーチパスを無視してしまいます。たとえば<code>git</code>コマンドが<code>/home/user/.local/bin/git</code>にあると見つかりません。</p>
+<pre class="bash"><code>alias git=foo
+command -p -v git
+#&gt; alias git=&#39;foo&#39;</code></pre>
+<p>無難な解決方法はエイリアスを一時解除することでしょう。サブシェルでできます。もしもエイリアスがなくても機能するように、<code>unalias git &amp;&gt; /dev/null</code>としてアンエイリアスした時の結果をすべて<code>/dev/null</code>にリダイレクトしてしまうといいでしょう。</p>
+<pre class="bash"><code>alias git=foo
+
+# サブシェルでエイリアスを一時解除してコマンドを探す
+echo &quot;$(
+  unalias git &amp;&gt; /dev/null
+  command -v git
+)&quot;
+#&gt; /usr/bin/git</code></pre>
+<p>ちなみにですが、bashを<code>-c</code>で呼びつつエイリアスも使うには</p>
+<pre class="bash"><code>shopt -s expand_aliases</code></pre>
+<p>を実行しておくみたいです。この記事をR Markdownで書いたところ、エイリアスが展開されなくて困って解決策を探しました。</p>
+</div>
