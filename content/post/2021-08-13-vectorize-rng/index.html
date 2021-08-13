@@ -1,0 +1,42 @@
+---
+title: Rの乱数生成関数は一発で色んなパラメータの分布を作れるよ
+author: ''
+date: '2021-08-13'
+slug: vectorize-rng
+categories: [R]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>あまり知られていない事実かもしれませんが、Rで乱数を発生させる関数のパラメータはベクトル化されています。つまり、正規分布から3000個の乱数を作る時、1000個ごとに期待値を0、1、2と変えるようなことが簡単にできます。覚えておくとシミュレーションで乱数が必要な時に、関数呼び出しを一度に纏められて便利&amp;高速です。</p>
+<pre class="r"><code>random_number &lt;- rnorm(3000, mean = rep(c(0, 1, 2), each = 1000), sd = 1)
+colMeans(matrix(
+  random_number,
+  ncol = 3
+))</code></pre>
+<pre><code>## [1] 0.0008321393 1.0307477089 2.0387482607</code></pre>
+<p>ネ？</p>
+<p>もちろん、二項分布やポアソン分布でもそんなことができます。今度は二項分布の期待値が0, 1, 2な3パターンを生成してみます。二項分布の期待値は <code>size * prob</code> なので、この値が0, 1, 2になれば、size, probは任意です。というわけで、</p>
+<ul>
+<li>size: 1, 2, 20</li>
+<li>prob: 0, 0.5, 0.1</li>
+<li>size * prob: 0, 1, 2</li>
+</ul>
+<p>となるようにしてみましょう。</p>
+<pre class="r"><code>random_number &lt;-   rbinom(
+    3000,
+    size = rep(c(1, 2, 20), each = 1000),
+    prob = rep(c(0, 0.5, 0.1), each = 1000)
+)
+
+colMeans(matrix(
+  random_number,
+  ncol = 3
+))</code></pre>
+<pre><code>## [1] 0.000 1.006 2.033</code></pre>
+<p>ネ？</p>
