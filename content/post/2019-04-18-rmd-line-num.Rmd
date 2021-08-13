@@ -13,11 +13,11 @@ summary: |
 ---
 
 
-```{r kilometer, echo = FALSE}
+```{r kilometer, echo = FALSE, eval=FALSE}
 blogdown::shortcode("tweet", "1118680971992109056")
 ```
 
-ということで前から私も挑戦しては挫折していたことに再挑戦しました．
+前から私も挑戦しては挫折していたことに再挑戦しました．
 
 "[Pandoc User’s Guide](https://www.pandoc.org/MANUAL.html)" と 
 "[Rmarkdown Definitive Guide](https://bookdown.org/yihui/rmarkdown/)"
