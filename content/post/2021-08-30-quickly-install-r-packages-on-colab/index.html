@@ -1,0 +1,96 @@
+---
+title: Google ColabでRパッケージの再インストールを爆速にする
+author: ''
+date: '2021-08-30'
+slug: quickly-install-r-packages-on-colab
+categories: [R]
+tags: [Google Colab]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary:
+  "Google Driveを活用してtidymodelsパッケージの再インストールを5分から1秒に短縮した。"
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+
+
+<style type="text/css">
+.figure img {
+  width: 100%;
+}
+.caption {
+  font-size: 0.8em;
+  color: gray;
+}
+</style>
+<p>Google ColabでRを使う場合、パッケージのインストールに時間がかかるところが悩みのタネです。たとえばtidymodelsパッケージをインストールすると、それだけで5分かかります。一定時間が経過すると、ノートブックの実行環境が初期化されるため、何度も待ち時間が発生します。</p>
+<p>そこで今回はパッケージの再インストールを爆速にする方法を紹介します。愚直に再インストールするとtidymodelsパッケージなら再び5分かかるところが1秒ほどに短縮できます。</p>
+<p>おおまかな手順としては以下の通りです。ノートブックの内容詳細とスクショを後述します。</p>
+<ol style="list-style-type: decimal">
+<li><a href="#install">パッケージインストール専用のノートブック</a>
+<ol style="list-style-type: decimal">
+<li><code>.libPaths("library")</code>などとして、空のディレクトリを追加パッケージのインストール先に設定する</li>
+<li>パッケージをインストールする</li>
+<li><code>tar("library.tar.gz", "library")</code>などとして、パッケージをインストールしたディレクトリを圧縮ファイルにする</li>
+<li>圧縮ファイルをダウンロードする</li>
+</ol></li>
+<li>Google Drive
+<ol style="list-style-type: decimal">
+<li>圧縮ファイルをGoogle Driveにアップロードする</li>
+<li>圧縮ファイルのダウンロードリンクを取得する
+<ul>
+<li>「リンクを知っている人全員」にアクセスを許可する</li>
+<li>リンクを他者に共有する場合、ライセンスの問題を各自で解決すること</li>
+</ul></li>
+</ol></li>
+<li><a href="#analysis">分析用ノートブック</a>
+<ol style="list-style-type: decimal">
+<li>シェルスクリプトを使ってGoogle Drive上の圧縮ファイルをダウンロード・展開する</li>
+<li><code>.libPaths("library")</code>などとして展開したディレクトリからパッケージを読み込めるようにする</li>
+<li><code>library(tidymodels)</code>などとしてパッケージを読み込み</li>
+</ol></li>
+</ol>
+<div id="install" class="section level1">
+<h1>パッケージインストール専用のノートブック</h1>
+<div class="figure">
+<img src="install-first.png" alt="" />
+<p class="caption">パッケージを始めてインストールする時の方法。tidymodelsのインストールに5分以上かかっているところに注目。</p>
+</div>
+<p>まず、以下のコードを実行して、Colab上でRを実行可能にしておきましょう。加えてパッケージのインストール先となる <code>library</code> ディレクトリを作成します。</p>
+<pre><code>%load_ext rpy2.ipython
+!mkdir library</code></pre>
+<p>次にパッケージのインストールと<code>library</code>ディレクトリの圧縮を行います。
+<code>%load_ext rpy2.ipython</code>コマンドでRを利用可能にした場合、R言語のセルは冒頭に<code>%%R</code>が必要な点に注意してください。</p>
+<pre class="r"><code>%%R
+.libPaths(&quot;library&quot;)
+install.packages(&#39;tidymodels&#39;)
+tar(&quot;library.tar.gz&quot;, &quot;library&quot;)</code></pre>
+<p><code>library.tar.gz</code>ファイルは、Colabの左にあるメニューのファイル一覧からダウンロードしてください。</p>
+</div>
+<div id="分析用ノートブック" class="section level1">
+<h1>分析用ノートブック</h1>
+<div class="figure">
+<img src="install-redo.png" alt="" />
+<p class="caption">再インストール方法。tidymodelsパッケージのインストールが1秒ほどで終わっている。Google Driveで取得したリンクのファイルID部分は黒塗りにした。</p>
+</div>
+<p>まずは「<a href="https://qiita.com/IsHYuhi/items/e4afc0163019343d9664">DriveのURLからデータを直接ダウンロード</a>」を参考に
+Google Drive上にあるインストールしたパッケージを圧縮したファイルを入手し、このノートブック上で使えるようにします。</p>
+<p>Google Driveで取得した共有用URL、ファイルIDを取得します。
+URLは以下のような形式になっているはずで、<code>&lt;file_id&gt;</code>に相当する文字列部分がファイルIDです</p>
+<pre><code>https://drive.google.com/file/d/&lt;file_id&gt;/view?usp=sharing</code></pre>
+<p>そして、セルに以下のシェルスクリプトを記述します。この時、<code>FILE_ID</code>変数に先ほど取得したファイルIDを代入してください。値は二重引用符で囲う点と、変数名と値の間の<code>=</code>にはスペースを挟まない点に注意してください。</p>
+<pre class="bash"><code>%%shell
+FILE_ID=&quot;&lt;file_id&gt;&quot;
+URL=&quot;https://drive.google.com/uc?export=download&amp;id=${FILE_ID}&quot;
+curl -sc /tmp/cookie $URL &gt; /dev/null
+CODE=&quot;$(awk &#39;/_warning_/ {print $NF}&#39; /tmp/cookie)&quot;
+curl -Lb /tmp/cookie &quot;https://drive.google.com/uc?export=download&amp;confirm=${CODE}&amp;id=${FILE_ID}&quot; -o library.tar.gz
+tar xzf library.tar.gz</code></pre>
+<p>これを実行すると、<code>library</code>ディレクトリが展開され、中に別のノートブックでインストールしたパッケージが詰め込まれています。</p>
+<p>あとはRを利用可能な状態にするセルを実行し、<code>library</code>ディレクトリから必要なパッケージを読み込みます。</p>
+<pre><code>%load_ext rpy2.ipython</code></pre>
+<pre class="r"><code>%%R
+.libPaths(&quot;library&quot;)
+library(tidyverse)</code></pre>
+</div>
