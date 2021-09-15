@@ -1,0 +1,191 @@
+---
+title: ブランチをディレクトリに割り当つつGit管理対象外ファイルも同期するgit worksyncを作った
+author: ''
+date: '2021-09-15'
+slug: git-worksync-1-0-0
+categories: [Git]
+tags: [Bash]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+    toc: true
+summary: |
+  ブランチごとに別ディレクトリで簡単に作業できる`git worksync`コマンドを作りました。
+  .gitignoreに入っているファイルや、git addしていないファイルも良い感じに同期できます。
+  .venvとかdataとかGitで管理したくないけど、なくてはならないディレクトリをいつもあなたの傍に。
+---
+
+```{bash prep, include=FALSE, error=TRUE}
+rm -rf repo* work*
+echo -e "repo*\nworktree*" > ".gitignore"
+if dpkg -l python3.8-venv > 2&> /dev/null
+then
+  echo ""
+else
+  sudo apt-get update
+  sudo apt-get install python3.8-venv -y
+fi
+```
+
+バージョン管理ソフトGitには`git worktree`コマンドがあり、
+これを使うとディレクトリ単位で作業ブランチを切り替られます。
+
+`git switch`コマンドでブランチを切り替えてしまうと、今いるディレクトリの内容が別のブランチの内容に切り替わります。
+これでは複数のブランチのソースコードを実行して結果を比較したい時などに不便です。
+ブランチごとにディレクトリが違えばそういった比較が簡単ですね。
+
+ただし、`git worktree`を使ってブランチを切り替えると、新しいディレクトリにはGitでバージョン管理したものしか存在しません。
+ということは、
+
+- Pythonのvenvで作った仮想環境がなくてパッケージを読み込めない
+- バージョン管理するにはデカ過ぎるdataディレクトリをコードが正しく参照できない
+
+といった事態が発生します。困りますね。
+
+そこで`git worksync`コマンドを作りました。
+従来の`git worktree`コマンドと比較してみましょう。
+
+今のところはmacOS、Linuxで動作します。
+将来的にはGo言語あたりで書き直してWindowsにも対応したいなと思います。
+
+# レポジトリ初期化
+
+まず、適当なディレクトリで
+
+1. レポジトリ初期化
+2. Python用仮想環境を生成。仮想環境はGit管理対象外にする。
+3. 仮想環境起動にtomlパッケージをインストールしバージョンを確認
+
+という手順を踏んでみます。
+
+```{bash echo=-1}
+rm -rf repo* work*
+# 1. レポジトリ初期化
+mkdir -p repo
+cd repo
+git init --quiet
+
+# 2. Python用仮想環境を生成。Git管理対象外にする。
+python3 -m venv .venv
+echo .venv > .gitignore
+git add .gitignore
+git commit --quiet -m "ignore .venv"
+
+# 3. 仮想環境起動にtomlパッケージをインストールしバージョンを確認
+source .venv/bin/activate
+pip3 --quiet install "toml==0.10.2"
+python -c "import toml; print('toml', toml.__version__)"
+```
+
+無事に**toml 0.10.2**をインストールできました。
+
+# ブランチを別ディレクトリに割り当て
+
+## `git worktree`編
+
+次に`git worktree`コマンドを使って、
+
+- **main**ブランチから派生した**worktree1**ブランチを作成
+- **worktree1**ブランチを同名のディレクトリに展開
+
+してみましょう。
+これには`git worktree add`コマンドを使い、引数には
+
+- ディレクトリのパス
+- ブランチ名
+
+の順に指定します。
+順番を覚えられないという人は、**worktree**という用語がGitでは作業ディレクトリのことを指すことを覚えておきましょう。
+コマンドが重視しているしているもの、すなわちディレクトリのパスが先です。
+
+worktreeを追加したら、そのディレクトリの中身を見てみます。
+`ls`コマンドに`-A`オプションをつけて、.から始まるファイルやディレクトリも表示しましょう。
+
+```{bash worktree-add, echo=-1}
+cd repo
+git branch worktree1 --quiet
+git worktree add ../worktree1 worktree1 --quiet
+ls -A ../worktree1
+```
+
+**.git**ディレクトリと**.gitignoer**ファイルが見えますね。
+しかし、`.venv`が足りません。
+これでは先程インストールした**toml**パッケージを利用できずに不便ですね。
+
+## `git worksync`編
+
+同じことを`git worksync`コマンドでやってみましょう。
+
+### インストール
+
+インストールするには、私のレポジトリから**git-worksync**ファイルをダウンロードして、パスの通っている場所に保存し、実行権限を付与します。
+
+https://github.com/atusy/git-worksync
+
+コマンドでやるなら↓のような感じ。
+`INSTALL_DIR`のところは適当に書き換えてください。
+
+```{bash install}
+INSTALL_DIR="/usr/local/bin"
+sudo wget -q https://raw.githubusercontent.com/atusy/git-worksync/main/git-worksync \
+  -O "${INSTALL_DIR}/git-worksync"
+sudo chmod +x "${INSTALL_DIR}/git-worksync"
+```
+
+インストールに成功すると、`git worksync`で コマンドのヘルプを表示できます。
+ファイル名は`git-worksync`だったのに`git worksync`でいいの？と思う方がいるかもしれませんが、
+`git`はサブコマンドを与えた時にハイフン区切りのコマンドを自動で探しにいってくれます。
+今回のように拡張コマンドを作成するときは`git-*`という名前にすると良い、覚えておきましょう。
+
+```{bash, eval=FALSE}
+git worksync
+```
+
+
+```{bash, echo=FALSE}
+git worksync 2>&1 | head
+echo "...省略"
+```
+
+ふむふむ、**untracked**（未追跡）や**ignored**（無視）なファイルなども良い感じにworktree間で同期してくれるみたいですね。
+
+### 実行
+
+試してみましょう。
+`git worktree add`コマンド由来の引数はすべてそのまま使えます。
+今度は`worktree2`ブランチを`worktree2`ディレクトリに展開します。
+で、展開した先のディレクトリを表示してみます。
+先のコードとほとんど変わりませんね。
+
+```{bash worksync, echo=-1}
+cd repo
+cd ../repo
+git branch worktree2 --quiet
+git worksync ../worktree2 worktree2 --quiet
+cd ../worktree2
+ls -A
+```
+
+お、今度は`.venv`もいます。
+ということは仮想環境を起動すればtomlパッケージを読み込めるはず。
+
+```{bash worksync-venv, echo=-1}
+cd worktree2
+source .venv/bin/activate
+python3 -c "import toml; print(toml.__version__)"
+```
+
+読み込めました！万歳！！
+
+# おわりに
+
+是非、使ってみて、バグ報告や機能の要望、★付けなどしてください。
+
+https://github.com/atusy/git-worksync
+
+もう少しオプションも紹介しようかと思いましたが、ヘルプ見てください。
+同期方法を色々と調整できます。
+
+丁度良い頃合いに夜半を過ぎたので、そろそろ寝るとします。
+この記事を書く間にバグに2つも気付けました。書いてよかったです。
+

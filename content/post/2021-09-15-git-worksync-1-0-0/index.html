@@ -1,0 +1,152 @@
+---
+title: ブランチをディレクトリに割り当つつGit管理対象外ファイルも同期するgit worksyncを作った
+author: ''
+date: '2021-09-15'
+slug: git-worksync-1-0-0
+categories: [Git]
+tags: [Bash]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+    toc: true
+summary: |
+  ブランチごとに別ディレクトリで簡単に作業できる`git worksync`コマンドを作りました。
+  .gitignoreに入っているファイルや、git addしていないファイルも良い感じに同期できます。
+  .venvとかdataとかGitで管理したくないけど、なくてはならないディレクトリをいつもあなたの傍に。
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+
+<div id="TOC">
+<ul>
+<li><a href="#レポジトリ初期化">レポジトリ初期化</a></li>
+<li><a href="#ブランチを別ディレクトリに割り当て">ブランチを別ディレクトリに割り当て</a>
+<ul>
+<li><a href="#git-worktree編"><code>git worktree</code>編</a></li>
+<li><a href="#git-worksync編"><code>git worksync</code>編</a>
+<ul>
+<li><a href="#インストール">インストール</a></li>
+<li><a href="#実行">実行</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#おわりに">おわりに</a></li>
+</ul>
+</div>
+
+<p>バージョン管理ソフトGitには<code>git worktree</code>コマンドがあり、これを使うとディレクトリ単位で作業ブランチを切り替られます。</p>
+<p><code>git switch</code>コマンドでブランチを切り替えてしまうと、今いるディレクトリの内容が別のブランチの内容に切り替わります。これでは複数のブランチのソースコードを実行して結果を比較したい時などに不便です。ブランチごとにディレクトリが違えばそういった比較が簡単ですね。</p>
+<p>ただし、<code>git worktree</code>を使ってブランチを切り替えると、新しいディレクトリにはGitでバージョン管理したものしか存在しません。ということは、</p>
+<ul>
+<li>Pythonのvenvで作った仮想環境がなくてパッケージを読み込めない</li>
+<li>バージョン管理するにはデカ過ぎるdataディレクトリをコードが正しく参照できない</li>
+</ul>
+<p>といった事態が発生します。困りますね。</p>
+<p>そこで<code>git worksync</code>コマンドを作りました。従来の<code>git worktree</code>コマンドと比較してみましょう。</p>
+<p>今のところはmacOS、Linuxで動作します。将来的にはGo言語あたりで書き直してWindowsにも対応したいなと思います。</p>
+<div id="レポジトリ初期化" class="section level1">
+<h1>レポジトリ初期化</h1>
+<p>まず、適当なディレクトリで</p>
+<ol style="list-style-type: decimal">
+<li>レポジトリ初期化</li>
+<li>Python用仮想環境を生成。仮想環境はGit管理対象外にする。</li>
+<li>仮想環境起動にtomlパッケージをインストールしバージョンを確認</li>
+</ol>
+<p>という手順を踏んでみます。</p>
+<pre class="bash"><code># 1. レポジトリ初期化
+mkdir -p repo
+cd repo
+git init --quiet
+
+# 2. Python用仮想環境を生成。Git管理対象外にする。
+python3 -m venv .venv
+echo .venv &gt; .gitignore
+git add .gitignore
+git commit --quiet -m &quot;ignore .venv&quot;
+
+# 3. 仮想環境起動にtomlパッケージをインストールしバージョンを確認
+source .venv/bin/activate
+pip3 --quiet install &quot;toml==0.10.2&quot;
+python -c &quot;import toml; print(&#39;toml&#39;, toml.__version__)&quot;</code></pre>
+<pre><code>## toml 0.10.2</code></pre>
+<p>無事に<strong>toml 0.10.2</strong>をインストールできました。</p>
+</div>
+<div id="ブランチを別ディレクトリに割り当て" class="section level1">
+<h1>ブランチを別ディレクトリに割り当て</h1>
+<div id="git-worktree編" class="section level2">
+<h2><code>git worktree</code>編</h2>
+<p>次に<code>git worktree</code>コマンドを使って、</p>
+<ul>
+<li><strong>main</strong>ブランチから派生した<strong>worktree1</strong>ブランチを作成</li>
+<li><strong>worktree1</strong>ブランチを同名のディレクトリに展開</li>
+</ul>
+<p>してみましょう。これには<code>git worktree add</code>コマンドを使い、引数には</p>
+<ul>
+<li>ディレクトリのパス</li>
+<li>ブランチ名</li>
+</ul>
+<p>の順に指定します。順番を覚えられないという人は、<strong>worktree</strong>という用語がGitでは作業ディレクトリのことを指すことを覚えておきましょう。コマンドが重視しているしているもの、すなわちディレクトリのパスが先です。</p>
+<p>worktreeを追加したら、そのディレクトリの中身を見てみます。
+<code>ls</code>コマンドに<code>-A</code>オプションをつけて、.から始まるファイルやディレクトリも表示しましょう。</p>
+<pre class="bash"><code>git branch worktree1 --quiet
+git worktree add ../worktree1 worktree1 --quiet
+ls -A ../worktree1</code></pre>
+<pre><code>## .git
+## .gitignore</code></pre>
+<p><strong>.git</strong>ディレクトリと<strong>.gitignoer</strong>ファイルが見えますね。しかし、<code>.venv</code>が足りません。これでは先程インストールした<strong>toml</strong>パッケージを利用できずに不便ですね。</p>
+</div>
+<div id="git-worksync編" class="section level2">
+<h2><code>git worksync</code>編</h2>
+<p>同じことを<code>git worksync</code>コマンドでやってみましょう。</p>
+<div id="インストール" class="section level3">
+<h3>インストール</h3>
+<p>インストールするには、私のレポジトリから<strong>git-worksync</strong>ファイルをダウンロードして、パスの通っている場所に保存し、実行権限を付与します。</p>
+<p><a href="https://github.com/atusy/git-worksync" class="uri">https://github.com/atusy/git-worksync</a></p>
+<p>コマンドでやるなら↓のような感じ。
+<code>INSTALL_DIR</code>のところは適当に書き換えてください。</p>
+<pre class="bash"><code>INSTALL_DIR=&quot;/usr/local/bin&quot;
+sudo wget -q https://raw.githubusercontent.com/atusy/git-worksync/main/git-worksync \
+  -O &quot;${INSTALL_DIR}/git-worksync&quot;
+sudo chmod +x &quot;${INSTALL_DIR}/git-worksync&quot;</code></pre>
+<p>インストールに成功すると、<code>git worksync</code>で コマンドのヘルプを表示できます。ファイル名は<code>git-worksync</code>だったのに<code>git worksync</code>でいいの？と思う方がいるかもしれませんが、
+<code>git</code>はサブコマンドを与えた時にハイフン区切りのコマンドを自動で探しにいってくれます。今回のように拡張コマンドを作成するときは<code>git-*</code>という名前にすると良い、覚えておきましょう。</p>
+<pre class="bash"><code>git worksync</code></pre>
+<pre><code>## `git worktree add` with synchronizing untracked/ignored resources.
+## Additional options are below.
+## 
+##   -i=, --ignored=     The applying method for the ignored (default: symbolic-link)
+##                       See METHODS section for the details.
+##   -u=, --untracked=   The applying method for the ignored (default: symbolic-link)
+##                       See METHODS section for the details.
+##   -s=, --symbolic=, --symbolic-link=&lt;path&gt;
+##                       Create symbolic link of a path.
+##                       Specify multiple times for the multiple paths.
+## ...省略</code></pre>
+<p>ふむふむ、<strong>untracked</strong>（未追跡）や<strong>ignored</strong>（無視）なファイルなども良い感じにworktree間で同期してくれるみたいですね。</p>
+</div>
+<div id="実行" class="section level3">
+<h3>実行</h3>
+<p>試してみましょう。
+<code>git worktree add</code>コマンド由来の引数はすべてそのまま使えます。今度は<code>worktree2</code>ブランチを<code>worktree2</code>ディレクトリに展開します。で、展開した先のディレクトリを表示してみます。先のコードとほとんど変わりませんね。</p>
+<pre class="bash"><code>cd ../repo
+git branch worktree2 --quiet
+git worksync ../worktree2 worktree2 --quiet
+cd ../worktree2
+ls -A</code></pre>
+<pre><code>## .git
+## .gitignore
+## .venv</code></pre>
+<p>お、今度は<code>.venv</code>もいます。ということは仮想環境を起動すればtomlパッケージを読み込めるはず。</p>
+<pre class="bash"><code>source .venv/bin/activate
+python3 -c &quot;import toml; print(toml.__version__)&quot;</code></pre>
+<pre><code>## 0.10.2</code></pre>
+<p>読み込めました！万歳！！</p>
+</div>
+</div>
+</div>
+<div id="おわりに" class="section level1">
+<h1>おわりに</h1>
+<p>是非、使ってみて、バグ報告や機能の要望、★付けなどしてください。</p>
+<p><a href="https://github.com/atusy/git-worksync" class="uri">https://github.com/atusy/git-worksync</a></p>
+<p>もう少しオプションも紹介しようかと思いましたが、ヘルプ見てください。同期方法を色々と調整できます。</p>
+<p>丁度良い頃合いに夜半を過ぎたので、そろそろ寝るとします。この記事を書く間にバグに2つも気付けました。書いてよかったです。</p>
+</div>
