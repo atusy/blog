@@ -1,0 +1,807 @@
+---
+title: PandocでPDFを作成する時に表の枠線を格子状にする
+author: ''
+date: '2021-09-22'
+slug: pandoc-partial-conversion-by-filter
+categories: [Pandoc]
+tags: [LaTeX, Lua, jq]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+    toc: true
+highlightjs:
+  - bash
+  - tex
+  - md
+  - lua
+  - json
+summary:
+  LuaフィルタからJSONフィルタを呼んで更にPandocを呼びます。辛い。
+  プリアンブルも必要。
+  R Markdownユーザーは素直にパッケージを使いましょう。
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+<link href="{{< blogdown/postref >}}index_files/tabwid/tabwid.css" rel="stylesheet" />
+
+<div id="TOC">
+<ul>
+<li><a href="#普通にmarkdown---latexしてみる">普通にMarkdown -&gt; LaTeXしてみる</a></li>
+<li><a href="#stack-exchangeの例は最近のpandocでは動かない">Stack Exchangeの例は最近のPandocでは動かない</a></li>
+<li><a href="#作戦">作戦</a></li>
+<li><a href="#実装">実装</a>
+<ul>
+<li><a href="#pandocフィルタで縦線を入れる">Pandocフィルタで縦線を入れる</a>
+<ul>
+<li><a href="#astの表だけをlatex化するluaフィルタ">ASTの表だけをLaTeX化するLuaフィルタ</a></li>
+<li><a href="#luaフィルタから受け取った部分的なドキュメントをlatex化して返すjsonフィルタ">Luaフィルタから受け取った部分的なドキュメントをLaTeX化して返すJSONフィルタ</a></li>
+<li><a href="#フィルタを使ってmarkdown---markdownしてみる">フィルタを使ってMarkdown -&gt; Markdownしてみる</a></li>
+</ul></li>
+<li><a href="#プリアンブルで横線を入れる">プリアンブルで横線を入れる</a></li>
+</ul></li>
+<li><a href="#実行">実行</a></li>
+<li><a href="#注意">注意</a>
+<ul>
+<li><a href="#画像を挿入できません">画像を挿入できません</a></li>
+<li><a href="#改行とかもできません">改行とかもできません</a></li>
+</ul></li>
+</ul>
+</div>
+
+<p><strong>R Markdownユーザーは素直にgtやflextable、huxtableなどのパッケージを使いましょう。</strong></p>
+<p>Pandoc’s Markdownで記述した表をPDFに出力すると、↓のような1行目の前後と最下部に横線の入った表になります。</p>
+<template id="dc9fd016-8360-4a31-9f92-c2c2c90b7bdf"><style>
+.tabwid table{
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  margin-top: 1.275em;
+  margin-bottom: 1.275em;
+  border-spacing: 0;
+  border-color: transparent;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+</style><div class="tabwid"><style>.cl-179772b8{border-collapse:collapse;}.cl-1792d28a{font-family:'DejaVu Sans';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-1792e270{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-1793070a{width:54pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-1793071e{width:54pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-17930728{width:54pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}</style><table class='cl-179772b8'>
+<thead><tr style="overflow-wrap:break-word;"><td class="cl-17930728"><p class="cl-1792e270"><span class="cl-1792d28a">foo</span></p></td><td class="cl-17930728"><p class="cl-1792e270"><span class="cl-1792d28a">bar</span></p></td></tr></thead><tbody><tr style="overflow-wrap:break-word;"><td class="cl-1793070a"><p class="cl-1792e270"><span class="cl-1792d28a">1</span></p></td><td class="cl-1793070a"><p class="cl-1792e270"><span class="cl-1792d28a">1</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-1793071e"><p class="cl-1792e270"><span class="cl-1792d28a">2</span></p></td><td class="cl-1793071e"><p class="cl-1792e270"><span class="cl-1792d28a">2</span></p></td></tr></tbody></table></div></template>
+<div class="flextable-shadow-host" id="574ac0d3-0c5b-4b8f-87d7-417ca4757401"></div>
+<script>
+var dest = document.getElementById("574ac0d3-0c5b-4b8f-87d7-417ca4757401");
+var template = document.getElementById("dc9fd016-8360-4a31-9f92-c2c2c90b7bdf");
+var caption = template.content.querySelector("caption");
+if(caption) {
+  caption.style.cssText = "display:block;text-align:center;";
+  var newcapt = document.createElement("p");
+  newcapt.appendChild(caption)
+  dest.parentNode.insertBefore(newcapt, dest.previousSibling);
+}
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+</script>
+
+<p>時には以下のような格子状の枠線がどうしても欲しい場合もあるでしょう。
+Pandocでやるにはどうすればいいのでしょうか？</p>
+<template id="36748fe2-f6fa-4bb6-8f90-f3663949fdb3"><style>
+.tabwid table{
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  margin-top: 1.275em;
+  margin-bottom: 1.275em;
+  border-spacing: 0;
+  border-color: transparent;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+</style><div class="tabwid"><style>.cl-17a38256{border-collapse:collapse;}.cl-179f768e{font-family:'DejaVu Sans';font-size:11pt;font-weight:bold;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-179f76b6{font-family:'DejaVu Sans';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-179f81ba{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-179f9fec{width:54pt;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 1pt solid rgba(102, 102, 102, 1.00);border-right: 1pt solid rgba(102, 102, 102, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-179fa000{width:54pt;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 1pt solid rgba(102, 102, 102, 1.00);border-left: 1pt solid rgba(102, 102, 102, 1.00);border-right: 1pt solid rgba(102, 102, 102, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}</style><table class='cl-17a38256'>
+<thead><tr style="overflow-wrap:break-word;"><td class="cl-179fa000"><p class="cl-179f81ba"><span class="cl-179f768e">foo</span></p></td><td class="cl-179fa000"><p class="cl-179f81ba"><span class="cl-179f768e">bar</span></p></td></tr></thead><tbody><tr style="overflow-wrap:break-word;"><td class="cl-179f9fec"><p class="cl-179f81ba"><span class="cl-179f76b6">1</span></p></td><td class="cl-179f9fec"><p class="cl-179f81ba"><span class="cl-179f76b6">1</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-179fa000"><p class="cl-179f81ba"><span class="cl-179f76b6">2</span></p></td><td class="cl-179fa000"><p class="cl-179f81ba"><span class="cl-179f76b6">2</span></p></td></tr></tbody></table></div></template>
+<div class="flextable-shadow-host" id="3bca2dee-21fc-4915-a999-675d6231c0b7"></div>
+<script>
+var dest = document.getElementById("3bca2dee-21fc-4915-a999-675d6231c0b7");
+var template = document.getElementById("36748fe2-f6fa-4bb6-8f90-f3663949fdb3");
+var caption = template.content.querySelector("caption");
+if(caption) {
+  caption.style.cssText = "display:block;text-align:center;";
+  var newcapt = document.createElement("p");
+  newcapt.appendChild(caption)
+  dest.parentNode.insertBefore(newcapt, dest.previousSibling);
+}
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+</script>
+
+<div id="普通にmarkdown---latexしてみる" class="section level1">
+<h1>普通にMarkdown -&gt; LaTeXしてみる</h1>
+<p>以下の表を含むMarkdownファイルをフツーにLaTeX化けしてみましょう。</p>
+<pre class="md md"><code>---
+title: example.md
+---
+
+# Header
+
+| foo | bar |
+|-----|-----|
+|  1  |  2  |
+|  a  |  b  |</code></pre>
+<p>以下のコマンドで変換すると、表は<code>\begin{longtable}[]{@{}ll@{}}</code>という行から始まることを確認できます。こいつにどうにかして枠線をいれたい。</p>
+<pre class="bash"><code>pandoc example.md -t latex</code></pre>
+<pre class="tex"><code>\hypertarget{header}{%
+\section{Header}\label{header}}
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+foo &amp; bar \\
+\midrule
+\endhead
+1 &amp; 2 \\
+a &amp; b \\
+\bottomrule
+\end{longtable}</code></pre>
+</div>
+<div id="stack-exchangeの例は最近のpandocでは動かない" class="section level1">
+<h1>Stack Exchangeの例は最近のPandocでは動かない</h1>
+<blockquote>
+<p><a href="https://tex.stackexchange.com/a/596005" class="uri">https://tex.stackexchange.com/a/596005</a></p>
+</blockquote>
+<p>少なくともPandoc 2.14.0.2はダメっぽいです。</p>
+<p>しかし、先の表をどうすればいいか指針はわかります。</p>
+<ul>
+<li><code>{@{}ll@{}}</code>が列の書式設定で、<code>l</code>は左揃えを示し、その両脇に<code>|</code>を配置すると縦線が入る</li>
+<li>行間に<code>\hline</code>を挟むと横線が入る</li>
+</ul>
+<p>これを自動化する方法も載っていますが、コメントにある通り、<code>array</code>パッケージを読み込むと動きません。今のPandocは<code>longtable</code>パッケージと同時に<code>array</code>パッケージを読み込むので、絶望ですね（<a href="https://github.com/jgm/pandoc-templates/blob/466c90ed5bb489d9cafe41b59fff47a3c5eb858c/default.latex#L276" class="uri">https://github.com/jgm/pandoc-templates/blob/466c90ed5bb489d9cafe41b59fff47a3c5eb858c/default.latex#L276</a>）。</p>
+</div>
+<div id="作戦" class="section level1">
+<h1>作戦</h1>
+<ol style="list-style-type: decimal">
+<li>LaTeX頑張る</li>
+<li>PandocにはTeXの出力までを任せて、TeXファイルを文字列置換した後、<code>lualatex</code>などのコマンドでPDF化</li>
+<li>Pandocフィルタ頑張る</li>
+</ol>
+<p>1が真っ当ですね。私にはできません。</p>
+<p>2もシンプルそうですね。ただ、Pandocで<code>--resource-path</code>などを指定していると死ぬ畏れありです。</p>
+<p>3も一見真っ当そうですね。
+Pandocは入力したファイルをまずASTに変換します。
+ASTは、どこが表だとかどこが行だとかをプログラムで扱いやすくしてくれます。
+ASTに対してはユーザーが必要に応じてフィルタ処理を噛ませられます。弄ったASTをPandocに返すとよしなに出力形式に変換してくれます。なにそれよさそうって感じがしますね。やってみるとしんどいです。</p>
+<p>結果としては横線に1と、縦線に3を組み合わせて頑張ります。</p>
+<p>真っ当 + 真っ当 = 真っ当……？</p>
+<p>ちなみにPandocフィルタには、2種類あります。</p>
+<ul>
+<li>JSONを受けとってJSONを返すフィルタ</li>
+<li>内蔵のLuaインタプリタを利用して内部表現ASTを受け取ってASTを返すフィルタ</li>
+</ul>
+<p>後者の方が内蔵されているだけあって便利なAPIが用意されていたり、高速だったりします。</p>
+<p>残念ながら今回は両方使います。</p>
+</div>
+<div id="実装" class="section level1">
+<h1>実装</h1>
+<div id="pandocフィルタで縦線を入れる" class="section level2">
+<h2>Pandocフィルタで縦線を入れる</h2>
+<p>フィルタはASTを処理すると説明したところでした。
+ASTってどんな感じかというと、JSONで表現するならこんな感じ。</p>
+<pre class="bash"><code>pandoc example.md -t json</code></pre>
+<pre class="json"><code>{&quot;pandoc-api-version&quot;:[1,22],&quot;meta&quot;:{&quot;title&quot;:{&quot;t&quot;:&quot;MetaInlines&quot;,&quot;c&quot;:[{&quot;t&quot;:&quot;Str&quot;,&quot;c&quot;:&quot;example.md&quot;}]}},&quot;blocks&quot;:[{&quot;t&quot;:&quot;Header&quot;,&quot;c&quot;:[1,[&quot;header&quot;,[],[]],[{&quot;t&quot;:&quot;Str&quot;,&quot;c&quot;:&quot;Header&quot;}]]},{&quot;t&quot;:&quot;Table&quot;,&quot;c&quot;:[[&quot;&quot;,[],[]],[null,[]],[[{&quot;t&quot;:&quot;AlignDefault&quot;},{&quot;t&quot;:&quot;ColWidthDefault&quot;}],[{&quot;t&quot;:&quot;AlignDefault&quot;},{&quot;t&quot;:&quot;ColWidthDefault&quot;}]],[[&quot;&quot;,[],[]],[[[&quot;&quot;,[],[]],[[[&quot;&quot;,[],[]],{&quot;t&quot;:&quot;AlignDefault&quot;},1,1,[{&quot;t&quot;:&quot;Plain&quot;,&quot;c&quot;:[{&quot;t&quot;:&quot;Str&quot;,&quot;c&quot;:&quot;foo&quot;}]}]],[[&quot;&quot;,[],[]],{&quot;t&quot;:&quot;AlignDefault&quot;},1,1,[{&quot;t&quot;:&quot;Plain&quot;,&quot;c&quot;:[{&quot;t&quot;:&quot;Str&quot;,&quot;c&quot;:&quot;bar&quot;}]}]]]]]],[[[&quot;&quot;,[],[]],0,[],[[[&quot;&quot;,[],[]],[[[&quot;&quot;,[],[]],{&quot;t&quot;:&quot;AlignDefault&quot;},1,1,[{&quot;t&quot;:&quot;Plain&quot;,&quot;c&quot;:[{&quot;t&quot;:&quot;Str&quot;,&quot;c&quot;:&quot;1&quot;}]}]],[[&quot;&quot;,[],[]],{&quot;t&quot;:&quot;AlignDefault&quot;},1,1,[{&quot;t&quot;:&quot;Plain&quot;,&quot;c&quot;:[{&quot;t&quot;:&quot;Str&quot;,&quot;c&quot;:&quot;2&quot;}]}]]]],[[&quot;&quot;,[],[]],[[[&quot;&quot;,[],[]],{&quot;t&quot;:&quot;AlignDefault&quot;},1,1,[{&quot;t&quot;:&quot;Plain&quot;,&quot;c&quot;:[{&quot;t&quot;:&quot;Str&quot;,&quot;c&quot;:&quot;a&quot;}]}]],[[&quot;&quot;,[],[]],{&quot;t&quot;:&quot;AlignDefault&quot;},1,1,[{&quot;t&quot;:&quot;Plain&quot;,&quot;c&quot;:[{&quot;t&quot;:&quot;Str&quot;,&quot;c&quot;:&quot;b&quot;}]}]]]]]]],[[&quot;&quot;,[],[]],[]]]}]}</code></pre>
+<details>
+<summary>
+整形したJSONを見る
+</summary>
+<pre class="bash"><code>pandoc example.md -t json | jq .</code></pre>
+<pre class="json"><code>{
+  &quot;pandoc-api-version&quot;: [
+    1,
+    22
+  ],
+  &quot;meta&quot;: {
+    &quot;title&quot;: {
+      &quot;t&quot;: &quot;MetaInlines&quot;,
+      &quot;c&quot;: [
+        {
+          &quot;t&quot;: &quot;Str&quot;,
+          &quot;c&quot;: &quot;example.md&quot;
+        }
+      ]
+    }
+  },
+  &quot;blocks&quot;: [
+    {
+      &quot;t&quot;: &quot;Header&quot;,
+      &quot;c&quot;: [
+        1,
+        [
+          &quot;header&quot;,
+          [],
+          []
+        ],
+        [
+          {
+            &quot;t&quot;: &quot;Str&quot;,
+            &quot;c&quot;: &quot;Header&quot;
+          }
+        ]
+      ]
+    },
+    {
+      &quot;t&quot;: &quot;Table&quot;,
+      &quot;c&quot;: [
+        [
+          &quot;&quot;,
+          [],
+          []
+        ],
+        [
+          null,
+          []
+        ],
+        [
+          [
+            {
+              &quot;t&quot;: &quot;AlignDefault&quot;
+            },
+            {
+              &quot;t&quot;: &quot;ColWidthDefault&quot;
+            }
+          ],
+          [
+            {
+              &quot;t&quot;: &quot;AlignDefault&quot;
+            },
+            {
+              &quot;t&quot;: &quot;ColWidthDefault&quot;
+            }
+          ]
+        ],
+        [
+          [
+            &quot;&quot;,
+            [],
+            []
+          ],
+          [
+            [
+              [
+                &quot;&quot;,
+                [],
+                []
+              ],
+              [
+                [
+                  [
+                    &quot;&quot;,
+                    [],
+                    []
+                  ],
+                  {
+                    &quot;t&quot;: &quot;AlignDefault&quot;
+                  },
+                  1,
+                  1,
+                  [
+                    {
+                      &quot;t&quot;: &quot;Plain&quot;,
+                      &quot;c&quot;: [
+                        {
+                          &quot;t&quot;: &quot;Str&quot;,
+                          &quot;c&quot;: &quot;foo&quot;
+                        }
+                      ]
+                    }
+                  ]
+                ],
+                [
+                  [
+                    &quot;&quot;,
+                    [],
+                    []
+                  ],
+                  {
+                    &quot;t&quot;: &quot;AlignDefault&quot;
+                  },
+                  1,
+                  1,
+                  [
+                    {
+                      &quot;t&quot;: &quot;Plain&quot;,
+                      &quot;c&quot;: [
+                        {
+                          &quot;t&quot;: &quot;Str&quot;,
+                          &quot;c&quot;: &quot;bar&quot;
+                        }
+                      ]
+                    }
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            [
+              &quot;&quot;,
+              [],
+              []
+            ],
+            0,
+            [],
+            [
+              [
+                [
+                  &quot;&quot;,
+                  [],
+                  []
+                ],
+                [
+                  [
+                    [
+                      &quot;&quot;,
+                      [],
+                      []
+                    ],
+                    {
+                      &quot;t&quot;: &quot;AlignDefault&quot;
+                    },
+                    1,
+                    1,
+                    [
+                      {
+                        &quot;t&quot;: &quot;Plain&quot;,
+                        &quot;c&quot;: [
+                          {
+                            &quot;t&quot;: &quot;Str&quot;,
+                            &quot;c&quot;: &quot;1&quot;
+                          }
+                        ]
+                      }
+                    ]
+                  ],
+                  [
+                    [
+                      &quot;&quot;,
+                      [],
+                      []
+                    ],
+                    {
+                      &quot;t&quot;: &quot;AlignDefault&quot;
+                    },
+                    1,
+                    1,
+                    [
+                      {
+                        &quot;t&quot;: &quot;Plain&quot;,
+                        &quot;c&quot;: [
+                          {
+                            &quot;t&quot;: &quot;Str&quot;,
+                            &quot;c&quot;: &quot;2&quot;
+                          }
+                        ]
+                      }
+                    ]
+                  ]
+                ]
+              ],
+              [
+                [
+                  &quot;&quot;,
+                  [],
+                  []
+                ],
+                [
+                  [
+                    [
+                      &quot;&quot;,
+                      [],
+                      []
+                    ],
+                    {
+                      &quot;t&quot;: &quot;AlignDefault&quot;
+                    },
+                    1,
+                    1,
+                    [
+                      {
+                        &quot;t&quot;: &quot;Plain&quot;,
+                        &quot;c&quot;: [
+                          {
+                            &quot;t&quot;: &quot;Str&quot;,
+                            &quot;c&quot;: &quot;a&quot;
+                          }
+                        ]
+                      }
+                    ]
+                  ],
+                  [
+                    [
+                      &quot;&quot;,
+                      [],
+                      []
+                    ],
+                    {
+                      &quot;t&quot;: &quot;AlignDefault&quot;
+                    },
+                    1,
+                    1,
+                    [
+                      {
+                        &quot;t&quot;: &quot;Plain&quot;,
+                        &quot;c&quot;: [
+                          {
+                            &quot;t&quot;: &quot;Str&quot;,
+                            &quot;c&quot;: &quot;b&quot;
+                          }
+                        ]
+                      }
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            &quot;&quot;,
+            [],
+            []
+          ],
+          []
+        ]
+      ]
+    }
+  ]
+}</code></pre>
+</details>
+<p>表のAST辛いですねー。ここから <code>\begin{longtable}...</code>といった記法に持っていくコードは書きたくない。</p>
+<p>ではどうするか？一旦、ASTの内、表に相当する部分をLaTeX化してしまいましょう。</p>
+<div id="astの表だけをlatex化するluaフィルタ" class="section level3">
+<h3>ASTの表だけをLaTeX化するLuaフィルタ</h3>
+<p><code>grid-table.lua</code>になります。大まかな手順は以下の通り。</p>
+<ol style="list-style-type: decimal">
+<li>ドキュメント中に表を探す</li>
+<li>表ごとに部分的なドキュメントを作成する</li>
+<li>部分的なドキュメントをJSONフィルタに渡して表の部分をLaTeX化したJSONを受けとる</li>
+<li>LaTeX部分の文字列を良い感じに置換して、元のドキュメントのASTに組込む</li>
+</ol>
+<p>表ごとに小規模なドキュメントを作成するため、親ドキュメントのメタデータも渡せるよう工夫しています。</p>
+<pre class="lua lua"><code>-- grid-table.lua
+
+-- 親ドキュメントのメタデータを抽出
+local METADATA = {}
+function Meta(meta)
+  METADATA = meta
+end
+
+-- 表ごとに小規模なドキュメントを作成、LaTeX化・文字列置換の後にASTに組込む
+function Table(tbl)
+  -- JSONフィルタを使って表をLaTeX化し該当のASTを抽出する
+  -- JSONフィルタの内容は後述
+  latex = pandoc.utils.run_json_filter(
+    pandoc.Pandoc({tbl}, METADATA),
+    &quot;latexify.bash&quot;
+  ).blocks[1]
+
+  -- 正規表現を使った文字列の置換を行う
+  -- pattern変数を使ってLaTeXを3つのブロックに分割
+  -- 2番目の`([lcr]+)`にマッチする部分では文字を`|`区切りにする
+  local pattern = table.concat({
+    &quot;(.*\\begin%{longtable%}%[%]%{@%{%})&quot;, -- 表の開始を宣言する部分
+    &quot;([lcr]+)&quot;,                            -- 文字の揃え方
+    &quot;(@%{%}%}.*)&quot;                          -- 残り
+  })
+  local text = &quot;&quot;
+  for i = 1, 3 do
+    match, _ = latex.text:gsub(pattern, string.format(&quot;%%%s&quot;, i))
+    text = text .. (i ~= 2 and match or match:gsub(&quot;(.)&quot;, &quot;|%1&quot;) .. &quot;|&quot;)
+  end
+  latex.text = text
+
+  -- 成果物を返す
+  return latex
+end
+
+-- 処理の順序の定義
+-- メタデータ、表の順に処理を行う
+return {
+  {Meta = Meta},
+  {Table = Table}
+}</code></pre>
+</div>
+<div id="luaフィルタから受け取った部分的なドキュメントをlatex化して返すjsonフィルタ" class="section level3">
+<h3>Luaフィルタから受け取った部分的なドキュメントをLaTeX化して返すJSONフィルタ</h3>
+<p><code>latexify.bash</code>になります。外部コマンドとして<code>pandoc</code>の他に<code>jq</code>のインストールが必要です。</p>
+<p>ざっくりとした流れは</p>
+<ol style="list-style-type: decimal">
+<li>標準入力としてJSONを受け取る</li>
+<li>Pandocを使ってJSONをLaTeX化</li>
+<li>JSONのblocksキーをLaTeXに置換して返す</li>
+</ol>
+<p>JSONの構造の説明は省略。
+<code>pandoc -t json</code>で色んなファイルをJSON化したら自然と分かります。ただ、出力は人に優しくない見た目なので、<code>pandoc -t json example.md | jq .</code>といった感じで<code>jq</code>コマンドで整形すると良いです。</p>
+<pre class="bash bash"><code>#!/bin/bash
+# latexify.bash
+
+# 標準入力としてJSONを受け取る
+JSON=&quot;$( cat - )&quot;
+
+# JSONに対してpandocを使ってLaTeX化する
+# 後でJSONとして返しやすいように適宜エスケープする
+LATEX=&quot;$(
+  echo &quot;$JSON&quot; \
+    | pandoc -f json -t latex \
+    | sed -e &#39;s/\\/\\\\/g&#39; -e &#39;s/&quot;/\\&quot;/g&#39;
+)&quot;
+
+# jqコマンドを使ってJSONを更新して返す
+# 具体的にはblocksキーをLaTeXのRawBlockにする
+QUERY=&quot;$(cat &lt;&lt;EOF
+.blocks[]|={
+  &quot;t&quot;: &quot;RawBlock&quot;,
+  &quot;c&quot;: [
+    &quot;latex&quot;,
+    &quot;$LATEX&quot;
+  ]
+}
+EOF
+)&quot;
+echo &quot;$JSON&quot; | jq &quot;$QUERY&quot;</code></pre>
+<p>作成したフィルタは実行可能にしておきましょう。</p>
+<pre class="bash"><code>chmod +x latexify.bash # JSONフィルタを実行可能にしておく。</code></pre>
+</div>
+<div id="フィルタを使ってmarkdown---markdownしてみる" class="section level3">
+<h3>フィルタを使ってMarkdown -&gt; Markdownしてみる</h3>
+<p>本来はPDFに出力しますが、まずはちゃんとそれっぽいソースを吐けるか、markdown化して確認します。</p>
+<pre class="bash"><code>pandoc example.md -t markdown --lua-filter grid-table.lua</code></pre>
+<pre class="md"><code># Header
+
+```{=latex}
+\begin{longtable}[]{@{}|l|l|@{}}
+\toprule
+foo &amp; bar \\
+\midrule
+\endhead
+1 &amp; 2 \\
+a &amp; b \\
+\bottomrule
+\end{longtable}
+```</code></pre>
+<p>よさそうですね。</p>
+</div>
+</div>
+<div id="プリアンブルで横線を入れる" class="section level2">
+<h2>プリアンブルで横線を入れる</h2>
+<p>ここは<a href="https://tex.stackexchange.com/a/596005">Stack Exchangeの投稿</a>を参考にミニマルに実装します。割りとシンプル。</p>
+</div>
+</div>
+<div id="実行" class="section level1">
+<h1>実行</h1>
+<p>やっと準備ができました。作ったLuaフィルタとプリアンブルを読んでPDF化しましょう。</p>
+<p>ここで注意点として、<code>--metadata=tables:true</code>を足してください。
+Pandocはドキュメント中に表があるかどうかを判定して自動的に必要なパッケージを読み込みます。しかし、表をすべてLaTeXで表現している場合は判定に失敗するので、明示的にパッケージを読み込みます。</p>
+<pre class="bash"><code>pandoc example.md \
+    -o example.pdf \
+    --lua-filter grid-table.lua \
+    --include-in-header preamble.tex \
+    --metadata=tables:true </code></pre>
+<p>以下、結果です。</p>
+<p><img src="example_1.png" width="510" /></p>
+</div>
+<div id="注意" class="section level1">
+<h1>注意</h1>
+<div id="画像を挿入できません" class="section level2">
+<h2>画像を挿入できません</h2>
+<p>ナゾのエラーが出て死にます。<code>\hline</code>を足しているのが悪いらしいです。誰かタスケテ。</p>
+<blockquote>
+<p>! Undefined control sequence.
+l.83 a &amp; \includegraphics</p>
+</blockquote>
+</div>
+<div id="改行とかもできません" class="section level2">
+<h2>改行とかもできません</h2>
+<p>カジュアルにMarkdownの中でLaTeXを使うと<code>\\</code>を使って強制改行できそうな気がしますが、レイアウトが崩れます。</p>
+<pre class="md"><code>| foo              | bar |
+|------------------|-----|
+| 1 `\\`{=latex} 2 |  3  |
+| 4                |  5  |</code></pre>
+<p>Pandoc’s Markdownの場合、Grid Tableという記法を使うと表の中で改行、改段落、箇条書きなど自由な記述が可能です。</p>
+<p>しかし今回紹介した方法では対応できません。</p>
+<p>というのも今回は列の揃え方に<code>{@{}lll@{}}</code>という書き方を想定していたのですが、出力は異なります。</p>
+<p>列ごとの書式の定義は <code>&gt;{\raggedright\arraybackslash}...</code> といった行で記述しているようですね。</p>
+<p>ようわからんので宿題です。</p>
+<pre class="bash"><code>cat &lt;&lt;EOF &gt; example2.md
+: Sample grid table.
+
++---------------+---------------+--------------------+
+| Fruit         | Price         | Advantages         |
++===============+===============+====================+
+| Bananas       | \$1.34         | - built-in wrapper |
+|               |               | - bright color     |
++---------------+---------------+--------------------+
+| Oranges       | \$2.10         | - cures scurvy     |
+|               |               | - tasty            |
++---------------+---------------+--------------------+
+EOF
+
+pandoc example2.md -t latex</code></pre>
+<pre class="tex"><code>## \begin{longtable}[]{@{}
+##   &gt;{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.22}}
+##   &gt;{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.22}}
+##   &gt;{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.29}}@{}}
+## \caption{Sample grid table.}\tabularnewline
+## \toprule
+## Fruit &amp; Price &amp; Advantages \\
+## \midrule
+## \endfirsthead
+## \toprule
+## Fruit &amp; Price &amp; Advantages \\
+## \midrule
+## \endhead
+## Bananas &amp; \$1.34 &amp; \begin{minipage}[t]{\linewidth}\raggedright
+## \begin{itemize}
+## \tightlist
+## \item
+##   built-in wrapper
+## \item
+##   bright color
+## \end{itemize}
+## \end{minipage} \\
+## Oranges &amp; \$2.10 &amp; \begin{minipage}[t]{\linewidth}\raggedright
+## \begin{itemize}
+## \tightlist
+## \item
+##   cures scurvy
+## \item
+##   tasty
+## \end{itemize}
+## \end{minipage} \\
+## \bottomrule
+## \end{longtable}</code></pre>
+<p>ちなみに無理にLuaフィルタを適用すると愉快なことになります。</p>
+<pre class="bash"><code>pandoc example2.md -t latex --lua-filter grid-table.lua</code></pre>
+<pre class="tex"><code>## \begin{longtable}[]{@{}
+##   &gt;{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.22}}
+##   &gt;{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.22}}
+##   &gt;{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.29}}@{}}
+## \caption{Sample grid table.}\tabularnewline
+## \toprule
+## Fruit &amp; Price &amp; Advantages \\
+## \midrule
+## \endfirsthead
+## \toprule
+## Fruit &amp; Price &amp; Advantages \\
+## \midrule
+## \endhead
+## Bananas &amp; \$1.34 &amp; \begin{minipage}[t]{\linewidth}\raggedright
+## \begin{itemize}
+## \tightlist
+## \item
+##   built-in wrapper
+## \item
+##   bright color
+## \end{itemize}
+## \end{minipage} \\
+## Oranges &amp; \$2.10 &amp; \begin{minipage}[t]{\linewidth}\raggedright
+## \begin{itemize}
+## \tightlist
+## \item
+##   cures scurvy
+## \item
+##   tasty
+## \end{itemize}
+## \end{minipage} \\
+## \bottomrule
+## \end{longtable}|\|b|e|g|i|n|{|l|o|n|g|t|a|b|l|e|}|[|]|{|@|{|}|
+## | | |&gt;|{|\|r|a|g|g|e|d|r|i|g|h|t|\|a|r|r|a|y|b|a|c|k|s|l|a|s|h|}|p|{|(|\|c|o|l|u|m|n|w|i|d|t|h| |-| |4|\|t|a|b|c|o|l|s|e|p|)| |*| |\|r|e|a|l|{|0|.|2|2|}|}|
+## | | |&gt;|{|\|r|a|g|g|e|d|r|i|g|h|t|\|a|r|r|a|y|b|a|c|k|s|l|a|s|h|}|p|{|(|\|c|o|l|u|m|n|w|i|d|t|h| |-| |4|\|t|a|b|c|o|l|s|e|p|)| |*| |\|r|e|a|l|{|0|.|2|2|}|}|
+## | | |&gt;|{|\|r|a|g|g|e|d|r|i|g|h|t|\|a|r|r|a|y|b|a|c|k|s|l|a|s|h|}|p|{|(|\|c|o|l|u|m|n|w|i|d|t|h| |-| |4|\|t|a|b|c|o|l|s|e|p|)| |*| |\|r|e|a|l|{|0|.|2|9|}|}|@|{|}|}|
+## |\|c|a|p|t|i|o|n|{|S|a|m|p|l|e| |g|r|i|d| |t|a|b|l|e|.|}|\|t|a|b|u|l|a|r|n|e|w|l|i|n|e|
+## |\|t|o|p|r|u|l|e|
+## |F|r|u|i|t| |&amp;| |P|r|i|c|e| |&amp;| |A|d|v|a|n|t|a|g|e|s| |\|\|
+## |\|m|i|d|r|u|l|e|
+## |\|e|n|d|f|i|r|s|t|h|e|a|d|
+## |\|t|o|p|r|u|l|e|
+## |F|r|u|i|t| |&amp;| |P|r|i|c|e| |&amp;| |A|d|v|a|n|t|a|g|e|s| |\|\|
+## |\|m|i|d|r|u|l|e|
+## |\|e|n|d|h|e|a|d|
+## |B|a|n|a|n|a|s| |&amp;| |\|$|1|.|3|4| |&amp;| |\|b|e|g|i|n|{|m|i|n|i|p|a|g|e|}|[|t|]|{|\|l|i|n|e|w|i|d|t|h|}|\|r|a|g|g|e|d|r|i|g|h|t|
+## |\|b|e|g|i|n|{|i|t|e|m|i|z|e|}|
+## |\|t|i|g|h|t|l|i|s|t|
+## |\|i|t|e|m|
+## | | |b|u|i|l|t|-|i|n| |w|r|a|p|p|e|r|
+## |\|i|t|e|m|
+## | | |b|r|i|g|h|t| |c|o|l|o|r|
+## |\|e|n|d|{|i|t|e|m|i|z|e|}|
+## |\|e|n|d|{|m|i|n|i|p|a|g|e|}| |\|\|
+## |O|r|a|n|g|e|s| |&amp;| |\|$|2|.|1|0| |&amp;| |\|b|e|g|i|n|{|m|i|n|i|p|a|g|e|}|[|t|]|{|\|l|i|n|e|w|i|d|t|h|}|\|r|a|g|g|e|d|r|i|g|h|t|
+## |\|b|e|g|i|n|{|i|t|e|m|i|z|e|}|
+## |\|t|i|g|h|t|l|i|s|t|
+## |\|i|t|e|m|
+## | | |c|u|r|e|s| |s|c|u|r|v|y|
+## |\|i|t|e|m|
+## | | |t|a|s|t|y|
+## |\|e|n|d|{|i|t|e|m|i|z|e|}|
+## |\|e|n|d|{|m|i|n|i|p|a|g|e|}| |\|\|
+## |\|b|o|t|t|o|m|r|u|l|e|
+## |\|e|n|d|{|l|o|n|g|t|a|b|l|e|}|\begin{longtable}[]{@{}
+##   &gt;{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.22}}
+##   &gt;{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.22}}
+##   &gt;{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.29}}@{}}
+## \caption{Sample grid table.}\tabularnewline
+## \toprule
+## Fruit &amp; Price &amp; Advantages \\
+## \midrule
+## \endfirsthead
+## \toprule
+## Fruit &amp; Price &amp; Advantages \\
+## \midrule
+## \endhead
+## Bananas &amp; \$1.34 &amp; \begin{minipage}[t]{\linewidth}\raggedright
+## \begin{itemize}
+## \tightlist
+## \item
+##   built-in wrapper
+## \item
+##   bright color
+## \end{itemize}
+## \end{minipage} \\
+## Oranges &amp; \$2.10 &amp; \begin{minipage}[t]{\linewidth}\raggedright
+## \begin{itemize}
+## \tightlist
+## \item
+##   cures scurvy
+## \item
+##   tasty
+## \end{itemize}
+## \end{minipage} \\
+## \bottomrule
+## \end{longtable}</code></pre>
+</div>
+</div>
+<div id="enjoy" class="section level1 unnumbered unlisted">
+<h1>ENJOY</h1>
+</div>

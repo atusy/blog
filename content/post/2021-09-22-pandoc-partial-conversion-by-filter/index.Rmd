@@ -1,0 +1,355 @@
+---
+title: PandocでPDFを作成する時に表の枠線を格子状にする
+author: ''
+date: '2021-09-22'
+slug: pandoc-partial-conversion-by-filter
+categories: [Pandoc]
+tags: [LaTeX, Lua, jq]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+    toc: true
+highlightjs:
+  - bash
+  - tex
+  - md
+  - lua
+  - json
+summary:
+  LuaフィルタからJSONフィルタを呼んで更にPandocを呼びます。辛い。
+  プリアンブルも必要。
+  R Markdownユーザーは素直にパッケージを使いましょう。
+---
+
+```{bash, include=FALSE}
+command -v jq || sudo apt-get install -y --no-install-recommends jq
+```
+
+
+**R Markdownユーザーは素直にgtやflextable、huxtableなどのパッケージを使いましょう。**
+
+Pandoc's Markdownで記述した表をPDFに出力すると、↓のような1行目の前後と最下部に横線の入った表になります。
+
+```{r, echo=FALSE}
+flextable::flextable(data.frame(foo = c(1, 2), bar = c(1, 2)))
+```
+
+時には以下のような格子状の枠線がどうしても欲しい場合もあるでしょう。
+Pandocでやるにはどうすればいいのでしょうか？
+
+```{r, echo=FALSE}
+flextable::flextable(data.frame(foo = c(1, 2), bar = c(1, 2))) |>
+  flextable::theme_box()
+```
+
+# 普通にMarkdown -> LaTeXしてみる
+
+以下の表を含むMarkdownファイルをフツーにLaTeX化けしてみましょう。
+
+```{cat, class.source='md', engine.opts=list(file = "example.md")}
+---
+title: example.md
+---
+
+# Header
+
+| foo | bar |
+|-----|-----|
+|  1  |  2  |
+|  a  |  b  |
+```
+
+以下のコマンドで変換すると、表は`\begin{longtable}[]{@{}ll@{}}`という行から始まることを確認できます。
+こいつにどうにかして枠線をいれたい。
+
+```{bash, comment='', class.output='tex'}
+pandoc example.md -t latex
+```
+
+# Stack Exchangeの例は最近のPandocでは動かない
+
+> https://tex.stackexchange.com/a/596005
+
+少なくともPandoc 2.14.0.2はダメっぽいです。
+
+しかし、先の表をどうすればいいか指針はわかります。
+
+- `{@{}ll@{}}`が列の書式設定で、`l`は左揃えを示し、その両脇に`|`を配置すると縦線が入る
+- 行間に`\hline`を挟むと横線が入る
+
+これを自動化する方法も載っていますが、コメントにある通り、`array`パッケージを読み込むと動きません。
+今のPandocは`longtable`パッケージと同時に`array`パッケージを読み込むので、絶望ですね（<https://github.com/jgm/pandoc-templates/blob/466c90ed5bb489d9cafe41b59fff47a3c5eb858c/default.latex#L276>）。
+
+# 作戦
+
+1. LaTeX頑張る
+2. PandocにはTeXの出力までを任せて、TeXファイルを文字列置換した後、`lualatex`などのコマンドでPDF化
+3. Pandocフィルタ頑張る
+
+1が真っ当ですね。私にはできません。
+
+2もシンプルそうですね。
+ただ、Pandocで`--resource-path`などを指定していると死ぬ畏れありです。
+
+3も一見真っ当そうですね。
+Pandocは入力したファイルをまずASTに変換します。
+ASTは、どこが表だとかどこが行だとかをプログラムで扱いやすくしてくれます。
+ASTに対してはユーザーが必要に応じてフィルタ処理を噛ませられます。
+弄ったASTをPandocに返すとよしなに出力形式に変換してくれます。
+なにそれよさそうって感じがしますね。
+やってみるとしんどいです。
+
+結果としては横線に1と、縦線に3を組み合わせて頑張ります。
+
+真っ当 + 真っ当 = 真っ当……？
+
+ちなみにPandocフィルタには、2種類あります。
+
+- JSONを受けとってJSONを返すフィルタ
+- 内蔵のLuaインタプリタを利用して内部表現ASTを受け取ってASTを返すフィルタ
+
+後者の方が内蔵されているだけあって便利なAPIが用意されていたり、高速だったりします。
+
+残念ながら今回は両方使います。
+
+# 実装
+
+## Pandocフィルタで縦線を入れる
+
+フィルタはASTを処理すると説明したところでした。
+ASTってどんな感じかというと、JSONで表現するならこんな感じ。
+
+```{bash, comment='', class.output='json'}
+pandoc example.md -t json
+```
+
+<details><summary>整形したJSONを見る</summary>
+
+```{bash, comment='', class.output='json'}
+pandoc example.md -t json | jq .
+```
+
+</details>
+
+表のAST辛いですねー。ここから `\begin{longtable}...`といった記法に持っていくコードは書きたくない。
+
+ではどうするか？
+一旦、ASTの内、表に相当する部分をLaTeX化してしまいましょう。
+
+### ASTの表だけをLaTeX化するLuaフィルタ
+
+`grid-table.lua`になります。
+大まかな手順は以下の通り。
+
+1. ドキュメント中に表を探す
+1. 表ごとに部分的なドキュメントを作成する
+1. 部分的なドキュメントをJSONフィルタに渡して表の部分をLaTeX化したJSONを受けとる
+1. LaTeX部分の文字列を良い感じに置換して、元のドキュメントのASTに組込む
+
+表ごとに小規模なドキュメントを作成するため、親ドキュメントのメタデータも渡せるよう工夫しています。
+
+```{cat, class.source='lua', engine.opts=list(file = "grid-table.lua")}
+-- grid-table.lua
+
+-- 親ドキュメントのメタデータを抽出
+local METADATA = {}
+function Meta(meta)
+  METADATA = meta
+end
+
+-- 表ごとに小規模なドキュメントを作成、LaTeX化・文字列置換の後にASTに組込む
+function Table(tbl)
+  -- JSONフィルタを使って表をLaTeX化し該当のASTを抽出する
+  -- JSONフィルタの内容は後述
+  latex = pandoc.utils.run_json_filter(
+    pandoc.Pandoc({tbl}, METADATA),
+    "latexify.bash"
+  ).blocks[1]
+
+  -- 正規表現を使った文字列の置換を行う
+  -- pattern変数を使ってLaTeXを3つのブロックに分割
+  -- 2番目の`([lcr]+)`にマッチする部分では文字を`|`区切りにする
+  local pattern = table.concat({
+    "(.*\\begin%{longtable%}%[%]%{@%{%})", -- 表の開始を宣言する部分
+    "([lcr]+)",                            -- 文字の揃え方
+    "(@%{%}%}.*)"                          -- 残り
+  })
+  local text = ""
+  for i = 1, 3 do
+    match, _ = latex.text:gsub(pattern, string.format("%%%s", i))
+    text = text .. (i ~= 2 and match or match:gsub("(.)", "|%1") .. "|")
+  end
+  latex.text = text
+
+  -- 成果物を返す
+  return latex
+end
+
+-- 処理の順序の定義
+-- メタデータ、表の順に処理を行う
+return {
+  {Meta = Meta},
+  {Table = Table}
+}
+```
+
+### Luaフィルタから受け取った部分的なドキュメントをLaTeX化して返すJSONフィルタ
+
+`latexify.bash`になります。
+外部コマンドとして`pandoc`の他に`jq`のインストールが必要です。
+
+ざっくりとした流れは
+
+1. 標準入力としてJSONを受け取る
+1. Pandocを使ってJSONをLaTeX化
+1. JSONのblocksキーをLaTeXに置換して返す
+
+JSONの構造の説明は省略。
+`pandoc -t json`で色んなファイルをJSON化したら自然と分かります。
+ただ、出力は人に優しくない見た目なので、`pandoc -t json example.md | jq .`といった感じで`jq`コマンドで整形すると良いです。
+
+```{cat, class.source='bash', engine.opts=list(file = "latexify.bash")}
+#!/bin/bash
+# latexify.bash
+
+# 標準入力としてJSONを受け取る
+JSON="$( cat - )"
+
+# JSONに対してpandocを使ってLaTeX化する
+# 後でJSONとして返しやすいように適宜エスケープする
+LATEX="$(
+  echo "$JSON" \
+    | pandoc -f json -t latex \
+    | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'
+)"
+
+# jqコマンドを使ってJSONを更新して返す
+# 具体的にはblocksキーをLaTeXのRawBlockにする
+QUERY="$(cat <<EOF
+.blocks[]|={
+  "t": "RawBlock",
+  "c": [
+    "latex",
+    "$LATEX"
+  ]
+}
+EOF
+)"
+echo "$JSON" | jq "$QUERY"
+```
+
+作成したフィルタは実行可能にしておきましょう。
+
+```{bash}
+chmod +x latexify.bash # JSONフィルタを実行可能にしておく。
+```
+
+### フィルタを使ってMarkdown -> Markdownしてみる
+
+本来はPDFに出力しますが、まずはちゃんとそれっぽいソースを吐けるか、markdown化して確認します。
+
+```{bash, comment='', class.output='md'}
+pandoc example.md -t markdown --lua-filter grid-table.lua
+```
+
+よさそうですね。
+
+## プリアンブルで横線を入れる
+
+ここは[Stack Exchangeの投稿](https://tex.stackexchange.com/a/596005)を参考にミニマルに実装します。
+割りとシンプル。
+
+```{cat, class.output='tex'}
+%preamble.tex
+
+% 表の行ごとに \hline が入るようにする
+\makeatletter
+\apptocmd{\LT@tabularcr}{\hline}{}{}
+\makeatother
+
+% ついでに横線と縦線の間に生じる空間を消しておく
+\setlength{\aboverulesep}{0pt}
+\setlength{\belowrulesep}{0pt}
+\renewcommand{\arraystretch}{1.3}
+```
+
+# 実行
+
+やっと準備ができました。
+作ったLuaフィルタとプリアンブルを読んでPDF化しましょう。
+
+ここで注意点として、`--metadata=tables:true`を足してください。
+Pandocはドキュメント中に表があるかどうかを判定して自動的に必要なパッケージを読み込みます。
+しかし、表をすべてLaTeXで表現している場合は判定に失敗するので、明示的にパッケージを読み込みます。
+
+```{bash}
+pandoc example.md \
+    -o example.pdf \
+    --lua-filter grid-table.lua \
+    --include-in-header preamble.tex \
+    --metadata=tables:true 
+```
+
+以下、結果です。
+
+```{r print, echo=FALSE}
+"example.pdf" |>
+  pdftools::pdf_convert(dpi = 120, verbose = FALSE) |>
+  knitr::include_graphics()
+```
+
+# 注意
+
+## 画像を挿入できません
+
+ナゾのエラーが出て死にます。`\hline`を足しているのが悪いらしいです。誰かタスケテ。
+
+> ! Undefined control sequence.
+> l.83 a & \includegraphics
+
+## 改行とかもできません
+
+カジュアルにMarkdownの中でLaTeXを使うと`\\`を使って強制改行できそうな気がしますが、レイアウトが崩れます。
+
+```md
+| foo              | bar |
+|------------------|-----|
+| 1 `\\`{=latex} 2 |  3  |
+| 4                |  5  |
+```
+
+Pandoc's Markdownの場合、Grid Tableという記法を使うと表の中で改行、改段落、箇条書きなど自由な記述が可能です。
+
+しかし今回紹介した方法では対応できません。
+
+というのも今回は列の揃え方に`{@{}lll@{}}`という書き方を想定していたのですが、出力は異なります。
+
+列ごとの書式の定義は `>{\raggedright\arraybackslash}...` といった行で記述しているようですね。
+
+ようわからんので宿題です。
+
+
+```{bash, comments='', class.output='tex'}
+cat <<EOF > example2.md
+: Sample grid table.
+
++---------------+---------------+--------------------+
+| Fruit         | Price         | Advantages         |
++===============+===============+====================+
+| Bananas       | \$1.34         | - built-in wrapper |
+|               |               | - bright color     |
++---------------+---------------+--------------------+
+| Oranges       | \$2.10         | - cures scurvy     |
+|               |               | - tasty            |
++---------------+---------------+--------------------+
+EOF
+
+pandoc example2.md -t latex
+```
+ちなみに無理にLuaフィルタを適用すると愉快なことになります。
+
+```{bash, comments='', class.output='tex'}
+pandoc example2.md -t latex --lua-filter grid-table.lua
+```
+
+# ENJOY {.unnumbered .unlisted}
