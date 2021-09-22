@@ -259,7 +259,7 @@ pandoc example.md -t markdown --lua-filter grid-table.lua
 ここは[Stack Exchangeの投稿](https://tex.stackexchange.com/a/596005)を参考にミニマルに実装します。
 割りとシンプル。
 
-```{cat, class.output='tex'}
+```{cat, class.source='tex', engine.opts=list(file = "preamble.tex")}
 %preamble.tex
 
 % 表の行ごとに \hline が入るようにする
