@@ -10,6 +10,7 @@ output:
     md_extensions: +east_asian_line_breaks+task_lists
 ---
 
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
 
 
 <p>この1、2ヶ月ほどmanjaroで動画を再生する時、画面がちらつくようになったのが気になっていました。ググったところ、Intel製GPUの場合はちらつき防止のオプションがあるので有効化するといいみたいですね。</p>
@@ -23,6 +24,12 @@ output:
   Option &quot;TearFree&quot; &quot;true&quot;
 EndSection</code></pre>
 <p><code>Option "TearFree" "true"</code>がポイントですね。ちらつきというと英語で<code>flicker</code>かなと思いがちなのですが、ここでは<code>tear</code>です。この場合の<code>tear</code>は涙ではなく引き裂くの意。どうもこの「ちらつき」は垂直同期に関係していて、画面が上下に「引き裂かれる」結果だからみたいですね。</p>
+<p>某所で教えて頂いたのですが、ちゃんと用語としてあるみたいですね。</p>
+<blockquote>
+<p>ティアリングとは</p>
+<p>１ 枚の画像の中に複数フレームの画像が描画されてしまい、映像が途中で左右にずれたように見える現象のこと</p>
+<p><a href="http://faq3.dospara.co.jp/faq/show/8398?site_domain=default" class="uri">http://faq3.dospara.co.jp/faq/show/8398?site_domain=default</a></p>
+</blockquote>
 <p>さすがArchWikiは情報がよく纏まってるなあとか、トラブル調査すると英語も含め勉強になるなと思った次第でした。</p>
 <p>ちなみに垂直同期は画面の更新度合いに合わせて自動でオンオフされるっぽいのですが、今回の設定を行ったら文字列などもくっきり読めるようになった気がします。</p>
 <p>あと、この設定を行う際、xrandrなどを使って解像度などの変更をしている人はディスプレイの指定方法が変わる場合がある点に注意してください。なぜかわかりませんが、私の環境では以下のようにハイフンを使わない名前に変わってました。</p>
@@ -31,3 +38,21 @@ EndSection</code></pre>
 <li><code>HDMI-1</code> -&gt; <code>HDMI1</code></li>
 </ul>
 <p>思えば、このちらつきが発生するようになった直前くらいに、丁度逆方向の名前の変更が発生してxrandrの設定が効かなくなるトラブルに見舞われたのでした。その頃になにかあったんだろうなあ……。</p>
+<div id="別解" class="section level2">
+<h2>別解</h2>
+<p>そもそもこの問題はドライバに<code>xf86-video-intel</code>を使うせいらしいです。非推奨なので、<code>modesetting</code>を使うといいとか。先の設定を使っている場合は、以下の手順でいける模様。</p>
+<ol style="list-style-type: decimal">
+<li><code>xf86-video-intel</code>をアンインストール</li>
+<li><code>/etc/X11/xorg.conf.d/20-intel.conf</code>を削除</li>
+<li><code>mesa</code>をインストール</li>
+<li><code>/etc/mkinitcpio.conf</code>に<code>MODULES=(i915)</code>と記述</li>
+<li><code>mkinitcpio -P</code>を実行</li>
+</ol>
+<p>ただし私の環境ではティアリングが復活してしまいました。
+4K + WUXGAなのが原因かも知れず、EDIDなるものを手動で指定する必要があるのではと議論してます。</p>
+<blockquote>
+<p>If you are using a custom EDID file (not applicable for the built-in resolutions), you should embed it into initramfs as well:</p>
+<p><a href="https://wiki.archlinux.org/title/Kernel_mode_setting#mkinitcpio" class="uri">https://wiki.archlinux.org/title/Kernel_mode_setting#mkinitcpio</a></p>
+</blockquote>
+<p>ちょっとダルいし<code>xf86-video-intel</code>でとりあえず問題は解決したので先送りにします。</p>
+</div>

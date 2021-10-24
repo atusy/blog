@@ -30,6 +30,14 @@ EndSection
 この場合の`tear`は涙ではなく引き裂くの意。
 どうもこの「ちらつき」は垂直同期に関係していて、画面が上下に「引き裂かれる」結果だからみたいですね。
 
+某所で教えて頂いたのですが、ちゃんと用語としてあるみたいですね。
+
+> ティアリングとは
+>
+> １ 枚の画像の中に複数フレームの画像が描画されてしまい、映像が途中で左右にずれたように見える現象のこと
+>
+> <http://faq3.dospara.co.jp/faq/show/8398?site_domain=default>
+
 さすがArchWikiは情報がよく纏まってるなあとか、トラブル調査すると英語も含め勉強になるなと思った次第でした。
 
 ちなみに垂直同期は画面の更新度合いに合わせて自動でオンオフされるっぽいのですが、
@@ -43,3 +51,26 @@ EndSection
 
 思えば、このちらつきが発生するようになった直前くらいに、丁度逆方向の名前の変更が発生してxrandrの設定が効かなくなるトラブルに見舞われたのでした。
 その頃になにかあったんだろうなあ……。
+
+## 別解
+
+そもそもこの問題はドライバに`xf86-video-intel`を使うせいらしいです。
+非推奨なので、`modesetting`を使うといいとか。
+先の設定を使っている場合は、以下の手順でいける模様。
+
+1. `xf86-video-intel`をアンインストール
+1. `/etc/X11/xorg.conf.d/20-intel.conf`を削除
+1. `mesa`をインストール
+1. `/etc/mkinitcpio.conf`に`MODULES=(i915)`と記述
+1. `mkinitcpio -P`を実行
+
+ただし私の環境ではティアリングが復活してしまいました。
+4K + WUXGAなのが原因かも知れず、EDIDなるものを手動で指定する必要があるのではと議論してます。
+
+> If you are using a custom EDID file (not applicable for the built-in resolutions), you should embed it into initramfs as well:
+> 
+> https://wiki.archlinux.org/title/Kernel_mode_setting#mkinitcpio
+
+ちょっとダルいし`xf86-video-intel`でとりあえず問題は解決したので先送りにします。
+
+
