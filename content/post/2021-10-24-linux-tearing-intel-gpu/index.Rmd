@@ -1,0 +1,36 @@
+---
+title: 'LinuxでIntel製CPU内蔵のGPUを使うと動画再生時に画面がちらつく問題の対策'
+author: ''
+date: '2021-10-24'
+slug: linux-tearing-intel-gpu
+categories: [Linux]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+この1、2ヶ月ほどmanjaroで動画を再生する時、画面がちらつくようになったのが気になっていました。
+ググったところ、Intel製GPUの場合はちらつき防止のオプションがあるので有効化するといいみたいですね。
+
+> <https://wiki.archlinux.org/title/intel_graphics#Tearing>
+
+`/etc/X11/xorg.conf.d/20-intel.conf` に以下を書き込むだけ。簡単。
+
+```
+Section "Device"
+  Identifier "Intel Graphics"
+  Driver "intel"
+  Option "TearFree" "true"
+EndSection
+```
+
+`Option "TearFree" "true"`がポイントですね。
+ちらつきというと英語で`flicker`かなと思いがちなのですが、ここでは`tear`です。
+この場合の`tear`は涙ではなく引き裂くの意。
+どうもこの「ちらつき」は垂直同期に関係していて、画面が上下に「引き裂かれる」結果だからみたいですね。
+
+さすがArchWikiは情報がよく纏まってるなあとか、トラブル調査すると英語も含め勉強になるなと思った次第でした。
+
+ちなみに垂直同期は画面の更新度合いに合わせて自動でオンオフされるっぽいのですが、
+今回の設定を行ったら文字列などもくっきり読めるようになった気がします。
