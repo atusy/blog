@@ -1,0 +1,36 @@
+---
+title: 'Tokyo.R 95でminidownパッケージを紹介でLTしてきました'
+author: ''
+date: '2021-10-31'
+slug: tokyor95
+categories: [R]
+tags: [TokyoR]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+  LT時間切れで消化不良だったのに☆15もつけてくれてありがとう。
+---
+
+資料は以下。
+
+> <https://atusy.github.io/tokyor95-minidown/>
+
+話したいことの半分も話せずLTタイムオーバーという申し訳ないことをしてしまいました。
+
+伝えたかったことを3行に纏めるなら、以下の通り。
+
+- 機能は`html_document`並みか一部は超える
+- それでいて600KB以上の軽量化に成功
+- 気に入ったら[GitHubのレポジトリ](https://github.com/atusy/minidown)に☆つけて
+
+しかし練習は必須ですね。
+聴くのを楽しみにして頂いた方には申し訳ない限りです。
+それでもこの土日で[GitHubのレポジトリ](https://github.com/atusy/minidown)で☆が15個ほど増えてて、みなさんに感謝です。
+
+次回以降に応用セッションで存分に語ってくださいと運営の方に言って頂きましたが、
+最近は色々抱え過ぎていて応用セッションのボリュームに相応わしい資料を準備する時間の用意も叶わないのが辛いところ……。
+
+せめて練習時間は捻出して、どこを伝えるか絞っていきたいところ……。
+
+応用セッションでtargetsパッケージを紹介されたuryuさんとか、あの巨大パッケージの概要に留まらず推し機能の紹介までされてて、素晴らしいなあと思いながら拝聴してました。
