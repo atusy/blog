@@ -1,0 +1,69 @@
+---
+title: Self containedなHTMLドキュメント生成時にiframeしたいなら`knitr::include_url`関数を使おう
+author: ''
+date: '2021-12-06'
+slug: rmarkdown-iframe
+categories: [R]
+tags: [R Markdown, knitr, rmarkdown]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+R Markdownの`html_document`などでHTMLドキュメントを作成すると、デフォルトではグラフなどの画像もHTML内に埋め込んでくれます。
+
+これは、`rmarkdown::html_document(self_contained = TRUE)`に相当する出力だからです。
+
+YAMLフロントマターで`self_contained`を`false`にすると、画像ファイルなどを別ファイルに出力してくれます。
+
+``` yml
+output:
+  html_document:
+    self_contained: false
+```
+
+`self_contained`なHTMLドキュメントは、ファイルを人に渡すときに手軽で便利ですね。
+
+しかし、最近のRStudioなどでR Markdownを利用すると、HTMLの`iframe`タグを使って他のページを取り込む時に、参照しているHTMLファイルまでself containedにしてしまいます。
+良さそうな響きですが、参照先がHTMLを動的に生成している場合などに問題を起こします。
+たとえばyoutubeのページを`iframe`タグで取り込むとYoutubeを再生できなくなります。
+
+これを防ぐ簡単な方法は、`iframe`タグを使う代わりに`knitr::include_url`を使いましょう。
+
+````
+`r ''````{r, echo=FALSE}
+# knitr 1.34以上が必要
+knitr::include_url("https://example.com")
+`r ''````
+````
+
+# より技術的な話
+
+最近のRStudioはPandoc >= 2.11.2を採用しています。
+以来、self_containedな文書を生成すると、従来より広範囲のHTMLタグに対して参照先の内容の取り込みが発生します。
+
+self_containedの例外処理を行うにはHTMLタグに対して、`data-external=1`を追加すればOKです。
+
+生HTMLなら以下。
+
+```html
+<iframe src="https://example.com" data-external=1></iframe>
+```
+
+htmltoolsパッケージを使ってR言語で記述するなら以下。
+
+```{r, eval=FALSE}
+htmltools::tags$iframe(src = "https://example.com", `data-external` = 1)
+```
+
+`knitr::include_url`関数の場合は、上述のような`data-external`属性を自動付与してくれます。
+便利ですね。
+
+
+
+
+# 参考リンク
+
+> src attribute overwritten, making iframe ineffective #2255 \
+> https://github.com/rstudio/rmarkdown/issues/2255
