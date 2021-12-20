@@ -1,0 +1,202 @@
+---
+title: RでPython風docstringを実装してみる
+author: ''
+date: '2021-12-20'
+slug: r-docstring
+categories: [R, Python]
+tags: [docstring, roxygen2]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+    toc: true
+summary: 関数魔改造講座body編と言えるかもしれない……。黒魔術の世界へようこそ。
+---
+
+Pythonでは以下のように関数内にドキュメントを記述できます。
+
+```python
+def add_one(x: float):
+    """Add one to x.
+    
+    Parameter
+    ---------
+    x: float
+    
+    
+    Return
+    ------
+    int
+      x + 1
+    """
+    return x + 1
+```
+
+これを記述しておくとJupyter Notebookなんかでは、`?add_one`とするだけでドキュメントが見られて便利です。
+
+RでもRmdファイル内で同じようなことがしたいなーという方、できますよ。
+
+# 関数のbody先頭にある文字列を取り出す
+
+まずは`.add_one`関数として、先頭にroxygen2風のドキュメントを記述した関数を用意してみましょう。
+自由ドキュメント内で引用符や括弧などをエスケープせずに使えるように、
+`r"---(文字列)---"`の記法を使ってます。
+これについては`help('"')`を参照してください。
+
+```{r}
+.add_one <- function(x) {
+  r"---(Add one.
+  
+  @param x: A numeric vector.
+  
+  @value
+  x + 1
+  )---"
+  x + 1
+}
+```
+
+この関数の処理内容を取り出すには、body関数を使います。
+
+```{r}
+body(.add_one)
+```
+
+`str`関数で構造を確認すると`language`オブジェクトです。特殊。
+
+```{r}
+str(body(.add_one))
+```
+
+でもリスト化してあげると、ASTっぽい感じに処理が保存されてる感じだと分かります。
+
+```{r}
+as.list(body(.add_one))
+```
+
+`x + 1`の部分をリスト化するとより分かりやすいですね。
+
+```{r}
+as.list(body(.add_one)[[3L]])
+```
+
+というわけで、別に`as.list`しなくても2番目の要素を取り出せば、先頭の処理を抽出できます
+
+```{r}
+body(.add_one)[[2L]]
+```
+
+あとは`cat`してやると良い感じに表示できますね。
+
+```{r}
+cat(body(.add_one)[[2L]])
+```
+
+# docstringを扱いやすくする
+
+`.add_one`関数のままでは、ドキュメントの抽出に`cat(body(.add_one)[[2L]])`とせねばならず、直感的ではありません。
+
+ちょっと改造した`add_one`関数を定義して、`help`関数で良い感じに表示できるようにしてみましょう。
+
+## 関数から直感的にdocstringを取り出せるようにする
+
+まずは`with_docstring`関数を用意し、関数の処理の先頭が文字列なら、
+該当部分を関数自身の`__doc__`属性に保存する`with_docstring`関数を定義してみましょう。
+ついでに、後々のことを考えてこの文字列には`docstring`クラスを与え、関数には`with_docstring`クラスを与えておきます。
+
+これで`attr(add_one, "__doc__")`すればヘルプを取り出せるようになり、取り出し方が直感的になります。
+
+```{r}
+with_docstring <- function(f) {
+  doc <- body(f)[2L][[1L]]
+  attr(f, "__doc__") <- structure(
+    `if`(is.character(doc), doc, ""),
+    class = "docstring"
+  )
+  class(f) <- c("with_docstring", class(f))
+  return(f)
+}
+
+add_one <- with_docstring(.add_one)
+attr(add_one, "__doc__")
+```
+
+`.add_one`関数を定義してから`add_one`関数にするのが面倒であれば、最初から関数定義を`with_docstring`関数でラップしましょう。
+Pythonで言うところのデコレータ的発想ですね。
+
+```{r}
+add_one <- with_docstring(function(x) {
+  r"---(Add one.
+  
+  @param x: A numeric vector.
+  
+  @value
+  x + 1
+  )---"
+  x + 1
+})
+```
+
+## docstringを良い感じにprintする
+
+docstringの抽出が簡単になりましたが、表示がイマイチです。
+
+```{r}
+attr(add_one, "__doc__")
+```
+
+というわけで`docstring`クラス用`print`メソッドを実装してあげましょう。
+単に`cat`するだけでOKです。
+
+```{r}
+print.docstring <- function(x, ...) {
+  cat(x)
+  invisible(x)
+}
+
+attr(add_one, "__doc__")
+```
+
+良い感じになりましたね。
+
+## help関数をマスクする
+
+あとは`help`関数を実装するだけです。
+色んな方法が考えられますが、一番シンプルな方法は`help`関数を総称関数にする手です。
+そして、`help.with_docstring`メソッドで`with_docstring`クラスオブジェクトだけの専用`help`を用意します。
+ついでに`help.default`を用意すれば、その他のオブジェクトに対しては従来の`utils::help`関数を呼べます。
+
+以下では`help`と`help.with_docstring`関数にたいして引数を定義せず、後から`utils::help`関数の引数を`formals`関数を使ってパクってます。
+このあたりについてはJapan.R 2018で発表した「[関数魔改造講座 (formals編)](https://atusy.github.io/presentation/japanr2018/formals-for-black-magicians.html#/)」を参照してください。
+
+```{r}
+help <- function() {
+  UseMethod("help")
+}
+help.default <- utils::help
+help.with_docstring <- function() {
+  print(attr(topic, "__doc__", exact = TRUE))
+}
+  
+formals(help) <- formals(help.with_docstring) <- formals(utils::help)
+help(add_one)
+```
+
+`printr`パッケージを使えばR Markdown内でヘルプを使えるので、docstringがない関数についてもちゃんとヘルプを呼べます。
+
+```{r}
+library(printr)
+help(identity)
+```
+
+## and more?
+
+`__doc__`属性に加える時に文字列をうまく編集すれば、色んなことができます。
+
+- roxygen2として処理してちゃんとしたヘルプっぽくする
+- マークダウンなどとして処理して太字とかを表現する
+
+など。
+
+楽しいですねー。
+
+# Enjoy {.unlisted}

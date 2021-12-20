@@ -1,0 +1,260 @@
+---
+title: RでPython風docstringを実装してみる
+author: ''
+date: '2021-12-20'
+slug: r-docstring
+categories: [R, Python]
+tags: [docstring, roxygen2]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+    toc: true
+summary: 関数魔改造講座body編と言えるかもしれない……。黒魔術の世界へようこそ。
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#関数のbody先頭にある文字列を取り出す">関数のbody先頭にある文字列を取り出す</a></li>
+<li><a href="#docstringを扱いやすくする">docstringを扱いやすくする</a><ul>
+<li><a href="#関数から直感的にdocstringを取り出せるようにする">関数から直感的にdocstringを取り出せるようにする</a></li>
+<li><a href="#docstringを良い感じにprintする">docstringを良い感じにprintする</a></li>
+<li><a href="#help関数をマスクする">help関数をマスクする</a></li>
+<li><a href="#and-more">and more?</a></li>
+</ul></li>
+<li><a href="#enjoy">Enjoy</a></li>
+</ul>
+</div>
+
+<p>Pythonでは以下のように関数内にドキュメントを記述できます。</p>
+<pre class="python"><code>def add_one(x: float):
+    &quot;&quot;&quot;Add one to x.
+    
+    Parameter
+    ---------
+    x: float
+    
+    
+    Return
+    ------
+    int
+      x + 1
+    &quot;&quot;&quot;
+    return x + 1</code></pre>
+<p>これを記述しておくとJupyter Notebookなんかでは、<code>?add_one</code>とするだけでドキュメントが見られて便利です。</p>
+<p>RでもRmdファイル内で同じようなことがしたいなーという方、できますよ。</p>
+<div id="関数のbody先頭にある文字列を取り出す" class="section level1">
+<h1>関数のbody先頭にある文字列を取り出す</h1>
+<p>まずは<code>.add_one</code>関数として、先頭にroxygen2風のドキュメントを記述した関数を用意してみましょう。自由ドキュメント内で引用符や括弧などをエスケープせずに使えるように、
+<code>r"---(文字列)---"</code>の記法を使ってます。これについては<code>help('"')</code>を参照してください。</p>
+<pre class="r"><code>.add_one &lt;- function(x) {
+  r&quot;---(Add one.
+  
+  @param x: A numeric vector.
+  
+  @value
+  x + 1
+  )---&quot;
+  x + 1
+}</code></pre>
+<p>この関数の処理内容を取り出すには、body関数を使います。</p>
+<pre class="r"><code>body(.add_one)</code></pre>
+<pre><code>## {
+##     &quot;Add one.\n  \n  @param x: A numeric vector.\n  \n  @value\n  x + 1\n  &quot;
+##     x + 1
+## }</code></pre>
+<p><code>str</code>関数で構造を確認すると<code>language</code>オブジェクトです。特殊。</p>
+<pre class="r"><code>str(body(.add_one))</code></pre>
+<pre><code>##  language {  &quot;Add one.\n  \n  @param x: A numeric vector.\n  \n  @value\n  x + 1\n  &quot;; x + 1 }
+##  - attr(*, &quot;srcref&quot;)=List of 3
+##   ..$ : &#39;srcref&#39; int [1:8] 1 25 1 25 25 25 1 1
+##   .. ..- attr(*, &quot;srcfile&quot;)=Classes &#39;srcfilecopy&#39;, &#39;srcfile&#39; &lt;environment: 0x55d9e585a420&gt; 
+##   ..$ : &#39;srcref&#39; int [1:8] 2 3 8 7 3 7 2 8
+##   .. ..- attr(*, &quot;srcfile&quot;)=Classes &#39;srcfilecopy&#39;, &#39;srcfile&#39; &lt;environment: 0x55d9e585a420&gt; 
+##   ..$ : &#39;srcref&#39; int [1:8] 9 3 9 7 3 7 9 9
+##   .. ..- attr(*, &quot;srcfile&quot;)=Classes &#39;srcfilecopy&#39;, &#39;srcfile&#39; &lt;environment: 0x55d9e585a420&gt; 
+##  - attr(*, &quot;srcfile&quot;)=Classes &#39;srcfilecopy&#39;, &#39;srcfile&#39; &lt;environment: 0x55d9e585a420&gt; 
+##  - attr(*, &quot;wholeSrcref&quot;)= &#39;srcref&#39; int [1:8] 1 0 10 1 0 1 1 10
+##   ..- attr(*, &quot;srcfile&quot;)=Classes &#39;srcfilecopy&#39;, &#39;srcfile&#39; &lt;environment: 0x55d9e585a420&gt;</code></pre>
+<p>でもリスト化してあげると、ASTっぽい感じに処理が保存されてる感じだと分かります。</p>
+<pre class="r"><code>as.list(body(.add_one))</code></pre>
+<pre><code>## [[1]]
+## `{`
+## 
+## [[2]]
+## [1] &quot;Add one.\n  \n  @param x: A numeric vector.\n  \n  @value\n  x + 1\n  &quot;
+## 
+## [[3]]
+## x + 1</code></pre>
+<p><code>x + 1</code>の部分をリスト化するとより分かりやすいですね。</p>
+<pre class="r"><code>as.list(body(.add_one)[[3L]])</code></pre>
+<pre><code>## [[1]]
+## `+`
+## 
+## [[2]]
+## x
+## 
+## [[3]]
+## [1] 1</code></pre>
+<p>というわけで、別に<code>as.list</code>しなくても2番目の要素を取り出せば、先頭の処理を抽出できます</p>
+<pre class="r"><code>body(.add_one)[[2L]]</code></pre>
+<pre><code>## [1] &quot;Add one.\n  \n  @param x: A numeric vector.\n  \n  @value\n  x + 1\n  &quot;</code></pre>
+<p>あとは<code>cat</code>してやると良い感じに表示できますね。</p>
+<pre class="r"><code>cat(body(.add_one)[[2L]])</code></pre>
+<pre><code>## Add one.
+##   
+##   @param x: A numeric vector.
+##   
+##   @value
+##   x + 1
+## </code></pre>
+</div>
+<div id="docstringを扱いやすくする" class="section level1">
+<h1>docstringを扱いやすくする</h1>
+<p><code>.add_one</code>関数のままでは、ドキュメントの抽出に<code>cat(body(.add_one)[[2L]])</code>とせねばならず、直感的ではありません。</p>
+<p>ちょっと改造した<code>add_one</code>関数を定義して、<code>help</code>関数で良い感じに表示できるようにしてみましょう。</p>
+<div id="関数から直感的にdocstringを取り出せるようにする" class="section level2">
+<h2>関数から直感的にdocstringを取り出せるようにする</h2>
+<p>まずは<code>with_docstring</code>関数を用意し、関数の処理の先頭が文字列なら、該当部分を関数自身の<code>__doc__</code>属性に保存する<code>with_docstring</code>関数を定義してみましょう。ついでに、後々のことを考えてこの文字列には<code>docstring</code>クラスを与え、関数には<code>with_docstring</code>クラスを与えておきます。</p>
+<p>これで<code>attr(add_one, "__doc__")</code>すればヘルプを取り出せるようになり、取り出し方が直感的になります。</p>
+<pre class="r"><code>with_docstring &lt;- function(f) {
+  doc &lt;- body(f)[2L][[1L]]
+  attr(f, &quot;__doc__&quot;) &lt;- structure(
+    `if`(is.character(doc), doc, &quot;&quot;),
+    class = &quot;docstring&quot;
+  )
+  class(f) &lt;- c(&quot;with_docstring&quot;, class(f))
+  return(f)
+}
+
+add_one &lt;- with_docstring(.add_one)
+attr(add_one, &quot;__doc__&quot;)</code></pre>
+<pre><code>## [1] &quot;Add one.\n  \n  @param x: A numeric vector.\n  \n  @value\n  x + 1\n  &quot;
+## attr(,&quot;class&quot;)
+## [1] &quot;docstring&quot;</code></pre>
+<p><code>.add_one</code>関数を定義してから<code>add_one</code>関数にするのが面倒であれば、最初から関数定義を<code>with_docstring</code>関数でラップしましょう。
+Pythonで言うところのデコレータ的発想ですね。</p>
+<pre class="r"><code>add_one &lt;- with_docstring(function(x) {
+  r&quot;---(Add one.
+  
+  @param x: A numeric vector.
+  
+  @value
+  x + 1
+  )---&quot;
+  x + 1
+})</code></pre>
+</div>
+<div id="docstringを良い感じにprintする" class="section level2">
+<h2>docstringを良い感じにprintする</h2>
+<p>docstringの抽出が簡単になりましたが、表示がイマイチです。</p>
+<pre class="r"><code>attr(add_one, &quot;__doc__&quot;)</code></pre>
+<pre><code>## [1] &quot;Add one.\n  \n  @param x: A numeric vector.\n  \n  @value\n  x + 1\n  &quot;
+## attr(,&quot;class&quot;)
+## [1] &quot;docstring&quot;</code></pre>
+<p>というわけで<code>docstring</code>クラス用<code>print</code>メソッドを実装してあげましょう。単に<code>cat</code>するだけでOKです。</p>
+<pre class="r"><code>print.docstring &lt;- function(x, ...) {
+  cat(x)
+  invisible(x)
+}
+
+attr(add_one, &quot;__doc__&quot;)</code></pre>
+<pre><code>## Add one.
+##   
+##   @param x: A numeric vector.
+##   
+##   @value
+##   x + 1
+## </code></pre>
+<p>良い感じになりましたね。</p>
+</div>
+<div id="help関数をマスクする" class="section level2">
+<h2>help関数をマスクする</h2>
+<p>あとは<code>help</code>関数を実装するだけです。色んな方法が考えられますが、一番シンプルな方法は<code>help</code>関数を総称関数にする手です。そして、<code>help.with_docstring</code>メソッドで<code>with_docstring</code>クラスオブジェクトだけの専用<code>help</code>を用意します。ついでに<code>help.default</code>を用意すれば、その他のオブジェクトに対しては従来の<code>utils::help</code>関数を呼べます。</p>
+<p>以下では<code>help</code>と<code>help.with_docstring</code>関数にたいして引数を定義せず、後から<code>utils::help</code>関数の引数を<code>formals</code>関数を使ってパクってます。このあたりについてはJapan.R 2018で発表した「<a href="https://atusy.github.io/presentation/japanr2018/formals-for-black-magicians.html#/">関数魔改造講座 (formals編)</a>」を参照してください。</p>
+<pre class="r"><code>help &lt;- function() {
+  UseMethod(&quot;help&quot;)
+}
+help.default &lt;- utils::help
+help.with_docstring &lt;- function() {
+  print(attr(topic, &quot;__doc__&quot;, exact = TRUE))
+}
+  
+formals(help) &lt;- formals(help.with_docstring) &lt;- formals(utils::help)
+help(add_one)</code></pre>
+<pre><code>## Add one.
+##   
+##   @param x: A numeric vector.
+##   
+##   @value
+##   x + 1
+## </code></pre>
+<p><code>printr</code>パッケージを使えばR Markdown内でヘルプを使えるので、docstringがない関数についてもちゃんとヘルプを呼べます。</p>
+<pre class="r"><code>library(printr)</code></pre>
+<pre><code>## Registered S3 method overwritten by &#39;printr&#39;:
+##   method                from     
+##   knit_print.data.frame rmarkdown</code></pre>
+<pre class="r"><code>help(identity)</code></pre>
+<div class="r-help-page">
+<table width="100%" summary="page for identity">
+<tr>
+<td>
+identity
+</td>
+<td style="text-align: right;">
+R Documentation
+</td>
+</tr>
+</table>
+<h2>
+Identity Function
+</h2>
+<h3>
+Description
+</h3>
+<p>
+A trivial identity function returning its argument.
+</p>
+<h3>
+Usage
+</h3>
+<pre class="r">
+identity(x)
+</pre>
+<h3>
+Arguments
+</h3>
+<table summary="R argblock">
+<tr valign="top">
+<td>
+<code>x</code>
+</td>
+<td>
+<p>
+an <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> object.
+</p>
+</td>
+</tr>
+</table>
+<h3>
+See Also
+</h3>
+<p>
+<code>diag</code> creates diagonal matrices, including identity ones.
+</p>
+</div>
+</div>
+<div id="and-more" class="section level2">
+<h2>and more?</h2>
+<p><code>__doc__</code>属性に加える時に文字列をうまく編集すれば、色んなことができます。</p>
+<ul>
+<li>roxygen2として処理してちゃんとしたヘルプっぽくする</li>
+<li>マークダウンなどとして処理して太字とかを表現する</li>
+</ul>
+<p>など。</p>
+<p>楽しいですねー。</p>
+</div>
+</div>
+<div id="enjoy" class="section level1 unlisted">
+<h1>Enjoy</h1>
+</div>
