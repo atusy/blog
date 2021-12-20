@@ -188,7 +188,7 @@ library(printr)
 help(identity)
 ```
 
-## and more?
+# Enjoy more?
 
 `__doc__`属性に加える時に文字列をうまく編集すれば、色んなことができます。
 
@@ -198,5 +198,3 @@ help(identity)
 など。
 
 楽しいですねー。
-
-# Enjoy {.unlisted}

@@ -20,9 +20,8 @@ summary: 関数魔改造講座body編と言えるかもしれない……。黒�
 <li><a href="#関数から直感的にdocstringを取り出せるようにする">関数から直感的にdocstringを取り出せるようにする</a></li>
 <li><a href="#docstringを良い感じにprintする">docstringを良い感じにprintする</a></li>
 <li><a href="#help関数をマスクする">help関数をマスクする</a></li>
-<li><a href="#and-more">and more?</a></li>
 </ul></li>
-<li><a href="#enjoy">Enjoy</a></li>
+<li><a href="#enjoy-more">Enjoy more?</a></li>
 </ul>
 </div>
 
@@ -68,14 +67,14 @@ summary: 関数魔改造講座body編と言えるかもしれない……。黒�
 <pre><code>##  language {  &quot;Add one.\n  \n  @param x: A numeric vector.\n  \n  @value\n  x + 1\n  &quot;; x + 1 }
 ##  - attr(*, &quot;srcref&quot;)=List of 3
 ##   ..$ : &#39;srcref&#39; int [1:8] 1 25 1 25 25 25 1 1
-##   .. ..- attr(*, &quot;srcfile&quot;)=Classes &#39;srcfilecopy&#39;, &#39;srcfile&#39; &lt;environment: 0x55d9e585a420&gt; 
+##   .. ..- attr(*, &quot;srcfile&quot;)=Classes &#39;srcfilecopy&#39;, &#39;srcfile&#39; &lt;environment: 0x55d19c96eec8&gt; 
 ##   ..$ : &#39;srcref&#39; int [1:8] 2 3 8 7 3 7 2 8
-##   .. ..- attr(*, &quot;srcfile&quot;)=Classes &#39;srcfilecopy&#39;, &#39;srcfile&#39; &lt;environment: 0x55d9e585a420&gt; 
+##   .. ..- attr(*, &quot;srcfile&quot;)=Classes &#39;srcfilecopy&#39;, &#39;srcfile&#39; &lt;environment: 0x55d19c96eec8&gt; 
 ##   ..$ : &#39;srcref&#39; int [1:8] 9 3 9 7 3 7 9 9
-##   .. ..- attr(*, &quot;srcfile&quot;)=Classes &#39;srcfilecopy&#39;, &#39;srcfile&#39; &lt;environment: 0x55d9e585a420&gt; 
-##  - attr(*, &quot;srcfile&quot;)=Classes &#39;srcfilecopy&#39;, &#39;srcfile&#39; &lt;environment: 0x55d9e585a420&gt; 
+##   .. ..- attr(*, &quot;srcfile&quot;)=Classes &#39;srcfilecopy&#39;, &#39;srcfile&#39; &lt;environment: 0x55d19c96eec8&gt; 
+##  - attr(*, &quot;srcfile&quot;)=Classes &#39;srcfilecopy&#39;, &#39;srcfile&#39; &lt;environment: 0x55d19c96eec8&gt; 
 ##  - attr(*, &quot;wholeSrcref&quot;)= &#39;srcref&#39; int [1:8] 1 0 10 1 0 1 1 10
-##   ..- attr(*, &quot;srcfile&quot;)=Classes &#39;srcfilecopy&#39;, &#39;srcfile&#39; &lt;environment: 0x55d9e585a420&gt;</code></pre>
+##   ..- attr(*, &quot;srcfile&quot;)=Classes &#39;srcfilecopy&#39;, &#39;srcfile&#39; &lt;environment: 0x55d19c96eec8&gt;</code></pre>
 <p>でもリスト化してあげると、ASTっぽい感じに処理が保存されてる感じだと分かります。</p>
 <pre class="r"><code>as.list(body(.add_one))</code></pre>
 <pre><code>## [[1]]
@@ -244,8 +243,9 @@ See Also
 </p>
 </div>
 </div>
-<div id="and-more" class="section level2">
-<h2>and more?</h2>
+</div>
+<div id="enjoy-more" class="section level1">
+<h1>Enjoy more?</h1>
 <p><code>__doc__</code>属性に加える時に文字列をうまく編集すれば、色んなことができます。</p>
 <ul>
 <li>roxygen2として処理してちゃんとしたヘルプっぽくする</li>
@@ -253,8 +253,4 @@ See Also
 </ul>
 <p>など。</p>
 <p>楽しいですねー。</p>
-</div>
-</div>
-<div id="enjoy" class="section level1 unlisted">
-<h1>Enjoy</h1>
 </div>
