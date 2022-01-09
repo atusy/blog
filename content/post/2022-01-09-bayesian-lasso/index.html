@@ -1,0 +1,89 @@
+---
+title: Stanを使ったBayesian Lassoの実装に関するメモ
+author: ''
+date: '2022-01-09'
+slug: bayesian-lasso
+categories: [Stats]
+tags: [Stan]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p>LASSOは確率モデルだと係数の事前分布にラプラス分布を指定したものに相当するって話はちょいちょい聞くけど、実際の証明とか実装はどうなってるんだろうなーと思ったので、いくつかのサイトを渡り歩いてみた。</p>
+<p>結果としてはホントにラプラス分布指定するだけでいいんだなーと分かった。</p>
+<details>
+<p><summary>実装</summary></p>
+<p><a href="https://statmodeling.hatenablog.com/entry/bayesian-lasso" class="uri">https://statmodeling.hatenablog.com/entry/bayesian-lasso</a> より引用</p>
+<pre><code>//model_lasso.stan
+data{
+  int N; //標本数
+  int H; //説明変数の数(切片を除く)
+  vector[N] y; //目的変数 標準化済み
+  matrix[N,H] x; // 説明変数 標準化済み
+}
+
+parameters{
+  real w_0;
+  vector[H] w; //係数パラメータ
+  real&lt;lower=0&gt; sigma;
+  real&lt;lower=0&gt; b;
+}
+
+transformed parameters{
+  vector[N] mu;
+
+  mu = w_0 + x * w;
+
+}
+
+model{
+
+  y ~ normal(mu, sigma);
+  w ~ double_exponential(0, b);
+
+}
+
+generated quantities{
+  real log_lambda;
+
+  log_lambda = log(sigma^2 / (N * b)); //(7)式
+}</code></pre>
+</details>
+<div id="sucre-hecacha-bayesian-ridgeとbayesian-lasso-通常の正則化回帰との比較" class="section level2">
+<h2>SUCRE HECACHA: Bayesian RidgeとBayesian Lasso 通常の正則化回帰との比較</h2>
+<p><a href="https://rmorita-stat.github.io/2021/01/regularization2/#lasso%E5%9B%9E%E5%B8%B0-1" class="uri">https://rmorita-stat.github.io/2021/01/regularization2/#lasso%E5%9B%9E%E5%B8%B0-1</a></p>
+<p>線形回帰、Ridge、LASSOをStanで実装</p>
+<p>確率モデルで表現できることの証明付き</p>
+</div>
+<div id="statmodeling-memorandum-bayesian-lassoで特徴選択" class="section level2">
+<h2>StatModeling Memorandum: Bayesian Lassoで特徴選択</h2>
+<p><a href="https://statmodeling.hatenablog.com/entry/bayesian-lasso" class="uri">https://statmodeling.hatenablog.com/entry/bayesian-lasso</a></p>
+<p>Stanで線形回帰、正則化項によるLASSO、ラプラス分布によるLASSOの3パターンを実装</p>
+<p>最後を除いてtransformed_parametersを使って誤差項を計算し、modelではincrement_log_probを使って誤差の最小化を計っている点がStanっぽくないけど数学的背景に則していて面白い書き方</p>
+</div>
+<div id="捨てられたブログ-stan-で-lasso" class="section level2">
+<h2>捨てられたブログ: Stan で Lasso</h2>
+<p><a href="https://blog.recyclebin.jp/archives/4397" class="uri">https://blog.recyclebin.jp/archives/4397</a></p>
+<p>ラプラス分布のパラメータ<span class="math inline">\(b\)</span>の事前分布に唯一、逆ガンマ分布を利用</p>
+<p>該当部分のコードは以下。
+lambdaは定数で0.02。</p>
+<pre><code>sigma2 ~ inv_gamma(0.001, 0.001);
+sigma &lt;- sqrt(sigma2);
+beta ~ double_exponential(0, sigma / lambda);</code></pre>
+<p>母分散が未知な場合の分散の事前分布が逆ガンマ分布なのが背景か？（参考: <a href="https://toukeier.hatenablog.com/entry/what-is-inverse-gamma-distribution/">統計ER: 逆ガンマ分布って何？いつ使うの？</a>）</p>
+<p>ただ、ラプラス分布の分散は<span class="math inline">\(2b^2\)</span>なので、こんな感じにした方が実態に則してそう？</p>
+<pre><code>variance ~ inv_gamma(0.001, 0.001)
+b &lt;- sqrt(variance / 2)
+beta ~ double_exponential(0, b)</code></pre>
+<p>そもそもStan的には、共役事前分布には拘らないらしい。また、分散のように正の実数を持つ値のモデリング方法として以下を提案している。</p>
+<ul>
+<li>無情報一様事前分布を<code>real&lt;lower=0&gt; b</code>の形式で与える</li>
+<li>弱情報事前分布として指数分布や半正規分布、半コーシー分布などを与える</li>
+</ul>
+<blockquote>
+<p><a href="https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations" class="uri">https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations</a></p>
+</blockquote>
+</div>
