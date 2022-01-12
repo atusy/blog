@@ -1,0 +1,230 @@
+---
+title: StanでFused LASSOしてみたかった
+author: ''
+date: '2022-01-12'
+slug: stan-fused-lasso
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p>StanでLASSOを実装すると、罰則化項Lambdaも同時に最適化できる。</p>
+<p>そりゃいいなと思ったのでFused LASSOも実装してみたくなった。</p>
+<p>Fused LASSOは隣合う回帰係数の差が疎であると仮定するもの。</p>
+<p>ステップ状の時系列データのデノイズなんかに使える。</p>
+<p>LASSOにおける罰則項は回帰係数<span class="math inline">\(β\)</span>のL1ノルム<span class="math inline">\(\sum_i{|\beta_i|}\)</span>だったところを、
+Fused LASSOでは隣合う回帰係数の差のL1ノルムに書き換えれば良い<span class="math inline">\(\sum_i{|\beta_{i+1} - \beta_{i}|}\)</span>。</p>
+<p>しかし、現状、どうにもうまくいってません……。</p>
+<div id="テストデータ" class="section level2">
+<h2>テストデータ</h2>
+<pre class="r"><code>set.seed(1)
+df &lt;- data.frame(
+  Y_true = c(rep(0, 20), rep(2, 20), rep(0, 20))
+) |&gt;
+  dplyr::mutate(
+    Y = Y_true + rnorm(dplyr::n(), 0, 0.2),
+    T = seq(dplyr::n())
+  )
+
+g &lt;- ggplot2::ggplot(df) +
+  ggplot2::geom_line(ggplot2::aes(T, Y_true)) +
+  ggplot2::geom_point(ggplot2::aes(T, Y))
+g</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+</div>
+<div id="genlassoパッケージによる実装" class="section level2">
+<h2>genlassoパッケージによる実装</h2>
+<p>めっちゃ簡単です。</p>
+<pre class="r"><code>fused &lt;- genlasso::fusedlasso1d(df$Y)</code></pre>
+<p>結果を表示すると、Lambdaを大きくするほどノイズを無視してステップ状になります。</p>
+<p>Lambdaを大きくしすぎると、本来のステップからずれた位置に推定されたステップが現れる点に注意。</p>
+<p>十分に大きくすると、ただの水平線になります。</p>
+<pre class="r"><code># 時刻T、Lambda、回帰係数βから成るデータフレーム
+beta &lt;- as.data.frame(fused$beta) |&gt;
+  setNames(fused$lambda) |&gt;
+  dplyr::mutate(T = dplyr::row_number()) |&gt;
+  tidyr::pivot_longer(
+    cols = -T,
+    names_to = &quot;lambda&quot;,
+    values_to = &quot;beta&quot;,
+    names_transform = list(lambda = as.numeric)
+  )
+
+# データフレームbetaの内、一部を表示
+g +
+  ggplot2::geom_line(
+    ggplot2::aes(x = T, y = beta, color = lambda, group = lambda),
+    data = beta |&gt; dplyr::filter(0.2 &lt; lambda &amp; lambda &lt; 5)
+  ) +
+  ggplot2::scale_color_viridis_c()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>
+<div id="正則化項による実装" class="section level2">
+<h2>正則化項による実装</h2>
+<p>StatModeling MemorandumさんのStanによるLASSO実装を参考に、罰則項を<span class="math inline">\(\sum_i{|\beta_i|}\)</span>から<span class="math inline">\(\sum_i{|\beta_{i+1} - \beta_{i}|}\)</span>に置き換えます。</p>
+<blockquote>
+<p><a href="https://statmodeling.hatenablog.com/entry/bayesian-lasso" class="uri">https://statmodeling.hatenablog.com/entry/bayesian-lasso</a></p>
+</blockquote>
+<pre class="stan"><code>// fused1.stan
+data {
+   int&lt;lower=1&gt; T;
+   matrix[T,T] X;
+   vector[T] Y;
+   real&lt;lower=0&gt; Lambda;
+}
+parameters {
+   vector[T] beta;
+}
+transformed parameters {
+  vector[T-1] beta_d1;
+  real&lt;lower=0&gt; squared_error;
+  beta_d1 = beta[1:T-1] - beta[2:T];
+  squared_error = dot_self(Y - X * beta);
+}
+model {
+  target += -squared_error;
+  for (k in 1:(T-1))
+    target += -Lambda * fabs(beta_d1[k]);
+}</code></pre>
+<p>ではサンプリングしてみましょう。</p>
+<p>genlassoパッケージの結果を参考に今回は<code>Lambda = 2</code>を試してみましょう。</p>
+<pre><code>## Warning in readLines(file, warn = TRUE): incomplete final line found on &#39;/home/
+## rstudio/Documents/github/atusy/blog/content/post/2022-01-12-stan-fused-lasso/
+## fused1.stan&#39;</code></pre>
+<pre><code>## Trying to compile a simple C file</code></pre>
+<pre><code>## Running /usr/local/lib/R/bin/R CMD SHLIB foo.c
+## gcc -I&quot;/usr/local/lib/R/include&quot; -DNDEBUG   -I&quot;/usr/local/lib/R/site-library/Rcpp/include/&quot;  -I&quot;/usr/local/lib/R/site-library/RcppEigen/include/&quot;  -I&quot;/usr/local/lib/R/site-library/RcppEigen/include/unsupported&quot;  -I&quot;/usr/local/lib/R/site-library/BH/include&quot; -I&quot;/usr/local/lib/R/site-library/StanHeaders/include/src/&quot;  -I&quot;/usr/local/lib/R/site-library/StanHeaders/include/&quot;  -I&quot;/usr/local/lib/R/site-library/RcppParallel/include/&quot;  -I&quot;/usr/local/lib/R/site-library/rstan/include&quot; -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DBOOST_NO_AUTO_PTR  -include &#39;/usr/local/lib/R/site-library/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp&#39;  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include   -fpic  -g -O2 -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c foo.c -o foo.o
+## In file included from /usr/local/lib/R/site-library/RcppEigen/include/Eigen/Core:88,
+##                  from /usr/local/lib/R/site-library/RcppEigen/include/Eigen/Dense:1,
+##                  from /usr/local/lib/R/site-library/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp:13,
+##                  from &lt;command-line&gt;:
+## /usr/local/lib/R/site-library/RcppEigen/include/Eigen/src/Core/util/Macros.h:628:1: error: unknown type name ‘namespace’
+##   628 | namespace Eigen {
+##       | ^~~~~~~~~
+## /usr/local/lib/R/site-library/RcppEigen/include/Eigen/src/Core/util/Macros.h:628:17: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘{’ token
+##   628 | namespace Eigen {
+##       |                 ^
+## In file included from /usr/local/lib/R/site-library/RcppEigen/include/Eigen/Dense:1,
+##                  from /usr/local/lib/R/site-library/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp:13,
+##                  from &lt;command-line&gt;:
+## /usr/local/lib/R/site-library/RcppEigen/include/Eigen/Core:96:10: fatal error: complex: No such file or directory
+##    96 | #include &lt;complex&gt;
+##       |          ^~~~~~~~~
+## compilation terminated.
+## make: *** [/usr/local/lib/R/etc/Makeconf:168: foo.o] Error 1
+## 
+## SAMPLING FOR MODEL &#39;fused1&#39; NOW (CHAIN 1).
+## Chain 1: 
+## Chain 1: Gradient evaluation took 3.2e-05 seconds
+## Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.32 seconds.
+## Chain 1: Adjust your expectations accordingly!
+## Chain 1: 
+## Chain 1: 
+## Chain 1: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 1: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 1: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 1: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 1: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 1: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 1: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 1: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 1: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 1: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 1: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 1: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 1: 
+## Chain 1:  Elapsed Time: 1.26572 seconds (Warm-up)
+## Chain 1:                1.14948 seconds (Sampling)
+## Chain 1:                2.4152 seconds (Total)
+## Chain 1: 
+## 
+## SAMPLING FOR MODEL &#39;fused1&#39; NOW (CHAIN 2).
+## Chain 2: 
+## Chain 2: Gradient evaluation took 5.6e-05 seconds
+## Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.56 seconds.
+## Chain 2: Adjust your expectations accordingly!
+## Chain 2: 
+## Chain 2: 
+## Chain 2: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 2: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 2: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 2: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 2: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 2: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 2: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 2: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 2: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 2: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 2: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 2: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 2: 
+## Chain 2:  Elapsed Time: 1.1476 seconds (Warm-up)
+## Chain 2:                1.08013 seconds (Sampling)
+## Chain 2:                2.22773 seconds (Total)
+## Chain 2: 
+## 
+## SAMPLING FOR MODEL &#39;fused1&#39; NOW (CHAIN 3).
+## Chain 3: 
+## Chain 3: Gradient evaluation took 2e-05 seconds
+## Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 0.2 seconds.
+## Chain 3: Adjust your expectations accordingly!
+## Chain 3: 
+## Chain 3: 
+## Chain 3: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 3: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 3: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 3: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 3: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 3: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 3: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 3: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 3: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 3: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 3: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 3: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 3: 
+## Chain 3:  Elapsed Time: 1.31638 seconds (Warm-up)
+## Chain 3:                1.13865 seconds (Sampling)
+## Chain 3:                2.45504 seconds (Total)
+## Chain 3: 
+## 
+## SAMPLING FOR MODEL &#39;fused1&#39; NOW (CHAIN 4).
+## Chain 4: 
+## Chain 4: Gradient evaluation took 1.8e-05 seconds
+## Chain 4: 1000 transitions using 10 leapfrog steps per transition would take 0.18 seconds.
+## Chain 4: Adjust your expectations accordingly!
+## Chain 4: 
+## Chain 4: 
+## Chain 4: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 4: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 4: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 4: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 4: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 4: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 4: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 4: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 4: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 4: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 4: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 4: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 4: 
+## Chain 4:  Elapsed Time: 1.17579 seconds (Warm-up)
+## Chain 4:                1.08785 seconds (Sampling)
+## Chain 4:                2.26363 seconds (Total)
+## Chain 4:</code></pre>
+<p>では可視化。むむむ。</p>
+<pre class="r"><code>df_pred &lt;- data.frame(
+  Y = fit1 |&gt;
+    rstan::extract(&quot;beta&quot;) |&gt;
+    (function(x) x[[1L]])() |&gt;
+    colMeans()
+) |&gt;
+  dplyr::mutate(T = dplyr::row_number())
+g +
+  ggplot2::geom_point(ggplot2::aes(x = T, y = Y), data = df_pred, color=&#39;red&#39;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>

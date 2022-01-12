@@ -1,0 +1,166 @@
+---
+title: StanでFused LASSOしてみたかった
+author: ''
+date: '2022-01-12'
+slug: stan-fused-lasso
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+    toc: true
+---
+
+StanでLASSOを実装すると、罰則化項Lambdaも同時に最適化できる。
+
+そりゃいいなと思ったのでFused LASSOも実装してみたくなった。
+
+Fused LASSOは隣合う回帰係数の差が疎であると仮定するもの。
+
+ステップ状の時系列データのデノイズなんかに使える。
+
+LASSOにおける罰則項は回帰係数$β$のL1ノルム$\sum_i{|\beta_i|}$だったところを、
+Fused LASSOでは隣合う回帰係数の差のL1ノルムに書き換えれば良い$\sum_i{|\beta_{i+1} - \beta_{i}|}$。
+
+しかし、現状、どうにもうまくいってません……。
+
+## テストデータ
+
+```{r}
+set.seed(1)
+df <- data.frame(
+  Y_true = c(rep(0, 20), rep(2, 20), rep(0, 20))
+) |>
+  dplyr::mutate(
+    Y = Y_true + rnorm(dplyr::n(), 0, 0.2),
+    T = seq(dplyr::n())
+  )
+
+g <- ggplot2::ggplot(df) +
+  ggplot2::geom_line(ggplot2::aes(T, Y_true)) +
+  ggplot2::geom_point(ggplot2::aes(T, Y))
+g
+```
+
+## genlassoパッケージによる実装
+
+めっちゃ簡単です。
+
+```{r}
+fused <- genlasso::fusedlasso1d(df$Y)
+```
+
+結果を表示すると、Lambdaを大きくするほどノイズを無視してステップ状になります。
+
+Lambdaを大きくしすぎると、本来のステップからずれた位置に推定されたステップが現れる点に注意。
+
+十分に大きくすると、ただの水平線になります。
+
+```{r}
+# 時刻T、Lambda、回帰係数βから成るデータフレーム
+beta <- as.data.frame(fused$beta) |>
+  setNames(fused$lambda) |>
+  dplyr::mutate(T = dplyr::row_number()) |>
+  tidyr::pivot_longer(
+    cols = -T,
+    names_to = "lambda",
+    values_to = "beta",
+    names_transform = list(lambda = as.numeric)
+  )
+
+# データフレームbetaの内、一部を表示
+g +
+  ggplot2::geom_line(
+    ggplot2::aes(x = T, y = beta, color = lambda, group = lambda),
+    data = beta |> dplyr::filter(0.2 < lambda & lambda < 5)
+  ) +
+  ggplot2::scale_color_viridis_c()
+```
+
+
+## 正則化項による実装
+
+StatModeling MemorandumさんのStanによるLASSO実装を参考に、
+罰則項を$\sum_i{|\beta_i|}$から$\sum_i{|\beta_{i+1} - \beta_{i}|}$に置き換えます。
+
+> https://statmodeling.hatenablog.com/entry/bayesian-lasso
+
+```{r, echo=FALSE, results='asis'}
+cat(c("``` stan", readr::read_lines("fused1.stan"), "```"), sep="\n")
+```
+
+ではサンプリングしてみましょう。
+
+genlassoパッケージの結果を参考に今回は`Lambda = 2`を試してみましょう。
+
+ちなみに`Lambda`を`parameters`ブロックで定義すれば、同時に探索できますが、どうにも0.019とか低い値がMAP推定になります。
+
+```{r, echo=FALSE, cache=TRUE}
+fit1 <- rstan::stan(
+  "fused1.stan",
+  seed = 0,
+  iter = 2000,
+  data = list(Y = df$Y, X = diag(nrow(df)), T = nrow(df), Lambda = 2)
+)
+```
+
+では可視化。むむむ。
+
+```{r}
+df_pred <- data.frame(Y = colMeans(rstan::extract(fit1, "beta")[[1L]])) |>
+  dplyr::mutate(T = dplyr::row_number())
+g +
+  ggplot2::geom_point(ggplot2::aes(x = T, y = Y), data = df_pred, color='red')
+```
+
+## 状態空間モデルで実装
+
+たぶん、隣合う係数の差が`double_exponential(0, s_mu)`に従うと記述すればOK。
+
+でもうまくいかない。
+
+罰則化項で実装した時もLambdaをサンプリングするとMAP推定が低くなりすぎたので、同じ問題を抱えてそう。
+
+```{stan, eval=FALSE}
+data {
+  int T;
+  int T_pred;
+  vector[T] Y;
+}
+
+parameters {
+  vector[T] mu;
+  real<lower=0> s_mu;
+  real<lower=0> s_Y;
+}
+
+transformed parameters {
+  vector[T-1] mu_d1;
+  mu_d1 = mu[1:(T-1)] - mu[2:T];
+}
+
+model {
+  mu_d1 ~ double_exponential(0, s_mu);
+  // ↓を↑に書き換えた
+  // mu_d1 ~ normal(0, s_mu);
+  Y ~ normal(mu, s_Y);
+}
+
+generated quantities {
+  vector[T+T_pred] mu_all;
+  vector[T_pred] y_pred;
+  mu_all[1:T] = mu;
+  for (t in 1:T_pred) {
+    mu_all[T+t] = normal_rng(mu_all[T+t-1], s_mu);
+    y_pred[t] = normal_rng(mu_all[T+t], s_Y);
+  }
+}
+```
+
+## コメント
+
+むずい……。
+
+変化点検出したいだけなら、`double_exponential`じゃなくて`cauchy`使うのがよさそうな感じしますねー。
+
+その時に収束しやすくする方法は「StanとRでベイズ統計モデリング」を参考にしてください。
