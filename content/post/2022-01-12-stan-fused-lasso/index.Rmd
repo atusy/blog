@@ -121,7 +121,7 @@ g +
 
 罰則化項で実装した時もLambdaをサンプリングするとMAP推定が低くなりすぎたので、同じ問題を抱えてそう。
 
-```{stan, eval=FALSE}
+```stan
 data {
   int T;
   int T_pred;
@@ -164,3 +164,4 @@ generated quantities {
 変化点検出したいだけなら、`double_exponential`じゃなくて`cauchy`使うのがよさそうな感じしますねー。
 
 その時に収束しやすくする方法は「StanとRでベイズ統計モデリング」を参考にしてください。
+

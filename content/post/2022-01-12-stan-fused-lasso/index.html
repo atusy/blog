@@ -8,9 +8,19 @@ tags: []
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists
+    toc: true
 ---
 
 
+<div id="TOC">
+<ul>
+<li><a href="#テストデータ">テストデータ</a></li>
+<li><a href="#genlassoパッケージによる実装">genlassoパッケージによる実装</a></li>
+<li><a href="#正則化項による実装">正則化項による実装</a></li>
+<li><a href="#状態空間モデルで実装">状態空間モデルで実装</a></li>
+<li><a href="#コメント">コメント</a></li>
+</ul>
+</div>
 
 <p>StanでLASSOを実装すると、罰則化項Lambdaも同時に最適化できる。</p>
 <p>そりゃいいなと思ったのでFused LASSOも実装してみたくなった。</p>
@@ -92,6 +102,7 @@ model {
 }</code></pre>
 <p>ではサンプリングしてみましょう。</p>
 <p>genlassoパッケージの結果を参考に今回は<code>Lambda = 2</code>を試してみましょう。</p>
+<p>ちなみに<code>Lambda</code>を<code>parameters</code>ブロックで定義すれば、同時に探索できますが、どうにも0.019とか低い値がMAP推定になります。</p>
 <pre><code>## Warning in readLines(file, warn = TRUE): incomplete final line found on &#39;/home/
 ## rstudio/Documents/github/atusy/blog/content/post/2022-01-12-stan-fused-lasso/
 ## fused1.stan&#39;</code></pre>
@@ -217,14 +228,54 @@ model {
 ## Chain 4:                2.26363 seconds (Total)
 ## Chain 4:</code></pre>
 <p>では可視化。むむむ。</p>
-<pre class="r"><code>df_pred &lt;- data.frame(
-  Y = fit1 |&gt;
-    rstan::extract(&quot;beta&quot;) |&gt;
-    (function(x) x[[1L]])() |&gt;
-    colMeans()
-) |&gt;
+<pre class="r"><code>df_pred &lt;- data.frame(Y = colMeans(rstan::extract(fit1, &quot;beta&quot;)[[1L]])) |&gt;
   dplyr::mutate(T = dplyr::row_number())
 g +
   ggplot2::geom_point(ggplot2::aes(x = T, y = Y), data = df_pred, color=&#39;red&#39;)</code></pre>
 <p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="状態空間モデルで実装" class="section level2">
+<h2>状態空間モデルで実装</h2>
+<p>たぶん、隣合う係数の差が<code>double_exponential(0, s_mu)</code>に従うと記述すればOK。</p>
+<p>でもうまくいかない。</p>
+<p>罰則化項で実装した時もLambdaをサンプリングするとMAP推定が低くなりすぎたので、同じ問題を抱えてそう。</p>
+<pre class="stan"><code>data {
+  int T;
+  int T_pred;
+  vector[T] Y;
+}
+
+parameters {
+  vector[T] mu;
+  real&lt;lower=0&gt; s_mu;
+  real&lt;lower=0&gt; s_Y;
+}
+
+transformed parameters {
+  vector[T-1] mu_d1;
+  mu_d1 = mu[1:(T-1)] - mu[2:T];
+}
+
+model {
+  mu_d1 ~ double_exponential(0, s_mu);
+  // ↓を↑に書き換えた
+  // mu_d1 ~ normal(0, s_mu);
+  Y ~ normal(mu, s_Y);
+}
+
+generated quantities {
+  vector[T+T_pred] mu_all;
+  vector[T_pred] y_pred;
+  mu_all[1:T] = mu;
+  for (t in 1:T_pred) {
+    mu_all[T+t] = normal_rng(mu_all[T+t-1], s_mu);
+    y_pred[t] = normal_rng(mu_all[T+t], s_Y);
+  }
+}</code></pre>
+</div>
+<div id="コメント" class="section level2">
+<h2>コメント</h2>
+<p>むずい……。</p>
+<p>変化点検出したいだけなら、<code>double_exponential</code>じゃなくて<code>cauchy</code>使うのがよさそうな感じしますねー。</p>
+<p>その時に収束しやすくする方法は「StanとRでベイズ統計モデリング」を参考にしてください。</p>
 </div>
