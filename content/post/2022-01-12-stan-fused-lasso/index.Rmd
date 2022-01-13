@@ -9,6 +9,7 @@ output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists
     toc: true
+math: true
 ---
 
 StanでLASSOを実装すると、罰則化項Lambdaも同時に最適化できる。
