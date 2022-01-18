@@ -1,0 +1,84 @@
+---
+title: grepとユカイな仲間たち
+author: ''
+date: '2022-01-18'
+slug: grep-and-friends
+categories: [R]
+tags: [grep]
+output:
+  blogdown::html_page:
+    toc: true
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+  `help(grep)`にある`gregexpr`とかを理解したい。
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+
+`?grep`すると色んな関数が並んでるけど、違いをよくわかってなかったので、改めて試す。
+
+# 実験
+
+```{r}
+fruits <- c("apple", "banana", "prune")
+```
+
+## `grep`関数はマッチした要素のインデックスを返す。
+
+```{r}
+grep("p", fruits)
+```
+
+## `grepl`関数はマッチしたか否かの真偽値を返す。
+
+```{r}
+grepl("p", fruits)
+```
+
+## `regexpr`関数は最初にマッチした箇所が何文字目で、何文字から成るか返す。
+
+```{r}
+regexpr("p", fruits)
+regexpr("p+", fruits)
+regexpr("[ap]+", fruits)
+```
+
+## `gregexpr`関数は`regexpr`関数の複数マッチ版。
+
+```{r}
+gregexpr("[ap]+", fruits)
+```
+
+## `regexec`関数は`regexpr`関数の返り値がリストになったもの
+
+```{r}
+regexec("p", fruits) |> str()
+```
+
+## `grepexec`関数は`gregexpr`関数のマッチ開始箇所をmatrixで表現したもの
+
+```{r}
+gregexec("p", fruits) |> str()
+```
+
+# 使い分け
+
+- 最初にマッチした箇所の情報が欲しいなら`regexp`
+- マッチした全箇所の情報が欲しいなら、解像度の低い順から
+    - `grep`
+    - `grepl`
+    - `gregexp`
+- `regexec`/`gregexec`の方が情報は多いかもしれないが出番は少なそう
+
+ちなみに`grepl`の方が解像度が高い根拠は返り値を`which`関数に与えるとから`grep`関数相当になるから。
+`grep`関数は入力した文字列ベクトルの長さ情報を失うので、返り値だけでは`grepl`関数の返り値を作れない。
+
+```{r}
+which(grepl("p", fruits))
+grep("p", fruits)
+```
+
+# Enjoy {.unlisted .unnumbered}

@@ -1,0 +1,159 @@
+---
+title: grepとユカイな仲間たち
+author: ''
+date: '2022-01-18'
+slug: grep-and-friends
+categories: [R]
+tags: [grep]
+output:
+  blogdown::html_page:
+    toc: true
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+  `help(grep)`にある`gregexpr`とかを理解したい。
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#実験">実験</a><ul>
+<li><a href="#grep関数はマッチした要素のインデックスを返す"><code>grep</code>関数はマッチした要素のインデックスを返す。</a></li>
+<li><a href="#grepl関数はマッチしたか否かの真偽値を返す"><code>grepl</code>関数はマッチしたか否かの真偽値を返す。</a></li>
+<li><a href="#regexpr関数は最初にマッチした箇所が何文字目で何文字から成るか返す"><code>regexpr</code>関数は最初にマッチした箇所が何文字目で、何文字から成るか返す。</a></li>
+<li><a href="#gregexpr関数はregexpr関数の複数マッチ版"><code>gregexpr</code>関数は<code>regexpr</code>関数の複数マッチ版。</a></li>
+<li><a href="#regexec関数はregexpr関数の返り値がリストになったもの"><code>regexec</code>関数は<code>regexpr</code>関数の返り値がリストになったもの</a></li>
+<li><a href="#grepexec関数はgregexpr関数のマッチ開始箇所をmatrixで表現したもの"><code>grepexec</code>関数は<code>gregexpr</code>関数のマッチ開始箇所をmatrixで表現したもの</a></li>
+</ul></li>
+<li><a href="#使い分け">使い分け</a></li>
+<li><a href="#enjoy">Enjoy</a></li>
+</ul>
+</div>
+
+<p><code>?grep</code>すると色んな関数が並んでるけど、違いをよくわかってなかったので、改めて試す。</p>
+<div id="実験" class="section level1">
+<h1>実験</h1>
+<pre class="r"><code>fruits &lt;- c(&quot;apple&quot;, &quot;banana&quot;, &quot;prune&quot;)</code></pre>
+<div id="grep関数はマッチした要素のインデックスを返す" class="section level2">
+<h2><code>grep</code>関数はマッチした要素のインデックスを返す。</h2>
+<pre class="r"><code>grep(&quot;p&quot;, fruits)
+#&gt; [1] 1 3</code></pre>
+</div>
+<div id="grepl関数はマッチしたか否かの真偽値を返す" class="section level2">
+<h2><code>grepl</code>関数はマッチしたか否かの真偽値を返す。</h2>
+<pre class="r"><code>grepl(&quot;p&quot;, fruits)
+#&gt; [1]  TRUE FALSE  TRUE</code></pre>
+</div>
+<div id="regexpr関数は最初にマッチした箇所が何文字目で何文字から成るか返す" class="section level2">
+<h2><code>regexpr</code>関数は最初にマッチした箇所が何文字目で、何文字から成るか返す。</h2>
+<pre class="r"><code>regexpr(&quot;p&quot;, fruits)
+#&gt; [1]  2 -1  1
+#&gt; attr(,&quot;match.length&quot;)
+#&gt; [1]  1 -1  1
+#&gt; attr(,&quot;index.type&quot;)
+#&gt; [1] &quot;chars&quot;
+#&gt; attr(,&quot;useBytes&quot;)
+#&gt; [1] TRUE
+regexpr(&quot;p+&quot;, fruits)
+#&gt; [1]  2 -1  1
+#&gt; attr(,&quot;match.length&quot;)
+#&gt; [1]  2 -1  1
+#&gt; attr(,&quot;index.type&quot;)
+#&gt; [1] &quot;chars&quot;
+#&gt; attr(,&quot;useBytes&quot;)
+#&gt; [1] TRUE
+regexpr(&quot;[ap]+&quot;, fruits)
+#&gt; [1] 1 2 1
+#&gt; attr(,&quot;match.length&quot;)
+#&gt; [1] 3 1 1
+#&gt; attr(,&quot;index.type&quot;)
+#&gt; [1] &quot;chars&quot;
+#&gt; attr(,&quot;useBytes&quot;)
+#&gt; [1] TRUE</code></pre>
+</div>
+<div id="gregexpr関数はregexpr関数の複数マッチ版" class="section level2">
+<h2><code>gregexpr</code>関数は<code>regexpr</code>関数の複数マッチ版。</h2>
+<pre class="r"><code>gregexpr(&quot;[ap]+&quot;, fruits)
+#&gt; [[1]]
+#&gt; [1] 1
+#&gt; attr(,&quot;match.length&quot;)
+#&gt; [1] 3
+#&gt; attr(,&quot;index.type&quot;)
+#&gt; [1] &quot;chars&quot;
+#&gt; attr(,&quot;useBytes&quot;)
+#&gt; [1] TRUE
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] 2 4 6
+#&gt; attr(,&quot;match.length&quot;)
+#&gt; [1] 1 1 1
+#&gt; attr(,&quot;index.type&quot;)
+#&gt; [1] &quot;chars&quot;
+#&gt; attr(,&quot;useBytes&quot;)
+#&gt; [1] TRUE
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] 1
+#&gt; attr(,&quot;match.length&quot;)
+#&gt; [1] 1
+#&gt; attr(,&quot;index.type&quot;)
+#&gt; [1] &quot;chars&quot;
+#&gt; attr(,&quot;useBytes&quot;)
+#&gt; [1] TRUE</code></pre>
+</div>
+<div id="regexec関数はregexpr関数の返り値がリストになったもの" class="section level2">
+<h2><code>regexec</code>関数は<code>regexpr</code>関数の返り値がリストになったもの</h2>
+<pre class="r"><code>regexec(&quot;p&quot;, fruits) |&gt; str()
+#&gt; List of 3
+#&gt;  $ : int 2
+#&gt;   ..- attr(*, &quot;match.length&quot;)= int 1
+#&gt;   ..- attr(*, &quot;index.type&quot;)= chr &quot;chars&quot;
+#&gt;   ..- attr(*, &quot;useBytes&quot;)= logi TRUE
+#&gt;  $ : int -1
+#&gt;   ..- attr(*, &quot;match.length&quot;)= int -1
+#&gt;   ..- attr(*, &quot;index.type&quot;)= chr &quot;chars&quot;
+#&gt;   ..- attr(*, &quot;useBytes&quot;)= logi TRUE
+#&gt;  $ : int 1
+#&gt;   ..- attr(*, &quot;match.length&quot;)= int 1
+#&gt;   ..- attr(*, &quot;index.type&quot;)= chr &quot;chars&quot;
+#&gt;   ..- attr(*, &quot;useBytes&quot;)= logi TRUE</code></pre>
+</div>
+<div id="grepexec関数はgregexpr関数のマッチ開始箇所をmatrixで表現したもの" class="section level2">
+<h2><code>grepexec</code>関数は<code>gregexpr</code>関数のマッチ開始箇所をmatrixで表現したもの</h2>
+<pre class="r"><code>gregexec(&quot;p&quot;, fruits) |&gt; str()
+#&gt; List of 3
+#&gt;  $ : int [1, 1:2] 2 3
+#&gt;   ..- attr(*, &quot;match.length&quot;)= int [1, 1:2] 1 1
+#&gt;   ..- attr(*, &quot;useBytes&quot;)= logi TRUE
+#&gt;   ..- attr(*, &quot;index.type&quot;)= chr &quot;chars&quot;
+#&gt;  $ : int -1
+#&gt;   ..- attr(*, &quot;match.length&quot;)= int -1
+#&gt;   ..- attr(*, &quot;index.type&quot;)= chr &quot;chars&quot;
+#&gt;   ..- attr(*, &quot;useBytes&quot;)= logi TRUE
+#&gt;  $ : int [1, 1] 1
+#&gt;   ..- attr(*, &quot;match.length&quot;)= int [1, 1] 1
+#&gt;   ..- attr(*, &quot;useBytes&quot;)= logi TRUE
+#&gt;   ..- attr(*, &quot;index.type&quot;)= chr &quot;chars&quot;</code></pre>
+</div>
+</div>
+<div id="使い分け" class="section level1">
+<h1>使い分け</h1>
+<ul>
+<li>最初にマッチした箇所の情報が欲しいなら<code>regexp</code></li>
+<li>マッチした全箇所の情報が欲しいなら、解像度の低い順から
+<ul>
+<li><code>grep</code></li>
+<li><code>grepl</code></li>
+<li><code>gregexp</code></li>
+</ul></li>
+<li><code>regexec</code>/<code>gregexec</code>の方が情報は多いかもしれないが出番は少なそう</li>
+</ul>
+<p>ちなみに<code>grepl</code>の方が解像度が高い根拠は返り値を<code>which</code>関数に与えるとから<code>grep</code>関数相当になるから。
+<code>grep</code>関数は入力した文字列ベクトルの長さ情報を失うので、返り値だけでは<code>grepl</code>関数の返り値を作れない。</p>
+<pre class="r"><code>which(grepl(&quot;p&quot;, fruits))
+#&gt; [1] 1 3
+grep(&quot;p&quot;, fruits)
+#&gt; [1] 1 3</code></pre>
+</div>
+<div id="enjoy" class="section level1 unlisted unnumbered">
+<h1>Enjoy</h1>
+</div>
