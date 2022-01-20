@@ -1,0 +1,65 @@
+---
+title: 書籍「Rが生産性を高める」のサポートサイトを公開しました
+author: ''
+date: '2022-01-20'
+slug: r-efficiency-book-support-site
+categories: [R]
+tags: [登山本]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p>igjitさん、hanaoriさんと共に「Rが生産性を高める〜データ分析ワークフロー効率化の実践〜」を共著しました。</p>
+<ul>
+<li>公式サイト：<a href="https://gihyo.jp/book/2022/978-4-297-12524-0" class="uri">https://gihyo.jp/book/2022/978-4-297-12524-0</a></li>
+<li>サポートサイト: <a href="https://github.com/ghmagazine/r_efficiency_book" class="uri">https://github.com/ghmagazine/r_efficiency_book</a></li>
+</ul>
+<p>電子版の発売は1/21、紙版の発売は1/26となっています。早くみなさんの元にお届けしたいですね。</p>
+<p>ちなみにジュンク堂書店池袋本店さんや書泉ブックタワーさんなどの一部店舗では先行販売が始まっています。</p>
+<p>ところで最近のプログラミング関係の技術書は、サポートサイトという形で記載したコードをGitHubなどに公開することが増えているそうで、我々も倣うことにしました。</p>
+<p>この記事ではサポートページをどうやって効率的に用意したか紹介します……がR言語は使っていません（笑）</p>
+<div id="本について" class="section level1">
+<h1>本について</h1>
+<p>Rを実践的に使う書籍というと分析手法や可視化に関連したものが多いなか、稀有な一冊になったかなと誇らしく思っています。</p>
+<p>愛称は「登山本」で、表紙もそれに合わせてます。これは著者一同が山好きなことと、山登りって装備一つで凄く体験が良くなることとに由来しています。本書に収めた色んなパッケージやテクニックが、みんなの生産性を高める装備になると嬉しいです。</p>
+</div>
+<div id="サポートページの作り方" class="section level1">
+<h1>サポートページの作り方</h1>
+<p>サポートページに掲載するコードはマークダウンで記述することにしました。宇宙本のサポートページには<a href="https://github.com/ghmagazine/rstudiobook_v2/blob/708324e79802473f880dabe71e96bd86d90163ad/sample_code/appendixA.R">Rスクリプト</a>が掲載されていたりしますが、登山本ではR言語以外にもYAMLやHTMLなどのコードが登場することもあり、章ごとに一覧しやすいマークダウンを選んだ次第です。</p>
+<p>元々原稿をR Markdownで記述しmarkdownに出力していたこともあり、コードブロックだけ残せばすぐにサポートページができるという都合もあります。ついでに見出しも残しておくことで、読者の方々が目的のコードを探してコピペしやすいようにしました。</p>
+<p>Rで似たようなことをやる手段としては <code>knitr::purl</code> 関数がありますが、これはRmdファイルなどからRコードを抽出することにフォーカスしています。</p>
+<p>今回は、目的に合致するPandocを採用しました。
+Pandocは文書形式を相互に変換するソフトウェアで、R MarkdownでもHTMLファイルやWordファイルを作成するのにPandocを利用しています。</p>
+<p>PandocにはLuaフィルタという、入力した文書をLua言語を使って弄ってから出力する機能があります。これを使うと見出しは全部太字にするとかいった操作が簡単にできます。基本は操作したい要素の名前の関数を書くだけです。見出しを操作したいなら<code>Header</code>関数ですね。引数名前は任意ですが、element（要素）の略で<code>el</code>が多いです。</p>
+<pre class="lua"><code>-- 見出しを全部太字にするフィルタの例
+function Header(el)
+  el.content = pandoc.Strong(el.content)
+  return el
+end</code></pre>
+<p>詳しい書き方は公式ドキュメントを参照してください（<a href="https://pandoc.org/lua-filters.html" class="uri">https://pandoc.org/lua-filters.html</a>）。</p>
+<p>今回は文書の要素を上から順に処理したいので、<code>Pandoc</code>という関数を作成します。その上で出会った要素が以下の条件を満たす場合のみを残し、他を捨てるという操作をしました。</p>
+<ul>
+<li><code>CodeBlock</code>で且つ<code>result</code>以外のクラスを持つ</li>
+<li><code>Header</code></li>
+</ul>
+<pre class="lua"><code>function Pandoc(doc)
+  local hblocks = {}
+  for i,el in ipairs(doc.blocks) do
+    if (el.t == &quot;CodeBlock&quot; and el.classes[1] ~= &quot;result&quot;) or
+       (el.t == &quot;Header&quot;) then
+      table.insert(hblocks, el)
+    end
+  end
+  return pandoc.Pandoc(hblocks, doc.meta)
+end</code></pre>
+<p>この関数を<code>filter.lua</code>などといったファイル名で保存しておきます。あとはPandocを呼ぶだけ。
+<code>ch01.md</code>ファイルを<code>filter.lua</code>で弄りながらGitHub-Flavored Markdown (gfm)に変換するといったことができちゃいます。</p>
+<pre class="bash"><code>pandoc ch01.md -t gfm --lua-filter filter.lua</code></pre>
+<p>実際には変換対象のファイルや変換後の保存先なども自動処理しちゃいたいので、シェルスクリプトを書いてます。</p>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>
