@@ -1,0 +1,73 @@
+---
+title: cronRパッケージで環境変数を指定する機能を追加するPRをした
+author: ''
+date: '2022-01-21'
+slug: support-envvar-in-cronr
+categories: [R]
+tags: [登山本]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary:
+  登山本で紹介したパッケージの機能不足コメントを頂いたのが嬉し過ぎて、
+  パッケージに機能追加を提案してきました。
+---
+
+igjitさん、hanaoriさんと共に「Rが生産性を高める〜データ分析ワークフロー効率化の実践〜」を共著しました。
+
+- 公式サイト：https://gihyo.jp/book/2022/978-4-297-12524-0
+- サポートサイト: https://github.com/ghmagazine/r_efficiency_book
+
+電子版の発売は今日1/21です。
+もうご購入頂いた方、ありがとうございます。
+
+紙版の発売は1/26となっています。
+こちらも早くみなさんの元にお届けしたいですね。
+
+首都圏一部店舗では先行発売をして頂いており、[Twitter検索](https://twitter.com/search?q=%22R%E3%81%8C%E7%94%9F%E7%94%A3%E6%80%A7%E3%82%92%E9%AB%98%E3%82%81%E3%82%8B%22%20%E5%85%88%E8%A1%8C&src=typed_query&f=top)すると以下が出てきます。
+
+- ジュンク堂書店池袋本店
+- 書泉ブックタワー
+- 紀伊國屋書店新宿本店
+
+昨今の情勢が情勢ではありますが、もしお近くにお越しの際は、是非とも手に取って頂けますと幸いです。
+
+# 本題
+
+さて、宣伝が長くなりましたが、早くもご購入頂いた方から、感想や実践した結果の報告などを頂いております。
+ありがとうございます。
+
+その中に本書で紹介したcronRパッケージの機能が不足しているというコメントがありました。
+コメントが頂けるのが嬉し過ぎて舞い上がってGitHubにて機能追加を提案してきました（<https://github.com/bnosac/cronR/pull/47>）。
+以下の方法でインストールすると新機能をお試し頂けます。
+
+```r
+install.packages('remotes')
+remotes::install_github('bnosac/cronR#47')
+```
+
+cronRパッケージはmacOSやLinuxにおいてRスクリプトやコマンドの定期実行を支援するパッケージです。
+
+しかし日本語ユーザーなどは文字化けに遭遇することがあるようです。
+
+これはcronそのものの環境変数を設定すると解決できます。
+
+> cronで文字化けするときの対処 <https://www.koikikukan.com/archives/2013/08/12-000300.php>
+
+ところが`cronR::cron_add`関数には該当する機能がなかったわけですね。
+
+そこで以下のように`env`引数を追加してよしなに環境変数を指定できるようにしました。
+
+```
+cronR::cron_add(
+  command = sprintf('echo "$LANG" > %s/cronR.log', Sys.getenv('HOME')),
+  frequency = 'minutely',
+  id = 'test1',
+  description = 'My procest 1',
+  tags = c('lab', 'xyz'),
+  ask = FALSE,
+  env = c(LANG = "en_US.UTF-8")
+)
+```
+
+便利ですね！

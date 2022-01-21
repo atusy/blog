@@ -1,0 +1,56 @@
+---
+title: cronRパッケージで環境変数を指定する機能を追加するPRをした
+author: ''
+date: '2022-01-21'
+slug: support-envvar-in-cronr
+categories: [R]
+tags: [登山本]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary:
+  登山本で紹介したパッケージの機能不足コメントを頂いたのが嬉し過ぎて、
+  パッケージに機能追加を提案してきました。
+---
+
+
+
+<p>igjitさん、hanaoriさんと共に「Rが生産性を高める〜データ分析ワークフロー効率化の実践〜」を共著しました。</p>
+<ul>
+<li>公式サイト：<a href="https://gihyo.jp/book/2022/978-4-297-12524-0" class="uri">https://gihyo.jp/book/2022/978-4-297-12524-0</a></li>
+<li>サポートサイト: <a href="https://github.com/ghmagazine/r_efficiency_book" class="uri">https://github.com/ghmagazine/r_efficiency_book</a></li>
+</ul>
+<p>電子版の発売は今日1/21です。もうご購入頂いた方、ありがとうございます。</p>
+<p>紙版の発売は1/26となっています。こちらも早くみなさんの元にお届けしたいですね。</p>
+<p>首都圏一部店舗では先行発売をして頂いており、<a href="https://twitter.com/search?q=%22R%E3%81%8C%E7%94%9F%E7%94%A3%E6%80%A7%E3%82%92%E9%AB%98%E3%82%81%E3%82%8B%22%20%E5%85%88%E8%A1%8C&amp;src=typed_query&amp;f=top">Twitter検索</a>すると以下が出てきます。</p>
+<ul>
+<li>ジュンク堂書店池袋本店</li>
+<li>書泉ブックタワー</li>
+<li>紀伊國屋書店新宿本店</li>
+</ul>
+<p>昨今の情勢が情勢ではありますが、もしお近くにお越しの際は、是非とも手に取って頂けますと幸いです。</p>
+<div id="本題" class="section level1">
+<h1>本題</h1>
+<p>さて、宣伝が長くなりましたが、早くもご購入頂いた方から、感想や実践した結果の報告などを頂いております。ありがとうございます。</p>
+<p>その中に本書で紹介したcronRパッケージの機能が不足しているというコメントがありました。コメントが頂けるのが嬉し過ぎて舞い上がってGitHubにて機能追加を提案してきました（<a href="https://github.com/bnosac/cronR/pull/47" class="uri">https://github.com/bnosac/cronR/pull/47</a>）。以下の方法でインストールすると新機能をお試し頂けます。</p>
+<pre class="r"><code>install.packages(&#39;remotes&#39;)
+remotes::install_github(&#39;bnosac/cronR#47&#39;)</code></pre>
+<p>cronRパッケージはmacOSやLinuxにおいてRスクリプトやコマンドの定期実行を支援するパッケージです。</p>
+<p>しかし日本語ユーザーなどは文字化けに遭遇することがあるようです。</p>
+<p>これはcronそのものの環境変数を設定すると解決できます。</p>
+<blockquote>
+<p>cronで文字化けするときの対処 <a href="https://www.koikikukan.com/archives/2013/08/12-000300.php" class="uri">https://www.koikikukan.com/archives/2013/08/12-000300.php</a></p>
+</blockquote>
+<p>ところが<code>cronR::cron_add</code>関数には該当する機能がなかったわけですね。</p>
+<p>そこで以下のように<code>env</code>引数を追加してよしなに環境変数を指定できるようにしました。</p>
+<pre><code>cronR::cron_add(
+  command = sprintf(&#39;echo &quot;$LANG&quot; &gt; %s/cronR.log&#39;, Sys.getenv(&#39;HOME&#39;)),
+  frequency = &#39;minutely&#39;,
+  id = &#39;test1&#39;,
+  description = &#39;My procest 1&#39;,
+  tags = c(&#39;lab&#39;, &#39;xyz&#39;),
+  ask = FALSE,
+  env = c(LANG = &quot;en_US.UTF-8&quot;)
+)</code></pre>
+<p>便利ですね！</p>
+</div>
