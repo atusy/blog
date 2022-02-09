@@ -1,0 +1,117 @@
+---
+title: "minidown 0.4.0をCRANにリリースしました"
+author: ''
+date: '2022-02-09'
+slug: minidown-0-4-0
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+minidownパッケージはR Markdownにおける`html_document`をもっとイイ感じにしたものです。
+
+作った理由や凄いところはTokyo.R 95の発表資料にまとめてます。
+
+> 「minidownで軽量・高機能なHTMLレポートを作成する」 \
+> https://atusy.github.io/tokyor95-minidown/#minidown
+
+# 0.4.0での主な変更
+
+今回のリリース、中々変更は大きいのですが、魅力は伝わりにくいかも
+
+## SASSを使ってCSSファイルを統合・軽量化
+
+ユーザー的には軽くなったところが嬉しいはず。
+
+コンテンツの量にも依存しますが、シンプルなページだと標準の`html_document`はminidownに比べて15倍から30倍ほど思いです。
+絶対値だと600KBくらい。
+スマホで閲覧する時なんか思うと馬鹿にならないですね。
+
+> ベンチマーク https://minidown.atusy.net/pkgdown/articles/Writing-vignettes-with-minidown.html
+
+## Shinyとの相性の改善
+
+Shinyを使うと、インタラクティブなドキュメントを作成できます。
+人と共有するには若干ハードルが高いですが、
+クラスター分析のクラスター数を変えるなど、
+分析の結果をデモできるスライドを作りたい場合なんかに便利です。
+
+> R MarkdownでShinyを利用する
+> https://qiita.com/kazutan/items/c249800a690f9222ba15
+
+minidownでも、YAMLフロントマターに`runtime: shiny`などと記述するだけで簡単に利用できます。
+
+```yaml
+output: minidown::mini_document
+runtime: shiny
+```
+
+ただ、目次や数式の挙動がおかしくなることがあるので修正しました。
+
+## タブセットの挙動改善
+
+minidownでは、コンテンツをタブで切り替えることができます。
+
+結果とソースコードとか、パラメータごとの結果とかでタブ分けすると便利なんじゃないでしょうか。
+
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">minidown experimentally adds the tabset feature like rmarkdown::html_document. The main advantage is you can navigate to the tab by ToC and URL.<br>Yes, you can share the tab of interest!<a href="https://t.co/Tqq8ePtqjr">https://t.co/Tqq8ePtqjr</a> <a href="https://twitter.com/hashtag/rstats?src=hash&amp;ref_src=twsrc%5Etfw">#rstats</a> <a href="https://twitter.com/hashtag/rmarkdown?src=hash&amp;ref_src=twsrc%5Etfw">#rmarkdown</a> <a href="https://t.co/TizRBmKNJX">pic.twitter.com/TizRBmKNJX</a></p>&mdash; atusy (@Atsushi776) <a href="https://twitter.com/Atsushi776/status/1349511210249588736?ref_src=twsrc%5Etfw">January 14, 2021</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+以下に使い方の説明付きのデモがあります。
+
+> デモ https://minidown.atusy.net/?framework=sakura&theme=default#tabset
+
+### タブを修飾可能に
+
+従来はタブのタイトルの修飾が難しかったのですが今回の更新で簡単になりました。
+
+たとえば「Tab 1]というタイトルのタブに対し、PandocのSpan記法を用いて`[Tab 1]{.important-tab}`と、いった具合に`important-tab`クラスを付与できるようになりました。
+
+````md
+# Tabset {.tabset}
+
+## [Tab 1]{.important-tab}
+````
+
+これなら別途CSSを記述してやれば、文字色の変更などが簡単です。
+
+```css
+.important-tab {
+    color: orange;
+}
+```
+
+### URLから特定のタブを開けるように
+
+URLを使って特定のタブを人に見せたい時に便利ですね。
+
+タブを開いた時点でブラウザのURL欄が更新されるのでコピペで共有できます。
+
+### HTMLウィジェットのサポート強化
+
+DTパッケージを使うと、データフレームを検索可能な表に出力できます。
+便利。
+
+> DTでインタラクティブな表作り
+> https://kazutan.github.io/SappoRoR5/DT_demo.html
+
+しかしタブセット内で使うとうまく表示されない場合があったので修正しました。
+
+DTパッケージに限らず不具合を抱えるHTMLウィジェットがあったかもしれませんが、改善したはず。
+
+# 0.5.0に向けて
+
+最近、rmarkdownパッケージの開発版で、`html_document`などを使った時に数式のレンダリングに様々なエンジンを使えるようになりました。
+
+- MathJax (JSでレンダリング。重いけど強い)
+- KaTeX (JSでレンダリング。軽い)
+- WebTeX (APIで画像化)
+
+元々minidownを開発したモチベーションの一つにMathJaxからKaTeXへの移行がありました。
+
+しかし、本家が色々な方法に対応するならminidownもそれに倣いたいなーと思う所存。
+
+より正確には、本家が色々な方法に対応するよう私が働きかけてたのですが、年単位で放置されてました。
+
+最近になってRStudioの中の人たちが私の実装をブラッシュアップしてくれた感じです。
