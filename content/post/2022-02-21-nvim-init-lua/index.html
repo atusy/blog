@@ -1,0 +1,200 @@
+---
+title: Neovimのconfigファイルをinit.lua化したので覚書
+author: ''
+date: '2022-02-21'
+slug: nvim-init-lua
+categories: [neovim]
+tags: [init.lua]
+output:
+  blogdown::html_page:
+    toc: true
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+  Neovim 0.5からはconfigファイルに`init.lua`としてLuaスクリプトでの記述を推奨しているそうです。
+  そこでVim/Nvim初心者が移行作業にあたって、どうやって情報を収集したか、途中で得た知見、やり残したことをまとめておきます。
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#困った時は">困った時は</a><ul>
+<li><a href="#init.lua入門系記事">init.lua入門系記事</a></li>
+<li><a href="#help">help</a></li>
+<li><a href="#githubで検索">GitHubで検索</a></li>
+</ul></li>
+<li><a href="#init.lua弄りで気付いたtips"><code>init.lua</code>弄りで気付いたTips</a><ul>
+<li><a href="#オプション設定">オプション設定</a></li>
+<li><a href="#キーマップ">キーマップ</a></li>
+<li><a href="#vscode-neo-vimに優しくする">VSCode Neo Vimに優しくする</a></li>
+<li><a href="#不採用-標準プラグインの無効化">(不採用) 標準プラグインの無効化</a></li>
+</ul></li>
+<li><a href="#todo">TODO</a><ul>
+<li><a href="#nvim_execを減らす">nvim_execを減らす</a></li>
+<li><a href="#気になるプラグインを試す">気になるプラグインを試す</a></li>
+</ul></li>
+</ul>
+</div>
+
+<p>Neovim 0.5からはconfigファイルに<code>init.lua</code>としてLuaスクリプトでの記述を推奨しているそうです。</p>
+<p>以下の記事でそれを知り、丁度、設定を詰め始めた頃だったこともあり、<a href="https://github.com/atusy/dotfiles/blob/d1dca8414e7f16ae26c0f33d8593caa6f1010115/dot_config/nvim/init.vim">init.vim</a>から<a href="https://github.com/atusy/dotfiles/blob/acddc13670cf717dccd50464a4f71e688bf1a322/dot_config/nvim/init.lua">init.lua</a>への移行を決断しました。</p>
+<blockquote>
+<p><a href="https://wonwon-eater.com/nvim-susume-settings/">[第2回] Neovimのすゝめ – 設定ファイルを作成する</a> by won won eaterさん</p>
+</blockquote>
+<p>本記事ではVim/Nvim初心者がどうやって情報を収集したか、途中で得た知見、やり残したことをまとめておきます。</p>
+<div id="困った時は" class="section level2">
+<h2>困った時は</h2>
+<p>Lua言語はちょっとやったことあるものの、Vim言語はコピペのみ、内部設計的なところも知らない私には色々困るところだらけです。</p>
+<div id="init.lua入門系記事" class="section level3">
+<h3>init.lua入門系記事</h3>
+<p>日本語で書かれた入門記事の類は非常に心強いですね。私が参考にしたものの内、内容が軽いものから順に掲載します。</p>
+<ul>
+<li><a href="https://wonwon-eater.com/nvim-susume-settings/">[第2回] Neovimのすゝめ – 設定ファイルを作成する</a> by won won eaterさん</li>
+<li><a href="https://zenn.dev/slin/articles/2020-11-03-neovim-lua2">NeovimのためのLua入門 init.lua編</a> by slinさん</li>
+<li><a href="https://github.com/willelz/nvim-lua-guide-ja/blob/master/README.ja.md">「Getting started using Lua in Neovim」日本語版</a> by hituji-nosippoさん</li>
+</ul>
+</div>
+<div id="help" class="section level3">
+<h3>help</h3>
+<p>公式のヘルプは心強い存在です。間違った情報に出会う確率も低いはず。</p>
+<p>Nvim特有の話はnvim上で検索しなければなりませんが、Vimと共通する部分は日本語の情報も豊富です。</p>
+<blockquote>
+<p><a href="https://vim-jp.org/vimdoc-ja/">help - Vim日本語ドキュメント</a> by vim-jp</p>
+</blockquote>
+<p>特にLua関係の話はhelpを見るべし。</p>
+<ul>
+<li>Lua全般: <code>:help lua</code></li>
+<li>キーマップ: <code>:help nvim_set_keymap</code></li>
+<li>など</li>
+</ul>
+<p>また、オプションによっては既定値がVimとNvimとで違うようです。既定値通りの設定を書いても冗長ですし、改めてヘルプを見る価値はあるでしょう。</p>
+</div>
+<div id="githubで検索" class="section level3">
+<h3>GitHubで検索</h3>
+<p><code>filename:init.lua</code>を含めて検索すると、GitHub上に公開された様々な<code>init.lua</code>ファイルを確認できます。</p>
+<p>helpを見てもわからんとか、そもそもhelpの探し方がわからんといった時に、実例ベースの有力な手掛りになるでしょう。</p>
+<p>ただし、内容によっては、Luaで書けるところを<code>vim.api.nvim_exec</code>を使ってVimスクリプトを実行している場合もあるので、どれを参考にするかはよく吟味しましょう。</p>
+<p>たとえば、nvimとOSのクリップボードを連携させる方法として、<code>init.vim</code>なら<code>set clipboard+=unnamedplus</code>と記述できます。しかしLua言語に<code>+=</code>はありません。</p>
+<p>どうするのか検索してみましょう。</p>
+<blockquote>
+<p><a href="https://github.com/search?q=filename%3Ainit.lua+clipboard+unnamedplus">filename:init.lua clipboard unnamedplus</a></p>
+</blockquote>
+<p>すると、以下のように色々とでてきます。</p>
+<ol style="list-style-type: decimal">
+<li>文字列を連結して代入
+<ul>
+<li><code>vim.o.clipboard = vim.o.clipboard .. 'unnamedplus'</code></li>
+</ul></li>
+<li>Luaテーブルに追加
+<ul>
+<li><code>vim.opt.clipboard:append{'unnamedplus'}</code></li>
+</ul></li>
+<li><code>+=</code>ではなく<code>=</code>相当な方法
+<ul>
+<li><code>vim.g.clipboard = 'clipboard'</code></li>
+<li><code>vim.api.nvim_set_option('clipboard', 'unnamedplus')</code></li>
+</ul></li>
+</ol>
+<p>先の<code>init.lua</code>入門系記事には<code>vim.o</code>を使った方法が書かれていることもあり、1つ目の方法を採用したくなりますが、要注意です。
+<code>:help clipboard</code>を見ればわかるとおり、カンマ区切りの文字列を求められますが、カンマが間に入っていません。現在地が空文字 (<code>""</code>) の場合の例外処理も必要そうです。</p>
+<p>そう思うと2つ目の方法が有望そうですが、これまで使ってない<code>vim.opt</code>というオブジェクトが出てきて、<code>vim.o</code>とどう違うの？となりますね。
+<code>:help vim.opt</code>を見ましょう。</p>
+<p>こんな感じでGitHub上の例とNvim上のhelpを行ったり来たりする必要があります。</p>
+</div>
+</div>
+<div id="init.lua弄りで気付いたtips" class="section level2">
+<h2><code>init.lua</code>弄りで気付いたTips</h2>
+<div id="オプション設定" class="section level3">
+<h3>オプション設定</h3>
+<p>先の入門記事では、グローバルオプションに<code>vim.o</code>, バッファ専用オプションに<code>vim.bo</code>などを使うとありますが、Luaのtableも使える<code>vim.opt</code>や<code>vim.opt_local</code>が便利だと思います。
+helpにも、Vimスクリプトでいう<a href="https://vim-jp.org/vimdoc-ja/options.html#set-option">set-option</a>に対応するものは、<code>vim.opt</code>だとあります。</p>
+<p>また、適当にコピペして既定値通りのオプションを無駄に記述しているものもあったので、一つずつhelpを読んで整理しました。</p>
+</div>
+<div id="キーマップ" class="section level3">
+<h3>キーマップ</h3>
+<p><code>vim.api.nvim_set_keymap</code>をイチイチ呼ぶのはダルい感じがしたので、多数のキーマップを設定したいプラグインではforループを使うことにしました。</p>
+<p>以下は連想配列を使う例。配列の配列にしてもいいかなと思ったのですが、ループ中でインデックスをとるのも面倒だったのです。連想配列のキーに複雑な文字列を使いたい場合は<code>['']</code>で囲うと良いみたいです。</p>
+<pre class="lua"><code>for k, v in pairs({
+  [&#39;&lt;C-H&gt;&#39;] = &#39;&lt;Plug&gt;(wintabs_next)&#39;,
+  [&#39;&lt;C-L&gt;&#39;] = &#39;&lt;Plug&gt;(wintabs_previous)&#39;,
+  [&#39;&lt;C-L&gt;&#39;] = &#39;&lt;Plug&gt;(wintabs_previous)&#39;,
+  [&#39;&lt;C-T&gt;c&#39;] = &#39;&lt;Plug&gt;(wintabs_close)&#39;,
+  [&#39;&lt;C-T&gt;u&#39;] = &#39;&lt;Plug&gt;(wintabs_undo)&#39;,
+  [&#39;&lt;C-T&gt;o&#39;] = &#39;&lt;Plug&gt;(wintabs_only)&#39;,
+  [&#39;&lt;C-W&gt;c&#39;] = &#39;&lt;Plug&gt;(wintabs_close_window)&#39;,
+  [&#39;&lt;C-W&gt;o&#39;] = &#39;&lt;Plug&gt;(wintabs_only_window)&#39;,
+  [&#39;&lt;C-T&gt;c&#39;] = &#39;&lt;Plug&gt;(wintabs_close)&#39;,
+  [&#39;&lt;C-T&gt;u&#39;] = &#39;&lt;Plug&gt;(wintabs_undo)&#39;,
+  [&#39;&lt;C-T&gt;o&#39;] = &#39;&lt;Plug&gt;(wintabs_only)&#39;,
+  [&#39;&lt;C-W&gt;c&#39;] = &#39;&lt;Plug&gt;(wintabs_close_window)&#39;,
+  [&#39;&lt;C-W&gt;o&#39;] = &#39;&lt;Plug&gt;(wintabs_only_window)&#39;
+}) do
+  vim.api.nvim_set_keymap(&#39;&#39;, k, v, {})
+end</code></pre>
+</div>
+<div id="vscode-neo-vimに優しくする" class="section level3">
+<h3>VSCode Neo Vimに優しくする</h3>
+<p>VSCodeにエクステンションを入れると、NeovimのキーマップやプラグインをVSCodeからも使えて最高です。</p>
+<blockquote>
+<p><a href="https://zenn.dev/yutakatay/articles/vscode-neovim">超融合!時空を越えた絆 Neo Vim(VSCode)を試してみた</a> by yukatさん</p>
+</blockquote>
+<p>Jupyter Notebookの操作にVSCodeを使いたいので採用しています。</p>
+<p>ConfigファイルはNeoviｍ本体と別に用意してもいいのですが、監理が大変なので、共通化しています。しかし、私の<code>init.vim</code>はステータスライン関係のプラグインなど、VSCodeには不要なものも問答無用で読み込んでいました。</p>
+<p>VSCodeのNeo Vimエクステンションを使っているかは、<code>nvim.g.vscode</code>で確認できるので、適宜<code>if nvim.g.vscode then return end</code>を使ってearly returnするようにしました。</p>
+<pre class="lua"><code>-- プラグイン読み込み
+require(&#39;jetpack&#39;).startup(function(use)
+  use &#39;tpope/vim-commentary&#39;
+  use &#39;easymotion/vim-easymotion&#39;
+  use &#39;haya14busa/vim-edgemotion&#39;
+  
+  if vim.g.vscode then return nil end
+
+  use &#39;feline-nvim/feline.nvim&#39;
+  use &#39;zefei/vim-wintabs&#39;
+  use {&#39;neoclide/coc.nvim&#39;, branch = &#39;release&#39;}
+  use &#39;lambdalisue/fern.vim&#39;
+  use {&#39;nvim-treesitter/nvim-treesitter&#39;, [&#39;do&#39;] = &#39;:TSUpdate&#39;}
+  use &#39;airblade/vim-gitgutter&#39;
+  use &#39;simeji/winresizer&#39;
+end)</code></pre>
+</div>
+<div id="不採用-標準プラグインの無効化" class="section level3">
+<h3>(不採用) 標準プラグインの無効化</h3>
+<p><code>nvim --startuptime statup.log</code>などとして、起動ログをとると、Neovimがいくつか標準プラグインを読んでいて、無効化すると起動が速くなるそうです。</p>
+<blockquote>
+<p><a href="https://zenn.dev/kawarimidoll/articles/8172a4c29a6653">Neovimの設定を見直して起動を30倍速にした</a> by kawarimidollさん</p>
+</blockquote>
+<p>ただ、現状で50msecで起動しているのが、5msec程度しか縮まないようだったので、<code>init.lua</code>そのもののシンプルさを重視することにしました。</p>
+</div>
+</div>
+<div id="todo" class="section level2">
+<h2>TODO</h2>
+<div id="nvim_execを減らす" class="section level3">
+<h3>nvim_execを減らす</h3>
+<p>プラグインマネージャに高速さがウリな<a href="https://zenn.dev/dog/articles/jetpack_intro">vim-jetpack</a>を使っています。これを自動でインストールするスクリプトが<a href="https://zenn.dev/dog/articles/jetpack_intro">Zennの記事</a>にありますがVimスクリプトです。
+<code>nvim_exec</code>するとオーバーヘッドがありそうですし、省きたいところ。</p>
+<p>とりあえずは<code>nvim_exec</code>が必要かどうかを判定するところまでLua言語化しておきました。
+vim-jetpackがインストール済みなら<code>nvim_exec</code>することもないので、及第点と思ってます。
+<code>autocmd</code>など、Luaでどう書けばいいか分かっていない部分があるので、ここから先は宿題です。</p>
+<pre class="lua"><code>if vim.fn.empty(vim.fn.glob(vim.fn.stdpath(&#39;data&#39;) .. &#39;/site/autoload/jetpack.vim&#39;)) == 1 then
+vim.api.nvim_exec(
+  [[
+    let jetpack = stdpath(&#39;data&#39;) . &#39;/site/autoload/jetpack.vim&#39;
+    autocmd VimEnter * JetpackSync | source $MYVIMRC
+    silent execute &#39;!curl -fLo &#39;.jetpack.&#39; --create-dirs  https://raw.githubusercontent.com/tani/vim-jetpack/master/autoload/jetpack.vim&#39;
+    silent execute &#39;!curl -fLo &quot;$HOME/.config/nvim/lua/jetpack.lua&quot; --create-dirs https://raw.githubusercontent.com/tani/vim-jetpack/master/lua/jetpack.lua&#39;
+  ]],
+  false
+)
+end</code></pre>
+</div>
+<div id="気になるプラグインを試す" class="section level3">
+<h3>気になるプラグインを試す</h3>
+<p>以下のサイトにはeasymotionのLua実装であるhop.nvimなど、速そうなプラグインや便利そうなプラグインが色々。</p>
+<blockquote>
+<p><a href="https://zenn.dev/kawarimidoll/articles/8172a4c29a6653">Neovimの設定を見直して起動を30倍速にした</a> by kawarimidollさん</p>
+</blockquote>
+<p>lazygit.nvimもよさげだが、これはもっと一般的な用途に使える<a href="https://github.com/akinsho/toggleterm.nvim#custom-terminals">toggleterm.nvim</a>が公式にalternativeとして指定されている。</p>
+<p>VSCodeのターミナルでgrepした時に、マッチしたファイルの該当行にクリックで飛べるのが便利なので、似たようなことをしたい。</p>
+<p><strong>ENJOY!!</strong></p>
+</div>
+</div>
