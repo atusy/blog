@@ -1,0 +1,84 @@
+---
+title: |
+  `list.files`関数で拡張子を指定したファイルを一覧するなら、`pattern = "\\.csv$"`みたいにすること
+author: ''
+date: '2022-02-25'
+slug: list-files-pattern
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+  - `list.files(pattern = ".csv")`みたいなのを見かけるけど、うっかり`analyze-csv.R`みたいなファイルにもマッチするよ。
+  - 厳密には`list.files(pattern = "\\.csv$")`としよう。
+  - ファイル操作には**fs**パッケージも便利。
+---
+
+
+
+<ul>
+<li><code>list.files(pattern = ".csv")</code>みたいなのを見かけるけど、うっかり<code>analyze-csv.R</code>みたいなファイルにもマッチするよ</li>
+<li>厳密には<code>list.files(pattern = "\\.csv$")</code>としよう</li>
+<li>ファイル操作には<strong>fs</strong>パッケージも便利</li>
+</ul>
+<div id="list.files関数のpattern引数は正規表現扱い" class="section level1">
+<h1><code>list.files</code>関数の<code>pattern</code>引数は正規表現扱い</h1>
+<p><code>list.files</code>を使うと指定したディレクトリ以下のファイルやディレクトリを一覧できます。</p>
+<pre class="r"><code># ダミーデータの用意
+target_directory &lt;- tempdir()
+target_directory |&gt;
+  file.path(c(&quot;analyze-csv.R&quot;, &quot;data1.csv&quot;, &quot;data2.csv&quot;, &quot;README.md&quot;)) |&gt;
+  file.create() |&gt;
+  invisible()
+
+# ファイル一覧の取得
+list.files(target_directory)
+#&gt; [1] &quot;analyze-csv.R&quot; &quot;data1.csv&quot;     &quot;data2.csv&quot;     &quot;README.md&quot;</code></pre>
+<p>さらに<code>pattern</code>引数を指定すると<strong>正規表現</strong>を使って、条件に一致するファイルだけを列挙できます。</p>
+<p>「<strong>正規表現</strong>を使って」というのがポイントで、うっかり<code>pattern = ".csv"</code>などと指定しようものならCSVファイル以外も列挙する畏れがあります。</p>
+<pre class="r"><code>list.files(target_directory, pattern = &quot;.csv&quot;)
+#&gt; [1] &quot;analyze-csv.R&quot; &quot;data1.csv&quot;     &quot;data2.csv&quot;</code></pre>
+<p>上記のファイル名はいずれも<code>.csv</code>という<strong>正規表現</strong>に<strong>部分一致</strong>しています。
+<code>.</code>は正規表現で任意の一文字にマッチします。加えてcsvで終わる文字列かどうかを指定できていません。なので、<code>csv</code>の前に任意の一文字があれば、以下のいずれにもマッチします。</p>
+<ul>
+<li>data1.csv</li>
+<li>analyze-csv.R</li>
+<li>data-csv</li>
+</ul>
+<p>大変だ！</p>
+<p>正しくは<code>pattern = "\\.csv$"</code>と指定しましょう。</p>
+<pre class="r"><code>list.files(target_directory, pattern = &quot;\\.csv$&quot;)
+#&gt; [1] &quot;data1.csv&quot; &quot;data2.csv&quot;</code></pre>
+<p><code>\\</code>を使うと正規表現で特殊な意味を持つ文字の意味を打ち消して、文字そのものとして扱えます。たとえば<code>\\.</code>は<code>.</code>が「任意の一文字」の意味ではなく、ピリオドそのものであることを示します。</p>
+<p>また、<code>$</code>は、正規表現で行末を意味します。</p>
+<p>よって<code>\\.csv$</code>は<code>.csv</code>で終わる文字列にマッチするわけですね。</p>
+<p>ちなみにファイル検索でしばしば登場する<code>*.csv</code>という文字列もやはりNG。頭の<code>*</code>は直前の文字が0文字以上続くことを意味します。
+<code>list.files</code>関数などRが採用する正規表現の流儀では空文字が0文字以上存在すればマッチ判定です。
+0文字でいいので、実質<code>pattern = ".csv"</code>に相当するわけですね。</p>
+<p>というわけで<code>pattern</code>引数がトリッキーですが、他にも色々便利なオプションがあるのでうまく付き合いましょう。</p>
+<ul>
+<li><code>all.files</code>: 隠しファイルも列挙する（既定値: <code>FALSE</code>）</li>
+<li><code>full.names</code>: フルパスを返す（既定値: <code>FALSE</code>）</li>
+<li><code>recursive</code>: サブディレクトリも検索する（既定値: <code>FALSE</code>）</li>
+<li><code>include.dirs</code>: ディレクトリも列挙する（既定値:<code>FALSE</code>）</li>
+</ul>
+</div>
+<div id="あるいはfsパッケージ" class="section level1">
+<h1>あるいはfsパッケージ</h1>
+<p>この手のファイル操作に特化したパッケージに<strong>fs</strong>パッケージがあります。</p>
+<p>ファイル一覧なら<code>fs::dir_ls</code>関数を使いましょう。
+<code>list.files</code>関数とよく似たことができますが、大きな違いは以下の2点です。</p>
+<ul>
+<li>返り値がフルパス固定</li>
+<li>既定動作でファイル以外にディレクトリなども列挙（<code>type</code>引数で調整可能）</li>
+</ul>
+<p>更に、パターンの指定方法として、<code>regexp</code>引数と<code>glob</code>引数を備えています。</p>
+<p><code>regexp</code>引数は<code>list.files</code>関数の<code>pattern</code>引数に等価です。</p>
+<pre class="r"><code>fs::dir_ls(target_directory, regexp = &quot;\\.csv$&quot;)
+#&gt; /tmp/Rtmp55uXav/data1.csv /tmp/Rtmp55uXav/data2.csv</code></pre>
+<p>一方<code>glob</code>引数を使うと、<code>*.csv</code>といった方法で指定の拡張子にマッチさせられます。</p>
+<pre class="r"><code>fs::dir_ls(target_directory, glob = &quot;*.csv&quot;)
+#&gt; /tmp/Rtmp55uXav/data1.csv /tmp/Rtmp55uXav/data2.csv</code></pre>
+<p><strong>ENJOY!</strong></p>
+</div>

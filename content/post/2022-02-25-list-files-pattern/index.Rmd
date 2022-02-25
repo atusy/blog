@@ -1,0 +1,111 @@
+---
+title: |
+  `list.files`関数で拡張子を指定したファイルを一覧するなら、`pattern = "\\.csv$"`みたいにすること
+author: ''
+date: '2022-02-25'
+slug: list-files-pattern
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+  - `list.files(pattern = ".csv")`みたいなのを見かけるけど、うっかり`analyze-csv.R`みたいなファイルにもマッチするよ。
+  - 厳密には`list.files(pattern = "\\.csv$")`としよう。
+  - ファイル操作には**fs**パッケージも便利。
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+- `list.files(pattern = ".csv")`みたいなのを見かけるけど、うっかり`analyze-csv.R`みたいなファイルにもマッチするよ
+- 厳密には`list.files(pattern = "\\.csv$")`としよう
+- ファイル操作には**fs**パッケージも便利
+
+# `list.files`関数の`pattern`引数は正規表現扱い
+
+`list.files`を使うと指定したディレクトリ以下のファイルやディレクトリを一覧できます。
+
+```{r}
+# ダミーデータの用意
+target_directory <- tempdir()
+target_directory |>
+  file.path(c("analyze-csv.R", "data1.csv", "data2.csv", "README.md")) |>
+  file.create() |>
+  invisible()
+
+# ファイル一覧の取得
+list.files(target_directory)
+```
+
+さらに`pattern`引数を指定すると**正規表現**を使って、条件に一致するファイルだけを列挙できます。
+
+「**正規表現**を使って」というのがポイントで、うっかり`pattern = ".csv"`などと指定しようものならCSVファイル以外も列挙する畏れがあります。
+
+```{r}
+list.files(target_directory, pattern = ".csv")
+```
+
+上記のファイル名はいずれも`.csv`という**正規表現**に**部分一致**しています。
+`.`は正規表現で任意の一文字にマッチします。
+加えてcsvで終わる文字列かどうかを指定できていません。
+なので、`csv`の前に任意の一文字があれば、以下のいずれにもマッチします。
+
+- data1.csv
+- analyze-csv.R
+- data-csv
+
+大変だ！
+
+正しくは`pattern = "\\.csv$"`と指定しましょう。
+
+```{r}
+list.files(target_directory, pattern = "\\.csv$")
+```
+
+
+`\\`を使うと正規表現で特殊な意味を持つ文字の意味を打ち消して、文字そのものとして扱えます。
+たとえば`\\.`は`.`が「任意の一文字」の意味ではなく、ピリオドそのものであることを示します。
+
+また、`$`は、正規表現で行末を意味します。
+
+よって`\\.csv$`は`.csv`で終わる文字列にマッチするわけですね。
+
+ちなみにファイル検索でしばしば登場する`*.csv`という文字列もやはりNG。
+頭の`*`は直前の文字が0文字以上続くことを意味します。
+`list.files`関数などRが採用する正規表現の流儀では空文字が0文字以上存在すればマッチ判定です。
+0文字でいいので、実質`pattern = ".csv"`に相当するわけですね。
+
+というわけで`pattern`引数がトリッキーですが、他にも色々便利なオプションがあるのでうまく付き合いましょう。
+
+- `all.files`: 隠しファイルも列挙する（既定値: `FALSE`）
+- `full.names`: フルパスを返す（既定値: `FALSE`）
+- `recursive`: サブディレクトリも検索する（既定値: `FALSE`）
+- `include.dirs`: ディレクトリも列挙する（既定値:`FALSE`）
+
+# あるいはfsパッケージ
+
+この手のファイル操作に特化したパッケージに**fs**パッケージがあります。
+
+ファイル一覧なら`fs::dir_ls`関数を使いましょう。
+`list.files`関数とよく似たことができますが、大きな違いは以下の2点です。
+
+- 返り値がフルパス固定
+- 既定動作でファイル以外にディレクトリなども列挙（`type`引数で調整可能）
+
+更に、パターンの指定方法として、`regexp`引数と`glob`引数を備えています。
+
+`regexp`引数は`list.files`関数の`pattern`引数に等価です。
+
+```{r}
+fs::dir_ls(target_directory, regexp = "\\.csv$")
+```
+
+一方`glob`引数を使うと、`*.csv`といった方法で指定の拡張子にマッチさせられます。
+
+```{r}
+fs::dir_ls(target_directory, glob = "*.csv")
+```
+
+**ENJOY!**
