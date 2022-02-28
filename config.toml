@@ -21,7 +21,6 @@ pygmentsUseClasses = true
 pygmentsCodeFences = true
 
 [taxonomies]
-  # tag = "tags"
   category = "categories"
   tag = "tags"
 
