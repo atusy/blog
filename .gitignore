@@ -1,7 +1,8 @@
 # User defined
 
-## Netlify
-/netlify/
+# Hugo
+.hugo_build.lock
+.resources
 
 # History files
 .Rhistory
