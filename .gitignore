@@ -2,7 +2,7 @@
 
 # Hugo
 .hugo_build.lock
-.resources
+resources
 
 # History files
 .Rhistory
