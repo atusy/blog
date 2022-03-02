@@ -1,0 +1,71 @@
+---
+title: RStudio Serverでblogdownを快適に使えるようにする
+author: ''
+date: '2022-03-02'
+slug: blogdown-rstudio-server
+categories: [R, Hugo]
+tags: [rmarkdown, blogdown, RStudio]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p>RStudioではうまくプレビューできたblogdown製のウェブページが、
+RStudio Serverではうまくプレビューできないことがあります。例えば以下のようなことが起きます。</p>
+<ul>
+<li>ページ遷移に失敗する</li>
+<li>画像が表示されない</li>
+<li>CSSが反映されない</li>
+<li>JavaScriptが機能しない</li>
+</ul>
+<p>どれもURLにまつわる問題です。</p>
+<p>この問題については以下のIssueで議論されていました。</p>
+<blockquote>
+<p>Not working in RStudio Server <a href="https://github.com/rstudio/blogdown/issues/124" class="uri">https://github.com/rstudio/blogdown/issues/124</a></p>
+</blockquote>
+<p>原因はRStudio ServerがトップページのURLを変換するからです（Proxy）。たとえば、<code>https://localhost:1313</code>みたいなのが、<code>http://localhost:8787/p/1313/</code>みたいになります。</p>
+<p>対策は相対パスの徹底です。</p>
+<ul>
+<li><code>config.toml</code>に<code>relativeurls = true</code>を追記する</li>
+<li>テーマ内で絶対パスを使っている場所があれば、以下の例のように変更する
+<ul>
+<li><code>.Permalink</code> -&gt; <code>.RelPermalink</code></li>
+<li><code>.Site.baseURL</code> -&gt; <code>relref . .Site.baseURL</code></li>
+</ul></li>
+</ul>
+<p>blogdownパッケージはRStudio Server上でプレビューしている場合に、自動的に<code>config.toml</code>の内容を最適化してくれますが、明示的に設定しておくといいでしょう。これにより、記事内でのリンクが自動的に相対パスに変更されます。</p>
+<p>ただし<code>config.toml</code>ファイルの内容は、サイトのテーマ側で生成されるリンクについては関与しません。</p>
+<p>そこで、上述の通りテーマ自体の修正が必要になります。</p>
+<p>ちなみに、<a href="https://gohugo.io/functions/relref/"><code>relref</code></a>は第一引数に指定したURLから第二引数に指定したURLへの相対パスを返す関数です。第一引数に<code>.</code>を指定すると現在のページのURLという意味になります。第二引数に<code>.Site.baseURL</code>を指定すると、<code>config.toml</code>の<code>baseurl</code>に指定した値が代入されます。</p>
+<p>似た関数に<a href="https://gohugo.io/functions/relURL/"><code>relURL</code></a>がありますが、こちらは引数を一つだけとり、サイトのトップページからの相対パスを返します。</p>
+<p>たとえば、サイトのURLが<code>https://example.com/hugo</code>で、現在ページが<code>https://example.com/hugo/post/1.html</code>の場合にそれぞれの関数の返り値を比較してみましょう。</p>
+<table>
+<thead>
+<tr class="header">
+<th>式</th>
+<th>返り値</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>relURL .Site.baseURL</code></td>
+<td><code>/hugo</code></td>
+</tr>
+<tr class="even">
+<td><code>relref . .Site.baseURL</code></td>
+<td><code>../</code></td>
+</tr>
+<tr class="odd">
+<td><code>relURL "https://example.com/hugo/mystyle.css"</code></td>
+<td><code>/hugo/mystyle.css</code></td>
+</tr>
+<tr class="even">
+<td><code>relref . "https://example.com/hugo/mystle.css"</code></td>
+<td><code>../mystyle.css</code></td>
+</tr>
+</tbody>
+</table>
+<p>先に述べた通りRStudio ServerがトップページのURLを変換する都合上、ドットを使った相対パスの方が都合がいいわけですね。</p>
+<p><strong>ENJOY!!</strong></p>

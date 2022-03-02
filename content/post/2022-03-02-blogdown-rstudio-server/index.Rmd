@@ -1,0 +1,62 @@
+---
+title: RStudio Serverでblogdownを快適に使えるようにする
+author: ''
+date: '2022-03-02'
+slug: blogdown-rstudio-server
+categories: [R, Hugo]
+tags: [rmarkdown, blogdown, RStudio]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+RStudioではうまくプレビューできたblogdown製のウェブページが、
+RStudio Serverではうまくプレビューできないことがあります。
+例えば以下のようなことが起きます。
+
+- ページ遷移に失敗する
+- 画像が表示されない
+- CSSが反映されない
+- JavaScriptが機能しない
+
+どれもURLにまつわる問題です。
+
+この問題については以下のIssueで議論されていました。
+
+> Not working in RStudio Server <https://github.com/rstudio/blogdown/issues/124>
+
+原因はRStudio ServerがトップページのURLを変換するからです（Proxy）。
+たとえば、`https://localhost:1313`みたいなのが、`http://localhost:8787/p/1313/`みたいになります。
+
+対策は相対パスの徹底です。
+
+- `config.toml`に`relativeurls = true`を追記する
+- テーマ内で絶対パスを使っている場所があれば、以下の例のように変更する
+    - `.Permalink` -> `.RelPermalink`
+    - `.Site.baseURL` -> `relref . .Site.baseURL`
+
+blogdownパッケージはRStudio Server上でプレビューしている場合に、自動的に`config.toml`の内容を最適化してくれますが、明示的に設定しておくといいでしょう。
+これにより、記事内でのリンクが自動的に相対パスに変更されます。
+
+ただし`config.toml`ファイルの内容は、サイトのテーマ側で生成されるリンクについては関与しません。
+
+そこで、上述の通りテーマ自体の修正が必要になります。
+
+ちなみに、[`relref`](https://gohugo.io/functions/relref/)は第一引数に指定したURLから第二引数に指定したURLへの相対パスを返す関数です。
+第一引数に`.`を指定すると現在のページのURLという意味になります。
+第二引数に`.Site.baseURL`を指定すると、`config.toml`の`baseurl`に指定した値が代入されます。
+
+似た関数に[`relURL`](https://gohugo.io/functions/relURL/)がありますが、こちらは引数を一つだけとり、サイトのトップページからの相対パスを返します。
+
+たとえば、サイトのURLが`https://example.com/hugo`で、現在ページが`https://example.com/hugo/post/1.html`の場合にそれぞれの関数の返り値を比較してみましょう。
+
+式 | 返り値
+-|-
+`relURL .Site.baseURL` | `/hugo` |
+`relref . .Site.baseURL` | `../` |
+`relURL "https://example.com/hugo/mystyle.css"` | `/hugo/mystyle.css`
+`relref . "https://example.com/hugo/mystle.css"` | `../mystyle.css`
+
+先に述べた通りRStudio ServerがトップページのURLを変換する都合上、ドットを使った相対パスの方が都合がいいわけですね。
+
+**ENJOY!!**
