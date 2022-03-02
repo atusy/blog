@@ -1,0 +1,25 @@
+---
+title: ウェブサイトのCSSやJavaScriptでキャッシュの衝突を避ける
+author: ''
+date: '2022-03-02'
+slug: hugo-css-fingerprint
+categories: [Hugo]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p>CSSやJavascriptのキャッシュはブラウジングの速度に貢献する一方、更新がクライアントサイドに適切に反映されない場合があります。</p>
+<p>ブラウザがキャッシュしている場合、キャッシュの有効起源切れを待つか<a href="https://dev.classmethod.jp/articles/chrome-super-reload-and-clear-cache-simultaneously/">スーパリロード</a>を使うという手もあります。スーパーリロードはChromeやFirefoxでは<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd>のキーボードショートカットでも実行できます。</p>
+<p>しかし、ページ閲覧者の体験を損なっています。</p>
+<p>また、昨今では<a href="https://ja.wikipedia.org/wiki/%E3%82%B3%E3%83%B3%E3%83%86%E3%83%B3%E3%83%84%E3%83%87%E3%83%AA%E3%83%90%E3%83%AA%E3%83%8D%E3%83%83%E3%83%88%E3%83%AF%E3%83%BC%E3%82%AF">コンテンツデリバリネットワーク</a>（CDN）により、サーバーサイドにキャッシュされたファイルが配信され、スーパーリロードをしてさえ古いファイルを参照してしまう場合があります。</p>
+<p>筆者の場合、<a href="https://pages.cloudflare.com/">Cloudflare Pages</a>で静的ウェブサイトをホスティングしたところ、上記の問題に悩まされました。</p>
+<p>このような問題はファイルを更新するごとに名前を固有のものに変更すると回避できます。</p>
+<p>力技な感じがしますが、Hugoなどでページをビルドしている場合は、テーマの記述方法を変えるだけで簡単に実現できます。以下のページに方法が詳解されてますので、参考にしてみてください。</p>
+<blockquote>
+<p><a href="https://kamoqq.info/post/hugo-asset-fingerprinting/">HugoでJSやCSSのブラウザキャッシュをいい感じに再読込させる</a> by kamoqqさん</p>
+</blockquote>
+<p><strong>ENJOY</strong></p>
