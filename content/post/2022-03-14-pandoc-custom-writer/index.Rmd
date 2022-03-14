@@ -1,0 +1,107 @@
+---
+title: 'Pandocカスタムライター入門1: 基本は文字列処理'
+author: ''
+date: '2022-03-14'
+slug: pandoc-custom-writer
+categories: [pandoc, lua]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: ["bash", "lua"]
+---
+
+[Pandoc](https://pandoc.org)は様々な文書ファイルを相互変換できるソフトウェアです。
+
+"A unitversal document converter"を名乗るだけのことはあり、
+HTML, LaTeX, Docx, Markdownなどの様々なファイル形式に対応します。
+
+更には対応するファイル形式の追加に対応します。
+入力の場合は[カスタムリーダー](https://pandoc.org/custom-readers.html)、出力の場合は[カスタムライター](https://pandoc.org/custom-writers.html)と呼ばれ、共にLua言語で定義できます。
+
+今回はカスタムライターに注目します。
+カスタムリーダーも中々面白そうなのですが、なかなかハードルが高そうなので、将来的に挑戦するとしましょう。
+
+カスタムライターの基本は、文字列の引数を処理して新しい文字列を返すことの繰り返しです。
+処理を文書の構成要素ごとに関数として定義します。
+ハイパーリンクであれば、リンク先のURLなど、追加の引数の処理も必要になりますが、基本は文字列処理です。
+
+入力した文字列がどんな構成要素から慣るかは、`pandoc -t native`コマンドで文書を内部表現に変換すれば分かります。
+たとえば`**重要**`というMarkdown記法による文字列は`Para`（段落）、`Strong`（重要）、`Str`（文字列）から構成されます。
+
+``` bash
+> echo '**重要**' | pandoc -t native
+[ Para [ Strong [ Str "重要" ] ] ]
+```
+
+Pandocが定義する文書の構成要素は中々に多いですが、今回は上述の3種類に注目しましょう。
+これら要素を処理する関数は文字列しか引数にとらないので、比較的単純です。
+構成要素一覧は[Lua type reference](https://pandoc.org/lua-filters.html#lua-type-reference)をご参照ください。
+
+まずは最も基礎的な、装飾を持たない文字列に対する処理は`Str`関数で定義します。
+特に処理が不要であれば、引数`s`（名称は任意。ここではstringの頭文字を利用）をそのまま返します。
+
+``` lua
+-- 文字列をそのまま返す
+function Str(s)
+  return s
+end
+```
+
+HTMLなどに出力する場合、文字列とHTMLタグを区別するため、一部の文字をエスケープしてやる必要があります。
+そのような場合はエスケープ処理用の`escape`関数を別途定義しておいて、引数`s`を処理すればいいわけです。
+
+``` lua
+-- HTML向けに文字列エスケープして返す
+function Str(s)
+  return escape(s)
+end
+```
+
+Strong要素をHTML化するのであれば、引数`s`を対応するHTML要素の`<strong>`で囲めばOKです。
+
+``` lua
+function Strong(s)
+  return "<strong>" .. s .. "</strong>"
+end
+```
+
+escapeはいらないの？と疑問に思うかもしれませんが、ここでPandocによる文字列の内部表現とそれに従う関数の適用順序が重要になります。
+改めて、`**重要**`の内部表現を見てみましょう。
+
+``` bash
+> echo '**重要**' | pandoc -t native
+[ Para [ Strong [ Str "重要" ] ] ]
+```
+
+まさにこの入れ子構造に従って関数を適用して、以下のように処理が進むわけです。
+
+``` lua
+Para(Strong(Str("重要"))) --> <p><strong>重要</strong></p>
+```
+
+ということは、`Str`関数と`Strong`関数の両方で文字のエスケープを行うと、
+入力が「`&`」であれば、`Str`関数がエスケープ処理した「`&amp;`」を`Strong`に渡し、最終的に「`<strong>&amp;amp;</strong>`」になってしまいます。
+ブラウザ上では「`<strong>&amp;amp;</strong>`{=html}」になってしまい、想定した「`<strong>&amp;</strong>`」と違ってしまいます。
+
+``` lua
+Str("&")         --> "&amp;"
+Strong(Str("&))  --> "<strong>&amp;amp;</strong>"
+```
+
+というわけで、各関数を定義する際には、その関数に渡る文字列が先にどのような関数で処理されていたかをイメージする必要があります。
+やや難易度の高いところですが、イメージが沸かないなら、先の例と同様に`pandoc -t native`を実行して逐次確認が必要になります。
+
+これが分かっていれば、`Para`関数は引数`s`を`<p>`要素で囲めばいいと分かります。
+
+``` lua
+function Para(s)
+  return "<p>" .. s .. "</p>"
+end
+```
+
+内部表現`[ Para [ Strong [ Str "重要" ] ] ]`に合わせて、内側の要素から順に`Str`, `Strong`, `Para`関数を定義しました。
+これだけではまともな文書ファイルをHTML文書に変換するに足りませんが、**必要な文章要素ごとに文字列処理を定義すればいい**とイメージは湧いたかと思います。
+
+**ENJOY**
+

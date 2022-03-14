@@ -1,0 +1,54 @@
+---
+title: 'Pandocカスタムライター入門1: 基本は文字列処理'
+author: ''
+date: '2022-03-14'
+slug: pandoc-custom-writer
+categories: [pandoc, lua]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: ["bash", "lua"]
+---
+
+
+
+<p><a href="https://pandoc.org">Pandoc</a>は様々な文書ファイルを相互変換できるソフトウェアです。</p>
+<p>“A unitversal document converter”を名乗るだけのことはあり、
+HTML, LaTeX, Docx, Markdownなどの様々なファイル形式に対応します。</p>
+<p>更には対応するファイル形式の追加に対応します。入力の場合は<a href="https://pandoc.org/custom-readers.html">カスタムリーダー</a>、出力の場合は<a href="https://pandoc.org/custom-writers.html">カスタムライター</a>と呼ばれ、共にLua言語で定義できます。</p>
+<p>今回はカスタムライターに注目します。カスタムリーダーも中々面白そうなのですが、なかなかハードルが高そうなので、将来的に挑戦するとしましょう。</p>
+<p>カスタムライターの基本は、文字列の引数を処理して新しい文字列を返すことの繰り返しです。処理を文書の構成要素ごとに関数として定義します。ハイパーリンクであれば、リンク先のURLなど、追加の引数の処理も必要になりますが、基本は文字列処理です。</p>
+<p>入力した文字列がどんな構成要素から慣るかは、<code>pandoc -t native</code>コマンドで文書を内部表現に変換すれば分かります。たとえば<code>**重要**</code>というMarkdown記法による文字列は<code>Para</code>（段落）、<code>Strong</code>（重要）、<code>Str</code>（文字列）から構成されます。</p>
+<pre class="bash"><code>&gt; echo &#39;**重要**&#39; | pandoc -t native
+[ Para [ Strong [ Str &quot;重要&quot; ] ] ]</code></pre>
+<p>Pandocが定義する文書の構成要素は中々に多いですが、今回は上述の3種類に注目しましょう。これら要素を処理する関数は文字列しか引数にとらないので、比較的単純です。構成要素一覧は<a href="https://pandoc.org/lua-filters.html#lua-type-reference">Lua type reference</a>をご参照ください。</p>
+<p>まずは最も基礎的な、装飾を持たない文字列に対する処理は<code>Str</code>関数で定義します。特に処理が不要であれば、引数<code>s</code>（名称は任意。ここではstringの頭文字を利用）をそのまま返します。</p>
+<pre class="lua"><code>-- 文字列をそのまま返す
+function Str(s)
+  return s
+end</code></pre>
+<p>HTMLなどに出力する場合、文字列とHTMLタグを区別するため、一部の文字をエスケープしてやる必要があります。そのような場合はエスケープ処理用の<code>escape</code>関数を別途定義しておいて、引数<code>s</code>を処理すればいいわけです。</p>
+<pre class="lua"><code>-- HTML向けに文字列エスケープして返す
+function Str(s)
+  return escape(s)
+end</code></pre>
+<p>Strong要素をHTML化するのであれば、引数<code>s</code>を対応するHTML要素の<code>&lt;strong&gt;</code>で囲めばOKです。</p>
+<pre class="lua"><code>function Strong(s)
+  return &quot;&lt;strong&gt;&quot; .. s .. &quot;&lt;/strong&gt;&quot;
+end</code></pre>
+<p>escapeはいらないの？と疑問に思うかもしれませんが、ここでPandocによる文字列の内部表現とそれに従う関数の適用順序が重要になります。改めて、<code>**重要**</code>の内部表現を見てみましょう。</p>
+<pre class="bash"><code>&gt; echo &#39;**重要**&#39; | pandoc -t native
+[ Para [ Strong [ Str &quot;重要&quot; ] ] ]</code></pre>
+<p>まさにこの入れ子構造に従って関数を適用して、以下のように処理が進むわけです。</p>
+<pre class="lua"><code>Para(Strong(Str(&quot;重要&quot;))) --&gt; &lt;p&gt;&lt;strong&gt;重要&lt;/strong&gt;&lt;/p&gt;</code></pre>
+<p>ということは、<code>Str</code>関数と<code>Strong</code>関数の両方で文字のエスケープを行うと、入力が「<code>&amp;</code>」であれば、<code>Str</code>関数がエスケープ処理した「<code>&amp;amp;</code>」を<code>Strong</code>に渡し、最終的に「<code>&lt;strong&gt;&amp;amp;amp;&lt;/strong&gt;</code>」になってしまいます。ブラウザ上では「<strong>&amp;amp;</strong>」になってしまい、想定した「<code>&lt;strong&gt;&amp;amp;&lt;/strong&gt;</code>」と違ってしまいます。</p>
+<pre class="lua"><code>Str(&quot;&amp;&quot;)         --&gt; &quot;&amp;amp;&quot;
+Strong(Str(&quot;&amp;))  --&gt; &quot;&lt;strong&gt;&amp;amp;amp;&lt;/strong&gt;&quot;</code></pre>
+<p>というわけで、各関数を定義する際には、その関数に渡る文字列が先にどのような関数で処理されていたかをイメージする必要があります。やや難易度の高いところですが、イメージが沸かないなら、先の例と同様に<code>pandoc -t native</code>を実行して逐次確認が必要になります。</p>
+<p>これが分かっていれば、<code>Para</code>関数は引数<code>s</code>を<code>&lt;p&gt;</code>要素で囲めばいいと分かります。</p>
+<pre class="lua"><code>function Para(s)
+  return &quot;&lt;p&gt;&quot; .. s .. &quot;&lt;/p&gt;&quot;
+end</code></pre>
+<p>内部表現<code>[ Para [ Strong [ Str "重要" ] ] ]</code>に合わせて、内側の要素から順に<code>Str</code>, <code>Strong</code>, <code>Para</code>関数を定義しました。これだけではまともな文書ファイルをHTML文書に変換するに足りませんが、<strong>必要な文章要素ごとに文字列処理を定義すればいい</strong>とイメージは湧いたかと思います。</p>
+<p><strong>ENJOY</strong></p>
