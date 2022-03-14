@@ -44,7 +44,7 @@ end</code></pre>
 <pre class="lua"><code>Para(Strong(Str(&quot;重要&quot;))) --&gt; &lt;p&gt;&lt;strong&gt;重要&lt;/strong&gt;&lt;/p&gt;</code></pre>
 <p>ということは、<code>Str</code>関数と<code>Strong</code>関数の両方で文字のエスケープを行うと、入力が「<code>&amp;</code>」であれば、<code>Str</code>関数がエスケープ処理した「<code>&amp;amp;</code>」を<code>Strong</code>に渡し、最終的に「<code>&lt;strong&gt;&amp;amp;amp;&lt;/strong&gt;</code>」になってしまいます。ブラウザ上では「<strong>&amp;amp;</strong>」になってしまい、想定した「<strong>&amp;</strong>」と違ってしまいます。</p>
 <pre class="lua"><code>Str(&quot;&amp;&quot;)         --&gt; &quot;&amp;amp;&quot;
-Strong(Str(&quot;&amp;))  --&gt; &quot;&lt;strong&gt;&amp;amp;amp;&lt;/strong&gt;&quot;</code></pre>
+Strong(Str(&quot;&amp;&quot;))  --&gt; &quot;&lt;strong&gt;&amp;amp;amp;&lt;/strong&gt;&quot;</code></pre>
 <p>というわけで、各関数を定義する際には、その関数に渡る文字列が先にどのような関数で処理されていたかをイメージする必要があります。やや難易度の高いところですが、イメージが沸かないなら、先の例と同様に<code>pandoc -t native</code>を実行して逐次確認が必要になります。</p>
 <p>これが分かっていれば、<code>Para</code>関数は引数<code>s</code>を<code>&lt;p&gt;</code>要素で囲めばいいと分かります。</p>
 <pre class="lua"><code>function Para(s)

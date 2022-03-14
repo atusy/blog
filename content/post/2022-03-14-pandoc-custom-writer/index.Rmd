@@ -86,7 +86,7 @@ Para(Strong(Str("重要"))) --> <p><strong>重要</strong></p>
 
 ``` lua
 Str("&")         --> "&amp;"
-Strong(Str("&))  --> "<strong>&amp;amp;</strong>"
+Strong(Str("&"))  --> "<strong>&amp;amp;</strong>"
 ```
 
 というわけで、各関数を定義する際には、その関数に渡る文字列が先にどのような関数で処理されていたかをイメージする必要があります。
