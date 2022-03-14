@@ -82,7 +82,7 @@ Para(Strong(Str("重要"))) --> <p><strong>重要</strong></p>
 
 ということは、`Str`関数と`Strong`関数の両方で文字のエスケープを行うと、
 入力が「`&`」であれば、`Str`関数がエスケープ処理した「`&amp;`」を`Strong`に渡し、最終的に「`<strong>&amp;amp;</strong>`」になってしまいます。
-ブラウザ上では「`<strong>&amp;amp;</strong>`{=html}」になってしまい、想定した「`<strong>&amp;</strong>`」と違ってしまいます。
+ブラウザ上では「`<strong>&amp;amp;</strong>`{=html}」になってしまい、想定した「`<strong>&amp;</strong>`{=html}」と違ってしまいます。
 
 ``` lua
 Str("&")         --> "&amp;"
