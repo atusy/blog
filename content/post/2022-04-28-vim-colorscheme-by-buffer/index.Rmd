@@ -1,0 +1,191 @@
+---
+title: Neovimのカラースキームを編集中のバッファのファイルパスに応じて変える
+author: atusy
+date: '2022-04-28'
+slug: vim-colorscheme-by-buffer
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs:
+  - lua
+---
+
+Vim/NeovimでLSPを利用して関数などの定義を参照すると、気付いたら標準ライブラリなどを参照している、なんて場面があります。
+
+どこまで実装を追いたいかは人それぞれとは言え、作業ディレクトリの内外どちらのファイルを参照しているかはすぐに気付ける方がいいでしょう。
+
+方法としてはいくつか考えられます。
+
+1. メッセージで通知する
+2. ステータスラインなどにフルパスを表示する
+3. 配色の変更などで訴える
+
+私は、（3）の方向性で、バッファのファイルパスが作業ディレクトリ内にあるか判定し、カラースキームを変えることにしました。
+
+（1）のメッセージで通知する方法は、ウィンドウから目を離すなど、時間経過と共に情報が記憶から流れる可能性があります。
+
+（2）のフルパスを表示する方法は、バッファが作業ディレクトリ内にあるか常に意識して、パスを都度確認する必要があります。
+加えてパスを読まねばならず、パスは「作業ディレクトリ内にあるか」以上の情報を含みます。
+
+（3）の配色の変更などで訴える方法は否応なしに情報が入ってくるので気に入りました。
+
+以下では、Neovim（`init.lua`）で実現する方法と注意点について述べます。
+Vimスクリプトでも実現できるはずなので、Vimユーザーは適当に読み替えてください。
+
+# ベースライン実装
+
+## 方針
+
+バッファのファイルパスに応じてカラースキームを変更したいので、素朴には`BufEnter`イベントで`autocmd`を発火させればいいでしょう。
+`BufEnter`は文字通り、バッファに入った時、即ち編集中のバッファが切り替わった時を指します。
+`autocmd`も文字通り、自動実行したいコマンドのことです。
+
+Neovimの場合、`vim.api.nvim_create_autocmd`関数を使って`autocmd`を定義できます。
+
+第一引数にはイベント名の`'BufEnter'`を指定します。
+
+第二引数には処理の条件や内容をテーブルで記述します。
+最低限指定すべき項目は`pattern`と`callback`です。
+
+`pattern`にはバッファのファイル名やファイルパスを指定します。
+ワイルドカードに`*`を使えるので、`*.lua`とすればLuaスクリプトに限定したautocmdを定義できます。
+今回はファイルパスの判定はより柔軟に行いたいので、任意のバッファに対して発火するよう`pattern = '*'`を指定します。
+
+`callback`にはautocmdが発火した時に実行したい関数を記述します。
+この関数は引数を1つ受け取るので、`args`など適当な名前をつけておきましょう。
+`args`引数にはテーブルが渡されます。
+詳細な内容は`:helpo nvim_create_autocmd`に譲るとして、ここで重要なのは`args.file`でバッファのファイル名（`<afile>`）を参照できる点です。
+つまり、`args.file`の内容を確認すれば**バッファが作業ディレクトリ内のファイルか否か**を判定できます。
+あとは、`vim.fn.getcwd`関数を使って作業ディレクトリとバッファのファイル名を比較し、条件分岐で適用したいカラスキームを選びます。
+
+## コード
+
+以下を`init.lua`にでも記述すれば、バッファが作業ディレクトリ内かどうか判定してカラースキームを変更できるようになります。
+ここではVim/Neovimに内蔵のカラスキームであるdesertとeveningを切り替えるようにしています。
+
+``` lua
+vim.api.nvim_create_autocmd(
+  'BufEnter',
+  {
+    pattern = '*',
+    callback = function(args)
+      local FILE = args.file  -- バッファのファイル名
+      local CWD = vim.fn.getcwd() -- 作業ディレクトリのパス
+
+      -- カラースキームの決定
+      -- ファイル名がCWDで始まっていればdesertを選択、それ以外はeveningを選択
+      local COLORSCHEME = CWD == string.sub(FILE, 1, string.len(CWD))
+                          and 'desert'  -- 普段用
+                          or 'evening'  -- 作業ディレクトリ外のバッファ用
+
+      -- カラースキームの適用
+      vim.cmd('colorscheme ' .. COLORSCHEME)
+    end
+  }
+)
+```
+
+# ベースライン実装の課題と対策
+
+最小限に目的を達成しましたが、上記のコードはいくつかの課題を抱えています。
+
+1. `init.lua`を再読み込みすると同じ`autocmd`が重複し、無駄や干渉に繋がる
+2. ファイル名の判定が厳密過ぎて過度にカラースキームが変わってしまう
+    - たとえばhelpの表示やterminalの起動など
+3. 現在のカラースキームと次のカラースキームが同じなら、`colorscheme`コマンドの実行が無駄
+4. 他のプラグインと干渉する場合がある
+    - statuslineやbufferline系のプラグインの表示が狂う
+    - colorscheme以外に`highlight`を追加するプラグインがある場合、条件次第で無効化される
+
+
+（1）のautocmdの重複・干渉問題は`vim.api.nvim_create_augroup`を使って解決しましょう。
+複数のautocmdを1つのグループにまとめるための関数ですが、同じグループを再作成する際に、登録済みのautocmdを消去してくれます（既定動作）。
+
+（2）のカラースキームの過度な切り替えを抑制するには、例外としたいバッファーのファイル名（`<afile>`）や種類（`&buftype`）を決めておきましょう。
+私はファイル名が空の場合と、種類がノーマルバッファ以外の場合にカラースキームの変更をスキップしています。
+バッファの種類とかノーマルバッファが何かご存知なければ`:help buftype`を参照してください。
+
+（3）の現在のカラースキームと次のカラースキームが同じなら`colorscheme`コマンドの実行が無駄になる問題は、
+状況通り、現在と次の2つのカラースキームの名前を比較すれば回避できます。
+
+（4）の他のプラグインとの干渉は中々に厄介な問題で、実際に使い始めるまで気付きにくい部分かもしれません。
+まずは自分が使っているプラグインを十分に把握すべきでしょう。
+それから、とりあえずやっておくべき対策として、`vim.api.nvim_create_autocmd`関数のオプションに`nested = true`を指定しましょう。
+Vim/Neovimにはカラースキームの変更前後のイベント（`ColorSchemePre`、`ColorScheme`）で発火するautocmdを定義できます。
+しかし、`autocmd`内でカラースキームを変更した場合、既定動作ではこれらのautocmdが発火されません。
+`nested = true`にすると、発火します。
+それでもだめな場合は、プラグインの初期化をautocmd内で実行するなどアドホックな対応が必要です。
+
+# 現在の実装
+
+上述の課題と対策を踏まえて、現在の私が`init.lua`内に記述しているコードをまとめると以下のようになります。
+
+執筆に力尽きたので、ここから先は適宜読み解いてください……。
+
+```lua
+-- [[ load plugins ]]
+require'jetpack'.startup(function(use)
+  -- colorschemeを提供するプラグイン
+  use '4513ECHO/vim-colors-hatsunemiku'
+  use 'morhetz/gruvbox'
+
+  -- highlightの一部を追加・変更するプラグイン
+  use 'm-demare/hlargs.nvim'
+  use 'norcalli/nvim-colorizer.lua'
+  use 'folke/lsp-colors.nvim'
+  use 'RRethy/vim-illuminate'
+end)
+
+--[[ colorscheme/highlight ]]
+-- params
+local DEFAULT_COLORSCHEME = 'hatsunemiku'
+local ALTERNATIVE_COLORSCHEME = 'gruvbox'
+
+-- set colorscheme
+local setup_hlargs = require'hlargs'.setup
+local setup_colorizer = require'colorizer'.setup
+local setup_lsp_colors = require'lsp-colors'.setup
+local function set_colorscheme(nm)
+  vim.cmd('colorscheme ' .. nm)
+  setup_hlargs()
+  setup_colorizer()
+  setup_lsp_colors()
+end
+set_colorscheme(DEFAULT_COLORSCHEME)
+
+-- Update colorscheme when buffer is outside of cwd
+vim.api.nvim_create_augroup('theme-by-buffer', {})
+vim.api.nvim_create_autocmd(
+  'BufEnter',
+  {
+    pattern = '*',
+    group = 'theme-by-buffer',
+    nested = true,
+    desc = 'Change theme by the path of the current buffer.',
+    callback = function(args)
+      local FILE = args.file
+
+      -- Do nothing if unneeded
+      if (
+        (FILE == '') or
+        (vim.api.nvim_exec('echo &buftype', true) ~= '')
+      ) then
+        return nil
+      end
+
+      -- Determine colorscheme
+      local CWD = vim.fn.getcwd()
+      local COLORSCHEME = CWD == string.sub(FILE, 1, string.len(CWD))
+                          and DEFAULT_COLORSCHEME
+                          or ALTERNATIVE_COLORSCHEME
+
+      -- Apply colorscheme and some highlight settings
+      if COLORSCHEME ~= vim.api.nvim_exec('colorscheme', true) then
+        set_colorscheme(COLORSCHEME)
+      end
+    end
+  }
+)
+```

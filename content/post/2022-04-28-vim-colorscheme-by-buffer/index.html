@@ -1,0 +1,145 @@
+
+
+<p>Vim/NeovimでLSPを利用して関数などの定義を参照すると、気付いたら標準ライブラリなどを参照している、なんて場面があります。</p>
+<p>どこまで実装を追いたいかは人それぞれとは言え、作業ディレクトリの内外どちらのファイルを参照しているかはすぐに気付ける方がいいでしょう。</p>
+<p>方法としてはいくつか考えられます。</p>
+<ol style="list-style-type: decimal">
+<li>メッセージで通知する</li>
+<li>ステータスラインなどにフルパスを表示する</li>
+<li>配色の変更などで訴える</li>
+</ol>
+<p>私は、（3）の方向性で、バッファのファイルパスが作業ディレクトリ内にあるか判定し、カラースキームを変えることにしました。</p>
+<p>（1）のメッセージで通知する方法は、ウィンドウから目を離すなど、時間経過と共に情報が記憶から流れる可能性があります。</p>
+<p>（2）のフルパスを表示する方法は、バッファが作業ディレクトリ内にあるか常に意識して、パスを都度確認する必要があります。加えてパスを読まねばならず、パスは「作業ディレクトリ内にあるか」以上の情報を含みます。</p>
+<p>（3）の配色の変更などで訴える方法は否応なしに情報が入ってくるので気に入りました。</p>
+<p>以下では、Neovim（<code>init.lua</code>）で実現する方法と注意点について述べます。
+Vimスクリプトでも実現できるはずなので、Vimユーザーは適当に読み替えてください。</p>
+<div id="ベースライン実装" class="section level1">
+<h1>ベースライン実装</h1>
+<div id="方針" class="section level2">
+<h2>方針</h2>
+<p>バッファのファイルパスに応じてカラースキームを変更したいので、素朴には<code>BufEnter</code>イベントで<code>autocmd</code>を発火させればいいでしょう。
+<code>BufEnter</code>は文字通り、バッファに入った時、即ち編集中のバッファが切り替わった時を指します。
+<code>autocmd</code>も文字通り、自動実行したいコマンドのことです。</p>
+<p>Neovimの場合、<code>vim.api.nvim_create_autocmd</code>関数を使って<code>autocmd</code>を定義できます。</p>
+<p>第一引数にはイベント名の<code>'BufEnter'</code>を指定します。</p>
+<p>第二引数には処理の条件や内容をテーブルで記述します。最低限指定すべき項目は<code>pattern</code>と<code>callback</code>です。</p>
+<p><code>pattern</code>にはバッファのファイル名やファイルパスを指定します。ワイルドカードに<code>*</code>を使えるので、<code>*.lua</code>とすればLuaスクリプトに限定したautocmdを定義できます。今回はファイルパスの判定はより柔軟に行いたいので、任意のバッファに対して発火するよう<code>pattern = '*'</code>を指定します。</p>
+<p><code>callback</code>にはautocmdが発火した時に実行したい関数を記述します。この関数は引数を1つ受け取るので、<code>args</code>など適当な名前をつけておきましょう。
+<code>args</code>引数にはテーブルが渡されます。詳細な内容は<code>:helpo nvim_create_autocmd</code>に譲るとして、ここで重要なのは<code>args.file</code>でバッファのファイル名（<code>&lt;afile&gt;</code>）を参照できる点です。つまり、<code>args.file</code>の内容を確認すれば<strong>バッファが作業ディレクトリ内のファイルか否か</strong>を判定できます。あとは、<code>vim.fn.getcwd</code>関数を使って作業ディレクトリとバッファのファイル名を比較し、条件分岐で適用したいカラスキームを選びます。</p>
+</div>
+<div id="コード" class="section level2">
+<h2>コード</h2>
+<p>以下を<code>init.lua</code>にでも記述すれば、バッファが作業ディレクトリ内かどうか判定してカラースキームを変更できるようになります。ここではVim/Neovimに内蔵のカラスキームであるdesertとeveningを切り替えるようにしています。</p>
+<pre class="lua"><code>vim.api.nvim_create_autocmd(
+  &#39;BufEnter&#39;,
+  {
+    pattern = &#39;*&#39;,
+    callback = function(args)
+      local FILE = args.file  -- バッファのファイル名
+      local CWD = vim.fn.getcwd() -- 作業ディレクトリのパス
+
+      -- カラースキームの決定
+      -- ファイル名がCWDで始まっていればdesertを選択、それ以外はeveningを選択
+      local COLORSCHEME = CWD == string.sub(FILE, 1, string.len(CWD))
+                          and &#39;desert&#39;  -- 普段用
+                          or &#39;evening&#39;  -- 作業ディレクトリ外のバッファ用
+
+      -- カラースキームの適用
+      vim.cmd(&#39;colorscheme &#39; .. COLORSCHEME)
+    end
+  }
+)</code></pre>
+</div>
+</div>
+<div id="ベースライン実装の課題と対策" class="section level1">
+<h1>ベースライン実装の課題と対策</h1>
+<p>最小限に目的を達成しましたが、上記のコードはいくつかの課題を抱えています。</p>
+<ol style="list-style-type: decimal">
+<li><code>init.lua</code>を再読み込みすると同じ<code>autocmd</code>が重複し、無駄や干渉に繋がる</li>
+<li>ファイル名の判定が厳密過ぎて過度にカラースキームが変わってしまう
+<ul>
+<li>たとえばhelpの表示やterminalの起動など</li>
+</ul></li>
+<li>現在のカラースキームと次のカラースキームが同じなら、<code>colorscheme</code>コマンドの実行が無駄</li>
+<li>他のプラグインと干渉する場合がある
+<ul>
+<li>statuslineやbufferline系のプラグインの表示が狂う</li>
+<li>colorscheme以外に<code>highlight</code>を追加するプラグインがある場合、条件次第で無効化される</li>
+</ul></li>
+</ol>
+<p>（1）のautocmdの重複・干渉問題は<code>vim.api.nvim_create_augroup</code>を使って解決しましょう。複数のautocmdを1つのグループにまとめるための関数ですが、同じグループを再作成する際に、登録済みのautocmdを消去してくれます（既定動作）。</p>
+<p>（2）のカラースキームの過度な切り替えを抑制するには、例外としたいバッファーのファイル名（<code>&lt;afile&gt;</code>）や種類（<code>&amp;buftype</code>）を決めておきましょう。私はファイル名が空の場合と、種類がノーマルバッファ以外の場合にカラースキームの変更をスキップしています。バッファの種類とかノーマルバッファが何かご存知なければ<code>:help buftype</code>を参照してください。</p>
+<p>（3）の現在のカラースキームと次のカラースキームが同じなら<code>colorscheme</code>コマンドの実行が無駄になる問題は、状況通り、現在と次の2つのカラースキームの名前を比較すれば回避できます。</p>
+<p>（4）の他のプラグインとの干渉は中々に厄介な問題で、実際に使い始めるまで気付きにくい部分かもしれません。まずは自分が使っているプラグインを十分に把握すべきでしょう。それから、とりあえずやっておくべき対策として、<code>vim.api.nvim_create_autocmd</code>関数のオプションに<code>nested = true</code>を指定しましょう。
+Vim/Neovimにはカラースキームの変更前後のイベント（<code>ColorSchemePre</code>、<code>ColorScheme</code>）で発火するautocmdを定義できます。しかし、<code>autocmd</code>内でカラースキームを変更した場合、既定動作ではこれらのautocmdが発火されません。
+<code>nested = true</code>にすると、発火します。それでもだめな場合は、プラグインの初期化をautocmd内で実行するなどアドホックな対応が必要です。</p>
+</div>
+<div id="現在の実装" class="section level1">
+<h1>現在の実装</h1>
+<p>上述の課題と対策を踏まえて、現在の私が<code>init.lua</code>内に記述しているコードをまとめると以下のようになります。</p>
+<p>執筆に力尽きたので、ここから先は適宜読み解いてください……。</p>
+<pre class="lua"><code>-- [[ load plugins ]]
+require&#39;jetpack&#39;.startup(function(use)
+  -- colorschemeを提供するプラグイン
+  use &#39;4513ECHO/vim-colors-hatsunemiku&#39;
+  use &#39;morhetz/gruvbox&#39;
+
+  -- highlightの一部を追加・変更するプラグイン
+  use &#39;m-demare/hlargs.nvim&#39;
+  use &#39;norcalli/nvim-colorizer.lua&#39;
+  use &#39;folke/lsp-colors.nvim&#39;
+  use &#39;RRethy/vim-illuminate&#39;
+end)
+
+--[[ colorscheme/highlight ]]
+-- params
+local DEFAULT_COLORSCHEME = &#39;hatsunemiku&#39;
+local ALTERNATIVE_COLORSCHEME = &#39;gruvbox&#39;
+
+-- set colorscheme
+local setup_hlargs = require&#39;hlargs&#39;.setup
+local setup_colorizer = require&#39;colorizer&#39;.setup
+local setup_lsp_colors = require&#39;lsp-colors&#39;.setup
+local function set_colorscheme(nm)
+  vim.cmd(&#39;colorscheme &#39; .. nm)
+  setup_hlargs()
+  setup_colorizer()
+  setup_lsp_colors()
+end
+set_colorscheme(DEFAULT_COLORSCHEME)
+
+-- Update colorscheme when buffer is outside of cwd
+vim.api.nvim_create_augroup(&#39;theme-by-buffer&#39;, {})
+vim.api.nvim_create_autocmd(
+  &#39;BufEnter&#39;,
+  {
+    pattern = &#39;*&#39;,
+    group = &#39;theme-by-buffer&#39;,
+    nested = true,
+    desc = &#39;Change theme by the path of the current buffer.&#39;,
+    callback = function(args)
+      local FILE = args.file
+
+      -- Do nothing if unneeded
+      if (
+        (FILE == &#39;&#39;) or
+        (vim.api.nvim_exec(&#39;echo &amp;buftype&#39;, true) ~= &#39;&#39;)
+      ) then
+        return nil
+      end
+
+      -- Determine colorscheme
+      local CWD = vim.fn.getcwd()
+      local COLORSCHEME = CWD == string.sub(FILE, 1, string.len(CWD))
+                          and DEFAULT_COLORSCHEME
+                          or ALTERNATIVE_COLORSCHEME
+
+      -- Apply colorscheme and some highlight settings
+      if COLORSCHEME ~= vim.api.nvim_exec(&#39;colorscheme&#39;, true) then
+        set_colorscheme(COLORSCHEME)
+      end
+    end
+  }
+)</code></pre>
+</div>
