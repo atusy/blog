@@ -1,0 +1,51 @@
+---
+title: DenoとTypeScriptで自作CLIツールのghfを移植してみた（動機編）
+author: ''
+date: '2022-05-27'
+slug: deno-ghf
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p>以前、<code>gh</code>コマンドを曖昧検索で便利にする<code>ghf</code>コマンドを作りました。</p>
+<blockquote>
+<p><a href="https://blog.atusy.net/2021/07/10/publish-gh-fzf/">GitHub CLI（gh）に曖昧検索の力を加えるghfコマンドを作ってzshプラグイン化した</a></p>
+</blockquote>
+<p>このツールは基本的には<code>bash</code>で書いており、手動で導入すればzshがなくても動きます。</p>
+<p>私のLinux環境では快適に使えていますが、2つの理由から別言語への移植を健闘していました。</p>
+<ol style="list-style-type: decimal">
+<li>ポータビリティ</li>
+<li>保守性</li>
+<li>機能拡張のしやすさ</li>
+</ol>
+<p>本稿ではこのあたりを考えた理由について記録しておきます。次回は感想戦かな。</p>
+<p>依存が増えるのはデメリットではありますが、趣味のプロジェクトですし、自分の環境にはDenoを当然のように入れてるので悪くない選択肢だと思います。</p>
+<p>もっとも、本家<code>gh</code>コマンドの実装を資産として活用できるGo言語を使った方がいいのでは、とDenoに移植してから気付いてしまったので、近くGoでも書き直すと思います。</p>
+<div id="ポータビリティ" class="section level2">
+<h2>ポータビリティ</h2>
+<p>戦術の通り、ghfコマンドは<code>bash</code>で書かれています。</p>
+<p>しかしWindowsで動かすには<code>bash</code>などの導入が面倒です。</p>
+<p>また、内部では<code>sed</code>や<code>grep</code>を使っていますが、これらのコマンドは実装によって挙動が違います。私はLinuxユーザーなのでGNU版を使って開発をしていますが、macOSにはBSD版が入っているのでまともに動作するか不明です。</p>
+<p>便利なのでせっかくならもっと多くの人に手軽に使ってもらえる形にしたいと思いました。</p>
+<p>Denoへの依存こそ発生しますが、きっとWindowsに<code>bash</code>を入れるよりは簡単でしょう。
+macOSやLinuxなら<code>homebrew</code>なりなんなりを使えば簡単に導入できます。</p>
+<p>また、Denoさえ入れてしまえば、あとは以下のコマンドで簡単にインストールできるようになります。パスを通す必要はありますが、その旨はコマンド実行時に表示される手順に従えばよいようです。</p>
+<pre class="bash"><code>deno install --allow-run --allow-env --allow-read --force --name ghf \
+    https://raw.githubusercontent.com/atusy/ghf.ts/main/ghf.ts</code></pre>
+</div>
+<div id="保守性" class="section level2">
+<h2>保守性</h2>
+<p>見通しの良いコードを書くには、関数の切り分けが大事です。そして関数の扱いやすさも大事です。</p>
+<p>しかしシェルスクリプトの関数は、n番目の引数を使って……みたいな書き方になるのでどうにも使い勝手が悪いです。加えて型付けができません。これでは引数を増やしたり順番を変えたりした時に、うっかり想定外の値を引数に渡すおそれがあります。</p>
+<p>静的型付けな言語ならこの問題を回避できるでしょう。</p>
+</div>
+<div id="機能拡張のしやすさ" class="section level2">
+<h2>機能拡張のしやすさ</h2>
+<p><code>ghf</code>コマンドは<code>gh</code>コマンドを通じてGitHubのAPIを叩いています。そのため、issueやレポジトリの一覧取得や、README.mdなどの概要の取得にどうしても多少の時間がかかります。このレスポンスを改善するため、キャッシュや非同期なプリフェッチを行いたいと考えています。</p>
+<p>こういった複雑なことをしたければやはり非同期プログラミングが容易な言語を採用した方がいいでしょう。また、拡張すればする程、ポータビリティや保守性は重荷になるわけで、シェルスクリプト脱却が楽かなと思いました。</p>
+</div>
