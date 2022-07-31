@@ -1,0 +1,74 @@
+---
+title: chowcho.nvimで任意の関数を、対話的に選択したwindowで実行
+author: ''
+date: '2022-07-31'
+slug: chowcho-nvim-any-func
+categories: [neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs:
+  - lua
+images:
+  - 2022/07/31/chowcho-nvim-any-func/images/vim-api-win-hide.gif
+---
+
+
+
+<p>chowcho.nvimを使うと、Neovimの各windowに番号が表示され、目的番号を入力すると、フォーカスを移動できます。</p>
+<p><a href="https://github.com/tkmpypy/chowcho.nvim" class="uri">https://github.com/tkmpypy/chowcho.nvim</a></p>
+<p>今回、この機能を一般化し、winidを受け取る任意の関数を実行できるようにしました。</p>
+<p>PRを無事にマージしてもらえたので、どなたでもご利用頂けます。</p>
+<p>以下にいくつか例を載せます。</p>
+<div id="選択したwindowを非表示にする" class="section level2">
+<h2>選択したwindowを非表示にする</h2>
+<pre class="lua"><code>require(&#39;chowcho&#39;).run(vim.api.nvim_win_hide)</code></pre>
+<p><img src="images/vim-api-win-hide.gif" /></p>
+<p>(動画GIF内のコードはマージ前の古いものなので、雰囲気だけお楽しみください)</p>
+</div>
+<div id="選択したwindow上のバッファを現在のwindowで開く" class="section level2">
+<h2>選択したwindow上のバッファを現在のwindowで開く</h2>
+<p><code>&lt;C-W&gt;e</code>にマップしています。</p>
+<pre class="lua"><code>vim.keymap.set({&#39;&#39;, &#39;t&#39;}, &#39;&lt;C-W&gt;e&#39;, function()
+  if vim.fn.winnr(&#39;$&#39;) &lt;= 1 then return end
+  require(&#39;chowcho&#39;).run(function(n)
+    vim.cmd(&quot;buffer &quot; .. vim.api.nvim_win_call(n, function()
+      return vim.fn.bufnr(&#39;%&#39;)
+    end))
+  end)
+end)</code></pre>
+</div>
+<div id="選択したwindowと現在のwindowでバッファを交換する" class="section level2">
+<h2>選択したwindowと現在のwindowでバッファを交換する</h2>
+<p><code>&lt;C-W&gt;x</code>にマップしています。</p>
+<p>元々の<code>&lt;C-W&gt;x</code>はカウントに指定した番号のwindowと現在のwindowを入れ替えます。しかし、同じ方向に分割したwindow同士でしか交換できないのは不便に感じていました。</p>
+<p>Windowの数が2以下の場合は<code>wincmd x</code>が発動します。</p>
+<p>3以上の時の動作は<code>buffer</code>コマンドを使っていますが、加えてバッファローカルなオプションも引き継ぐようにしています。特にreadonlyなバッファを<code>buffer</code>コマンドで開くと、編集可能になるので、これを防ぐ狙いです。</p>
+<pre class="lua"><code>local _chowcho_run = require&#39;chowcho&#39;.run
+local _chowcho_bufnr = function(winid)
+  return vim.api.nvim_win_call(winid, function()
+    return vim.fn.bufnr(&#39;%&#39;), vim.opt_local
+  end)
+end
+local _chowcho_buffer = function(winid, bufnr, opt_local)
+  return vim.api.nvim_win_call(winid, function()
+    local old = _chowcho_bufnr(0)
+    vim.cmd(&quot;buffer &quot; .. bufnr)
+    vim.opt_local = opt_local
+    return old
+  end)
+end
+
+vim.keymap.set({&#39;&#39;, &#39;t&#39;}, &#39;&lt;C-W&gt;x&#39;, function()
+  _chowcho_run(function(n)
+    if vim.fn.winnr(&#39;$&#39;) &lt;= 2 then
+      vim.cmd(&quot;wincmd x&quot;)
+      return
+    end
+    local bufnr0, opt_local0 = _chowcho_bufnr(0)
+    local bufnrn, opt_localn = _chowcho_buffer(n, bufnr0, opt_local0)
+    _chowcho_buffer(0, bufnrn, opt_localn)
+  end)
+end)</code></pre>
+</div>
