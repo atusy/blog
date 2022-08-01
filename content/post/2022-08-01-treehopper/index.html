@@ -1,0 +1,36 @@
+---
+title: nvim-treehopperで捗るコードの折り畳み
+author: ''
+date: '2022-08-01'
+slug: treehopper
+categories: [Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [lua]
+images:
+  - 2022/08/01/treehopper/images/zfvm.gif
+---
+
+
+<p><a href="https://github.com/mfussenegger/nvim-treehopper">nvim-treehopper</a>を使うと、ソースコードの抽象構文木に基づいた範囲選択が簡単にできます。</p>
+<p>関数定義全体を選択とか、<code>if</code>文の条件部分を選択とか、文脈に沿った範囲選択が捗るわけです。</p>
+<p>おそらく、定番の使い道は選択範囲の削除（<code>d</code> | <code>D</code>)やヤンク（<code>y</code> | <code>Y</code>）でしょう。加えてコードの折り畳み（<code>zf</code>）とも相性が良いとに気付きました。</p>
+<div class="figure">
+<img src="images/zfvm.gif" alt="" />
+<p class="caption">treehopperで選択した範囲を折り畳む様子</p>
+</div>
+<p>ノーマルモードでは<code>zf{motion}</code>と、モーションで移動した範囲に対して折り畳みを実行するので、使い勝手が悪く感じます。</p>
+<p>そこで、以下のように<code>zf</code>をマッピングしてあげると、モーションの変わりにnvim-treehopperで折り畳み範囲を決定できます。</p>
+<pre class="lua"><code>vim.api.nvim_set_keymap(
+  &#39;n&#39;,
+  &#39;zf&#39;,
+  function()
+    require&#39;tsht&#39;.nodes()
+    vim.cmd(&quot;normal! zf&quot;)
+  end,
+  {silent = true}
+)</code></pre>
+<p><code>:help zf</code>にある通り、<code>zf</code>は<code>foldmethod</code>オプションが “manual” か “marker” の時しか、使えませんので、ご注意下さい。</p>
+<p><strong>Enjoy!!</strong></p>
