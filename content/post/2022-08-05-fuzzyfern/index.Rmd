@@ -1,0 +1,65 @@
+---
+title: Fuzzy Finderで捗るFernによるファイル操作
+author: ''
+date: '2022-08-05'
+slug: fuzzyfern
+categories: [neovim, fern.vim, telescope.nvim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [lua, vim]
+images:
+  - 2022/08/05/fuzzyfinder/images/fuzzyfern.gif
+---
+
+[Fern](https://github.com/lambdalisue/fern.vim)はVim/Neovim向けのファイラーで、外部依存がなくパフォーマンスも良好なので、好んで使っています。
+
+また、ファイラーらしく、ファイル操作などの機能を種々揃えており、「action」と呼んでいます。
+
+Fernの画面上で`a`を押すと、コマンドラインモードでアクションを指定でき、設定してあればタブ補完も効くようです。
+作者は、ユーザーがキーマッピングを覚えなくて良い点を魅力に挙げています。
+
+しかし、せっかくならよく使う操作はマッピングも覚えてしまいたいところ。
+
+というわけで[Telescope](https://github.com/nvim-telescope/telescope.nvim)というNeovim向けのFuzzy finderを使って、キーマッピングを曖昧検索 & 実行できるようにしてみました。
+
+![](images/fuzzyfern.gif)
+
+上の動画GIFの通り、マッピングとそれによって発動するコマンドが同時に確認できます。
+たとえば、`R`は`rename`してくれるようですね。
+一方で`<Plug>`で始まるInternalなマッピングも絞りこめます。
+今回選択した、ファイル削除のアクションには特にユーザー側でマッピングしていないことがわかります。
+よく使うけれどマッピングされていないものがあれば、設定ファイルをメンテナンスする良い機会かもしれません。
+
+実現方法は案外単純です。
+
+1. Telescopeに組込みのキーマップに対する検索機能を起動
+2. Telescope起動時にFernのアクションに関連するキーワード（fern-action）と空白を先行入力しておく
+3. 自分が使いたい機能に関連しそうなキーワードを入力する
+
+
+1と2の部分に関しては以下のようなコマンドで実現できます。
+
+``` lua
+:lua require'telescope.builtin'.keymaps(); vim.cmd("normal i'fern-action ")
+```
+
+Telescopeの拡張機能であいまい検索アルゴリズムに`fzf`を採用している都合上、`fern-action`に部分一致の手前に`'`が入っています。
+このあたりはご自身の環境に合わせて調整してください。
+
+私は`<C-P>k`にキーマッピングに対するあいまい検索をマッピングしています。
+そこで、以下のようにFernのバッファ上では同じマッピングでactionに対するマッピングだけを検索できるようにしています。
+
+``` vim
+function! s:init_fern() abort
+  nnoremap <buffer> <C-P>k <Cmd>lua require'telescope.builtin'.keymaps(); vim.cmd("normal i'fern-action ")<CR>
+endfunction
+
+augroup fern-custom
+  autocmd! *
+  autocmd FileType fern call s:init_fern()
+augroup END
+```
+
+**ENJOY!!**

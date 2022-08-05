@@ -1,0 +1,43 @@
+---
+title: Fuzzy Finderで捗るFernによるファイル操作
+author: ''
+date: '2022-08-05'
+slug: fuzzyfern
+categories: [neovim, fern.vim, telescope.nvim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [lua, vim]
+images:
+  - 2022/08/05/fuzzyfinder/images/fuzzyfern.gif
+---
+
+
+
+<p><a href="https://github.com/lambdalisue/fern.vim">Fern</a>はVim/Neovim向けのファイラーで、外部依存がなくパフォーマンスも良好なので、好んで使っています。</p>
+<p>また、ファイラーらしく、ファイル操作などの機能を種々揃えており、「action」と呼んでいます。</p>
+<p>Fernの画面上で<code>a</code>を押すと、コマンドラインモードでアクションを指定でき、設定してあればタブ補完も効くようです。作者は、ユーザーがキーマッピングを覚えなくて良い点を魅力に挙げています。</p>
+<p>しかし、せっかくならよく使う操作はマッピングも覚えてしまいたいところ。</p>
+<p>というわけで<a href="https://github.com/nvim-telescope/telescope.nvim">Telescope</a>というNeovim向けのFuzzy finderを使って、キーマッピングを曖昧検索 &amp; 実行できるようにしてみました。</p>
+<p><img src="images/fuzzyfern.gif" /></p>
+<p>上の動画GIFの通り、マッピングとそれによって発動するコマンドが同時に確認できます。たとえば、<code>R</code>は<code>rename</code>してくれるようですね。一方で<code>&lt;Plug&gt;</code>で始まるInternalなマッピングも絞りこめます。今回選択した、ファイル削除のアクションには特にユーザー側でマッピングしていないことがわかります。よく使うけれどマッピングされていないものがあれば、設定ファイルをメンテナンスする良い機会かもしれません。</p>
+<p>実現方法は案外単純です。</p>
+<ol style="list-style-type: decimal">
+<li>Telescopeに組込みのキーマップに対する検索機能を起動</li>
+<li>Telescope起動時にFernのアクションに関連するキーワード（fern-action）と空白を先行入力しておく</li>
+<li>自分が使いたい機能に関連しそうなキーワードを入力する</li>
+</ol>
+<p>1と2の部分に関しては以下のようなコマンドで実現できます。</p>
+<pre class="lua"><code>:lua require&#39;telescope.builtin&#39;.keymaps(); vim.cmd(&quot;normal i&#39;fern-action &quot;)</code></pre>
+<p>Telescopeの拡張機能であいまい検索アルゴリズムに<code>fzf</code>を採用している都合上、<code>fern-action</code>に部分一致の手前に<code>'</code>が入っています。このあたりはご自身の環境に合わせて調整してください。</p>
+<p>私は<code>&lt;C-P&gt;k</code>にキーマッピングに対するあいまい検索をマッピングしています。そこで、以下のようにFernのバッファ上では同じマッピングでactionに対するマッピングだけを検索できるようにしています。</p>
+<pre class="vim"><code>function! s:init_fern() abort
+  nnoremap &lt;buffer&gt; &lt;C-P&gt;k &lt;Cmd&gt;lua require&#39;telescope.builtin&#39;.keymaps(); vim.cmd(&quot;normal i&#39;fern-action &quot;)&lt;CR&gt;
+endfunction
+
+augroup fern-custom
+  autocmd! *
+  autocmd FileType fern call s:init_fern()
+augroup END</code></pre>
+<p><strong>ENJOY!!</strong></p>
