@@ -1,0 +1,35 @@
+---
+title: "Vim/NeovimのCTRL_GをPrefixにしてみる"
+author: ''
+date: '2022-08-08'
+slug: ctrlg-as-prefix-vim
+categories: [Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [lua]
+summary: |
+  CTRL_Gの機能はステータスラインで賄えるのでGit用のPrefixにしてみました
+---
+
+
+<p><code>&lt;C-G&gt;</code>（<kbd>Ctrl</kbd>_<kbd>G</kbd>）は、編集中のバッファのファイル名や編集状態、現在行に関する情報を与えてくれるマッピングです。</p>
+<p>私の場合、ステータスラインに必要な情報は表示しているので、不要だなと気付きました。</p>
+<p>なので思いきって、Gitに関連する操作のPrefixに割り当ててみました。
+Git関連の操作には、<a href="https://github.com/lambdalisue/gin.vim">lambdaalisue/gin.vim</a>や<a href="https://github.com/tanvirtin/vgit.nvim">tanvirtin/vgit</a>、<a href="https://github.com/nvim-telescope/telescope.nvim">nvim-telescope/telescope.nvim</a>といったプラグインを使い分けています。</p>
+<pre class="lua"><code>-- &lt;C-G&gt;相当だが、ファイルパスをクリップボードに追加
+vim.keymap.set(&#39;n&#39;, &#39;&lt;C-G&gt;&lt;C-G&gt;&#39;, [[&lt;C-G&gt;&lt;Cmd&gt;let @+ = expand(&quot;%&quot;)&lt;CR&gt;]], {})
+
+-- git commitをインサートモードで開始
+vim.keymap.set(&#39;n&#39;, &#39;&lt;C-G&gt;&lt;C-Space&gt;&#39;, [[&lt;Cmd&gt;Gin commit&lt;CR&gt;i]], {})
+
+-- git stage
+vim.keymap.set(&#39;n&#39;, &#39;&lt;C-G&gt;&lt;C-S&gt;&#39;, [[&lt;Cmd&gt;Telescope git_status&lt;CR&gt;]], {})
+
+-- ファイルを保存してカーソル位置のハンクをgit add
+vim.keymap.set(&#39;n&#39;, &#39;&lt;C-G&gt;&lt;C-A&gt;&#39;, function()
+  vim.cmd(&quot;up&quot;)
+  require(&quot;vgit&quot;)vgit.buffer_hunk_stage()
+end, {})</code></pre>
+<p><strong>Enjoy</strong></p>
