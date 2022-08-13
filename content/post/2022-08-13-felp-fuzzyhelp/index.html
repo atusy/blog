@@ -1,0 +1,93 @@
+---
+title: felpパッケージでRのヘルプをあいまいに検索しよう
+author: ''
+date: '2022-08-13'
+slug: felp-fuzzyhelp
+categories: [R]
+tags: [felp]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+images:
+  - 2022/08/13/felp-fuzzyhelp/images/fuzzyhelp.gif
+---
+
+
+
+<p>Rでヘルプを見ようにも記憶が曖昧だったり、つづりがあやふやで調べようがない経験があるかもしれません。</p>
+<ul>
+<li>tidyverseに入ってるなんちゃらパッケージのミュータントみたいな関数、なんだっけ？</li>
+<li><code>geom_lime</code>とか<code>geom_pint</code>ってライムもビールも欲しいけどそうやないんや！<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></li>
+</ul>
+<p>そこで、あいまいな（fuzzy）キーワードでヘルプを検索する<code>fuzzyhelp</code>関数をfelpパッケージに追加しました。</p>
+<p>まだCRANにはアップロードしてませんが、よければ使ってみてください。</p>
+<pre class="r"><code># 要remotesパッケージ
+# install.package(&quot;remotes&quot;)
+remotes::install_github(&quot;atusy/felp&quot;)</code></pre>
+<div class="figure">
+<img src="images/fuzzyhelp.gif" alt="" />
+<p class="caption">fuzzyhelpのデモ</p>
+</div>
+<p>使い方は以下の通り。</p>
+<ol style="list-style-type: decimal">
+<li>UIを起動
+<ul>
+<li><code>felp::fuzzyhelp()</code>を実行するか、コマンドパレットを<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>で開き「Fuzzy Search on R Help」を指定する</li>
+</ul></li>
+<li>検索キーワードを入力
+<ul>
+<li>あいまい一致するので、typoを気にする必要はありませ</li>
+<li>スペースはキーワードの区切り扱いになります</li>
+</ul></li>
+<li>検索結果一覧から必要なTopicを選ぶ
+<ul>
+<li>一覧のサイズはマウス操作で変更可能</li>
+</ul></li>
+<li>画面下部でヘルプを閲覧する</li>
+<li>UIを終了
+<ul>
+<li><strong>Done</strong>ボタンを押すと、最後にプレビューしているページのヘルプを正式に展開します。RStudioであればHelpタブが表示され、コンソールであれば<code>help</code>関数が実行されます。</li>
+<li><strong>Cancel</strong>ボタンを押すと、何もせずに終了します。</li>
+</ul></li>
+</ol>
+<p>通常の<code>help</code>関数を使う場合と異なり、パッケージ名やヘルプのタイトルにもあいまい一致する特徴があります。</p>
+<p>トピック名、パッケージ名、タイトルの順に重みをつけていますが、使ってみてイマイチな挙動があれば教えてください。</p>
+<div id="アルゴリズム" class="section level2">
+<h2>アルゴリズム</h2>
+<p>ざっと以下の通りです</p>
+<ol style="list-style-type: decimal">
+<li>入力文字を半角スペースで分割しクエリとする</li>
+<li>パッケージ、トピック、タイトル、それぞれに対し各クエリとの距離行列を算出する
+<ul>
+<li>行数: 検索対象の数</li>
+<li>列数: 検索クエリの数</li>
+<li>手法
+<ul>
+<li>パッケージ: レーベンシュタイン距離（<code>stringdist::stringdist</code>関数）</li>
+<li>トピック: レーベンシュタイン距離（<code>stringdist::stringdist</code>関数）</li>
+<li>タイトル: タイトルの文字列上で窓をずらしながらOptimal string aligment（OSA; 制限付きDamerau-Levenshtein距離）の最小値を算出（<code>stringdist::afind</code>関数）</li>
+</ul></li>
+</ul></li>
+<li>パッケージ、トピック、タイトルそれぞれの距離行列に対して行ごとの平均値を計算し、重み付きの和をとり、スコアとする</li>
+<li>検索対象をスコアの昇順でソートする</li>
+<li>検索クエリが複数ある場合、上位20点の順位を調整する
+<ul>
+<li>パッケージとトピックがどの検索クエリと最近傍にあったか調べる</li>
+<li>最近傍クエリが共通する場合、上位20位の範囲で最下位にする</li>
+<li>ただし、最近傍クエリが2回以上入力されている場合をのぞく</li>
+</ul></li>
+</ol>
+<p>一番のキモは最後の順位調整でしょう。</p>
+<p>たとえば「ggplot geom_pint」で検索した場合、「geom_pint」は「geom_point」の誤りです。このため、「ggplot」クエリと距離の近い「ggplot2」パッケージの「ggplot」関数が最有力候補になりやすいです。しかし、ユーザーは意図を持って複数クエリを入力しているはずなので、パッケージ名とトピック名（この場合は関数名）が異なるクエリと最近傍になる組み合わせを優先しました。ただし、ユーザーが「ggplot ggplot」と入力している場合は、「ggplot」を2箇所以上にマッチさせたいのだと予想できるので、例外としています。</p>
+<p>2番目の距離行列の算出方法は色々試してなんとなくよさそうな指標を採用しています。タイトルに関してはパッケージやトピックに比べて長文なので、部分的なあいまい一致を鑑みるべきだろうと考えました。</p>
+<p>3番目の重み付けは多くのユーザーがトピック（基本的に関数名）、パッケージ、タイトルの順に気にするだろうという考えから実施しています。数値としてはトピックが1、パッケージが0.5、タイトルが0.1となっていますが、具体的根拠はありません。</p>
+</div>
+<div id="enjoy" class="section level2">
+<h2>Enjoy!!</h2>
+</div>
+<div class="footnotes footnotes-end-of-document">
+<hr />
+<ol>
+<li id="fn1"><p>よくあるタイポとのことで、ジョークパッケージ化されてます <a href="https://github.com/coolbutuseless/geomlime" class="uri">https://github.com/coolbutuseless/geomlime</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
