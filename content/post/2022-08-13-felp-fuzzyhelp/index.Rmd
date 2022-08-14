@@ -26,7 +26,7 @@ Rでヘルプを見ようにも記憶が曖昧だったり、つづりがあや�
 
 ```r
 # 要remotesパッケージ
-# install.package("remotes")
+# install.packages("remotes")
 remotes::install_github("atusy/felp")
 ```
 
