@@ -2,6 +2,7 @@
 title: felpパッケージでRのヘルプをあいまいに検索しよう
 author: ''
 date: '2022-08-13'
+lastmod: '2022-10-12'
 slug: felp-fuzzyhelp
 categories: [R]
 tags: [felp]
@@ -14,20 +15,104 @@ images:
 
 
 
-<p>Rでヘルプを見ようにも記憶が曖昧だったり、つづりがあやふやで調べようがない経験があるかもしれません。</p>
+<p>Rでヘルプを見ようにも記憶があいまいだったり、つづりがあやふやで調べようがない経験があるかもしれません。</p>
 <ul>
 <li>tidyverseに入ってるなんちゃらパッケージのミュータントみたいな関数、なんだっけ？</li>
 <li><code>geom_lime</code>とか<code>geom_pint</code>ってライムもビールも欲しいけどそうやないんや！<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></li>
 </ul>
 <p>そこで、あいまいな（fuzzy）キーワードでヘルプを検索する<code>fuzzyhelp</code>関数をfelpパッケージに追加しました。</p>
-<p>まだCRANにはアップロードしてませんが、よければ使ってみてください。</p>
-<pre class="r"><code># 要remotesパッケージ
-# install.packages(&quot;remotes&quot;)
-remotes::install_github(&quot;atusy/felp&quot;)</code></pre>
-<div class="figure">
-<img src="images/fuzzyhelp.gif" alt="" />
-<p class="caption">fuzzyhelpのデモ</p>
+<p>詳しい使い方は<a href="#howto">後述</a>しますが、<code>felp::fuzzyhelp()</code>を実行するか、コマンドパレットを<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>で開き「Fuzzy Search on R Help」を指定すればすぐに使い始められると思います（参考：<a href="https://gihyo.jp/article/2022/09/increase-productivity-of-r-01">RStudioが生産性を高める［前編］〜コマンドパレットによる検索の効率化</a>）。</p>
+<p>ぜひ、CRANからfelpパッケージをインストールして使ってみてください。</p>
+<pre class="r"><code>install.packages(&quot;felp&quot;)</code></pre>
+<div id="デモ" class="section level2">
+<h2>デモ</h2>
+<p><img src="images/fuzzyhelp.gif" /></p>
+<div id="あいまいなキーワードによる検索" class="section level3">
+<h3>あいまいなキーワードによる検索</h3>
+<p><img src="images/fuzzyhelp-basic.png" /></p>
+<p>あいまい検索で有名なfzfアルゴリズムをカスタムしたものを採用しています。</p>
+<p><code>print</code>に対して<code>prnt</code>など、打ち漏らしを許容するアルゴリズムなので、自信のある部分だけを入力して絞り込むといいでしょう。打ち間違えはNGなので、<code>print</code>に対して<code>plint</code>はマッチしません。</p>
 </div>
+<div id="s3メソッドの検索" class="section level3">
+<h3>S3メソッドの検索</h3>
+<p><img src="images/fuzzyhelp-s3.png" /></p>
+<p><code>class</code>関数を使ってオブジェクトのクラスを調べておくと、そのオブジェクト向けに定義されたS3メソッドの検索も簡単です。
+<code>data.frame</code>クラスであれば、<code>.data.frame</code>と検索してみてください。</p>
+<p>クラスとかS3メソッドとはなんぞやという方は以下の説明を読んでください。</p>
+<details>
+<summary>
+S3オブジェクト指向とヘルプの関係
+</summary>
+<p>Rの関数の中には、与えたオブジェクトの種類（<code>class</code>）に応じて挙動を変えるものがいます。</p>
+<p><code>print</code>関数がその代表です。</p>
+<p>たとえば<code>data.frame</code>関数は<strong>data.frame</strong>クラスのデータフレームを作成します。また、作成したオブジェクトを確認すると、見慣れた表状のデータが表示されます。</p>
+<pre class="r"><code># data.frameクラス
+
+# データ作成
+x_df &lt;- data.frame(a = runif(5), b = seq(5))
+
+# クラスを確認
+print(class(x_df))
+#&gt; [1] &quot;data.frame&quot;
+
+# データ表示
+print(x_df)
+#&gt;           a b
+#&gt; 1 0.2655087 1
+#&gt; 2 0.3721239 2
+#&gt; 3 0.5728534 3
+#&gt; 4 0.9082078 4
+#&gt; 5 0.2016819 5</code></pre>
+<p>これを、<code>tibble::as_tibble</code>関数でTidyverse版データフレームに変換すると、各列の値こそ変わりませんが、表示内容は変わります。</p>
+<ul>
+<li>1行目にデータが5行2列のtibbleであると表示（<code># A tibble: 5 × 2</code>）</li>
+<li>列名前の下に列ごとのデータの型を表示（<code>&lt;dbl&gt;</code>、<code>&lt;int&gt;</code>など）</li>
+<li>小数点の表示桁数が減る</li>
+</ul>
+<pre class="r"><code># tbl_dfクラス
+
+# データ変換
+x_tbl &lt;- tibble::as_tibble(x_df)
+
+# 変換前のデータとの同一性を確認
+print(x_df == x_tbl)
+#&gt;         a    b
+#&gt; [1,] TRUE TRUE
+#&gt; [2,] TRUE TRUE
+#&gt; [3,] TRUE TRUE
+#&gt; [4,] TRUE TRUE
+#&gt; [5,] TRUE TRUE
+
+# クラスを確認
+print(class(x_tbl))
+#&gt; [1] &quot;tbl_df&quot;     &quot;tbl&quot;        &quot;data.frame&quot;
+
+# データ表示
+print(x_tbl)
+#&gt; # A tibble: 5 × 2
+#&gt;       a     b
+#&gt;   &lt;dbl&gt; &lt;int&gt;
+#&gt; 1 0.266     1
+#&gt; 2 0.372     2
+#&gt; 3 0.573     3
+#&gt; 4 0.908     4
+#&gt; 5 0.202     5</code></pre>
+<p>この変化は、<code>print</code>関数が、受け取ったデータのクラス名に応じて挙動を変えるために起きます。</p>
+<p>今回の場合は、<code>x_df</code>に対しては<code>print.data.frame</code>が、<code>x_tbl</code>に対しては<code>print.tbl_df</code>関数が使われています。</p>
+<p>これらは、呼び出した関数の名前と、与えたデータのクラス名を<code>.</code>で繋いだ名前の関数です。</p>
+<p>ここで、<code>print</code>関数を総称関数、<code>print.data.frame</code>関数や<code>print.tbl_df</code>関数をS3メソッドと呼びます。</p>
+<p>このため、データの種類に応じた関数の挙動を知るには、総称関数ではなく、S3メソッドのヘルプを見る必要があります。</p>
+</details>
+</div>
+<div id="vignetteやdemoの検索" class="section level3">
+<h3>VignetteやDemoの検索</h3>
+<p><img src="images/fuzzyhelp-vignette.png" /></p>
+<p>検索対象には純粋なHelp以外にVignette（長文形式のドキュメント）やDemoを含んでいます。</p>
+<p>現在はどれかに限定して検索するような機能はありませんが、特定のパッケージに関するヘルプ一覧を眺めている時などに、良い出会いがあるやも知れません。</p>
+</div>
+</div>
+<div id="howto" class="section level2">
+<h2>使い方</h2>
 <p>使い方は以下の通り。</p>
 <ol style="list-style-type: decimal">
 <li>UIを起動
@@ -36,7 +121,7 @@ remotes::install_github(&quot;atusy/felp&quot;)</code></pre>
 </ul></li>
 <li>検索キーワードを入力
 <ul>
-<li>あいまい一致するので、typoを気にする必要はありませ</li>
+<li>あいまい一致するので、typoを気にする必要はありません</li>
 <li>スペースはキーワードの区切り扱いになります</li>
 </ul></li>
 <li>検索結果一覧から必要なTopicを選ぶ
@@ -50,37 +135,27 @@ remotes::install_github(&quot;atusy/felp&quot;)</code></pre>
 <li><strong>Cancel</strong>ボタンを押すと、何もせずに終了します。</li>
 </ul></li>
 </ol>
-<p>通常の<code>help</code>関数を使う場合と異なり、パッケージ名やヘルプのタイトルにもあいまい一致する特徴があります。</p>
-<p>トピック名、パッケージ名、タイトルの順に重みをつけていますが、使ってみてイマイチな挙動があれば教えてください。</p>
+</div>
 <div id="アルゴリズム" class="section level2">
 <h2>アルゴリズム</h2>
 <p>ざっと以下の通りです</p>
 <ol style="list-style-type: decimal">
-<li>入力文字を半角スペースで分割しクエリとする</li>
-<li>パッケージ、トピック、タイトル、それぞれに対し各クエリとの距離行列を算出する
+<li>入力文字を半角スペースで分割しクエリに指定</li>
+<li>パッケージ名とタイトルに対し、各クエリとのあいまい一致度のスコア行列を計算
 <ul>
 <li>行数: 検索対象の数</li>
 <li>列数: 検索クエリの数</li>
-<li>手法
+<li>手法:
 <ul>
-<li>パッケージ: レーベンシュタイン距離（<code>stringdist::stringdist</code>関数）</li>
-<li>トピック: レーベンシュタイン距離（<code>stringdist::stringdist</code>関数）</li>
-<li>タイトル: タイトルの文字列上で窓をずらしながらOptimal string aligment（OSA; 制限付きDamerau-Levenshtein距離）の最小値を算出（<code>stringdist::afind</code>関数）</li>
+<li><strong>fzfアルゴリズム</strong>のボーナス計算を先頭一致と連続一致に限定したもの + 検索対象文字列の長さに応じたペナルティ</li>
+<li>参考：<a href="https://www.wantedly.com/companies/wantedly/post_articles/306103">fzfのスコア計算を読んでみる</a></li>
 </ul></li>
 </ul></li>
-<li>パッケージ、トピック、タイトルそれぞれの距離行列に対して行ごとの平均値を計算し、重み付きの和をとり、スコアとする</li>
-<li>検索対象をスコアの昇順でソートする</li>
-<li>検索クエリが複数ある場合、上位20点の順位を調整する
-<ul>
-<li>パッケージとトピックがどの検索クエリと最近傍にあったか調べる</li>
-<li>最近傍クエリが共通する場合、上位20位の範囲で最下位にする</li>
-<li>ただし、最近傍クエリが2回以上入力されている場合をのぞく</li>
-</ul></li>
+<li>2つのスコア行列の値をセルごとに比較し、大きい方の値を採用したスコア行列に集計</li>
+<li>集計したスコア行列の行ごとの和をとり、検索対象のスコアを確定</li>
+<li>検索対象をスコアの降順、パッケージ名、タイトルの順にソート</li>
 </ol>
-<p>一番のキモは最後の順位調整でしょう。</p>
-<p>たとえば「ggplot geom_pint」で検索した場合、「geom_pint」は「geom_point」の誤りです。このため、「ggplot」クエリと距離の近い「ggplot2」パッケージの「ggplot」関数が最有力候補になりやすいです。しかし、ユーザーは意図を持って複数クエリを入力しているはずなので、パッケージ名とトピック名（この場合は関数名）が異なるクエリと最近傍になる組み合わせを優先しました。ただし、ユーザーが「ggplot ggplot」と入力している場合は、「ggplot」を2箇所以上にマッチさせたいのだと予想できるので、例外としています。</p>
-<p>2番目の距離行列の算出方法は色々試してなんとなくよさそうな指標を採用しています。タイトルに関してはパッケージやトピックに比べて長文なので、部分的なあいまい一致を鑑みるべきだろうと考えました。</p>
-<p>3番目の重み付けは多くのユーザーがトピック（基本的に関数名）、パッケージ、タイトルの順に気にするだろうという考えから実施しています。数値としてはトピックが1、パッケージが0.5、タイトルが0.1となっていますが、具体的根拠はありません。</p>
+<p>速度向上のため、内部的には検索クエリの文字数が1、2、3以上の3パターンでスコアの算出方法を変えています。</p>
 </div>
 <div id="enjoy" class="section level2">
 <h2>Enjoy!!</h2>
