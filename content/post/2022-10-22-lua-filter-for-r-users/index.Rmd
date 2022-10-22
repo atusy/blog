@@ -1,0 +1,663 @@
+---
+title: Luaフィルタで表現力を手に入れろ
+author: ''
+date: '2022-10-22'
+slug: lua-filter-for-r-users
+categories: [R, Lua]
+tags: [Pandoc, R Markdown, Quarto]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+    pandoc_args:
+      - "--lua-filter=codeblock.lua"
+summary:
+  作例と共にLuaフィルタとLuaの文法について紹介。Tokyo.R 102の資料で主にRユーザーを対象としているが、Pandocユーザーにも参考になるはず。
+---
+
+```{r, include=FALSE}
+chunk <- function(args) {
+  paste0("```{", args, "}")
+}
+r <- function(code, fence = "`") {
+  paste0(fence, "r ", deparse(substitute(code)), fence)
+}
+```
+
+
+R MarkdownやQuartoは分析レポートの作成に便利なツールです。
+RmdファイルやQmdファイルはMarkdownの文法を拡張し、本文中のソースコードの一部を実行し、結果を挿入した上で、HTMLやPDFなどへ変換します。
+
+文書作成をプログラミングできるので、体裁など表現の部分にも手を出せます。
+しかし、凝ったことをすると、文書内に分析に関するコードと表現に関するコードが混在し、保守性を失います。
+
+本記事では、この問題の対処方法としてLuaフィルタを紹介します。
+簡単なフィルタを書きながらLua言語文法を学びつつ、最終的には「レベル1の見出し」に章番号を自動追加するフィルタを書いてみましょう。
+
+本記事は[Tokyo.R 102](https://techplay.jp/event/877203)の内容を一部改変したものです。
+
+# Luaフィルタとは？
+
+- Pandocで文書変換時に文書を弄れる仕組み
+    - R MarkdownもQuartoも裏でPandocの世話になってる
+
+      ```
+      Rmd ----------------> md ---------> html
+            knitr::knit()        pandoc
+      ```
+- 複雑な表現を自動化し、コンテンツに集中！
+    - [見出しの番号付け](https://github.com/rstudio/rmarkdown/blob/main/inst/rmarkdown/lua/number-sections.lua)
+        - `# 見出し` と普通に見出しを書いたら番号がつく
+    - [相互参照](https://github.com/quarto-dev/quarto-cli/tree/3aa68656d4f1c1f419b6e9c9d75df8cf53f73865/src/resources/filters/crossref)
+        - 番号付きの図は `![caption](figure.png){#id}`
+        - 参照する時は `@fig-id`
+    - [改ページ](https://github.com/rstudio/rmarkdown/blob/main/inst/rmarkdown/lua/pagebreak.lua)
+        - [HTML](https://pagedown.rbind.io), Word, LaTeX向けの記法を `\pagebreak` に統一
+- Lua言語で書く
+    - 実行環境はPandocに内蔵
+- ASTの概念を知ってると捗る
+    - Abstract Syntax Tree; 抽象構文木
+    - フィルタは文書のAST（の一部）を受け取ってASTを返す関数の集まり
+    - Rの文法もASTに分解して表現できる \
+      （参考：R言語徹底解説 or <https://adv-r.hadley.nz/expressions.html?q=abstract#ast>）
+    - ASTのイメージ図
+
+      ```
+      █─文書 
+      ├─█─見出し
+      │ ├─内容
+      │ └─レベル
+      └─█─段落 
+        └─内容
+      ```
+
+## Luaフィルタのない世界
+
+- 見出しの順序が変わったら番号振り直し
+- 図の順序が変わったら番号振り直し
+- 出力するフォーマットに合わせた改ページの記述
+
+```` markdown
+# 1. ああ
+
+図1を参照
+
+![図1 すごい図](sugoi.png)
+
+## 1.1 あい
+
+## 1.2 あう
+
+
+<!-- 出力形式ごとに改行に必要なコードを挿入 -->
+
+```{=latex}
+\pagebreak
+```
+
+```{=html}
+<div style="page-break-after: always;"></div>
+```
+
+# 2. かか
+````
+
+## Luaフィルタのある世界
+
+``` markdown
+# ああ
+
+@fig-sugoi を参照
+
+![すごい図](sugoi.png){#fig-sugoi}
+
+## あい
+
+## あう
+
+\pagebreak
+
+# かか
+```
+
+## Rで頑張る世界
+
+チャンクまみれで読みづらい
+
+- 見出しの番号を出力する関数`h`
+- 図を参照する関数`ref`
+- 図を番号付けする関数`tag`
+- 改ページする関数`pagebreak`
+
+```` markdown
+# `r r(h(1))` ああ
+
+`r r(ref("fig", "sugoi"))` を参照
+
+![`r r(tag("fig", "sugoi"))` すごい図](sugoi.png)
+
+## `r r(h(2))` あい
+
+## `r r(h(2))` あう
+
+`r r(pagebreak())`
+
+# `r r(h(1))` かか
+````
+
+または`Rmd`ファイルから中間生成される`md`ファイルを文字列処理で弄る（正規表現ツライ）
+
+## JavaScriptのある世界
+
+HTMLにしか出力しないなら良いんじゃないかな
+
+# Lua言語コワイ？
+
+そんなことないよ！Wikipedia先生を信じろ！
+
+> 汎用性が高いが比較的容易に実装が可能 \
+> <https://ja.wikipedia.org/wiki/Lua>
+
+2言語使えるようになると3言語目の敷居も下がるよ！
+
+R使えれば十分だからわざわざPython……と思ってる人もLuaなら需要があるかも？
+
+# 作りながら学ぶ
+
+Luaの文法や、Pandoc Luaフィルタの基礎をおさえつつ、レベル1の見出しに章番号を振るフィルタを作ってみよう
+
+フィルタは`filter.lua`などのファイル名で保存しておくと、
+各種出力フォーマットが備える`pandoc_args`引数を通じて利用できる
+
+```` markdown
+---
+output:
+  md_document:
+    pandoc_args:
+      - "--lua-filter=filter.lua"
+---
+
+# 見出し1
+
+## 見出し 1.1
+
+# 見出し2
+````
+
+↓
+
+```` markdown
+# 第1章：見出し1
+
+## 見出し1.1
+
+# 第2章: 見出し2
+````
+
+## 見出しをそのまま出力する
+
+関数を定義するだけ
+
+``` lua
+Header = function(el)
+  return el
+end
+```
+
+- 関数名は操作したい要素に対応
+    - 見出し：`Header`
+    - 段落：`Para`
+    - コードブロック：`CodeBlock`
+    - https://pandoc.org/lua-filters.html#lua-type-reference
+- 引数は1つ
+    - 名前は任意
+- 返り値
+    - 文書の構成要素または、構成要素のリスト
+    - 今回は引数をそのまま返した
+
+### ほぼ同等の表現
+
+返り値が `nil` なら要素を無加工で返す操作に相当
+
+Luaの`nil`はRの`NULL`に近い
+
+``` lua
+Header = function(el)
+  return nil
+end
+```
+
+返り値が暗黙の`nil`なケースもある
+
+``` lua
+Header = function(el)
+end
+```
+
+### 様々な要素をそのまま出力する
+
+```lua
+Header = function(el)
+  return el
+end
+
+CodeBlock = function(el)
+  return el
+end
+```
+
+複数の関数を定義した時の処理の順序についてはドキュメント参照 \
+<https://pandoc.org/lua-filters.html#traversal-order>
+
+## 見出しを増やす
+
+``` markdown
+# 見出し
+```
+
+↓
+
+``` markdown
+# 見出し
+
+# 見出し
+```
+
+### Luaフィルタ
+
+``` lua
+Header = function(el)
+  return {el, el}
+end
+```
+
+`{el, el}`はテーブル
+
+Rのリストに近い存在 (`list(el, el)`)
+
+## 見出しをなくす
+
+``` markdown
+# 見出し
+
+段落
+```
+
+↓
+
+``` markdown
+段落
+```
+
+### Luaフィルタ
+
+``` lua
+Header = function(el)
+  return {}
+end
+```
+
+`nil`を返すと`el`を無加工で返した場合と同等な点に注意
+
+## 見出しのレベルを上げる {#increment-level}
+
+``` markdown
+# 見出し
+```
+
+↓
+
+``` markdown
+## 見出し
+```
+
+### Luaフィルタ
+
+``` lua
+Header = function(el)
+  el.level = el.level + 1
+  return el
+end
+```
+
+- `el.level`はRの`el$level`に相当
+- `el["level"]`でも良い。これはRの`el[["level"]]`に相当
+- 要素がどんなフィールドを持つかはドキュメントを見る
+  - [`Header`](https://pandoc.org/lua-filters.html#type-header)
+    - level
+    - content
+    - attr
+    - ...
+
+## 見出しを段落に変換する {#convert-h-to-p}
+
+``` markdown
+# 見出し
+```
+
+↓
+
+``` markdown
+見出し
+```
+
+### Luaフィルタ
+
+``` lua
+Header = function(el)
+  return pandoc.Para(el.content)
+end
+```
+
+- `pandoc`はモジュールの一種
+    - 最初から読み込まれている
+    - 追加読み込みで様々なモジュールが利用可能（例えば[`pandoc.utils`](https://pandoc.org/lua-filters.html#module-pandoc.utils)）
+    - パッケージの中身は`.`演算子や`[`演算子で取り出す
+        - Rなら`pandoc::Para`
+- `pandoc.Para`は段落（Paragraph）を作成する関数
+    - コンストラクタとも
+    - `pandoc.Para`関数は第一引数に文章としての中身（inline content）を受け取るので、`Header`オブジェクトの`.content`をわたせばいい
+    - 各コンストラクタの引数の説明はドキュメントを参照
+        - [Header](https://pandoc.org/lua-filters.html#pandoc.header)
+        - [Para](https://pandoc.org/lua-filters.html#pandoc.para)
+
+## すべての見出しを強調する {#strong-all}
+
+``` markdown
+# 見出し
+```
+
+↓
+
+``` markdown
+# **見出し**
+```
+
+### Luaフィルタ
+
+直前の2例で学んだことの応用
+
+- 要素のフィールドの編集（[見出しのレベルを上げる](#increment-level)）
+- コンストラクタの利用（[見出しを段落に変更する](#convert-h-to-p)）
+
+``` lua
+Header = function(el)
+  el.content = pandoc.Strong(el.content)
+  return el
+end
+```
+
+## レベル1の見出しを強調する {#strong-h1}
+
+``` markdown
+# 見出し1
+
+## 見出し1.1
+```
+
+↓
+
+``` markdown
+# **見出し1**
+
+## 見出し1.1
+```
+
+### Luaフィルタ
+
+[すべての見出しを強調](#strong-all)のフィルタを改造
+
+``` lua
+Header = function(el)
+  -- レベルが2以上なら無加工で返す
+  if el.level >= 2 then
+    return el
+  end
+
+  -- さもなくば強調して返す
+  el.content = pandoc.Strong(el.content)
+  return el
+end
+```
+
+### elseも使って書く
+
+``` lua
+Header = function(el)
+  if el.level >= 2 then
+    -- レベルが2以上なら無加工で返す
+    return el
+  else
+    -- さもなくば強調して返す
+    el.content = pandoc.Strong(el.content)
+    return el
+  end
+end
+```
+
+## すべての見出しに目印 {#mark-all}
+
+``` markdown
+# 見出し1
+
+## 見出し1.1
+```
+
+↓
+
+``` markdown
+# ☆見出し1
+
+## ☆見出し1.1
+```
+
+### Luaフィルタ
+
+#### 方針
+
+- `el.content`はテーブル
+    - `見出し1`なら`{pandoc.Str("見出し1")}`
+    - `Section 1`なら`{pandoc.Str("Section"), pandoc.Space(), pandoc.Str("1")})`
+- テーブルの先頭に`pandoc.Str("☆")`を加えればいい
+- あるいは`{pandoc.Str("☆")}`の後ろに`el.content`を繋げば良い
+    - Rで書くとこんな感じ
+      ``` r
+      Header <- function(el) {
+        content <- list(pandoc::Str("☆"))
+
+        for i in seq_along(el$content) {
+          content[i + 1] <- el$content[[i]]
+        }
+
+        el$content <- content
+
+        return(el)
+      }
+      ```
+    - Luaでも`for`文を使えばできそう
+
+#### for文を使う実装
+
+``` lua
+Header = function(el)
+  -- ☆で始まるcontentを用意
+  local content = {pandoc.Str("☆")}
+
+  -- el.contentはテーブル
+  -- el.conetntの各要素をcontentにつけ加える
+  for i, v in ipairs(el.content) do
+    content[i + 1] = v
+  end
+
+  -- 完成したcontentでel.contentを上書きして返す
+  el.content = content
+  return el
+end
+```
+
+- テーブルのループに`ipairs`関数は必須
+- 名前付きテーブルなら`pairs`関数を使う
+    - `pairs({a = 1, b = 2})`
+
+#### table.insert関数を使う
+
+`table.*`にはテーブル操作に便利な関数が色々入っている
+
+``` lua
+Header = function(el)
+  -- el.contentの1番目の要素に☆を追加
+  table.insert(el.content, 1, pandoc.Str("☆"))
+  return el
+end
+```
+
+- 見出しの内容（content）は`el.content`
+- `el.content`は文書要素のテーブル
+    - `{pandoc.Str("見出し1")}`
+    - `{pandoc.Str("First"), pandoc.Space(), pandoc.Str("Section")}`
+- テーブルの任意箇所に要素を挿入するには`table.insert`関数
+    - 返り値は`nil`でテーブルを直接編集する点に注意
+        - Rの`append`関数とはここが最大の違い
+    - 引数
+        - 位置を指定する場合
+            - 第1引数：テーブル
+            - 第2引数：挿入したい位置
+            - 第3引数：挿入したい要素
+        - 末尾に追加する場合
+            - 第1引数：テーブル
+            - 第2引数：挿入したい要素
+
+## レベル1の見出しに目印
+
+``` markdown
+# 見出し1
+
+## 見出し1.1
+```
+
+↓
+
+``` markdown
+# ☆見出し1
+
+## 見出し1.1
+```
+
+### Luaフィルタ
+
+``` lua
+Header = function(el)
+  --[[ 見出しレベルが2以上なら何もしない ]]
+  if el.level >= 2 then
+    return el
+  end
+
+  -- ☆で始まるcontentを用意
+  local content = {pandoc.Str("☆")}
+
+  -- el.contentはテーブル
+  -- el.conetntの各要素をcontentにつけ加える
+  for i, v in ipairs(el.content) do
+    content[i + 1] = v
+  end
+
+  -- 完成したcontentでel.contentを上書きして返す
+  el.content = content
+  return el
+end
+```
+
+- [すべての見出しに目印](#mark-all)を改変
+    - [すべての見出しを強調](#strong-all) -> [レベル1の見出しを強調](#strong-h1)と同様に`if`文を加えて処理を条件付け
+    - `el.level`が1の時だけ目印をつける
+
+## 見出しに章番号
+
+``` markdown
+# 見出し 1
+
+## 見出し 1.1
+
+# 見出し 2
+```
+
+↓
+
+``` markdown
+# 第1章：見出し 1
+
+## 見出し 1.1
+
+# 第2章：見出し 2
+```
+
+### Luaフィルタ
+
+``` lua
+--[[ 章番号を初期化 ]]
+local n = 0
+
+Header = function(el)
+  -- 見出しレベルが2以上なら何もしない
+  if el.level >= 2 then
+    return el
+  end
+
+  --[[ 章番号を更新 ]]
+  -- Rの n <<- n + 1 に相当
+  n = n + 1
+
+  --[[ 章番号を持つcontentを初期化 ]]
+  local content = {
+    pandoc.Str(
+      -- Rの paste0("第", n "章：") に相当
+      "第" .. n .. "章："
+    )
+  }
+
+  -- contentにel.contentの要素をつけ加える
+  for i, v in el.content do
+    content[i + 1] = v
+  end
+
+  -- 完成したcontentでel.contentを上書きし、返す
+  el.content = content
+  return el
+end
+```
+
+- 先の例の「☆」の代わりに「第n章：」を頭につけたい
+- ただし、`n`は可変な数値
+    - Luaでは`..`演算子で文字列や数値を文字列に結合できる
+        - `pandoc.Str("第" .. n .. "章：")`
+    - `n`はレベル1の見出しを処理する毎にカウントを増やす
+        - `local n = 0`として関数の外で初期化し、関数実行時に1足した値で上書きしていく
+        - 雑に説明すると
+            - Luaの`local n = 0`はRの`n <- 0`
+            - Luaの`n = 0`はRの`n <<- 0`
+            - 基本は`local`を使って初期化すること
+                - ただし`Header`関数などのフィルタはスクリプトの外でPandocが使いたいので`local`をつけない
+
+# Enjoy!
+
+Luaフィルタを使うと、ソースファイルをシンプルに保ちつつ、表現力を手に入れられる
+
+Luaの基礎として、名前付きテーブルや`for`文など紹介しきれていないものもある
+
+分からなかったらTwitterとかSlackで聞いてくれたら答えられるかも？
+
+以下、参考リンク集
+
+- 作例：https://github.com/pandoc/lua-filters
+- ドキュメント：https://pandoc.org/lua-filters.html
+- Lua 5.3リファレンスマニュアル：http://milkpot.sakura.ne.jp/lua/lua53_manual_ja.html
+    - 名前付きテーブル（`{a = 1}`）
+    - テーブル操作（`table.insert`, `table.concat`, ...）
+    - 文字列操作（`string.gmatch`, `string.gsub`, ...)
+    - 例外処理（`pcall`）
+    - 関数定義
+        - `function Header(el) ... end`という書き方もある
+    - 関数呼出
+        - 位置引数しか扱えない
+            - `f = function(x) return x end` に対して
+            - `f(1)` はOK
+

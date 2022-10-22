@@ -1,0 +1,688 @@
+---
+title: Luaフィルタで表現力を手に入れろ
+author: ''
+date: '2022-10-22'
+slug: lua-filter-for-r-users
+categories: [R, Lua]
+tags: [Pandoc, R Markdown, Quarto]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+    pandoc_args:
+      - "--lua-filter=codeblock.lua"
+summary:
+  作例と共にLuaフィルタとLuaの文法について紹介。Tokyo.R 102の資料で主にRユーザーを対象としているが、Pandocユーザーにも参考になるはず。
+---
+
+
+
+<p>R MarkdownやQuartoは分析レポートの作成に便利なツールです。
+RmdファイルやQmdファイルはMarkdownの文法を拡張し、本文中のソースコードの一部を実行し、結果を挿入した上で、HTMLやPDFなどへ変換します。</p>
+<p>文書作成をプログラミングできるので、体裁など表現の部分にも手を出せます。しかし、凝ったことをすると、文書内に分析に関するコードと表現に関するコードが混在し、保守性を失います。</p>
+<p>本記事では、この問題の対処方法としてLuaフィルタを紹介します。簡単なフィルタを書きながらLua言語文法を学びつつ、最終的には「レベル1の見出し」に章番号を自動追加するフィルタを書いてみましょう。</p>
+<p>本記事は<a href="https://techplay.jp/event/877203">Tokyo.R 102</a>の内容を一部改変したものです。</p>
+<div id="luaフィルタとは" class="section level1">
+<h1>Luaフィルタとは？</h1>
+<ul>
+<li>Pandocで文書変換時に文書を弄れる仕組み
+<ul>
+<li><p>R MarkdownもQuartoも裏でPandocの世話になってる</p>
+<pre><code>Rmd ----------------&gt; md ---------&gt; html
+      knitr::knit()        pandoc</code></pre></li>
+</ul></li>
+<li>複雑な表現を自動化し、コンテンツに集中！
+<ul>
+<li><a href="https://github.com/rstudio/rmarkdown/blob/main/inst/rmarkdown/lua/number-sections.lua">見出しの番号付け</a>
+<ul>
+<li><code># 見出し</code> と普通に見出しを書いたら番号がつく</li>
+</ul></li>
+<li><a href="https://github.com/quarto-dev/quarto-cli/tree/3aa68656d4f1c1f419b6e9c9d75df8cf53f73865/src/resources/filters/crossref">相互参照</a>
+<ul>
+<li>番号付きの図は <code>![caption](figure.png){#id}</code></li>
+<li>参照する時は <code>@fig-id</code></li>
+</ul></li>
+<li><a href="https://github.com/rstudio/rmarkdown/blob/main/inst/rmarkdown/lua/pagebreak.lua">改ページ</a>
+<ul>
+<li><a href="https://pagedown.rbind.io">HTML</a>, Word, LaTeX向けの記法を <code>\pagebreak</code> に統一</li>
+</ul></li>
+</ul></li>
+<li>Lua言語で書く
+<ul>
+<li>実行環境はPandocに内蔵</li>
+</ul></li>
+<li>ASTの概念を知ってると捗る
+<ul>
+<li><p>Abstract Syntax Tree; 抽象構文木</p></li>
+<li><p>フィルタは文書のAST（の一部）を受け取ってASTを返す関数の集まり</p></li>
+<li><p>Rの文法もASTに分解して表現できる<br />
+（参考：R言語徹底解説 or <a href="https://adv-r.hadley.nz/expressions.html?q=abstract#ast" class="uri">https://adv-r.hadley.nz/expressions.html?q=abstract#ast</a>）</p></li>
+<li><p>ASTのイメージ図</p>
+<pre><code>█─文書 
+├─█─見出し
+│ ├─内容
+│ └─レベル
+└─█─段落 
+  └─内容</code></pre></li>
+</ul></li>
+</ul>
+<div id="luaフィルタのない世界" class="section level2">
+<h2>Luaフィルタのない世界</h2>
+<ul>
+<li>見出しの順序が変わったら番号振り直し</li>
+<li>図の順序が変わったら番号振り直し</li>
+<li>出力するフォーマットに合わせた改ページの記述</li>
+</ul>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># 1. ああ
+
+図1を参照
+
+![図1 すごい図](sugoi.png)
+
+## 1.1 あい
+
+## 1.2 あう
+
+
+&lt;!-- 出力形式ごとに改行に必要なコードを挿入 --&gt;
+
+```{=latex}
+\pagebreak
+```
+
+```{=html}
+&lt;div style=&quot;page-break-after: always;&quot;&gt;&lt;/div&gt;
+```
+
+# 2. かか</code></pre>
+</summary>
+</div>
+<div id="luaフィルタのある世界" class="section level2">
+<h2>Luaフィルタのある世界</h2>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># ああ
+
+@fig-sugoi を参照
+
+![すごい図](sugoi.png){#fig-sugoi}
+
+## あい
+
+## あう
+
+\pagebreak
+
+# かか</code></pre>
+</summary>
+</div>
+<div id="rで頑張る世界" class="section level2">
+<h2>Rで頑張る世界</h2>
+<p>チャンクまみれで読みづらい</p>
+<ul>
+<li>見出しの番号を出力する関数<code>h</code></li>
+<li>図を参照する関数<code>ref</code></li>
+<li>図を番号付けする関数<code>tag</code></li>
+<li>改ページする関数<code>pagebreak</code></li>
+</ul>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># `r h(1)` ああ
+
+`r ref(&quot;fig&quot;, &quot;sugoi&quot;)` を参照
+
+![`r tag(&quot;fig&quot;, &quot;sugoi&quot;)` すごい図](sugoi.png)
+
+## `r h(2)` あい
+
+## `r h(2)` あう
+
+`r pagebreak()`
+
+# `r h(1)` かか</code></pre>
+</summary>
+<p>または<code>Rmd</code>ファイルから中間生成される<code>md</code>ファイルを文字列処理で弄る（正規表現ツライ）</p>
+</div>
+<div id="javascriptのある世界" class="section level2">
+<h2>JavaScriptのある世界</h2>
+<p>HTMLにしか出力しないなら良いんじゃないかな</p>
+</div>
+</div>
+<div id="lua言語コワイ" class="section level1">
+<h1>Lua言語コワイ？</h1>
+<p>そんなことないよ！Wikipedia先生を信じろ！</p>
+<blockquote>
+<p>汎用性が高いが比較的容易に実装が可能<br />
+<a href="https://ja.wikipedia.org/wiki/Lua" class="uri">https://ja.wikipedia.org/wiki/Lua</a></p>
+</blockquote>
+<p>2言語使えるようになると3言語目の敷居も下がるよ！</p>
+<p>R使えれば十分だからわざわざPython……と思ってる人もLuaなら需要があるかも？</p>
+</div>
+<div id="作りながら学ぶ" class="section level1">
+<h1>作りながら学ぶ</h1>
+<p>Luaの文法や、Pandoc Luaフィルタの基礎をおさえつつ、レベル1の見出しに章番号を振るフィルタを作ってみよう</p>
+<p>フィルタは<code>filter.lua</code>などのファイル名で保存しておくと、各種出力フォーマットが備える<code>pandoc_args</code>引数を通じて利用できる</p>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code>---
+output:
+  md_document:
+    pandoc_args:
+      - &quot;--lua-filter=filter.lua&quot;
+---
+
+# 見出し1
+
+## 見出し 1.1
+
+# 見出し2</code></pre>
+</summary>
+<p>↓</p>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># 第1章：見出し1
+
+## 見出し1.1
+
+# 第2章: 見出し2</code></pre>
+</summary>
+<div id="見出しをそのまま出力する" class="section level2">
+<h2>見出しをそのまま出力する</h2>
+<p>関数を定義するだけ</p>
+<details open><summary>lua</summary>
+<pre class="lua"><code>Header = function(el)
+  return el
+end</code></pre>
+</summary>
+<ul>
+<li>関数名は操作したい要素に対応
+<ul>
+<li>見出し：<code>Header</code></li>
+<li>段落：<code>Para</code></li>
+<li>コードブロック：<code>CodeBlock</code></li>
+<li><a href="https://pandoc.org/lua-filters.html#lua-type-reference" class="uri">https://pandoc.org/lua-filters.html#lua-type-reference</a></li>
+</ul></li>
+<li>引数は1つ
+<ul>
+<li>名前は任意</li>
+</ul></li>
+<li>返り値
+<ul>
+<li>文書の構成要素または、構成要素のリスト</li>
+<li>今回は引数をそのまま返した</li>
+</ul></li>
+</ul>
+<div id="ほぼ同等の表現" class="section level3">
+<h3>ほぼ同等の表現</h3>
+<p>返り値が <code>nil</code> なら要素を無加工で返す操作に相当</p>
+<p>Luaの<code>nil</code>はRの<code>NULL</code>に近い</p>
+<details open><summary>lua</summary>
+<pre class="lua"><code>Header = function(el)
+  return nil
+end</code></pre>
+</summary>
+<p>返り値が暗黙の<code>nil</code>なケースもある</p>
+<details open><summary>lua</summary>
+<pre class="lua"><code>Header = function(el)
+end</code></pre>
+</summary>
+</div>
+<div id="様々な要素をそのまま出力する" class="section level3">
+<h3>様々な要素をそのまま出力する</h3>
+<details open><summary>lua</summary>
+<pre class="lua"><code>Header = function(el)
+  return el
+end
+
+CodeBlock = function(el)
+  return el
+end</code></pre>
+</summary>
+<p>複数の関数を定義した時の処理の順序についてはドキュメント参照<br />
+<a href="https://pandoc.org/lua-filters.html#traversal-order" class="uri">https://pandoc.org/lua-filters.html#traversal-order</a></p>
+</div>
+</div>
+<div id="見出しを増やす" class="section level2">
+<h2>見出しを増やす</h2>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># 見出し</code></pre>
+</summary>
+<p>↓</p>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># 見出し
+
+# 見出し</code></pre>
+</summary>
+<div id="luaフィルタ" class="section level3">
+<h3>Luaフィルタ</h3>
+<details open><summary>lua</summary>
+<pre class="lua"><code>Header = function(el)
+  return {el, el}
+end</code></pre>
+</summary>
+<p><code>{el, el}</code>はテーブル</p>
+<p>Rのリストに近い存在 (<code>list(el, el)</code>)</p>
+</div>
+</div>
+<div id="見出しをなくす" class="section level2">
+<h2>見出しをなくす</h2>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># 見出し
+
+段落</code></pre>
+</summary>
+<p>↓</p>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code>段落</code></pre>
+</summary>
+<div id="luaフィルタ-1" class="section level3">
+<h3>Luaフィルタ</h3>
+<details open><summary>lua</summary>
+<pre class="lua"><code>Header = function(el)
+  return {}
+end</code></pre>
+</summary>
+<p><code>nil</code>を返すと<code>el</code>を無加工で返した場合と同等な点に注意</p>
+</div>
+</div>
+<div id="increment-level" class="section level2">
+<h2>見出しのレベルを上げる</h2>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># 見出し</code></pre>
+</summary>
+<p>↓</p>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code>## 見出し</code></pre>
+</summary>
+<div id="luaフィルタ-2" class="section level3">
+<h3>Luaフィルタ</h3>
+<details open><summary>lua</summary>
+<pre class="lua"><code>Header = function(el)
+  el.level = el.level + 1
+  return el
+end</code></pre>
+</summary>
+<ul>
+<li><code>el.level</code>はRの<code>el$level</code>に相当</li>
+<li><code>el["level"]</code>でも良い。これはRの<code>el[["level"]]</code>に相当</li>
+<li>要素がどんなフィールドを持つかはドキュメントを見る
+<ul>
+<li><a href="https://pandoc.org/lua-filters.html#type-header"><code>Header</code></a>
+<ul>
+<li>level</li>
+<li>content</li>
+<li>attr</li>
+<li>…</li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="convert-h-to-p" class="section level2">
+<h2>見出しを段落に変換する</h2>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># 見出し</code></pre>
+</summary>
+<p>↓</p>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code>見出し</code></pre>
+</summary>
+<div id="luaフィルタ-3" class="section level3">
+<h3>Luaフィルタ</h3>
+<details open><summary>lua</summary>
+<pre class="lua"><code>Header = function(el)
+  return pandoc.Para(el.content)
+end</code></pre>
+</summary>
+<ul>
+<li><code>pandoc</code>はモジュールの一種
+<ul>
+<li>最初から読み込まれている</li>
+<li>追加読み込みで様々なモジュールが利用可能（例えば<a href="https://pandoc.org/lua-filters.html#module-pandoc.utils"><code>pandoc.utils</code></a>）</li>
+<li>パッケージの中身は<code>.</code>演算子や<code>[</code>演算子で取り出す
+<ul>
+<li>Rなら<code>pandoc::Para</code></li>
+</ul></li>
+</ul></li>
+<li><code>pandoc.Para</code>は段落（Paragraph）を作成する関数
+<ul>
+<li>コンストラクタとも</li>
+<li><code>pandoc.Para</code>関数は第一引数に文章としての中身（inline content）を受け取るので、<code>Header</code>オブジェクトの<code>.content</code>をわたせばいい</li>
+<li>各コンストラクタの引数の説明はドキュメントを参照
+<ul>
+<li><a href="https://pandoc.org/lua-filters.html#pandoc.header">Header</a></li>
+<li><a href="https://pandoc.org/lua-filters.html#pandoc.para">Para</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="strong-all" class="section level2">
+<h2>すべての見出しを強調する</h2>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># 見出し</code></pre>
+</summary>
+<p>↓</p>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># **見出し**</code></pre>
+</summary>
+<div id="luaフィルタ-4" class="section level3">
+<h3>Luaフィルタ</h3>
+<p>直前の2例で学んだことの応用</p>
+<ul>
+<li>要素のフィールドの編集（<a href="#increment-level">見出しのレベルを上げる</a>）</li>
+<li>コンストラクタの利用（<a href="#convert-h-to-p">見出しを段落に変更する</a>）</li>
+</ul>
+<details open><summary>lua</summary>
+<pre class="lua"><code>Header = function(el)
+  el.content = pandoc.Strong(el.content)
+  return el
+end</code></pre>
+</summary>
+</div>
+</div>
+<div id="strong-h1" class="section level2">
+<h2>レベル1の見出しを強調する</h2>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># 見出し1
+
+## 見出し1.1</code></pre>
+</summary>
+<p>↓</p>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># **見出し1**
+
+## 見出し1.1</code></pre>
+</summary>
+<div id="luaフィルタ-5" class="section level3">
+<h3>Luaフィルタ</h3>
+<p><a href="#strong-all">すべての見出しを強調</a>のフィルタを改造</p>
+<details open><summary>lua</summary>
+<pre class="lua"><code>Header = function(el)
+  -- レベルが2以上なら無加工で返す
+  if el.level &gt;= 2 then
+    return el
+  end
+
+  -- さもなくば強調して返す
+  el.content = pandoc.Strong(el.content)
+  return el
+end</code></pre>
+</summary>
+</div>
+<div id="elseも使って書く" class="section level3">
+<h3>elseも使って書く</h3>
+<details open><summary>lua</summary>
+<pre class="lua"><code>Header = function(el)
+  if el.level &gt;= 2 then
+    -- レベルが2以上なら無加工で返す
+    return el
+  else
+    -- さもなくば強調して返す
+    el.content = pandoc.Strong(el.content)
+    return el
+  end
+end</code></pre>
+</summary>
+</div>
+</div>
+<div id="mark-all" class="section level2">
+<h2>すべての見出しに目印</h2>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># 見出し1
+
+## 見出し1.1</code></pre>
+</summary>
+<p>↓</p>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># ☆見出し1
+
+## ☆見出し1.1</code></pre>
+</summary>
+<div id="luaフィルタ-6" class="section level3">
+<h3>Luaフィルタ</h3>
+<div id="方針" class="section level4">
+<h4>方針</h4>
+<ul>
+<li><code>el.content</code>はテーブル
+<ul>
+<li><code>見出し1</code>なら<code>{pandoc.Str("見出し1")}</code></li>
+<li><code>Section 1</code>なら<code>{pandoc.Str("Section"), pandoc.Space(), pandoc.Str("1")})</code></li>
+</ul></li>
+<li>テーブルの先頭に<code>pandoc.Str("☆")</code>を加えればいい</li>
+<li>あるいは<code>{pandoc.Str("☆")}</code>の後ろに<code>el.content</code>を繋げば良い
+<ul>
+<li><p>Rで書くとこんな感じ</p>
+<details open><summary>r</summary>
+<pre class="r"><code>Header &lt;- function(el) {
+  content &lt;- list(pandoc::Str(&quot;☆&quot;))
+
+  for i in seq_along(el$content) {
+    content[i + 1] &lt;- el$content[[i]]
+  }
+
+  el$content &lt;- content
+
+  return(el)
+}</code></pre>
+</summary></li>
+<li><p>Luaでも<code>for</code>文を使えばできそう</p></li>
+</ul></li>
+</ul>
+</div>
+<div id="for文を使う実装" class="section level4">
+<h4>for文を使う実装</h4>
+<details open><summary>lua</summary>
+<pre class="lua"><code>Header = function(el)
+  -- ☆で始まるcontentを用意
+  local content = {pandoc.Str(&quot;☆&quot;)}
+
+  -- el.contentはテーブル
+  -- el.conetntの各要素をcontentにつけ加える
+  for i, v in ipairs(el.content) do
+    content[i + 1] = v
+  end
+
+  -- 完成したcontentでel.contentを上書きして返す
+  el.content = content
+  return el
+end</code></pre>
+</summary>
+<ul>
+<li>テーブルのループに<code>ipairs</code>関数は必須</li>
+<li>名前付きテーブルなら<code>pairs</code>関数を使う
+<ul>
+<li><code>pairs({a = 1, b = 2})</code></li>
+</ul></li>
+</ul>
+</div>
+<div id="table.insert関数を使う" class="section level4">
+<h4>table.insert関数を使う</h4>
+<p><code>table.*</code>にはテーブル操作に便利な関数が色々入っている</p>
+<details open><summary>lua</summary>
+<pre class="lua"><code>Header = function(el)
+  -- el.contentの1番目の要素に☆を追加
+  table.insert(el.content, 1, pandoc.Str(&quot;☆&quot;))
+  return el
+end</code></pre>
+</summary>
+<ul>
+<li>見出しの内容（content）は<code>el.content</code></li>
+<li><code>el.content</code>は文書要素のテーブル
+<ul>
+<li><code>{pandoc.Str("見出し1")}</code></li>
+<li><code>{pandoc.Str("First"), pandoc.Space(), pandoc.Str("Section")}</code></li>
+</ul></li>
+<li>テーブルの任意箇所に要素を挿入するには<code>table.insert</code>関数
+<ul>
+<li>返り値は<code>nil</code>でテーブルを直接編集する点に注意
+<ul>
+<li>Rの<code>append</code>関数とはここが最大の違い</li>
+</ul></li>
+<li>引数
+<ul>
+<li>位置を指定する場合
+<ul>
+<li>第1引数：テーブル</li>
+<li>第2引数：挿入したい位置</li>
+<li>第3引数：挿入したい要素</li>
+</ul></li>
+<li>末尾に追加する場合
+<ul>
+<li>第1引数：テーブル</li>
+<li>第2引数：挿入したい要素</li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="レベル1の見出しに目印" class="section level2">
+<h2>レベル1の見出しに目印</h2>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># 見出し1
+
+## 見出し1.1</code></pre>
+</summary>
+<p>↓</p>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># ☆見出し1
+
+## 見出し1.1</code></pre>
+</summary>
+<div id="luaフィルタ-7" class="section level3">
+<h3>Luaフィルタ</h3>
+<details open><summary>lua</summary>
+<pre class="lua"><code>Header = function(el)
+  --[[ 見出しレベルが2以上なら何もしない ]]
+  if el.level &gt;= 2 then
+    return el
+  end
+
+  -- ☆で始まるcontentを用意
+  local content = {pandoc.Str(&quot;☆&quot;)}
+
+  -- el.contentはテーブル
+  -- el.conetntの各要素をcontentにつけ加える
+  for i, v in ipairs(el.content) do
+    content[i + 1] = v
+  end
+
+  -- 完成したcontentでel.contentを上書きして返す
+  el.content = content
+  return el
+end</code></pre>
+</summary>
+<ul>
+<li><a href="#mark-all">すべての見出しに目印</a>を改変
+<ul>
+<li><a href="#strong-all">すべての見出しを強調</a> -&gt; <a href="#strong-h1">レベル1の見出しを強調</a>と同様に<code>if</code>文を加えて処理を条件付け</li>
+<li><code>el.level</code>が1の時だけ目印をつける</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="見出しに章番号" class="section level2">
+<h2>見出しに章番号</h2>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># 見出し 1
+
+## 見出し 1.1
+
+# 見出し 2</code></pre>
+</summary>
+<p>↓</p>
+<details open><summary>markdown</summary>
+<pre class="markdown"><code># 第1章：見出し 1
+
+## 見出し 1.1
+
+# 第2章：見出し 2</code></pre>
+</summary>
+<div id="luaフィルタ-8" class="section level3">
+<h3>Luaフィルタ</h3>
+<details open><summary>lua</summary>
+<pre class="lua"><code>--[[ 章番号を初期化 ]]
+local n = 0
+
+Header = function(el)
+  -- 見出しレベルが2以上なら何もしない
+  if el.level &gt;= 2 then
+    return el
+  end
+
+  --[[ 章番号を更新 ]]
+  -- Rの n &lt;&lt;- n + 1 に相当
+  n = n + 1
+
+  --[[ 章番号を持つcontentを初期化 ]]
+  local content = {
+    pandoc.Str(
+      -- Rの paste0(&quot;第&quot;, n &quot;章：&quot;) に相当
+      &quot;第&quot; .. n .. &quot;章：&quot;
+    )
+  }
+
+  -- contentにel.contentの要素をつけ加える
+  for i, v in el.content do
+    content[i + 1] = v
+  end
+
+  -- 完成したcontentでel.contentを上書きし、返す
+  el.content = content
+  return el
+end</code></pre>
+</summary>
+<ul>
+<li>先の例の「☆」の代わりに「第n章：」を頭につけたい</li>
+<li>ただし、<code>n</code>は可変な数値
+<ul>
+<li>Luaでは<code>..</code>演算子で文字列や数値を文字列に結合できる
+<ul>
+<li><code>pandoc.Str("第" .. n .. "章：")</code></li>
+</ul></li>
+<li><code>n</code>はレベル1の見出しを処理する毎にカウントを増やす
+<ul>
+<li><code>local n = 0</code>として関数の外で初期化し、関数実行時に1足した値で上書きしていく</li>
+<li>雑に説明すると
+<ul>
+<li>Luaの<code>local n = 0</code>はRの<code>n &lt;- 0</code></li>
+<li>Luaの<code>n = 0</code>はRの<code>n &lt;&lt;- 0</code></li>
+<li>基本は<code>local</code>を使って初期化すること
+<ul>
+<li>ただし<code>Header</code>関数などのフィルタはスクリプトの外でPandocが使いたいので<code>local</code>をつけない</li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+<p>Luaフィルタを使うと、ソースファイルをシンプルに保ちつつ、表現力を手に入れられる</p>
+<p>Luaの基礎として、名前付きテーブルや<code>for</code>文など紹介しきれていないものもある</p>
+<p>分からなかったらTwitterとかSlackで聞いてくれたら答えられるかも？</p>
+<p>以下、参考リンク集</p>
+<ul>
+<li>作例：<a href="https://github.com/pandoc/lua-filters" class="uri">https://github.com/pandoc/lua-filters</a></li>
+<li>ドキュメント：<a href="https://pandoc.org/lua-filters.html" class="uri">https://pandoc.org/lua-filters.html</a></li>
+<li>Lua 5.3リファレンスマニュアル：<a href="http://milkpot.sakura.ne.jp/lua/lua53_manual_ja.html" class="uri">http://milkpot.sakura.ne.jp/lua/lua53_manual_ja.html</a>
+<ul>
+<li>名前付きテーブル（<code>{a = 1}</code>）</li>
+<li>テーブル操作（<code>table.insert</code>, <code>table.concat</code>, …）</li>
+<li>文字列操作（<code>string.gmatch</code>, <code>string.gsub</code>, …)</li>
+<li>例外処理（<code>pcall</code>）</li>
+<li>関数定義
+<ul>
+<li><code>function Header(el) ... end</code>という書き方もある</li>
+</ul></li>
+<li>関数呼出
+<ul>
+<li>位置引数しか扱えない
+<ul>
+<li><code>f = function(x) return x end</code> に対して</li>
+<li><code>f(1)</code> はOK</li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
