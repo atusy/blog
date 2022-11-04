@@ -1,0 +1,76 @@
+---
+title: "telescope.nvimで作る簡易コマンドパレット（VSCodeのCtrl + Shift + Pっぽいの）"
+author: ''
+date: '2022-11-03'
+slug: telescope-as-command-pallete
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs:
+  - lua
+---
+
+
+
+<p><a href="https://github.com/nvim-telescope/telescope.nvim">telescope.nvim</a>はキーマップ、Exコマンド、ファイルなどを検索・活用するためのNeovim用プラグインです。</p>
+<p>この内、キーマップ（<code>:Telescope keymaps</code>）の主な用途は忘れてしまったマッピングの検索でしょう。実は、<code>&lt;Plug&gt;</code>系のマッピングを実際のキー入力にアサインせずとも使えるので、滅多に使わない機能へ簡単にアクセスする方法として便利です。</p>
+<p>この方法については<a href="Fuzzy%20Finderで捗るFernによるファイル操作">Fuzzy Finderで捗るFernによるファイル操作</a>でも紹介しました。</p>
+<p>本稿では<code>:Telescope keymaps</code>を使って簡易的ながら汎用なコマンドパレットを構築する方法を紹介します。</p>
+<div id="telescope-keymapsのコマンドパレット化" class="section level1">
+<h1><code>:Telescope keymaps</code>のコマンドパレット化</h1>
+<div id="plugマッピングを自前で定義" class="section level2">
+<h2><code>&lt;Plug&gt;</code>マッピングを自前で定義</h2>
+<p><code>:Telescope keymaps</code>はマッピングを検索・実行できるので、自前で様々なマッピングを用意してやれば、簡単にランチャー化できます。しかし、まじめにマッピングすると、重複なく直感的なキー入力を考える必要があり、コストが高い方法です。</p>
+<p>しかし、<code>&lt;Plug&gt;</code>系マッピングの検索・実行が可能な点を考慮すると可能性が広がります。たとえば私は、<code>telescope.builtin</code>に含まれるすべての関数を<code>&lt;Plug&gt;(telescope.*)</code>という名前で登録しています。そして<code>:Telescope keymaps</code>で「telescope」を検索すると以下のように絞り込めます。</p>
+<p><img src="images/plug-telescope.png" /></p>
+<p>上記と同等のことは以下のExコマンドの<code>:Telescope Builtin</code>でも実行できますが、<code>:Telescope keymaps</code>をより汎用的なコマンドパレット化できるので気に入ってます。
+<code>&lt;Plug&gt;</code>マッピングの登録は以下の通り<code>for</code>文で行っています。</p>
+<pre class="lua"><code>for k, v in pairs(require(&quot;telescope.builtin&quot;)) do
+  if type(v) == &quot;function&quot; then
+    vim.keymap.set(&#39;n&#39;, &#39;&lt;Plug&gt;(telescope.&#39; .. k .. &#39;)&#39;, v)
+  end
+end</code></pre>
+</div>
+<div id="マッピングに説明文descを追加" class="section level2">
+<h2>マッピングに説明文（desc）を追加</h2>
+<p><code>:Telescope keymaps</code>を使ったコマンドパレットは便利ですが、マッピングによっては検索性に難があります。</p>
+<p>たとえば、<code>&lt;Plug&gt;</code>以外のマッピングは検索しにくい場合があります。私は<code>x</code>で文字を消す時はblack hole registerを使っています。もし、検索してマッピングを探したくなったら何をキーワードにすればいいでしょうか？</p>
+<pre class="lua"><code>vim.keymap.set({ &#39;n&#39;, &#39;v&#39; }, &#39;x&#39;, &#39;&quot;_x&#39;)</code></pre>
+<p><code>&lt;Plug&gt;</code>を組み合わせてマッピングしていれば検索性は若干向上しますが、設定が冗長になります。</p>
+<pre class="lua"><code>vim.keymap.set({ &#39;n&#39;, &#39;v&#39; }, &#39;&lt;Plug&gt;(x-with-blackhole-register)&#39;, &#39;&quot;_x&#39;)
+vim.keymap.set({ &#39;n&#39;, &#39;v&#39; }, &#39;x&#39;, &#39;&lt;Plug&gt;(x-with-blackhole-register)&#39;)</code></pre>
+<p>加えて、<code>&lt;Plug&gt;</code>を使ったマッピングは文字数制限にひっかかりやすい問題や、半角スペースが検索時に<code>&lt;Space&gt;</code>と表示される問題があります。後者はsnake_caseやkebab-caseなどで単語を区切る手もありますが、スペースの方が読み易い人も多いでしょう。</p>
+<p>このような場合にマッピングに説明文をつけると便利です。</p>
+<pre class="lua"><code>vim.keymap.set({ &#39;n&#39;, &#39;v&#39; }, &#39;x&#39;, &#39;&quot;_x&#39;, {desc = &quot;x with blackhole register&quot;})
+vim.keymap.set({ &#39;n&#39;, &#39;v&#39; }, &#39;X&#39;, &#39;&quot;_X&#39;, {desc = &quot;X with blackhole register&quot;})</code></pre>
+<p>すると、検索画面の右側に<code>desc</code>に指定した説明文が表示されるようになります。
+<code>desc</code>が未指定の場合は、<code>"_x</code>など、rhsに相当する文字列が表示されます。</p>
+<p><img src="images/desc-telescope.png" /></p>
+</div>
+<div id="検索候補を事前に絞り込み" class="section level2">
+<h2>検索候補を事前に絞り込み</h2>
+<p>ここまでの設定で<code>:Telescope keymaps</code>をコマンドパレット化できました。しかし、プラグイン由来のマッピングも含めて検索すると煩わしいかもしれません。</p>
+<p>その場合、先述の<code>desc</code>に特別なキーワードを入れて絞り込みしやすくするといいでしょう。私は<code>☆</code>を入れています。</p>
+<p>加えて、マッピング経由で検索を開始する時は自動で<code>☆</code>で絞り込む設定が便利です。</p>
+<pre class="lua"><code>vim.keymap.set(&#39;n&#39;, &#39;mm&#39;, function()
+  require(&#39;telescope.builtin&#39;).keymaps()
+  vim.cmd(&quot;normal! i☆&quot;)
+end)</code></pre>
+<p>これなら、起動直後にバックスペースで一字消すだけで、<code>☆</code>をつけていない検索候補にもアクセスできます。</p>
+<p><img src="images/star-telescope.png" /></p>
+</div>
+</div>
+<div id="telescope-commandsのコマンドパレット化" class="section level1">
+<h1><code>:Telescope commands</code>のコマンドパレット化</h1>
+<p><code>:Telescope commands</code>ではユーザー定義のコマンドを検索・実行できるので、コマンドパレットとしての活路があります。マッピングと同様に<code>desc</code>の設定・検索も可能です。しかし、<code>commands</code>を使うといくつか難があり、私は<code>keymaps</code>を採用しました。</p>
+<ul>
+<li>コマンドパレット向けのコマンド定義がcmdlineの補完候補を汚染しうる</li>
+<li>コマンドパレットからの実行がhistoryを汚染しうる</li>
+<li>コマンドライン補完があるので、そもそも<code>:Telescope commands</code>をほとんど使わない</li>
+</ul>
+</div>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>
