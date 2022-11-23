@@ -33,7 +33,7 @@ local ALTERNATIVE_COLORSCHEME = &quot;terafox&quot;
 -- styler.nvimを発動するautocmd
 -- ノーマルバッファで且つ、保存先がCWD外ならALTERNATIVE_COLORSCHEMEを適用
 vim.api.nvim_create_autocmd(
-  &#39;BufRead&#39;, -- Neovim内でCWDを変えるケースがあるなら&#39;BufEnter&#39;もアリ
+  &#39;BufEnter&#39;,
   {
     group = vim.api.nvim_create_augroup(&#39;styler-custom&#39;, {}),
     desc = &#39;Change theme by the path of the current buffer.&#39;,
