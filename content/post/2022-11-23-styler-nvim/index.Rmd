@@ -1,0 +1,67 @@
+---
+title: styler.nvimを使うとバッファごとにcolorschemeを変えられて便利
+author: ''
+date: '2022-11-23'
+slug: styler-nvim
+categories: [Neovim]
+tags: [styler.nvim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs:
+  - lua
+---
+
+[This Week in Neovim](https://this-week-in-neovim.org)という、週次でNeovim関係のニュースを届けてくれるウェブサイトの[21 Nov 2022号](https://this-week-in-neovim.org/2022/Nov/21)で、プラグインの[folke/styler.nvim](https://github.com/styler.nvim)が紹介されていました。
+
+このプラグインの目的は、READMEにある通り、ファイルタイプごとのカラースキーム設定です。
+
+> Simple Neovim plugin to set a different colorscheme per filetype.
+
+実は、もう少しRADMEを読み進めると`Styler`コマンドや`require("styler").set_theme()`関数を使うと、バッファ単位でのカラースキームの設定が可能です。
+
+私はバッファのファイルパスが作業ディレクトリ以下にあるか否かでカラースキームを変えたかったので、実に都合がよさそうです。
+
+過去にもこの目的で記事を書きましたが、当時のNeovimの機能では全体のカラースキームを変えるしかありませんでした。
+このため、カレントバッファが作業ディレクトリ下にあるかは分かるが、どのウィンドウのバッファが作業ディレクトリ下にあるかは分からないという問題を抱えていました。
+
+> [Neovimのカラースキームを編集中のバッファのファイルパスに応じて変える](https://blog.atusy.net/2022/04/28/vim-colorscheme-by-buffer/)
+
+実際以下のような設定で簡単に実現できました。
+
+``` lua
+-- CWD外のバッファに適用したいカラースキーム
+-- vim.api.nvim_set_hlを使っているNeovim向けカラースキームしか使えない点に注意
+local ALTERNATIVE_COLORSCHEME = "terafox"
+
+-- styler.nvimを発動するautocmd
+-- ノーマルバッファで且つ、保存先がCWD外ならALTERNATIVE_COLORSCHEMEを適用
+vim.api.nvim_create_autocmd(
+  'BufRead', -- Neovim内でCWDを変えるケースがあるなら'BufEnter'もアリ
+  {
+    group = vim.api.nvim_create_augroup('styler-custom', {}),
+    desc = 'Change theme by the path of the current buffer.',
+    callback = function(args)
+      if vim.api.nvim_buf_get_option(0, "buftype") ~= '' then return end
+      if args.file == '' or vim.startswith(args.file, fn.getcwd() .. '/') then return end
+      require('styler').set_theme(0, { colorscheme = ALTERNATIVE_COLORSCHEME })
+    end
+  }
+)
+```
+
+注意点は2つ。
+
+- 利用可能なカラースキームは内部で`vim.api.nvim_set_hl`を使っているNeovim向けカラースキームに限定される
+- `Styler`コマンドを使いたい場合は`require('styler').setup`関数の実行が必要
+    - 引数にテーブルを取るが、空のテーブルや`nil`ではNG。最低でも`{ themes = { } }`を与える必要がある
+    - コマンドが不要なら、`require('styler').set_theme`関数を使えばOK
+
+styler.nvimと関係ないところでは、Markdown内のコードブロックとかに任意のカラースキームを適用できたら最高だなーと思ってます。
+
+Enjoy!!
+
+
+
+
+
