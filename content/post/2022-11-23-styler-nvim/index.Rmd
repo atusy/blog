@@ -12,7 +12,7 @@ highlightjs:
   - lua
 ---
 
-[This Week in Neovim](https://this-week-in-neovim.org)という、週次でNeovim関係のニュースを届けてくれるウェブサイトの[21 Nov 2022号](https://this-week-in-neovim.org/2022/Nov/21)で、プラグインの[folke/styler.nvim](https://github.com/styler.nvim)が紹介されていました。
+[This Week in Neovim](https://this-week-in-neovim.org)という、週次でNeovim関係のニュースを届けてくれるウェブサイトの[21 Nov 2022号](https://this-week-in-neovim.org/2022/Nov/21)で、プラグインの[folke/styler.nvim](https://github.com/folke/styler.nvim)が紹介されていました。
 
 このプラグインの目的は、READMEにある通り、ファイルタイプごとのカラースキーム設定です。
 
@@ -27,7 +27,7 @@ highlightjs:
 
 > [Neovimのカラースキームを編集中のバッファのファイルパスに応じて変える](https://blog.atusy.net/2022/04/28/vim-colorscheme-by-buffer/)
 
-実際以下のような設定で簡単に実現できました。
+styler.nvimの登場で完成に至れました。
 
 ``` lua
 -- CWD外のバッファに適用したいカラースキーム

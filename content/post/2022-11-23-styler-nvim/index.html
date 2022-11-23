@@ -14,7 +14,7 @@ highlightjs:
 
 
 
-<p><a href="https://this-week-in-neovim.org">This Week in Neovim</a>という、週次でNeovim関係のニュースを届けてくれるウェブサイトの<a href="https://this-week-in-neovim.org/2022/Nov/21">21 Nov 2022号</a>で、プラグインの<a href="https://github.com/styler.nvim">folke/styler.nvim</a>が紹介されていました。</p>
+<p><a href="https://this-week-in-neovim.org">This Week in Neovim</a>という、週次でNeovim関係のニュースを届けてくれるウェブサイトの<a href="https://this-week-in-neovim.org/2022/Nov/21">21 Nov 2022号</a>で、プラグインの<a href="https://github.com/folke/styler.nvim">folke/styler.nvim</a>が紹介されていました。</p>
 <p>このプラグインの目的は、READMEにある通り、ファイルタイプごとのカラースキーム設定です。</p>
 <blockquote>
 <p>Simple Neovim plugin to set a different colorscheme per filetype.</p>
@@ -25,7 +25,7 @@ highlightjs:
 <blockquote>
 <p><a href="https://blog.atusy.net/2022/04/28/vim-colorscheme-by-buffer/">Neovimのカラースキームを編集中のバッファのファイルパスに応じて変える</a></p>
 </blockquote>
-<p>実際以下のような設定で簡単に実現できました。</p>
+<p>styler.nvimの登場で完成に至れました。</p>
 <pre class="lua"><code>-- CWD外のバッファに適用したいカラースキーム
 -- vim.api.nvim_set_hlを使っているNeovim向けカラースキームしか使えない点に注意
 local ALTERNATIVE_COLORSCHEME = &quot;terafox&quot;
