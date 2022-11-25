@@ -1,0 +1,72 @@
+---
+title: styler.nvimでアクティブなウィンドウか否かでカラースキームを変える
+author: ''
+date: '2022-11-25'
+slug: styler-nvim-dim-inactive-windows
+categories: [Neovim]
+tags: [styler.nvim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs:
+  - lua
+---
+
+
+
+<p>先日は<a href="https://github.com/folke/styler.nvim">styler.nvim</a>を使ってバッファが作業ディレクトリに属すか否かで適用するカラースキームを変えました。</p>
+<blockquote>
+<p><a href="https://blog.atusy.net/2022/11/23/styler-nvim/">styler.nvimを使うとバッファごとにcolorschemeを変えられて便利</a></p>
+</blockquote>
+<p>今回はウィンドウがアクティブか否かで適用するカラースキームを変えてみます。</p>
+<p><img src="images/neovim-with-styler-nvim.png" /></p>
+<p>似た用途で<a href="https://github.com/levouh/tint.nvim">tint.nvim</a>を使うと、非アクティブなウィンドウのコントラストを抑えられます。しかし、<a href="https://github.com/folke/styler.nvim">styler.nvim</a>と干渉するのと、コントラストを落としたせいで視認性に乏しくなるおそれがあります。</p>
+<p><a href="https://github.com/folke/styler.nvim">styler.nvim</a>だけ使えば干渉の心配はなくなりますし、人気なカラースキームを使えば低コントラストでも十分な視認性が期待できます。</p>
+<p>特に<a href="https://github.com/EdenEast/nightfox.nvim">nightfox.nvim</a>が提供する高コントラストなduskfoxと低コントラストなnordfoxは文字の色合いが似ていることもあり、相性がよく、今回試してみました。また、<a href="https://github.com/folke/styler.nvim">styler.nvim</a>はウィンドウローカルなカラースキームを実現するもので、cmdlineやウィンドウ境界はターゲットとしていません。こういったその他の部分やfloatwinには<a href="https://github.com/catppuccin/nvim">catppuccin</a>を採用してみました。</p>
+<pre class="lua"><code>--[[
+# Change colorschemes by active/inactive windows
+
+This is a simplified version, and may cause performance issue if so many windows are open.
+
+## Requirements:
+
+- nvim &gt;= 0.8
+- plugins
+    - folke/styler.nvim
+    - catppuccin/nvim
+    - EdenEast/nightfox.nvim
+]]
+
+-- settings
+-- ACTIVE_COLORSCHEME and INACTIVE_COLORSCHEME must be colorschemes using `nvim_set_hl`
+BASE_COLORSCHEME = &#39;catppuccin-mocha&#39;
+ACTIVE_COLORSCHEME = &#39;duskfox&#39;
+INACTIVE_COLORSCHEME = &#39;nordfox&#39;
+
+-- Apply colorscheme
+vim.cmd(&quot;colorscheme &quot; .. BASE_COLORSCHEME)
+
+-- Create autocmd to apply styler.nvim on active/inactive windows
+nvim.api.nvim_create_autocmd(
+  { &#39;WinEnter&#39;, &#39;BufEnter&#39; },
+  {
+    group = nvim.api.nvim_create_augroup(&#39;theme-custom&#39;, {}),
+    callback = function(_)
+      local set_theme = require(&#39;styler&#39;).set_theme
+      local win = nvim.api.nvim_get_current_win()
+
+      -- use default colorscheme instead of applying styler.nvim on floatwin
+      -- because some UIs are composed of multiple windows and they should share the theme
+      if api.nvim_win_get_config(win).relative ~= &quot;&quot; then return end
+
+      -- apply styler.nvim on active window
+      set_theme(win, { colorscheme = ACTIVE_COLORSCHEME })
+
+      -- apply styler.nvim on inactive windows
+      for _, w in pairs(api.nvim_tabpage_list_wins(0)) do
+        if w ~= win then set_theme(w, { colorscheme = INACTIVE_COLORSCHEME }) end
+      end
+    end
+  }
+)</code></pre>
+<p>ENJOY!!</p>
