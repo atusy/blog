@@ -1,0 +1,89 @@
+---
+title: 私のzshrcの推しポイント
+author: ''
+date: '2022-12-07'
+slug: zshrc2022
+categories: [zsh, dotfiles]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+私のzshrcの推しポイントを簡単にまとめておく
+
+zshrcはGitHubで管理しているので、推しポイントへのリンクも適宜掲載しておく
+
+# プロンプト
+
+https://github.com/atusy/dotfiles/blob/c654f90e8ec9ebbc18543d8f0349f7f8202f20c0/dot_zshrc#L20-L36
+
+![](images/prompt.png)
+
+- プロンプトを2行に分ける
+    - 1行目は作業ディレクトリ、`git status`、kubernetesのコンテキスト
+    - 2行目は実行したいコマンドを入力する場所
+    - 2行に分けると1行目が長くてもコマンドの入力開始位置が右に寄らず済む
+- 作業ディレクトリの表示は後半の3階層分のみ
+    - ホントに知りたい時は`pwd`すればいいだけ
+- Git statusの表示は [woefe/git-prompt.zsh](https://github.com/woefe/git-prompt.zsh) の `gitprompt` 関数に依存
+    - でもプラグインの読み込みに失敗した時とかにエラーが出て欲しくないので、プラグイン読み込み前に、無能な `gitprompt` 関数を定義してある
+
+      ``` bash
+      function gitprompt {
+        :
+      }
+      ```
+- Kubernetesのコンテキストは事故防止のため表示しておく
+
+# エイリアス
+
+- `sudo vi`でも`sudo vim`などとエイリアスが効くよう、`alias sudo='sudo '`しておく https://github.com/atusy/dotfiles/blob/c654f90e8ec9ebbc18543d8f0349f7f8202f20c0/dot_zshrc#L153
+- `alias top='htop'`などとbetter somethingへのエイリアスは、そのコマンドが存在することを `command -v htop` などと確認しておく https://github.com/atusy/dotfiles/blob/c654f90e8ec9ebbc18543d8f0349f7f8202f20c0/dot_zshrc#L160-L162
+- `kubectl`はコンテキスト間違いによる事故を防ぐ工夫をこらした関数にエイリアス
+    - `KUBE_CONTEXT`環境変数の中身とcurrent contextが違ったら、`KUBE_CONTEXT`環境変数に望ましいコンテキストを入力した上で、この値をcurrent contextに設定するよう促す https://github.com/atusy/dotfiles/blob/c654f90e8ec9ebbc18543d8f0349f7f8202f20c0/dot_zshrc#L203-L223
+- `kubectx`に上記の`KUBE_CONTEXT`の更新機能を追加する https://github.com/atusy/dotfiles/blob/c654f90e8ec9ebbc18543d8f0349f7f8202f20c0/dot_zshrc#L197-L202
+
+# コマンドを好みのエディタで編集
+
+↓を仕込んでおくと、`<CTRL-X><CTRL-E>`で入力中のコマンドを好きなエディタで編集できる
+
+``` bash
+export EDITOR=nvim  # 好きなエディタ
+autoload -Uz edit-command-line
+zle -N edit-command-line
+bindkey "^x^e" edit-command-line
+```
+
+私はNeovim内でNeovimが入れ子になるのを防ぐため、ちょっと工夫を凝らしている
+
+- 使うエディタは環境変数`EDITOR_CMD`を優先し`EDITOR`にフォールバック https://github.com/atusy/dotfiles/blob/c654f90e8ec9ebbc18543d8f0349f7f8202f20c0/dot_zshrc#L146-L150
+- Neovim内で環境変数`EDITOR_CMD`を設定 https://github.com/atusy/dotfiles/blob/44cbfacfafab7f3dd6cebe7c6ad557816f64ed0f/dot_config/nvim/init.lua#L229
+
+# 補完
+
+- ↓あたりでなんとかしてるけどzstyleは正直なにも覚えていない
+    - zstyleによる設定 https://github.com/atusy/dotfiles/blob/c654f90e8ec9ebbc18543d8f0349f7f8202f20c0/dot_zshrc#L111-L144
+    - プラグインの利用
+        - [zsh-users/zsh-completions](https://github.com/zsh-users/zsh-completions)
+        - [zsh-users/zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions)
+
+# プラグイン
+
+- [yuki-yano/zeno.zsh](https://github.com/yuki-yano/zeno.zsh)
+    - 作者による[紹介記事](https://zenn.dev/yano/articles/zsh_plugin_from_deno)
+    - スニペットの展開
+        - `top` + スペースを入力したら、`htop`に展開するなど、better somethingへのエイリアスをスニペットとして展開し、自分が本当に使っているコマンドが何か常に意識できるようにする
+        - `ping` + スペースを入力したら、`ping -c 5`に展開するなど、常用する引数をスニペットに登録して、入力を短縮する
+    - fzfによる補完
+        - `git`操作
+        - `ghq`で管理しているレポジトリのディレクトリへの`cd`
+        - Command historyの入力
+- [atusy/gh-fzf](https://github.com/atusy/gh-fzf)
+    - `gh`コマンドを`fzf`でもっと便利にする
+    - [紹介記事](https://blog.atusy.net/2021/07/10/publish-gh-fzf/)
+- [mollifier/cd-gitroot](https://github.com/mollifier/cd-gitroot)
+    - `cd-gitroot`コマンドでGitでバージョン管理しているディレクトリの深い層からプロジェクトルートへ飛べる
+    - `alias gd='cd-gitroot'`している
+
+
