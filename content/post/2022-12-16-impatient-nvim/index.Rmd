@@ -1,0 +1,68 @@
+---
+title: impatient.nvimによるNeovim起動高速化のコツと作者の思想
+author: ''
+date: '2022-12-16'
+slug: impatient-nvim
+categories: [Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs:
+  - lua
+---
+
+本記事は[Vimアドベントカレンダー2022](https://qiita.com/advent-calendar/2022/vim)の16日目の記事です。
+
+[lewis6991/impatient.nvim][impatient.nvim]は、Luaのモジュールをバイトコードとしてキャッシュしたり、モジュールに対応するパスをキャッシュすることで、Neovimの起動を高速化します。
+
+うまく使うと作者は54ms -> 6msと10倍近くの高速化を果たしていますし、他の最適化と組み合わせて30倍速を達成した例もあります（<https://zenn.dev/kawarimidoll/articles/8172a4c29a6653>）。
+プラグインマネージャは任意で、作者は[packer.nvim]、後者の例は[vim-plug](https://github.com/junegunn/vim-plug)、本記事の筆者は[vim-jetpack](https://github.com/tani/vim-jetpack)を使っています。
+
+うまく使う上で覚えておくべき点は3つほどあります。
+
+1. 設定ファイル（`init.lua` or `init.vim`）のできるだけ早い段階で[impatient.nvim]を有効化すること
+   - [impatient.nvim]にキャッシュすべきモジュールを知らせるために、他のモジュールに先んじて読み込みます
+   - なんなら`init.lua`の大部分をモジュール化してしまうと良いでしょう。たとえばこんな感じ
+
+    ``` lua
+    -- impatient.nvimのクローン先をruntimepathに追加し、`require`で読めるようにする
+    vim.opt.runtimepath:append(vim.fn.stdpath('data') .. '/impatient')
+
+    -- impatient.nvimが読み込める場合のみ最適化する
+    local ok, impatient = pcall(require, 'impatient')
+    if ok then
+      impatient.enable_profile()
+    else
+      vim.notify(ok, vim.log.levels.ERROR)
+    end
+
+    -- モジュール化したinit.luaを読む
+    require('atusy') -- ~/.config/nvim/lua/atusy.lua
+    ```
+
+2. Luaモジュールをバイトコード化するので、Vim scriptで書かれたプラグインは高速化できない
+3. モジュールに対応するパスをキャッシュするせいで読み込み順は保証されない
+    - 多くのLua製プラグインは`setup`関数などによりユーザーサイド明示的な初期化を行うため、読み込み順序の問題を回避できます
+    - できない場合はパスのキャッシュを無効化しましょう `_G.__luacache_config = { modpaths = { enable = false } }`
+
+ちなみに私の環境で[dstein64/vim-startuptime](https://github.com/dstein64/vim-startuptime)を使って計測したところ147ms -> 95msと高速化が確認されました。
+なぜか、`nvim --startuptime startup.log`ではあまり違いが出なかった気がするのが不思議です。
+
+`--startuptime`で高速化を認められなかったため、issueを眺めていた時に、作者の思想が現れている興味深いスレッドを見つけたので、紹介しておきます。
+
+> https://github.com/lewis6991/impatient.nvim/issues/65
+
+このスレッドは起動速度が変わらないという報告に関するものです。
+途中、プラグインの読み込み方法は作者に委ねろ。賢くあろうとするな。そんなに良い方法があるならPRしろといった由のコメントがついています。
+
+> Let plugin authors determine how a plugin should be loaded and don't try to be smarter than them. If you really have a way to make a plugin more efficient, then raise a PR on said plugin.
+
+最近、[impatient.nvim]の作者は、[packer.nvim]の開発にも挑んでいて、遅延ロードをあまり評価しない姿勢を見せているのですが、このあたりの思想から来てるんだなあと思った次第。
+delphinus35さんが嘆いてらしたのが記憶に新しいです（https://twitter.com/delphinus35/status/1597208568155222017）。
+
+個人的には、「そんな良い方法」はなかなかなくて、読み込みタイミングを変える代わりに利用方法に制限を設けたりしながら「わかる人」がやるのが遅延ロードなのかなと思ってます。
+私はそこを頑張りたくない人なので、[impatient.nvim]みたいに良い感じにやってくれるのを歓迎するばかりです。
+
+[impatient.nvim]: https://github.com/lewis6991/impatient.nvim
+[packer.nvim]: https://github.com/wbthomason/packer.nvim

@@ -1,0 +1,58 @@
+---
+title: impatient.nvimによるNeovim起動高速化のコツと作者の思想
+author: ''
+date: '2022-12-16'
+slug: impatient-nvim
+categories: [Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs:
+  - lua
+---
+
+
+
+<p>本記事は<a href="https://qiita.com/advent-calendar/2022/vim">Vimアドベントカレンダー2022</a>の16日目の記事です。</p>
+<p><a href="https://github.com/lewis6991/impatient.nvim">lewis6991/impatient.nvim</a>は、Luaのモジュールをバイトコードとしてキャッシュしたり、モジュールに対応するパスをキャッシュすることで、Neovimの起動を高速化します。</p>
+<p>うまく使うと作者は54ms -&gt; 6msと10倍近くの高速化を果たしていますし、他の最適化と組み合わせて30倍速を達成した例もあります（<a href="https://zenn.dev/kawarimidoll/articles/8172a4c29a6653" class="uri">https://zenn.dev/kawarimidoll/articles/8172a4c29a6653</a>）。プラグインマネージャは任意で、作者は<a href="https://github.com/wbthomason/packer.nvim">packer.nvim</a>、後者の例は<a href="https://github.com/junegunn/vim-plug">vim-plug</a>、本記事の筆者は<a href="https://github.com/tani/vim-jetpack">vim-jetpack</a>を使っています。</p>
+<p>うまく使う上で覚えておくべき点は3つほどあります。</p>
+<ol style="list-style-type: decimal">
+<li>設定ファイル（<code>init.lua</code> or <code>init.vim</code>）のできるだけ早い段階で<a href="https://github.com/lewis6991/impatient.nvim">impatient.nvim</a>を有効化すること
+<ul>
+<li><a href="https://github.com/lewis6991/impatient.nvim">impatient.nvim</a>にキャッシュすべきモジュールを知らせるために、他のモジュールに先んじて読み込みます</li>
+<li>なんなら<code>init.lua</code>の大部分をモジュール化してしまうと良いでしょう。たとえばこんな感じ</li>
+</ul>
+<pre class="lua"><code>-- impatient.nvimのクローン先をruntimepathに追加し、`require`で読めるようにする
+vim.opt.runtimepath:append(vim.fn.stdpath(&#39;data&#39;) .. &#39;/impatient&#39;)
+
+-- impatient.nvimが読み込める場合のみ最適化する
+local ok, impatient = pcall(require, &#39;impatient&#39;)
+if ok then
+  impatient.enable_profile()
+else
+  vim.notify(ok, vim.log.levels.ERROR)
+end
+
+-- モジュール化したinit.luaを読む
+require(&#39;atusy&#39;) -- ~/.config/nvim/lua/atusy.lua</code></pre></li>
+<li>Luaモジュールをバイトコード化するので、Vim scriptで書かれたプラグインは高速化できない</li>
+<li>モジュールに対応するパスをキャッシュするせいで読み込み順は保証されない
+<ul>
+<li>多くのLua製プラグインは<code>setup</code>関数などによりユーザーサイド明示的な初期化を行うため、読み込み順序の問題を回避できます</li>
+<li>できない場合はパスのキャッシュを無効化しましょう <code>_G.__luacache_config = { modpaths = { enable = false } }</code></li>
+</ul></li>
+</ol>
+<p>ちなみに私の環境で<a href="https://github.com/dstein64/vim-startuptime">dstein64/vim-startuptime</a>を使って計測したところ147ms -&gt; 95msと高速化が確認されました。なぜか、<code>nvim --startuptime startup.log</code>ではあまり違いが出なかった気がするのが不思議です。</p>
+<p><code>--startuptime</code>で高速化を認められなかったため、issueを眺めていた時に、作者の思想が現れている興味深いスレッドを見つけたので、紹介しておきます。</p>
+<blockquote>
+<p><a href="https://github.com/lewis6991/impatient.nvim/issues/65" class="uri">https://github.com/lewis6991/impatient.nvim/issues/65</a></p>
+</blockquote>
+<p>このスレッドは起動速度が変わらないという報告に関するものです。途中、プラグインの読み込み方法は作者に委ねろ。賢くあろうとするな。そんなに良い方法があるならPRしろといった由のコメントがついています。</p>
+<blockquote>
+<p>Let plugin authors determine how a plugin should be loaded and don’t try to be smarter than them. If you really have a way to make a plugin more efficient, then raise a PR on said plugin.</p>
+</blockquote>
+<p>最近、<a href="https://github.com/lewis6991/impatient.nvim">impatient.nvim</a>の作者は、<a href="https://github.com/wbthomason/packer.nvim">packer.nvim</a>の開発にも挑んでいて、遅延ロードをあまり評価しない姿勢を見せているのですが、このあたりの思想から来てるんだなあと思った次第。
+delphinus35さんが嘆いてらしたのが記憶に新しいです（<a href="https://twitter.com/delphinus35/status/1597208568155222017" class="uri">https://twitter.com/delphinus35/status/1597208568155222017</a>）。</p>
+<p>個人的には、「そんな良い方法」はなかなかなくて、読み込みタイミングを変える代わりに利用方法に制限を設けたりしながら「わかる人」がやるのが遅延ロードなのかなと思ってます。私はそこを頑張りたくない人なので、<a href="https://github.com/lewis6991/impatient.nvim">impatient.nvim</a>みたいに良い感じにやってくれるのを歓迎するばかりです。</p>
