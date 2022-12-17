@@ -1,0 +1,103 @@
+---
+title: もっと良い感じにstyler.nvimでアクティブなウィンドウか否かでカラースキームを変える
+author: ''
+date: '2022-12-17'
+slug: styler-nvim-active-win
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs:
+  - lua
+---
+
+
+
+<p>以前、Neovimと<a href="https://github.com/folke/styler.nvim">styler.nvim</a>を使ってアクティブウィンドウを目立たせる方法を紹介しました。</p>
+<blockquote>
+<p><a href="https://blog.atusy.net/2022/11/25/styler-nvim-dim-inactive-windows/">styler.nvimでアクティブなウィンドウか否かでカラースキームを変える</a></p>
+</blockquote>
+<p>下図のように、注目しているウィンドウが一目瞭然なので気に入ってます。</p>
+<p><img src="images/styler.png" /></p>
+<p>しかし、当時のコードはいくつかの課題を抱えていたので、もう少し洗練させることにしました。</p>
+<p>以下に、minimalな設定と、改善点の要約を置いておきます。</p>
+<p>なお、筆者はWindowがアクティブか否かに加え、バッファがカレントディレクトリにあるかや、初期のtabpageにいるかといった条件で、より詳細にカラースキームを調整しています（<a href="https://github.com/atusy/dotfiles/blob/7e4c1348ebc0eaf648f3fd4029463a94ee89d46d/dot_config/nvim/lua/config/colorscheme.lua#L1">参考</a>）。</p>
+<pre class="lua"><code>--[[
+必要なプラグイン
+
+- https://github.com/EdenEast/nightfox.nvim
+- https://github.com/folke/styler.nvim
+]]
+
+-- 設定
+-- styler.set_themeに与えるカラースキームはLua製な必要あり
+DEFAULT_COLORSCHEME = &#39;duskfox&#39;
+INACTIVE_COLORSCHEME = &#39;nordfox&#39;
+
+-- 非アクティブウィンドウ向けの関数
+local function inactivate(win)
+  -- skip for certain situations
+  if not api.nvim_win_is_valid(win) then return end
+  if api.nvim_win_get_config(win).relative ~= &quot;&quot; then return end
+
+  -- apply colorscheme if not yet
+  if (vim.w[win].theme or {}).colorscheme ~= INACTIVE_COLORSCHEME then
+    require(&#39;styler&#39;).set_theme(win, { colorscheme = INACTIVE_COLORSCHEME })
+  end
+end
+
+-- autocmdの発行
+api.nvim_create_autocmd(
+  { &#39;WinLeave&#39; },
+  {
+    group = vim.api.nvim_create_augroup(&#39;styler-nvim-custom&#39;, {}),
+    callback = function(_)
+      local win_event = api.nvim_get_current_win()
+      vim.schedule(function()
+        local win_pre = fn.win_getid(fn.winnr(&#39;#&#39;))
+        local win_cursor = api.nvim_get_current_win()
+
+        -- カーソル位置のウィンドウでstyler.nvimを無効化する
+        if (vim.w[win_cursor].theme or {}).colorscheme then
+          require(&#39;styler&#39;).clear(win_cursor)
+        fi
+
+        -- 直前のウィンドウにカーソルがなければinactivate
+        if win_pre ~= 0 and win_pre ~= win_cursor then
+          inactivate(win_pre)
+        end
+
+        -- イベントを発行したウィンドウにカーソルがなければinactivate
+        if win_event ~= win_cursor then
+          inactivate(win_event)
+        end
+      end)
+    end
+  }
+)</code></pre>
+<ul>
+<li>予想外な挙動の抑制
+<ul>
+<li>非同期がウリなプラグイン（Fern）でアクティブなウィンドウが変わっても直前のウィンドウが目立つままになるケースがあったので、callbackを<code>vim.schedule()</code>を使い、カラースキームの変更をmain event-loopに遅延</li>
+<li><code>WinEnter</code>を発行せずにカレントウィンドウが変わるケースを観測したので、<code>WinLeave</code>をトリガーに変更
+<ul>
+<li>実際のカラースキーム変更は<code>vim.schedule()</code>で遅延しているので実質<code>WinEnter</code>より後になる</li>
+</ul></li>
+<li>操作対象のウィンドウがいつの間にか消えている可能性に備え、<code>vim.api.nvim_win_is_valid()</code>でバリデーション</li>
+</ul></li>
+<li>パフォーマンス改善
+<ul>
+<li>表示されているウィンドウすべてを走査していたので、適用対象を以下に限定
+<ul>
+<li>イベントを発行した時のウィンドウ</li>
+<li>main event-loopにおけるアクティブウィンドウ</li>
+<li>main event-loopにおける直前のウィンドウ</li>
+</ul></li>
+<li><a href="https://github.com/folke/styler.nvim">styler.nvim</a>の適用の要否を判定
+<ul>
+<li><a href="https://github.com/folke/styler.nvim">styler.nvim</a>は状態をウィンドウローカルな<code>theme</code>変数に保存するので、そこをチェック</li>
+</ul></li>
+</ul></li>
+</ul>
+<p><strong>ENJOY!!</strong></p>
