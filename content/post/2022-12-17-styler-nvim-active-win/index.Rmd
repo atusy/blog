@@ -12,6 +12,8 @@ highlightjs:
   - lua
 ---
 
+本記事は[Vimアドベントカレンダー2022 その3](https://qiita.com/advent-calendar/2022/vim)の17日目の記事です。
+
 以前、Neovimと[styler.nvim]を使ってアクティブウィンドウを目立たせる方法を紹介しました。
 
 > [styler.nvimでアクティブなウィンドウか否かでカラースキームを変える](https://blog.atusy.net/2022/11/25/styler-nvim-dim-inactive-windows/)
