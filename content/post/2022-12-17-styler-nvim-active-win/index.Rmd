@@ -89,7 +89,7 @@ api.nvim_create_autocmd(
     - `WinEnter`を発行せずにカレントウィンドウが変わるケースを観測したので、`WinLeave`をトリガーに変更
         - 実際のカラースキーム変更は`vim.schedule()`で遅延しているので実質`WinEnter`より後になる
     - ウィンドウを変更せずに追加するケースに対応するため、`WinNew`をトリガーに追加
-        - （例：`vim.api.nvim_win_call(vim.fn.win_getid(vim.fn.winnr('#')), function() vim.cmd('vsplit') end)`)
+        - 例：`vim.api.nvim_win_call(0, vim.cmd.vsplit)`
     - 操作対象のウィンドウがいつの間にか消えている可能性に備え、`vim.api.nvim_win_is_valid()`でバリデーション
 - パフォーマンス改善
     - 表示されているウィンドウすべてを走査していたので、適用対象を以下に限定
