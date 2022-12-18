@@ -59,15 +59,15 @@ api.nvim_create_autocmd(
   {
     group = vim.api.nvim_create_augroup('styler-nvim-custom', {}),
     callback = function(_)
-      local win_event = api.nvim_get_current_win()
+      local win_event = vim.api.nvim_get_current_win()
       vim.schedule(function()
-        local win_pre = fn.win_getid(fn.winnr('#'))
-        local win_cursor = api.nvim_get_current_win()
+        local win_pre = vim.fn.win_getid(vim.fn.winnr('#'))
+        local win_cursor = vim.api.nvim_get_current_win()
 
         -- カーソル位置のウィンドウでstyler.nvimを無効化する
         if (vim.w[win_cursor].theme or {}).colorscheme then
           require('styler').clear(win_cursor)
-        fi
+        end
 
         -- 直前のウィンドウにカーソルがなければinactivate
         if win_pre ~= 0 and win_pre ~= win_cursor then
