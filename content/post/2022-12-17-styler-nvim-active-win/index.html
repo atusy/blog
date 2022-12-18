@@ -50,19 +50,19 @@ end
 
 -- autocmdの発行
 api.nvim_create_autocmd(
-  { &#39;WinLeave&#39; },
+  { &#39;WinLeave&#39;, &#39;WinNew&#39; },
   {
     group = vim.api.nvim_create_augroup(&#39;styler-nvim-custom&#39;, {}),
     callback = function(_)
-      local win_event = api.nvim_get_current_win()
+      local win_event = vim.api.nvim_get_current_win()
       vim.schedule(function()
-        local win_pre = fn.win_getid(fn.winnr(&#39;#&#39;))
-        local win_cursor = api.nvim_get_current_win()
+        local win_pre = vim.fn.win_getid(vim.fn.winnr(&#39;#&#39;))
+        local win_cursor = vim.api.nvim_get_current_win()
 
         -- カーソル位置のウィンドウでstyler.nvimを無効化する
         if (vim.w[win_cursor].theme or {}).colorscheme then
           require(&#39;styler&#39;).clear(win_cursor)
-        fi
+        end
 
         -- 直前のウィンドウにカーソルがなければinactivate
         if win_pre ~= 0 and win_pre ~= win_cursor then
@@ -84,6 +84,10 @@ api.nvim_create_autocmd(
 <li><code>WinEnter</code>を発行せずにカレントウィンドウが変わるケースを観測したので、<code>WinLeave</code>をトリガーに変更
 <ul>
 <li>実際のカラースキーム変更は<code>vim.schedule()</code>で遅延しているので実質<code>WinEnter</code>より後になる</li>
+</ul></li>
+<li>ウィンドウを変更せずに追加するケースに対応するため、<code>WinNew</code>をトリガーに追加
+<ul>
+<li>（例：<code>vim.api.nvim_win_call(vim.fn.win_getid(vim.fn.winnr('#')), function() vim.cmd('vsplit') end)</code>)</li>
 </ul></li>
 <li>操作対象のウィンドウがいつの間にか消えている可能性に備え、<code>vim.api.nvim_win_is_valid()</code>でバリデーション</li>
 </ul></li>
