@@ -12,6 +12,12 @@ highlightjs:
   - lua
 ---
 
+本記事の改訂版が出ています
+
+> http://localhost:4321/2022/12/17/styler-nvim-active-win/
+
+-----
+
 先日は[styler.nvim](https://github.com/folke/styler.nvim)を使ってバッファが作業ディレクトリに属すか否かで適用するカラースキームを変えました。
 
 > [styler.nvimを使うとバッファごとにcolorschemeを変えられて便利](https://blog.atusy.net/2022/11/23/styler-nvim/)
