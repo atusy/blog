@@ -3,7 +3,7 @@ title: もっと良い感じにstyler.nvimでアクティブなウィンドウ�
 author: ''
 date: '2022-12-17'
 slug: styler-nvim-active-win
-categories: []
+categories: [Neovim]
 tags: []
 output:
   blogdown::html_page:
