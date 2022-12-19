@@ -14,7 +14,7 @@ highlightjs:
 
 本記事の改訂版が出ています
 
-> http://localhost:4321/2022/12/17/styler-nvim-active-win/
+> https://blog.atusy.net/2022/12/17/styler-nvim-active-win/
 
 -----
 
