@@ -36,6 +36,9 @@ highlightjs:
 DEFAULT_COLORSCHEME = &#39;duskfox&#39;
 INACTIVE_COLORSCHEME = &#39;nordfox&#39;
 
+-- カラースキームの適用
+vim.cmd(&quot;colorscheme &quot; .. DEFAULT_COLORSCHEME)
+
 -- 非アクティブウィンドウ向けの関数
 local function inactivate(win)
   -- skip for certain situations
@@ -87,7 +90,7 @@ api.nvim_create_autocmd(
 </ul></li>
 <li>ウィンドウを変更せずに追加するケースに対応するため、<code>WinNew</code>をトリガーに追加
 <ul>
-<li>（例：<code>vim.api.nvim_win_call(vim.fn.win_getid(vim.fn.winnr('#')), function() vim.cmd('vsplit') end)</code>)</li>
+<li>例：<code>vim.api.nvim_win_call(0, vim.cmd.vsplit)</code></li>
 </ul></li>
 <li>操作対象のウィンドウがいつの間にか消えている可能性に備え、<code>vim.api.nvim_win_is_valid()</code>でバリデーション</li>
 </ul></li>
