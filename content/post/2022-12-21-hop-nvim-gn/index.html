@@ -1,0 +1,27 @@
+---
+title: hop.nvimで直近の検索パターンにホップ
+author: ''
+date: '2022-12-21'
+slug: hop-nvim-gn
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs:
+  - vim
+  - lua
+---
+
+
+
+<p><a href="https://github.com/phaazon/hop.nvim">hop.nvim</a>は<a href="https://github.com/easymotion/vim-easymotion">easymotion</a>的な検索対象をラベル付けして、入力されたラベルの場所に飛ぶ系のプラグインです。</p>
+<p>私はこれまで<code>f</code>モーションの拡張としてしか使ってませんでしたが、<code>/</code>の代替として文字列検索に一致した箇所へホップする機能もあると気付きました。</p>
+<p>たとえばこの記事の原稿に対して<code>nvim</code>で検索実行している様子が以下のスクリーンショット。次に<code>a</code>を入力すれば、画像の1行目で目立つ<code>a</code>に飛びます。</p>
+<p><img src="images/hop-pattern.png" /></p>
+<p>で、これを使えば、直近で使用した検索パターンを使ってホップできます。検索にマッチするパターンが複数あって、画面内の該当箇所まで何回<code>n/N</code>すればいいか分からないなんて時に便利ですね。</p>
+<p>コマンドでやるならこんな感じ。</p>
+<pre class="vim"><code>:lua require(&#39;hop&#39;).hint_patterns({}, vim.api.nvim_exec(&#39;echo @/&#39;, true))</code></pre>
+<p>私は以下のように<code>normal</code>モードの<code>gn</code>にマッピングしてbetter gnとして使ってみることにしました。</p>
+<pre class="lua"><code>vim.keymap.set(&#39;n&#39;, &#39;gn&#39;, require(&#39;hop&#39;).hint_patterns({}, vim.api.nvim_exec(&#39;echo @/&#39;, true)))</code></pre>
+<p>ENJOY!</p>
