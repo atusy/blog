@@ -33,7 +33,7 @@ highlightjs:
 :lua require('hop').hint_patterns({}, vim.api.nvim_exec('echo @/', true))
 ```
 
-私は以下のように`normal`モードの`gn`にマッピングしてbetter gnとして使ってみることにしました。
+私は以下のように`normal`モードの`gn`にマッピングして使ってみることにしました。
 
 ``` lua
 vim.keymap.set('n', 'gn', require('hop').hint_patterns({}, vim.api.nvim_exec('echo @/', true)))
