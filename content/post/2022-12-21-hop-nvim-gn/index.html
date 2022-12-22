@@ -23,6 +23,6 @@ highlightjs:
 <p>で、これを使えば、直近で使用した検索パターンを使ってホップできます。検索にマッチするパターンが複数あって、画面内の該当箇所まで何回<code>n/N</code>すればいいか分からないなんて時に便利ですね。</p>
 <p>コマンドでやるならこんな感じ。</p>
 <pre class="vim"><code>:lua require(&#39;hop&#39;).hint_patterns({}, vim.api.nvim_exec(&#39;echo @/&#39;, true))</code></pre>
-<p>私は以下のように<code>normal</code>モードの<code>gn</code>にマッピングしてbetter gnとして使ってみることにしました。</p>
-<pre class="lua"><code>vim.keymap.set(&#39;n&#39;, &#39;gn&#39;, require(&#39;hop&#39;).hint_patterns({}, vim.api.nvim_exec(&#39;echo @/&#39;, true)))</code></pre>
+<p>私は以下のように<code>normal</code>モードの<code>gn</code>にマッピングして使ってみることにしました。</p>
+<pre class="lua"><code>vim.keymap.set(&#39;n&#39;, &#39;gn&#39;, function() require(&#39;hop&#39;).hint_patterns({}, vim.api.nvim_exec(&#39;echo @/&#39;, true)) end)</code></pre>
 <p>ENJOY!</p>
