@@ -1,0 +1,29 @@
+---
+title: "rstudioapi::registerChunkCallbackが面白い"
+author: ''
+date: '2022-12-26'
+slug: rstudioapi-registerchunkcallback
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+rstudioapiパッケージにはRStudioを操作する様々な関数があります。
+
+`registerChunkCallback`という関数が面白かったのでちょっと実験しました。
+
+以下のような関数を登録しておくと、チャンクの実行後にやってくれるらしい。
+
+- 引数
+    - `chunkName`: チャンク名。ハイフンはアンスコに変換される
+    - `chunkCode`: チャンクのコード。```` ``` ````も含み、改行などは`&#10;`などに変換される
+- 返り値
+    - HTMLを含むリスト
+
+実用性はナゾだがいくつか実験してみた。
+
+![](images/registerchunkcallback.png)
+
+ENJOY!
