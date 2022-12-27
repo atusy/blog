@@ -1,0 +1,51 @@
+---
+title: rticlesパッケージで作成する文書の参考文献の位置を変える
+author: ''
+date: '2022-12-28'
+slug: rticles-reference-location
+categories: [R]
+tags: [rmarkdown, rticles]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p>R Markdownの参考文献は通常では文書末尾に挿入されます。しかし、多くの場合は挿入場所を、以下の呪文を唱えた場所に変更できます。</p>
+<pre><code>::: {#refs}
+:::</code></pre>
+<p>これは、R Markdownの拡張元となっているMarkdown方言（Pandoc’s Markdown）の機能です。</p>
+<p><code>:::</code>はHTMLでいうところの<code>&lt;div&gt;</code>に相当し、<code>{}</code>の中身は<code>&lt;div&gt;</code>に指定した属性に相当します。</p>
+<p>つまり以下に同じ。</p>
+<pre class="html"><code>&lt;div id=refs&gt;&lt;/div&gt;</code></pre>
+<p>Pandocはこの種の<code>&lt;div&gt;</code>を特別扱いして、参考文献の挿入先と認識します。</p>
+<p>ただし、これはPandocが自身に組込みのciteprocという参考文献処理エンジンを使う場合に限定されます。</p>
+<p>一方、rticlesパッケージの出力形式の一部は、参考文献処理エンジンの既定値がnatbibやbiblatexが変更されています。そこで、出力形式の<code>citation_package</code>引数に<code>default</code>を渡すと、同様に制御できるようになります<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>。たとえば出力形式に<code>rticles::sim_article</code>関数を使うなら以下の通り。</p>
+<pre class="yaml"><code>output:
+  rticles::sim_article:
+    citation_package: default</code></pre>
+<p>注意点は以下の通り。</p>
+<ul>
+<li><p>参考文献処理エンジンを変更するため、書式が想定と異なる可能性がある</p></li>
+<li><p><code>rticles::agu_article</code>関数など一部は、<code>&lt;div&gt;</code>が<code>\hypertarget{refs}{}</code>に変換されてしまい、以下のエラーを発します。</p>
+<blockquote>
+<p>! Undefined control sequence.
+l.218 \hypertarget
+{refs}{}</p>
+</blockquote>
+<p>この問題はLuaフィルタで解決できる可能性もあります。
+R Markdownが内部で使っているPandocでは2.19.1で<code>pandoc.utils.citeproc</code>関数が追加され、Luaフィルタ内でcitationを解決できるようになりました<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>。</p></li>
+</ul>
+<p>ちなみに<code>rticles::sim_article</code>を使った出力例は以下です。</p>
+<p><img src="images/sim.png" /></p>
+<div id="enjoy" class="section level1">
+<h1>Enjoy!</h1>
+</div>
+<div class="footnotes footnotes-end-of-document">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://github.com/rstudio/rticles/issues/338" class="uri">https://github.com/rstudio/rticles/issues/338</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p><a href="https://pandoc.org/releases.html#pandoc-2.19.1-2022-08-18" class="uri">https://pandoc.org/releases.html#pandoc-2.19.1-2022-08-18</a><a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>

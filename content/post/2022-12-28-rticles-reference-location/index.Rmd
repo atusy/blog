@@ -1,0 +1,67 @@
+---
+title: rticlesパッケージで作成する文書の参考文献の位置を変える
+author: ''
+date: '2022-12-28'
+slug: rticles-reference-location
+categories: [R]
+tags: [rmarkdown, rticles]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+R Markdownの参考文献は通常では文書末尾に挿入されます。
+しかし、多くの場合は挿入場所を、以下の呪文を唱えた場所に変更できます。
+
+```
+::: {#refs}
+:::
+```
+
+これは、R Markdownの拡張元となっているMarkdown方言（Pandoc's Markdown）の機能です。
+
+`:::`はHTMLでいうところの`<div>`に相当し、`{}`の中身は`<div>`に指定した属性に相当します。
+
+つまり以下に同じ。
+
+``` html
+<div id=refs></div>
+```
+
+Pandocはこの種の`<div>`を特別扱いして、参考文献の挿入先と認識します。
+
+ただし、これはPandocが自身に組込みのciteprocという参考文献処理エンジンを使う場合に限定されます。
+
+一方、rticlesパッケージの出力形式の一部は、参考文献処理エンジンの既定値がnatbibやbiblatexが変更されています。
+そこで、出力形式の`citation_package`引数に`default`を渡すと、同様に制御できるようになります[^issue]。
+たとえば出力形式に`rticles::sim_article`関数を使うなら以下の通り。
+
+
+``` yaml
+output:
+  rticles::sim_article:
+    citation_package: default
+```
+
+注意点は以下の通り。
+
+- 参考文献処理エンジンを変更するため、書式が想定と異なる可能性がある
+- `rticles::agu_article`関数など一部は、`<div>`が`\hypertarget{refs}{}`に変換されてしまい、以下のエラーを発します。
+
+    > ! Undefined control sequence.
+    > l.218 \hypertarget
+    >                   {refs}{}
+
+    この問題はLuaフィルタで解決できる可能性もあります。
+    R Markdownが内部で使っているPandocでは2.19.1で`pandoc.utils.citeproc`関数が追加され、Luaフィルタ内でcitationを解決できるようになりました[^pandoc]。
+
+ちなみに`rticles::sim_article`を使った出力例は以下です。
+
+![](images/sim.png)
+
+# Enjoy!
+
+[^issue]: https://github.com/rstudio/rticles/issues/338
+
+[^pandoc]: https://pandoc.org/releases.html#pandoc-2.19.1-2022-08-18
