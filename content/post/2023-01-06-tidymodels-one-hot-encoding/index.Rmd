@@ -14,12 +14,15 @@ output:
 
 > [RでOne-hot Encodingをする with tidyverse](https://socinuit.hatenablog.com/entry/2023/01/06/214251)
 
+tidymodelsは統計・機械学習モデリングを統一的なフレームワークに落とし込む存在です。
+こう書くと、前処理から推論、評価まで全部を行う時を想定しがちですが、つまみ食いして前処理だけ任せるのもアリでしょう。
+
 ```{r, include=FALSE}
 library(recipes)
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-こんな感じの、a、b、cの水準からなるx列を含むデータフレームを対象にしてみます。
+というわけで、こんな感じの、a、b、cの水準からなるx列を含むデータフレームを対象にOne-hot encodingしてみます。
 
 ```{r}
 data <- data.frame(id = seq(4L), x = c("a", "b", "c", "c"))

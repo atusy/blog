@@ -16,7 +16,8 @@ output:
 <blockquote>
 <p><a href="https://socinuit.hatenablog.com/entry/2023/01/06/214251">RでOne-hot Encodingをする with tidyverse</a></p>
 </blockquote>
-<p>こんな感じの、a、b、cの水準からなるx列を含むデータフレームを対象にしてみます。</p>
+<p>tidymodelsは統計・機械学習モデリングを統一的なフレームワークに落とし込む存在です。こう書くと、前処理から推論、評価まで全部を行う時を想定しがちですが、つまみ食いして前処理だけ任せるのもアリでしょう。</p>
+<p>というわけで、こんな感じの、a、b、cの水準からなるx列を含むデータフレームを対象にOne-hot encodingしてみます。</p>
 <pre class="r"><code>data &lt;- data.frame(id = seq(4L), x = c(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;c&quot;))
 data
 #&gt;   id x
