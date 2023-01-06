@@ -1,0 +1,72 @@
+---
+title: tidymodelsでOne-hot Encodingする
+author: ''
+date: '2023-01-06'
+slug: tidymodels-one-hot-encoding
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+きぬいとさんがtidyverseでOne-hot Encodingしているのを見ましたが、餅は餅屋でtidymodelsもいいよねという話。
+
+> [RでOne-hot Encodingをする with tidyverse](https://socinuit.hatenablog.com/entry/2023/01/06/214251)
+
+```{r, include=FALSE}
+library(recipes)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+こんな感じの、a、b、cの水準からなるx列を含むデータフレームを対象にしてみます。
+
+```{r}
+data <- data.frame(id = seq(4L), x = c("a", "b", "c", "c"))
+data
+```
+
+Tidymodelsでは前処理をする前に、その「レシピ」を作ります。
+今回みたいにダミー変数を作りたいだけなら冗長に感じるかもしれませんが、これが中々重要な概念。
+`recipes::prep`関数でレシピを特定のデータで評価しパラメータを保存しておくので、未知のデータに使い回せます。
+
+```{r}
+# レシピの用意と学習
+rec <- recipes::recipe(
+  ~ .,  # モデル式。今回は目的変数を考えないので、~の左は空白
+  data = data  # レシピの作成に使うデータ
+) |>
+  recipes::step_dummy("x", one_hot = TRUE) |>  # x列からダミー変数を作る
+  recipes::prep()  # レシピの評価
+```
+
+レシピの適用は`recipes::bake`関数。レシピを用意した時と同じデータであれば、`new_data = NULL`でOKです。
+これで、One-hot encoding完了。
+
+```{r}
+# レシピの適用
+recipes::bake(rec, new_data = NULL)
+```
+
+ちなみに、`recipes::step_dummy`関数で引数に`one_hot = TRUE`を指定しましたが、`FALSE`にすると、上記の結果から`x_a`列が欠如します。
+`x_a`の情報は`x_b`、`x_c`から分かるので、モデリングには不要なものとして、既定値では`FALSE`が指定されています。
+
+最後にレシピの有用性を確認しましょう。
+最初のデータは、a、b、cの3水準から成りました。
+`new_data`をつぃて、水準にdを含むデータフレームを与えるとどうなるでしょうか。
+
+```{r}
+# 新規データへのレシピ適用
+recipes::bake(rec, new_data = data.frame(id = c(5L, 6L), x = c("a", "d")))
+```
+
+`recipes::prep`関数を適用した時に観測しなかった水準がある旨を警告してくれています。
+加えてx列の値が`"d"`だった行では、x_a、x_b、x_cの各列の値が`NA`になっています。
+
+recipesパッケージを含むtidymodelsに入門したい人は、丁度今日に発売開始した、以下の本を読んでみると良いと思います。
+tidymodelsは統計・機会学習モデリングを統一的なフレームワークに落としこんでくれる存在です。
+Pythonにおけるscikit-learn的なものですが、「統一的」な代わりに巨大なので、日本語で全容を掴める書籍は貴重な存在です。
+
+> Rユーザのためのtidymodels[実践]入門 〜モダンな統計・機械学習モデリングの世界 https://gihyo.jp/book/2023/978-4-297-13236-1
+
+ENJOY!

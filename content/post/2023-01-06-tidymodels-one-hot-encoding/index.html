@@ -1,0 +1,65 @@
+---
+title: tidymodelsでOne-hot Encodingする
+author: ''
+date: '2023-01-06'
+slug: tidymodels-one-hot-encoding
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p>きぬいとさんがtidyverseでOne-hot Encodingしているのを見ましたが、餅は餅屋でtidymodelsもいいよねという話。</p>
+<blockquote>
+<p><a href="https://socinuit.hatenablog.com/entry/2023/01/06/214251">RでOne-hot Encodingをする with tidyverse</a></p>
+</blockquote>
+<p>こんな感じの、a、b、cの水準からなるx列を含むデータフレームを対象にしてみます。</p>
+<pre class="r"><code>data &lt;- data.frame(id = seq(4L), x = c(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;c&quot;))
+data
+#&gt;   id x
+#&gt; 1  1 a
+#&gt; 2  2 b
+#&gt; 3  3 c
+#&gt; 4  4 c</code></pre>
+<p>Tidymodelsでは前処理をする前に、その「レシピ」を作ります。今回みたいにダミー変数を作りたいだけなら冗長に感じるかもしれませんが、これが中々重要な概念。
+<code>recipes::prep</code>関数でレシピを特定のデータで評価しパラメータを保存しておくので、未知のデータに使い回せます。</p>
+<pre class="r"><code># レシピの用意と学習
+rec &lt;- recipes::recipe(
+  ~ .,  # モデル式。今回は目的変数を考えないので、~の左は空白
+  data = data  # レシピの作成に使うデータ
+) |&gt;
+  recipes::step_dummy(&quot;x&quot;, one_hot = TRUE) |&gt;  # x列からダミー変数を作る
+  recipes::prep()  # レシピの評価</code></pre>
+<p>レシピの適用は<code>recipes::bake</code>関数。レシピを用意した時と同じデータであれば、<code>new_data = NULL</code>でOKです。これで、One-hot encoding完了。</p>
+<pre class="r"><code># レシピの適用
+recipes::bake(rec, new_data = NULL)
+#&gt; # A tibble: 4 × 4
+#&gt;      id   x_a   x_b   x_c
+#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+#&gt; 1     1     1     0     0
+#&gt; 2     2     0     1     0
+#&gt; 3     3     0     0     1
+#&gt; 4     4     0     0     1</code></pre>
+<p>ちなみに、<code>recipes::step_dummy</code>関数で引数に<code>one_hot = TRUE</code>を指定しましたが、<code>FALSE</code>にすると、上記の結果から<code>x_a</code>列が欠如します。
+<code>x_a</code>の情報は<code>x_b</code>、<code>x_c</code>から分かるので、モデリングには不要なものとして、既定値では<code>FALSE</code>が指定されています。</p>
+<p>最後にレシピの有用性を確認しましょう。最初のデータは、a、b、cの3水準から成りました。
+<code>new_data</code>をつぃて、水準にdを含むデータフレームを与えるとどうなるでしょうか。</p>
+<pre class="r"><code># 新規データへのレシピ適用
+recipes::bake(rec, new_data = data.frame(id = c(5L, 6L), x = c(&quot;a&quot;, &quot;d&quot;)))
+#&gt; Warning: There are new levels in a factor: d
+#&gt; # A tibble: 2 × 4
+#&gt;      id   x_a   x_b   x_c
+#&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+#&gt; 1     5     1     0     0
+#&gt; 2     6    NA    NA    NA</code></pre>
+<p><code>recipes::prep</code>関数を適用した時に観測しなかった水準がある旨を警告してくれています。加えてx列の値が<code>"d"</code>だった行では、x_a、x_b、x_cの各列の値が<code>NA</code>になっています。</p>
+<p>recipesパッケージを含むtidymodelsに入門したい人は、丁度今日に発売開始した、以下の本を読んでみると良いと思います。
+tidymodelsは統計・機会学習モデリングを統一的なフレームワークに落としこんでくれる存在です。
+Pythonにおけるscikit-learn的なものですが、「統一的」な代わりに巨大なので、日本語で全容を掴める書籍は貴重な存在です。</p>
+<blockquote>
+<p>Rユーザのためのtidymodels[実践]入門 〜モダンな統計・機械学習モデリングの世界 <a href="https://gihyo.jp/book/2023/978-4-297-13236-1" class="uri">https://gihyo.jp/book/2023/978-4-297-13236-1</a></p>
+</blockquote>
+<p>ENJOY!</p>
