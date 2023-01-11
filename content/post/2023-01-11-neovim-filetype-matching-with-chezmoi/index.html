@@ -1,0 +1,50 @@
+---
+title: chezmoiを使って管理しているdotfileのファイルタイプをNeovimにうまく認識させる
+author: ''
+date: '2023-01-11'
+slug: neovim-filetype-matching-with-chezmoi
+categories: [Neovim, chezmoi]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [lua]
+---
+
+
+
+<p>Neovimはファイルの名前や内容を元に、ファイルタイプを決定する機能を持っています。たとえば、拡張子が<code>.sh</code>だったらシェルスクリプトだと判断できます。</p>
+<p>このルールを改変する機能も備わっており<code>:h vim.filetype.add</code>に記載されています。</p>
+<p>これを利用して、<a href="https://www.chezmoi.io">chezmoi</a>で管理しているdotfileのファイルタイプ検出を改善してみましょう。</p>
+<p>本記事では<a href="https://www.chezmoi.io">chezmoi</a>そのものの解説はしないので、Zennなどの紹介記事をあたってください。</p>
+<blockquote>
+<p><a href="https://zenn.dev/ryo_kawamata/articles/introduce-chezmoi">chezmoi で dotfiles を手軽に柔軟にセキュアに管理する</a> by ryo_kawamataさん</p>
+</blockquote>
+<p><a href="https://www.chezmoi.io">chezmoi</a>では、<code>.config</code>など<code>.</code>で始まるファイルやディレクトリを<code>dot_config</code>などと<code>dot_</code>始まりに改名したコピーを別ディレクトリでバージョン管理しています。このため、たとえば<code>.zshrc</code>なら<code>filetype=zsh</code>なところ、<code>dot_zshrc</code>なせいでファイルタイプを検出できない、といった事態に陥ります。</p>
+<p>そこで、<a href="https://www.chezmoi.io">chezmoi</a>で管理しているファイルを編集する時は、そのファイルパス中の<code>/dot_</code>を<code>/.</code>に置換した上で、<code>vim.filetype.match</code>関数を使ってファイルタイプを再判定するとよさそうです。といっても、<code>dot_config/nvim/init.lua</code>のように、拡張子でファイルタイプをうまく検出できるケースもあるので、検出失敗時のフォールバックとして設定すると良いでしょう。</p>
+<p><code>~/.config/nvim/filetype.lua</code>に以下を記述するだけで設定できます。</p>
+<pre class="lua"><code>vim.filetype.add({
+  -- フルパスを使って判定するので、`pattern`キー内に記述
+  pattern = {
+    -- フルパスはlua-patternという正規表現っぽいものでマッチでき、環境変数も使える
+    [&#39;${HOME}/.local/share/chezmoi/.*&#39;] = {
+      -- テーブルの第一要素はフルパスなどを受け取ってファイルタイプを返す関数
+      function(
+        path,  -- フルパス
+        buf    -- buffer number
+      )
+        -- パスに`/dot_`を含む場合、パスを改変して再判定させる
+        if path:match(&#39;/dot_&#39;) then
+          return vim.filetype.match({
+            filename = path:gsub(&#39;/dot_&#39;, &#39;/.&#39;),
+            buf = buf,
+          })
+        end
+      end,
+      -- テーブルの第二要素でpriorityを最低にしておくと、フォールバック相当になる
+      { priority = -math.huge }
+    },
+  },
+})</code></pre>
+<p>私は当初、basenameが<code>dot_</code>始まりかだけ確認していましたが、<code>/dot_</code>をすべて<code>.</code>に置換するようにしました。こうしておくと、<code>dot_config/git/config</code>といったファイル名ではなく親ディレクトリに<code>/dot_</code>を含むケースでも、ファイルタイプを<code>gitconfig</code>として検出できるようになります。</p>
+<p>ENJOY!</p>

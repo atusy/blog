@@ -1,0 +1,64 @@
+---
+title: chezmoiを使って管理しているdotfileのファイルタイプをNeovimにうまく認識させる
+author: ''
+date: '2023-01-11'
+slug: neovim-filetype-matching-with-chezmoi
+categories: [Neovim, chezmoi]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [lua]
+---
+
+Neovimはファイルの名前や内容を元に、ファイルタイプを決定する機能を持っています。
+たとえば、拡張子が`.sh`だったらシェルスクリプトだと判断できます。
+
+このルールを改変する機能も備わっており`:h vim.filetype.add`に記載されています。
+
+これを利用して、[chezmoi]で管理しているdotfileのファイルタイプ検出を改善してみましょう。
+
+[chezmoi]: https://www.chezmoi.io
+
+本記事では[chezmoi]そのものの解説はしないので、Zennなどの紹介記事をあたってください。
+
+> [chezmoi で dotfiles を手軽に柔軟にセキュアに管理する](https://zenn.dev/ryo_kawamata/articles/introduce-chezmoi) by ryo_kawamataさん
+
+[chezmoi]では、`.config`など`.`で始まるファイルやディレクトリを`dot_config`などと`dot_`始まりに改名したコピーを別ディレクトリでバージョン管理しています。
+このため、たとえば`.zshrc`なら`filetype=zsh`なところ、`dot_zshrc`なせいでファイルタイプを検出できない、といった事態に陥ります。
+
+そこで、[chezmoi]で管理しているファイルを編集する時は、そのファイルパス中の`/dot_`を`/.`に置換した上で、`vim.filetype.match`関数を使ってファイルタイプを再判定するとよさそうです。
+といっても、`dot_config/nvim/init.lua`のように、拡張子でファイルタイプをうまく検出できるケースもあるので、検出失敗時のフォールバックとして設定すると良いでしょう。
+
+`~/.config/nvim/filetype.lua`に以下を記述するだけで設定できます。
+
+``` lua
+vim.filetype.add({
+  -- フルパスを使って判定するので、`pattern`キー内に記述
+  pattern = {
+    -- フルパスはlua-patternという正規表現っぽいものでマッチでき、環境変数も使える
+    ['${HOME}/.local/share/chezmoi/.*'] = {
+      -- テーブルの第一要素はフルパスなどを受け取ってファイルタイプを返す関数
+      function(
+        path,  -- フルパス
+        buf    -- buffer number
+      )
+        -- パスに`/dot_`を含む場合、パスを改変して再判定させる
+        if path:match('/dot_') then
+          return vim.filetype.match({
+            filename = path:gsub('/dot_', '/.'),
+            buf = buf,
+          })
+        end
+      end,
+      -- テーブルの第二要素でpriorityを最低にしておくと、フォールバック相当になる
+      { priority = -math.huge }
+    },
+  },
+})
+```
+
+私は当初、basenameが`dot_`始まりかだけ確認していましたが、`/dot_`をすべて`.`に置換するようにしました。
+こうしておくと、`dot_config/git/config`といったファイル名ではなく親ディレクトリに`/dot_`を含むケースでも、ファイルタイプを`gitconfig`として検出できるようになります。
+
+ENJOY!
