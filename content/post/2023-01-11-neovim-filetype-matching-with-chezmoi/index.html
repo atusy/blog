@@ -13,10 +13,6 @@ highlightjs: [lua]
 
 
 
-<p>2023-1-11追記：</p>
-<p><code>chezmoi edit</code>でNeovimを起動した場合、ここに書いた方法を使わなくても、適切にファイルタイプを検出できます。
-ryoppippiさん、教えてくださってありがとうございます。</p>
-<hr />
 <p>Neovimはファイルの名前や内容を元に、ファイルタイプを決定する機能を持っています。たとえば、拡張子が<code>.sh</code>だったらシェルスクリプトだと判断できます。</p>
 <p>このルールを改変する機能も備わっており<code>:h vim.filetype.add</code>に記載されています。</p>
 <p>これを利用して、<a href="https://www.chezmoi.io">chezmoi</a>で管理しているdotfileのファイルタイプ検出を改善してみましょう。</p>
@@ -52,3 +48,8 @@ ryoppippiさん、教えてくださってありがとうございます。</p>
 })</code></pre>
 <p>私は当初、basenameが<code>dot_</code>始まりかだけ確認していましたが、<code>/dot_</code>をすべて<code>.</code>に置換するようにしました。こうしておくと、<code>dot_config/git/config</code>といったファイル名ではなく親ディレクトリに<code>/dot_</code>を含むケースでも、ファイルタイプを<code>gitconfig</code>として検出できるようになります。</p>
 <p>ENJOY!</p>
+<div id="追記" class="section level1">
+<h1>2023-1-11追記：</h1>
+<p><code>chezmoi edit .zshrc</code>などで編集した場合、ここに書いた方法を使わなくても、適切にファイルタイプを検出できます。
+ryoppippiさん、教えてくださってありがとうございます。</p>
+</div>
