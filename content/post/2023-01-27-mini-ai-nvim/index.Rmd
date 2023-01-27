@@ -8,6 +8,7 @@ tags: [mini.ai, mini.nvim, textobject]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists
+    toc: true
 highlightjs: [lua]
 ---
 
