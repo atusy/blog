@@ -1,0 +1,122 @@
+---
+title: 'Neovimのテキストオブジェクトをカスタムできるmini.aiが便利'
+author: ''
+date: '2023-01-27'
+slug: mini-ai-nvim
+categories: [Neovim]
+tags: [mini.ai, mini.nvim, textobject]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [lua]
+---
+
+
+
+<div id="mini.aiについて" class="section level1">
+<h1>Mini.aiについて</h1>
+<p>VimやNeovimのテキストオブジェクト、便利ですよね。</p>
+<p><code>yi(</code>すれば、括弧の中のどこにいても括弧の中全体をヤンクできると知った時は感動ものでした。</p>
+<p>たとえば以下の<code>|</code>がカーソル位置なら<code>yi(</code>で<code>hoge fuga piyo</code>をヤンクできます。
+<code>ya(</code>にすれば括弧も含めてヤンクできます。</p>
+<pre><code>(hoge fug|a piyo)</code></pre>
+<p>エキストオブジェクトの便利さに関しては日本語の記事も沢山あるので、検索していただくとして、本記事では自分でテキストオブジェクトを定義する方法として、<a href="https://github.com/echasnovski/mini.ai">mini.ai</a>プラグインを紹介します。</p>
+<ul>
+<li>Lua製なので、<code>init.lua</code>を書いてる人と親和性が高い
+− テキストオブジェクトを自作できる
+<ul>
+<li>正規表現ライクなLua Patternsを使う</li>
+<li>関数を使う</li>
+</ul></li>
+<li>Treesitterとの組み合わせもラクチン</li>
+</ul>
+<p>あたりが特徴でしょうか。</p>
+<p>個人的にはTreesitter対応を魅力に感じていますが、パーサーがない場合のフォールバック処理を自前で用意する必要があり、まだ導入に至っていません。</p>
+<p>なにはともあれ、いくつかLuaPatternsを自作してみましょう。</p>
+<p>ちなみに本記事で紹介した内容をもっと推し進めたものが以下にあります。</p>
+<p><a href="https://github.com/atusy/dotfiles/blob/d08d88f60d74ed0956a4f1c01b9d05269fa35b55/dot_config/nvim/lua/plugins/textobj.lua" class="uri">https://github.com/atusy/dotfiles/blob/d08d88f60d74ed0956a4f1c01b9d05269fa35b55/dot_config/nvim/lua/plugins/textobj.lua</a></p>
+</div>
+<div id="テキストオブジェクトを自作する" class="section level1">
+<h1>テキストオブジェクトを自作する</h1>
+<div id="iで-foo-の両端のスペースを含めた範囲を選択する" class="section level2">
+<h2><code>i[</code>で<code>[ foo ]</code>の両端のスペースを含めた範囲を選択する</h2>
+<p><a href="https://github.com/echasnovski/mini.ai">mini.ai</a>の標準設定では、<code>vi[</code>だと両端のスペースを含まず、<code>vi]</code>で含みます。</p>
+<p><a href="https://github.com/echasnovski/mini.ai">mini.ai</a>導入前に<code>vi[</code>を使っていた人はびっくりしそうですね。</p>
+<p>設定は簡単で、<code>setup</code>関数で<code>custom_textobjects</code>を以下のように記述します。同様に<code>{</code>、<code>[</code>、<code>&lt;</code>なども設定すると良いでしょう。</p>
+<pre class="lua"><code>require(&#39;mini.ai&#39;).setup({
+  custom_textobjects = {
+    [&#39;[&#39;] = { &#39;%b[]&#39;, &#39;^().().*().()$&#39; }
+  },
+})</code></pre>
+<p>キーの<code>['['] = ...</code>は読みにくいですが、<code>i[</code>および<code>a[</code>の定義であることを示します。
+Luaではテーブルのキーに複雑な文字列を指定する時に<code>'[' = ...</code>とするのではなく、<code>['['] = ...</code>とするのですね。初見では戸惑うかもしれません。</p>
+<p>値の<code>{ '%b[]', '^().().*().()$' }</code> は更に独特ですね。
+<a href="https://github.com/echasnovski/mini.ai">mini.ai</a>では、Lua Patternsをテーブルに複数記述することで、左から順にマッチする箇所を絞り込めます。更に最後の要素ではキャプチャ（<code>()</code>）を使って、<code>a[</code>や<code>i[</code>の両端の位置を決められます。</p>
+<p>今回の場合、<code>%b[]</code>で対となる<code>[]</code>を探しています。
+<code>%b</code>の重要性は以下テキストで、<code>|</code>がカーソル位置の場合にどの範囲を選択したいか考えてみると良いでしょう。</p>
+<pre><code>[ [ | [ foo ] ] ]</code></pre>
+<p><code>a[</code>期待するのは<code>[ [ foo ] ]</code>です。しかし、馴染み深い <code>.*</code> による最長一致などを使うと想定外の範囲を選択します。</p>
+<ul>
+<li><code>[.*]</code>: <code>[ [ foo ] ] ]</code>（<code>.*</code>は最長一致）</li>
+<li><code>[.-]</code>: <code>[ [ foo ]</code> （<code>.-</code>は最短一致）</li>
+<li><code>%b[]</code>: <code>[ [ foo ] ]</code></li>
+</ul>
+<p>そして、<code>^().().*().()$</code>は、<code>i[</code>と<code>a[</code>の選択範囲を示します。
+1番目と4番目の<code>()</code>が<code>a[</code>の選択範囲で2番目と3番目の<code>()</code>が<code>i]</code>の選択範囲です。</p>
+<p>今回の例だと、</p>
+<ol style="list-style-type: decimal">
+<li><code>%b[]</code> で <code>[ [ foo ] ]</code> を選択</li>
+<li><code>^().().*().()$</code>で、1で選択された範囲から<code>a[</code>と<code>i[</code>の位置を指定</li>
+</ol>
+<p>ということが起きています。</p>
+<p>ちなみに<code>a[</code>の両端を示す<code>()</code>は以下のように省略可能です。</p>
+<pre class="lua"><code>require(&#39;mini.ai&#39;).setup({
+  custom_textobjects = {
+    [&#39;[&#39;] = { &#39;%b[]&#39;, &#39;^.().*().$&#39; }
+  },
+})</code></pre>
+</div>
+<div id="aで-foo-のような二重カッコを選択する" class="section level2">
+<h2><code>a]</code>で<code>[[ foo ]]</code>のような二重カッコを選択する</h2>
+<p>Lua言語など、一部の言語では二重カッコ（<code>[[]]</code>）が特別な意味を持ちます。</p>
+<p><code>v2a[</code>などとして、重なる回数を明示する手もありますが、よく使うなら<code>vi]</code>とできると便利ですね。
+<code>i[</code>と<code>i]</code>が同じである必要はありません。</p>
+<pre class="lua"><code>require(&#39;mini.ai&#39;).setup({
+  custom_textobjects = {
+    [&#39;[&#39;] = { &#39;%b[]&#39;, &#39;^.().*().$&#39; }
+    [&#39;]&#39;] = { &#39;%b[]&#39;, &#39;^.%[().*()%].$&#39; }  -- va] で [[ foo ]] 全体を選択できるようになる
+  },
+})</code></pre>
+<p>正規表現の解読は読者にお任せするとして、<code>2a[</code>と<code>a[</code>の違いを考えてみましょう。以下の例で<code>|</code>にカーソルがあるとします。</p>
+<pre><code>[[  [ foo | ]  ]]</code></pre>
+<p><code>2a[</code>では、<code>[[</code>の連続性は加味せず<code>[</code>の数だけを見るので、<code>[ [ foo ] ]</code>を選択してしまいます。
+<code>a]</code>なら、正しく<code>[[  [ foo ]  ]]</code>を選択できます。</p>
+</div>
+<div id="ajで-foo-のような日本語のカッコを選択する" class="section level2">
+<h2><code>aj]</code>で<code>「 foo 」</code>のような日本語のカッコを選択する</h2>
+<p>私はブログなどもNeovimで書いてますが、この時、日本語のカッコをtextobjectで扱えると便利です。</p>
+<p>あいにく、<code>custom_textobjects</code>はキーに使える文字が一つですが、値にはLua Patternsを返却する関数を記述できます。</p>
+<p>この性質を利用して、<code>vij</code>と打ったら<code>getchar()</code>でもう1文字を入力させ、入力文字に合わせて挙動を変えるといいでしょう。</p>
+<pre class="lua"><code>require(&#39;mini.ai&#39;).setup({
+  custom_textobjects = {
+    [&#39;j&#39;] = function()
+      -- キーを入力させる
+      local char = vim.fn.nr2char(vim.fn.getchar())
+
+      -- 入力が`[`だったら、「」を対象とするLua Patternsを返す
+      if char == &#39;[&#39; then
+        return {&#39;^「().-()」$&#39;}
+      end
+
+      -- 他はエラー
+      error(&#39;j&#39; .. char .. &#39; is unsupported&#39;)
+    end
+  },
+})</code></pre>
+<p><code>i[</code>の例では<code>%b[]</code>を使いましたが、あいにく非ASCII文字（？）は非対応なようで、<code>%b「」</code>は機能しません。幸い、<code>「あ「い」う」</code>などとネストすることはまずないので、最短一致の<code>^「().-()」$</code>を使います。</p>
+<p>関数を使うと途端に自由度が上がるので、たとえば<code>i [</code>で<a href="https://github.com/echasnovski/mini.ai">mini.ai</a>のデフォルトの<code>i[</code>のように空白を除去した範囲を選択するなんてこともできます。</p>
+</div>
+<div id="enjoy" class="section level2">
+<h2>ENJOY!</h2>
+</div>
+</div>
