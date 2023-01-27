@@ -163,7 +163,7 @@ require('mini.ai').setup({
 
 関数を使うと途端に自由度が上がるので、たとえば`i [`で[mini.ai]のデフォルトの`i[`のように空白を除去した範囲を選択するなんてこともできます。
 
-## ENJOY!
+# ENJOY! {.unlisted}
 
 [mini.ai]: https://github.com/echasnovski/mini.ai
 [mini.surround]: https://github.com/echasnovski/mini.surround
