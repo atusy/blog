@@ -1,0 +1,131 @@
+---
+title: PandocのLuaフィルタ内で引用文献を処理するpandoc.utils.citeprocを試す
+author: ''
+date: '2023-01-31'
+slug: pandoc-citeproc-lua
+categories: [Pandoc]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+  toc: true
+highlightjs: [bash, markdown, html, json, lua]
+summary:
+  Pandocで引用文献を処理する方法として、`--citeproc`引数と`--lua-filter`引数を使う場合を比較。
+  後者では`pandoc.utils.citeproc`関数を利用。
+  Luaフィルタを使うとASTレベルで引用文献を処理するので、更にフィルタをかけたい場合に便利。
+  ただし、`--citeproc`引数と併用すると引用文献のリストを2回繰り返すので排他利用を推奨。
+---
+
+Pandoc 2.19.1から、Luaフィルタ向けに`pandoc.utils.citeproc`関数が追加されました。
+
+これは、Pandocで引用文献を生成する`--citeproc`引数相当の処理をASTレベルで実現します。
+ライターの後（？）に処理される`--citeproc`と異なり、生成された引用文献に更にフィルタをかけられます。
+
+たとえば書籍をPandocで書く場合に、章ごとに引用文献を用意したい、といった需要を叶えてくれそうですね。
+
+Luaフィルタ向けと書きましたが、カスタムライタを用意する場合も、`pandoc.utils.citeproc`で引用文献リストをAST内に追加してから出力フォーマットに合わせて整形すると便利かもしれません。
+
+こう、夢が広がりますが、実際の挙動を確認してから使わないと怖いので、試してみました。
+
+結論は、`--citeproc`した場合と`--lua-filter`で`pandoc.utils.citeproc`した場合は同じ結果になるが、併用すると、引用文献のリストを2回繰り返します。
+基本的には排他利用した方がいいです。
+
+# `--citeproc`と`--lua-filter`による引用文献の処理結果比較
+
+Pandocに与える引数を変えつつ、Pandoc's Markdownを、GFMに変換して、`--citeproc`と`--lua-filter`の挙動を理解します。
+
+## 実験結果
+
+citeproc | lua filter | 結果
+-|-|-
+なし | なし | 未処理
+あり | なし | 通常の処理方法により引用文献のリストを生成
+なし | あり | 上と同じ
+あり | あり | 引用文献のリストが2回繰り返す
+
+## 実験条件
+
+以下のMarkdownを入力し、`gfm-raw_html`形式に出力します。
+`gfm`に`-raw_html`をつけて出力からHTMLを除去することで、ノイズを抑えます。
+
+```markdown
+@john2022
+
+# refs
+```
+
+引用文献には以下の内容の`assets/example.bib`を使います。
+
+```{biblatex, eval=FALSE, code=readLines("assets/example.bib")}
+```
+
+`--lua-filter`を指定する場合は、以下の内容の`assets/citeproc.lua`を使います。
+
+```{lua, eval=FALSE, code=readLines("assets/citeproc.lua")}
+```
+
+この条件で、`--citeproc`引数と`--lua-filter`引数のありなしの組み合わせを比較します。
+
+## 実験
+
+### `--citeproc`なし、`--lua-filter`なし
+
+`--bibliography`を指定しただけでは引用文献は生成されません
+
+```{bash}
+#| comment: ""
+#| class.output: "markdown"
+echo -e "@john2022\n\n# refs" | pandoc -t gfm-raw_html --bibliography="assets/example.bib"
+```
+
+### `--citeproc`あり、`--lua-filter`なし
+
+通常通り引用文献が生成されます
+
+```{bash}
+#| comment: ""
+#| class.output: "markdown"
+echo -e "@john2022\n\n# refs" | pandoc -t gfm-raw_html --bibliography="assets/example.bib" \
+  --citeproc
+```
+
+### `--citeproc`なし、`--lua-fiter`あり
+
+`--citeproc`のみの場合と同じ結果
+
+```{bash}
+#| comment: ""
+#| class.output: "markdown"
+echo -e "@john2022\n\n# refs" | pandoc -t gfm-raw_html --bibliography="assets/example.bib" \
+  --lua-filter="assets/citeproc.lua"
+```
+
+### `--citeproc`あり、`--lua-filter`あり
+
+引用文献を2回繰り返してしまいます。
+
+```{bash}
+#| comment: ""
+#| class.output: "markdown"
+echo -e "@john2022\n\n# refs" | pandoc -t gfm-raw_html --bibliography="assets/example.bib" \
+  --citeproc --lua-filter="assets/citeproc.lua"
+```
+
+# おまけ
+
+## `--citeproc`がASTレベルで作用していないことを確認する
+
+以下のJSONフィルタを使い、Pandocが処理するASTのレベルでは引用文献が生成されていないことを確認します。
+
+```{bash, eval=FALSE, code=readLines("assets/ast.sh")}
+```
+
+JSON表現なので結果が長大ですが、引用文献が生成されていないのは確かなようです。
+
+```{bash}
+#| comment: ""
+#| class.output: "json"
+echo -e "@john2022\n\n# refs" | pandoc -t gfm-raw_html --bibliography="assets/example.bib" \
+  --citeproc --filter="assets/ast.sh"
+```

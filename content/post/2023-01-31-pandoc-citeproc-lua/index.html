@@ -1,0 +1,274 @@
+---
+title: PandocのLuaフィルタ内で引用文献を処理するpandoc.utils.citeprocを試す
+author: ''
+date: '2023-01-31'
+slug: pandoc-citeproc-lua
+categories: [Pandoc]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+  toc: true
+highlightjs: [bash, markdown, html, json, lua]
+summary:
+  Pandocで引用文献を処理する方法として、`--citeproc`引数と`--lua-filter`引数を使う場合を比較。
+  後者では`pandoc.utils.citeproc`関数を利用。
+  Luaフィルタを使うとASTレベルで引用文献を処理するので、更にフィルタをかけたい場合に便利。
+  ただし、`--citeproc`引数と併用すると引用文献のリストを2回繰り返すので排他利用を推奨。
+---
+
+
+
+<p>Pandoc 2.19.1から、Luaフィルタ向けに<code>pandoc.utils.citeproc</code>関数が追加されました。</p>
+<p>これは、Pandocで引用文献を生成する<code>--citeproc</code>引数相当の処理をASTレベルで実現します。ライターの後（？）に処理される<code>--citeproc</code>と異なり、生成された引用文献に更にフィルタをかけられます。</p>
+<p>たとえば書籍をPandocで書く場合に、章ごとに引用文献を用意したい、といった需要を叶えてくれそうですね。</p>
+<p>Luaフィルタ向けと書きましたが、カスタムライタを用意する場合も、<code>pandoc.utils.citeproc</code>で引用文献リストをAST内に追加してから出力フォーマットに合わせて整形すると便利かもしれません。</p>
+<p>こう、夢が広がりますが、実際の挙動を確認してから使わないと怖いので、試してみました。</p>
+<p>結論は、<code>--citeproc</code>した場合と<code>--lua-filter</code>で<code>pandoc.utils.citeproc</code>した場合は同じ結果になるが、併用すると、引用文献のリストを2回繰り返します。基本的には排他利用した方がいいです。</p>
+<div id="citeprocと--lua-filterによる引用文献の処理結果比較" class="section level1">
+<h1><code>--citeproc</code>と<code>--lua-filter</code>による引用文献の処理結果比較</h1>
+<p>Pandocに与える引数を変えつつ、Pandoc’s Markdownを、GFMに変換して、<code>--citeproc</code>と<code>--lua-filter</code>の挙動を理解します。</p>
+<div id="実験結果" class="section level2">
+<h2>実験結果</h2>
+<table>
+<thead>
+<tr class="header">
+<th>citeproc</th>
+<th>lua filter</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>なし</td>
+<td>なし</td>
+<td>未処理</td>
+</tr>
+<tr class="even">
+<td>あり</td>
+<td>なし</td>
+<td>通常の処理方法により引用文献のリストを生成</td>
+</tr>
+<tr class="odd">
+<td>なし</td>
+<td>あり</td>
+<td>上と同じ</td>
+</tr>
+<tr class="even">
+<td>あり</td>
+<td>あり</td>
+<td>引用文献のリストが2回繰り返す</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="実験条件" class="section level2">
+<h2>実験条件</h2>
+<p>以下のMarkdownを入力し、<code>gfm-raw_html</code>形式に出力します。
+<code>gfm</code>に<code>-raw_html</code>をつけて出力からHTMLを除去することで、ノイズを抑えます。</p>
+<pre class="markdown"><code>@john2022
+
+# refs</code></pre>
+<p>引用文献には以下の内容の<code>assets/example.bib</code>を使います。</p>
+<pre class="biblatex"><code>@Manual{john2022,
+  title = {title},
+  author = {john},
+  year = {2022},
+}</code></pre>
+<p><code>--lua-filter</code>を指定する場合は、以下の内容の<code>assets/citeproc.lua</code>を使います。</p>
+<pre class="lua"><code>function Pandoc(doc)
+  return pandoc.utils.citeproc(doc)
+end</code></pre>
+<p>この条件で、<code>--citeproc</code>引数と<code>--lua-filter</code>引数のありなしの組み合わせを比較します。</p>
+</div>
+<div id="実験" class="section level2">
+<h2>実験</h2>
+<div id="citeprocなし--lua-filterなし" class="section level3">
+<h3><code>--citeproc</code>なし、<code>--lua-filter</code>なし</h3>
+<p><code>--bibliography</code>を指定しただけでは引用文献は生成されません</p>
+<pre class="bash"><code>echo -e &quot;@john2022\n\n# refs&quot; | pandoc -t gfm-raw_html --bibliography=&quot;assets/example.bib&quot;</code></pre>
+<pre class="markdown"><code>@john2022
+
+# refs</code></pre>
+</div>
+<div id="citeprocあり--lua-filterなし" class="section level3">
+<h3><code>--citeproc</code>あり、<code>--lua-filter</code>なし</h3>
+<p>通常通り引用文献が生成されます</p>
+<pre class="bash"><code>echo -e &quot;@john2022\n\n# refs&quot; | pandoc -t gfm-raw_html --bibliography=&quot;assets/example.bib&quot; \
+  --citeproc</code></pre>
+<pre class="markdown"><code>john (2022)
+
+# refs
+
+john. 2022. *Title*.</code></pre>
+</div>
+<div id="citeprocなし--lua-fiterあり" class="section level3">
+<h3><code>--citeproc</code>なし、<code>--lua-fiter</code>あり</h3>
+<p><code>--citeproc</code>のみの場合と同じ結果</p>
+<pre class="bash"><code>echo -e &quot;@john2022\n\n# refs&quot; | pandoc -t gfm-raw_html --bibliography=&quot;assets/example.bib&quot; \
+  --lua-filter=&quot;assets/citeproc.lua&quot;</code></pre>
+<pre class="markdown"><code>john (2022)
+
+# refs
+
+john. 2022. *Title*.</code></pre>
+</div>
+<div id="citeprocあり--lua-filterあり" class="section level3">
+<h3><code>--citeproc</code>あり、<code>--lua-filter</code>あり</h3>
+<p>引用文献を2回繰り返してしまいます。</p>
+<pre class="bash"><code>echo -e &quot;@john2022\n\n# refs&quot; | pandoc -t gfm-raw_html --bibliography=&quot;assets/example.bib&quot; \
+  --citeproc --lua-filter=&quot;assets/citeproc.lua&quot;</code></pre>
+<pre class="markdown"><code>john (2022)
+
+# refs
+
+john. 2022. *Title*.
+
+john. 2022. *Title*.</code></pre>
+</div>
+</div>
+</div>
+<div id="おまけ" class="section level1">
+<h1>おまけ</h1>
+<div id="citeprocがastレベルで作用していないことを確認する" class="section level2">
+<h2><code>--citeproc</code>がASTレベルで作用していないことを確認する</h2>
+<p>以下のJSONフィルタを使い、Pandocが処理するASTのレベルでは引用文献が生成されていないことを確認します。</p>
+<pre class="bash"><code>#!/bin/bash
+content=&quot;$(cat - | jq -r .)&quot;
+
+echo -e &quot;\`\`\`\`\`\`\n${content}\n\`\`\`\`\`\`&quot; | pandoc -f markdown -t json</code></pre>
+<p>JSON表現なので結果が長大ですが、引用文献が生成されていないのは確かなようです。</p>
+<pre class="bash"><code>echo -e &quot;@john2022\n\n# refs&quot; | pandoc -t gfm-raw_html --bibliography=&quot;assets/example.bib&quot; \
+  --citeproc --filter=&quot;assets/ast.sh&quot;</code></pre>
+<pre class="json"><code>    {
+      &quot;pandoc-api-version&quot;: [
+        1,
+        23
+      ],
+      &quot;meta&quot;: {
+        &quot;bibliography&quot;: {
+          &quot;t&quot;: &quot;MetaString&quot;,
+          &quot;c&quot;: &quot;assets/example.bib&quot;
+        }
+      },
+      &quot;blocks&quot;: [
+        {
+          &quot;t&quot;: &quot;Para&quot;,
+          &quot;c&quot;: [
+            {
+              &quot;t&quot;: &quot;Cite&quot;,
+              &quot;c&quot;: [
+                [
+                  {
+                    &quot;citationId&quot;: &quot;john2022&quot;,
+                    &quot;citationPrefix&quot;: [],
+                    &quot;citationSuffix&quot;: [],
+                    &quot;citationMode&quot;: {
+                      &quot;t&quot;: &quot;AuthorInText&quot;
+                    },
+                    &quot;citationNoteNum&quot;: 1,
+                    &quot;citationHash&quot;: 0
+                  }
+                ],
+                [
+                  {
+                    &quot;t&quot;: &quot;Str&quot;,
+                    &quot;c&quot;: &quot;john&quot;
+                  },
+                  {
+                    &quot;t&quot;: &quot;Space&quot;
+                  },
+                  {
+                    &quot;t&quot;: &quot;Str&quot;,
+                    &quot;c&quot;: &quot;(2022)&quot;
+                  }
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          &quot;t&quot;: &quot;Header&quot;,
+          &quot;c&quot;: [
+            1,
+            [
+              &quot;refs&quot;,
+              [
+                &quot;unnumbered&quot;
+              ],
+              []
+            ],
+            [
+              {
+                &quot;t&quot;: &quot;Str&quot;,
+                &quot;c&quot;: &quot;refs&quot;
+              }
+            ]
+          ]
+        },
+        {
+          &quot;t&quot;: &quot;Div&quot;,
+          &quot;c&quot;: [
+            [
+              &quot;refs&quot;,
+              [
+                &quot;references&quot;,
+                &quot;csl-bib-body&quot;,
+                &quot;hanging-indent&quot;
+              ],
+              []
+            ],
+            [
+              {
+                &quot;t&quot;: &quot;Div&quot;,
+                &quot;c&quot;: [
+                  [
+                    &quot;ref-john2022&quot;,
+                    [
+                      &quot;csl-entry&quot;
+                    ],
+                    []
+                  ],
+                  [
+                    {
+                      &quot;t&quot;: &quot;Para&quot;,
+                      &quot;c&quot;: [
+                        {
+                          &quot;t&quot;: &quot;Str&quot;,
+                          &quot;c&quot;: &quot;john.&quot;
+                        },
+                        {
+                          &quot;t&quot;: &quot;Space&quot;
+                        },
+                        {
+                          &quot;t&quot;: &quot;Str&quot;,
+                          &quot;c&quot;: &quot;2022.&quot;
+                        },
+                        {
+                          &quot;t&quot;: &quot;Space&quot;
+                        },
+                        {
+                          &quot;t&quot;: &quot;Emph&quot;,
+                          &quot;c&quot;: [
+                            {
+                              &quot;t&quot;: &quot;Str&quot;,
+                              &quot;c&quot;: &quot;Title&quot;
+                            }
+                          ]
+                        },
+                        {
+                          &quot;t&quot;: &quot;Str&quot;,
+                          &quot;c&quot;: &quot;.&quot;
+                        }
+                      ]
+                    }
+                  ]
+                ]
+              }
+            ]
+          ]
+        }
+      ]
+    }</code></pre>
+</div>
+</div>
