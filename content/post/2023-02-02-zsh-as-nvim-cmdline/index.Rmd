@@ -1,0 +1,57 @@
+---
+title: NeovimのターミナルをExコマンド実行環境化する
+author: ''
+date: '2023-02-02'
+slug: zsh-as-nvim-cmdline
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+  Neovim内に開いたTerminalで`:`から始まる文字列を入力すると、Neovimで実行した結果を表示する仕組みを作ってみました。
+
+  <video controls src=images/nvr.mkv></video>
+---
+
+Neovim内に開いたTerminalで`:`から始まる文字列を入力すると、Neovimで実行した結果を表示する仕組みを作ってみました。
+
+<video controls src=images/nvr.mkv></video>
+
+# 解説
+
+Zshには`zle`というプロンプトに入力している文字列（バッファ）を編集する機能があります。
+
+また、`bindkey`というVimのようにキー入力をなんらかの関数にマッピングする機能もあります。
+
+これを使い、<kbd>Enter</kbd>したら、バッファが`:`で始まるか確認し、`:`始まりならNeovim経由で実行し、その他はZsh上で実行します。
+
+`:q`すると、ターミナルが閉じるようになるのも便利ですね！
+
+コマンドとその結果をNeovimとやりとりする方法には[neovim-remote](https://github.com/mhinz/neovim-remote)を使っています。
+
+```
+function nvr-or-accept-line() {
+  # バッファが:で始まる場合はNeovimに実行させ結果を表示する
+  if echo $BUFFER | grep --silent "^:"; then
+    # コマンドをNeovimに実行させ、出力を受けとる
+    local RES="$( nvr --remote-expr "execute(\"${BUFFER//\"/\\\"}\")" )"
+
+    # 出力を表示する
+    printf "$RES"
+
+    # <C-C>っぽいことして現在のZshのバッファを終了する
+    zle send-break
+    return
+  fi
+
+  # Neovimに送らない時は普通に処理する
+  zle accept-line
+}
+
+# Enterキーでnvr-or-accept-lineが発動するようにマッピング
+zle -N nvr-or-accept-line
+bindkey '^m' nvr-or-accept-line
+```
+
+Enjoy!
