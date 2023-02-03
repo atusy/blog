@@ -16,6 +16,10 @@ summary: |
 
 Neovim内に開いたTerminalで`:`から始まる文字列を入力すると、Neovimで実行した結果を表示する仕組みを作ってみました。
 
+Zshプラグインとして利用できます。
+
+> https://github.com/atusy/zsh-nvrepl
+
 <video controls src=images/nvr.mkv></video>
 
 # 解説
