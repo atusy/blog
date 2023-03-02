@@ -1,0 +1,63 @@
+---
+title: Insertモードでも気軽に←・→したい
+author: ''
+date: '2023-03-03'
+slug: horizontal-arrows-on-insert
+categories: [Vim, Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p>本記事は3/3の<a href="https://vim-jp.org/ekiden/">Vim 駅伝</a>の記事です<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>。</p>
+<div id="概要" class="section level2">
+<h2>概要</h2>
+<p>通常、Vim/NeovimのInsertモードで<kbd>←</kbd>や<kbd>→</kbd>を使うと、Undo blockが途切れます。</p>
+<p>これではUndoやドットリピートが直感に反するケースがあるので、以下のようにマッピングしておくと便利です。
+Insertモード中で水平移動してタイポ修正する人や、自動入力された閉括弧の外側へ<kbd>→</kbd>で移動した後、NormalモードでUndoやドットリピートする時に活躍します。</p>
+<pre class="vim"><code>inoremap &lt;Left&gt; &lt;C-G&gt;U&lt;Left&gt;
+inoremap &lt;Right&gt; &lt;C-G&gt;U&lt;Right&gt;</code></pre>
+</div>
+<div id="解説" class="section level2">
+<h2>解説</h2>
+<p>Undo blockは<code>u</code>などで戻せる変更の単位です。</p>
+<p><kbd>←</kbd>などの影響でInsertモード中のUndo blockが分割されるとこれの何が厄介か、タイポ修正を例に見てみましょう。</p>
+<p>以下の例では、「あいうえお」という行を作りたかったが、「あいお」と入力してしまい、やむなく「い」と「お」の間に<kbd>←</kbd>で移動して「あいうえお」を完成させノーマルモードに戻っています。</p>
+<pre><code>oあいお&lt;Left&gt;うえ&lt;Esc&gt;</code></pre>
+<p>この時やっぱり今のなし！と思って<code>u</code>すると「あいうえお」の行が消えず「あいお」という行に変わります。</p>
+<p>最後に<kbd>←</kbd>、すなわち<code>i_&lt;Left&gt;</code>した時の状態に戻ったわけです。</p>
+<p>あるいは、「あいうえお」の行を増やしたくて<code>.</code>でリピートすると、「あいうえお」の行が「あいううええお」になってしまいます。</p>
+<p>やはり最後に<kbd>←</kbd>して以降の変更、すなわち<code>うえ</code>という入力を繰り返したわけです。</p>
+<p>知っていれば納得の挙動ですが、あまり使い勝手が良いとも言えません。</p>
+<p>そこで<a href="https://vim-jp.org/vimdoc-ja/insert.html#i_CTRL-G_U"><code>i_CTRL-G_U</code></a>してから水平移動するとUndo blockを継続できます。</p>
+<p>これをデフォルト挙動にしたい人は<code>inoremap</code>を使って<code>&lt;Left&gt;</code>や<code>&lt;Right&gt;</code>の前に<code>&lt;C-G&gt;U</code>をつけてあげればいいのです。</p>
+<pre class="vim"><code>inoremap &lt;Left&gt; &lt;C-G&gt;U&lt;Left&gt;
+inoremap &lt;Right&gt; &lt;C-G&gt;U&lt;Right&gt;</code></pre>
+<p>別の例で、autopairsなどと呼ばれる、閉括弧などを補完するプラグインの利用を考えてみましょう。筆者は<a href="https://github.com/echasnovski/mini.pairs">echasnovski/mini.pairs</a>を使っているので、これの動作を基準に<code>(1 + 1) * 2</code>という行を作成してみます。</p>
+<p>プラグインが<code>)</code>を自動入力してくれますが、<code>)</code>の右側に移動したい場合、<code>)</code>と入力するか<code>&lt;Right&gt;</code>するか選べます。</p>
+<ul>
+<li><code>o(1 + 1) * 2&lt;Esc&gt;</code></li>
+<li><code>o(1 + 1&lt;Right&gt; * 2&lt;Esc&gt;</code></li>
+</ul>
+<p>前者の場合はUndo blockが途切れないので<code>u</code>も<code>.</code>もInsertモードでの変更全体に及びます。</p>
+<p>一方後者では<code>&lt;Right&gt;</code>でUndo blockが途切れてしまうので、<code>u</code>すると<code>(1 + 1)</code>になりますし、<code>.</code>すると<code>(1 + 1) *  * 22</code>になります。厄介ですね。</p>
+<p>一方、先のマッピングをしておけば、直感的に<code>u</code>や<code>.</code>ができます。便利。</p>
+</div>
+<div id="おまけ" class="section level2">
+<h2>おまけ</h2>
+<p>本記事のきっかけは毎週土曜日23時から開催されている「<a href="https://vim-jp.org/reading-vimrc/">vimrc読書会</a>」です。</p>
+<p>インサートモード中のUndo blockをわざと区切る<code>i_CTRL-G_u</code>の存在を知り、周辺のヘルプを読んでいて、ここで紹介した<code>i_CTRL-G-U</code>を知りました。</p>
+<blockquote>
+<p><a href="https://matrix.to/#/!nSpBuqIwPsRatnPFsb:gitter.im/$xLEenKjUSyKjVkmFygfYfE5K6AW9ogY7q7bvriS-bDQ?via=gitter.im&amp;via=matrix.org&amp;via=syui.cf" class="uri">https://matrix.to/#/!nSpBuqIwPsRatnPFsb:gitter.im/$xLEenKjUSyKjVkmFygfYfE5K6AW9ogY7q7bvriS-bDQ?via=gitter.im&amp;via=matrix.org&amp;via=syui.cf</a></p>
+</blockquote>
+<p><strong>Enjoy</strong></p>
+</div>
+<div class="footnotes footnotes-end-of-document">
+<hr />
+<ol>
+<li id="fn1"><p>Vim 駅伝の概要は右記から <a href="https://thinca.hatenablog.com/entry/vim-ekiden-is-launched" class="uri">https://thinca.hatenablog.com/entry/vim-ekiden-is-launched</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>

@@ -1,0 +1,85 @@
+---
+title: Insertモードでも気軽に←・→したい
+author: ''
+date: '2023-03-03'
+slug: horizontal-arrows-on-insert
+categories: [Vim, Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+本記事は3/3の[Vim 駅伝](https://vim-jp.org/ekiden/)の記事です[^ekiden]。
+
+## 概要
+
+[^ekiden]: Vim 駅伝の概要は右記から https://thinca.hatenablog.com/entry/vim-ekiden-is-launched
+
+通常、Vim/NeovimのInsertモードで<kbd>←</kbd>や<kbd>→</kbd>を使うと、Undo blockが途切れます。
+
+これではUndoやドットリピートが直感に反するケースがあるので、以下のようにマッピングしておくと便利です。
+Insertモード中で水平移動してタイポ修正する人や、自動入力された閉括弧の外側へ<kbd>→</kbd>で移動した後、NormalモードでUndoやドットリピートする時に活躍します。
+
+``` vim
+inoremap <Left> <C-G>U<Left>
+inoremap <Right> <C-G>U<Right>
+```
+
+## 解説
+
+Undo blockは`u`などで戻せる変更の単位です。
+
+<kbd>←</kbd>などの影響でInsertモード中のUndo blockが分割されるとこれの何が厄介か、タイポ修正を例に見てみましょう。
+
+以下の例では、「あいうえお」という行を作りたかったが、「あいお」と入力してしまい、やむなく「い」と「お」の間に<kbd>←</kbd>で移動して「あいうえお」を完成させノーマルモードに戻っています。
+
+```
+oあいお<Left>うえ<Esc>
+```
+
+この時やっぱり今のなし！と思って`u`すると「あいうえお」の行が消えず「あいお」という行に変わります。
+
+最後に<kbd>←</kbd>、すなわち`i_<Left>`した時の状態に戻ったわけです。
+
+あるいは、「あいうえお」の行を増やしたくて`.`でリピートすると、「あいうえお」の行が「あいううええお」になってしまいます。
+
+やはり最後に<kbd>←</kbd>して以降の変更、すなわち`うえ`という入力を繰り返したわけです。
+
+知っていれば納得の挙動ですが、あまり使い勝手が良いとも言えません。
+
+そこで[`i_CTRL-G_U`](https://vim-jp.org/vimdoc-ja/insert.html#i_CTRL-G_U)してから水平移動するとUndo blockを継続できます。
+
+これをデフォルト挙動にしたい人は`inoremap`を使って`<Left>`や`<Right>`の前に`<C-G>U`をつけてあげればいいのです。
+
+``` vim
+inoremap <Left> <C-G>U<Left>
+inoremap <Right> <C-G>U<Right>
+```
+
+別の例で、autopairsなどと呼ばれる、閉括弧などを補完するプラグインの利用を考えてみましょう。
+筆者は[echasnovski/mini.pairs](https://github.com/echasnovski/mini.pairs)を使っているので、これの動作を基準に`(1 + 1) * 2`という行を作成してみます。
+
+プラグインが`)`を自動入力してくれますが、`)`の右側に移動したい場合、`)`と入力するか`<Right>`するか選べます。
+
+- `o(1 + 1) * 2<Esc>`
+- `o(1 + 1<Right> * 2<Esc>`
+
+前者の場合はUndo blockが途切れないので`u`も`.`もInsertモードでの変更全体に及びます。
+
+一方後者では`<Right>`でUndo blockが途切れてしまうので、`u`すると`(1 + 1)`になりますし、`.`すると`(1 + 1) *  * 22`になります。
+厄介ですね。
+
+一方、先のマッピングをしておけば、直感的に`u`や`.`ができます。便利。
+
+## おまけ
+
+本記事のきっかけは毎週土曜日23時から開催されている「[vimrc読書会](https://vim-jp.org/reading-vimrc/)」です。
+
+インサートモード中のUndo blockをわざと区切る`i_CTRL-G_u`の存在を知り、周辺のヘルプを読んでいて、ここで紹介した`i_CTRL-G-U`を知りました。
+
+> https://matrix.to/#/!nSpBuqIwPsRatnPFsb:gitter.im/$xLEenKjUSyKjVkmFygfYfE5K6AW9ogY7q7bvriS-bDQ?via=gitter.im&via=matrix.org&via=syui.cf
+
+
+
+**Enjoy**
