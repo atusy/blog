@@ -116,7 +116,7 @@ end
 
 -- autocmd
 vim.api.nvim_create_autocmd(&quot;FileType&quot;, {
-  group = utils.augroup,
+  group = vim.api.nvim_create_augroup(&quot;tsnode-marker-nested-func&quot;, {}),
   pattern = { &quot;lua&quot;, &quot;python&quot;, &quot;go&quot; },
   callback = function(ctx)
     require(&quot;tsnode-marker&quot;).set_automark(ctx.buf, {
