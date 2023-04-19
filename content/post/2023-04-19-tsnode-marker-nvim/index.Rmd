@@ -1,0 +1,144 @@
+---
+title: "Markdownのコードブロックとかテキストの文脈に合わせて背景色を変えるtsnode-marker.nvimを作った"
+author: ''
+date: '2023-04-19'
+slug: tsnode-marker-nvim
+categories: [Neovim]
+tags: ["tsnode-marker.nvim"]
+highlightjs: ["lua"]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+Neovimはtreesitterを使ってテキストファイルをパースする機能を備えています。
+
+代表的な用例は、パース結果に基くシンタックスハイライトですが、文法に従った範囲を取得できるので、コードの折り畳みや、テキストオブジェクトにも活躍します。
+
+- [nvim-treehopperで捗るコードの折り畳み](https://blog.atusy.net/2022/08/01/treehopper/)
+- [Neovimのテキストオブジェクトをカスタムできるmini.aiが便利](https://blog.atusy.net/2023/01/27/mini-ai-nvim/)
+
+treesitterを活用し、指定した範囲の背景色を変更する、[tsnode-marker.nvim]を作成しました。
+
+以下の例では、（左）Markdownファイル中のコードブロックや（右）関数定義中に含まれる関数定義の背景色を変えています。
+
+![デモ画像](https://user-images.githubusercontent.com/30277794/221220876-3296c5e8-56c7-4ab7-9e91-e3b72340b39f.png)
+
+# セールスポイント
+
+- ハイライトの判定が簡単 & 柔軟
+    - treesitterによるキャプチャ名の指定に加え、ユーザー定義関数をサポート
+    - 例は後述
+- インデントも良い感じに扱う
+    - デモ画像の通り、インデントにスペースやタブが混在していても良い感じにインデント幅を判定
+- 高速
+    - 画面に表示している範囲だけ注目
+    - スクロール時は表示の差分だけ注目
+    - 抽象構文木の根からハイライト範囲の判定を行い、ハイライト対象なノードの子孫ノードの判定をスキップ
+
+# 使い方
+
+冒頭のデモ画像を実現する方法を紹介します。
+
+## 基本
+
+FileTypeに対して`autocmd`をしかける形で、`require("tsnode-marker").set_automark`を実行します。
+
+たとえば、Markdownファイルのコードブロック中のコードの背景色を変更するなら、以下のように書けます。
+
+``` lua
+vim.api.nvim_create_autocmd("FileType", {
+  group = vim.api.nvim_create_augroup("tsnode-marker-markdown", {}),
+  pattern = "markdown",
+  callback = function(ctx)
+    require("tsnode-marker").set_automark(ctx.buf, {
+      target = { "code_fence_content" }, -- list of target node types
+      hl_group = "CursorLine", -- highlight group
+    })
+  end,
+})
+```
+
+`target`に指定している`{ "code_fence_content" }`が背景色を変更する範囲です。
+teesitterによるキャプチャの名前をリストで複数記述できます。
+
+指定したい範囲のキャプチャ名が分からない場合はNeovim 0.9以降に導入された`:InspectTree`を使ってみましょう。
+以下のように、キャプチャとその範囲を閲覧できます。
+
+```
+(section) ; [1:1 - 3]
+ (fenced_code_block) ; [1:1 - 3]
+  (fenced_code_block_delimiter) ; [1:1 - 4:0]
+  (info_string) ; [1:5 - 9:0]
+   (language) ; [1:5 - 9:0]
+  (block_continuation) ; [2:1 - 1:1]
+  (code_fence_content) ; [2:1 - 1:2]
+   (command) ; [2:1 - 5:1]
+    name: (command_name) ; [2:1 - 5:1]
+     (word) ; [2:1 - 5:1]
+   (block_continuation) ; [3:1 - 1:2]
+  (fenced_code_block_delimiter) ; [3:1 - 4:2]
+```
+
+## 発展
+
+キャプチャ名による素朴なハイライト判定以外にも、ユーザー定義関数による複雑な判定も可能です。
+
+これにより、関数中に定義された関数をハイライトするといった、複雑な操作を実現できます。
+
+``` lua
+---ノードが関数定義か判定する関数
+---@param node tsnode
+---@return bool
+local function is_def(node)
+  return vim.tbl_contains({
+    "func_literal",
+    "function_declaration",
+    "function_definition",
+    "method_declaration",
+    "method_definition",
+  }, node:type())
+end
+
+---ノードが関数定義中の関数定義か判定する関数
+---@param _ bufnr
+---@param node tsnode
+---@return bool
+local function is_nested_def(_, node)
+  if not is_def(node) then
+    return false
+  end
+  local parent = node:parent()
+  while parent do
+    if is_def(parent) then
+      return true
+    end
+    parent = parent:parent()
+  end
+  return false
+end
+
+-- autocmd
+vim.api.nvim_create_autocmd("FileType", {
+  group = utils.augroup,
+  pattern = { "lua", "python", "go" },
+  callback = function(ctx)
+    require("tsnode-marker").set_automark(ctx.buf, {
+      target = is_nested_def,
+      hl_group = "CursorLine",
+    })
+  end,
+})
+```
+
+# 余談
+
+Neovim向けのプラグインの多くは、`setup`関数を備えるケースが多いです。
+[tsnode-marker.nvim]は`setup`関数を持ちません。
+特に必要性を感じないので……。
+
+テキストの変更に対するハイライト範囲の更新は、`TextChanged`系のイベントに対する`autocmd`で実現しています。
+何やら、`LanguageTree:register_cbs()`を使うと、`on_changedtree`に対してcallbackを指定できる模様。
+こちらを使ってみるのもアリかな……？と思ってます。
+
+[tsnode-marker.nvim]: https://github.com/atusy/tsnode-marker.nvim
