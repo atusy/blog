@@ -1,0 +1,78 @@
+---
+title: gptstudio = ChatGPT + RStudioがおもしろい
+author: ''
+date: '2023-04-26'
+slug: gptstudio
+categories: [R, ChatGPT]
+tags: [gptstudio, gpttools]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p>ChatGPTを使ってRStudio上でのコーディングを支援する<a href="https://github.com/JamesHWade/gptstudio/">gptstudio</a>パッケージが登場しました。姉妹製品に[gpttoools]パッケージもあります。</p>
+<p>利用には<a href="https://platform.openai.com/account/api-keys">OpenAIのAPI Key</a>が必要にです。生成するトークンに対する従量課金制ですが、$5のお試し枠がついてます。</p>
+<p>機能は以下の通り。開発者がデモ動画を後悔しているので、詳細はレポジトリを参照してもらうとよさそうです。</p>
+<ul>
+<li><a href="https://github.com/JamesHWade/gptstudio/">gptstudio</a>製アドイン
+<ul>
+<li><code>ChatGPT</code>: RStudioのViewer上でChatGPTとChatできる</li>
+<li><code>ChatGPT in Source</code>: ソースファイル上で選択したコメントやコードから、ChatGPT製の実装を提案する。選択範囲は編集されず、選択範囲直下に提案内容が挿入される</li>
+<li><code>Comment your code</code>: ソースファイルに適宜コメントを追加する。選択範囲を直接編集する</li>
+<li><code>Spelling and Grammer</code>: ソースファイル上の綴りや文法の誤りを修正する。選択範囲を直接編集する</li>
+</ul></li>
+<li><a href="https://github.com/JamesHWade/gpttools/">gpttools</a>製アドイン
+<ul>
+<li><code>Add roxygen to function</code></li>
+<li><code>ChatGPT with Retrieval</code></li>
+<li><code>Document Data</code></li>
+<li><code>Convert script to function</code></li>
+<li><code>Suggest Improvements</code></li>
+<li><code>Suggest unit test</code></li>
+</ul></li>
+</ul>
+<p><a href="https://github.com/JamesHWade/gpttools/">gpttools</a>パッケージのアドインについては説明を省略しましたが色々できそうですね。</p>
+<p>たとえば、<code>ggplot2::diamonds</code>データセットを<code>ggplot2</code>パッケージを使って要約してくれと頼んだ結果が以下。初めて使うパッケージの雰囲気を把握するケースではかなり威力を発揮しそうですね。</p>
+<p><img src="images/ggplot2.jpeg" /></p>
+<p>ChatGPT本体を利用した例としては、先日のTokyo.Rでkuroさんがtidymodelsパッケージを説明するためのコードを生成していましたね。</p>
+<blockquote>
+<p>tidymodelsでモデリング 事始め
+<a href="https://kuro1981.github.io/tokyorSlides/2023_TokyoR_for_begineer/2023_TokyoR_for_begineer.html#/title-slide" class="uri">https://kuro1981.github.io/tokyorSlides/2023_TokyoR_for_begineer/2023_TokyoR_for_begineer.html#/title-slide</a></p>
+</blockquote>
+<p>有用ながら、いくつか発展途上な感じも見受けられるので、今後に期待したいところ</p>
+<ul>
+<li>選択範囲に対してアドインを実行した後、結果が反映されるまで無反応に見える</li>
+<li>結果反映までにカーソル位置を変えるとコードの挿入位置が狂う</li>
+<li>選択範囲に注意が必要で、カーソル位置が文脈を読み取るほどの機能はない
+<ul>
+<li><code>ChatGPT in Source</code>を使い、コメントからコードを生成する場合、選択範囲にコメント記号（<code>#</code>）も含めておく必要あり
+<ul>
+<li><p><code>#</code>を含めなかった場合、Markdownで記述されたRコードと説明が挿入されてしまった。結果的に、以下の例ではR Markdownのチャンク内にMarkdown文書を記述してしまった</p>
+<p><img src="images/chatgpt-in-source.png" /></p></li>
+</ul></li>
+<li><code>Add roxygen to function</code>を使い、関数にRoxygen2コメントによるドキュメントを追加する場合、関数全体を選択しておく必要あり
+<ul>
+<li><p>関数内部にカーソルがあり、何も選択していない状態で、同機能を実行すると、カーソル行を元にRoxygen2コメントつきの関数が実装されてしまった。結果的に、以下の例では関数が入れ子になった</p>
+<p><img src="images/roxygen.png" /></p></li>
+</ul></li>
+</ul></li>
+<li>GitHub Copilotのようなコードの補完機能はなさそう</li>
+</ul>
+<div id="github-copilotとの関係" class="section level2">
+<h2>GitHub Copilotとの関係</h2>
+<p>AIによるコーディング支援といえばGitHub Copilotですが、VSCodeなど一部のエディタでしか使えない現状があります。</p>
+<blockquote>
+<p>Getting started with GitHub Copilot <a href="https://docs.github.com/en/copilot/getting-started-with-github-copilot" class="uri">https://docs.github.com/en/copilot/getting-started-with-github-copilot</a></p>
+</blockquote>
+<p>CopilotそのものはAPIを提供している様子がなく、基盤技術となっていてAPI提供のある<a href="https://platform.openai.com/docs/models/gpt-3">Codex</a>はDeprecated（廃止予定）な模様。</p>
+<p>OpenAIの<a href="https://platform.openai.com/docs/models/overview">APIドキュメント</a>を読むに、GPT-4またはGPT-3.5がCodexを置き換えていきそうです。</p>
+<p>価格面ではOpenAI APIは従量課金で、Copilotは月額制です（個人で$10/月、企業で$19/月）。</p>
+<p>使い方次第ではCopilotが割高になりそうですが、エディタが公式サポートされていれば、便利な機能も豊富そうですし、生成したコードが原因で著作権侵害などの訴えを受けた場合の保険も提供してくれるようです。</p>
+<blockquote>
+<p>GitHub will defend you against any claim by an unaffiliated third-party that your use of GitHub Copilot misappropriated a trade secret or directly infringes a patent, copyright, trademark, or other intellectual property right of a third party, up to the greater of $500,000.00 USD or the total amount paid to GitHub for the use of GitHub Copilot during the 12 months preceding the claim.
+<a href="https://github.com/customer-terms/github-copilot-product-specific-terms" class="uri">https://github.com/customer-terms/github-copilot-product-specific-terms</a></p>
+</blockquote>
+<p><a href="https://github.com/JamesHWade/gptstudio/">gptstudio</a>パッケージや<a href="https://github.com/JamesHWade/gpttools/">gpttools</a>パッケージはまさにGPT-3.5を利用しているパッケージなようですね。</p>
+</div>
