@@ -16,8 +16,9 @@ ChatGPTを使ってRStudio上でのコーディングを支援する[gptstudio]�
 利用には[OpenAIのAPI Key](https://platform.openai.com/account/api-keys)が必要にです。
 生成するトークンに対する従量課金制ですが、$5のお試し枠がついてます。
 
-機能は以下の通り。
+アドインを通じて様々な機能を提供しています。
 開発者がデモ動画を後悔しているので、詳細はレポジトリを参照してもらうとよさそうです。
+また、アドインの利用方法については[別記事](https://gihyo.jp/article/2022/10/increase-productivity-of-r-02?summary)を参照ください。
 
 - [gptstudio]製アドイン
     - `ChatGPT`: RStudioのViewer上でChatGPTとChatできる
