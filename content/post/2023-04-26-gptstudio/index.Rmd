@@ -72,14 +72,14 @@ CopilotそのものはAPIを提供している様子がなく、基盤技術と�
 
 OpenAIの[APIドキュメント](https://platform.openai.com/docs/models/overview)を読むに、GPT-4またはGPT-3.5がCodexを置き換えていきそうです。
 
+[gptstudio]パッケージや[gpttools]パッケージはまさにGPT-3.5を利用しているパッケージなようですね。
+
 価格面ではOpenAI APIは従量課金で、Copilotは月額制です（個人で\$10/月、企業で\$19/月）。
 
 使い方次第ではCopilotが割高になりそうですが、エディタが公式サポートされていれば、便利な機能も豊富そうですし、生成したコードが原因で著作権侵害などの訴えを受けた場合の保険も提供してくれるようです。
 
 > GitHub will defend you against any claim by an unaffiliated third-party that your use of GitHub Copilot misappropriated a trade secret or directly infringes a patent, copyright, trademark, or other intellectual property right of a third party, up to the greater of $500,000.00 USD or the total amount paid to GitHub for the use of GitHub Copilot during the 12 months preceding the claim. 
 > https://github.com/customer-terms/github-copilot-product-specific-terms
-
-[gptstudio]パッケージや[gpttools]パッケージはまさにGPT-3.5を利用しているパッケージなようですね。
 
 [gptstudio]: https://github.com/JamesHWade/gptstudio/
 
