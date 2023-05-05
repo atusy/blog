@@ -1,0 +1,37 @@
+---
+title: TailscaleをDockerで動かすと、再起動時に認証失敗 or IPアドレスが変わってしまう問題への対処
+author: ''
+date: '2023-05-05'
+slug: tailscale-docker
+categories: [tailscale, docker]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p>Dockerで[Tailscale]を使ったVPNを構築してみました。</p>
+<p><a href="https://hub.docker.com/r/tailscale/tailscale">公式の案内</a>では以下の手順で<a href="https://tailscale.com/kb/1085/auth-keys/">auth key</a>を用いた起動ができます。</p>
+<pre><code>docker run -d --name=tailscaled \
+  -v /var/lib:/var/lib -v /dev/net/tun:/dev/net/tun \
+  --network=host --cap-add=NET_ADMIN --cap-add=NET_RAW \
+  --env TS_AUTHKEY={{ auth key }} \
+  tailscale/tailscale</code></pre>
+<p>しかし、この方法は公式も記述している通り一時的な（ephemeral）用途向きです。</p>
+<p><code>docker container restart tailscaled</code>でコンテナを再起動すると、auth keyの種類に応じて以下の挙動を示します。</p>
+<ul>
+<li><strong>One-off</strong>: 再起動時には鍵が無効化されているため認証に失敗する</li>
+<li><strong>Reusable</strong>: 再起動時には新しいデバイスと認識されるため、新しいIPアドレスを持つ</li>
+</ul>
+<p>認証成功時の状態（state）は<code>/var/lib/tailscale</code>下に保存されているので、tailscale起動時にこのディレクトリを読み込む必要があります。</p>
+<p>コマンドに <code>--env TS_STATE_DIR=/var/lib/tailscale</code>を追加してください<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>。</p>
+<p><code>-v /var/lib:/var/lib</code>して状態の永続化をしてそうなフリして、環境変数が別途必要だなんて驚きですね……。</p>
+<p>ちなみにauth keyを発行する時にtagをつけておくと、認証情報が無期限に有効になります。これならReusableなキーを発行せずとも十分そうですね。</p>
+<div class="footnotes footnotes-end-of-document">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://github.com/tailscale/tailscale/issues/7119" class="uri">https://github.com/tailscale/tailscale/issues/7119</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
