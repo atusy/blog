@@ -10,7 +10,7 @@ output:
     md_extensions: +east_asian_line_breaks+task_lists
 ---
 
-Dockerで[Tailscale]を使ったVPNを構築してみました。
+Dockerで[Tailscale](https://tailscale.com)を使ったVPNを構築してみました。
 
 [公式の案内](https://hub.docker.com/r/tailscale/tailscale)では以下の手順で[auth key](https://tailscale.com/kb/1085/auth-keys/)を用いた起動ができます。
 
