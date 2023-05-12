@@ -1,0 +1,110 @@
+---
+title: Tailscale + Samba + NextCloudでおうちクラウド始めた
+author: ''
+date: '2023-05-12'
+slug: tailscale-nextcloud
+categories: [tailscale, samba, nextcloud]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+- 外出先から家にあるデータにアクセスしたい
+- （義）両親に家族写真を共有したい
+- デバイス間でデータを同期したい
+- データ容量の制限を考えたくない
+- セキュリティはそこそこ欲しい
+- 変なデータ混ざっても垢BANされたくない
+
+こういった要望を叶えるためにtailscaleで構築したVPN内でのみアクセスできるSamba（ファイル共有）とNextCloud（DropBox的なもの）をたててみました。
+
+記事の最後に置いた `docker-compose.yml` で割と簡単にたちあげられるのが良いですね。
+
+VPNユーザーしかアクセスできないのと、VPNが暗号化を担うおかげでhttpsなしでNextCloudを運用できるのも強いです。
+
+また、企業のクラウドサービスだと、うかつに子供の写真をアップロードして垢BANなんて憂き目がありえます（[参考](https://news.yahoo.co.jp/articles/76290c984481258a694fd23f6285eee6f24fea2a)）。
+おうちクラウドならそんな心配もない。
+
+ただし、自分で電気代やインフラの面倒は見てやる必要があります……。
+
+が、これは勉強のチャンスということで。
+
+現在はサーバー側に`nextcloudcmd`を置いて、SambaとNextCloudを同期させてます。
+将来的にはこれもdockerに入れてしまいたい。
+
+また、SambaとNextCloudは別のHDDにデータを保存しているので、どっちかが死んでもデータは無事な想定。
+といっても同期なので、壊れたデータを同期する、みたいなおそれはあります。
+このあたりのバックアップ体制は今後用意していきたいなと。
+
+``` yaml
+# 一部認証情報などをsecret.envに書いてる
+
+services:
+  # tailscale
+  tailscale:
+    image: tailscale/tailscale
+    restart: always
+    env_file:
+      secret.env
+    environment:
+      TS_STATE_DIR: /var/lib/tailscale
+    hostname: home
+    volumes:
+      # コンテナを作り直した時のために認証情報を保持
+      - "./services/tailscale/volumes/var/lib:/var/lib:z"
+    ports:
+      - "139:139" # for services.samba
+      - "445:445" # for services.samba
+
+  # samba
+  samba:
+    # https://github.com/ServerContainers/samba
+    image: ghcr.io/servercontainers/samba
+    restart: always
+    network_mode: service:tailscale
+    environment:
+      MODEL: 'TimeCapsule'
+      AVAHI_NAME: StorageServer
+
+      SAMBA_CONF_LOG_LEVEL: 3
+      SAMBA_GLOBAL_CONFIG_client_SPACE_smb_SPACE_encrypt: required
+
+      # 共有すべきディレクトリの設定
+
+    volumes:
+      # 共有すべきディレクトリのマウント
+
+  # nextcloud
+  nextcloud-db:
+    image: mariadb:10.6
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
+    volumes:
+      - ./services/nextcloud-db/var/lib/mysql:/var/lib/mysql:z
+    env_file: secret.env
+    environment:
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+
+  nextcloud-redis:
+    image: redis:alpine
+    restart: always
+
+  nextcloud-app:
+    container_name: nextcloud-home
+    image: nextcloud
+    build:
+      context: services/nextcloud-app
+    restart: always
+    volumes:
+      - ./services/nextcloud-app/var/lib/html:/var/www/html:z
+    env_file: secret.env
+    environment:
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=nextcloud-db
+      - REDIS_HOST=nextcloud-redis
+    network_mode: service:tailscale
+    depends_on: ["nextcloud-db", "nextcloud-redis"]
+```

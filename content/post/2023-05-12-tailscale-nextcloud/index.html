@@ -1,0 +1,99 @@
+---
+title: Tailscale + Samba + NextCloudでおうちクラウド始めた
+author: ''
+date: '2023-05-12'
+slug: tailscale-nextcloud
+categories: [tailscale, samba, nextcloud]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<ul>
+<li>外出先から家にあるデータにアクセスしたい</li>
+<li>（義）両親に家族写真を共有したい</li>
+<li>デバイス間でデータを同期したい</li>
+<li>データ容量の制限を考えたくない</li>
+<li>セキュリティはそこそこ欲しい</li>
+<li>変なデータ混ざっても垢BANされたくない</li>
+</ul>
+<p>こういった要望を叶えるためにtailscaleで構築したVPN内でのみアクセスできるSamba（ファイル共有）とNextCloud（DropBox的なもの）をたててみました。</p>
+<p>記事の最後に置いた <code>docker-compose.yml</code> で割と簡単にたちあげられるのが良いですね。</p>
+<p>VPNユーザーしかアクセスできないのと、VPNが暗号化を担うおかげでhttpsなしでNextCloudを運用できるのも強いです。</p>
+<p>また、企業のクラウドサービスだと、うかつに子供の写真をアップロードして垢BANなんて憂き目がありえます（<a href="https://news.yahoo.co.jp/articles/76290c984481258a694fd23f6285eee6f24fea2a">参考</a>）。おうちクラウドならそんな心配もない。</p>
+<p>ただし、自分で電気代やインフラの面倒は見てやる必要があります……。</p>
+<p>が、これは勉強のチャンスということで。</p>
+<p>現在はサーバー側に<code>nextcloudcmd</code>を置いて、SambaとNextCloudを同期させてます。将来的にはこれもdockerに入れてしまいたい。</p>
+<p>また、SambaとNextCloudは別のHDDにデータを保存しているので、どっちかが死んでもデータは無事な想定。といっても同期なので、壊れたデータを同期する、みたいなおそれはあります。このあたりのバックアップ体制は今後用意していきたいなと。</p>
+<pre class="yaml"><code># 一部認証情報などをsecret.envに書いてる
+
+services:
+  # tailscale
+  tailscale:
+    image: tailscale/tailscale
+    restart: always
+    env_file:
+      secret.env
+    environment:
+      TS_STATE_DIR: /var/lib/tailscale
+    hostname: home
+    volumes:
+      # コンテナを作り直した時のために認証情報を保持
+      - &quot;./services/tailscale/volumes/var/lib:/var/lib:z&quot;
+    ports:
+      - &quot;139:139&quot; # for services.samba
+      - &quot;445:445&quot; # for services.samba
+
+  # samba
+  samba:
+    # https://github.com/ServerContainers/samba
+    image: ghcr.io/servercontainers/samba
+    restart: always
+    network_mode: service:tailscale
+    environment:
+      MODEL: &#39;TimeCapsule&#39;
+      AVAHI_NAME: StorageServer
+
+      SAMBA_CONF_LOG_LEVEL: 3
+      SAMBA_GLOBAL_CONFIG_client_SPACE_smb_SPACE_encrypt: required
+
+      # 共有すべきディレクトリの設定
+
+    volumes:
+      # 共有すべきディレクトリのマウント
+
+  # nextcloud
+  nextcloud-db:
+    image: mariadb:10.6
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
+    volumes:
+      - ./services/nextcloud-db/var/lib/mysql:/var/lib/mysql:z
+    env_file: secret.env
+    environment:
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+
+  nextcloud-redis:
+    image: redis:alpine
+    restart: always
+
+  nextcloud-app:
+    container_name: nextcloud-home
+    image: nextcloud
+    build:
+      context: services/nextcloud-app
+    restart: always
+    volumes:
+      - ./services/nextcloud-app/var/lib/html:/var/www/html:z
+    env_file: secret.env
+    environment:
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=nextcloud-db
+      - REDIS_HOST=nextcloud-redis
+    network_mode: service:tailscale
+    depends_on: [&quot;nextcloud-db&quot;, &quot;nextcloud-redis&quot;]</code></pre>
