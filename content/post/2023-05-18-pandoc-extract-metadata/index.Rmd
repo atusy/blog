@@ -1,0 +1,56 @@
+---
+title: PandocでドキュメントのYAMLフロントマター（メタデータ）を抽出する
+author: ''
+date: '2023-05-18'
+slug: pandoc-extract-metadata
+categories: [Pandoc]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+以下のようなMarkdownファイルがあってYAMLフロントマターから `.data.hoge` を取り出したい、みたいなことはしばしばあります。
+
+``` markdown
+---
+title: タイトル
+author: atusy
+data:
+  hoge: fuga
+---
+
+なんかコンテンツ
+```
+
+こういう時、うまく `grep` コマンドとか使ってやるのも手ですが、Pandocの力でYAMLファイルを生成しても面白いでしょう。
+
+以下のように、本分の部分 `Blocks` を除去するようなLuaフィルタを渡してあげるといいです。
+
+``` bash
+pandoc example.md \
+  -L <( echo "function Blocks(_) return {} end" ) \
+  -t markdown --standalone \
+  -o example.yml
+```
+
+見事にYAMLだけ抽出できます。
+ただし、PandocではYAML Metadataブロックに含まれる文字列をMarkdownとして処理してしまうので、入力との完全一致は期待できません。
+
+``` yaml
+---
+title: タイトル
+author: atusy
+data:
+  hoge: fuga
+---
+```
+
+一度YAMLにしてしまえば後は [gojq](https://github.com/itchyny/gojq) コマンドが便利です。
+
+以下のようなコマンドで簡単に `.data.hoge` を抜き出せます。
+
+
+``` bash
+cat "example.yml" | gojq --yaml-input -s '.[0].data.hoge'
+```
