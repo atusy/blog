@@ -1,0 +1,107 @@
+---
+title: leap.nvimを拡張して検索対象にラベルをつけて飛べるleap-search.nvimを作った
+author: ''
+date: '2023-05-24'
+slug: leap-onto-matched-patterns
+categories: [Neovim]
+tags: [leap.nvim, leap-search.nvim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<div id="leap.nvimについて" class="section level1">
+<h1>leap.nvimについて</h1>
+<p>[easymotion][]系のNeovimプラグインとしてメジャーどころには<a href="https://github.com/phaazon/hop.nvim">hop.nvim</a>や<a href="https://github.com/ggandor/leap.nvim">leap.nvim</a>があります。</p>
+<p><a href="https://github.com/ggandor/leap.nvim">leap.nvim</a>はいわゆる[easymotion][]系のプラグインで、入力した文字にマッチする箇所にラベル（a, b, c, …）をつけ、ラベルを入力するとその位置にカーソルを移動します。</p>
+<p>デフォルトの挙動は[easymotion]の<a href="https://github.com/easymotion/vim-easymotion#2-character-search-motion">2-character search motion</a>に近いもので、2文字にマッチする箇所にラベルをつけます。</p>
+<p>2-character search motionとして見た時の[easymotion]と<a href="https://github.com/ggandor/leap.nvim">leap.nvim</a>の大きな違いは2つ。</p>
+<ul>
+<li>ラベルをつけるタイミング
+<ul>
+<li>[easymotion]は2文字入力し終えてから</li>
+<li><a href="https://github.com/ggandor/leap.nvim">leap.nvim</a>は1文字目の段階から。ジャンプ先の最初の2文字目くらいは読まずとも頭に入っているだろうから、2文字目を入力する時間でラベルを読み、3文字目としてラベルを入力すれば思考のスピードでジャンプできる、という考え方のよう。</li>
+</ul></li>
+<li>ラベルをつける位置
+<ul>
+<li><p>[easymotion]はジャンプするまさしくその位置</p></li>
+<li><p><a href="https://github.com/ggandor/leap.nvim">leap.nvim</a>はジャンプ先の2文字後。</p>
+<pre><code>leap
+^に飛びたい場合、「le」と左から文字を読みながら入力すると、3文字目の「a」の位置にラベルがつくので、そのまま目の移動に合わせてラベルを入力できる</code></pre></li>
+</ul></li>
+</ul>
+<p>合う合わないはありそうですが、個人的にはなかなか合理的に思います。</p>
+<p>ところで<a href="https://github.com/ggandor/leap.nvim">leap.nvim</a>は単純なモーションプラグインではなく、指定した箇所にラベルをつけて、選んだラベルに対して任意のアクションを実行するためのフレームワークでもあります。</p>
+<p><code>targets</code>引数を指定すれば、1、2、3行目の1文字目にラベルをつけられますし、<code>action</code>引数を指定すれば、選択したラベルやターゲットに関する情報を元に任意の操作を実行できます。</p>
+<pre class="lua"><code>require(&quot;leap&quot;).leap({
+  targets = {
+    { pos = {1, 1} },
+    { pos = {2, 1} },
+    { pos = {3, 1} },
+  },
+  action = function(x) {
+    vim.print(x.label) -- 選択したラベルの表示
+    vim.print(x.pos) -- 選択したターゲットの位置
+  }
+})</code></pre>
+<p>簡単に拡張できそうな気配がしますね！</p>
+</div>
+<div id="leap-search.nvimについて" class="section level1">
+<h1>leap-search.nvimについて</h1>
+<p>というわけで指定したパターンを元に、Window内の文字列を検索してラベルをつけ、ジャンプする<a href="https://github.com/atusy/leap-search.nvim">leap-search.nvim</a>を作ってみました。</p>
+<div id="正規表現による検索結果へのジャンプ" class="section level2">
+<h2>正規表現による検索結果へのジャンプ</h2>
+<p>たとえば以下のように <code>leap.{-}nvim</code> などと、Vimの正規表現を利用できます。</p>
+<pre class="lua"><code>require(&quot;leap-search&quot;).leap(&quot;leap.{-}nvim&quot;)</code></pre>
+<p>応用すると直前の検索パターンでハイライトされた箇所にジャンプなんてこともできますね。</p>
+<pre class="vim"><code>/leap.{-}nvim
+:lua require(&quot;leap-search&quot;).leap(vim.fn.getreg(&quot;/&quot;))</code></pre>
+<p><img src="images/leap-search-slash.gif" /></p>
+<p>とても便利なので、私は以下のようにマッピングしています。</p>
+<pre class="lua"><code>vim.keymap.set(&quot;n&quot;, &quot;gn&quot;, function() require(&quot;leap-search&quot;).leap(vim.fn.getreg(&quot;/&quot;)) end)
+vim.keymap.set(&quot;n&quot;, &quot;gN&quot;, function() require(&quot;leap-search&quot;).leap(vim.fn.getreg(&quot;/&quot;), {}, { backward = true }) end)</code></pre>
+<p>ドキュメントがまだ皆無ですが、第二引数が<a href="https://github.com/atusy/leap-search.nvim">leap-search.nvim</a>独自のオプションのテーブル、第三引数が<a href="https://github.com/ggandor/leap.nvim">leap.nvim</a>本体のオプションのテーブルになってます。</p>
+</div>
+<div id="様々な検索エンジンの利用" class="section level2">
+<h2>様々な検索エンジンの利用</h2>
+<p>第二引数を弄ると、以下の検索エンジンの組み合わせも可能です。</p>
+<ul>
+<li>Vimの正規表現を用いる<code>vim.regex</code></li>
+<li>Lua expressionまたは部分一致を用いる<code>string.find</code></li>
+<li>migemoで日本語をローマジ検索する<code>kensaku.query</code>
+<ul>
+<li>エンジンが依存する<a href="https://github.com/lambdalisue/kensaku.vim">kensaku.vim</a>が必要</li>
+<li>全角文字へのラベルに関するバグを補正する<a href="https://github.com/atusy/leap-wide.nvim">leap-wide.nvim</a>を推奨</li>
+</ul></li>
+</ul>
+<p>たとえば <code>string.find</code> で部分一致を、 <code>kensaku.query</code> でローマ時検索を実行するなら以下。</p>
+<pre class="lua"><code>-- 「kensaku」というパターンで「kensaku」にも「検索」にもラベルをつけられる
+require(&quot;leap-search&quot;).leap(&quot;kensaku&quot;, {
+  engines = {
+    { name = &quot;string.find&quot;, plain = true },
+    { name = &quot;kensaku.query&quot; },
+  },
+})</code></pre>
+</div>
+<div id="対話的な検索" class="section level2">
+<h2>対話的な検索</h2>
+<p>更に、第一引数に検索パターンに<code>nil</code>を与えると対話的な検索モードに入ります。あいまい検索機能こそありませんが、<a href="https://github.com/yuki-yano/fuzzy-motion.vim">fuzzy-motion.vim</a>に近い挙動です。</p>
+<pre class="lua"><code>require(&quot;leap-search&quot;).leap(
+  nil,
+  {
+    engines = {
+      { name = &quot;string.find&quot;, plain = true },
+      { name = &quot;kensaku.query&quot; },
+    }
+  },
+  {
+    -- 現在のWindow全体を検索対象にする
+    target_windows = { vim.api.nvim_get_current_win() },
+  },
+)</code></pre>
+<p><img src="images/leap-search-interactive.gif" /></p>
+<p><strong>ENJOY!!</strong></p>
+</div>
+</div>
