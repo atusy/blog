@@ -13,6 +13,7 @@ output:
 [leap.nvim]: https://github.com/ggandor/leap.nvim
 [leap-search.nvim]: https://github.com/atusy/leap-search.nvim
 [hop.nvim]: https://github.com/phaazon/hop.nvim
+[easymotion]: https://github.com/easymotion/vim-easymotion
 
 # leap.nvimについて
 
@@ -20,16 +21,16 @@ output:
 
 [leap.nvim][]はいわゆる[easymotion][]系のプラグインで、入力した文字にマッチする箇所にラベル（a, b, c, ...）をつけ、ラベルを入力するとその位置にカーソルを移動します。
 
-デフォルトの挙動は[easymotion]の[2-character search motion](https://github.com/easymotion/vim-easymotion#2-character-search-motion)に近いもので、2文字にマッチする箇所にラベルをつけます。
+デフォルトの挙動は[easymotion][]の[2-character search motion](https://github.com/easymotion/vim-easymotion#2-character-search-motion)に近いもので、2文字にマッチする箇所にラベルをつけます。
 
-2-character search motionとして見た時の[easymotion]と[leap.nvim]の大きな違いは2つ。
+2-character search motionとして見た時の[easymotion][]と[leap.nvim]の大きな違いは2つ。
 
 - ラベルをつけるタイミング
-    - [easymotion]は2文字入力し終えてから
-    - [leap.nvim]は1文字目の段階から。ジャンプ先の最初の2文字目くらいは読まずとも頭に入っているだろうから、2文字目を入力する時間でラベルを読み、3文字目としてラベルを入力すれば思考のスピードでジャンプできる、という考え方のよう。
+    - [easymotion][]は2文字入力し終えてから
+    - [leap.nvim][]は1文字目の段階から。ジャンプ先の最初の2文字目くらいは読まずとも頭に入っているだろうから、2文字目を入力する時間でラベルを読み、3文字目としてラベルを入力すれば思考のスピードでジャンプできる、という考え方のよう。
 - ラベルをつける位置
-    - [easymotion]はジャンプするまさしくその位置
-    - [leap.nvim]はジャンプ先の2文字後。
+    - [easymotion][]はジャンプするまさしくその位置
+    - [leap.nvim][]はジャンプ先の2文字後。
 
       ```
       leap
@@ -60,7 +61,7 @@ require("leap").leap({
 
 # leap-search.nvimについて
 
-というわけで指定したパターンを元に、Window内の文字列を検索してラベルをつけ、ジャンプする[leap-search.nvim]を作ってみました。
+というわけで指定したパターンを元に、Window内の文字列を検索してラベルをつけ、ジャンプする[leap-search.nvim][]を作ってみました。
 
 ## 正規表現による検索結果へのジャンプ
 
@@ -86,7 +87,7 @@ vim.keymap.set("n", "gn", function() require("leap-search").leap(vim.fn.getreg("
 vim.keymap.set("n", "gN", function() require("leap-search").leap(vim.fn.getreg("/"), {}, { backward = true }) end)
 ```
 
-ドキュメントがまだ皆無ですが、第二引数が[leap-search.nvim]独自のオプションのテーブル、第三引数が[leap.nvim]本体のオプションのテーブルになってます。
+ドキュメントがまだ皆無ですが、第二引数が[leap-search.nvim][]独自のオプションのテーブル、第三引数が[leap.nvim][]本体のオプションのテーブルになってます。
 
 ## 様々な検索エンジンの利用
 

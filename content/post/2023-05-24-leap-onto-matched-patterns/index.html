@@ -14,19 +14,19 @@ output:
 
 <div id="leap.nvimについて" class="section level1">
 <h1>leap.nvimについて</h1>
-<p>[easymotion][]系のNeovimプラグインとしてメジャーどころには<a href="https://github.com/phaazon/hop.nvim">hop.nvim</a>や<a href="https://github.com/ggandor/leap.nvim">leap.nvim</a>があります。</p>
-<p><a href="https://github.com/ggandor/leap.nvim">leap.nvim</a>はいわゆる[easymotion][]系のプラグインで、入力した文字にマッチする箇所にラベル（a, b, c, …）をつけ、ラベルを入力するとその位置にカーソルを移動します。</p>
-<p>デフォルトの挙動は[easymotion]の<a href="https://github.com/easymotion/vim-easymotion#2-character-search-motion">2-character search motion</a>に近いもので、2文字にマッチする箇所にラベルをつけます。</p>
-<p>2-character search motionとして見た時の[easymotion]と<a href="https://github.com/ggandor/leap.nvim">leap.nvim</a>の大きな違いは2つ。</p>
+<p><a href="https://github.com/easymotion/vim-easymotion">easymotion</a>系のNeovimプラグインとしてメジャーどころには<a href="https://github.com/phaazon/hop.nvim">hop.nvim</a>や<a href="https://github.com/ggandor/leap.nvim">leap.nvim</a>があります。</p>
+<p><a href="https://github.com/ggandor/leap.nvim">leap.nvim</a>はいわゆる<a href="https://github.com/easymotion/vim-easymotion">easymotion</a>系のプラグインで、入力した文字にマッチする箇所にラベル（a, b, c, …）をつけ、ラベルを入力するとその位置にカーソルを移動します。</p>
+<p>デフォルトの挙動は<a href="https://github.com/easymotion/vim-easymotion">easymotion</a>の<a href="https://github.com/easymotion/vim-easymotion#2-character-search-motion">2-character search motion</a>に近いもので、2文字にマッチする箇所にラベルをつけます。</p>
+<p>2-character search motionとして見た時の<a href="https://github.com/easymotion/vim-easymotion">easymotion</a>と<a href="https://github.com/ggandor/leap.nvim">leap.nvim</a>の大きな違いは2つ。</p>
 <ul>
 <li>ラベルをつけるタイミング
 <ul>
-<li>[easymotion]は2文字入力し終えてから</li>
+<li><a href="https://github.com/easymotion/vim-easymotion">easymotion</a>は2文字入力し終えてから</li>
 <li><a href="https://github.com/ggandor/leap.nvim">leap.nvim</a>は1文字目の段階から。ジャンプ先の最初の2文字目くらいは読まずとも頭に入っているだろうから、2文字目を入力する時間でラベルを読み、3文字目としてラベルを入力すれば思考のスピードでジャンプできる、という考え方のよう。</li>
 </ul></li>
 <li>ラベルをつける位置
 <ul>
-<li><p>[easymotion]はジャンプするまさしくその位置</p></li>
+<li><p><a href="https://github.com/easymotion/vim-easymotion">easymotion</a>はジャンプするまさしくその位置</p></li>
 <li><p><a href="https://github.com/ggandor/leap.nvim">leap.nvim</a>はジャンプ先の2文字後。</p>
 <pre><code>leap
 ^に飛びたい場合、「le」と左から文字を読みながら入力すると、3文字目の「a」の位置にラベルがつくので、そのまま目の移動に合わせてラベルを入力できる</code></pre></li>
