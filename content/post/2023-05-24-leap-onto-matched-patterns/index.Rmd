@@ -15,6 +15,8 @@ output:
 [hop.nvim]: https://github.com/phaazon/hop.nvim
 [easymotion]: https://github.com/easymotion/vim-easymotion
 
+本記事は[Vim駅伝](https://vim-jp.org/ekiden/)の5/24の記事です。
+
 # leap.nvimについて
 
 [easymotion][]系のNeovimプラグインとしてメジャーどころには[hop.nvim][]や[leap.nvim][]があります。
