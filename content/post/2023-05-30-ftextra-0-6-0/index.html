@@ -1,0 +1,123 @@
+---
+title: データフレームからの表組みを楽にするftExtra 0.6.0をリリース！脚注の書式指定が柔軟に！！
+author: ''
+date: '2023-05-30'
+slug: ftextra-0-6-0
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+<link href="{{< blogdown/postref >}}index_files/tabwid/tabwid.css" rel="stylesheet" />
+<script src="{{< blogdown/postref >}}index_files/tabwid/tabwid.js"></script>
+
+
+<p><a href="https://ftextra.atusy.net">ftExtra</a> 0.6.0では、脚注に関する機能が強化されました。</p>
+<p><a href="https://ftextra.atusy.net">ftExtra</a>パッケージはRで表を出力する際に、セルの文字列をマークダウンとしてフォーマットする機能などを提供するパッケージです<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>。</p>
+<p>デフォルトではR Markdownと同様にマークダウン方言としてPandoc’s Markdownを採用しており、<code>^[aaa]</code>といった記法で脚注を記載できます。</p>
+<pre class="r"><code># 脚注を含むデータフレーム
+d &lt;- data.frame(x = &quot;a^[aaa]&quot;, y = &quot;b^[bbb]&quot;)
+d
+#&gt;         x       y
+#&gt; 1 a^[aaa] b^[bbb]</code></pre>
+<p>上記を<a href="https://ftextra.atusy.net">ftExtra</a>パッケージの力で表に変換すると以下のようになります。</p>
+<pre class="r"><code># 脚注つきの表
+d |&gt; ftExtra::as_flextable() |&gt; ftExtra::colformat_md()</code></pre>
+<div class="tabwid"><style>.cl-2a116b20{}.cl-2a086c64{font-family:'DejaVu Sans';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-2a086c6e{font-family:'DejaVu Sans';font-size:6.6pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;position: relative;bottom:3.3pt;}.cl-2a0cbf4e{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-2a0cd4c0{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2a0cd4ca{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2a0cd4d4{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}</style><table data-quarto-disable-processing='true' class='cl-2a116b20'><thead><tr style="overflow-wrap:break-word;"><th class="cl-2a0cd4c0"><p class="cl-2a0cbf4e"><span class="cl-2a086c64">x</span></p></th><th class="cl-2a0cd4c0"><p class="cl-2a0cbf4e"><span class="cl-2a086c64">y</span></p></th></tr></thead><tbody><tr style="overflow-wrap:break-word;"><td class="cl-2a0cd4ca"><p class="cl-2a0cbf4e"><span class="cl-2a086c64">a</span><span class="cl-2a086c6e">1</span></p></td><td class="cl-2a0cd4ca"><p class="cl-2a0cbf4e"><span class="cl-2a086c64">b</span><span class="cl-2a086c6e">2</span></p></td></tr></tbody><tfoot><tr style="overflow-wrap:break-word;"><td  colspan="2"class="cl-2a0cd4d4"><p class="cl-2a0cbf4e"><span class="cl-2a086c6e">1</span><span class="cl-2a086c64">aaa</span></p></td></tr><tr style="overflow-wrap:break-word;"><td  colspan="2"class="cl-2a0cd4d4"><p class="cl-2a0cbf4e"><span class="cl-2a086c6e">2</span><span class="cl-2a086c64">bbb</span></p></td></tr></tfoot></table></div>
+<p>掲載媒体によっては、脚注の参照にアラビア数字ではなくローマ数字を使いたいかもしれません。これは、<code>.footnote_options</code>引数によって簡単に調整できます。</p>
+<pre class="r"><code># 脚注をローマ数字で参照
+d |&gt;
+  ftExtra::as_flextable() |&gt;
+  ftExtra::colformat_md(
+    .footnote_options = ftExtra::footnote_options(ref = &quot;i&quot;)
+  )</code></pre>
+<div class="tabwid"><style>.cl-2a3ac3b2{}.cl-2a33fe38{font-family:'DejaVu Sans';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-2a33fe42{font-family:'DejaVu Sans';font-size:6.6pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;position: relative;bottom:3.3pt;}.cl-2a3684e6{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-2a36949a{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2a3694a4{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2a3694a5{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}</style><table data-quarto-disable-processing='true' class='cl-2a3ac3b2'><thead><tr style="overflow-wrap:break-word;"><th class="cl-2a36949a"><p class="cl-2a3684e6"><span class="cl-2a33fe38">x</span></p></th><th class="cl-2a36949a"><p class="cl-2a3684e6"><span class="cl-2a33fe38">y</span></p></th></tr></thead><tbody><tr style="overflow-wrap:break-word;"><td class="cl-2a3694a4"><p class="cl-2a3684e6"><span class="cl-2a33fe38">a</span><span class="cl-2a33fe42">i</span></p></td><td class="cl-2a3694a4"><p class="cl-2a3684e6"><span class="cl-2a33fe38">b</span><span class="cl-2a33fe42">ii</span></p></td></tr></tbody><tfoot><tr style="overflow-wrap:break-word;"><td  colspan="2"class="cl-2a3694a5"><p class="cl-2a3684e6"><span class="cl-2a33fe42">i</span><span class="cl-2a33fe38">aaa</span></p></td></tr><tr style="overflow-wrap:break-word;"><td  colspan="2"class="cl-2a3694a5"><p class="cl-2a3684e6"><span class="cl-2a33fe42">ii</span><span class="cl-2a33fe38">bbb</span></p></td></tr></tfoot></table></div>
+<p><a href="https://ftextra.atusy.net">ftExtra</a> 0.6.0のリリースでは、脚注の参照をもっと柔軟に扱えるようになりました</p>
+<ul>
+<li><code>prefix</code>、<code>suffix</code>の指定</li>
+<li>ユーザー定義関数によるマークダウン出力</li>
+</ul>
+<p>順番に見てみましょう。</p>
+<p>まずは<code>prefix</code>、<code>suffix</code>を指定してみます。</p>
+<pre class="r"><code># 脚注を括弧で囲ったローマ数字で参照
+d |&gt;
+  ftExtra::as_flextable() |&gt;
+  ftExtra::colformat_md(
+    .footnote_options = ftExtra::footnote_options(
+      ref = &quot;i&quot;,
+      prefix = &quot;(&quot;,
+      suffix = &quot;)&quot;
+    )
+  )</code></pre>
+<div class="tabwid"><style>.cl-2a64c46e{}.cl-2a5cdf06{font-family:'DejaVu Sans';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-2a5cdf10{font-family:'DejaVu Sans';font-size:6.6pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;position: relative;bottom:3.3pt;}.cl-2a604542{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-2a605a46{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2a605a50{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2a605a5a{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}</style><table data-quarto-disable-processing='true' class='cl-2a64c46e'><thead><tr style="overflow-wrap:break-word;"><th class="cl-2a605a46"><p class="cl-2a604542"><span class="cl-2a5cdf06">x</span></p></th><th class="cl-2a605a46"><p class="cl-2a604542"><span class="cl-2a5cdf06">y</span></p></th></tr></thead><tbody><tr style="overflow-wrap:break-word;"><td class="cl-2a605a50"><p class="cl-2a604542"><span class="cl-2a5cdf06">a</span><span class="cl-2a5cdf10">(i)</span></p></td><td class="cl-2a605a50"><p class="cl-2a604542"><span class="cl-2a5cdf06">b</span><span class="cl-2a5cdf10">(ii)</span></p></td></tr></tbody><tfoot><tr style="overflow-wrap:break-word;"><td  colspan="2"class="cl-2a605a5a"><p class="cl-2a604542"><span class="cl-2a5cdf10">(i)</span><span class="cl-2a5cdf06">aaa</span></p></td></tr><tr style="overflow-wrap:break-word;"><td  colspan="2"class="cl-2a605a5a"><p class="cl-2a604542"><span class="cl-2a5cdf10">(ii)</span><span class="cl-2a5cdf06">bbb</span></p></td></tr></tfoot></table></div>
+<p>次にユーザー定義関数によるマークダウン出力も試してみましょう。</p>
+<p>例として、</p>
+<ul>
+<li>ラベルの種類
+<ul>
+<li>列名に対する脚注は、ラベルにアルファベットを使う (a, b, c, …)</li>
+<li>値に対する脚注は、ラベルにアラビア数字を使う (1, 2, 3, …)</li>
+</ul></li>
+<li>ラベルの書式
+<ul>
+<li>列名と値につけるラベルは上付き文字で行う (<sup>a</sup>, <sup>1</sup>, …)</li>
+<li>脚注につけるラベルはコロンでサフィックスする（a:, 1:, …)</li>
+</ul></li>
+</ul>
+<p>とします。</p>
+<p>まず、参照方法を決めるユーザー定義関数を用意します。</p>
+<pre class="r"><code>#&#39; @param n
+#&#39;  n版目の参照であることを示すinteger値
+#&#39; @param part
+#&#39;  脚注の参照元が列名（header）か値（body）かを示すcharacter値
+#&#39; @param footer
+#&#39;  この関数が脚注にラベルをつけようとしているか、
+#&#39;  part引数の値の箇所につけようとしているかを示すlogical値
+#&#39;
+#&#39; @return マークダウン文字列
+ref &lt;- function(n, part, footer) {
+  # 列名（header）にはアルファベットを、値（body）にはローマ数字を使う
+  s &lt;- if (part == &quot;header&quot;) {
+    letters[n]
+  } else {
+    as.character(n)
+  }
+
+  # 脚注内のラベルは「: 」でsuffixする
+  if (footer) {
+    return(paste0(s, &quot;:\\ &quot;))
+  }
+
+  # 列名と値へのラベルは上付き文字にする
+  return(paste0(&quot;^&quot;, s, &quot;^&quot;))
+}</code></pre>
+<p>次にデータフレームを表に出力します。</p>
+<p>マークダウンの処理にはこれまで通り、<code>colformat_md</code>関数を使いますが、<code>part</code>引数を使って列名（header）と値（body）を別々に処理する必要がある点に注意してください。あとは<code>footnote_options</code>関数の<code>ref</code>引数に、これまで文字列を指定していたところを、先程定義した関数に変更します。</p>
+<pre class="r"><code># ユーザー定義関数を使って参照ラベルをカスタマイズした表を出力
+tibble::tibble(
+  &quot;header1^[note a]&quot; = c(&quot;x^[note 1]&quot;, &quot;y&quot;),
+  &quot;header2&quot; = c(&quot;a&quot;, &quot;b^[note 2]&quot;)
+) %&gt;%
+  ftExtra::as_flextable() %&gt;%
+  # 見出しのマークダウンを処理
+  ftExtra::colformat_md(
+    part = &quot;header&quot;, .footnote_options = footnote_options(ref = ref)
+  ) %&gt;%
+  # 値のマークダウンを処理
+  ftExtra::colformat_md(
+    part = &quot;body&quot;, .footnote_options = footnote_options(ref = ref)
+  ) %&gt;%
+  # 出力時の表の幅を微調整
+  flextable::autofit(add_w = 0.2)</code></pre>
+<div class="tabwid"><style>.cl-2b21656a{}.cl-2b172140{font-family:'DejaVu Sans';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-2b172154{font-family:'DejaVu Sans';font-size:6.6pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;position: relative;bottom:3.3pt;}.cl-2b1bf828{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-2b1c1768{width:1.067in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2b1c1772{width:1.021in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2b1c1773{width:1.067in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2b1c177c{width:1.021in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2b1c177d{width:1.067in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2b1c1786{width:1.021in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2b1c1790{width:1.067in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2b1c1791{width:1.021in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(255, 255, 255, 0.00);border-top: 0 solid rgba(255, 255, 255, 0.00);border-left: 0 solid rgba(255, 255, 255, 0.00);border-right: 0 solid rgba(255, 255, 255, 0.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}</style><table data-quarto-disable-processing='true' class='cl-2b21656a'><thead><tr style="overflow-wrap:break-word;"><th class="cl-2b1c1768"><p class="cl-2b1bf828"><span class="cl-2b172140">header1</span><span class="cl-2b172154">a</span></p></th><th class="cl-2b1c1772"><p class="cl-2b1bf828"><span class="cl-2b172140">header2</span></p></th></tr></thead><tbody><tr style="overflow-wrap:break-word;"><td class="cl-2b1c1773"><p class="cl-2b1bf828"><span class="cl-2b172140">x</span><span class="cl-2b172154">1</span></p></td><td class="cl-2b1c177c"><p class="cl-2b1bf828"><span class="cl-2b172140">a</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-2b1c177d"><p class="cl-2b1bf828"><span class="cl-2b172140">y</span></p></td><td class="cl-2b1c1786"><p class="cl-2b1bf828"><span class="cl-2b172140">b</span><span class="cl-2b172154">2</span></p></td></tr></tbody><tfoot><tr style="overflow-wrap:break-word;"><td  colspan="2"class="cl-2b1c1790"><p class="cl-2b1bf828"><span class="cl-2b172140">a: </span><span class="cl-2b172140">note</span><span class="cl-2b172140"> </span><span class="cl-2b172140">a</span></p></td></tr><tr style="overflow-wrap:break-word;"><td  colspan="2"class="cl-2b1c1790"><p class="cl-2b1bf828"><span class="cl-2b172140">1: </span><span class="cl-2b172140">note</span><span class="cl-2b172140"> </span><span class="cl-2b172140">1</span></p></td></tr><tr style="overflow-wrap:break-word;"><td  colspan="2"class="cl-2b1c1790"><p class="cl-2b1bf828"><span class="cl-2b172140">2: </span><span class="cl-2b172140">note</span><span class="cl-2b172140"> </span><span class="cl-2b172140">2</span></p></td></tr></tfoot></table></div>
+<p>ENJOY!!</p>
+<div class="footnotes footnotes-end-of-document">
+<hr />
+<ol>
+<li id="fn1"><p>正確には<a href="https://ftextra.atusy.net">ftExtra</a>パッケージは<a href="https://davidgohel.github.io/flextable/">flextable</a>パッケージの拡張という位置付けです。
+<a href="https://davidgohel.github.io/flextable/">flextable</a>パッケージはデータフレームを表に変換する際に活躍し、R Markdownでhtml、pdf、docxなど様々なフォーマットに出力できます。
+<a href="https://ftextra.atusy.net">ftExtra</a>パッケージではマークダウンの処理の他に、行のグルーピングや、列名の分割などの機能を提供しています。<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>

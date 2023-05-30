@@ -1,0 +1,149 @@
+---
+title: データフレームからの表組みを楽にするftExtra 0.6.0をリリース！脚注の書式指定が柔軟に！！
+author: ''
+date: '2023-05-30'
+slug: ftextra-0-6-0
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+[ftExtra]: https://ftextra.atusy.net
+[flextable]: https://davidgohel.github.io/flextable/
+
+[ftExtra][] 0.6.0では、脚注に関する機能が強化されました。
+
+```{r, include=FALSE}
+library(ftExtra)
+knitr::opts_chunk$set(
+  comment = "#>",
+  collapse = TRUE
+)
+```
+
+[ftExtra][]パッケージはRで表を出力する際に、セルの文字列をマークダウンとしてフォーマットする機能などを提供するパッケージです[^ftextra]。
+
+[^ftextra]:
+    正確には[ftExtra][]パッケージは[flextable][]パッケージの拡張という位置付けです。
+    [flextable][]パッケージはデータフレームを表に変換する際に活躍し、R Markdownでhtml、pdf、docxなど様々なフォーマットに出力できます。
+    [ftExtra][]パッケージではマークダウンの処理の他に、行のグルーピングや、列名の分割などの機能を提供しています。
+
+デフォルトではR Markdownと同様にマークダウン方言としてPandoc's Markdownを採用しており、`^[aaa]`といった記法で脚注を記載できます。
+
+```{r}
+# 脚注を含むデータフレーム
+d <- data.frame(x = "a^[aaa]", y = "b^[bbb]")
+d
+```
+
+上記を[ftExtra][]パッケージの力で表に変換すると以下のようになります。
+
+```{r}
+# 脚注つきの表
+d |> ftExtra::as_flextable() |> ftExtra::colformat_md()
+```
+
+掲載媒体によっては、脚注の参照にアラビア数字ではなくローマ数字を使いたいかもしれません。
+これは、`.footnote_options`引数によって簡単に調整できます。
+
+``` {r}
+# 脚注をローマ数字で参照
+d |>
+  ftExtra::as_flextable() |>
+  ftExtra::colformat_md(
+    .footnote_options = ftExtra::footnote_options(ref = "i")
+  )
+```
+
+[ftExtra][] 0.6.0のリリースでは、脚注の参照をもっと柔軟に扱えるようになりました
+
+- `prefix`、`suffix`の指定
+- ユーザー定義関数によるマークダウン出力
+
+順番に見てみましょう。
+
+まずは`prefix`、`suffix`を指定してみます。
+
+``` {r}
+# 脚注を括弧で囲ったローマ数字で参照
+d |>
+  ftExtra::as_flextable() |>
+  ftExtra::colformat_md(
+    .footnote_options = ftExtra::footnote_options(
+      ref = "i",
+      prefix = "(",
+      suffix = ")"
+    )
+  )
+```
+
+次にユーザー定義関数によるマークダウン出力も試してみましょう。
+
+例として、
+
+- ラベルの種類
+  - 列名に対する脚注は、ラベルにアルファベットを使う (a, b, c, ...)
+  - 値に対する脚注は、ラベルにアラビア数字を使う (1, 2, 3, ...)
+- ラベルの書式
+  - 列名と値につけるラベルは上付き文字で行う (^a^, ^1^, ...)
+  - 脚注につけるラベルはコロンでサフィックスする（a:, 1:, ...)
+
+とします。
+
+まず、参照方法を決めるユーザー定義関数を用意します。
+
+```{r}
+#' @param n
+#'  n版目の参照であることを示すinteger値
+#' @param part
+#'  脚注の参照元が列名（header）か値（body）かを示すcharacter値
+#' @param footer
+#'  この関数が脚注にラベルをつけようとしているか、
+#'  part引数の値の箇所につけようとしているかを示すlogical値
+#'
+#' @return マークダウン文字列
+ref <- function(n, part, footer) {
+  # 列名（header）にはアルファベットを、値（body）にはローマ数字を使う
+  s <- if (part == "header") {
+    letters[n]
+  } else {
+    as.character(n)
+  }
+
+  # 脚注内のラベルは「: 」でsuffixする
+  if (footer) {
+    return(paste0(s, ":\\ "))
+  }
+
+  # 列名と値へのラベルは上付き文字にする
+  return(paste0("^", s, "^"))
+}
+```
+
+次にデータフレームを表に出力します。
+
+マークダウンの処理にはこれまで通り、`colformat_md`関数を使いますが、`part`引数を使って列名（header）と値（body）を別々に処理する必要がある点に注意してください。
+あとは`footnote_options`関数の`ref`引数に、これまで文字列を指定していたところを、先程定義した関数に変更します。
+
+```{r}
+# ユーザー定義関数を使って参照ラベルをカスタマイズした表を出力
+tibble::tibble(
+  "header1^[note a]" = c("x^[note 1]", "y"),
+  "header2" = c("a", "b^[note 2]")
+) %>%
+  ftExtra::as_flextable() %>%
+  # 見出しのマークダウンを処理
+  ftExtra::colformat_md(
+    part = "header", .footnote_options = footnote_options(ref = ref)
+  ) %>%
+  # 値のマークダウンを処理
+  ftExtra::colformat_md(
+    part = "body", .footnote_options = footnote_options(ref = ref)
+  ) %>%
+  # 出力時の表の幅を微調整
+  flextable::autofit(add_w = 0.2)
+```
+
+ENJOY!!
