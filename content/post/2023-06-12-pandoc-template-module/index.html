@@ -1,0 +1,86 @@
+---
+title: PandocのLuaフィルタからPandoc templateを呼べるpandoc.templateモジュールがとても便利
+author: ''
+date: '2023-06-12'
+slug: pandoc-template-module
+categories: [Pandoc]
+tags: [Lua filter]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [lua, markdown]
+---
+
+
+
+<p>Pandoc 3.0以降ではLuaフィルタで使えるモジュールに<code>pandoc.template</code>が追加されました。これを使うとLuaフィルタ内で<a href="https://pandoc.org/MANUAL.html#templates">Pandoc Template</a>を展開できます。</p>
+<p>うまく使うと定型句を任意のタイミングで、少しずつ文言を変えながら展開する、といったことが可能です。</p>
+<p>たとえば、後述するLuaフィルタとテンプレートファイルを書いておいてあげれば、以下の<code>&lt;div&gt;</code>からテンプレートを展開して、<code>Pandocはいいぞ</code>と出力されます。</p>
+<pre class="markdown"><code>&lt;div template=assets/template.md x=&quot;Pandoc&quot;&gt;&lt;/div&gt;</code></pre>
+<p>属性<code>x</code>の値を<code>"Pandoc"</code>から<code>"Luaフィルタ"</code>に書き換えれば出力は<code>Luaフィルタはいいぞ</code>になります。</p>
+<pre class="markdown"><code>&lt;div template=assets/template.md x=&quot;Luaフィルタ&quot;&gt;&lt;/div&gt;</code></pre>
+<p>この程度のシンプルな例であれば、Luaフィルタ上で直接文字列操作をしてやれば済むでしょうが、定型句が長くなる、条件分岐するなど複雑さを増すごとに威力を発揮するでしょう。</p>
+<p><code>&lt;div&gt;</code>を使って好きなタイミングで読んでいるだけなので、入力がHTMLやMarkdownであれば、定型句（<code>&lt;div&gt;</code>）の前後に任意の文章を挿入できる柔軟性も魅力です。</p>
+<p>肝心のLuaフィルタは以下のように記述します。簡略して書いているため、いくつか注意点があります。</p>
+<ul>
+<li>テンプレートファイルは<code>markdown</code>形式決め打ち</li>
+<li>テンプレートファイルに相対パスを指定する場合は作業ディレクトリを基準</li>
+<li>同じテンプレートを何度もコンパイルしている点など最適化の余地あり</li>
+</ul>
+<pre class="lua"><code>--[[ assets/filter.lua ]]
+
+---テキストファイルを読む
+---@param filepath string テンプレートのファイルパス。相対パスの基準はPandoc実行時の作業ディレクトリ。
+---@return string テンプレートの中身
+local function read_lines(filepath)
+  local lines = {}
+  for i in io.lines(filepath) do
+    table.insert(lines, i)
+  end
+  return table.concat(lines, &quot;\n&quot;)
+end
+
+---テンプレートファイルを指定したコンテキスト化で展開し、Markdownとして処理する
+---@param filepath string テンプレートのファイルパス。相対パスの基準はPandoc実行時の作業ディレクトリ。
+---@param context table&lt;any, any&gt;
+---@return any blocks PandocのBlock要素のリスト
+local function apply_template(filepath, context)
+  local content = read_lines(filepath)
+  local compiled = pandoc.template.compile(content)
+  local rendered = pandoc.template.apply(compiled, context):render()
+  return pandoc.read(rendered, &quot;markdown&quot;, PANDOC_READER_OPTIONS).blocks
+end
+
+---divのtemplate属性にファイルが指定されていれば、divの属性をコンテキストとしてテンプレートを展開するフィルタ
+function Div(el)
+  if el.attributes.template then
+    local ctx = {}
+    for k, v in pairs(el.attributes) do
+      ctx[k] = v
+    end
+    return apply_template(el.attributes.template, ctx)
+  end
+  return el
+end</code></pre>
+<p><code>assets/template.md</code>の中身は以下の通りです。</p>
+<pre class="markdown"><code>&lt;!-- assets/template.md --&gt;
+${x}はいいぞ</code></pre>
+<p>では、このフィルタとテンプレートを利用するMarkdownファイルを用意しましょう。</p>
+<pre class="markdown"><code>&lt;!-- assets/example.md --&gt;
+
+# 好きなもの紹介するぞ
+
+&lt;div template=assets/template.md x=&quot;Pandoc&quot;&gt;&lt;/div&gt;
+&lt;div template=assets/template.md x=&quot;Luaフィルタ&quot;&gt;&lt;/div&gt;
+&lt;div template=assets/template.md x=&quot;R&quot;&gt;&lt;/div&gt;</code></pre>
+<p>あとはMarkdownファイルをPandocで良い感じに処理すれば、無事にテンプレートが展開されます。
+<code>&lt;div&gt;</code>の<code>x</code>属性に指定していた値が、テンプレートの<code>${x}</code>に展開されていることがわかりますね。</p>
+<pre class="bash"><code>&gt; cat assets/example.md | pandoc -t markdown -L assets/filter.lua --strip-comments
+# 好きなもの紹介するぞ
+
+Pandocはいいぞ
+
+Luaフィルタはいいぞ
+
+Rはいいぞ</code></pre>
+<p><strong>ENJOY!</strong></p>

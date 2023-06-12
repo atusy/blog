@@ -1,0 +1,72 @@
+---
+title: PandocのLuaフィルタからPandoc templateを呼べるpandoc.templateモジュールがとても便利
+author: ''
+date: '2023-06-12'
+slug: pandoc-template-module
+categories: [Pandoc]
+tags: [Lua filter]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [lua, markdown]
+---
+
+Pandoc 3.0以降ではLuaフィルタで使えるモジュールに`pandoc.template`が追加されました。
+これを使うとLuaフィルタ内で[Pandoc Template](https://pandoc.org/MANUAL.html#templates)を展開できます。
+
+うまく使うと定型句を任意のタイミングで、少しずつ文言を変えながら展開する、といったことが可能です。
+
+たとえば、後述するLuaフィルタとテンプレートファイルを書いておいてあげれば、以下の`<div>`からテンプレートを展開して、`Pandocはいいぞ`と出力されます。
+
+``` markdown
+<div template=assets/template.md x="Pandoc"></div>
+```
+
+属性`x`の値を`"Pandoc"`から`"Luaフィルタ"`に書き換えれば出力は`Luaフィルタはいいぞ`になります。
+
+``` markdown
+<div template=assets/template.md x="Luaフィルタ"></div>
+```
+
+この程度のシンプルな例であれば、Luaフィルタ上で直接文字列操作をしてやれば済むでしょうが、定型句が長くなる、条件分岐するなど複雑さを増すごとに威力を発揮するでしょう。
+
+`<div>`を使って好きなタイミングで読んでいるだけなので、入力がHTMLやMarkdownであれば、定型句（`<div>`）の前後に任意の文章を挿入できる柔軟性も魅力です。
+
+
+肝心のLuaフィルタは以下のように記述します。
+簡略して書いているため、いくつか注意点があります。
+
+- テンプレートファイルは`markdown`形式決め打ち
+- テンプレートファイルに相対パスを指定する場合は作業ディレクトリを基準
+- 同じテンプレートを何度もコンパイルしている点など最適化の余地あり
+
+
+```{bash, comment="", echo=FALSE, class.output="lua"}
+cat assets/filter.lua
+```
+
+```{r, include=FALSE}
+knitr::opts_knit$set(collapse = TRUE)
+```
+
+`assets/template.md`の中身は以下の通りです。
+
+
+```{bash, comment="", echo=FALSE, class.output="markdown"}
+cat assets/template.md
+```
+
+では、このフィルタとテンプレートを利用するMarkdownファイルを用意しましょう。
+
+```{bash, comment="", echo=FALSE, class.output="markdown"}
+cat assets/example.md
+```
+
+あとはMarkdownファイルをPandocで良い感じに処理すれば、無事にテンプレートが展開されます。
+`<div>`の`x`属性に指定していた値が、テンプレートの`${x}`に展開されていることがわかりますね。
+
+```{bash, comment="", prompt=TRUE, collapse=TRUE}
+cat assets/example.md | pandoc -t markdown -L assets/filter.lua --strip-comments
+```
+
+**ENJOY!**
