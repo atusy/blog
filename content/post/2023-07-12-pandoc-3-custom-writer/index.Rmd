@@ -1,0 +1,72 @@
+---
+title: Pandoc 3でカスタムライターがとてもよくなった
+author: ''
+date: '2023-07-14'
+slug: pandoc-3-custom-writer
+categories: [Pandoc]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [lua]
+---
+
+様々な文書形式を相互変換するPandocにはカスタムライター・カスタムリーダーという、独自形式の読み書きをサポートする機能があります。
+Lua言語で記述でき、便利関数も色々と用意されています。
+
+Pandoc 2系におけるカスタムライターは、処理したい要素（たとえば段落）ごとに、文字列を受け取り文字列を返す関数を定義する、素朴な設計でした。
+案外なんとかなるものですが、元の文書構造に関する情報を一部失っているという欠点がありました。
+
+> [Pandocカスタムライター入門1: 基本は文字列処理](ttps://blog.atusy.net/2022/03/14/pandoc-custom-writer/)
+
+たとえば、段落（Para）をHTMLに出力するには、入力の文字列を`<p>...</p>`で囲ったものに変換する関数を定義します。
+同様にコードブロック（CodeBlock）や画像（Image）などの関数を定義していきます。
+
+``` lua
+---Para は段落の文字列を<p>タグで囲う
+---@param s string
+---@return string
+function Para(s)
+  return "<p>" .. s .. "</p>"
+end
+```
+
+これがPandoc 3系では、`Writer`という一つの関数を定義する方式に変更されました。
+この関数は[Pandocオブジェクト](https://pandoc.org/lua-filters.html#type-pandoc)と[WriterOptionsオブジェクト](https://pandoc.org/lua-filters.html#type-writeroptions)を引数にとり、文字列を返します。
+
+[Pandocオブジェクト](https://pandoc.org/lua-filters.html#type-pandoc)は入力文書のパース結果（AST; Abstract Syntax Tree; 抽象構文木）なので、文書構造の情報を保っている点が魅力です。
+
+Pandoc公式の[例](https://pandoc.org/custom-writers.html#example-modified-markdown-writer)としては、下記のように、GitHub Flavored Markdownを調整する例が紹介されています。
+
+``` lua
+---GitHub Flavored Markdownを出力するカスタムライター
+---
+---Pandoc組込みのgfm出力では、言語指定がないコードブロックをIndented Code Block化するが、
+---このカスタムライターでは必ず ``` で囲ったFenced Code Block化する
+---
+---@param doc  Pandoc オブジェクト https://pandoc.org/lua-filters.html#type-pandoc
+---@param opts WriterOptions オブジェクト https://pandoc.org/lua-filters.html#type-writeroptions
+---@return string
+function Writer (doc, opts)
+  local filter = {
+    CodeBlock = function (cb)
+      -- only modify if code block has no attributes
+      if cb.attr == pandoc.Attr() then
+        local delimited = '```\n' .. cb.text .. '\n```'
+        return pandoc.RawBlock('markdown', delimited)
+      end
+    end
+  }
+  return pandoc.write(doc:walk(filter), 'gfm', opts)
+end
+```
+
+Luaフィルタに精通した人であれば、上記はLuaフィルタでも表現できるので、インパクトが小さいかもしれません。
+
+しかし、カスタムライター内にLuaフィルターを入れられるということは、従来であればカスタムライターとLuaフィルターの両方を用意していたところを、カスタムライター1つに集約できる魅力ととらえられますね。
+
+実際、Atusyが開発に携わっている `pandoc2review` というOSSでは、任意の文書をRe:VIEW形式に変換するためにカスタムライターとLuaフィルターの両方を使っています。
+これはPandoc 2へのサポートも続けているため、当面は仕方のない部分ではありますが、将来的にはカスタムライターへ統一できるかもしれません。
+
+> https://github.com/kmuto/pandoc2review
+
