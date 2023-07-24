@@ -1,0 +1,76 @@
+---
+title: Vimでコマンドライン履歴を遡りやすくする
+author: ''
+date: '2023-07-24'
+slug: vim-clean-history
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [ "vim", "lua" ]
+---
+
+Vimのコマンドラインで、履歴を遡りたい時、`:w`とか`:qa`とかが出てきて煩わしく感じることがあります。
+
+正直、これくらいシンプルなExコマンドであれば履歴に残しておく意味すら薄いので、履歴に残さない（or 履歴から消す）といいでしょう。
+
+履歴に残さないのはそこそこ面倒なので、消す方法を実装しました。
+
+やってることはとてもシンプル。
+
+- `ModeChanged`イベントに対する`autocmd`でコマンドラインモードから他のモードに変わった時に、直前のExコマンドの履歴を取得する
+- 履歴の内容が不要であれば履歴から消す
+  - ここでは`x`, `q`, `wq`, `qa`などを不要扱い
+
+この場合、`CmdlineLeave`が使えない点には注意です。
+`CmdlineLeave`はコマンドラインモード終了前のイベントなので、このタイミングでは履歴が更新されていません。
+
+## Vim script
+
+``` vim
+augroup histclean
+  autocmd!
+  autocmd ModeChanged c:* call s:HistClean()
+augroup END
+
+function! s:HistClean() abort
+  let cmd = histget(":", -1)
+  if cmd == "x" || cmd == "xa" || cmd =~# "^w\\?q\\?a\\?!\\?$"
+    call histdel(":", -1)
+  endif
+endfunction
+```
+
+## Lua (Neovim)
+
+``` lua
+vim.api.nvim_create_autocmd("ModeChanged", {
+  pattern = "c:*",
+  group = utils.augroup,
+  callback = function()
+    local cmd = vim.fn.histget(":", -1)
+    if cmd == "x" or cmd == "xa" or cmd:match("^w?q?a?!?$") then
+      vim.fn.histdel(":", -1)
+    end
+  end,
+})
+```
+
+## おまけ
+
+面倒と言いましたマッピングを駆使すれば履歴を残さずに特定のコマンドを実行することもできます。
+Exprマッピングを使っているので、コマンドが `<` などを含む場合はもう少し丁寧にやってください。
+
+``` lua
+vim.keymap.set("c", "<cr>", function()
+  if vim.fn.getcmdtype() ~= ":" then
+    return "<cr>"
+  end
+  local cmd = vim.fn.getcmdline()
+  if cmd == "x" or cmd == "xa" or cmd:match("^w?q?a?!?$") then
+    return "<c-u><bs><cmd>" .. cmd .. "<cr>"
+  end
+  return "<cr>"
+end, {expr = true})
+```
