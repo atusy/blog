@@ -1,5 +1,6 @@
 ---
-title: 日本語の「っ」から始まる送り仮名とSKK+AZUKによる日本語入力に関する考察
+title: 日本語の「っ」から始まる送り仮名とSKK+AZIKによる日本語入力に関する考察
+slug: skk-azik-and-sokuon-okuri
 date: "2023-08-01"
 format: hugo-md
 ---
