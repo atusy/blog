@@ -42,3 +42,5 @@ vignettes/*.pdf
 rsconnect/
 .Rproj.user
 public/
+
+/.quarto/
