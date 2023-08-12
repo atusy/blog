@@ -22,6 +22,7 @@ pygmentsCodeFences = true
 
 [markup.goldmark.renderer]
 unsafe= true
+hardWraps = true
 
 [taxonomies]
   category = "categories"
