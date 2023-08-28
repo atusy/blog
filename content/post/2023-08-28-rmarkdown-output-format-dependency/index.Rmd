@@ -1,0 +1,92 @@
+---
+title: Modifying output format from within R Markdown chunk by `rmarkdown::output_format_dependency`
+author: ''
+date: '2023-08-28'
+slug: rmarkdown-output-format-dependency
+categories: [R, R Markdown]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+This article introduces a new feature from **rmarkdown** 2.24, [`output_format_dependency()`].
+
+R Markdown users use variety of output formats from variety of packages such as `html_document`, `bookdown::git_book`, `revealjs::revealjs_presentation`, and so on
+
+Usually, users specify the YAML frontmatter to choose and tweak formats.
+
+``` yaml
+output:
+  html_document:
+    toc: true
+```
+
+Some people may be surprised, but the output formats are R functions!
+And the above example is tweaking the output format by specifying function arguments via the YAML frontmatter.
+Output formats already provide customizibility.
+
+But what if we want further customizations?
+
+Then, [`output_format_dependency()`] is for you.
+This new feature allows you to modify output format **from within chunk**.
+
+The example below adds a lua filter and a post processor.
+You can try it simply by copy and paste it to a chunk of your Rmd files.
+
+``` {r, eval=FALSE}
+rmarkdown::output_format_dependency(
+  name = "example",
+  pre_processor = function(...) {
+    # add lua filter to automatically add line numbers to CodeBlock
+    filterfile <- tempfile()
+    filterurl <- "https://raw.githubusercontent.com/atusy/lua-filters/master/lua/auto-number-lines.lua"
+    download.file(filterurl, filterfile)
+    rmarkdown::pandoc_lua_filter_args(filterfile)
+  },
+  post_processor = function(metadata, input_file, output_file, ...) {
+    # make a copy suffixed by timestamp
+    output_file2 <- sub(
+      "([.][^.]+)$",
+      paste0("-", Sys.time(), "\\1"),
+      output_file
+    )
+    file.copy(output_file, output_file2, overwrite = TRUE)
+    output_file
+  }
+)
+```
+
+If you have an experience with defining custom output formats, you probably notice that [`output_format_dependency()`] and [`output_format()`] shares most of the arguments.
+[`output_format_dependency()`] can do almost evertyhing the [`output_format()`] does.
+Exception is the `knitr` argument in [`output_format()`] because [`output_format_dependency()`] is declared during knit and merged to original output format after knit.
+
+Compared to [`output_format()`], [`output_format_dependency()`] has advantages for both users and R package developers because [`output_format_dependency()`] works **from within chunk**.
+
+For users, the advantage is that they do not have to dive into developer's world.
+There are several ways to use [`output_format()`], but all are slightly complex: writing `.Rprofile`, writing an R script, or writing an R package, and so on.
+If users want to re-use the [`output_format_dependency()`] in multiple Rmd files, then factor out the Rmd file and include it by other documents by [child](https://yihui.org/knitr/options/#child-documents) chunk option.
+
+For R package developers, the advantage is that they do not have to define multiple output formats just for sharing the same dependency.
+The previous example has a post processor that makes a copy of the output file suffixed by timestamp.
+This can be considered as a format-agnostic feature, however, the usage of [`output_format()`] means defining `timestamped_html_document()`, `timestamped_pdf_document()`, `timestamped_word_document()`, and so on.
+This is a nightmare.
+Instead, by using [`output_format_dependency()`], developers just have to export a function, and let users use a function in Rmd files.
+
+In the future, I will implement `attach_output_format_dependencies()` which works like `htmltools::attachDependencies()`.
+Then R packages can provide widgets that can automatically import variety of dependencies such as Lua filters.
+
+## Call for sponsorships
+
+I deeply appreciate my sponsors that supports my contributions (https://github.com/sponsors/atusy).
+
+![](images/sponsors.jpg)
+
+If you liked my contributions and started sponsorship, I would be more than happy!
+My contributions are slow these days because I am not using R these days.
+In such a situation, the sponsorship really motivates me to contribute to R community.
+
+
+
+[`output_format_dependency()`]: https://rmarkdown.rstudio.com/docs/reference/output_format_dependency.html
+[`output_format()`]: https://rmarkdown.rstudio.com/docs/reference/output_format.html
