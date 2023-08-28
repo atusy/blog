@@ -23,7 +23,7 @@ output:
 ```
 
 Some people may be surprised, but the output formats are R functions!
-And the above example is tweaking the output format by specifying function arguments via the YAML frontmatter.
+And the above example is equivalent to specifying the `toc` argument to [`html_document()`](https://rmarkdown.rstudio.com/docs/reference/html_document.html).
 Output formats already provide customizibility.
 
 But what if we want further customizations?
