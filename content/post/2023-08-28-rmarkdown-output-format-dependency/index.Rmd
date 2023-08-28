@@ -84,7 +84,7 @@ I deeply appreciate my sponsors for supporting my contributions (https://github.
 
 If you liked my contributions and started sponsorship, I would be more than happy!
 My contributions are slow these days because I am using R less these days.
-In such a situation, the sponsorship really motivates me to contribute to R community.
+In such a situation, your sponsorship really motivates me contributing to R community.
 
 
 
