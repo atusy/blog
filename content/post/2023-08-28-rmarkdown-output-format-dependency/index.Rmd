@@ -78,7 +78,7 @@ Then R packages can provide widgets that can automatically import variety of dep
 
 ## Call for sponsorships
 
-I deeply appreciate my sponsors that supports my contributions (https://github.com/sponsors/atusy).
+I deeply appreciate my sponsors for supporting my contributions (https://github.com/sponsors/atusy).
 
 ![](images/sponsors.jpg)
 
