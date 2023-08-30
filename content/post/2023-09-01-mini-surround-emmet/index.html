@@ -1,0 +1,135 @@
+---
+title: mini.surroundによるHTMLタグ編集のemmet対応
+author: ''
+date: '2023-09-01'
+slug: mini-surround-emmet
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p><a href="https://github.com/echasnovski/mini.surround">mini.surround</a>は<a href="https://github.com/machakann/vim-sandwich">vim-sandwich</a>のような、括弧やクオーテーションなどで囲まれた文字列を編集するためのNeovim向けプラグインです。</p>
+<p>選択範囲を<code>()</code>で囲う、文字列の囲いを<code>()</code>から<code>""</code>に変更する、<code>""</code>による囲いを削除するといったことが可能です。同様にHTMLタグに対する操作にも対応していますが素朴なものです。</p>
+<p>emmet記法に対応すると、<code>div.foo</code>で<code>&lt;div class=foo&gt;&lt;/div&gt;</code>に相当するタグの追加や削除などができて便利そうなので実装してみました。他にも<code>div&gt;p</code>で<code>&lt;div&gt;&lt;p&gt;&lt;/p&gt;&lt;/div&gt;</code>のようなネストしたタグも扱えるのでなかなか便利です。現在はとりあえずタグの追加と置換時の新しいタグでemmet記法を使えます。</p>
+<p><img src="images/emmet.gif" /></p>
+<p>置換</p>
+<div class="foo">
+<div>
+hoge
+</div>
+</div>
+<p>設定方法は記事後半の<span id="impl">実装</span>または<a href="https://github.com/atusy/dotfiles/blob/76fdab24798868a73489156c00e5fda08ba54589/dot_config/nvim/lua/plugins/textobj.lua#L147-L168">私の設定</a>を参考にしてください。</p>
+<p>実装方法ですが、emmet記法をどうパースするかが課題ですね。たぶん、文字列操作でもそこまで大変にはなりません。でもせっかくならもっとそれっぽいパーサーが欲しいですね。</p>
+<p>Neovimユーザーであれば、パーサーと聞くと<code>treesitter</code>を思い浮かべます。残念ながら<code>treesitter</code>で書かれたemmetパーサーはなさそうです。かと言って<a href="https://github.com/echasnovski/mini.surround">mini.surround</a>の用途で<code>treesitter</code>のパーサーをがっつり書こうという気にもなれません。</p>
+<p>実はNeovimは[lpeg]というパターンマッチングライブラリを内蔵しており、これを使ってパーサーを実装できます。</p>
+<p>実際以下の84行程度のファイルで実装しています。実体としてはパーサーは47行で実装しており、残りはパースした結果をHTMLタグに変換するコードです。</p>
+<p><a href="https://github.com/atusy/dotfiles/blob/5919dfb49ea21ee70cd3fcb26fa48819c412426e/dot_config/nvim/lua/atusy/parser/emmet.lua#L1-L84" class="uri">https://github.com/atusy/dotfiles/blob/5919dfb49ea21ee70cd3fcb26fa48819c412426e/dot_config/nvim/lua/atusy/parser/emmet.lua#L1-L84</a></p>
+<p>というわけで、<code>mini.surround</code>をemmet対応させられて便利！という話でもありつつ、Neovimのマイナー（？）機能な<code>lpeg</code>の紹介でした。</p>
+<p>ENJOY!</p>
+<div id="impl" class="section level2">
+<h2>実装</h2>
+<p><a href="https://github.com/atusy/dotfiles/blob/76fdab24798868a73489156c00e5fda08ba54589/dot_config/nvim/lua/plugins/textobj.lua#L147-L168">私の設定</a>から必要な部分を抜き出したものです。たぶん動くはず。</p>
+<pre class="lua"><code>-- emmet parserの実装
+local lpeg = vim.lpeg
+local name = (lpeg.P(1) - lpeg.S(&quot;#.[&gt;&quot;)) ^ 1
+local tag = lpeg.Cg(name, &quot;tag&quot;)
+local id = lpeg.P(&quot;#&quot;) * name
+local cls = lpeg.P(&quot;.&quot;) * name
+local kv = lpeg.P({ &quot;[&quot; * ((1 - lpeg.S(&quot;[]&quot;)) + lpeg.V(1)) ^ 0 * &quot;]&quot; })
+local child = lpeg.P(&quot;&gt;&quot;) * lpeg.P(1) ^ 1
+local attr = lpeg.C(child + kv + id + cls) ^ 0
+
+local kindmap = {
+  [&quot;.&quot;] = &quot;class&quot;,
+  [&quot;#&quot;] = &quot;id&quot;,
+  [&quot;[&quot;] = &quot;kv&quot;,
+  [&quot;&gt;&quot;] = &quot;child&quot;,
+}
+
+local function parse(s)
+  local splits = lpeg.match(lpeg.Ct(tag * attr), s)
+
+  if type(splits) ~= &quot;table&quot; then
+    return
+  end
+
+  local res = {
+    tag = splits.tag,
+    class = {},
+    id = {},
+    kv = {},
+    child = nil,
+  }
+
+  for _, sp in ipairs(splits) do
+    local k, v = string.match(sp, &quot;(.)(.*)&quot;)
+    local kind = kindmap[k]
+    if kind == &quot;child&quot; then
+      res.child = parse(v)
+    else
+      if kind == &quot;kv&quot; then
+        v = string.gsub(v, &quot;%]$&quot;, &quot;&quot;)
+      end
+      table.insert(res[kind], v)
+    end
+  end
+
+  return res
+end
+
+-- emmet -&gt; HTMLタグの変換の実装
+local function opentag(x)
+  local res = &quot;&lt;&quot; .. x.tag
+  if #x.id &gt; 0 then
+    res = res .. &#39; id=&quot;&#39; .. x.id[1] .. &#39;&quot;&#39;
+  end
+  if #x.class &gt; 0 then
+    res = res .. &#39; class=&quot;&#39; .. table.concat(x.class, &quot; &quot;) .. &#39;&quot;&#39;
+  end
+  if #x.kv &gt; 0 then
+    res = res .. &quot; &quot; .. table.concat(x.kv, &quot; &quot;)
+  end
+  res = res .. &quot;&gt;&quot;
+  if x.child then
+    res = res .. opentag(x.child)
+  end
+  return res
+end
+
+local function closetag(x)
+  local res = &quot;&quot;
+  if x.child then
+    res = closetag(x.child) .. res
+  end
+  res = res .. &quot;&lt;/&quot; .. x.tag .. &quot;&gt;&quot;
+  return res
+end
+
+local function totag(x)
+  local p = parse(x)
+  return { left = opentag(p), right = closetag(p) }
+end
+
+
+-- mini.surroundの設定
+require(&quot;mini.surround&quot;).setup({
+  n_lines = 100,
+  custom_surroundings = {
+    t = {
+      input = { &quot;&lt;(%w-)%f[^&lt;%w][^&lt;&gt;]-&gt;.-&lt;/%1&gt;&quot;, &quot;^&lt;.-&gt;().*()&lt;/[^/]-&gt;$&quot; }, -- from https://github.com/echasnovski/mini.surround/blob/14f418209ecf52d1a8de9d091eb6bd63c31a4e01/lua/mini/surround.lua#LL1048C13-L1048C72
+      output = function()
+        local emmet = require(&quot;mini.surround&quot;).user_input(&quot;Emmet&quot;)
+        if not emmet then
+          return nil
+        end
+        return totag(emmet)
+      end,
+    }
+  },
+})</code></pre>
+<p><a href="https://www.inf.puc-rio.br/~roberto/lpeg/">lpeg</a></p>
+</div>
