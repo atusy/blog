@@ -8,6 +8,7 @@ tags: []
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [lua]
 ---
 
 [mini.surround]は[vim-sandwich]のような、括弧やクオーテーションなどで囲まれた文字列を編集するためのNeovim向けプラグインです。
