@@ -16,16 +16,10 @@ output:
 <p>選択範囲を<code>()</code>で囲う、文字列の囲いを<code>()</code>から<code>""</code>に変更する、<code>""</code>による囲いを削除するといったことが可能です。同様にHTMLタグに対する操作にも対応していますが素朴なものです。</p>
 <p>emmet記法に対応すると、<code>div.foo</code>で<code>&lt;div class=foo&gt;&lt;/div&gt;</code>に相当するタグの追加や削除などができて便利そうなので実装してみました。他にも<code>div&gt;p</code>で<code>&lt;div&gt;&lt;p&gt;&lt;/p&gt;&lt;/div&gt;</code>のようなネストしたタグも扱えるのでなかなか便利です。現在はとりあえずタグの追加と置換時の新しいタグでemmet記法を使えます。</p>
 <p><img src="images/emmet.gif" /></p>
-<p>置換</p>
-<div class="foo">
-<div>
-hoge
-</div>
-</div>
-<p>設定方法は記事後半の<span id="impl">実装</span>または<a href="https://github.com/atusy/dotfiles/blob/76fdab24798868a73489156c00e5fda08ba54589/dot_config/nvim/lua/plugins/textobj.lua#L147-L168">私の設定</a>を参考にしてください。</p>
+<p>設定方法は記事後半の<a href="#impl">実装</a>または<a href="https://github.com/atusy/dotfiles/blob/76fdab24798868a73489156c00e5fda08ba54589/dot_config/nvim/lua/plugins/textobj.lua#L147-L168">私の設定</a>を参考にしてください。</p>
 <p>実装方法ですが、emmet記法をどうパースするかが課題ですね。たぶん、文字列操作でもそこまで大変にはなりません。でもせっかくならもっとそれっぽいパーサーが欲しいですね。</p>
 <p>Neovimユーザーであれば、パーサーと聞くと<code>treesitter</code>を思い浮かべます。残念ながら<code>treesitter</code>で書かれたemmetパーサーはなさそうです。かと言って<a href="https://github.com/echasnovski/mini.surround">mini.surround</a>の用途で<code>treesitter</code>のパーサーをがっつり書こうという気にもなれません。</p>
-<p>実はNeovimは[lpeg]というパターンマッチングライブラリを内蔵しており、これを使ってパーサーを実装できます。</p>
+<p>実はNeovimは<a href="https://www.inf.puc-rio.br/~roberto/lpeg/">lpeg</a>というパターンマッチングライブラリを内蔵しており、これを使ってパーサーを実装できます。</p>
 <p>実際以下の84行程度のファイルで実装しています。実体としてはパーサーは47行で実装しており、残りはパースした結果をHTMLタグに変換するコードです。</p>
 <p><a href="https://github.com/atusy/dotfiles/blob/5919dfb49ea21ee70cd3fcb26fa48819c412426e/dot_config/nvim/lua/atusy/parser/emmet.lua#L1-L84" class="uri">https://github.com/atusy/dotfiles/blob/5919dfb49ea21ee70cd3fcb26fa48819c412426e/dot_config/nvim/lua/atusy/parser/emmet.lua#L1-L84</a></p>
 <p>というわけで、<code>mini.surround</code>をemmet対応させられて便利！という話でもありつつ、Neovimのマイナー（？）機能な<code>lpeg</code>の紹介でした。</p>
@@ -131,5 +125,4 @@ require(&quot;mini.surround&quot;).setup({
     }
   },
 })</code></pre>
-<p><a href="https://www.inf.puc-rio.br/~roberto/lpeg/">lpeg</a></p>
 </div>
