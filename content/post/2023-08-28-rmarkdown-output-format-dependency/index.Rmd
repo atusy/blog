@@ -73,8 +73,69 @@ This can be considered as a format-agnostic feature, however, the usage of [`out
 This is a nightmare.
 Instead, by using [`output_format_dependency()`], developers just have to export a function, and let users use a function in Rmd files.
 
-In the future, I will implement `attach_output_format_dependencies()` which works like `htmltools::attachDependencies()`.
-Then R packages can provide widgets that can automatically import variety of dependencies such as Lua filters.
+The previous example merges the dependency to the output format by implicit `knitr::knit_print()`.
+This is a convenient way to define a document-specific dependency.
+However, when packaging, this is not a robust way because there is no guarantee that the dependency is `knitr::knit_print`ed.
+In such a case, do explicit merging by `knitr::knit_meta_add()` like a following example implementing cross reference of sections.
+
+``` {r, include=FALSE}
+ref <- function(x) {
+  sprintf("`r ref('%s')`", x)
+}
+```
+
+````
+---
+title: cross reference of sections
+output: html_document
+---
+
+`r ""````{cat, engine.opts=list(file = "example.lua")}
+-- lua filter
+
+local headers = {}
+
+local function collect_header(header)
+  headers["#" .. header.identifier] = header
+end
+
+local function link_header(link)
+  if #link.content == 0 and headers[link.target] then
+    link.content = headers[link.target].content
+  end
+  return link
+end
+
+return {
+  { Header = collect_header },
+  { Link = link_header },
+}
+```
+
+`r ""````{r}
+ref <- function(id) {
+  dep <- rmarkdown::output_format_dependency(
+    name = "example",
+    pandoc = list(lua_filters = "example.lua"),
+  )
+
+  # dep is merged to output_format without relying on knit_print
+  knitr::knit_meta_add(list(dep))
+
+  return(sprintf("[](#%s)", id))
+}
+```
+
+# awesome section {#awesome} 
+
+see `r ref("brilliant")`
+
+# brilliant section {#brilliant}
+
+see `r ref("awesome")`
+````
+
+Enjoy R Markdown!!
 
 ## Call for sponsorships
 

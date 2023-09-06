@@ -58,8 +58,59 @@ The previous example has a post processor that makes a copy of the output file s
 This can be considered as a format-agnostic feature, however, the usage of <a href="https://rmarkdown.rstudio.com/docs/reference/output_format.html"><code>output_format()</code></a> means defining <code>timestamped_html_document()</code>, <code>timestamped_pdf_document()</code>, <code>timestamped_word_document()</code>, and so on.
 This is a nightmare.
 Instead, by using <a href="https://rmarkdown.rstudio.com/docs/reference/output_format_dependency.html"><code>output_format_dependency()</code></a>, developers just have to export a function, and let users use a function in Rmd files.</p>
-<p>In the future, I will implement <code>attach_output_format_dependencies()</code> which works like <code>htmltools::attachDependencies()</code>.
-Then R packages can provide widgets that can automatically import variety of dependencies such as Lua filters.</p>
+<p>The previous example merges the dependency to the output format by implicit <code>knitr::knit_print()</code>.
+This is a convenient way to define a document-specific dependency.
+However, when packaging, this is not a robust way because there is no guarantee that the dependency is <code>knitr::knit_print</code>ed.
+In such a case, do explicit merging by <code>knitr::knit_meta_add()</code> like a following example implementing cross reference of sections.</p>
+<pre><code>---
+title: cross reference of sections
+output: html_document
+---
+
+```{cat, engine.opts=list(file = &quot;example.lua&quot;)}
+-- lua filter
+
+local headers = {}
+
+local function collect_header(header)
+  headers[&quot;#&quot; .. header.identifier] = header
+end
+
+local function link_header(link)
+  if #link.content == 0 and headers[link.target] then
+    link.content = headers[link.target].content
+  end
+  return link
+end
+
+return {
+  { Header = collect_header },
+  { Link = link_header },
+}
+```
+
+```{r}
+ref &lt;- function(id) {
+  dep &lt;- rmarkdown::output_format_dependency(
+    name = &quot;example&quot;,
+    pandoc = list(lua_filters = &quot;example.lua&quot;),
+  )
+
+  # dep is merged to output_format without relying on knit_print
+  knitr::knit_meta_add(list(dep))
+
+  return(sprintf(&quot;[](#%s)&quot;, id))
+}
+```
+
+# awesome section {#awesome} 
+
+see `r ref(&#39;brilliant&#39;)`
+
+# brilliant section {#brilliant}
+
+see `r ref(&#39;awesome&#39;)`</code></pre>
+<p>Enjoy R Markdown!!</p>
 <div id="call-for-sponsorships" class="section level2">
 <h2>Call for sponsorships</h2>
 <p>I deeply appreciate my sponsors for supporting my contributions (<a href="https://github.com/sponsors/atusy" class="uri">https://github.com/sponsors/atusy</a>).</p>
