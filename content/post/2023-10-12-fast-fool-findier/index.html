@@ -1,0 +1,164 @@
+---
+title: Rでアホになった要素を速く見つけろ！（ナベアツネタ）
+author: ''
+date: '2023-10-12'
+slug: fast-fool-findier
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<blockquote>
+<p>ナベアツは数字がでかくなるほどアホになる割合がアップすると聞いたので検証してみました
+<a href="https://twitter.com/jagarikin/status/1711855799184785732" class="uri">https://twitter.com/jagarikin/status/1711855799184785732</a></p>
+</blockquote>
+<p>これをRでやってみるべく、MITTIさんが書いたコードが重いらしいです。</p>
+<blockquote>
+<pre class="r"><code>f &lt;- function(n){
+x &lt;- 1:10^n
+mean(str_detect(x, &quot;[3]&quot;) | x %% 3 == 0)
+}</code></pre>
+<p>f(8)でmacがフリーズして困ったことになってる😇</p>
+<p><a href="https://twitter.com/MITTI12101/status/1712071347466305823" class="uri">https://twitter.com/MITTI12101/status/1712071347466305823</a></p>
+</blockquote>
+<p>というわけで高速化してみましょう。</p>
+<div id="の倍数を速く見つける" class="section level2">
+<h2>3の倍数を速く見つける</h2>
+<p>一般的な方法として3の倍数かどうかを判定するには3で割った余りが0であるか確認するのが良いです。</p>
+<p>しかし、桁が増えると計算負荷が高くなるのも当然です。</p>
+<p>今回の場合、<code>1:10^n</code>に対してそれぞれが3の倍数か判定しているところに注目すると、剰余の計算が不要になります。</p>
+<p>だって3の倍数は3回ごとに現れるのだもの。</p>
+<pre class="r"><code>n &lt;- 7
+bench::mark(
+  occurrence = rep_len(c(FALSE, FALSE, TRUE), 10L^n),
+  jouyo = seq(10L^n) %% 3L == 0L,
+  min_iterations = 10
+) |&gt; plot()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/factor-of-three-1.png" width="672" /></p>
+</div>
+<div id="のつく数を速く見つける" class="section level2">
+<h2>3のつく数を速く見つける</h2>
+<p>元の例では <code>str_detect(x, "[3]")</code> と、正規表現を使って検出しています。しかし、今回は正規表現まで使う理由は薄いですね。</p>
+<p><code>stringi::stri_detect_fixed()</code> や <code>grepl(fixed = TRUE)</code> を使うと良いでしょう。なぜかは知りませんが、部分一致であれば<code>grepl(fixed = TRUE)</code>が最速のようです。
+<strong>base</strong>パッケージもあなどれませんね。</p>
+<pre class="r"><code>x &lt;- seq(10^6)
+bench::mark(
+  stri_detect_fixed = stringi::stri_detect_fixed(x, &quot;3&quot;),
+  str_detect = stringr::str_detect(x, &quot;3&quot;),
+  grepl_fixed = grepl(&quot;3&quot;, x, fixed = TRUE),
+  grepl = grepl(&quot;3&quot;, x),
+  min_iterations = 10
+) |&gt; plot()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/str-detect-3-1.png" width="672" /></p>
+<p>ところで、任意の数値に対して3を含むか検証するのであれば上記が一般解でしょう。</p>
+<p>3の倍数の検出でも指摘した通り、今回は<code>1：10^n</code>という数列に対して3を含むか検出したいので、3がどこに現れるか考えると、ずっと速くなります。</p>
+<p>たとえば1の位に3が出現するのは3, 13, 23, … と10回起きです。
+10の位に3が出現するのは30~39, 130~139, 230~239, …と100回起きに10回です。</p>
+<p>この性質に注目した<code>has3_by_occurrence()</code>を、先の<code>grepl(fixed = TRUE)</code>と比較してみましょう。</p>
+<pre class="r"><code>has3_internal &lt;- function(n) {
+  x &lt;- rep_len(FALSE, 10L^n)
+  k &lt;- 10L^(n - 1L)
+  i &lt;- 3L * k
+  x[i:(i + k - 1)] &lt;- TRUE
+  x
+}
+
+has3_by_occurrence &lt;- function(n) {
+  len &lt;- 10^n
+  x &lt;- logical(len)
+  for (i in seq(n)) {
+    x[rep_len(has3_internal(i), len)] &lt;- TRUE
+  }
+  x
+}
+
+bench::mark(
+  occurrence = has3_by_occurrence(7),
+  grepl_fixed = grepl(&quot;3&quot;, seq(10^7), fixed = TRUE),
+  min_iterations = 10,
+) |&gt; plot()
+#&gt; Warning: Some expressions had a GC in every iteration; so filtering is
+#&gt; disabled.</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/has-three-1.png" width="672" /></p>
+<p>ケタで速いですね。</p>
+<p>ちなみに、<code>has3_by_occurrence()</code>では、<code>has3_internal()</code>の返り値を<code>rep_len()</code>して長さ調整していました。</p>
+<p>可読性を犠牲にしていいならば、Rがベクトルをリサイクルする仕組みを利用すると、更に速くなります。</p>
+<pre class="r"><code>has3_by_occurrence2 &lt;- function(n) {
+  len &lt;- 10^n
+  x &lt;- logical(len)
+  for (i in seq(n)) {
+    x[has3_internal(i)] &lt;- TRUE
+  }
+  x
+}
+
+bench::mark(
+  occurrence1 = has3_by_occurrence(7),
+  occurrence2 = has3_by_occurrence2(7),
+  min_iterations = 10,
+) |&gt; plot()
+#&gt; Warning: Some expressions had a GC in every iteration; so filtering is
+#&gt; disabled.</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/has-three-2-1.png" width="672" /></p>
+</div>
+<div id="の倍数または3のつく数を速く見つける" class="section level2">
+<h2>3の倍数または3のつく数を速く見つける</h2>
+<p>以上を踏まえて、元の例をbaselineとしたベンチマークを比較してみましょう。</p>
+<pre class="r"><code>aho_baseline &lt;- function(n) {
+  x &lt;- 1:10^n
+  stringr::str_detect(x, &quot;[3]&quot;) | x %% 3 == 0
+}
+
+aho_fast_internal &lt;- function(n) {
+  x &lt;- rep_len(FALSE, 10L^n)
+  k &lt;- 10L^(n - 1L)
+  i &lt;- 3L * k
+  x[i:(i + k - 1)] &lt;- TRUE
+  x
+}
+
+aho_fast &lt;- function(n) {
+  len &lt;- 10L^n
+
+  # 3の倍数ならTRUE
+  x &lt;- rep_len(c(FALSE, FALSE, TRUE), len) # 3の倍数でバカになる
+
+  # 3がつくならTRUE
+  for (m in seq(n)) {
+    x[aho_fast_internal(m)] &lt;- TRUE # 3がつくとバカになる
+  }
+
+  x
+}
+
+bench::mark(
+  baseline = aho_baseline(6),
+  fast = aho_fast(6),
+  min_iterations = 10,
+) |&gt; plot()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/aho6-1.png" width="672" /></p>
+<p>十分に高速化していますね。ちょっと意外かもしれませんが、ここでは <code>for</code> が高速化で大活躍しています。</p>
+<p>MITTIさんとは環境が異なるものの、8ケタでも十分に戦えます。</p>
+<pre class="r"><code>plot(bench::mark(aho_fast(8), min_iterations = 10))
+#&gt; Warning: Some expressions had a GC in every iteration; so filtering is
+#&gt; disabled.</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/aho8-1.png" width="672" /></p>
+</div>
+<div id="アホになる割合" class="section level2">
+<h2>アホになる割合</h2>
+<p>せっかくなので見ておきましょう。</p>
+<pre class="r"><code>seq(8) |&gt;
+  purrr::map_dbl(function(n) mean(aho_fast(n))) |&gt;
+  print() |&gt;
+  plot()
+#&gt; [1] 0.3000000 0.4500000 0.5130000 0.5625000 0.6063300 0.6457050 0.6811353
+#&gt; [8] 0.7130218</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/plot-1.png" width="672" /></p>
+<p>あまり知られていないかもしれませんが、Rにおいて、<code>print</code>関数は入力をそのまま返すのがお作法とされています。なのでパイプの間に挟んでもちゃんと機能します。</p>
+<p>いやあ、こういうRらしさを使った高速化、楽しいですね！</p>
+<p>ENJOY!</p>
+</div>
