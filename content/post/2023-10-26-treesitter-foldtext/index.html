@@ -1,0 +1,67 @@
+---
+title: "テキストの折り畳みを彩る vim.treesitter.foldtext() を使ってみる"
+author: atusy
+date: '2023-10-26'
+slug: treesitter-foldtext
+categories: [Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [lua]
+summary: |
+  Neovim 0.10で使えるようになる`vim.treesitter.foldtext()`を使うと折り畳んだコードもキレイに色付けられるぞ。ラッパー書けば次の行の情報も色付けて表示できたりしてとっても便利だぞ。
+---
+
+
+
+<p>2023/10/27の<a href="https://vim-jp.org/ekiden/">Vim駅伝</a>記事です。前回はKyoh86さんによる「<a href="https://zenn.dev/vim_jp/articles/f23938c7df2dd9">忘れられないQuickfix</a>」でした。</p>
+<p>Neovimは<a href="https://tree-sitter.github.io/tree-sitter/">Tree-sitter</a>を組込むことで、コードをパースし、文法に基づいたシンタックスハイライトや文字列選択を可能にしています。</p>
+<p>最近、Neovimに<code>vim.treesitter.foldtext</code>関数が追加され、折り畳んだコードのハイライトが可能になりました<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>。
+Neovim 0.10で利用可能になる見込みです（2023/10/17時点の最新版は0.9.4）。</p>
+<p><code>set foldtext=v:lua.vim.treesitter.foldtext()</code>すると有効化でき、以下のように折り畳んだ部分が色付きます。ステキ！関連するところで、<code>vim.treesitter.foldexpr()</code>を使うと折り畳み範囲の決定もTreesitter任せにできます。これらの機能は独立しているので、折り畳み範囲は手動で決めつつ (<code>set foldmethod=manual</code>)、色付けはTreesitterに任せるのもアリです。</p>
+<p><img src="images/fold-close-treesitter.png" /></p>
+<p>対するデフォルト（<code>set foldtext=foldtext()</code>）は以下の通り、色付いていません。個人的には折り畳んだ頭の部分に付加情報の<code>+--  3 lines:</code>がつくのも苦手でした。</p>
+<p><img src="images/fold-close-default.png" /></p>
+<p>ちなみに、可読性の高いfoldtextを実現するプラグインには<a href="https://github.com/lambdalisue/readablefold.vim">readablefold.vim</a>や<a href="https://github.com/anuvyklack/pretty-fold.nvim">pretty-fold.nvim</a>、<a href="https://github.com/kevinhwang91/nvim-ufo">nvim-ufo</a>などがあります。
+<a href="https://github.com/kevinhwang91/nvim-ufo">nvim-ufo</a>はTreesitterによる色付けにも対応しているようです。</p>
+<p>もひとつちなんでおくとこの機能の実現の立役者は、foldtextのhighlightをvirtual textの書式で定義できるようになった下記のPRです。</p>
+<blockquote>
+<p>feat(folds): support virtual text format for ‘foldtext’ <a href="https://github.com/neovim/neovim/pull/25209" class="uri">https://github.com/neovim/neovim/pull/25209</a></p>
+</blockquote>
+<p>さて、これだけだとただの使ってみた系の記事なのですが、少し工夫してあげると、JSONの折り畳みなんかもキレイに表示できるようになります。通常、オブジェクトを折り畳んでしまうと<code>{・・・・・・・・・・・・・・・</code>みたいな表示になってしまって中身に皆目検討つかなくなります。
+<code>vim.treesitter.foldtext</code>関数をうまく使ってあげると、2行目の内容も色付けた上で1行目にマージしたfoldtextを生成できます。</p>
+<p><img src="images/fold-close-json.png" /></p>
+<pre class="lua"><code>function Foldtext()
+  local res = vim.treesitter.foldtext()
+
+  if type(res) == &quot;string&quot; then
+    return res
+  end
+
+  if (#res == 1 and res[1][1] == &quot;{&quot;) or (#res == 2 and res[1][1]:match(&quot;^%s+$&quot;) and res[2][1] == &quot;{&quot;) then
+    local foldstart = vim.v.foldstart
+    vim.v.foldstart = foldstart + 1
+    local text = vim.treesitter.foldtext()
+    if type(text) == &quot;table&quot; then
+      for i, v in pairs(text) do
+        if i == 1 and v[1]:match(&quot;^%s+$&quot;) then
+          v[1] = &quot; &quot;
+        end
+        table.insert(res, v)
+      end
+    end
+    vim.v.foldstart = foldstart
+  end
+  return res
+end
+
+vim.opt.foldtext = [[v:lua.Foldtext()]]</code></pre>
+<p><a href="https://vim-jp.org/ekiden/">Vim駅伝</a>、次回は10/30でmityuさんによる「:terminal から親の Vim でファイルを開く(cmd.exe 編)」です。</p>
+<p>ENJOY!</p>
+<div class="footnotes footnotes-end-of-document">
+<hr />
+<ol>
+<li id="fn1"><p>feat(treesitter): add foldtext with treesitter highlighting <a href="https://github.com/neovim/neovim/pull/25391" class="uri">https://github.com/neovim/neovim/pull/25391</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
