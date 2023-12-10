@@ -52,6 +52,6 @@ let g:denops#deno_dir = 'path/to/deno/1.38.4/cache'
 
 また、プラグインの初回インストールやDenoの更新に際して発生する待ち時間も減らすべく、独自に並列キャッシュする仕組みも入れてみてます。快速。
 
-> https://github.com/atusy/dotfiles/blob/5c3d3d4984712fdb673d6778f8a01d7f9877ceae/dot_config/nvim/lua/plugins/denops/init.lua?plain=1#L5
+> https://github.com/atusy/dotfiles/blob/5c3d3d4984712fdb673d6778f8a01d7f9877ceae/dot_config/nvim/lua/plugins/skkeleton/init.lua?plain=1#L23-L29
 
 ENJOY!
