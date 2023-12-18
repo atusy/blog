@@ -1,0 +1,52 @@
+---
+title: VimのOperator待機モードでexclusive motionをinclusiveに使う
+author: atusy
+date: '2023-12-18'
+slug: vim-convert-exclusive-motions-into-inclusive
+categories: [Vim, Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+[Vimアドベントカレンダー2023](https://qiita.com/advent-calendar/2023/vim)の12/18の記事です。
+昨日の記事は以下の通りでした
+
+-   ryoppippiさんによる「びむびむびーむ」(2023/12/18 22:25時点で未投稿)
+-   atusyによる「[Vimで無名レジスタでchange/delete/yankした時に、イニシャルに相当するレジスタにも値を入れる](https://blog.atusy.net/2023/12/17/vim-easy-to-remember-regnames/)」
+
+Vimのモーションのinclusive/exclusive、なかなか意識する場面が少ないですね。
+
+たとえば、単語の区切りのスペースの上で`db`すると、スペースが消えずに、単語の間のスペースが2つになってしまいます。
+これは`b`がexclusive motionなためです（[:h b](https://vim-jp.org/vimdoc-ja/motion.html#b)）。
+難しい......。
+
+    hoge fuga piyo
+             ↑ここでdbすると
+    hoge  piyo
+    になる
+
+`d`や`c`を実行すると[Operator待機モード](https://vim-jp.org/vimdoc-ja/intro.html#Operator-pending-mode)という、操作範囲の指定を待つモードに入るわけですが、このモード用にマッピングされている`v`（[:h o_v](https://vim-jp.org/vimdoc-ja/motion.html#o_v)）を使うと、文字単位のexclusive motionとinclusive motionを相互変換できます。
+
+つまり、さっきの例で`dvb`すると、inclusiveになってスペースが1つになる......！
+
+    hoge fuga piyo
+             ↑ここでdvbすると
+    hoge piyo
+    になる
+
+今回のケースくらいなら、`dbx`や`xdb`という手もあります。
+
+    hoge fuga piyo
+             ↑ここでdbして
+    hoge  piyo
+         ↑ここにカーソルがくるのでxすると
+    hoge piyo
+
+しかし、たとえば行末にカーソルがあるような状況で`fuga piyo`をyankしたい時など、`yv2b`や`yvFf`が大活躍することでしょう。
+
+    hoge fuga piyo
+                 ↑ここでyvFf
+
+**ENJOY!**
