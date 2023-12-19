@@ -128,4 +128,9 @@ getParseData(parse(text = src, keep.source = TRUE))
 
 パースには多少の時間もかかるかもしれないので、色々工夫の余地はありそうですが、よりよい定義ジャンプの実装に一歩近付けそうな気配を感じました。
 
+投稿後にMichael Chiricoさんが教えてくれましたが、`xmlparsedata::xml_parse_data()`が便利らしいです。
+たしかによさそう。
+
+> https://cran.r-project.org/web/packages/xmlparsedata/readme/README.html
+
 **ENJOY**
