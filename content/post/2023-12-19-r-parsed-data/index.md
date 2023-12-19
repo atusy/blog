@@ -34,16 +34,16 @@ Neovimでの補完だってこのとおり。
 
 ![](img/neovim-completion.png)
 
-それもこれも**[languageserver](https://github.com/REditorSupport/languageserver)**パッケージのおかげです。
-**[languageserver](https://github.com/REditorSupport/languageserver)**パッケージは[Language Sever Protocol](https://microsoft.github.io/language-server-protocol/)という仕様に基いて、変数定義やヘルプなどの情報の問い合わせに対応してくれるサーバーを実装しています。
+それもこれも[**languageserver**](https://github.com/REditorSupport/languageserver)パッケージのおかげです。
+[**languageserver**](https://github.com/REditorSupport/languageserver)パッケージは[Language Sever Protocol](https://microsoft.github.io/language-server-protocol/)という仕様に基いて、変数定義やヘルプなどの情報の問い合わせに対応してくれるサーバーを実装しています。
 
 しかしちょっとした不満が......。
 
-たとえば`rmarkdown::render`関数の定義を要求した時、**[languageserver](https://github.com/REditorSupport/languageserver)**パッケージは関数定義を一時ファイルに書き出します。
+たとえば`rmarkdown::render`関数の定義を要求した時、[**languageserver**](https://github.com/REditorSupport/languageserver)パッケージは関数定義を一時ファイルに書き出します。
 これでは、`rmarkdown::render`関数の中で利用されている`pandoc_available`関数の定義を見たいと思っても、一時ファイルと`pandoc_available`関数が定義されているファイルの関連付けがないために、遡れません。
 
 また、他の言語におけるLanguage Serverは、同じ変数を複数回定義している場合に、定義箇所のリストを返します。
-しかし、Rの**[languageserver](https://github.com/REditorSupport/languageserver)**パッケージは1つしか見つけてくれません。
+しかし、Rの[**languageserver**](https://github.com/REditorSupport/languageserver)パッケージは1つしか見つけてくれません。
 
 というわけでなんとかしたいなと考えています。
 
