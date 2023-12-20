@@ -12,6 +12,7 @@ output:
 
 [ddc.vim]: https://github.com/Shougo/ddc.vim
 [ddc-source-shell-native]: https://github.com/Shougo/ddc-source-shell-native
+[gin.vim]: https://github.com/lambdalisue/gin.vim
 
 [ddc.vim]は自動補完プラグインの1つです。
 Denoをバックエンドにすることで、ユーザーにとっては軽快な挙動を、開発者にとっては高いメンテナンス性を享受できます。
@@ -19,8 +20,6 @@ Denoをバックエンドにすることで、ユーザーにとっては軽快�
 > [新世代の自動補完プラグイン ddc.vim](https://zenn.dev/shougo/articles/ddc-vim-beta)
 
 コマンドライン補完にも対応しており、組込みの補完よりも補完候補のソースやマッチング、ソーティングにおいて、高い柔軟性を持ちます。
-
-[gin.vim] :https://github.com/lambdalisue/gin.vim
 
 たとえばExコマンドの`make`はターゲットの補完に対応していません。
 VimでGitを使うための[gin.vim]が提供する`Gin`コマンドもサブコマンド（`commit`や`cherry-pick`など）を補完できません。
