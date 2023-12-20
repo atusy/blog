@@ -1,0 +1,116 @@
+---
+title: ddc.vimを使ってmakeやGinなどのExコマンドの補完を実現する
+author: atusy
+date: '2023-12-20'
+slug: ddc-fish-alias-completion
+categories: [Vim, Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+[ddc.vim](https://github.com/Shougo/ddc.vim)は自動補完プラグインの1つです。
+Denoをバックエンドにすることで、ユーザーにとっては軽快な挙動を、開発者にとっては高いメンテナンス性を享受できます。
+
+> [新世代の自動補完プラグイン ddc.vim](https://zenn.dev/shougo/articles/ddc-vim-beta)
+
+コマンドライン補完にも対応しており、組込みの補完よりも補完候補のソースやマッチング、ソーティングにおいて、高い柔軟性を持ちます。
+
+\[gin.vim\] :https://github.com/lambdalisue/gin.vim
+
+たとえばExコマンドの`make`はターゲットの補完に対応していません。
+VimでGitを使うための\[gin.vim\]が提供する`Gin`コマンドもサブコマンド（`commit`や`cherry-pick`など）を補完できません。
+
+Exコマンドの引数の補完をしようと思うと、Exコマンドを定義するタイミングで補完の動作も定義する必要があります（[`:h command-complete`](https://vim-jp.org/vimdoc-ja/map.html#:command-completion-custom)）
+ユーザーサイドで定義するのは中々厳しいものがありそうですし、本家へのPRも簡単ではなさそうですね......。
+
+でも大丈夫。[ddc.vim](https://github.com/Shougo/ddc.vim)ならできます！
+
+![](img/ddc.png)
+
+Vimでは`:!git switch -c hoge`といった具合に、`:!`から始まるコマンドをシェルで実行する機能があります。
+そして、[ddc.vim](https://github.com/Shougo/ddc.vim)向けには、シェルスクリプト向けの補完候補を提供する[ddc-source-shell-native](https://github.com/Shougo/ddc-source-shell-native)があります。
+
+これらをうまく使ってあげると、Exコマンドをあたかもシェルのコマンドのように扱って補完できます。
+
+## 設定方法
+
+### 準備するもの
+
+-   [deno](https://deno.com)
+-   [fish](https://fishshell.com)
+-   Vimプラグイン
+    -   [pum.vim](https://github.com/Shougo/pum.vim)
+    -   [denops.vim](https://github.com/vim-denops/denops.vim)
+    -   [ddc.vim](https://github.com/Shougo/ddc.vim)
+    -   [ddc-ui-pum](https://github.com/Shougo/ddc-ui-pum)
+    -   [ddc-source-shell-native](https://github.com/Shougo/ddc-source-shell-native)
+    -   [ddc-matcher_head](https://github.com/Shougo/ddc-matcher_head)
+
+### fishの設定
+
+fishはエイリアスを作った場合に、補完定義を大元のコマンドから継承できて便利です。
+
+`~/.config/fish/config.fish`に以下のように補完したいExコマンドのaliasを書いておきます。
+
+たとえば`Gin`や`GinBuffer`は実質的に`git`コマンドのラッパーなので、`git`へのaliasとして書きます。
+
+``` sh
+alias Gin=git
+alias GinBuffer=git
+```
+
+### Vimの設定
+
+......と言いつつNeovim向けのLuaになってます。うまく読み替えてください。
+
+最小設定なので補完候補の表示しかできません。
+候補選択などをするにはマッピングを設定してください。
+
+``` lua
+-- プラグイン読み込み
+vim.opt.runtimepath:prepend("path/to/pum.vim")
+vim.opt.runtimepath:prepend("path/to/denops.vim")
+vim.opt.runtimepath:prepend("path/to/ddc.vim")
+vim.opt.runtimepath:prepend("path/to/ddc-ui-pum")
+vim.opt.runtimepath:prepend("path/to/ddc-source-shell-native")
+vim.opt.runtimepath:prepend("path/to/ddc-matcher_head")
+
+-- コマンドライン補完の設定
+vim.fn["ddc#custom#patch_global"]({
+  ui = "pum",
+  autoCompleteEvents = { "CmdlineChanged" },
+  cmdlineSources = { [":"] = { "shell-native" } },
+  sourceOptions = {
+    ["shell-native"] = {
+      mark = "FISH",
+      matchers = { "matcher_head" },
+      isVolatile = true,
+      minAutoCompleteLength = 0,
+      minKeywordLength = 0,
+      -- コマンドラインが `!`、`Make `、`Gin `、`GinBuffer `のいずれかで始まる場合のみ有効
+      enabledIf = string.format(
+        [[getcmdline() =~# "^\\(%s\\)" ? v:true : v:false]],
+        table.concat({ "!", "Make ", "Gin ", "GinBuffer " }, [[\\|]])
+      ),
+    },
+  },
+  sourceParams = { ["shell-native"] = { shell = "fish" } },
+})
+
+function CommandlinePre()
+  vim.fn["ddc#enable_cmdline_completion"]()
+end
+
+vim.keymap.set("n", ":", "<Cmd>lua CommandlinePre()<CR>:")
+```
+
+## おまけ
+
+Gitのコマンド補完と一口に言っても、実装依存でshellによって様々だったりします。
+Zshの設定は骨が折れますが、やっておくと、`cherry-pick`の対象コミットを補完したり、コミットメッセージを見れたりして便利。
+
+![](ddc-more.png)
+
+**ENJOY**
