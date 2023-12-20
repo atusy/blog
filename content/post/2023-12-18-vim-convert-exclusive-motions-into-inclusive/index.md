@@ -13,7 +13,7 @@ output:
 [Vimアドベントカレンダー2023](https://qiita.com/advent-calendar/2023/vim)の12/18の記事です。
 昨日の記事は以下の通りでした
 
--   ryoppippiさんによる「びむびむびーむ」(2023/12/18 22:25時点で未投稿)
+-   ryoppippiさんによる「[Vimで人生が豊かになった話](https://docs.google.com/presentation/d/1Y-KASktkcmsS5BNelTH10WpoA6SIQbvDpxi6vFnETn4/edit#slide=id.p)」(2023/12/18 22:25時点で未投稿)
 -   atusyによる「[Vimで無名レジスタでchange/delete/yankした時に、イニシャルに相当するレジスタにも値を入れる](https://blog.atusy.net/2023/12/17/vim-easy-to-remember-regnames/)」
 
 Vimのモーションのinclusive/exclusive、なかなか意識する場面が少ないですね。
