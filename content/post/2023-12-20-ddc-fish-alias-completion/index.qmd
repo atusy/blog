@@ -114,6 +114,6 @@ vim.keymap.set("n", ":", "<Cmd>lua CommandlinePre()<CR>:")
 Gitのコマンド補完と一口に言っても、実装依存でshellによって様々だったりします。
 Zshの設定は骨が折れますが、やっておくと、`cherry-pick`の対象コミットを補完したり、コミットメッセージを見れたりして便利。
 
-![](ddc-more.png)
+![](img/ddc-more.png)
 
 **ENJOY**
