@@ -1,0 +1,57 @@
+---
+title: ftExtra v0.6.2をリリースしました
+author: atusy
+date: '2024-03-01'
+slug: ftextra-v0-6-2
+categories: [R]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+[ftExtra] v0.6.2をリリースしました。
+
+[flextable]パッケージを使って表組みする時に、セル内のマークダウンを処理できる `ftExtra::colformat_md()` がウリです。
+
+```{r, include=FALSE}
+library(ftExtra)
+```
+
+```{r}
+data.frame(
+  x = c("**bold**", "*italic*"),
+  y = c("^superscript^", "~subscript~"),
+  z = c("***~ft~^Extra^** is*", "*Cool*"),
+  stringsAsFactors = FALSE
+) |>
+  flextable::flextable() |>
+  ftExtra::colformat_md()
+```
+
+[ftExtra]: https://ftextra.atusy.net/
+[flextable]: https://ardata-fr.github.io/flextable-book/
+
+今回はマークダウン内でHorizontalRule（水平線）を使った場合に、エラーが発生するというバグの修正でした。
+そもそも表の中で水平線を使いたいシーンがあるか分かりませんが、そもそもflextableが水平線に対応していないこともあり、どんな記法を使っても`---`に置換する処理となっています。
+これは、Pandocでマークダウンをパースした瞬間に元の文字列の情報が失われ、どんな記法で書かれたか分からなくなるためです。
+
+
+```{r}
+data.frame(x = c("---", "***", "_ _ _")) |>
+  flextable::flextable() |>
+  ftExtra::colformat_md()
+```
+
+前回が9月なのでおよそ半年ぶりのリリースですね。
+データサイエンスから離れて久しく、凝った表組みや文書作成をする機会も乏しいので私が利用するシーンは全然ありません。
+その割にはまめにIssue対応できているのではないかなと自画自賛しています。
+
+[ftExtra]はナゾの勢いでかきなぐったパッケージなので、たまにメンテするには処理の理解が追い付かない部分があります。
+その内書き直したいなあという気持ちと、それなら[gt]向けの処理を実装するとかの方が面白いのではという気持ちで揺れてますね。
+[gt]はcommonmarkに対応していますが、Pandoc's Markdownに対応していないので、R MarkdownやQuartoとの相性が抜群とは言えない……と思ってます。
+
+[gt]: https://gt.rstudio.com/
+
+ENJOY!
+
