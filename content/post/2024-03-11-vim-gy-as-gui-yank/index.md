@@ -10,6 +10,8 @@ output:
     md_extensions: +east_asian_line_breaks+task_lists
 ---
 
+[Vim 駅伝](https://vim-jp.org/ekiden/)の2024/3/11の記事です。
+
 Vim/Neovimで文字列をクリップボードへヤンクする主な方法は大きく二通りあります。
 
 -   都度指定
