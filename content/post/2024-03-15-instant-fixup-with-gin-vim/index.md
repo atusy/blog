@@ -87,11 +87,11 @@ Ginのアクションがマッピングであることは先にも述べた通�
 ``` lua
 vim.api.nvim_create_autocmd("BufReadCmd", {
   group = vim.api.nvim_create_augroup("gin-custom", {}),
-    pattern = "ginlog://*" ,
-    callback = function(ctx)
-      vim.keymap.set("n", "a", function()
-        require("telescope.builtin").keymaps({ default_text = "gin-action " })
-      end, { buffer = ctx.buf })
+  pattern = "ginlog://*" ,
+  callback = function(ctx)
+    vim.keymap.set("n", "a", function()
+      require("telescope.builtin").keymaps({ default_text = "gin-action " })
+    end, { buffer = ctx.buf })
   end,
 })
 ```
