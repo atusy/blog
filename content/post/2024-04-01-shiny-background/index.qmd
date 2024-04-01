@@ -1,0 +1,145 @@
+---
+title: Shinyをバックグラウンドで起動する
+author: atusy
+date: '2024-04-01'
+slug: shiny-as-background-process
+categories: [R]
+tags: [Shiny]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+先週、[felp] v0.4.0をリリースしました。
+
+このパッケージはShinyを使っていて、`felp::fuzzyhelp()`を実行すると、以下のように、ヘルプをあいまい検索できます。
+あるいは以下のデモのように、RStudioのコマンドパレット[^command-palette]からも起動できます。
+
+![](https://felp.atusy.net/reference/figures/fuzzyhelp.gif)
+
+この機能は非常に便利なのですが、felp v0.3.0までの制限として、`fuzzyfelp`関数を起動している間は他の関数を実行できませんでした。
+
+その対策として、[felp] v0.4.0では、Shinyをバックグラウンドプロセスで起動させるようにしたので、そのテクニックを紹介します。
+
+# 普通にShinyを起動するとどうなるか
+
+対話的な操作ができるわけでもない、アプリですらないページであれば、以下のように1行で起動できます。
+
+
+```{r, eval=FALSE}
+shiny::runGadget(shiny::basicPage("Hello, world."), function(...) {})
+```
+
+実行すると、以下のようなメッセージと共に、RStudioのViewerペインやブラウザに`Hello, world`と表示されるかと思います。
+
+```
+Loading required package: shiny
+
+Listening on http://127.0.0.1:7071
+```
+
+その後、`str(mtcars)`など、他の関数を実行するには、<kbd>Ctrl</kbd>+<kbd>C</kbc>などを実行してShinyを終了させる必要があります。
+
+Shinyを起動したまま他の作業をしたい時に不便ですね
+
+# Shinyをバックグラウンドで起動する
+
+## 素のRでやる（非RStudio環境）
+
+Shinyをバックグラウンドで起動するには`callr::r_bg`関数を使います。
+[callr]言わずと知れた（？）、RからRを呼び出すパッケージですね。
+`callr::r_bg`関数は文字通りRをバックグラウンドで起動するので、Shinyアプリケーションをバックグラウンド起動できます。
+
+なお、RStudioサーバーでこの方法を使うと、ブラウジングできないことを確認しています。
+
+```{r, eval=FALSE}
+callr::r_bg(
+  function() {
+    shiny::runGadget(shiny::basicPage("Hello, world."), function(...) {})
+  },
+  env = Sys.getenv() # 起動に使うブラウザの設定などを引き継ぐ
+)
+```
+
+## RStudioにも対応させる
+
+### RStudio上のRは別プロセスからブラウザを起動できない
+
+RStudioサーバーでは、`browseURL`関数や`rstudioapi::viewer`関数を別プロセスで実行しても、うまくページを表示できません。
+GUI版は未確認ですが、同様の可能性があります。
+
+```{r, eval=FALSE}
+callr::r(function() {
+  browseURL("https://example.com") # なにも起きない
+  rstudioapi::viewer("https://example.com") # RStudio not running というエラーが発生
+})
+```
+
+### アプリケーションを起動待ちしてメインプロセスでブラウザを起動する
+
+これならOK。
+
+```{r, eval=FALSE}
+# ShinyアプリケーションのURL保存先
+shinyURL <- tempfile()
+writeLines("", shinyURL)
+
+# バックグラウンドでのshinyの起動
+callr::r_bg(
+  function(shinyURL) {
+    viewer <- function(url) {
+      # Shinyがブラウザを開くつもりでこの関数を実行する
+      # つまりShinyが起動すると、一時ファイルにURLが書き込まれる
+      writeLines(url, shinyURL)
+    }
+    shiny::runGadget(
+      shiny::basicPage("Hello, world."),
+      function(...) {},
+      viewer = viewer
+    )
+  },
+  args = list(shinyURL = shinyURL) # メインプロセスと変数を共有するには
+                                   # 関数の引数を経由させる
+)
+
+# 一時ファイルへのURL書き込みを確認できたらブラウザかViewerペインを起動する
+# 無限待ちしないように適当な回数のループにしておく
+for (i in seq(10)) {
+  url <- readLines(shinyURL)
+  if (url != "") {
+    browseURL(url) # または rstudioapi::viewer(url)
+    break
+  }
+  Sys.sleep(0.2)
+}
+```
+
+ただし、この方法でのShinyアプリケーション起動を繰り返すと、どんどんプロセスが増えます。
+[felp]パッケージでは、起動済みのアプリケーションがあれば、追加でアプリケーションを起動する代わりに、起動済みアプリケーションのURLを開くように工夫しています。
+
+ちなみに`callr::r_bg`関数の返り値を変数に保存しておくと、後からsuspendしたりkillしたりできます。
+これをうまく使ってプロセスを管理してもOK。
+
+```{r, cache = TRUE, collapse = TRUE, comment = "#>"}
+p <- callr::r_bg(function() Sys.sleep(2)) # 2秒間スリープするバックグラウンドプロセス
+p$suspend() # プロセスを一時停止
+Sys.sleep(4) # 2秒以上待つ
+p$get_exit_status() # 一時停止中に待ってもexit statusはNULLのまま
+p$resume() # プロセスを再開
+Sys.sleep(4) # 2秒以上待つ
+p$get_exit_status() # スリープ期間を経過したため、exitしている
+p$kill() # プロセスは終了済みなのでFALSEが返る
+```
+
+
+**ENJOY!**
+
+今年は少しR関係の活動を増やしてこうかなと考えてます。
+もしよければスポンサーしていただけると非常に励みになります。
+
+<https://github.com/sponsors/atusy>
+
+[^command-palette]: コマンドパレットについては技評さんで紹介記事を書かせていただきました（RStudioが生産性を高める［前編］ 〜コマンドパレットによる検索の効率化 <https://gihyo.jp/article/2022/09/increase-productivity-of-r-01>）
+
+[felp]: https://felp.atusy.net/
+[callr]: https://callr.r-lib.org/
