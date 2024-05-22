@@ -30,12 +30,7 @@ Weztermで区切ったPaneの中でNeovimを操作していると、`<c-w>l`し�
 これを全方向に対応させる設定は以下。
 
 ``` lua
-local directions = {
-  h = "Left",
-  j = "Down",
-  k = "Up",
-  l = "Right",
-}
+local directions = { h = "Left", j = "Down", k = "Up", l = "Right" }
 
 local move_nvim_win_or_wezterm_pane = function(hjkl)
   -- 現在のウィンドウIDを取得
@@ -44,18 +39,9 @@ local move_nvim_win_or_wezterm_pane = function(hjkl)
   -- ウィンドウ移動を試す
   vim.cmd.wincmd(hjkl)
 
-  -- 新しいウィンドウIDを取得
-  local newwin = vim.api.nvim_get_current_win()
-
-  -- ウィンドウ移動の前後でIDが変わっていれば移動成功と見做す
-  if oldwin ~= newwin then
-    return
-  end
-
-  -- ウィンドウ移動が発生しなかった場合、移動方向にWeztermのペインがあれば、ペイン移動を実施
-  local pane = require("wezterm").get_pane_direction(directions[hjkl])
-  if pane then
-    require("wezterm").switch_pane.id(pane)
+  -- 現在ウィンドウに変化がなければWeztermのPane移動を試す
+  if win == vim.api.nvim_get_current_win() then
+    require("wezterm").switch_pane.direction(directions[hjkl])
   end
 end
 
@@ -70,24 +56,13 @@ Atusyはプラグインマネージャーの[lazy.nvim](https://github.com/folke
 
 ``` lua
 -- ~/.config/nvim/lua/plugins/wezterm/init.lua
-local directions = {
-  h = "Left",
-  j = "Down",
-  k = "Up",
-  l = "Right",
-}
+local directions = { h = "Left", j = "Down", k = "Up", l = "Right" }
 
-local move_nvim_win_or_wezterm_pane = function(hjkl)
-  local oldwin = vim.api.nvim_get_current_win()
+local function move_nvim_win_or_wezterm_pane(hjkl)
+  local win = vim.api.nvim_get_current_win()
   vim.cmd.wincmd(hjkl)
-  local newwin = vim.api.nvim_get_current_win()
-  if oldwin ~= newwin then
-    return
-  end
-
-  local pane = require("wezterm").get_pane_direction(directions[hjkl])
-  if pane then
-    require("wezterm").switch_pane.id(pane)
+  if win == vim.api.nvim_get_current_win() then
+    require("wezterm").switch_pane.direction(directions[hjkl])
   end
 end
 
