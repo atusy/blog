@@ -4,7 +4,7 @@ author: atusy
 date: '2024-05-29'
 slug: vim-HL-enhanced
 categories:
-  - fish
+  - vim
 tags: []
 output:
   'blogdown::html_page':
@@ -20,7 +20,7 @@ highlightjs:
 
 > https://zenn.dev/vim_jp/articles/20240522_ekiden_better_hl
 
-`H`と`L`は通常では、カーソルをウィンドウ内で最初の行や最後の行に移動させるコマンドです。
+`H`と`L`は通常では、表示領域内の最初の行や最後の行にカーソルを移動させるコマンドです。
 連打しやすい割に、連打する意味がない、惜しい存在ですが、スクロール機能も持たせるのは良いアイデアですね。
 
 というわけで、似たようなことを、疑似サブモードを利用して実現してみました。
