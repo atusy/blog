@@ -1,7 +1,7 @@
 ---
 title: fish使い始めた
 author: atusy
-date: '2024-05-21'
+date: '2024-05-27'
 slug: fish
 categories:
   - fish
