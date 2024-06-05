@@ -43,9 +43,6 @@ nnoremap gf gF
 従って`expand('<cfile>')`すると、実際のファイル名（URL）に展開されます。
 
 あとは`'<cfile>'`がURLかどうか判定して動作を切り替えればOK。
-Linuxなら`xdg-open`を使うといいでしょう。他は知らん。
-Neovim nightly使いなら、`vim.ui.open()`という関数でよしなにできるっぽいです。
-
 
 ```lua
 -- Lua (Neovim向け)
