@@ -52,8 +52,8 @@ Neovim nightly使いなら、`vim.ui.open()`という関数でよしなにでき
 vim.keymap.set("n", "gf", function()
   local cfile = vim.fn.expand("<cfile>")
   if cfile:match("^https?://") then
-    -- Neovim nightlyなら `vim.ui.open(cfile)` が便利。
-    vim.fn.system({"xdg-open", cfile})
+    -- Neovim <= 0.9.x なら vim.fn.system("xdg-open " .. cfile)
+    vim.ui.open(cfile)
   else
     vim.cmd("normal! gF")
   end

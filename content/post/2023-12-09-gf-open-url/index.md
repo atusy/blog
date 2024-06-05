@@ -3,12 +3,15 @@ title: VimでgfしたらURLをブラウザで開く
 author: atusy
 date: '2023-12-09'
 slug: gf-open-url
-categories: [Vim, Neovim]
+categories:
+  - Vim
+  - Neovim
 tags: []
 output:
-  blogdown::html_page:
+  'blogdown::html_page':
     md_extensions: +east_asian_line_breaks+task_lists
 ---
+
 
 Vimアドベントカレンダー12/9の記事です。
 昨日の記事は以下の2本でした。
@@ -51,8 +54,8 @@ Neovim nightly使いなら、`vim.ui.open()`という関数でよしなにでき
 vim.keymap.set("n", "gf", function()
   local cfile = vim.fn.expand("<cfile>")
   if cfile:match("^https?://") then
-    -- Neovim nightlyなら `vim.ui.open(cfile)` が便利。
-    vim.fn.system({"xdg-open", cfile})
+    -- Neovim <= 0.9.x なら vim.fn.system("xdg-open " .. cfile)
+    vim.ui.open(cfile)
   else
     vim.cmd("normal! gF")
   end
