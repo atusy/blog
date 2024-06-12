@@ -1,0 +1,81 @@
+---
+title: Vimのj/kを加速させるサブモード
+author: atusy
+date: '2024-06-12'
+slug: vim-submode-jjjj
+categories:
+  - vim
+tags: []
+output:
+  'blogdown::html_page':
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs:
+  - lua
+---
+
+
+[Vim駅伝](https://vim-jp.org/ekiden/)の2024/6/12の記事です。
+
+Vimmerならついなんとはなしにj/kしちゃうこともありますし、`<C-D>`とか使いなよと分かってても長距離j/kしちゃうこともありますよね。
+そういった人向けに、j/kを連打すると移動距離を変える[ryhsd/accelerated-jk](https://github.com/rhysd/accelerated-jk)があります。
+
+これを見てふと、サブモードを使うと、折り返した行の見掛け通りに上下移動したい時に`gjgjgj`せずに`gjjj`する方法を思い出しました。
+
+> [Vim で折り返し行を簡単に移動できるサブモード・テクニック](https://zenn.dev/mattn/articles/83c2d4c7645faa)
+
+これ、うまく使えば`jjjj`って連打したら`j2j4j8j`みたくなるマッピング作れるんじゃね......？
+というわけでできたのがこちら。
+
+私の力不足でLuaのみです......。
+Vimユーザーはよしなに翻訳してください......。
+
+``` lua
+--- accelerate は速度をコントロールする
+--- この数式の場合、10連打以上すると、2, 4, 8, 16と加速する
+local function accelerate(n)
+  return math.min(16, math.max(1, math.floor((n - 10) ^ 2)))
+end
+
+--- j を j2<Plug>(j) に上書き
+---
+--- ただし5j などカウント付きの場合は加速しない
+vim.keymap.set("n", "j", function()
+    local count = vim.v.count
+    if count > 0 then
+        return "j"
+    end
+    return "j2<Plug>(j)"
+end, { expr = true })
+
+--- j を連打すると、 2j4j8j12j12j 風なる
+---
+--- 実際には jj jjjj jjjjjjjj といった具合にしてあげるとぬるぬる動く
+vim.keymap.set("n", "<Plug>(j)j", function()
+    local speed = accelerate(vim.v.count1)
+    return "<Cmd><CR>" .. string.rep("j", speed) .. (count + 1) .. "<Plug>(j)"
+end, { expr = true })
+```
+
+コードをちゃんと読んでいただけた方は謎の`<Cmd><CR>`にお気付きかもしれません。
+これをなくすと、`j`を2発打つだけで20行くらい飛んでくので注意が必要なのです。
+
+たとえば以下のようなマッピングをして、`2<space>j`すると、`4j`になると思いきや`22j`になってしまうのですね。
+
+``` vim
+nnoremap <space>j 2j
+```
+
+`<Cmd><CR>`を空打ちしてあげると、カウントを無視できるようになります。
+
+``` vim
+nnoremap <space>j <Cmd><CR>2j
+```
+
+というわけで、あとはexpr-mappingでカウント数をよしなに調整してあげれば良いというわけ。
+
+`<Nop>`も試しましたがダメでした。もっと良い方法あれば教えていただけると嬉しいです。
+
+なお、このマッピング、作ってみたかっただけで使ってはいないのですが、カウントの扱いに対する学びがあってよかったです。
+思いついたらやってみるのはいいことですね。
+
+**ENJOY!!**
