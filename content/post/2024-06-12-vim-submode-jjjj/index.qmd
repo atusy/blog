@@ -30,7 +30,7 @@ Vimmerならついなんとはなしにj/kしちゃうこともありますし�
 --- accelerate は速度をコントロールする
 --- この数式の場合、10連打以上すると、2, 4, 8, 16と加速する
 local function accelerate(n)
-  return math.min(16, math.max(1, math.floor((n - 10) ^ 2)))
+  return math.min(16, math.floor(math.max(n - 10, 1) ^ 2))
 end
 
 --- j を j2<Plug>(j) に上書き
