@@ -47,12 +47,12 @@ vim.keymap.set("n", "j", function()
     return "j2<Plug>(j)"
 end, { expr = true })
 
---- j を連打すると、 2j4j8j12j12j 風なる
+--- j を連打すると、 2j4j8j12j12j 風になる
 ---
 --- 実際には jj jjjj jjjjjjjj といった具合にしてあげるとぬるぬる動く
 vim.keymap.set("n", "<Plug>(j)j", function()
     local speed = accelerate(vim.v.count1)
-    return "<Cmd><CR>" .. string.rep("j", speed) .. (count + 1) .. "<Plug>(j)"
+    return "<Esc>" .. string.rep("j", speed) .. (count + 1) .. "<Plug>(j)"
 end, { expr = true })
 
 --- <Plug>(j) を <Nop> にしておくと、ベルが鳴らなくて快適かも
@@ -60,7 +60,7 @@ end, { expr = true })
 vim.keymap.set("n", "<Plug>(j)", "<Nop>")
 ```
 
-コードをちゃんと読んでいただけた方は謎の`<Cmd><CR>`にお気付きかもしれません。
+コードをちゃんと読んでいただけた方は謎の`<Esc>`にお気付きかもしれません。
 これをなくすと、`j`を2発打つだけで20行くらい飛んでくので注意が必要なのです。
 
 たとえば以下のようなマッピングをして、`2<space>j`すると、`4j`になると思いきや`22j`になってしまうのですね。
@@ -69,20 +69,18 @@ vim.keymap.set("n", "<Plug>(j)", "<Nop>")
 nnoremap <space>j 2j
 ```
 
-`<Cmd><CR>`を空打ちしてあげると、カウントを無視できるようになります。
+`<Esc>`してあげると、カウントを無視できるようになります。
 
 ``` vim
-nnoremap <space>j <Cmd><CR>2j
+nnoremap <space>j <Esc>2j
 ```
 
 というわけで、あとはmap-\<expr\>でカウント数をよしなに調整してあげれば良いというわけ。
 これで`2<space>j`が`4j`になります。
 
 ``` vim
-nnoremap <expr> <space>j "<Cmd><CR>" . 2 * v:count1 . "j"
+nnoremap <expr> <space>j "<Esc>" . 2 * v:count1 . "j"
 ```
-
-`<Nop>`も試しましたがダメでした。もっと良い方法あれば教えていただけると嬉しいです。
 
 なお、このマッピング、作ってみたかっただけで使ってはいないのですが、カウントの扱いに対する学びがあってよかったです。
 思いついたらやってみるのはいいことですね。
