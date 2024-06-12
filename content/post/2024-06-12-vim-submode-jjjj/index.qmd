@@ -44,7 +44,7 @@ vim.keymap.set("n", "j", function()
 	return "j2<Plug>(j)"
 end, { expr = true })
 
---- j を連打すると、 2j4j8j12j12j 風なる
+--- j を連打すると、 2j4j8j12j12j 風になる
 ---
 --- 実際には jj jjjj jjjjjjjj といった具合にしてあげるとぬるぬる動く
 vim.keymap.set("n", "<Plug>(j)j", function()
@@ -66,7 +66,7 @@ vim.keymap.set("n", "<Plug>(j)", "<Nop>")
 nnoremap <space>j 2j
 ```
 
-`<Esc>`を空打ちしてあげると、カウントを無視できるようになります。
+`<Esc>`してあげると、カウントを無視できるようになります。
 
 ``` vim
 nnoremap <space>j <Esc>2j
