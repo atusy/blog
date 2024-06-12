@@ -54,6 +54,10 @@ vim.keymap.set("n", "<Plug>(j)j", function()
     local speed = accelerate(vim.v.count1)
     return "<Cmd><CR>" .. string.rep("j", speed) .. (count + 1) .. "<Plug>(j)"
 end, { expr = true })
+
+--- <Plug>(j) を <Nop> にしておくと、ベルが鳴らなくて快適かも
+--- Neovim はデフォルトで set belloff=all されてるので、気にしなくてもいいっちゃいい
+vim.keymap.set("n", "<Plug>(j)", "<Nop>")
 ```
 
 コードをちゃんと読んでいただけた方は謎の`<Cmd><CR>`にお気付きかもしれません。
