@@ -1,0 +1,87 @@
+---
+title: SKKの接頭辞・接尾辞変換をvim-skk/skkeletonに追加した
+author: atusy
+date: '2024-06-21'
+slug: skkeleton-affix
+categories: [vim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+[Vim駅伝](https://vim-jp.org/ekiden/)の2024/6/21の記事です。
+
+SKKは快適な日本語入力を実現する素敵なインプットメソッドです。
+
+WindowsやmacOSなどOS本体向けの実装もあるのですが、Vim向けにも[skkeleton]や[tussk]といった実装があります。
+そして各種実装のルーツはemacsの[ddskk]です。
+
+私はNeovimで[skkeleton]を使っていますが、[ddskk]の接頭辞・接尾辞変換機能^[<https://ddskk.readthedocs.io/ja/latest/06_apps.html#id35>]がないことに長らくもどかしさを感じていました。
+
+
+
+接頭辞・接尾辞は、たとえば「第三部」の「第」や「部」にあたる部分ですね。
+フツーのIMEであれば「だいさんじゅうぶ」を丸ごと変換すれば、よしなにしてくれますが、SKKの場合は辞書に登録している範囲で適宜分割して入力・変換していく必要があります。
+
+```
+Dai_Sanjuu_Bu_
+（_はスペースに相当）
+```
+
+ただし、「Dai」は代第台大題……とたくさん候補がありますし、「Bu」も部分武不……とやはり沢山の候補があります。
+
+接頭辞・接尾辞変換は、`>`を使って変換対象が接頭辞または接尾辞であることを明示することで、変換候補を絞り込む機能です。
+
+```
+Dai>Sanjuu_>Bu_
+（_はスペースに相当）
+```
+
+こんな感じにすると、「Dai>」は接頭辞なので第や大が候補になりますが、題などは候補から外されます。
+同様に「>Bu」は接尾辞なので、部や歩が候補になりますが、武などは候補から外されます。
+
+なんて便利！
+実際使ってみるとこんな感じ。
+
+![](images/skkeleton-affix.webm)
+
+実装にあたってはddskkのドキュメントと、fcitx-skkの挙動を参考にしました。
+
+接頭辞や接尾辞の変換候補は辞書の中で`>`を使って明示されているので、とても扱いやすいです（<https://ddskk.readthedocs.io/ja/latest/06_apps.html#id35>）。
+
+```
+ちょう> /超/
+>し /氏/
+```
+
+というわけでやるべきことは主に3つです。
+
+- `>`の位置で接頭辞・接尾辞の変換開始を判定する
+- 変換中の`>`の表示を既存実装に合わせる
+  - 今回はfcitx-skkに合わせて非表示とした
+- 接尾辞・接頭辞変換の確定結果から`>`を取り除く
+
+とても簡単そうですね。
+実際には、この実装をユーザーが使えるインターフェースに落としこむ（`>`にマッピングする）必要があり、そこでskkeletonの設計を理解する必要があります。
+そこが一番大変だったかな？
+
+PR上では、最初は接頭辞と接尾辞をひとまとめにしていました。
+しかし、接頭辞は`InputState`（変換対象の入力中）に`>`を入力することで発動するのに対し、接尾辞は`HenkanState`（入力した文字の変換中）に`>`を入力することで、変換を確定させてから接尾辞の入力を開始するもので、実態が大きく異なります。
+`InputState`に関連する関数は`function/input.ts`に、`HenkanState`に関連する関数は`function/henkan.ts`に入っていたので、ひとまとめにすべきではないよね、ということで、後から分割しました。
+その様子はコミットログから追って頂けるのではないかなと思います。
+
+> https://github.com/vim-skk/skkeleton/pull/194
+
+[skkeleton]はTypeScriptで実装されているおかげでコードが追いやすく、開発体験がよかったです。
+型システムにもLSPにも感謝ですね。
+
+そうそう、今回の開発で接頭辞と接尾辞をまとめて扱う言葉ってなんだろう……？となったのですが、ChatGPTに問い合わせて "affix" という単語を教えてもらいました。
+検証しやすい場面でLLMは大活躍しますね。
+
+**ENJOY!**
+
+
+[skkeleton]: https://github.com/vim-skk/skkeleton
+[tussk]: https://github.com/kawarimidoll/tuskk.vim
+[ddskk]: https://github.com/skk-dev/ddskk
