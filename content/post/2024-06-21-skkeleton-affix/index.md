@@ -40,7 +40,8 @@ WindowsやmacOSなどOS本体向けの実装もあるのですが、Vim向けに
 なんて便利！
 実際使ってみるとこんな感じ。
 
-![](images/skkeleton-affix.webm)
+<video src="images/skkeleton-affix.webm" controls>
+</video>
 
 実装にあたってはddskkのドキュメントと、fcitx-skkの挙動を参考にしました。
 
