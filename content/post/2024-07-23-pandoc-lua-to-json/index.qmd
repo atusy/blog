@@ -1,0 +1,44 @@
+---
+title: PandocでLuaオブジェクトをJSON文字列化する
+author: atusy
+date: '2024-07-23'
+slug: pandoc-lua-to-json
+categories: [pandoc]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [bash]
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment="#>")
+```
+
+ドキュメントの相互変換ツールであるPandocは、Lua言語のインタプリタを内蔵しており、便利なモジュールも様々に提供しています。
+本来はLuaフィルタという、ドキュメント変換処理に割り込みをかけるために持っている機能ですが、`pandoc lua`でインタプリタを起動したり、`pandoc lua hoge.lua`で**hoge.lua**を実行したりもできちゃいます。
+
+濫用してあげると、以下のようにLuaのオブジェクトをJSON化して出力できます。
+
+```{bash, eval=TRUE}
+echo "print(pandoc.json.encode({ a = 1, b = {'x', 'y', 'z'} }))" | pandoc lua -
+```
+
+もちろん、上記の例のようにデータをスクリプトに直書きするなら、最初からJSONにしておけばいいのです。
+
+Luaフィルタから静的なデータを別ファイルに分離していて、更にLuaフィルタ以外でもデータを使いたいようなニッチなケースでは便利かもしれません。
+
+```{bash, eval=TRUE}
+echo "return {a = 1, b = {'x', 'y', 'z'}}" > /tmp/data.lua
+echo "print(pandoc.json.encode(dofile('/tmp/data.lua')))" | pandoc lua - | jq .a
+```
+
+データの管理方法としては、そもそもJSONファイルを扱う方が素直です。
+LuaオブジェクトをJSON文字列化する`pandoc.json.encode`関数があるように、JSON文字列をLuaオブジェクト化する`pandoc.json.decode`関数を利用できます。
+あえて、Luaスクリプトでデータを管理するメリットがあるとしたら、型アノテーションやコメントが可能なこと、エディタの補完が利用可能なことあたりでしょうか。
+
+ENJOY!
+
+---
+
+約一ヶ月ぶりのブログ更新でした。少しずつブログも再開していきたいですね
