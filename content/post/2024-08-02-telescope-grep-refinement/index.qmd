@@ -1,0 +1,91 @@
+---
+title: telescope.nvimでlive_grepした結果をファイル名で絞り込む
+author: atusy
+date: '2024-08-03'
+slug: telescope-grep-refiement
+categories: [Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+[Vim駅伝](https://vim-jp.org/ekiden/)8/2の記事です。
+
+[telescope.nvim]: https://github.com/nvim-telescope/telescope.nvim
+
+[telescope.nvim]はNeovim向けのファジーファインダーと類されるプラグインです。
+便利な機能の一つに`:Telescope live_grep`があり、プロジェクト内のファイルを正規表現で検索できます。
+
+しかし、検索結果が多いときに、ファイル名で絞り込みたいことがあります。
+たとえば、特定のディレクトリだけの結果が必要とか、テスト関係のファイルを除外したいとかいった状況があります。
+
+[telescope.nvim]には検索結果をクイックフィックスリストに送り込むアクションがあるので、これと`:Telescope quickfix`を組み合わせると、近しいことが簡単に実現できます。
+
+```lua
+require("telescope.builtin").live_grep({
+	attach_mappings = function(prompt_bufnr, map)
+		map("i", "<C-G><C-G>", function()
+			require("telescope.actions").send_to_qflist(prompt_bufnr)
+			require("telescope.builtin").quickfix()
+		end)
+		return true
+	end,
+})
+```
+
+しかし、この方法では検索対象にファイル名だけでなく、grepにマッチした行も含まれてしまいます。
+たとえば、以下のようなクイックフィックスリストが作成された場合、ファイル名に`qfscope`が含まれる行だけを絞り込みたいとします。
+実際には、`README.md`の1行目に`qfscope`が含まれているため、`README.md`もマッチしてしまいます。
+
+```
+README.md|1 col 12| # qfscope.nvim
+doc/qfscope.txt|1 col 37| *qfscope.txt*     Refine telescope.nvim search results by using quickfix list
+doc/qfscope.txt|2 col 11| *qfscope.nvim*
+doc/qfscope.txt|6 col 47| Repository: https://github.com/atusy/qfscope.nvim
+```
+
+これを防ぐには、[telescope.nvim]の`sorter`を弄る必要があります。
+`sorter`は、プロンプト文字列に対して検索結果のマッチ度（スコア）を計算する`scoring_function`というメソッドを持ちます。
+このメソッドを良い感じにしてあげれば、ファイル名だけを検索対象にできます。
+
+`scoring_function`は通常では、`function(self, prompt, line, entry): number`をいったシグネチャを持ます。
+この`line`引数が検索対象に相当します。
+先程のクイックフィックスリストの例で言えば`README.md|1 col 12| # qfscope.nvim`ですね。
+ファイル名を検索対象にするには、`lien`引数の変わりに`entry`引数の`filename`フィールドに注目させてあげればOKです。
+ということで↓のように上書きする関数を用意しましょう。
+
+``` lua
+local function filename_sorter()
+	local sorter = require("telescope.config").values.generic_sorter()
+	local score = sorter.scoring_function
+	sorter.scoring_function = function(self, prompt, _, entry)
+		return score(self, prompt, entry.filename, entry)
+	end
+	return sorter
+end
+```
+
+あとは、`:Telescope quickfix`を起動する時に、自前の`sorter`を渡してあげれば、`live_grep`した結果をファイル名で絞り込めるようになります。
+[telescope.nvim]の`setup`時に、検索アルゴリズムとして[telescope-fzf-native.nvim](https://github.com/nvim-telescope/telescope-fzf-native.nvim)を指定していれば、`!_test.go`などとして、テスト関連のファイルを除外するといった使い方もできます。
+
+```lua
+require("telescope.builtin").live_grep({
+	attach_mappings = function(prompt_bufnr, map)
+		map("i", "<C-G><C-G>", function()
+			actions.send_to_qflist(prompt_bufnr)
+			require("telescope.builtin").quickfix({
+				sorter = filename_sorter(),
+			})
+		end)
+		return true
+	end,
+})
+```
+
+ちなみに今日紹介した内容をより一般化したプラグインとして、[atusy/qfscope.nvim](https://github.com/atusy/qfscope.nvim)を作成しました。
+
+次回の記事あたりでデモも含めて紹介できたらなと思います。
+
+**ENJOY!!**
+
