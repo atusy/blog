@@ -24,13 +24,13 @@ output:
 
 ``` lua
 require("telescope.builtin").live_grep({
-    attach_mappings = function(prompt_bufnr, map)
-        map("i", "<C-G><C-G>", function()
-            require("telescope.actions").send_to_qflist(prompt_bufnr)
-            require("telescope.builtin").quickfix()
-        end)
-        return true
-    end,
+  attach_mappings = function(prompt_bufnr, map)
+    map("i", "<C-G><C-G>", function()
+      require("telescope.actions").send_to_qflist(prompt_bufnr)
+      require("telescope.builtin").quickfix()
+    end)
+    return true
+  end,
 })
 ```
 
@@ -55,12 +55,12 @@ require("telescope.builtin").live_grep({
 
 ``` lua
 local function filename_sorter()
-    local sorter = require("telescope.config").values.generic_sorter()
-    local score = sorter.scoring_function
-    sorter.scoring_function = function(self, prompt, _, entry)
-        return score(self, prompt, entry.filename, entry)
-    end
-    return sorter
+  local sorter = require("telescope.config").values.generic_sorter()
+  local score = sorter.scoring_function
+  sorter.scoring_function = function(self, prompt, _, entry)
+    return score(self, prompt, entry.filename, entry)
+  end
+  return sorter
 end
 ```
 
@@ -69,15 +69,15 @@ end
 
 ``` lua
 require("telescope.builtin").live_grep({
-    attach_mappings = function(prompt_bufnr, map)
-        map("i", "<C-G><C-G>", function()
-            actions.send_to_qflist(prompt_bufnr)
-            require("telescope.builtin").quickfix({
-                sorter = filename_sorter(),
-            })
-        end)
-        return true
-    end,
+  attach_mappings = function(prompt_bufnr, map)
+    map("i", "<C-G><C-G>", function()
+      actions.send_to_qflist(prompt_bufnr)
+      require("telescope.builtin").quickfix({
+        sorter = filename_sorter(),
+      })
+    end)
+    return true
+  end,
 })
 ```
 
