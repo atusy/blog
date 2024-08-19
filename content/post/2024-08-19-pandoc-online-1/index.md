@@ -1,0 +1,77 @@
+---
+title: 'Pandoc ONLINE #1で「PandocとLuaフィルタで作るプログラマブルな文書」について発表しました'
+author: atusy
+date: '2024-08-07'
+slug: pandoc-online-1
+categories:
+  - Pandoc
+tags: []
+output:
+  'blogdown::html_page':
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+日本Pandocユーザ会主催の勉強会「[Pandoc ONLINE #1](https://pandoc-jp.connpass.com/event/323815/)」が開催されました。
+コミュニティ主催のsky_yさんが活動を再開していこうとしてらっしゃるので、これからが楽しみですね。
+勉強会後の雑談会では、Pandocの技術的な話はしばしば出てくるが、業務でどう使われているか、みたいな話がなかなか出てこないという感想もあったので、コミュニティが盛り上がってこのあたりの知見共有も進むといいなと思います。
+
+さて本題。
+
+Markdownで文書を作成しているときに、コードの実行結果を埋めこめるといいなと感じることがあります。
+[Quarto](https://quarto.org/)や[R Markdown](https://rmarkdown.rstudio.com/)などを使えば既に実現できますが、もうちょっと軽量な方法が欲しいなと思って実装してみました。
+
+> <https://github.com/atusy/pandoc-coderunner>
+
+詳しくは資料をご参考頂きたいですが、ここでも簡単に紹介しておこうと思います（<https://github.com/atusy/pandoc-coderunner/wiki/2024%E2%80%9008%E2%80%9018-Introducing-coderunner-on-Pandoc-Night>）。
+
+まだ実験段階ですが以下のように、コードブロックやコードに`{.lua eval=true}`という属性をつけることで、コードを評価して結果を埋め込むことができます。
+同等の属性を付与できれば、入力形式はMarkdownに限らず、djotなどでもOKです。
+
+```` markdown
+以下のコードブロックは箇条書きになる。
+
+```{.lua eval=true}
+return "- foo\
+- bar"
+```
+
+さらに `return 1 + 1`{.lua eval=true} というコードも評価される。
+````
+
+ただし、上記の方法では、コードの実行結果が出力形式に調和的な必要があります。
+出力がHTMLなら、箇条書きには`return "<ul><li>foo</li><li>bar</li></ul>"`すべきです。
+
+これでは単一のソースファイルから複数の出力形式が欲しい場合に不便なので、文字列以外に、PandocのASTを返してもOKとしました。
+
+``` lua
+return pandoc.BulletList({
+  pandoc.Plain({pandoc.Str("foo")}),
+  pandoc.Plain({pandoc.Str("bar")})
+})
+```
+
+それから、コードブロックやコードの間で変数・関数の共有も可能です。
+
+```` markdown
+```{.lua eval=true}
+x = "hoge"
+```
+
+`x`には`x`{.lua eval=true}が入っている。
+````
+
+Lua以外の言語も簡易的にサポートしています。
+以下の例のように、言語名（コマンド名）を指定すると、そのコマンドにコードを渡して実行します。
+Luaの場合は`return`した内容が出力されましたが、Lua以外の言語では標準出力が出力されます。
+それから、コードブロック間での変数の共有はサポートしていません。
+
+```` markdown
+```{.python eval=true}
+print("Hello, world!")
+```
+````
+
+もう少し発展的な内容も発表しましたが、APIがまだ安定していないので、興味のある方だけ発表資料を見ていただければと思います。
+
+# ENJOY!
