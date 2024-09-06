@@ -1,0 +1,43 @@
+---
+title: "zfをline-wise化して直感的な挙動にするマッピング"
+author: atusy
+date: '2024-09-06'
+slug: linewise-zf
+categories: [Vim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+  `zf`がline-wiseに作用するよう`nnoremap zf zfV`や`vnoremap <expr> zf mode() ==# 'V' ? 'zf' : 'Vzf'`しとくと便利
+---
+
+
+
+<p><a href="https://vim-jp.org/ekiden/">Vim駅伝</a>2024/09/06の記事です。</p>
+<p>Vimの<code>zf</code>コマンドは、モーションまたはビジュアルモードによる選択範囲に対して折り畳みを作ります。</p>
+<p>私はよく、<code>vjjjzf</code>みたいな感じで、ビジュアル選択した範囲を折り畳んだり、<a href="https://github.com/folke/flash.nvim">folke/flash.nvim</a>と組み合わせて文法上の意味のある範囲（関数全体とかマークダウンの章とか）を折り畳む使い方をしてます。</p>
+<p>しかし、選択範囲がchar-wiseだと折り畳み範囲の最後が空行な場合に、追加で一行折り畳んでしまいます。以下のようなマッピングで、<code>zf</code>を強制line-wise化するといいでしょう。</p>
+<pre class="vim"><code>nnoremap zf zfV
+vnoremap &lt;expr&gt; zf mode() ==# &#39;V&#39; ? &#39;zf&#39; : &#39;Vzf&#39;
+</code></pre>
+<p>設定がない場合に以下のようなマークダウンにおいて、1行目から<code>vjjjzf</code>してみると、言わんとすることが分かると思います。</p>
+<pre class="markdown"><code># foo
+
+hoge
+
+# bar
+
+fuga</code></pre>
+<p><code>vjjj</code>なので、ビジュアルにハイライトしている範囲は4行なのに、折り畳みが5行になってしまうのです。</p>
+<pre class="markdown"><code>--- 5 lines: # foo ----------------------------
+
+fuga</code></pre>
+<p>これはchar-wiseなビジュアルモードだと、空行の選択が改行の選択になってしまっているからですね。</p>
+<p>理屈はわかるものの、使いづらいです。</p>
+<p>こんな時は、<code>Vjjjzf</code>とline-wiseなビジュアルモードを使えばOKです。
+<code>zf{motion}</code>の場合も<code>zfV{motion}</code>すると、モーションをline-wiseに強制できます。これで解決ではあるものの、ストローク数が増えるのは難点です。</p>
+<p>というわけで、冒頭で示したとおり、<code>zf</code>が必ずline-wiseになるようマッピングしてしまうといいです。</p>
+<pre class="vim"><code>nnoremap zf zfV
+vnoremap &lt;expr&gt; zf mode() ==# &#39;V&#39; ? &#39;zf&#39; : &#39;Vzf&#39;</code></pre>
+<p>ENJOY!!</p>
