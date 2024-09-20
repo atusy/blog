@@ -5,6 +5,7 @@ date: '2024-09-20'
 slug: hmny-wallet
 categories: ["Gadget"]
 tags: []
+images: ["2024/09/20/hmny-wallet/images/wallet.jpg", "2024/09/20/hmny-wallet/images/wallet-inside.jpg"]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists
