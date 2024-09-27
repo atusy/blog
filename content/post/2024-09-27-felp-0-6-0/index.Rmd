@@ -1,0 +1,63 @@
+---
+title: "Rのヘルプを便利にするfelp v0.6.0をリリース"
+author: atusy
+date: '2024-09-27'
+slug: felp-0-6-0
+categories: [R]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+```{r, include=FALSE}
+```
+
+Rのヘルプを便利にする**felp**パッケージのv0.6.0をリリースしました。
+
+**felp**はfunctional helpの略称です。
+数年前のTokyo.Rでの雑談がきっかけで生まれたパッケージで主に以下の機能があります。
+
+- `fuzzyhelp()`: パッケージや関数のヘルプをあいまい検索するShinyアプリ
+- `felp()`: `help()`を拡張し、ヘルプと同時に関数の実装も表示する関数
+- `?.`: 関数名前を入力してからヘルプを見たくなった時に、関数名の頭まで戻らずとも、`print?.`といった具合に関数名の後ろに`?.`をつけるだけでヘルプを表示する疑似後置演算子
+- `?p`: `?.`のパッケージ版で`dplyr?.`などして使う後置演算子
+
+最近のリリースはもっぱら`fuzzyhelp()`の改善です。
+
+## v0.6.0の主な変更点
+
+### `fuzzyhelp()`の改善
+
+### パフォーマンス改善
+
+あいまい検索は、それなりに重たい処理です。
+`fuzzyhelp()`では、[fzf](https://github.com/junegunn/fzf)由来の、それなりに軽量で高品質なアルゴリズムを移植＆チューニングしていますが、それでもやや時間がかかります。
+
+そこで、**memoise**パッケージを導入して、一度検索した結果をキャッシュし、再検索のパフォーマンスを改善しました。
+
+### UI改善
+
+- ヘルプのトピック一覧の背景白を項目ごとに灰色と白色で塗り分けた
+- ヘルプのトピック一覧のフォントサイズを小さくし、代わりにプレビュー画面の高さを上げた
+
+![](images/felp-toc.png)
+
+### RStudio Serverでプレビューが表示されない問題の修正
+
+RのHTML版ヘルプは、`tools::startDynamiHelp()`を使って内部的にサーバーを立てています。
+一方RStudio Serverは自身がヘルプサーバーを兼ねているらしく、URLが異なっていました。
+このためプレビューが表示できない問題がありました。
+
+- 通常: `http://localhost:{port}/library/{package}/html/{topic}.html`
+- RStudio Server: `http://{RStudio ServerのURL}/help/library/{package}/html/{topic}.html`
+
+## v0.7.0の予定
+
+あいまい検索をもっと高速にしたい思いがあります。
+これはRで実装したアルゴリズムの改善でも多少見込みがありますが、個人的な興味から、**extendr**パッケージでRustと連携してみたいと考えています。
+Rustには[skim](https://github.com/lotabout/skim)というあいまい検索CLIツールがあり、これを流用できないかと目論んでいます。
+
+すぐとりかかれるかはわかりませんが、ぼちぼちやってきます。
+
+# ENJOY
