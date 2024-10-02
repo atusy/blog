@@ -1,8 +1,9 @@
+source("~/.Rprofile")
 options(
   browser = local({
-    browser <- getOption("browser")
-    if (is.null(browser) || browser == "") return(Sys.getenv("BROWSER"))
-    return(browser)
+    browser <- Sys.getenv("BROWSER")
+    if (browser != "") return(browser)
+    return(getOption("browser"))
   }),
   blogdown.ext = ".Rmd",
   blogdown.files_filter = function(x, ...) {
