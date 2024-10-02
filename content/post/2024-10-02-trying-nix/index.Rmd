@@ -1,0 +1,70 @@
+---
+title: "いいぞいいぞと言われるnixをためしてる"
+author: atusy
+date: '2024-10-02'
+slug: trying-nix
+categories: [Nix]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+```{r, include=FALSE}
+```
+
+[Nix]: https://nix.dev/
+
+[Nix]はLinuxやUnix向けのパッケージマネージャーです。
+ぱっと5つメリットをあげるとこんなところでしょうか。
+
+- 様々なLinuxディストリビューションやmacOSで使える
+- 再現性がありロールバックも可能
+- 入れたいパッケージごとに依存関係を独立して管理するので、Aを入れるにはBのバージョンアップが必要みたいな問題が起きない
+- 特定のプロジェクト（ディレクトリ）ごとに使うパッケージを変えられる
+- 設定ファイルも含めた構成管理ソフトウェアとしても使える
+
+最近、[スリーシェイク](https://3-shake.co.jp)に転職して、職場のPCがmacOSになりました。
+以前は仕事もプライベートもmanjaro linuxで統一していたのでとりあえず`paru`を使えばよかったのですが、そうも言ってられないので、[Nix]を使ってみることにしました。
+
+ちょっとずつ慣れてきたので感想を箇条書きしておきます。
+
+- パッケージ管理のコマンドが統一されるのは快適
+- [Nix]さえあればOKとはなかなかいかない
+  - なんやかんやmacOS未対応なパッケージがある
+  - GUIのインストールは他のパッケージマネージャーを使うほうがいいことも
+    - macOSにnixでwezterm（ターミナル）を入れると、Dockからの起動の挙動がイマイチ
+      - 設定で`front_end = "WebGpu"`にしないと文字列が全部豆腐になる
+      - DockにWeztermを入れて起動すると、標準のターミナル経由の起動になり、画面が2つ立ちあがってしまう
+      - そのくせWeztermを閉じても標準のターミナルは終了してくれない
+    - Linuxにweztermを入れると、なんか起動時にクラッシュする
+- 特定のバージョンのパッケージのインストールはハードルが高い
+  - たぶんFlake（？）あたりの知識が必要っぽいので、ハードルが高い
+  - 代替手段に逃げるのも正直ありかも
+    - [devbox](https://www.jetify.com/devbox)は裏でNixを使っているので対応パッケージが豊富
+    - [mise](https://github.com/jdx/mise)または[asdf](https://asdf-vm.com/)は定番なので、業務で共通のツールとして使いやすい
+- いきなり構成管理もするのはやめておいた方がいいかも
+  - とりあえず[home-manager](https://nix-community.github.io/home-manager/)を入れてみたものの、Nix言語やらFlakeやら覚えることが多過ぎる
+  - 雰囲気でやったらneovim-nightlyの導入でめちゃめちゃ躓いた
+  - 素直にNix言語とかの勉強したほうがいい
+- なんかRのパッケージ管理に躓いた
+  - `install.packages("blogdown")`して`blogdown::serve_site()`したらエラーになる
+
+    ```
+    Error in dyn.load(file, DLLpath = DLLpath, ...) : 
+    unable to load shared object '/home/atusy/R/x86_64-pc-linux-gnu-library/4.4/Rcpp/libs/Rcpp.so':
+    /nix/store/kl05kz98gyqzrjm16j9j9pfbm3gp4s2b-gfortran-13.3.0-lib/lib/libstdc++.so.6: version `CXXABI_1.3.15'
+    not found (required by /home/atusy/R/x86_64-pc-linux-gnu-library/4.4/Rcpp/libs/Rcpp.so)
+    ```
+
+  - nix経由でも**blogdown**をインストールできるが、利用するにはライブラリの読み込み設定が必要
+
+    ```r
+    # .Rprofileに入れておく
+    .libPath(file.path(Sys.getenv("HOME"), ".nix-profile/library"), .libPaths())
+    ```
+
+とりあえずプライベートPCは`home-manager`での管理を進めてみるつもりです。
+慣れてきたら仕事のPCも`nix-darwin`なるものを入れてみようと思います。
+
+# ENJOY

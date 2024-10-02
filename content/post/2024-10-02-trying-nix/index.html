@@ -1,0 +1,71 @@
+---
+title: "いいぞいいぞと言われるnixをためしてる"
+author: atusy
+date: '2024-10-02'
+slug: trying-nix
+categories: [Nix]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p><a href="https://nix.dev/">Nix</a>はLinuxやUnix向けのパッケージマネージャーです。ぱっと5つメリットをあげるとこんなところでしょうか。</p>
+<ul>
+<li>様々なLinuxディストリビューションやmacOSで使える</li>
+<li>再現性がありロールバックも可能</li>
+<li>入れたいパッケージごとに依存関係を独立して管理するので、Aを入れるにはBのバージョンアップが必要みたいな問題が起きない</li>
+<li>特定のプロジェクト（ディレクトリ）ごとに使うパッケージを変えられる</li>
+<li>設定ファイルも含めた構成管理ソフトウェアとしても使える</li>
+</ul>
+<p>最近、<a href="https://3-shake.co.jp">スリーシェイク</a>に転職して、職場のPCがmacOSになりました。以前は仕事もプライベートもmanjaro linuxで統一していたのでとりあえず<code>paru</code>を使えばよかったのですが、そうも言ってられないので、<a href="https://nix.dev/">Nix</a>を使ってみることにしました。</p>
+<p>ちょっとずつ慣れてきたので感想を箇条書きしておきます。</p>
+<ul>
+<li>パッケージ管理のコマンドが統一されるのは快適</li>
+<li><a href="https://nix.dev/">Nix</a>さえあればOKとはなかなかいかない
+<ul>
+<li>なんやかんやmacOS未対応なパッケージがある</li>
+<li>GUIのインストールは他のパッケージマネージャーを使うほうがいいことも
+<ul>
+<li>macOSにnixでwezterm（ターミナル）を入れると、Dockからの起動の挙動がイマイチ
+<ul>
+<li>設定で<code>front_end = "WebGpu"</code>にしないと文字列が全部豆腐になる</li>
+<li>DockにWeztermを入れて起動すると、標準のターミナル経由の起動になり、画面が2つ立ちあがってしまう</li>
+<li>そのくせWeztermを閉じても標準のターミナルは終了してくれない</li>
+</ul></li>
+<li>Linuxにweztermを入れると、なんか起動時にクラッシュする</li>
+</ul></li>
+</ul></li>
+<li>特定のバージョンのパッケージのインストールはハードルが高い
+<ul>
+<li>たぶんFlake（？）あたりの知識が必要っぽいので、ハードルが高い</li>
+<li>代替手段に逃げるのも正直ありかも
+<ul>
+<li><a href="https://www.jetify.com/devbox">devbox</a>は裏でNixを使っているので対応パッケージが豊富</li>
+<li><a href="https://github.com/jdx/mise">mise</a>または<a href="https://asdf-vm.com/">asdf</a>は定番なので、業務で共通のツールとして使いやすい</li>
+</ul></li>
+</ul></li>
+<li>いきなり構成管理もするのはやめておいた方がいいかも
+<ul>
+<li>とりあえず<a href="https://nix-community.github.io/home-manager/">home-manager</a>を入れてみたものの、Nix言語やらFlakeやら覚えることが多過ぎる</li>
+<li>雰囲気でやったらneovim-nightlyの導入でめちゃめちゃ躓いた</li>
+<li>素直にNix言語とかの勉強したほうがいい</li>
+</ul></li>
+<li>なんかRのパッケージ管理に躓いた
+<ul>
+<li><p><code>install.packages("blogdown")</code>して<code>blogdown::serve_site()</code>したらエラーになる</p>
+<pre><code>Error in dyn.load(file, DLLpath = DLLpath, ...) : 
+unable to load shared object &#39;/home/atusy/R/x86_64-pc-linux-gnu-library/4.4/Rcpp/libs/Rcpp.so&#39;:
+/nix/store/kl05kz98gyqzrjm16j9j9pfbm3gp4s2b-gfortran-13.3.0-lib/lib/libstdc++.so.6: version `CXXABI_1.3.15&#39;
+not found (required by /home/atusy/R/x86_64-pc-linux-gnu-library/4.4/Rcpp/libs/Rcpp.so)</code></pre></li>
+<li><p>nix経由でも<strong>blogdown</strong>をインストールできるが、利用するにはライブラリの読み込み設定が必要</p>
+<pre class="r"><code># .Rprofileに入れておく
+.libPath(file.path(Sys.getenv(&quot;HOME&quot;), &quot;.nix-profile/library&quot;), .libPaths())</code></pre></li>
+</ul></li>
+</ul>
+<p>とりあえずプライベートPCは<code>home-manager</code>での管理を進めてみるつもりです。慣れてきたら仕事のPCも<code>nix-darwin</code>なるものを入れてみようと思います。</p>
+<div id="enjoy" class="section level1">
+<h1>ENJOY</h1>
+</div>
