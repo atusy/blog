@@ -1,0 +1,267 @@
+---
+title: "nix-shellでRを使う"
+author: atusy
+date: '2024-10-07'
+slug: nix-shell-and-r
+categories: [R, Nix]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [r, bash, nix, diff]
+---
+
+
+
+<p><a href="https://nix.dev/">Nix</a>はLinuxやUnix向けのパッケージマネージャーです。</p>
+<p><code>nix-env --install R</code>としてグローバルに利用可能なRをインストールすることもできますが、
+<code>nix-shell --package R</code>して一時的なR環境を<code>bash</code>上に構築することもできます。</p>
+<p>R本体やパッケージのバージョン指定も可能なので、プロジェクトごとにパッケージのバージョン指定が異なる場合や、グローバル環境にインストールしたパッケージとプロジェクト用パッケージで依存関係が衝突する場合に便利です。</p>
+<p>この記事では<code>nix-shell</code>を使ってR環境を構築する方法を紹介します。</p>
+<ul>
+<li>Rの入れ方とバージョンの固定方法</li>
+<li>パッケージの入れ方とバージョンの固定方法</li>
+<li>RStudioやradianとの組み合わせ方法</li>
+</ul>
+<p>色々書いてますが、基本的には<a href="https://docs.ropensci.org/rix/">rix</a>パッケージを使った方法が簡便だと思います。</p>
+<div id="素朴なr環境セットアップ手順" class="section level1">
+<h1>素朴なR環境セットアップ手順</h1>
+<p>たとえば以下のようにして、Rで<strong>dplyr</strong>、<strong>shiny</strong>を使う環境を作ることができます。</p>
+<pre class="bash"><code># 方法1: Rと共に`rPackages.*`を指定する
+nix-shell --packages R rPackages.dplyr rPackages.shiny
+
+# 方法2: Nix式を引数に指定して、依存関係を明示する
+nix-shell --packages &#39;(rWrapper.override { packages = with rPackages; [ dplyr shiny ]; })&#39;
+
+# 方法3: Nix式を`default.nix`に記述しておく
+echo &#39;(rWrapper.override { packages = with rPackages; [ dplyr shiny ]; })&#39; &gt; default.nix
+nix-shell</code></pre>
+<p><code>rPackages.*</code>を指定せずに、Rの中から<code>install.packages()</code>でパッケージをインストールすることもできますが、おすすめはしません。以下の<strong>curl</strong>パッケージのように、システム側の依存ライブラリの不足によるエラーが発生するケースがあります。すなおに<code>nix-shell -p R rPackages.curl</code>するのがよいでしょう。</p>
+<pre class="bash"><code>nix-shell --pure -p R curl --command &quot;R -e &#39;install.packages(\&quot;curl\&quot;)&#39;&quot;
+# (前略)
+# --------------------------- [ANTICONF] --------------------------------
+# Configuration failed because libcurl was not found. Try installing:
+#  * deb: libcurl4-openssl-dev (Debian, Ubuntu, etc)
+#  * rpm: libcurl-devel (Fedora, CentOS, RHEL)
+# If libcurl is already installed, check that &#39;pkg-config&#39; is in your
+# PATH and PKG_CONFIG_PATH contains a libcurl.pc file. If pkg-config
+# is unavailable you can set INCLUDE_DIR and LIB_DIR manually via:
+# R CMD INSTALL --configure-vars=&#39;INCLUDE_DIR=... LIB_DIR=...&#39;
+# -------------------------- [ERROR MESSAGE] ---------------------------
+# &lt;stdin&gt;:1:10: fatal error: curl/curl.h: No such file or directory
+# compilation terminated.
+# --------------------------------------------------------------------
+# ERROR: configuration failed for package &#39;curl&#39;</code></pre>
+</div>
+<div id="バージョンを固定した環境のセットアップ手順" class="section level1">
+<h1>バージョンを固定した環境のセットアップ手順</h1>
+<p>さきほどまでの手順では、<code>nix-shell</code>実行時に手に入る最新のR環境が構築されます。特定のバージョンのRを使いたい場合には、Nix式を手書きするか、rixパッケージを使う方法があります。
+Nix式の手書きは面倒なので、rixパッケージを使う方が実用的でしょう。</p>
+<div id="nix式を手書きする方法" class="section level2">
+<h2>nix式を手書きする方法</h2>
+<p>Nixはパッケージマネージャですが、そのリポジトリはGitでバージョン管理されています。従って特定のバージョンのRが必要な場合には、適切なリポジトリのリビジョンを指定すればOKです。たとえば、以下の<code>default.nix</code>を用意して、<code>nix-shell</code>すると、R 4.3.3を利用できます。</p>
+<pre class="nix"><code># default.nix
+let
+  # R 4.3.3 が登録されているリポジトリ
+  pkgs = import (fetchTarball &quot;https://github.com/NixOS/nixpkgs/archive/019f5c29c5afeb215587e17bf1ec31dc1913595b.tar.gz&quot;) {};
+in
+pkgs.mkShell {
+  buildInputs = [ pkgs.R, pkgs.rPackages.ggplot2 ];
+}</code></pre>
+<p>Rのバージョンを指定できましたが、パッケージのバージョン指定まではできていません。単純に<code>pkgs.rPackages.ggplot2</code>を指定すると、上述のR 4.1.1が利用可能なリポジトリが登録されたタイミングで最新の<strong>ggplot2</strong>パッケージがインストールされます。</p>
+<p>パッケージのバージョンも指定するには、更にGitHubからパッケージのソースコードを取得するように書く必要があります。
+<code>propagatedBuildInputs</code>にはインストールしたいパッケージが依存しているパッケージ一覧も記述が必要で、相当に手間がかかります。次に説明する<code>rix</code>パッケージを使って<code>default.nix</code>を生成する方法が無難でしょう。</p>
+<pre class="nix"><code># default.nix
+let
+  # R 4.3.3
+  pkgs = import (fetchTarball &quot;https://github.com/NixOS/nixpkgs/archive/019f5c29c5afeb215587e17bf1ec31dc1913595b.tar.gz&quot;) {};
+ 
+  # パッケージ
+  rpkgs = [ 
+    (pkgs.rPackages.buildRPackage {
+      name = &quot;ggplot2&quot;;
+      src = pkgs.fetchzip {
+       url = &quot;https://cran.r-project.org/src/contrib/Archive/ggplot2/ggplot2_3.4.0.tar.gz&quot;;
+       sha256 = &quot;sha256-8ZuFJQaCDAKsNlJ7YNuqDZlCXeh+w2BtiypMJFrFOS0=&quot;;
+      };
+      propagatedBuildInputs = builtins.attrValues {
+        inherit (pkgs.rPackages) 
+          cli
+          glue
+          gtable
+          isoband
+          lifecycle
+          MASS
+          mgcv
+          rlang
+          scales
+          tibble
+          vctrs
+          withr;
+      };
+    })
+  ];
+in
+pkgs.mkShell {
+  buildInputs = [ pkgs.R rpkgs ];
+}</code></pre>
+</div>
+<div id="rixパッケージを使う方法" class="section level2">
+<h2>rixパッケージを使う方法</h2>
+<p><strong>rix</strong>パッケージを使うと、<code>default.nix</code>の生成をRから実行できます。メリットもりだくさんなので、活用するといいでしょう。</p>
+<ul>
+<li>Rのバージョン指定のために必要なNixのリポジトリのリビジョンを探す必要がない</li>
+<li>CRAN上のパッケージのバージョン指定が<code>ggplot2@3.4.0</code>と簡単に書ける
+<ul>
+<li>パッケージの依存関係も自動で解決してくれる</li>
+</ul></li>
+<li>GitHub上のパッケージを<code>list(package_name = '...', repo_url = '...', commit = '...')</code>として指定できる</li>
+<li><code>.Rprofile</code>を自動生成し、<code>install.packages()</code>などの利用を禁止してくれる
+<ul>
+<li>先述の<code>curl</code>パッケージのインストールエラーを未然に防ぎ、<code>default.nix</code>の更新を促してくれる</li>
+</ul></li>
+</ul>
+<pre class="bash"><code># default.nixの生成
+nix-shell \
+  --expr &quot;$(curl -sl https://raw.githubusercontent.com/ropensci/rix/main/inst/extdata/default.nix)&quot; \
+  --run &quot;R -e \&quot;
+    rix::rix(
+      r_ver = &#39;4.3.3&#39;,
+      r_pkgs = c(&#39;ggplot2@3.4.0&#39;),
+      git_pkgs = list(
+        list(
+          package_name = &#39;remotes&#39;,
+          repo_url = &#39;https://github.com/r-lib/remotes&#39;,
+          commit = &#39;5b7eb08f70ecc4f885f2c75330ce77f87e7dd14e&#39;
+        )
+      ),
+      ide = &#39;other&#39;,
+      system_pkgs = NULL, # python3 などのシステムパッケージを指定
+      project_path = &#39;.&#39;,
+      overwrite = TRUE,
+      print = TRUE
+    )
+  \&quot;&quot;
+
+# default.nixを使ってシェルを起動
+nix-shell</code></pre>
+</div>
+</div>
+<div id="radianやrstudioを使う環境のセットアップ手順" class="section level1">
+<h1>radianやRStudioを使う環境のセットアップ手順</h1>
+<div id="radianやrstudioをnixで導入する場合" class="section level2">
+<h2>radianやRStudioをNixで導入する場合</h2>
+<div id="nix式を手書きする方法-1" class="section level3">
+<h3>Nix式を手書きする方法</h3>
+<p>Nixで用意したradianやRStudioを使う場合、パッケージの導入方法に注意が必要です。以下のように、<code>R</code>と同時に入れるか、<code>radianWrapper</code>や<code>rstudioWrapper</code>を使うといいでしょう。</p>
+<pre class="bash"><code># 方法1: Rと同時に入れる
+# radian単体でもRを同時にインストールするが、その場合は`librar(poorman)`に失敗する
+# rstudioがこの方法で動作するかは未確認
+nix-shell --pure --packages R radianWrapper rPackages.poorman --command radian
+
+# 方法2: radianWrapperやrstudioWrapperをoverrideして入れる
+# radianの場合は`wrapR = true`も指定すると、Rコマンドも使える
+nix-shell --pure --packages &#39;(radianWrapper.override { packages = with rPackages; [ poorman ]; wrapR = true; })&#39;</code></pre>
+<p><code>--packages python312Packages.radian rPackages.poorman</code>や<code>--packages radianWrapper rPackages</code></p>
+<p>ただしRのコンソールにRStudioやradianを使う場合、単純に<code>--packages rstudio</code>などと指定しても、RStudioやradianからは<strong>tidyverse</strong>パッケージや<strong>shiny</strong>パッケージを参照できない点に注意です。</p>
+<pre class="bash"><code>nix-shell --packages R rPackages.tidyverse rPackages.shiny \
+  rstudio python312Packages.radian</code></pre>
+</div>
+<div id="rixを使う方法" class="section level3">
+<h3>rixを使う方法</h3>
+<div id="system_pkgsにradianやrstudioを指定する" class="section level4">
+<h4>system_pkgsにradianやRStudioを指定する</h4>
+<p><code>system_pkgs</code>に<code>radianWrapper</code>を指定する方法です。
+<code>rstudioWrapper</code>もこの方法で対応できるかは未確認です。</p>
+<pre class="bash"><code># default.nixの生成
+nix-shell \
+  --expr &quot;$(curl -sl https://raw.githubusercontent.com/ropensci/rix/main/inst/extdata/default.nix)&quot; \
+  --run &quot;R -e \&quot;
+    rix::rix(
+      r_ver = &#39;4.3.3&#39;,
+      r_pkgs = c(&#39;ggplot2@3.4.0&#39;),
+      git_pkgs = NULL,
+      ide = &#39;radian&#39;,
+      system_pkgs = c(&#39;radianWrapper&#39;), # python3 などのシステムパッケージを指定
+      project_path = &#39;.&#39;,
+      overwrite = TRUE,
+      print = TRUE
+    )
+  \&quot;&quot;
+
+# default.nixを使ってシェルを起動
+nix-shell</code></pre>
+</div>
+</div>
+<div id="rixで生成したdefault.nixを編集する" class="section level3">
+<h3>rixで生成したdefault.nixを編集する</h3>
+<p>buildInputsに<code>radianWrapper</code>や<code>rstudioWrapper</code>をoverrideしたものを用意する方法です。たぶんここまでする必要はあまりない気がしますが、もし<code>rix::rix(system_pkgs = "rstudioWrapper")</code>でうまくいかなかった場合に有効でしょう。</p>
+<pre class="diff"><code>  # This file was generated by the {rix} R package v0.12.4 on 2024-10-08
+  # with following call:
+  # &gt;rix::rix(r_ver = &quot;019f5c29c5afeb215587e17bf1ec31dc1913595b&quot;,
+  #  &gt; r_pkgs = &quot;poorman@0.2.0&quot;,
+  #  &gt; system_pkgs = NULL,
+  #  &gt; git_pkgs = NULL,
+  #  &gt; ide = &quot;radian&quot;,
+  #  &gt; project_path = &quot;__ignored/&quot;,
+  #  &gt; overwrite = TRUE,
+  #  &gt; print = TRUE)
+  # It uses nixpkgs&#39; revision 019f5c29c5afeb215587e17bf1ec31dc1913595b for reproducibility purposes
+  # which will install R version 4.3.3.
+  # Report any issues to https://github.com/ropensci/rix
+  let
+   pkgs = import (fetchTarball &quot;https://github.com/NixOS/nixpkgs/archive/019f5c29c5afeb215587e17bf1ec31dc1913595b.tar.gz&quot;) {};
+    
+    git_archive_pkgs = [ 
+      (pkgs.rPackages.buildRPackage {
+        name = &quot;poorman&quot;;
+        src = pkgs.fetchzip {
+         url = &quot;https://cran.r-project.org/src/contrib/Archive/poorman/poorman_0.2.0.tar.gz&quot;;
+         sha256 = &quot;sha256-Arc6N7s1l62K0I6NNo1Xdq3jmYbL0I6iM1dr2KPOvKU=&quot;;
+        };
+        propagatedBuildInputs = builtins.attrValues {
+          inherit (pkgs.rPackages) ;
+        };
+      })
+    ];
+     
+    system_packages = builtins.attrValues {
+      inherit (pkgs) 
+        glibcLocales
+        nix
+        R;
+    };
+    
+  in
+
+  pkgs.mkShell {
+    LOCALE_ARCHIVE = if pkgs.system == &quot;x86_64-linux&quot; then &quot;${pkgs.glibcLocales}/lib/locale/locale-archive&quot; else &quot;&quot;;
+    LANG = &quot;en_US.UTF-8&quot;;
+     LC_ALL = &quot;en_US.UTF-8&quot;;
+     LC_TIME = &quot;en_US.UTF-8&quot;;
+     LC_MONETARY = &quot;en_US.UTF-8&quot;;
+     LC_PAPER = &quot;en_US.UTF-8&quot;;
+     LC_MEASUREMENT = &quot;en_US.UTF-8&quot;;
+
+-   buildInputs = [ git_archive_pkgs   system_packages   ];
++   buildInputs = [
++     git_archive_pkgs
++     system_packages
++     (pkgs.radianWrapper.override { packages = git_archive_pkgs; })
++     (pkgs.rstudioWrapper.override { packages = git_archive_pkgs; })
++   ];
+      
+  }</code></pre>
+</div>
+</div>
+<div id="radianやrstudioをnixを使わずに導入する場合" class="section level2">
+<h2>radianやRStudioをNixを使わずに導入する場合</h2>
+<p><code>nix-shell</code>の環境構築が一発で済むメリットを捨てることになりますが、Nixを使わずにradianやRStudioを導入する方法もありでしょう。
+Nixは再現性のメリットもありますが、radianやRStudioの挙動が分析の再現性に影響する可能性はほとんどないと思います。</p>
+<p>radianの場合は<code>nix-shell</code>に入ってから<code>radian</code>を実行すれば、自動的に<code>nix-shell</code>で入れたRを利用できます。
+rstudioの場合はたしか設定項目として利用するRのパスを指定できたはず。</p>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>ENJOY</h1>
+</div>
