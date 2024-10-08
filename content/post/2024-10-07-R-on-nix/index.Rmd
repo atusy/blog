@@ -43,7 +43,16 @@ nix-shell --packages R rPackages.dplyr rPackages.shiny
 nix-shell --packages '(rWrapper.override { packages = with rPackages; [ dplyr shiny ]; })'
 
 # 方法3: Nix式を`default.nix`に記述しておく
-echo '(rWrapper.override { packages = with rPackages; [ dplyr shiny ]; })' > default.nix
+echo '
+let
+ pkgs = import <nixpkgs> {};
+in
+pkgs.mkShell {
+  buildInputs = [
+    (pkgs.rWrapper.override { packages = with pkgs.rPackages; [dplyr shiny]; })
+  ];
+}
+' > default.nix
 nix-shell
 ```
 

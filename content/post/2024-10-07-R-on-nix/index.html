@@ -34,7 +34,16 @@ nix-shell --packages R rPackages.dplyr rPackages.shiny
 nix-shell --packages &#39;(rWrapper.override { packages = with rPackages; [ dplyr shiny ]; })&#39;
 
 # 方法3: Nix式を`default.nix`に記述しておく
-echo &#39;(rWrapper.override { packages = with rPackages; [ dplyr shiny ]; })&#39; &gt; default.nix
+echo &#39;
+let
+ pkgs = import &lt;nixpkgs&gt; {};
+in
+pkgs.mkShell {
+  buildInputs = [
+    (pkgs.rWrapper.override { packages = with pkgs.rPackages; [dplyr shiny]; })
+  ];
+}
+&#39; &gt; default.nix
 nix-shell</code></pre>
 <p><code>rPackages.*</code>を指定せずに、Rの中から<code>install.packages()</code>でパッケージをインストールすることもできますが、おすすめはしません。以下の<strong>curl</strong>パッケージのように、システム側の依存ライブラリの不足によるエラーが発生するケースがあります。すなおに<code>nix-shell -p R rPackages.curl</code>するのがよいでしょう。</p>
 <pre class="bash"><code>nix-shell --pure -p R curl --command &quot;R -e &#39;install.packages(\&quot;curl\&quot;)&#39;&quot;
