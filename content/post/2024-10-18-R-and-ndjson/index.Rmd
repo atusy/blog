@@ -1,0 +1,249 @@
+---
+title: "Rでndjson形式のログを解析する"
+author: atusy
+date: '2024-10-22'
+slug: anaylze-ndjson-logs-in-r
+categories: [R]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [r, json]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+set.seed(123)
+tempfile <- function() {
+  dir = file.path("assets", "temp")
+  dir.create(dir, showWarnings = FALSE, recursive = TRUE)
+  file.path(dir, paste0("temp", round(runif(1) * 1e6)))
+}
+```
+
+最近、ndjson形式のログをRで解析しました。
+やはり**tidyverse**を使える体験のよさは他の追随を許しません。
+
+ただ、ndjson形式を直接読み込む方法を知らずに、`jq`コマンドを使って通常のJSON形式に変換してから読み込んでいました（`cat file.ndjson | jq -c -s . > file.json`）。
+読み込みからRで完結したいと思ったので、方法を調べてみました。
+
+結論としては、用途に応じていくつかのパターンがありそうでした。
+
+a. `jsonlite::stream_in`関数でデータフレーム化する
+    - 簡単
+    - 巨大なファイルの読み込みには時間がかかる
+b. **duckdb**パッケージを使ってデータフレーム化する
+    - 読み込みが高速
+    - （a）より一手間かかる
+    - メモリより大きなファイルは扱えない
+c. **duckdb**パッケージを使ってインメモリデータベース化する
+    - 読み込み・計算共に高速で省メモリ
+    - （a）より一手間かかる
+    - 集計に利用可能な関数が限られる
+ 
+# ndjson形式とは
+
+ndjson形式は、1行ごとにJSON形式のデータが記述されたファイル形式です。
+
+
+`````json
+{"timestamp": "2024-10-07T00:00:00", "message": "start processing", "task": "1"}
+{"timestamp": "2024-10-07T00:00:02", "message": "finish processing", "task": "1"}
+`````
+
+いわゆるプレインテキストのログと異なり、行ごとにJSONとしてパースできるため、読み込みやすいです。
+読み込みの容易さだけであれば通常のJSONでもいいですが、ndjsonであればログの追加は単純な行の追記で済むため、書き込みもしやすいです。
+
+# Rでndjsonを読み込む
+
+Rでも、**jsonlite**パッケージを使って簡単にndjsonを読み込むことができます。
+`read.csv`関数などのように直接ファイルパスを指定するのではなく、`file`関数で作成したコネクションを`stream_in`関数に渡して読み込む点に注意してください[^with-connection]。
+
+[^with-connection]: 一般的に、作成したコネクションは`close`関数で後処理する必要がありますが、`stream_in`関数は内部でコネクションを自動的にクローズします。コネクションの有効なスコープを限定する方法に`withr::with_connection`関数を使う方法もありますが、`stream_in`関数の自動クローズ機能と干渉するので、ここでは使いません。
+
+```{r}
+# サンプルデータの作成
+ndjson <- tempfile()
+writeLines(c(
+  '{"timestamp": "2024-10-07T00:00:00Z", "message": "program start"}',
+  '{"timestamp": "2024-10-07T00:00:01Z", "message": "start processing", "task": "1"}',
+  '{"timestamp": "2024-10-07T00:00:02Z", "message": "start processing", "task": "2"}',
+  '{"timestamp": "2024-10-07T00:01:02Z", "message": "finish processing", "task": "2"}',
+  '{"timestamp": "2024-10-07T00:02:02Z", "message": "finish processing", "task": "1"}',
+  '{"timestamp": "2024-10-07T00:02:03Z", "message": "program end"}'
+), ndjson)
+
+# データ読み込み
+df <- jsonlite::stream_in(file(ndjson))
+df
+```
+
+読み込み結果はデータフレームなので集計も容易です。
+たとえば以下のように、タスクごとの処理時間（duration）を求めることができます。
+
+```{r}
+df |>
+  # 不要なデータの除去
+  dplyr::filter(!is.na(task)) |>
+  # タイムスタンプのパース
+  dplyr::mutate(timestamp = clock::date_time_parse_RFC_3339(timestamp)) |>
+  # タスクごとの開始時間と終了時間の抽出
+  dplyr::summarize(
+    start = min(timestamp),
+    end = max(timestamp),
+    .by = "task"
+  ) |>
+  # タスクごとの処理時間の計算
+  dplyr::mutate(duration = end - start)
+```
+
+# Rで巨大なndjsonを扱う
+
+先にも触れた通り、ndjsonの読み込みは**jsonlite**パッケージを使えば簡単です。
+しかし、巨大なファイルになると、読み込みに時間がかかります。
+
+ログデータの代わりに、`nycflights13::flights`データセットをndjson化して実験してみましょう（`r nrow(nycflights13::flights)`行`r ncol(nycflights13::flights)`列のデータセット）。
+
+```{r}
+# サンプルデータの容易
+ndjson <- tempfile()
+withr::with_connection(list(con = file(ndjson, "wb")), {
+  nycflights13::flights |>
+    jsonlite::stream_out(con)
+})
+```
+
+```{r use-jsonlite, cache=TRUE}
+# jsonliteによる読み込みとtidyverseによる集計のベンチマーク
+use_jsonlite <- function() {
+  file(ndjson) |>
+    jsonlite::stream_in(verbose = FALSE) |>
+    dplyr::group_by(dest) |>
+    dplyr::summarize(delay = mean(dep_time, na.rm = TRUE))
+}
+
+bench::mark(use_jsonlite(), iterations = 10)
+```
+
+`jsonlite::stream_in`関数は、ファイルを少しずつ読み込んで、最後に`rbind`関数で1まとまりのデータフレームに変換しています。
+おそらく、この部分が処理時間を要しているのでしょう。
+`pagesize`引数を使って一度に読み込む範囲を広くとったり、実装に手を出して`dplyr::bind_rows`関数を使えば、高速化が望めます。
+
+しかし、パフォーマンスチューニングするのは辛いのと、Rでやることに限界を感じそうです。
+少し覚えることを増やして**duckdb**パッケージを使えば、トータルで幸せになれそうなので、紹介します。
+
+## duckdbパッケージを使う
+
+**duckdb**は列指向のデータベース管理システムです。
+同名のパッケージにより、Rから簡単に利用できます。
+
+なにやら仰々しいですが、、今回の用途であれば、一部の定型的な呪文を覚えるだけで、実質的には普段のデータフレームと同様に操作できます。
+
+```{r, eval=FALSE}
+# インメモリデータベースにndjsonを読み込む
+# この部分が呪文相当
+con <- DBI::dbConnect(duckdb::duckdb())
+DBI::dbExecute(
+  con,
+  paste(
+    # duckdbでjsonを使う準備
+    "INSTALL json; LOAD json;",
+    # ndjsonをtblテーブルに読み込む
+    "CREATE OR REPLACE TABLE tbl AS SELECT * FROM read_ndjson('log.ndjson');"
+  )
+)
+
+# データベースの内容をデータフレーム化する
+dplyr::tbl(con, "tbl") |>
+  dplyr::collect()
+```
+
+最後の2行でデータフレーム化けしてしまえば、あとは普通のデータフレームのように、R上で列選択や集計を行えます。
+
+```{r, eval=FALSE}
+# R上で列選択
+dplyr::tbl(con, "tbl") |>
+  dplyr::collect() |>
+  dplyr::select(foo)
+```
+
+**dbplyr**パッケージの力により、`dplyr::collect()`の前でもtidyverse流のデータ加工を実施できます。
+この場合は、加工をデータベース側で行うため、更なる高速化や省メモリ化が期待できます。
+ただし、利用可能な関数が限られる点に注意してください（[参考](https://dbplyr.tidyverse.org/articles/translation-function.html)）。
+
+```{r, eval=FALSE}
+# duckdb上で列選択
+dplyr::tbl(con, "tbl") |>
+  dplyr::select(foo) |>
+  dplyr::collect()
+```
+
+### duckdbパッケージでndjsonをデータフレーム化する
+
+ndjsonファイルが巨大でも、データフレームがメモリに乗る程度のサイズであれば、**duckdb**パッケージをndjsonファイルのデータフレーム化ツールとして使うといいでしょう。
+ベンチマーク結果も**jsonlite**パッケージを使う場合に比べて2桁高速です。
+
+```{r use-duckdb-for-loading, cache=TRUE}
+use_duckdb2 <- function() {
+  # データベースとのコネクションを作成
+  con <- withr::local_db_connection(DBI::dbConnect(duckdb::duckdb()))
+
+  # インメモリデータベースにndjsonを読み込む
+  DBI::dbExecute(
+    con,
+    paste(
+      "INSTALL json; LOAD json;",
+      "CREATE OR REPLACE TABLE tbl AS SELECT * FROM read_ndjson('%s');"
+    ) |> sprintf(ndjson)
+  )
+
+  # インメモリデータベースをデータフレームに変換する
+  df <- dplyr::tbl(con, "tbl") |>
+    dplyr::collect()
+
+  # データフレームを集計する
+  df |>
+    dplyr::group_by(dest) |>
+    dplyr::summarize(delay = mean(dep_time, na.rm = TRUE))
+}
+
+# ベンチマーク
+bench::mark(use_duckdb2(), iterations = 10)
+```
+
+### duckdbパッケージでndjsonをインメモリデータベース化する
+
+**duckdb**パッケージを単純な形式変換ツールとして使うのではまだ遅いケースでは、**duckdb**上に読み込んだデータをデータフレーム化する**前**に、データベース上で集計を行うことで、高速化を図ることができます。
+
+今回のデータ程度では劇的な差はないので、集計に利用可能な関数の制限を受けてまで、活用する必要はないでしょう。
+
+```{r use-duckdb-for-loading-and-summarizing, cache=TRUE}
+require(dbplyr)
+use_duckdb <- function() {
+  # データベースとのコネクションを作成
+  con <- withr::local_db_connection(DBI::dbConnect(duckdb::duckdb()))
+
+  # インメモリデータベースにndjsonを読み込む
+  DBI::dbExecute(
+    con,
+    paste(
+      "INSTALL json; LOAD json;",
+      "CREATE OR REPLACE TABLE tbl AS SELECT * FROM read_ndjson('%s');"
+    ) |> sprintf(ndjson)
+  )
+
+  # インメモリデータベースを集計し、結果をデータフレームに変換する
+  dplyr::tbl(con, "tbl") |>
+    dplyr::group_by(dest) |>
+    dplyr::summarize(delay = mean(dep_time, na.rm = TRUE)) |>
+    dplyr::collect()
+}
+
+bench::mark(use_duckdb(), iterations = 10)
+```
+
+# ENJOY
+
+ndjson形式のログをRで解析する方法として、`jsonlite`パッケージで読み込む方法、`duckdb`でデータフレーム化する方法、`duckdb`で加工してからデータフレーム化する方法を紹介しました。
+
+みなさんのログ解析が捗れば幸いです。

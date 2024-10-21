@@ -1,0 +1,228 @@
+---
+title: "Rでndjson形式のログを解析する"
+author: atusy
+date: '2024-10-22'
+slug: anaylze-ndjson-logs-in-r
+categories: [R]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [r, json]
+---
+
+
+
+<p>最近、ndjson形式のログをRで解析しました。やはり<strong>tidyverse</strong>を使える体験のよさは他の追随を許しません。</p>
+<p>ただ、ndjson形式を直接読み込む方法を知らずに、<code>jq</code>コマンドを使って通常のJSON形式に変換してから読み込んでいました（<code>cat file.ndjson | jq -c -s . &gt; file.json</code>）。読み込みからRで完結したいと思ったので、方法を調べてみました。</p>
+<p>結論としては、用途に応じていくつかのパターンがありそうでした。</p>
+<ol style="list-style-type: lower-alpha">
+<li><code>jsonlite::stream_in</code>関数でデータフレーム化する
+<ul>
+<li>簡単</li>
+<li>巨大なファイルの読み込みには時間がかかる</li>
+</ul></li>
+<li><strong>duckdb</strong>パッケージを使ってデータフレーム化する
+<ul>
+<li>読み込みが高速</li>
+<li>（a）より一手間かかる</li>
+<li>メモリより大きなファイルは扱えない</li>
+</ul></li>
+<li><strong>duckdb</strong>パッケージを使ってインメモリデータベース化する
+<ul>
+<li>読み込み・計算共に高速で省メモリ</li>
+<li>（a）より一手間かかる</li>
+<li>集計に利用可能な関数が限られる</li>
+</ul></li>
+</ol>
+<div id="ndjson形式とは" class="section level1">
+<h1>ndjson形式とは</h1>
+<p>ndjson形式は、1行ごとにJSON形式のデータが記述されたファイル形式です。</p>
+<pre class="json"><code>{&quot;timestamp&quot;: &quot;2024-10-07T00:00:00&quot;, &quot;message&quot;: &quot;start processing&quot;, &quot;task&quot;: &quot;1&quot;}
+{&quot;timestamp&quot;: &quot;2024-10-07T00:00:02&quot;, &quot;message&quot;: &quot;finish processing&quot;, &quot;task&quot;: &quot;1&quot;}</code></pre>
+<p>いわゆるプレインテキストのログと異なり、行ごとにJSONとしてパースできるため、読み込みやすいです。読み込みの容易さだけであれば通常のJSONでもいいですが、ndjsonであればログの追加は単純な行の追記で済むため、書き込みもしやすいです。</p>
+</div>
+<div id="rでndjsonを読み込む" class="section level1">
+<h1>Rでndjsonを読み込む</h1>
+<p>Rでも、<strong>jsonlite</strong>パッケージを使って簡単にndjsonを読み込むことができます。
+<code>read.csv</code>関数などのように直接ファイルパスを指定するのではなく、<code>file</code>関数で作成したコネクションを<code>stream_in</code>関数に渡して読み込む点に注意してください<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>。</p>
+<pre class="r"><code># サンプルデータの作成
+ndjson &lt;- tempfile()
+writeLines(c(
+  &#39;{&quot;timestamp&quot;: &quot;2024-10-07T00:00:00Z&quot;, &quot;message&quot;: &quot;program start&quot;}&#39;,
+  &#39;{&quot;timestamp&quot;: &quot;2024-10-07T00:00:01Z&quot;, &quot;message&quot;: &quot;start processing&quot;, &quot;task&quot;: &quot;1&quot;}&#39;,
+  &#39;{&quot;timestamp&quot;: &quot;2024-10-07T00:00:02Z&quot;, &quot;message&quot;: &quot;start processing&quot;, &quot;task&quot;: &quot;2&quot;}&#39;,
+  &#39;{&quot;timestamp&quot;: &quot;2024-10-07T00:01:02Z&quot;, &quot;message&quot;: &quot;finish processing&quot;, &quot;task&quot;: &quot;2&quot;}&#39;,
+  &#39;{&quot;timestamp&quot;: &quot;2024-10-07T00:02:02Z&quot;, &quot;message&quot;: &quot;finish processing&quot;, &quot;task&quot;: &quot;1&quot;}&#39;,
+  &#39;{&quot;timestamp&quot;: &quot;2024-10-07T00:02:03Z&quot;, &quot;message&quot;: &quot;program end&quot;}&#39;
+), ndjson)
+
+# データ読み込み
+df &lt;- jsonlite::stream_in(file(ndjson))
+#&gt; opening file input connection.
+#&gt;  Found 6 records... Imported 6 records. Simplifying...
+#&gt; closing file input connection.
+df
+#&gt;              timestamp           message task
+#&gt; 1 2024-10-07T00:00:00Z     program start &lt;NA&gt;
+#&gt; 2 2024-10-07T00:00:01Z  start processing    1
+#&gt; 3 2024-10-07T00:00:02Z  start processing    2
+#&gt; 4 2024-10-07T00:01:02Z finish processing    2
+#&gt; 5 2024-10-07T00:02:02Z finish processing    1
+#&gt; 6 2024-10-07T00:02:03Z       program end &lt;NA&gt;</code></pre>
+<p>読み込み結果はデータフレームなので集計も容易です。たとえば以下のように、タスクごとの処理時間（duration）を求めることができます。</p>
+<pre class="r"><code>df |&gt;
+  # 不要なデータの除去
+  dplyr::filter(!is.na(task)) |&gt;
+  # タイムスタンプのパース
+  dplyr::mutate(timestamp = clock::date_time_parse_RFC_3339(timestamp)) |&gt;
+  # タスクごとの開始時間と終了時間の抽出
+  dplyr::summarize(
+    start = min(timestamp),
+    end = max(timestamp),
+    .by = &quot;task&quot;
+  ) |&gt;
+  # タスクごとの処理時間の計算
+  dplyr::mutate(duration = end - start)
+#&gt;   task               start                 end      duration
+#&gt; 1    1 2024-10-07 00:00:01 2024-10-07 00:02:02 2.016667 mins
+#&gt; 2    2 2024-10-07 00:00:02 2024-10-07 00:01:02 1.000000 mins</code></pre>
+</div>
+<div id="rで巨大なndjsonを扱う" class="section level1">
+<h1>Rで巨大なndjsonを扱う</h1>
+<p>先にも触れた通り、ndjsonの読み込みは<strong>jsonlite</strong>パッケージを使えば簡単です。しかし、巨大なファイルになると、読み込みに時間がかかります。</p>
+<p>ログデータの代わりに、<code>nycflights13::flights</code>データセットをndjson化して実験してみましょう（336776行19列のデータセット）。</p>
+<pre class="r"><code># サンプルデータの容易
+ndjson &lt;- tempfile()
+withr::with_connection(list(con = file(ndjson, &quot;wb&quot;)), {
+  nycflights13::flights |&gt;
+    jsonlite::stream_out(con)
+})
+#&gt; Processed 500 rows...Processed 1000 rows...Processed 1500 rows...Processed 2000 rows...Processed 2500 rows...Processed 3000 rows...Processed 3500 rows...Processed 4000 rows...Processed 4500 rows...Processed 5000 rows...Processed 5500 rows...Processed 6000 rows...Processed 6500 rows...Processed 7000 rows...Processed 7500 rows...Processed 8000 rows...Processed 8500 rows...Processed 9000 rows...Processed 9500 rows...Processed 10000 rows...Processed 10500 rows...Processed 11000 rows...Processed 11500 rows...Processed 12000 rows...Processed 12500 rows...Processed 13000 rows...Processed 13500 rows...Processed 14000 rows...Processed 14500 rows...Processed 15000 rows...Processed 15500 rows...Processed 16000 rows...Processed 16500 rows...Processed 17000 rows...Processed 17500 rows...Processed 18000 rows...Processed 18500 rows...Processed 19000 rows...Processed 19500 rows...Processed 20000 rows...Processed 20500 rows...Processed 21000 rows...Processed 21500 rows...Processed 22000 rows...Processed 22500 rows...Processed 23000 rows...Processed 23500 rows...Processed 24000 rows...Processed 24500 rows...Processed 25000 rows...Processed 25500 rows...Processed 26000 rows...Processed 26500 rows...Processed 27000 rows...Processed 27500 rows...Processed 28000 rows...Processed 28500 rows...Processed 29000 rows...Processed 29500 rows...Processed 30000 rows...Processed 30500 rows...Processed 31000 rows...Processed 31500 rows...Processed 32000 rows...Processed 32500 rows...Processed 33000 rows...Processed 33500 rows...Processed 34000 rows...Processed 34500 rows...Processed 35000 rows...Processed 35500 rows...Processed 36000 rows...Processed 36500 rows...Processed 37000 rows...Processed 37500 rows...Processed 38000 rows...Processed 38500 rows...Processed 39000 rows...Processed 39500 rows...Processed 40000 rows...Processed 40500 rows...Processed 41000 rows...Processed 41500 rows...Processed 42000 rows...Processed 42500 rows...Processed 43000 rows...Processed 43500 rows...Processed 44000 rows...Processed 44500 rows...Processed 45000 rows...Processed 45500 rows...Processed 46000 rows...Processed 46500 rows...Processed 47000 rows...Processed 47500 rows...Processed 48000 rows...Processed 48500 rows...Processed 49000 rows...Processed 49500 rows...Processed 50000 rows...Processed 50500 rows...Processed 51000 rows...Processed 51500 rows...Processed 52000 rows...Processed 52500 rows...Processed 53000 rows...Processed 53500 rows...Processed 54000 rows...Processed 54500 rows...Processed 55000 rows...Processed 55500 rows...Processed 56000 rows...Processed 56500 rows...Processed 57000 rows...Processed 57500 rows...Processed 58000 rows...Processed 58500 rows...Processed 59000 rows...Processed 59500 rows...Processed 60000 rows...Processed 60500 rows...Processed 61000 rows...Processed 61500 rows...Processed 62000 rows...Processed 62500 rows...Processed 63000 rows...Processed 63500 rows...Processed 64000 rows...Processed 64500 rows...Processed 65000 rows...Processed 65500 rows...Processed 66000 rows...Processed 66500 rows...Processed 67000 rows...Processed 67500 rows...Processed 68000 rows...Processed 68500 rows...Processed 69000 rows...Processed 69500 rows...Processed 70000 rows...Processed 70500 rows...Processed 71000 rows...Processed 71500 rows...Processed 72000 rows...Processed 72500 rows...Processed 73000 rows...Processed 73500 rows...Processed 74000 rows...Processed 74500 rows...Processed 75000 rows...Processed 75500 rows...Processed 76000 rows...Processed 76500 rows...Processed 77000 rows...Processed 77500 rows...Processed 78000 rows...Processed 78500 rows...Processed 79000 rows...Processed 79500 rows...Processed 80000 rows...Processed 80500 rows...Processed 81000 rows...Processed 81500 rows...Processed 82000 rows...Processed 82500 rows...Processed 83000 rows...Processed 83500 rows...Processed 84000 rows...Processed 84500 rows...Processed 85000 rows...Processed 85500 rows...Processed 86000 rows...Processed 86500 rows...Processed 87000 rows...Processed 87500 rows...Processed 88000 rows...Processed 88500 rows...Processed 89000 rows...Processed 89500 rows...Processed 90000 rows...Processed 90500 rows...Processed 91000 rows...Processed 91500 rows...Processed 92000 rows...Processed 92500 rows...Processed 93000 rows...Processed 93500 rows...Processed 94000 rows...Processed 94500 rows...Processed 95000 rows...Processed 95500 rows...Processed 96000 rows...Processed 96500 rows...Processed 97000 rows...Processed 97500 rows...Processed 98000 rows...Processed 98500 rows...Processed 99000 rows...Processed 99500 rows...Processed 1e+05 rows...Processed 100500 rows...Processed 101000 rows...Processed 101500 rows...Processed 102000 rows...Processed 102500 rows...Processed 103000 rows...Processed 103500 rows...Processed 104000 rows...Processed 104500 rows...Processed 105000 rows...Processed 105500 rows...Processed 106000 rows...Processed 106500 rows...Processed 107000 rows...Processed 107500 rows...Processed 108000 rows...Processed 108500 rows...Processed 109000 rows...Processed 109500 rows...Processed 110000 rows...Processed 110500 rows...Processed 111000 rows...Processed 111500 rows...Processed 112000 rows...Processed 112500 rows...Processed 113000 rows...Processed 113500 rows...Processed 114000 rows...Processed 114500 rows...Processed 115000 rows...Processed 115500 rows...Processed 116000 rows...Processed 116500 rows...Processed 117000 rows...Processed 117500 rows...Processed 118000 rows...Processed 118500 rows...Processed 119000 rows...Processed 119500 rows...Processed 120000 rows...Processed 120500 rows...Processed 121000 rows...Processed 121500 rows...Processed 122000 rows...Processed 122500 rows...Processed 123000 rows...Processed 123500 rows...Processed 124000 rows...Processed 124500 rows...Processed 125000 rows...Processed 125500 rows...Processed 126000 rows...Processed 126500 rows...Processed 127000 rows...Processed 127500 rows...Processed 128000 rows...Processed 128500 rows...Processed 129000 rows...Processed 129500 rows...Processed 130000 rows...Processed 130500 rows...Processed 131000 rows...Processed 131500 rows...Processed 132000 rows...Processed 132500 rows...Processed 133000 rows...Processed 133500 rows...Processed 134000 rows...Processed 134500 rows...Processed 135000 rows...Processed 135500 rows...Processed 136000 rows...Processed 136500 rows...Processed 137000 rows...Processed 137500 rows...Processed 138000 rows...Processed 138500 rows...Processed 139000 rows...Processed 139500 rows...Processed 140000 rows...Processed 140500 rows...Processed 141000 rows...Processed 141500 rows...Processed 142000 rows...Processed 142500 rows...Processed 143000 rows...Processed 143500 rows...Processed 144000 rows...Processed 144500 rows...Processed 145000 rows...Processed 145500 rows...Processed 146000 rows...Processed 146500 rows...Processed 147000 rows...Processed 147500 rows...Processed 148000 rows...Processed 148500 rows...Processed 149000 rows...Processed 149500 rows...Processed 150000 rows...Processed 150500 rows...Processed 151000 rows...Processed 151500 rows...Processed 152000 rows...Processed 152500 rows...Processed 153000 rows...Processed 153500 rows...Processed 154000 rows...Processed 154500 rows...Processed 155000 rows...Processed 155500 rows...Processed 156000 rows...Processed 156500 rows...Processed 157000 rows...Processed 157500 rows...Processed 158000 rows...Processed 158500 rows...Processed 159000 rows...Processed 159500 rows...Processed 160000 rows...Processed 160500 rows...Processed 161000 rows...Processed 161500 rows...Processed 162000 rows...Processed 162500 rows...Processed 163000 rows...Processed 163500 rows...Processed 164000 rows...Processed 164500 rows...Processed 165000 rows...Processed 165500 rows...Processed 166000 rows...Processed 166500 rows...Processed 167000 rows...Processed 167500 rows...Processed 168000 rows...Processed 168500 rows...Processed 169000 rows...Processed 169500 rows...Processed 170000 rows...Processed 170500 rows...Processed 171000 rows...Processed 171500 rows...Processed 172000 rows...Processed 172500 rows...Processed 173000 rows...Processed 173500 rows...Processed 174000 rows...Processed 174500 rows...Processed 175000 rows...Processed 175500 rows...Processed 176000 rows...Processed 176500 rows...Processed 177000 rows...Processed 177500 rows...Processed 178000 rows...Processed 178500 rows...Processed 179000 rows...Processed 179500 rows...Processed 180000 rows...Processed 180500 rows...Processed 181000 rows...Processed 181500 rows...Processed 182000 rows...Processed 182500 rows...Processed 183000 rows...Processed 183500 rows...Processed 184000 rows...Processed 184500 rows...Processed 185000 rows...Processed 185500 rows...Processed 186000 rows...Processed 186500 rows...Processed 187000 rows...Processed 187500 rows...Processed 188000 rows...Processed 188500 rows...Processed 189000 rows...Processed 189500 rows...Processed 190000 rows...Processed 190500 rows...Processed 191000 rows...Processed 191500 rows...Processed 192000 rows...Processed 192500 rows...Processed 193000 rows...Processed 193500 rows...Processed 194000 rows...Processed 194500 rows...Processed 195000 rows...Processed 195500 rows...Processed 196000 rows...Processed 196500 rows...Processed 197000 rows...Processed 197500 rows...Processed 198000 rows...Processed 198500 rows...Processed 199000 rows...Processed 199500 rows...Processed 2e+05 rows...Processed 200500 rows...Processed 201000 rows...Processed 201500 rows...Processed 202000 rows...Processed 202500 rows...Processed 203000 rows...Processed 203500 rows...Processed 204000 rows...Processed 204500 rows...Processed 205000 rows...Processed 205500 rows...Processed 206000 rows...Processed 206500 rows...Processed 207000 rows...Processed 207500 rows...Processed 208000 rows...Processed 208500 rows...Processed 209000 rows...Processed 209500 rows...Processed 210000 rows...Processed 210500 rows...Processed 211000 rows...Processed 211500 rows...Processed 212000 rows...Processed 212500 rows...Processed 213000 rows...Processed 213500 rows...Processed 214000 rows...Processed 214500 rows...Processed 215000 rows...Processed 215500 rows...Processed 216000 rows...Processed 216500 rows...Processed 217000 rows...Processed 217500 rows...Processed 218000 rows...Processed 218500 rows...Processed 219000 rows...Processed 219500 rows...Processed 220000 rows...Processed 220500 rows...Processed 221000 rows...Processed 221500 rows...Processed 222000 rows...Processed 222500 rows...Processed 223000 rows...Processed 223500 rows...Processed 224000 rows...Processed 224500 rows...Processed 225000 rows...Processed 225500 rows...Processed 226000 rows...Processed 226500 rows...Processed 227000 rows...Processed 227500 rows...Processed 228000 rows...Processed 228500 rows...Processed 229000 rows...Processed 229500 rows...Processed 230000 rows...Processed 230500 rows...Processed 231000 rows...Processed 231500 rows...Processed 232000 rows...Processed 232500 rows...Processed 233000 rows...Processed 233500 rows...Processed 234000 rows...Processed 234500 rows...Processed 235000 rows...Processed 235500 rows...Processed 236000 rows...Processed 236500 rows...Processed 237000 rows...Processed 237500 rows...Processed 238000 rows...Processed 238500 rows...Processed 239000 rows...Processed 239500 rows...Processed 240000 rows...Processed 240500 rows...Processed 241000 rows...Processed 241500 rows...Processed 242000 rows...Processed 242500 rows...Processed 243000 rows...Processed 243500 rows...Processed 244000 rows...Processed 244500 rows...Processed 245000 rows...Processed 245500 rows...Processed 246000 rows...Processed 246500 rows...Processed 247000 rows...Processed 247500 rows...Processed 248000 rows...Processed 248500 rows...Processed 249000 rows...Processed 249500 rows...Processed 250000 rows...Processed 250500 rows...Processed 251000 rows...Processed 251500 rows...Processed 252000 rows...Processed 252500 rows...Processed 253000 rows...Processed 253500 rows...Processed 254000 rows...Processed 254500 rows...Processed 255000 rows...Processed 255500 rows...Processed 256000 rows...Processed 256500 rows...Processed 257000 rows...Processed 257500 rows...Processed 258000 rows...Processed 258500 rows...Processed 259000 rows...Processed 259500 rows...Processed 260000 rows...Processed 260500 rows...Processed 261000 rows...Processed 261500 rows...Processed 262000 rows...Processed 262500 rows...Processed 263000 rows...Processed 263500 rows...Processed 264000 rows...Processed 264500 rows...Processed 265000 rows...Processed 265500 rows...Processed 266000 rows...Processed 266500 rows...Processed 267000 rows...Processed 267500 rows...Processed 268000 rows...Processed 268500 rows...Processed 269000 rows...Processed 269500 rows...Processed 270000 rows...Processed 270500 rows...Processed 271000 rows...Processed 271500 rows...Processed 272000 rows...Processed 272500 rows...Processed 273000 rows...Processed 273500 rows...Processed 274000 rows...Processed 274500 rows...Processed 275000 rows...Processed 275500 rows...Processed 276000 rows...Processed 276500 rows...Processed 277000 rows...Processed 277500 rows...Processed 278000 rows...Processed 278500 rows...Processed 279000 rows...Processed 279500 rows...Processed 280000 rows...Processed 280500 rows...Processed 281000 rows...Processed 281500 rows...Processed 282000 rows...Processed 282500 rows...Processed 283000 rows...Processed 283500 rows...Processed 284000 rows...Processed 284500 rows...Processed 285000 rows...Processed 285500 rows...Processed 286000 rows...Processed 286500 rows...Processed 287000 rows...Processed 287500 rows...Processed 288000 rows...Processed 288500 rows...Processed 289000 rows...Processed 289500 rows...Processed 290000 rows...Processed 290500 rows...Processed 291000 rows...Processed 291500 rows...Processed 292000 rows...Processed 292500 rows...Processed 293000 rows...Processed 293500 rows...Processed 294000 rows...Processed 294500 rows...Processed 295000 rows...Processed 295500 rows...Processed 296000 rows...Processed 296500 rows...Processed 297000 rows...Processed 297500 rows...Processed 298000 rows...Processed 298500 rows...Processed 299000 rows...Processed 299500 rows...Processed 3e+05 rows...Processed 300500 rows...Processed 301000 rows...Processed 301500 rows...Processed 302000 rows...Processed 302500 rows...Processed 303000 rows...Processed 303500 rows...Processed 304000 rows...Processed 304500 rows...Processed 305000 rows...Processed 305500 rows...Processed 306000 rows...Processed 306500 rows...Processed 307000 rows...Processed 307500 rows...Processed 308000 rows...Processed 308500 rows...Processed 309000 rows...Processed 309500 rows...Processed 310000 rows...Processed 310500 rows...Processed 311000 rows...Processed 311500 rows...Processed 312000 rows...Processed 312500 rows...Processed 313000 rows...Processed 313500 rows...Processed 314000 rows...Processed 314500 rows...Processed 315000 rows...Processed 315500 rows...Processed 316000 rows...Processed 316500 rows...Processed 317000 rows...Processed 317500 rows...Processed 318000 rows...Processed 318500 rows...Processed 319000 rows...Processed 319500 rows...Processed 320000 rows...Processed 320500 rows...Processed 321000 rows...Processed 321500 rows...Processed 322000 rows...Processed 322500 rows...Processed 323000 rows...Processed 323500 rows...Processed 324000 rows...Processed 324500 rows...Processed 325000 rows...Processed 325500 rows...Processed 326000 rows...Processed 326500 rows...Processed 327000 rows...Processed 327500 rows...Processed 328000 rows...Processed 328500 rows...Processed 329000 rows...Processed 329500 rows...Processed 330000 rows...Processed 330500 rows...Processed 331000 rows...Processed 331500 rows...Processed 332000 rows...Processed 332500 rows...Processed 333000 rows...Processed 333500 rows...Processed 334000 rows...Processed 334500 rows...Processed 335000 rows...Processed 335500 rows...Processed 336000 rows...Processed 336500 rows...Complete! Processed total of 336776 rows.</code></pre>
+<pre class="r"><code># jsonliteによる読み込みとtidyverseによる集計のベンチマーク
+use_jsonlite &lt;- function() {
+  file(ndjson) |&gt;
+    jsonlite::stream_in(verbose = FALSE) |&gt;
+    dplyr::group_by(dest) |&gt;
+    dplyr::summarize(delay = mean(dep_time, na.rm = TRUE))
+}
+
+bench::mark(use_jsonlite(), iterations = 10)
+#&gt; Warning: Some expressions had a GC in every iteration; so filtering is
+#&gt; disabled.
+#&gt; # A tibble: 1 × 6
+#&gt;   expression          min   median `itr/sec` mem_alloc `gc/sec`
+#&gt;   &lt;bch:expr&gt;     &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;
+#&gt; 1 use_jsonlite()    11.9s    12.7s    0.0792        NA    0.507</code></pre>
+<p><code>jsonlite::stream_in</code>関数は、ファイルを少しずつ読み込んで、最後に<code>rbind</code>関数で1まとまりのデータフレームに変換しています。おそらく、この部分が処理時間を要しているのでしょう。
+<code>pagesize</code>引数を使って一度に読み込む範囲を広くとったり、実装に手を出して<code>dplyr::bind_rows</code>関数を使えば、高速化が望めます。</p>
+<p>しかし、パフォーマンスチューニングするのは辛いのと、Rでやることに限界を感じそうです。少し覚えることを増やして<strong>duckdb</strong>パッケージを使えば、トータルで幸せになれそうなので、紹介します。</p>
+<div id="duckdbパッケージを使う" class="section level2">
+<h2>duckdbパッケージを使う</h2>
+<p><strong>duckdb</strong>は列指向のデータベース管理システムです。同名のパッケージにより、Rから簡単に利用できます。</p>
+<p>なにやら仰々しいですが、、今回の用途であれば、一部の定型的な呪文を覚えるだけで、実質的には普段のデータフレームと同様に操作できます。</p>
+<pre class="r"><code># インメモリデータベースにndjsonを読み込む
+# この部分が呪文相当
+con &lt;- DBI::dbConnect(duckdb::duckdb())
+DBI::dbExecute(
+  con,
+  paste(
+    # duckdbでjsonを使う準備
+    &quot;INSTALL json; LOAD json;&quot;,
+    # ndjsonをtblテーブルに読み込む
+    &quot;CREATE OR REPLACE TABLE tbl AS SELECT * FROM read_ndjson(&#39;log.ndjson&#39;);&quot;
+  )
+)
+
+# データベースの内容をデータフレーム化する
+dplyr::tbl(con, &quot;tbl&quot;) |&gt;
+  dplyr::collect()</code></pre>
+<p>最後の2行でデータフレーム化けしてしまえば、あとは普通のデータフレームのように、R上で列選択や集計を行えます。</p>
+<pre class="r"><code># R上で列選択
+dplyr::tbl(con, &quot;tbl&quot;) |&gt;
+  dplyr::collect() |&gt;
+  dplyr::select(foo)</code></pre>
+<p><strong>dbplyr</strong>パッケージの力により、<code>dplyr::collect()</code>の前でもtidyverse流のデータ加工を実施できます。この場合は、加工をデータベース側で行うため、更なる高速化や省メモリ化が期待できます。ただし、利用可能な関数が限られる点に注意してください（<a href="https://dbplyr.tidyverse.org/articles/translation-function.html">参考</a>）。</p>
+<pre class="r"><code># duckdb上で列選択
+dplyr::tbl(con, &quot;tbl&quot;) |&gt;
+  dplyr::select(foo) |&gt;
+  dplyr::collect()</code></pre>
+<div id="duckdbパッケージでndjsonをデータフレーム化する" class="section level3">
+<h3>duckdbパッケージでndjsonをデータフレーム化する</h3>
+<p>ndjsonファイルが巨大でも、データフレームがメモリに乗る程度のサイズであれば、<strong>duckdb</strong>パッケージをndjsonファイルのデータフレーム化ツールとして使うといいでしょう。ベンチマーク結果も<strong>jsonlite</strong>パッケージを使う場合に比べて2桁高速です。</p>
+<pre class="r"><code>use_duckdb2 &lt;- function() {
+  # データベースとのコネクションを作成
+  con &lt;- withr::local_db_connection(DBI::dbConnect(duckdb::duckdb()))
+
+  # インメモリデータベースにndjsonを読み込む
+  DBI::dbExecute(
+    con,
+    paste(
+      &quot;INSTALL json; LOAD json;&quot;,
+      &quot;CREATE OR REPLACE TABLE tbl AS SELECT * FROM read_ndjson(&#39;%s&#39;);&quot;
+    ) |&gt; sprintf(ndjson)
+  )
+
+  # インメモリデータベースをデータフレームに変換する
+  df &lt;- dplyr::tbl(con, &quot;tbl&quot;) |&gt;
+    dplyr::collect()
+
+  # データフレームを集計する
+  df |&gt;
+    dplyr::group_by(dest) |&gt;
+    dplyr::summarize(delay = mean(dep_time, na.rm = TRUE))
+}
+
+# ベンチマーク
+bench::mark(use_duckdb2(), iterations = 10)
+#&gt; Warning: Some expressions had a GC in every iteration; so filtering is
+#&gt; disabled.
+#&gt; # A tibble: 1 × 6
+#&gt;   expression         min   median `itr/sec` mem_alloc `gc/sec`
+#&gt;   &lt;bch:expr&gt;    &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;
+#&gt; 1 use_duckdb2()    497ms    535ms      1.83        NA     2.92</code></pre>
+</div>
+<div id="duckdbパッケージでndjsonをインメモリデータベース化する" class="section level3">
+<h3>duckdbパッケージでndjsonをインメモリデータベース化する</h3>
+<p><strong>duckdb</strong>パッケージを単純な形式変換ツールとして使うのではまだ遅いケースでは、<strong>duckdb</strong>上に読み込んだデータをデータフレーム化する<strong>前</strong>に、データベース上で集計を行うことで、高速化を図ることができます。</p>
+<p>今回のデータ程度では劇的な差はないので、集計に利用可能な関数の制限を受けてまで、活用する必要はないでしょう。</p>
+<pre class="r"><code>require(dbplyr)
+use_duckdb &lt;- function() {
+  # データベースとのコネクションを作成
+  con &lt;- withr::local_db_connection(DBI::dbConnect(duckdb::duckdb()))
+
+  # インメモリデータベースにndjsonを読み込む
+  DBI::dbExecute(
+    con,
+    paste(
+      &quot;INSTALL json; LOAD json;&quot;,
+      &quot;CREATE OR REPLACE TABLE tbl AS SELECT * FROM read_ndjson(&#39;%s&#39;);&quot;
+    ) |&gt; sprintf(ndjson)
+  )
+
+  # インメモリデータベースを集計し、結果をデータフレームに変換する
+  dplyr::tbl(con, &quot;tbl&quot;) |&gt;
+    dplyr::group_by(dest) |&gt;
+    dplyr::summarize(delay = mean(dep_time, na.rm = TRUE)) |&gt;
+    dplyr::collect()
+}
+
+bench::mark(use_duckdb(), iterations = 10)
+#&gt; # A tibble: 1 × 6
+#&gt;   expression        min   median `itr/sec` mem_alloc `gc/sec`
+#&gt;   &lt;bch:expr&gt;   &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt;
+#&gt; 1 use_duckdb()    469ms    492ms      2.00        NA     1.33</code></pre>
+</div>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>ENJOY</h1>
+<p>ndjson形式のログをRで解析する方法として、<code>jsonlite</code>パッケージで読み込む方法、<code>duckdb</code>でデータフレーム化する方法、<code>duckdb</code>で加工してからデータフレーム化する方法を紹介しました。</p>
+<p>みなさんのログ解析が捗れば幸いです。</p>
+</div>
+<div class="footnotes footnotes-end-of-document">
+<hr />
+<ol>
+<li id="fn1"><p>一般的に、作成したコネクションは<code>close</code>関数で後処理する必要がありますが、<code>stream_in</code>関数は内部でコネクションを自動的にクローズします。コネクションの有効なスコープを限定する方法に<code>withr::with_connection</code>関数を使う方法もありますが、<code>stream_in</code>関数の自動クローズ機能と干渉するので、ここでは使いません。<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
