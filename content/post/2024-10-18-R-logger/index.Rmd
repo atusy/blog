@@ -1,0 +1,129 @@
+---
+title: "Rでログを出力する（loggerパッケージ）"
+author: atusy
+date: '2024-10-25'
+slug: R-logger
+categories: [R]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [r, json]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+logger::log_appender(logger::appender_stdout)
+```
+
+先日「[Rでndjson形式のログを解析する](https://blog.atusy.net/2024/10/22/anaylze-ndjson-logs-in-r/)]」の記事を書いた流れで、そういえばRでログを出力する方法を知らないな思ったので調べてみました。
+
+Rでログを扱うパッケージはいくつかありますが、開発が盛んなのは**logger**パッケージのようです。
+最近（2024年8月がごろ）はHadleyも開発に入っているので、安心感がありますね。
+**logger**パッケージのWebサイトには、類似パッケージの紹介もあるので、他を見当したい場合も、まずはここを見てみるとよいでしょう。
+
+> https://daroczig.github.io/logger/
+
+# ログを出してみる
+
+とりあえず`logger::log_info`関数などにメッセージをあたえればログが出ます。
+簡単。
+
+```{r}
+logger::log_info("これはINFOログです")
+logger::log_warn("これはWARNログです")
+```
+
+# ログの出力レベルを変える
+
+システムの以上を検証したい場合には`INFO`ログがいらないとか、あるいは`DEBUG`ログを出したいというケースもあるでしょう。
+このような場合は`logger::log_threshold`関数でログの出力レベルを変えます。
+
+普段は`INFO`ログ以上を出すようにしておくといいでしょう（既定値）。
+
+たとえば以下のようにすると、`WARN`以上のログだけが出力されます。
+
+```{r}
+logger::log_threshold("WARN")
+logger::log_info("これはINFOログです。出力されません。")
+logger::log_warn("これはWARNログです。出力されます。")
+```
+
+
+# ログのフォーマットを変える
+
+先日「[Rでndjson形式のログを解析する](https://blog.atusy.net/2024/10/22/anaylze-ndjson-logs-in-r/)]」を書いた通り、私はndjson形式のログを好むので、**logger**パッケージも対応しているか気になっていました。
+以下のように簡単に設定できそうで安心しています。
+
+```{r}
+logger::log_formatter(logger::formatter_json)
+logger::log_layout(logger::layout_json_parser(fields = c("time", "level", "ns", "fn" )))
+logger::log_warn(message = "これはWARNログです")
+```
+
+ただ、`time`フィールドを`timestamp`フィールドにしたいとか思うと一工夫要りそうです。
+ここはまた別の機会に調べてみたいと思います。
+
+# ログの出力先を変える
+
+```{r}
+t <- tempfile()
+logger::log_appender(logger::appender_file(t))
+logger::log_warn("これはWARNログです。")
+readLines(t)
+```
+
+`logger::appender_tee`関数を使うと、コンソールとファイルの両方に出力することもできます。
+とりあえずログを眺めたいけど、あとでも使いたいなんてケースに便利そうですね。
+
+コンソールにはINFO以上のログを出して、ファイルにはDEBUGログも出すとかできても便利そうですが、その場合は時前実装が必要な気配です。
+
+# 気になること
+
+## 便利関数の機能
+
+**logger**パッケージは便利関数をいくつか用意しているので試してみたいところ。
+
+1. `message`関数や`warning`関数の出力をログに転送する機能
+2. Shinyアプリケーションでユーザー入力の変更をログに転送する機能
+
+## パッケージ開発での利用
+
+パッケージ開発でもロガーを仕込むとデバグしやすくなりそうだなと思いました。
+しかし、**logger**パッケージでは設定に使う関数（`logger::logger_threshold`など）が全体に適用されないか気になってます。
+
+たとえば、パッケージ側ではデフォルトで`WARN`以上のログを出力するようにしていて、ユーザーが時前のスクリプトの`INFO`ログを出すことにした時、パッケージ側の`INFO`ログも出てしまわないかとか。
+パッケージ開発にも使いやすいよう、良い感じに設定を切り替えるぜって書いてるので大丈夫かなーとは思ってます。
+
+> automatically finding and creating a custom namespace for all R packages writing log messages
+
+ちなみにPythonの**logging**モジュールの場合、`get_logger`で作成したロガーそれぞれに対して設定を変更できます。
+こっちの方が分かりやすいなーとも思いますが、いかにもオブジェクト指向な感じです。
+Rの**logger**パッケージはRらしい書き方を追求したのかなと思います。
+
+```{python}
+import logging
+logger0 = logging.getLogger("logger0")
+logger1 = logging.getLogger("logger1")
+logger1.setLevel(logging.ERROR)
+
+# logger0はERRORログ以外も出せる
+logger0.warning("This is WARN log from logger0")
+logger0.error("This is ERROR log from logger0")
+
+# logger1はERRORログだけ出せる
+logger1.warning("This is WARN log from logger1")
+logger1.error("This is ERROR log from logger1")
+```
+
+## ログローテーション
+
+ログをファイルに出力する場合、サイズが大きくなるとメモリやディスクを逼迫する可能性があります。
+これを避ける方法として、ログの書き込み先変更や、古いログの削除が一般的です。
+**logger**パッケージでもこれらを実現する方法があるのか気になります。
+
+# ENJOY
+
+**logger**パッケージ、いい感じですね。
+本格的に使うにはまだ調査が足りませんが、手元の分析ログを出したい時などには十分使えそうに思いました。
+

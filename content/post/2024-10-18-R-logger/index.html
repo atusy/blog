@@ -1,0 +1,103 @@
+---
+title: "Rでログを出力する（loggerパッケージ）"
+author: atusy
+date: '2024-10-25'
+slug: R-logger
+categories: [R]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [r, json]
+---
+
+
+
+<p>先日「<a href="https://blog.atusy.net/2024/10/22/anaylze-ndjson-logs-in-r/">Rでndjson形式のログを解析する</a>]」の記事を書いた流れで、そういえばRでログを出力する方法を知らないな思ったので調べてみました。</p>
+<p>Rでログを扱うパッケージはいくつかありますが、開発が盛んなのは<strong>logger</strong>パッケージのようです。最近（2024年8月がごろ）はHadleyも開発に入っているので、安心感がありますね。
+<strong>logger</strong>パッケージのWebサイトには、類似パッケージの紹介もあるので、他を見当したい場合も、まずはここを見てみるとよいでしょう。</p>
+<blockquote>
+<p><a href="https://daroczig.github.io/logger/" class="uri">https://daroczig.github.io/logger/</a></p>
+</blockquote>
+<div id="ログを出してみる" class="section level1">
+<h1>ログを出してみる</h1>
+<p>とりあえず<code>logger::log_info</code>関数などにメッセージをあたえればログが出ます。簡単。</p>
+<pre class="r"><code>logger::log_info(&quot;これはINFOログです&quot;)
+#&gt; INFO [2024-10-25 10:26:09] これはINFOログです
+logger::log_warn(&quot;これはWARNログです&quot;)
+#&gt; WARN [2024-10-25 10:26:09] これはWARNログです</code></pre>
+</div>
+<div id="ログの出力レベルを変える" class="section level1">
+<h1>ログの出力レベルを変える</h1>
+<p>システムの以上を検証したい場合には<code>INFO</code>ログがいらないとか、あるいは<code>DEBUG</code>ログを出したいというケースもあるでしょう。このような場合は<code>logger::log_threshold</code>関数でログの出力レベルを変えます。</p>
+<p>普段は<code>INFO</code>ログ以上を出すようにしておくといいでしょう（既定値）。</p>
+<p>たとえば以下のようにすると、<code>WARN</code>以上のログだけが出力されます。</p>
+<pre class="r"><code>logger::log_threshold(&quot;WARN&quot;)
+logger::log_info(&quot;これはINFOログです。出力されません。&quot;)
+logger::log_warn(&quot;これはWARNログです。出力されます。&quot;)
+#&gt; WARN [2024-10-25 10:26:09] これはWARNログです。出力されます。</code></pre>
+</div>
+<div id="ログのフォーマットを変える" class="section level1">
+<h1>ログのフォーマットを変える</h1>
+<p>先日「<a href="https://blog.atusy.net/2024/10/22/anaylze-ndjson-logs-in-r/">Rでndjson形式のログを解析する</a>]」を書いた通り、私はndjson形式のログを好むので、<strong>logger</strong>パッケージも対応しているか気になっていました。以下のように簡単に設定できそうで安心しています。</p>
+<pre class="r"><code>logger::log_formatter(logger::formatter_json)
+logger::log_layout(logger::layout_json_parser(fields = c(&quot;time&quot;, &quot;level&quot;, &quot;ns&quot;, &quot;fn&quot; )))
+logger::log_warn(message = &quot;これはWARNログです&quot;)
+#&gt; {&quot;time&quot;:&quot;2024-10-25 10:26:09&quot;,&quot;level&quot;:&quot;WARN&quot;,&quot;ns&quot;:&quot;global&quot;,&quot;fn&quot;:&quot;eval&quot;,&quot;message&quot;:&quot;これはWARNログです&quot;}</code></pre>
+<p>ただ、<code>time</code>フィールドを<code>timestamp</code>フィールドにしたいとか思うと一工夫要りそうです。ここはまた別の機会に調べてみたいと思います。</p>
+</div>
+<div id="ログの出力先を変える" class="section level1">
+<h1>ログの出力先を変える</h1>
+<pre class="r"><code>t &lt;- tempfile()
+logger::log_appender(logger::appender_file(t))
+logger::log_warn(&quot;これはWARNログです。&quot;)
+readLines(t)
+#&gt; [1] &quot;{\&quot;time\&quot;:\&quot;2024-10-25 10:26:09\&quot;,\&quot;level\&quot;:\&quot;WARN\&quot;,\&quot;ns\&quot;:\&quot;global\&quot;,\&quot;fn\&quot;:\&quot;eval\&quot;,\&quot;5\&quot;:\&quot;これはWARNログです。\&quot;}&quot;</code></pre>
+<p><code>logger::appender_tee</code>関数を使うと、コンソールとファイルの両方に出力することもできます。とりあえずログを眺めたいけど、あとでも使いたいなんてケースに便利そうですね。</p>
+<p>コンソールにはINFO以上のログを出して、ファイルにはDEBUGログも出すとかできても便利そうですが、その場合は時前実装が必要な気配です。</p>
+</div>
+<div id="気になること" class="section level1">
+<h1>気になること</h1>
+<div id="便利関数の機能" class="section level2">
+<h2>便利関数の機能</h2>
+<p><strong>logger</strong>パッケージは便利関数をいくつか用意しているので試してみたいところ。</p>
+<ol style="list-style-type: decimal">
+<li><code>message</code>関数や<code>warning</code>関数の出力をログに転送する機能</li>
+<li>Shinyアプリケーションでユーザー入力の変更をログに転送する機能</li>
+</ol>
+</div>
+<div id="パッケージ開発での利用" class="section level2">
+<h2>パッケージ開発での利用</h2>
+<p>パッケージ開発でもロガーを仕込むとデバグしやすくなりそうだなと思いました。しかし、<strong>logger</strong>パッケージでは設定に使う関数（<code>logger::logger_threshold</code>など）が全体に適用されないか気になってます。</p>
+<p>たとえば、パッケージ側ではデフォルトで<code>WARN</code>以上のログを出力するようにしていて、ユーザーが時前のスクリプトの<code>INFO</code>ログを出すことにした時、パッケージ側の<code>INFO</code>ログも出てしまわないかとか。パッケージ開発にも使いやすいよう、良い感じに設定を切り替えるぜって書いてるので大丈夫かなーとは思ってます。</p>
+<blockquote>
+<p>automatically finding and creating a custom namespace for all R packages writing log messages</p>
+</blockquote>
+<p>ちなみにPythonの<strong>logging</strong>モジュールの場合、<code>get_logger</code>で作成したロガーそれぞれに対して設定を変更できます。こっちの方が分かりやすいなーとも思いますが、いかにもオブジェクト指向な感じです。
+Rの<strong>logger</strong>パッケージはRらしい書き方を追求したのかなと思います。</p>
+<pre class="python"><code>import logging
+logger0 = logging.getLogger(&quot;logger0&quot;)
+logger1 = logging.getLogger(&quot;logger1&quot;)
+logger1.setLevel(logging.ERROR)
+
+# logger0はERRORログ以外も出せる
+logger0.warning(&quot;This is WARN log from logger0&quot;)
+#&gt; This is WARN log from logger0
+logger0.error(&quot;This is ERROR log from logger0&quot;)
+#&gt; This is ERROR log from logger0
+
+# logger1はERRORログだけ出せる
+logger1.warning(&quot;This is WARN log from logger1&quot;)
+logger1.error(&quot;This is ERROR log from logger1&quot;)
+#&gt; This is ERROR log from logger1</code></pre>
+</div>
+<div id="ログローテーション" class="section level2">
+<h2>ログローテーション</h2>
+<p>ログをファイルに出力する場合、サイズが大きくなるとメモリやディスクを逼迫する可能性があります。これを避ける方法として、ログの書き込み先変更や、古いログの削除が一般的です。
+<strong>logger</strong>パッケージでもこれらを実現する方法があるのか気になります。</p>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>ENJOY</h1>
+<p><strong>logger</strong>パッケージ、いい感じですね。本格的に使うにはまだ調査が足りませんが、手元の分析ログを出したい時などには十分使えそうに思いました。</p>
+</div>
