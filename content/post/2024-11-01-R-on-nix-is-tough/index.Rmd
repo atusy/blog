@@ -1,0 +1,143 @@
+---
+title: "Nixで最新のR環境を構築できなくてしんどい"
+author: atusy
+date: '2024-11-01'
+slug: nix-r-is-tough
+categories: [R, Nix]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [r]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+先日、[nix-shellでRを使う](http://localhost:4321/2024/10/07/nix-shell-and-r/)という記事を書きましたが、Nixで入れたRをふだん使いするのはしんどいな……と感じています。
+いかんせん、R本体もパッケージも最新のものを使えない現状があります。
+
+
+# nix本家が対応に困ってる
+
+2024-11-01時点で最新のRは4.4.2ですが、nixで利用可能なRは4.4.1で止まっています。
+どうにも、パッケージの依存関係の都合で更新したくてもできない状況になっているようです。
+
+> <https://github.com/NixOS/nixpkgs/issues/344920#issuecomment-2380170404>
+
+なお、Nixで利用可能なRのバージョンは以下で確認できます。
+
+> <https://lazamar.co.uk/nix-versions/?channel=nixpkgs-unstable&package=R>
+
+実際、最新のnixpkgsを使ってRをインストールしてみると、4.4.1がインストールされます。
+
+````bash
+nix-shell \
+    -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/63bbfc75b35232e7003903508a2d37c3c794b95.tar.gz \
+    -p R \
+    --run "R --version"
+# R version 4.4.1 (2024-06-14) -- "Race for Your Life"
+````
+
+同様に、パッケージも最新版を利用できない状況です。
+私が開発している[felp](https://felp.atusy.net/)パッケージは最新版がv0.6.0ですが、nixで利用可能なのはv0.5.0です。
+
+````bash
+nix-shell \
+    -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/63bbfc75b35232e7003903508a2d37c3c794b95.tar.gz \
+    -p R rPackages.felp \
+    --run "R --vanilla -s -e \"packageVersion('felp')\""
+# [1] ‘0.5.0’
+````
+
+パッケージのバージョンに関しては`override`すれば、おそらく弄れるのですが、その場合は依存パッケージの記述も上書きする必要があり、かなりしんどいです。
+もしやるならrixに解決してもらいたいところですが、後述の通り、rixもうまく動きません。
+
+# rixの挙動もなんかへん
+
+rixパッケージは、R言語を通じてNixにおけるRの環境構築を支援するパッケージです。
+
+R 4.4.2を指定すると、指定したバージョンは存在しないというエラーが出ます。
+
+````bash
+nix-shell \
+    --expr "$(curl -sl https://raw.githubusercontent.com/ropensci/rix/main/inst/extdata/default.nix)" \
+    --run "R --vanilla -s -e \"rix::rix(r_ver = '4.4.2', project_path = tempdir())\""
+
+# Error in get_latest(r_ver) : The provided R version is likely wrong.
+# Please check that you provided a correct R version.
+# You can list available versions using `available_r()`.
+# You can also directly provide a commit, but you need to make sure it points to the right repo used by `rix()`.
+# You can also use 'bleeding_edge' and 'frozen_edge'.
+# Calls: <Anonymous> -> make_nixpkgs_url -> get_latest
+# Execution halted
+````
+
+R 4.4.1はインストール可能なはずですが、やはりエラーが出ます。
+これはたぶんrixパッケージ側の問題？
+
+````bash
+nix-shell \
+    --expr "$(curl -sl https://raw.githubusercontent.com/ropensci/rix/main/inst/extdata/default.nix)" \
+    --run "R --vanilla -s -e \"rix::rix(r_ver = '4.4.2', project_path = tempdir())\""
+
+# Error in get_latest(r_ver) : The provided R version is likely wrong.
+# Please check that you provided a correct R version.
+# You can list available versions using `available_r()`.
+# You can also directly provide a commit, but you need to make sure it points to the right repo used by `rix()`.
+# You can also use 'bleeding_edge' and 'frozen_edge'.
+# Calls: <Anonymous> -> make_nixpkgs_url -> get_latest
+# Execution halted
+````
+
+そのくせR 4.4.0を指定すると、nixpkgsにR 4.4.0はないから、4.4.1を使うよとなって成功します。
+
+````bash
+nix-shell \
+    --expr "$(curl -sl https://raw.githubusercontent.com/ropensci/rix/main/inst/extdata/default.nix)" \
+    --run "R --vanilla -s -e \"rix::rix(r_ver = '4.4.0', project_path = tempdir())\""
+    
+# ### Bootstrapping isolated, project-specific, and runtime-pure R setup via Nix ###
+# 
+# ==> Existing isolated nix-R project folder:
+#  /tmp/RtmpvXOxyy 
+# 
+# * current R session running inside Nix environment and not from RStudio
+# 
+# ==> Added `.Rprofile` file and code lines for new R sessions launched from:
+# /tmp/RtmpvXOxyy
+# 
+# * Added the location of the Nix store to `PATH` environmental variable for new R sessions on host/docker RStudio:
+# /nix/var/nix/profiles/default/bin
+# 
+# ==> Also adjusting `PATH` via `Sys.setenv()`, so that system commands can invoke key Nix commands like `nix-build` 
+# in this RStudio session outside Nix
+# 
+# ### Successfully generated `default.nix` and `.Rprofile` ###
+# 
+# 
+# Warning message:
+# In rix::rix(r_ver = "4.4.0", project_path = tempdir()) :
+#   You chose '4.4.0' as the R version, however this version is not available in nixpkgs. The generated expression wi
+# ll thus install R version 4.4.1.
+````
+
+先日の記事「[nix-shellでRを使う](http://localhost:4321/2024/10/07/nix-shell-and-r/)」では`ggplot2@3.4.0`などとしてパッケージのバージョンを指定できると紹介しましたが、nixpkgsにないバージョンは指定できないのか、`felp@0.6.0`は失敗してしまいます。
+
+````bash
+nix-shell \
+    --expr "$(curl -sl https://raw.githubusercontent.com/ropensci/rix/main/inst/extdata/default.nix)" \
+    --run "R --vanilla -s -e \"rix::rix(r_ver = '4.3.3', r_pkgs = 'felp@0.6.0', project_path = tempdir())\""
+    
+# Error: Request `curl::curl_fetch_disk()` failed:
+# The requested URL returned error: 404
+# If it's a Github repo, check the url and commit.
+# Are these correct? If it's an archived CRAN package, check the name
+# of the package and the version number.
+# Execution halted
+````
+
+# ENJOY
+
+いやーしんどい現状を調べるのも楽しさの一つですね！
