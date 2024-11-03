@@ -1,0 +1,30 @@
+---
+title: RStudio 1.2.x では install.packages する時にパッケージ名を補完してくれる
+author: ~
+date: '2019-05-18'
+slug: auto-complete-when-install-package
+categories: [R]
+tags: [RStudio, RStudio 1.2]
+images: 
+  - /images/covers/2019-05-18-install-packages.png
+---
+
+
+
+<p><a href="//www.rstudio.com/products/rstudio/release-notes/">リリースノート</a>にも載っていない RStudio 1.2.x の世界</p>
+<blockquote>
+<p>ん？install.packagesするとき、ライブラリ名が補完される・・・？？？</p>
+</blockquote>
+<p>という <a href="//twitter.com/niszet0">@niszet0</a> 氏の <a href="https://x.com/niszet0/status/1129251313668173827">投稿</a> を発端に確認．</p>
+<p>なぜか私が纏めることに．</p>
+<p><img src="images/2019-05-18-install-packages-by-rstudio-1-2.gif" /></p>
+<p>上の画像のように，パッケージ名を引用符で<strong>囲わずに</strong>入力し始め，tab キーを押すと幸せになれる．</p>
+<p>パッケージの説明については，インストール済みの場合のみ見れるようだ．</p>
+<p>残念ながら以下のように，<code>c()</code> で囲った中にパッケージ名を書き出しても，
+パッケージ名を補完することはできない．</p>
+<pre class=".r"><code>install.packages(c(tid))</code></pre>
+<p><code>pacman</code> パッケージや <code>pak</code> パッケージなど，パッケージの管理を便利にしてくれる
+パッケージでも利用できるといいが，まあ難しいだろうことは想像に固くない．</p>
+<p>ちなみに GitHub 上のパッケージをインストールしたいけど，
+ユーザー名やパッケージ名があやふやな時には <code>githubinstall</code> パッケージが便利です
+(参考: <a href="https://www.karada-good.net/analyticsr/r-341" class="uri">https://www.karada-good.net/analyticsr/r-341</a>)．</p>
