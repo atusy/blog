@@ -14,11 +14,6 @@ summary: |
   Rmd で様々な HTMLフォーマット に出力した時にコードブロックに行番号を表示する機能 +α を PR したので使い方の紹介と PR の記録，
 ---
 
-```{r setup0, include = FALSE}
-pacman::p_load_gh("atusy/atusydown")
-pacman::p_load(blogdown)
-```
-
 ****
 
 # 前書き
@@ -257,13 +252,13 @@ knitr に対する PR は上述の通り，コードブロックに attribute �
 ````
 
 ```{css show-title, echo = FALSE}
-.show-title[title]:before {
+pre.show-title[title]:before {
   content: attr(title); 
   background: skyblue;
   position: absolute;
 }
-.show-title code {
-  padding-top: 2rem;
+pre.show-title code {
+  padding-top: 4rem;
 }
 ```
 
@@ -363,7 +358,9 @@ Hugo にはビルトインでシンタックスハイライトをしたり行番
 KY技研の [\@\_K4ZUKI\_](//twitter.com/_K4ZUKI_) 氏によると，
 Docx は ページ・セクション単位でしかカウンタを持ってないらしい．
 
-`r shortcode("tweet", "1118832141985402880")`
+> wordは行番号無理っぽいんだよねー ページ内かセクション内でしかカウンタ持ってないっぽい
+> 知らんけど（
+> https://x.com/_K4ZUKI_/status/1118832141985402880
 
 つまり Pandoc の機能でどうこうは無理．
 
