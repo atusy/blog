@@ -31,7 +31,7 @@ Shinyでplotly.jsを使わずにインタラクティブな図を作れるのか
 `dblclickOpts` と組み合わせると、
 拡大した領域内で点をダブルクリックして点の情報を取り出すことも可能みたいです。 
 
-```{r ui}
+```r
 library(shiny)
 library(ggplot2)
 

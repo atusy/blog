@@ -19,7 +19,7 @@ submodule ならできる
 
 ディスク容量節約
 
-```{sh}
+```sh
 git submodule deinit [name]
 ```
 
@@ -36,7 +36,7 @@ submodule の中で submodule 化しよう．
 
 新しいレポジトリに各資料のレポジトリを submodule として登録するだけ
 
-```{sh}
+```sh
 mkdir hoge
 cd hoge
 hub create atusy/hoge
