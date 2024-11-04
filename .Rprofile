@@ -9,5 +9,5 @@ options(
   blogdown.files_filter = function(x, ...) {
     x[!grepl(".*/examples/.*", x)]
   },
-  blogdown.hugo.version = "0.92.1"
+  blogdown.hugo.version = "0.108.0"
 )
