@@ -9,5 +9,6 @@ options(
   blogdown.files_filter = function(x, ...) {
     x[!grepl(".*/examples/.*", x)]
   },
-  blogdown.hugo.version = "0.108.0"
+  # NOTE: requires hugo-extended e.g., `mise x hugo@extended_0.123.0` -- hugo server
+  blogdown.hugo.version = "0.123.0"
 )
