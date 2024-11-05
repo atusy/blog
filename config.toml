@@ -13,12 +13,12 @@ buildDrafts = false
 buildFuture = true
 footnoteReturnLinkContents = "↩"
 
-# Pagination
-paginate = 7
-paginatePath = "page"
-
 pygmentsUseClasses = true
 pygmentsCodeFences = true
+
+[pagination]
+pagerSize = 7
+pagination.path= "page"
 
 [markup.goldmark.renderer]
 unsafe= true
