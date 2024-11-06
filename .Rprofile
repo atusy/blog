@@ -10,5 +10,5 @@ options(
     x[!grepl(".*/examples/.*", x)]
   },
   # NOTE: requires hugo-extended e.g., `mise x hugo@extended_0.123.0` -- hugo server
-  blogdown.hugo.version = "0.123.0"
+  blogdown.hugo.version = "0.137.1"
 )
