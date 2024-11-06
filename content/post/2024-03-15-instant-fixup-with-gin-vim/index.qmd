@@ -38,16 +38,16 @@ instantにできることはさっさとやっておくと、コミットの並�
 具体的な手順は以下のような感じ
 
 1. 修正したいコミットに混ぜたい変更をステージングしておく
-  - ステージング方法は任意。[gin.vim]を使う場合はファイル単位なら`:GinAdd`や`:GinStatus`、パッチ単位なら`:GinPatch {path}`が便利。
-    [gitsigns.nvim](https://github.com/lewis6991/gitsigns.nvim)を使えばバッファ上でカーソル位置のhunkやVisualモードで選択した範囲のステージングもできる。
+    - ステージング方法は任意。[gin.vim]を使う場合はファイル単位なら`:GinAdd`や`:GinStatus`、パッチ単位なら`:GinPatch {path}`が便利。
+      [gitsigns.nvim](https://github.com/lewis6991/gitsigns.nvim)を使えばバッファ上でカーソル位置のhunkやVisualモードで選択した範囲のステージングもできる。
 1. `:GinLog`を使ってログを表示する
-  - `git log`相当。`:GinLog --graph --oneline -n 20`などとオプションの指定も可能
+    - `git log`相当。`:GinLog --graph --oneline -n 20`などとオプションの指定も可能
 1. 修正したいコミットにカーソルを合わせて`a`（`<Plug>(gin-action-choice)`）を実行する
 1. 修正方法に合わせて必要な**instant fixup**を選択
-  - `fixup:instant-fixup`: ステージングした差分を選択したコミットに追加
-  - `fixup:instant-reword`: コミットメッセージの書き換え
-  - `fixup:instant-amend`: 上記2つを同時に実行
-    - 今回の動画に示した例ならこれで一発
+    - `fixup:instant-fixup`: ステージングした差分を選択したコミットに追加
+    - `fixup:instant-reword`: コミットメッセージの書き換え
+    - `fixup:instant-amend`: 上記2つを同時に実行
+        - 今回の動画に示した例ならこれで一発
 
 生のgitコマンドでやろうとすると、以下のようにそこそこ煩雑な操作です。
 まずは`git commit --fixup`や`git rebase --interactive`を覚えるべし……という気持ちもありつつ、生ではinstant感を得られませんね。
