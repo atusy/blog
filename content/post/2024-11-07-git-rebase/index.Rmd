@@ -9,6 +9,8 @@ output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists
 highlighhtjs: [r]
+summary:
+    レビューやログを振り返る時のために、Gitのコミットログを整理するrebase作業が、少しでも楽になるよう個人的に気をつけているポイントをまとめました。
 ---
 
 ```{r setup, include=FALSE}
