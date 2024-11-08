@@ -9,6 +9,8 @@ output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists
 highlighhtjs: [r]
+summary:
+    レビューやログを振り返る時のために、Gitのコミットログを整理するrebase作業が、少しでも楽になるよう個人的に気をつけているポイントをまとめました。
 ---
 
 
@@ -97,31 +99,25 @@ Emacsならmagitを使えばいいらしいです。</p>
 <p>rebaseはコミットの結合（fixup）、削除（drop）、入れ替え（pick）、メッセージ修正など（reword）、できることが多いです。しかし、一度にやるとだいたい混乱の原因になります。</p>
 <p>とりあえずは以下のように5回とかに分けて<code>rebase</code>してみるといいと思います。慣れてきたら、一度にやることを増やしてみてもOKです。困ったら<code>git rebase --abort</code>して、rebaseを段階的に進める方針に戻れば済みます。</p>
 <ol style="list-style-type: decimal">
-<li>fixupコミットの結合</li>
-</ol>
+<li>fixupコミットの結合
 <ul>
 <li><code>git commit --fixup</code>で作ったコミットは<code>git rebase --interactive</code>した時に、自動的にfixup先のコミットと結合するようにコミットリストが整理される</li>
 <li>なにも考えずにいコミットリストを保存してrebaseに進めばOKなので、他のrebase作業に先んじて実施して、考えることを減らしておく</li>
-</ul>
-<ol style="list-style-type: decimal">
+</ul></li>
 <li>不要コミットの削除</li>
-<li>その他のコミットの結合</li>
-</ol>
+<li>その他のコミットの結合
 <ul>
 <li>コミットを結合するとコミットの数が減るので、順序の入れ替えやメッセージの修正の時に考えることが減る</li>
-</ul>
-<ol style="list-style-type: decimal">
-<li>コミットの順序入れ替え</li>
-</ol>
+</ul></li>
+<li>コミットの順序入れ替え
 <ul>
 <li>全体の流れをととのえる作業なので、後の方にしておく</li>
-</ul>
-<ol style="list-style-type: decimal">
-<li>コミットメッセージの修正</li>
-</ol>
+</ul></li>
+<li>コミットメッセージの修正
 <ul>
 <li>順序入れ替えや結合が終わってから実施することで、最終的な前後関係をふまえたメッセージを作成できる</li>
-</ul>
+</ul></li>
+</ol>
 </div>
 </div>
 <div id="enjoy" class="section level1">
