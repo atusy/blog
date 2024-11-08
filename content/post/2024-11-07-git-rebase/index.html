@@ -66,12 +66,13 @@ pick xyzxyzy あとでdeadbeeをfixupするコミット</code></pre>
 <pre><code>pick deadbee The oneline of this commit
 fixup xyzxyzy あとでdeadbeeをfixupするコミット
 pick fa1afe1 The oneline of the next commit</code></pre>
-<p><code>git commit --fixup</code>を使うと、commitする時にfixup先を指定する必要がある代わりに、rebase時のリスト操作が自動化されます。</p>
+<p><code>git commit --fixup</code>を使うと、commitする時にfixup先を指定する必要がある代わりに、rebase時のリスト操作が自動化できます。</p>
 <p>たとえば、<code>git commit --fixup deadbee</code>しておくと、<code>deadbee</code>のコミットメッセージに<code>fixup!</code>とprefixされたコミットができます。</p>
 <blockquote>
 <p>fixup! xyzxyzy あとでdeadbeeをfixupするコミット</p>
 </blockquote>
-<p>この状態で<code>git rebase --interactive</code>すると、順番の整理と<code>fixup</code>の指定が自動で行われます。</p>
+<p>この状態で<code>git rebase --interactive --autosquash</code>すると、順番の整理と<code>fixup</code>の指定が自動で行われます。
+<code>--autosquash</code>オプションの指定が面倒であれば、<code>git config rebase.autoSquash true</code>しておきましょう。</p>
 <pre><code>pick deadbee The oneline of this commit
 fixup fixup! deadbee The oneline of this commit
 pick fa1afe1 The oneline of the next commit</code></pre>

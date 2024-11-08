@@ -104,13 +104,14 @@ fixup xyzxyzy あとでdeadbeeをfixupするコミット
 pick fa1afe1 The oneline of the next commit
 ```
 
-`git commit --fixup`を使うと、commitする時にfixup先を指定する必要がある代わりに、rebase時のリスト操作が自動化されます。
+`git commit --fixup`を使うと、commitする時にfixup先を指定する必要がある代わりに、rebase時のリスト操作が自動化できます。
 
 たとえば、`git commit --fixup deadbee`しておくと、`deadbee`のコミットメッセージに`fixup!`とprefixされたコミットができます。
 
 > fixup! xyzxyzy あとでdeadbeeをfixupするコミット
 
-この状態で`git rebase --interactive`すると、順番の整理と`fixup`の指定が自動で行われます。
+この状態で`git rebase --interactive --autosquash`すると、順番の整理と`fixup`の指定が自動で行われます。
+`--autosquash`オプションの指定が面倒であれば、`git config rebase.autoSquash true`しておきましょう。
 
 ```
 pick deadbee The oneline of this commit
