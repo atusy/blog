@@ -1,0 +1,160 @@
+---
+title: "git rebaseの苦労を減らすための覚え書き"
+author: atusy
+date: '2024-11-07'
+slug: git-rebase
+categories: [Git]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [r]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+チームレビューやあとからログを振り返る時のために、Gitのコミットログはできるだけ整理しておきたい派です。
+といっても最初から綺麗にコミットできることばかりではないので、`git rebase`でコミットのメッセージを修正したり、順序を整理したり、結合したりといった作業は日常的に行っています。
+`git rebase`を常用する一方で、ログの修正は複雑な操作になりやすく、負荷が高いのも理解するので、個人的にrebaseを楽にするために気をつけているポイントをまとめておきます。
+
+散々語られている分野な気もしますが、自分の中での整理も兼ねて……。
+
+なお、`git rebase`の基本的な使い方には触れません。
+
+# 困ったときの対応手段を覚えておく
+
+とりあえず困った時のリカバリー手段があることを覚えておきましょう。
+失敗しても大丈夫と思えるだけで負荷がずっと下がります。
+
+リカバリーした後は、落ち着いてrebaseし直すもよし、誰かと一緒にrebaseするもよしです。
+あるいは、レビューしてもらうことが目的なら、PRの概要を充実させたり、口頭でコードを解説しながらレビューしてもらったり他の手段をとってもいいでしょう。
+少しずつ慣れればOKです。
+
+## rebase中ならとりあえず`git rebase --abort`でなかったことにする
+
+rebaseしたらコンフリクトした！わけわかんない！
+
+特にrebaseを使い始めた時にはありがちです。
+いったん落ち着いて、rebase操作をなかったことにしましょう。
+
+`git rebase --abort`です。
+
+## rebaseが終わってしまった時は`git reset --hard`でrebase前の状態に戻す
+
+rebaseが終わった後に不都合に気付いた時も、`git reflog`コマンドを使えば、rebase前のログも見ることができます。
+必要なコミットを見つけて`git reset --hard <commit>`で復元しましょう。
+
+reflogを見るのが嫌であれば、rebase前に`git tag <タグ名>`でタグをうっておくといいです。
+タグを覚えておけば、`git reset --hard <タグ名>`で戻れます。
+
+あるいは、rebase前にブランチをGitHubなどにpushしておく手もあります。
+その場合は`git reset --hard origin/<ブランチ名>`でrebase前の状態を復元できます。
+
+タグやpushを利用すると、rebase時のコンフリクト解消で意図せぬ変更を加えてしまったか、確認する手段にもなります（例：`git diff <origin/ブランチ名>`）。
+
+# コミットを工夫してrebase負荷を下げる
+
+rebaseは負荷が高くなりやすい作業なので、コミットの積みかたを工夫して負荷のインフレを抑えることが大切に思います。
+
+## コミットの粒度を小さくする
+
+巨大なコミットを後から分割・編集するのは特に負荷の高い作業です。
+あとから結合するのは簡単なので、迷ったら小さくした方がマシです。
+レビューやログ閲覧の観点からも、コミット粒度は小さめな方がいいでしょう。
+
+もちろん、`import文を追加`みたいな行単位のコミットはやりすぎなので、見極めが肝心です。
+コミット粒度の話題はWeb上にたくさんあると思います。
+
+基本的には、コミットタイトルに複数の変更を書きたくなったら、分けてコミットすることを意識すればいいでしょう。
+バグ修正と機能追加は別のコミットにするわけです。
+もし機能追加だけに関する変更であったとしても、2種類以上の機能追加であれば、やはりコミットは分けるべきでしょう。
+
+コミット粒度を小さくする意識を育てる上で、conventional commitの活用もいいと思います。
+コミットメッセージに`fix:`（修正）や`feat:`（機能追加）などをprefixするので、prefixにそぐわない内容をコミットする気持ちわるさを抱けるようになります。
+
+> https://www.conventionalcommits.org/ja/v1.0.0/
+
+## `git commit --amend`で直前のコミットを即座に修正する
+
+`git commit --amend`を使うと、追加の変更内容を直前のコミットに追加したり、コミットメッセージを修正したりできます。
+
+どんどんコミットを積んで後でrebaseするよりも、直感的で単純な操作なので、鋭意活用しましょう。
+
+## `git commit --fixup`でrebase時のfixup先を予め指定する
+
+`git rebase --interactive`したとき、コミットにfixup先の指定に迷ったり間違えたりすることは珍しくないです。
+
+fixupしたいコミットをfixup先のコミットの直後に移動させ、`pick`を`fixup`に書き換える作業なので、移動先を間違えたり、移動させたまではいいが、`fixup`の指定を忘れるなんてことが起きやすいわけですね。
+
+```
+pick deadbee The oneline of this commit
+pick fa1afe1 The oneline of the next commit
+pick xyzxyzy あとでdeadbeeをfixupするコミット
+```
+
+↓
+
+```
+pick deadbee The oneline of this commit
+fixup xyzxyzy あとでdeadbeeをfixupするコミット
+pick fa1afe1 The oneline of the next commit
+```
+
+`git commit --fixup`を使うと、commitする時にfixup先を指定する必要がある代わりに、rebase時のリスト操作が自動化されます。
+
+たとえば、`git commit --fixup deadbee`しておくと、`deadbee`のコミットメッセージに`fixup!`とprefixされたコミットができます。
+
+> fixup! xyzxyzy あとでdeadbeeをfixupするコミット
+
+この状態で`git rebase --interactive`すると、順番の整理と`fixup`の指定が自動で行われます。
+
+```
+pick deadbee The oneline of this commit
+fixup fixup! deadbee The oneline of this commit
+pick fa1afe1 The oneline of the next commit
+```
+
+ちなみに、lazygitの[Amend an old commit](https://github.com/jesseduffield/lazygit?tab=readme-ov-file#amend-an-old-commit)]を使うと、fixupコミットの作成からrebaseまでを一発でやってくれるので、捗ります。
+
+Vim/Neovimではgin.vimというプラグインで実現できるので参考にしてみてください。
+Emacsならmagitを使えばいいらしいです。
+
+> gin.vimで捗るgitのログ改竄 (instant fixup)
+> https://blog.atusy.net/2024/03/15/instant-fixup-with-gin-vim/
+
+# rebaseの工夫
+
+## はやめはやめにやる
+
+どんどんコミットして開発を進めたくなる気持ちをこらえて、rebaseは小まめにやっちゃいましょう。
+コミットを5個積んでからのrebaseと10個積んでからのrebaseでは、当然、5個の方が単純です。
+大きくメリットは2つでしょうか。
+
+- 数が少ない方がコンフリクトが発生したとしても解消しやすい
+- あとでrebaseするつもりが、どうrebaseしていいか忘れた、そもそもrebaseし忘れたという自体を防げる
+
+## 一度に色々やりすぎない
+
+rebaseはコミットの結合（fixup）、削除（drop）、入れ替え（pick）、メッセージ修正など（reword）、できることが多いです。
+しかし、一度にやるとだいたい混乱の原因になります。
+
+とりあえずは以下のように5回とかに分けて`rebase`してみるといいと思います。
+慣れてきたら、一度にやることを増やしてみてもOKです。
+困ったら`git rebase --abort`して、rebaseを段階的に進める方針に戻れば済みます。
+
+1. fixupコミットの結合
+  - `git commit --fixup`で作ったコミットは`git rebase --interactive`した時に、自動的にfixup先のコミットと結合するようにコミットリストが整理される
+  - なにも考えずにいコミットリストを保存してrebaseに進めばOKなので、他のrebase作業に先んじて実施して、考えることを減らしておく
+1. 不要コミットの削除
+1. その他のコミットの結合
+  - コミットを結合するとコミットの数が減るので、順序の入れ替えやメッセージの修正の時に考えることが減る
+1. コミットの順序入れ替え
+  - 全体の流れをととのえる作業なので、後の方にしておく
+1. コミットメッセージの修正
+  - 順序入れ替えや結合が終わってから実施することで、最終的な前後関係をふまえたメッセージを作成できる
+
+# ENJOY
+
+みなさんのチーム開発が捗りますように！

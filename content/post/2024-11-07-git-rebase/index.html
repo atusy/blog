@@ -1,0 +1,130 @@
+---
+title: "git rebaseの苦労を減らすための覚え書き"
+author: atusy
+date: '2024-11-07'
+slug: git-rebase
+categories: [Git]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [r]
+---
+
+
+
+<p>チームレビューやあとからログを振り返る時のために、Gitのコミットログはできるだけ整理しておきたい派です。といっても最初から綺麗にコミットできることばかりではないので、<code>git rebase</code>でコミットのメッセージを修正したり、順序を整理したり、結合したりといった作業は日常的に行っています。
+<code>git rebase</code>を常用する一方で、ログの修正は複雑な操作になりやすく、負荷が高いのも理解するので、個人的にrebaseを楽にするために気をつけているポイントをまとめておきます。</p>
+<p>散々語られている分野な気もしますが、自分の中での整理も兼ねて……。</p>
+<p>なお、<code>git rebase</code>の基本的な使い方には触れません。</p>
+<div id="困ったときの対応手段を覚えておく" class="section level1">
+<h1>困ったときの対応手段を覚えておく</h1>
+<p>とりあえず困った時のリカバリー手段があることを覚えておきましょう。失敗しても大丈夫と思えるだけで負荷がずっと下がります。</p>
+<p>リカバリーした後は、落ち着いてrebaseし直すもよし、誰かと一緒にrebaseするもよしです。あるいは、レビューしてもらうことが目的なら、PRの概要を充実させたり、口頭でコードを解説しながらレビューしてもらったり他の手段をとってもいいでしょう。少しずつ慣れればOKです。</p>
+<div id="rebase中ならとりあえずgit-rebase---abortでなかったことにする" class="section level2">
+<h2>rebase中ならとりあえず<code>git rebase --abort</code>でなかったことにする</h2>
+<p>rebaseしたらコンフリクトした！わけわかんない！</p>
+<p>特にrebaseを使い始めた時にはありがちです。いったん落ち着いて、rebase操作をなかったことにしましょう。</p>
+<p><code>git rebase --abort</code>です。</p>
+</div>
+<div id="rebaseが終わってしまった時はgit-reset---hardでrebase前の状態に戻す" class="section level2">
+<h2>rebaseが終わってしまった時は<code>git reset --hard</code>でrebase前の状態に戻す</h2>
+<p>rebaseが終わった後に不都合に気付いた時も、<code>git reflog</code>コマンドを使えば、rebase前のログも見ることができます。必要なコミットを見つけて<code>git reset --hard &lt;commit&gt;</code>で復元しましょう。</p>
+<p>reflogを見るのが嫌であれば、rebase前に<code>git tag &lt;タグ名&gt;</code>でタグをうっておくといいです。タグを覚えておけば、<code>git reset --hard &lt;タグ名&gt;</code>で戻れます。</p>
+<p>あるいは、rebase前にブランチをGitHubなどにpushしておく手もあります。その場合は<code>git reset --hard origin/&lt;ブランチ名&gt;</code>でrebase前の状態を復元できます。</p>
+<p>タグやpushを利用すると、rebase時のコンフリクト解消で意図せぬ変更を加えてしまったか、確認する手段にもなります（例：<code>git diff &lt;origin/ブランチ名&gt;</code>）。</p>
+</div>
+</div>
+<div id="コミットを工夫してrebase負荷を下げる" class="section level1">
+<h1>コミットを工夫してrebase負荷を下げる</h1>
+<p>rebaseは負荷が高くなりやすい作業なので、コミットの積みかたを工夫して負荷のインフレを抑えることが大切に思います。</p>
+<div id="コミットの粒度を小さくする" class="section level2">
+<h2>コミットの粒度を小さくする</h2>
+<p>巨大なコミットを後から分割・編集するのは特に負荷の高い作業です。あとから結合するのは簡単なので、迷ったら小さくした方がマシです。レビューやログ閲覧の観点からも、コミット粒度は小さめな方がいいでしょう。</p>
+<p>もちろん、<code>import文を追加</code>みたいな行単位のコミットはやりすぎなので、見極めが肝心です。コミット粒度の話題はWeb上にたくさんあると思います。</p>
+<p>基本的には、コミットタイトルに複数の変更を書きたくなったら、分けてコミットすることを意識すればいいでしょう。バグ修正と機能追加は別のコミットにするわけです。もし機能追加だけに関する変更であったとしても、2種類以上の機能追加であれば、やはりコミットは分けるべきでしょう。</p>
+<p>コミット粒度を小さくする意識を育てる上で、conventional commitの活用もいいと思います。コミットメッセージに<code>fix:</code>（修正）や<code>feat:</code>（機能追加）などをprefixするので、prefixにそぐわない内容をコミットする気持ちわるさを抱けるようになります。</p>
+<blockquote>
+<p><a href="https://www.conventionalcommits.org/ja/v1.0.0/" class="uri">https://www.conventionalcommits.org/ja/v1.0.0/</a></p>
+</blockquote>
+</div>
+<div id="git-commit---amendで直前のコミットを即座に修正する" class="section level2">
+<h2><code>git commit --amend</code>で直前のコミットを即座に修正する</h2>
+<p><code>git commit --amend</code>を使うと、追加の変更内容を直前のコミットに追加したり、コミットメッセージを修正したりできます。</p>
+<p>どんどんコミットを積んで後でrebaseするよりも、直感的で単純な操作なので、鋭意活用しましょう。</p>
+</div>
+<div id="git-commit---fixupでrebase時のfixup先を予め指定する" class="section level2">
+<h2><code>git commit --fixup</code>でrebase時のfixup先を予め指定する</h2>
+<p><code>git rebase --interactive</code>したとき、コミットにfixup先の指定に迷ったり間違えたりすることは珍しくないです。</p>
+<p>fixupしたいコミットをfixup先のコミットの直後に移動させ、<code>pick</code>を<code>fixup</code>に書き換える作業なので、移動先を間違えたり、移動させたまではいいが、<code>fixup</code>の指定を忘れるなんてことが起きやすいわけですね。</p>
+<pre><code>pick deadbee The oneline of this commit
+pick fa1afe1 The oneline of the next commit
+pick xyzxyzy あとでdeadbeeをfixupするコミット</code></pre>
+<p>↓</p>
+<pre><code>pick deadbee The oneline of this commit
+fixup xyzxyzy あとでdeadbeeをfixupするコミット
+pick fa1afe1 The oneline of the next commit</code></pre>
+<p><code>git commit --fixup</code>を使うと、commitする時にfixup先を指定する必要がある代わりに、rebase時のリスト操作が自動化されます。</p>
+<p>たとえば、<code>git commit --fixup deadbee</code>しておくと、<code>deadbee</code>のコミットメッセージに<code>fixup!</code>とprefixされたコミットができます。</p>
+<blockquote>
+<p>fixup! xyzxyzy あとでdeadbeeをfixupするコミット</p>
+</blockquote>
+<p>この状態で<code>git rebase --interactive</code>すると、順番の整理と<code>fixup</code>の指定が自動で行われます。</p>
+<pre><code>pick deadbee The oneline of this commit
+fixup fixup! deadbee The oneline of this commit
+pick fa1afe1 The oneline of the next commit</code></pre>
+<p>ちなみに、lazygitの<a href="https://github.com/jesseduffield/lazygit?tab=readme-ov-file#amend-an-old-commit">Amend an old commit</a>]を使うと、fixupコミットの作成からrebaseまでを一発でやってくれるので、捗ります。</p>
+<p>Vim/Neovimではgin.vimというプラグインで実現できるので参考にしてみてください。
+Emacsならmagitを使えばいいらしいです。</p>
+<blockquote>
+<p>gin.vimで捗るgitのログ改竄 (instant fixup)
+<a href="https://blog.atusy.net/2024/03/15/instant-fixup-with-gin-vim/" class="uri">https://blog.atusy.net/2024/03/15/instant-fixup-with-gin-vim/</a></p>
+</blockquote>
+</div>
+</div>
+<div id="rebaseの工夫" class="section level1">
+<h1>rebaseの工夫</h1>
+<div id="はやめはやめにやる" class="section level2">
+<h2>はやめはやめにやる</h2>
+<p>どんどんコミットして開発を進めたくなる気持ちをこらえて、rebaseは小まめにやっちゃいましょう。コミットを5個積んでからのrebaseと10個積んでからのrebaseでは、当然、5個の方が単純です。大きくメリットは2つでしょうか。</p>
+<ul>
+<li>数が少ない方がコンフリクトが発生したとしても解消しやすい</li>
+<li>あとでrebaseするつもりが、どうrebaseしていいか忘れた、そもそもrebaseし忘れたという自体を防げる</li>
+</ul>
+</div>
+<div id="一度に色々やりすぎない" class="section level2">
+<h2>一度に色々やりすぎない</h2>
+<p>rebaseはコミットの結合（fixup）、削除（drop）、入れ替え（pick）、メッセージ修正など（reword）、できることが多いです。しかし、一度にやるとだいたい混乱の原因になります。</p>
+<p>とりあえずは以下のように5回とかに分けて<code>rebase</code>してみるといいと思います。慣れてきたら、一度にやることを増やしてみてもOKです。困ったら<code>git rebase --abort</code>して、rebaseを段階的に進める方針に戻れば済みます。</p>
+<ol style="list-style-type: decimal">
+<li>fixupコミットの結合</li>
+</ol>
+<ul>
+<li><code>git commit --fixup</code>で作ったコミットは<code>git rebase --interactive</code>した時に、自動的にfixup先のコミットと結合するようにコミットリストが整理される</li>
+<li>なにも考えずにいコミットリストを保存してrebaseに進めばOKなので、他のrebase作業に先んじて実施して、考えることを減らしておく</li>
+</ul>
+<ol style="list-style-type: decimal">
+<li>不要コミットの削除</li>
+<li>その他のコミットの結合</li>
+</ol>
+<ul>
+<li>コミットを結合するとコミットの数が減るので、順序の入れ替えやメッセージの修正の時に考えることが減る</li>
+</ul>
+<ol style="list-style-type: decimal">
+<li>コミットの順序入れ替え</li>
+</ol>
+<ul>
+<li>全体の流れをととのえる作業なので、後の方にしておく</li>
+</ul>
+<ol style="list-style-type: decimal">
+<li>コミットメッセージの修正</li>
+</ol>
+<ul>
+<li>順序入れ替えや結合が終わってから実施することで、最終的な前後関係をふまえたメッセージを作成できる</li>
+</ul>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>ENJOY</h1>
+<p>みなさんのチーム開発が捗りますように！</p>
+</div>
