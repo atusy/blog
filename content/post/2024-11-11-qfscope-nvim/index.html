@@ -1,0 +1,45 @@
+---
+title: "qfscope.nvimでtelescope.nvimの検索結果を絞り込む"
+author: atusy
+date: '2024-11-11'
+slug: qfscope-nvim
+categories: [Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [r]
+summary:
+    telescope.nvimの検索結果をファイル名や該当行の内容で絞り込みたいときのために、qfscope.nvimを開発しました。
+---
+
+
+
+<p>この記事は、<a href="https://vim-jp.org/ekiden/">Vim駅伝</a>の2024年11月11日の記事です。
+11月8日の記事はmichirakaraさんの<a href="Neovim%20で音楽を再生するプラグインを作った">Neovim で音楽を再生するプラグインを作った</a>でした。</p>
+<p><a href="https://github.com/nvim-telescope/telescope.nvim">telescope.nvim</a>はありとあらゆる検索を行うプラグインです。たとえばプロジェクト中のソースコードをファイル名であいまい検索したり、内容を正規表現で検索するプラグインです。他にもNeovimのヘルプやマッピング、Exコマンドなど、組込み機能だけでも機能豊富です。</p>
+<p>しかし、あいまい検索だとヒットしすぎてイマイチ絞り込めない、検索結果を<code>&lt;c-q&gt;</code>でQuickfixリスト送りしたいが不要なファイルも多い、といったケースでちょっとした不便さを感じます。</p>
+<p>今までは、<code>&lt;c-q&gt;</code>でQuickfixリスト送りした後に、<a href="https://github.com/itchyny/vim-qfedit">vim-qfedit</a>を使ってQuickfixリストを整理していたのですが、もう少しスマートにやりたいところ。</p>
+<p>そこで、<a href="https://github.com/atusy/qfscope.nvim">qfscope.nvim</a>を作りました。以下の例では、<code>vim</code>でgrepした結果に対し、ファイル名で絞り込みをかけたり、マッチした行をさらにgrepしたりしています。</p>
+<video autoplay controls>
+<source src=./video/demo.mp4>
+</video>
+<p>やっていることとしては、<a href="https://github.com/nvim-telescope/telescope.nvim">telescope.nvim</a>がもともと供える<code>&lt;c-q&gt;</code>による検査結果のQuickfixリスト送りと、<code>:Telescope quickfix</code>によるくQuickfixリストの検索の組み合わせを、よりスムーズに行えるようにしてる感じです。</p>
+<p>したがって、<a href="https://github.com/atusy/qfscope.nvim">qfscope.nvim</a>はQuickfixリスト送りに対応した任意のソースを絞り込み対象にできます。
+LSPの参照や診断結果なども対応可能なのが魅力ですね。</p>
+<p>また、Quickfixリストのファイル名部分、行内容部分、全体の3パターンに対して、あいまい検索や正規表現検索ができます。簡易的ですが、検索結果の戻る・進むも供えているので、絞り込み結果がイマイチだった時のやりなおしもできるはず。パワフルだと思うのでぜひ使ってみてください。</p>
+<pre><code>foo.md|1 col 1| 1行目の内容
+^-----
+ファイル名部分だけをあいまい検索 or grep
+
+foo.md|1 col 1| 1行目の内容
+                ^----------
+                 該当行の内容をあいまい検索 or grep
+
+foo.md|1 col 1| 1行目の内容
+^--------------------------
+全体をあいまい検索 or grep</code></pre>
+<div id="enjoy" class="section level1">
+<h1>ENJOY!</h1>
+<p>みなさんのファイル編集がますます捗りますように！</p>
+</div>

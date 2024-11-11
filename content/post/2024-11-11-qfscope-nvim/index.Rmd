@@ -1,0 +1,68 @@
+---
+title: "qfscope.nvimでtelescope.nvimの検索結果を絞り込む"
+author: atusy
+date: '2024-11-11'
+slug: qfscope-nvim
+categories: [Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [r]
+summary:
+    telescope.nvimの検索結果をファイル名や該当行の内容で絞り込みたいときのために、qfscope.nvimを開発しました。
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+この記事は、[Vim駅伝](https://vim-jp.org/ekiden/)の2024年11月11日の記事です。
+11月8日の記事はmichirakaraさんの[Neovim で音楽を再生するプラグインを作った]( Neovim で音楽を再生するプラグインを作った)でした。
+
+
+[telescope.nvim]はありとあらゆる検索を行うプラグインです。
+たとえばプロジェクト中のソースコードをファイル名であいまい検索したり、内容を正規表現で検索するプラグインです。
+他にもNeovimのヘルプやマッピング、Exコマンドなど、組込み機能だけでも機能豊富です。
+
+しかし、あいまい検索だとヒットしすぎてイマイチ絞り込めない、検索結果を`<c-q>`でQuickfixリスト送りしたいが不要なファイルも多い、といったケースでちょっとした不便さを感じます。
+
+今までは、`<c-q>`でQuickfixリスト送りした後に、[vim-qfedit](https://github.com/itchyny/vim-qfedit)を使ってQuickfixリストを整理していたのですが、もう少しスマートにやりたいところ。
+
+そこで、[qfscope.nvim]を作りました。
+以下の例では、`vim`でgrepした結果に対し、ファイル名で絞り込みをかけたり、マッチした行をさらにgrepしたりしています。
+
+<video autoplay controls>
+<source src=./video/demo.mp4>
+</video>
+
+やっていることとしては、[telescope.nvim]がもともと供える`<c-q>`による検査結果のQuickfixリスト送りと、`:Telescope quickfix`によるくQuickfixリストの検索の組み合わせを、よりスムーズに行えるようにしてる感じです。
+
+したがって、[qfscope.nvim]はQuickfixリスト送りに対応した任意のソースを絞り込み対象にできます。
+LSPの参照や診断結果なども対応可能なのが魅力ですね。
+
+また、Quickfixリストのファイル名部分、行内容部分、全体の3パターンに対して、あいまい検索や正規表現検索ができます。
+簡易的ですが、検索結果の戻る・進むも供えているので、絞り込み結果がイマイチだった時のやりなおしもできるはず。
+パワフルだと思うのでぜひ使ってみてください。
+
+```
+foo.md|1 col 1| 1行目の内容
+^-----
+ファイル名部分だけをあいまい検索 or grep
+
+foo.md|1 col 1| 1行目の内容
+                ^----------
+                 該当行の内容をあいまい検索 or grep
+
+foo.md|1 col 1| 1行目の内容
+^--------------------------
+全体をあいまい検索 or grep
+```
+
+# ENJOY!
+
+みなさんのファイル編集がますます捗りますように！
+
+
+[telescope.nvim]: https://github.com/nvim-telescope/telescope.nvim
+[qfscope.nvim]: https://github.com/atusy/qfscope.nvim
