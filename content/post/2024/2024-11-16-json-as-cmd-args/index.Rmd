@@ -1,0 +1,89 @@
+---
+title: "コマンドの引数にJSONやYAMLを使うと便利かも"
+author: atusy
+date: '2024-11-16'
+slug: json-as-cmd-args
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [bash]
+summary: |
+  コマンドの引数をいっそJSONやYAMLにしちゃうと、シェルスクリプトの引数処理でwhileループを回避できる、配列など複雑な値もJSONの枠組みで扱える、JSONSchemaでバリデーションできると、嬉しいことが沢山かも。
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+コマンドの引数処理は面倒なものですね。
+特にシェルスクリプトでは引数を`while`ループの中で処理することが多く複雑になりがちです。
+
+> bashシェルスクリプトで引数とオプションを解析する by kawarimidoll \
+> https://zenn.dev/kawarimidoll/articles/d546892a6d36eb
+
+`jq`を繰り返し呼ぶことを許容できるなら、いっそJSONを受けてしまうと見通しのいいコードになると思います。
+
+```{bash}
+f() {
+  local x
+  local y
+  x=$(jq -r '.x' <<< "$1")
+  y=$(jq -r '.y' <<< "$1")
+
+  echo "x is $x and y is $y"
+}
+
+f '{"x": 1, "y": 2}'
+```
+
+さらに`gojq`などを使うとYAMLを入力にできます。
+YAMLはJSONの拡張で、通常は改行を伴うので、シェルスクリプト向きじゃないように思うかもしれません。
+実はオブジェクトの記法として、`{x: foo, y: 'hoge fuga'}`のように、二重引用符の省略や単一引用符による代用が可能な性質が光ります。
+引用符を省略できるだけで気軽さがぐんと上がりますし、オブジェクト内で変数展開を使いたい場合に引用符のエスケープ地獄を回避できたりします。
+
+```{bash, output=FALSE}
+yq() {
+  cat - | gojq -r --yaml-input "$1"
+}
+
+f() {
+  local x
+  local y
+  x=$(yq '.x' <<< "$1")
+  y=$(yq '.y' <<< "$1")
+
+  echo "x is $x and y is $y"
+}
+
+x="hoge fuga"
+
+# YAMLによる入力
+f "{x: foo, y: '$x'}"
+```
+
+上記の例をJSONでやると大変ですね。
+
+`````bash
+f "{\"x\": \"foo\", \"y\": \"$x\"}"
+`````
+
+引数に配列を受けとるのもたやすいです。
+しかも`--x=foo,bar,baz`なのか`--x foo bar baz`なのか、`--x foo --x bar --x bar`なのか……といった作者の好みを排除できます。
+
+```{bash}
+f() {
+  for i in $(jq -r '.x[]' <<< "$1"); do
+    echo "$i"
+  done
+}
+
+f '{"x": ["foo", "bar", "baz"]}'
+```
+
+複雑なコードを書くときはDenoなどを使いたくなりますが、JSONやYAMLなら多くの言語で扱えるので特に問題ないはずです。
+加えてJSONSchemaを使ったバリデーションも可能なので、言語ごとの引数処理の作法の違いを吸収しやすいんじゃないかなと思ってます。
+と言いつつだ試せてませんが……。
+
+# ENJOY

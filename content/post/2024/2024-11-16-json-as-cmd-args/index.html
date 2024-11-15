@@ -1,0 +1,71 @@
+---
+title: "コマンドの引数にJSONやYAMLを使うと便利かも"
+author: atusy
+date: '2024-11-16'
+slug: json-as-cmd-args
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [bash]
+summary: |
+  コマンドの引数をいっそJSONやYAMLにしちゃうと、シェルスクリプトの引数処理でwhileループを回避できる、配列など複雑な値もJSONの枠組みで扱える、JSONSchemaでバリデーションできると、嬉しいことが沢山かも。
+---
+
+
+
+<p>コマンドの引数処理は面倒なものですね。特にシェルスクリプトでは引数を<code>while</code>ループの中で処理することが多く複雑になりがちです。</p>
+<blockquote>
+<p>bashシェルスクリプトで引数とオプションを解析する by kawarimidoll<br />
+<a href="https://zenn.dev/kawarimidoll/articles/d546892a6d36eb" class="uri">https://zenn.dev/kawarimidoll/articles/d546892a6d36eb</a></p>
+</blockquote>
+<p><code>jq</code>を繰り返し呼ぶことを許容できるなら、いっそJSONを受けてしまうと見通しのいいコードになると思います。</p>
+<pre class="bash"><code>f() {
+  local x
+  local y
+  x=$(jq -r &#39;.x&#39; &lt;&lt;&lt; &quot;$1&quot;)
+  y=$(jq -r &#39;.y&#39; &lt;&lt;&lt; &quot;$1&quot;)
+
+  echo &quot;x is $x and y is $y&quot;
+}
+
+f &#39;{&quot;x&quot;: 1, &quot;y&quot;: 2}&#39;
+#&gt; x is 1 and y is 2</code></pre>
+<p>さらに<code>gojq</code>などを使うとYAMLを入力にできます。
+YAMLはJSONの拡張で、通常は改行を伴うので、シェルスクリプト向きじゃないように思うかもしれません。実はオブジェクトの記法として、<code>{x: foo, y: 'hoge fuga'}</code>のように、二重引用符の省略や単一引用符による代用が可能な性質が光ります。引用符を省略できるだけで気軽さがぐんと上がりますし、オブジェクト内で変数展開を使いたい場合に引用符のエスケープ地獄を回避できたりします。</p>
+<pre class="bash"><code>yq() {
+  cat - | gojq -r --yaml-input &quot;$1&quot;
+}
+
+f() {
+  local x
+  local y
+  x=$(yq &#39;.x&#39; &lt;&lt;&lt; &quot;$1&quot;)
+  y=$(yq &#39;.y&#39; &lt;&lt;&lt; &quot;$1&quot;)
+
+  echo &quot;x is $x and y is $y&quot;
+}
+
+x=&quot;hoge fuga&quot;
+
+# YAMLによる入力
+f &quot;{x: foo, y: &#39;$x&#39;}&quot;
+#&gt; x is foo and y is hoge fuga</code></pre>
+<p>上記の例をJSONでやると大変ですね。</p>
+<pre class="bash"><code>f &quot;{\&quot;x\&quot;: \&quot;foo\&quot;, \&quot;y\&quot;: \&quot;$x\&quot;}&quot;</code></pre>
+<p>引数に配列を受けとるのもたやすいです。しかも<code>--x=foo,bar,baz</code>なのか<code>--x foo bar baz</code>なのか、<code>--x foo --x bar --x bar</code>なのか……といった作者の好みを排除できます。</p>
+<pre class="bash"><code>f() {
+  for i in $(jq -r &#39;.x[]&#39; &lt;&lt;&lt; &quot;$1&quot;); do
+    echo &quot;$i&quot;
+  done
+}
+
+f &#39;{&quot;x&quot;: [&quot;foo&quot;, &quot;bar&quot;, &quot;baz&quot;]}&#39;
+#&gt; foo
+#&gt; bar
+#&gt; baz</code></pre>
+<p>複雑なコードを書くときはDenoなどを使いたくなりますが、JSONやYAMLなら多くの言語で扱えるので特に問題ないはずです。加えてJSONSchemaを使ったバリデーションも可能なので、言語ごとの引数処理の作法の違いを吸収しやすいんじゃないかなと思ってます。と言いつつだ試せてませんが……。</p>
+<div id="enjoy" class="section level1">
+<h1>ENJOY</h1>
+</div>
