@@ -1,0 +1,93 @@
+---
+title: "Rのパッケージ内でloggerパッケージを使う"
+author: atusy
+date: '2024-12-09'
+slug: logger-in-R-package
+categories: [R]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+  Rのloggerパッケージをパッケージ開発に使う場合、`.onLoad`関数内でログレベルなどの設定しよう。
+  `.onLoad`関数の`pkgname`引数を`logger::log_threshold`などの設定関数の`namespace`引数に渡すと、パッケージ内のログだけを対象に設定を変更できます。
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+logger::log_appender(logger::appender_stdout)
+```
+
+Japan.R 2024が迫ってきまいした。
+私は開発におけるログ出力の意義と分析方法について話すつもりです。
+採択されなかったらドンマイということで。
+忘れものしなければ、「[Rが生産性を高める 〜データ分析ワークフロー効率化の実践](https://gihyo.jp/book/2022/978-4-297-12524-0)」を絹本するつもりです。
+欲しかった人はチャンスかもしれません！
+
+さて、本題に入り、パッケージ開発における**logger**パッケージの使い方を解説します。
+Japan.Rの準備していて躓いたので、ここでまとめておきます。
+
+**logger**パッケージを使ってログを出す場合、ログレベルやフォーマットの設定は不可欠です。
+
+たとえばログレベルは`logger::log_threshold`関数で設定できます。
+`"INFO"`など所望のログレベルを指定するだけで使えるので一見は簡単です。
+
+```{r}
+logger::log_threshold("INFO")
+```
+
+ただし、パッケージで使う場合には、`namespace`引数に注意が必要です。
+デフォルトでは`"global"`が指定されています。
+もしパッケージ内で*global* namespaceのログレベルを変更してしまうと、他に**logger**パッケージを使っている箇所に影響が出ます。
+
+```{r}
+logger::log_threshold |>
+  formals() |>
+  str()
+```
+
+たとえば、*global*のログレベルをWARNにすると、example1やexample2のログもWARN以上しか表示されなくなります。
+
+```{r}
+# globalのログレベルは全体に影響するため、example1やexample2のINFOログも表示されなくなる
+logger::log_threshold("WARN", namespace = "global")
+logger::log_info("namespaceを指定していないログ", namespace = "global")
+logger::log_info("namespaceを指定したログ", namespace = "example1")
+logger::log_info("namespaceを指定したログ", namespace = "example2")
+```
+
+ログ出力時は、同じnamespaceの設定が優先されるため、必要に応じてnamespaceごとに設定するといいでしょう。
+パッケージ開発時はマストと言えます。
+
+```{r}
+# example namespaceのログはexample namespaceの設定を利用するため、INFOログも表示される
+logger::log_threshold("WARN", namespace = "global")
+logger::log_info("namespaceを指定していないログ", namespace = "global")
+logger::log_threshold("INFO", namespace = "example")
+logger::log_info("namespaceを指定したログ", namespace = "example")
+```
+
+ちなみに`log_info`関数などのログを出力する関数`namespace`引数の既定値が`NA`になっており、実行時にパッケージ名などから自動的判定します。
+
+```{r}
+logger::log_info |>
+  formals() |>
+  str()
+```
+
+したがって、明示的にnamespaceを指定すべき関数は設定系の関数に限られます。
+パッケージ開発であれば、`.onLoad`関数内で設定してやると、この関数の`pkgname`引数を流用できます。
+ログレベルはデフォルトでOFFにしておき、環境変数で設定すると、ユーザーに無用にログを出さないで済むかと思います。
+
+```{r}
+.onLoad <- function(libname, pkgname) {
+  logger::log_threshold(Sys.getenv("PROJECT_LOG_LEVEL", "OFF"), pkgname)
+  logger::log_formatter(logger::formatter_json, pkgname)
+  logger::log_layout(
+    logger::layout_json_parser(fields = c("time", "level", "ns", "fn" )),
+    pkgname
+  )
+}
+```
+
+# ENJOY!
