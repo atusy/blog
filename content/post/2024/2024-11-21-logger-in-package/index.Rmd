@@ -1,7 +1,7 @@
 ---
 title: "Rのパッケージ内でloggerパッケージを使う"
 author: atusy
-date: '2024-12-09'
+date: '2024-11-19'
 slug: logger-in-R-package
 categories: [R]
 tags: []
