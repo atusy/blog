@@ -1,0 +1,39 @@
+---
+title: "mini.aiで日本語の括弧の中身をrepeatableに編集する"
+author: atusy
+date: '2024-11-27'
+slug: mini-ai-ja
+categories: [Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+  mini.aiとremapをうまく活用すると`aj[`で「foo」のような日本語の括弧に対して発動するテキストオブジェクトをdot-repeatableに実装できることに気付きました。
+---
+
+
+
+<p><a href="https://github.com/echasnovski/mini.ai">mini.ai</a>によるテキストオブジェクトの拡張の例として、過去の記事では、<a href="https://github.com/echasnovski/mini.ai">mini.ai</a>を使って<code>aj[</code>で「 foo 」のような日本語のカッコを選択する方法を紹介しました。</p>
+<blockquote>
+<p>Neovimのテキストオブジェクトをカスタムできるmini.aiが便利
+<a href="https://blog.atusy.net/2023/01/27/mini-ai-nvim/" class="uri">https://blog.atusy.net/2023/01/27/mini-ai-nvim/</a></p>
+</blockquote>
+<p>しかし、当時の記事の方法ではdot-repeatできない弱点がありました。
+<a href="https://github.com/echasnovski/mini.ai">mini.ai</a>が開発方針として、<code>j[</code>などの2文字以上のキーワードの利用を禁止しています。これをなんとかするために、<code>aj</code>と入力したら<code>getcharstr()</code>して追加で1文字受けとり、その内容に応じて利用する括弧を条件分岐していました。この対話的なインターフェースがdot-repeatを阻害していたようです。</p>
+<p>日本語の括弧の中身の編集にdot-repeatが必要になる場面が少ないとは言え、地味にストレスでした。</p>
+<p>というわけで、なんとかしたいと考えていたのですが、<a href="https://github.com/echasnovski/mini.ai">mini.ai</a>に組込みの<code>i?</code>/<code>a?</code>というテキストオブジェクトを流用すればいいと気付きました。</p>
+<p><code>i?</code>は、テキストオブジェクトの左端と右端をユーザー入力で指定するテキストオブジェクトです。先の<code>ij</code>と同様に対話的なテキストオブジェクトですが、<a href="https://github.com/echasnovski/mini.ai">mini.ai</a>側の工夫により、dot-repeatに対応しています。</p>
+<p>というわけで、以下のようにすれば、「foo」のような日本語の括弧に対応した編集が可能になります。事故が怖いので避けがちなremapの出番ですね。</p>
+<pre class="lua"><code>vim.keymap.set({&quot;x&quot;, &quot;o&quot;}, &quot;ij[&quot;, &quot;i?「&lt;cr&gt;」&lt;cr&gt;&quot;, { remap = true })
+vim.keymap.set({&quot;x&quot;, &quot;o&quot;}, &quot;aj[&quot;, &quot;a?「&lt;cr&gt;」&lt;cr&gt;&quot;, { remap = true })</code></pre>
+<p>同様に、<code>&lt;</code>や<code>{</code>なども設定しておくといいでしょう。</p>
+<pre class="lua"><code>vim.keymap.set({&quot;x&quot;, &quot;o&quot;}, &quot;ij&lt;&quot;, &quot;i?＜&lt;cr&gt;＞&lt;cr&gt;&quot;, { remap = true })
+vim.keymap.set({&quot;x&quot;, &quot;o&quot;}, &quot;aj&lt;&quot;, &quot;a?＜&lt;cr&gt;＞&lt;cr&gt;&quot;, { remap = true })
+vim.keymap.set({&quot;x&quot;, &quot;o&quot;}, &quot;ij{&quot;, &quot;i?｛&lt;cr&gt;｝&lt;cr&gt;&quot;, { remap = true })
+vim.keymap.set({&quot;x&quot;, &quot;o&quot;}, &quot;aj{&quot;, &quot;a?｛&lt;cr&gt;｝&lt;cr&gt;&quot;, { remap = true })</code></pre>
+<p>他にも<code>]</code>など閉じ括弧の場合は二重括弧にするなど、アイデアが広がりますね。</p>
+<pre class="lua"><code>vim.keymap.set({&quot;x&quot;, &quot;o&quot;}, &quot;ij]&quot;, &quot;i?『&lt;cr&gt;』&lt;cr&gt;&quot;, { remap = true })
+vim.keymap.set({&quot;x&quot;, &quot;o&quot;}, &quot;aj]&quot;, &quot;a?『&lt;cr&gt;』&lt;cr&gt;&quot;, { remap = true })</code></pre>
+<p>remapを避けがちでこの発想になかなか至れませんでしたが、macroを使っているときにふと閃きました。固定観念、うまく捨ててきたいですね。</p>
+<p>ENJOY!</p>
