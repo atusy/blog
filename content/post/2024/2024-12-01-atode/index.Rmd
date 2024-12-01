@@ -1,0 +1,62 @@
+---
+title: "週間アトデ 2024-12-01"
+author: atusy
+date: '2024-12-01'
+slug: atodeyomanakata
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [bash]
+summary: |
+  アトデヨム、ウソジャナイ、ヨムノタノシー
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+タイムアップして、読むどころかキュレーションしきれてないけど、今週もアトデヨムがたくさんでした。
+
+- [スタッフエンジニアの道](https://speakerdeck.com/snoozer05/sutatuhuenzinianodao-the-staff-engineers-path)
+    - 過去の職場で、スペシャリストっていってもマネジメントに通ずる能力が求められるよねーみたいな話をしたことがあったが、具体的なところに踏み込まずに思考停止してしまっていたところを、よく表現してくれててありがたい。
+    - そもそもスペシャリストってなんだよってところもふわふわしてたのだけれど、スタッフエンジニアの定義がしっくりきた。
+- [自動化するLLMシステムの品質管理: LLM-as-a-judge の作り方](https://techblog.gaudiy.com/entry/2024/10/22/105609)
+    - 最近、LLMに触れることが多いので、気になっていた分野。今後の参考にしたい
+- [I Stopped Using Kubernetes. Our DevOps Team Is Happier Than Ever](https://blog.stackademic.com/i-stopped-using-kubernetes-our-devops-team-is-happier-than-ever-a5519f916ec0)
+    - 前職で、同僚が、よっぽどKubernetes特有の機能を使わない限り避けたほうがいいんだよと言ってたのを彷彿とさせた
+    - スケーリングやIaCを叶える一方で運用コストは並大抵じゃないぜという話が書いてある
+    - この運用コストの部分があまり語られない傾向にあるが、インフラのオーバーヘッド（controleplaneの費用）、高い専門性を要する故の人件費、マニフェストやObservabilityにまつわる複雑性は無視できないとのこと
+    - ただ、この組織は47 clusterも運用してたみたいなので、だいぶ特殊な気はする
+    - Kubernetesを使うべきかの判断基準も提供してて、まあそうかもと思う
+        - yes
+            - 数千レベルのマイクロサービスを持つ
+            - 複雑なオートスケールが必要
+            - マルチクラウドが必要
+            - 特殊なデプロイ方法が必要
+        - no
+            - マイクロサービス数が20程度
+            - 予測しならスケーリング可能
+            - マネージドサービス主体で構成
+            - DevOpsチームが小規模
+    - 少なくとも、Kubernetesはサービスローンチの初手でとるようなものではないのかもなあと思った
+-  [SREというチーム名やめてクラウド基盤という名前にした話に共感する人！](https://x.com/shin1988/status/1861358233837019335)
+    - やってることに即したチーム名にしたとのこと
+    - チーム名って大事だよなあと思う。目指す姿とも実態とも異なるチーム名にしてしまうと、不協和音の元な気はする
+-  [参加レポート「CloudNative Days Winter 2024 一日で学ぶクラウドネイティブ技術実践ハンズオン」#CNDW2024](https://dev.classmethod.jp/articles/cnd2024-winter-handson-report/)
+    - 表題通り
+    - Kubernetes関連で知ってて損はなさそうなことを一気に学べるいいハンズオンっぽい
+    - ハンズオン資料が公開されてるとのことで挑戦してみたいのう。やりたいこと無限にあるので……あああとなるけど。
+        - https://github.com/cloudnativedaysjp/cnd-handson/tree/main
+- [Cache 解体新書](https://zenn.dev/jxck/books/cache-anatomia)
+    - レスポンスヘッダのCache-Controlに関する話らしい
+    - 自分はここを気にするほどフロントエンド触れてないので、いったん放置
+- [『データ分析基盤を作ってみよう　～性能設計編～』というタイトルで勉強会を開催しました](https://tech.nri-net.com/entry/2024/11/22/143842)
+    - 勉強会の資料（アトデヨム）と、その続きの話
+    - 続きの部分
+        - ログ分析にS3+Athenaを使う場合、小さいファイルが大量に存在してるとパフォーマンス・コストが不利だよ
+        - S3 Express One Zoneによるパフォーマンス改善や、CloudFrontの新機能を使ってログファイルをParquetなどにまとめてからアップロードするといいよ
+- [Prompt Poet](https://blog.character.ai/introducing-prompt-poet/)
+- [グーグルも注目、プロンプトエンジニアリングの最前線、「Prompt Poet」が示す可能性](https://news.yahoo.co.jp/articles/c170a508b013131fb2a0ab5a29b853f0715721ca)
+
