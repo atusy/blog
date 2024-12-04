@@ -1,0 +1,68 @@
+---
+title: "構造化ログのスキーマを考えてみる"
+author: atusy
+date: '2024-12-04'
+slug: log-schema
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+  ログ設計初心者なりに、分析しやすいログってなにかなと考えてみた。
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+Japan.R 2024の開催が目前になりましたね。
+私は「Happy Structured Logging in R（構造化ログ入門.R）」というタイトルで応募しました。
+
+ndjsonやjsonlと呼ばれる、1行1JSONレコードで構成される形式のログを使う意義と、その分析例について話す予定です。
+
+ところがどっこい、実は私、自分でログを設計したことはない。
+なんとなく過去に触った製品を思い出したり、発表用のデモをいじりながら、アプリケーションログのスキーマを考えてみました。
+APIサーバーの場合はレスポンスコードなどの情報も追加になると思います。
+
+| key | type | desc | example |
+| --- | --- | --- | --- |
+| time | string | timestamp | `2024-12-03 22:38:17` |
+| level | string | log level | `INFO` |
+| ns | string | name of package, project, ... | `japanr2024` |
+| message | string | static message | `Received request` |
+| value | any | a value related to the message | `list(input = "tokyo")` |
+| session_id | string | unique per access | `01JE6BWEWP0BAAFGPZTZ9GBNM6` |
+| trace_id | string | unique per request | `01JE6BWEXF5F6HDD4YFZBP157F` |
+| span_id | string | unique per task | `01JE6BWEXSW65DD1EC858XMZQ3` |
+| context | named list | (Optional) additional context | `list(...)` |
+
+意識したのは2点。
+
+- 人間でも読めた方がいい情報が頭の方に入っていること
+- **tidyverse**などを使った分析がしやすいこと
+
+特に、`message`はついつい`x is defined: 1`とか、動的な値にしたくなるのですが、静的なものにすると、分析しやすいかなと思います。
+
+動的なログメッセージでは、フィルタリングする時に正規表現が必要になったり、文字列の値をパースする必要が発生します。
+
+```r
+logdata |>
+  dplyr::filter(message |> stringr::str_detect("^x is defined:")) |>
+```
+
+一方で静的なログメッセージであれば、`message`の完全一致でのフィルタリングが可能な上、`value`もJSONで表現可能な範囲で型がつくので数値比較などが容易になると思います。
+
+```r
+# { "message": "x is defined", "value": 1 } みたいなログを想定
+logdata |>
+  # メッセージのフィルタに完全一致を使える
+  dplyr::filter(message == "x is defined") |>
+  dplyr::filter(value > 0)
+```
+
+もし、もっとこうするといいよーとか参考資料とかあれば、Xとかで教えてもらえると嬉しいです。
+
+<https://x.com/Atsushi776>
+
+# ENJOY

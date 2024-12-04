@@ -1,0 +1,112 @@
+---
+title: "構造化ログのスキーマを考えてみる"
+author: atusy
+date: '2024-12-04'
+slug: log-schema
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+  ログ設計初心者なりに、分析しやすいログってなにかなと考えてみた。
+---
+
+
+
+<p>Japan.R 2024の開催が目前になりましたね。私は「Happy Structured Logging in R（構造化ログ入門.R）」というタイトルで応募しました。</p>
+<p>ndjsonやjsonlと呼ばれる、1行1JSONレコードで構成される形式のログを使う意義と、その分析例について話す予定です。</p>
+<p>ところがどっこい、実は私、自分でログを設計したことはない。なんとなく過去に触った製品を思い出したり、発表用のデモをいじりながら、アプリケーションログのスキーマを考えてみました。
+APIサーバーの場合はレスポンスコードなどの情報も追加になると思います。</p>
+<table>
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>key</th>
+<th>type</th>
+<th>desc</th>
+<th>example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>time</td>
+<td>string</td>
+<td>timestamp</td>
+<td><code>2024-12-03 22:38:17</code></td>
+</tr>
+<tr class="even">
+<td>level</td>
+<td>string</td>
+<td>log level</td>
+<td><code>INFO</code></td>
+</tr>
+<tr class="odd">
+<td>ns</td>
+<td>string</td>
+<td>name of package, project, …</td>
+<td><code>japanr2024</code></td>
+</tr>
+<tr class="even">
+<td>message</td>
+<td>string</td>
+<td>static message</td>
+<td><code>Received request</code></td>
+</tr>
+<tr class="odd">
+<td>value</td>
+<td>any</td>
+<td>a value related to the message</td>
+<td><code>list(input = "tokyo")</code></td>
+</tr>
+<tr class="even">
+<td>session_id</td>
+<td>string</td>
+<td>unique per access</td>
+<td><code>01JE6BWEWP0BAAFGPZTZ9GBNM6</code></td>
+</tr>
+<tr class="odd">
+<td>trace_id</td>
+<td>string</td>
+<td>unique per request</td>
+<td><code>01JE6BWEXF5F6HDD4YFZBP157F</code></td>
+</tr>
+<tr class="even">
+<td>span_id</td>
+<td>string</td>
+<td>unique per task</td>
+<td><code>01JE6BWEXSW65DD1EC858XMZQ3</code></td>
+</tr>
+<tr class="odd">
+<td>context</td>
+<td>named list</td>
+<td>(Optional) additional context</td>
+<td><code>list(...)</code></td>
+</tr>
+</tbody>
+</table>
+<p>意識したのは2点。</p>
+<ul>
+<li>人間でも読めた方がいい情報が頭の方に入っていること</li>
+<li><strong>tidyverse</strong>などを使った分析がしやすいこと</li>
+</ul>
+<p>特に、<code>message</code>はついつい<code>x is defined: 1</code>とか、動的な値にしたくなるのですが、静的なものにすると、分析しやすいかなと思います。</p>
+<p>動的なログメッセージでは、フィルタリングする時に正規表現が必要になったり、文字列の値をパースする必要が発生します。</p>
+<pre class="r"><code>logdata |&gt;
+  dplyr::filter(message |&gt; stringr::str_detect(&quot;^x is defined:&quot;)) |&gt;</code></pre>
+<p>一方で静的なログメッセージであれば、<code>message</code>の完全一致でのフィルタリングが可能な上、<code>value</code>もJSONで表現可能な範囲で型がつくので数値比較などが容易になると思います。</p>
+<pre class="r"><code># { &quot;message&quot;: &quot;x is defined&quot;, &quot;value&quot;: 1 } みたいなログを想定
+logdata |&gt;
+  # メッセージのフィルタに完全一致を使える
+  dplyr::filter(message == &quot;x is defined&quot;) |&gt;
+  dplyr::filter(value &gt; 0)</code></pre>
+<p>もし、もっとこうするといいよーとか参考資料とかあれば、Xとかで教えてもらえると嬉しいです。</p>
+<p><a href="https://x.com/Atsushi776" class="uri">https://x.com/Atsushi776</a></p>
+<div id="enjoy" class="section level1">
+<h1>ENJOY</h1>
+</div>
