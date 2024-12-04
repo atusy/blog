@@ -95,7 +95,7 @@ APIサーバーの場合はレスポンスコードなどの情報も追加に�
 <li>人間でも読めた方がいい情報が頭の方に入っていること</li>
 <li><strong>tidyverse</strong>などを使った分析がしやすいこと</li>
 </ul>
-<p>特に、<code>message</code>はついつい<code>x is defined: 1</code>とか、動的な値にしたくなるのですが、静的なものにすると、分析しやすいかなと思います。</p>
+<p>特に、<code>message</code>はついつい<code>x is defined: 1</code>とか、動的な値にしたくなるのですが、静的なほうが分析しやすいかなと思います。</p>
 <p>動的なログメッセージでは、フィルタリングする時に正規表現が必要になったり、文字列の値をパースする必要が発生します。</p>
 <pre class="r"><code>logdata |&gt;
   dplyr::filter(message |&gt; stringr::str_detect(&quot;^x is defined:&quot;)) |&gt;</code></pre>
