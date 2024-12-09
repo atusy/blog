@@ -101,7 +101,7 @@ Vimでは文字入力しないノーマルモードを中心として、様々�
 自作プラグインにより、補助ラベルを使った効率的な操作が可能です。
 
 - <https://github.com/atusy/jab.nvim>
-- <https://github.com/atusy/treemoneky.nvim>
+- <https://github.com/atusy/treemonkey.nvim>
 
 類似のプラグインは多数ありますが、私のユースケースを満たさなかったので自作しました。
 
@@ -134,7 +134,7 @@ Vim/Neovimには`f<文字>`と入力すると指定した文字にカーソル�
 
 ### 範囲選択
 
-- <https://github.com/atusy/treemoneky.nvim>
+- <https://github.com/atusy/treemonkey.nvim>
 
 プログラミングである範囲を削除したりコピーしたりしたいとき、たいてい範囲はプログラミング言語における意味のある塊です。
 NeovimはTreesitterを用いた構文解析機能を内蔵しているので、解析結果を利用して範囲の両端にラベルをつけ、選択可能なプラグインを作りました。
@@ -148,7 +148,7 @@ NeovimはTreesitterを用いた構文解析機能を内蔵しているので、�
 このため、左端を示すラベルが`a`と`b`の2つになり重なってしまいます。
 ユーザーは見えているラベルを選択するしかないので、いったんは見えている方を選択するしかありません。
 従来プラグインでは、選んでみるまで`print`と`print("Hello, world")`のどちらが選ばれるか分かりませんでした。
-私の[treemonkey.nvim](https://github.com/atusy/treemoneky.nvim)はここを解決した形です。
+私の[treemonkey.nvim](https://github.com/atusy/treemonkey.nvim)はここを解決した形です。
 
 ```
 print("Hello, world!")

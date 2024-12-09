@@ -88,7 +88,7 @@ Vimからとの互換性を極力保ちつつ、新しい機能の追加・変�
 <p>自作プラグインにより、補助ラベルを使った効率的な操作が可能です。</p>
 <ul>
 <li><a href="https://github.com/atusy/jab.nvim" class="uri">https://github.com/atusy/jab.nvim</a></li>
-<li><a href="https://github.com/atusy/treemoneky.nvim" class="uri">https://github.com/atusy/treemoneky.nvim</a></li>
+<li><a href="https://github.com/atusy/treemonkey.nvim" class="uri">https://github.com/atusy/treemonkey.nvim</a></li>
 </ul>
 <p>類似のプラグインは多数ありますが、私のユースケースを満たさなかったので自作しました。</p>
 <div id="行内の移動" class="section level3">
@@ -114,13 +114,13 @@ Vimからとの互換性を極力保ちつつ、新しい機能の追加・変�
 <div id="範囲選択" class="section level3">
 <h3>範囲選択</h3>
 <ul>
-<li><a href="https://github.com/atusy/treemoneky.nvim" class="uri">https://github.com/atusy/treemoneky.nvim</a></li>
+<li><a href="https://github.com/atusy/treemonkey.nvim" class="uri">https://github.com/atusy/treemonkey.nvim</a></li>
 </ul>
 <p>プログラミングである範囲を削除したりコピーしたりしたいとき、たいてい範囲はプログラミング言語における意味のある塊です。
 NeovimはTreesitterを用いた構文解析機能を内蔵しているので、解析結果を利用して範囲の両端にラベルをつけ、選択可能なプラグインを作りました。</p>
 <p><img src="images/treemonkey.gif" /></p>
 <p>既存プラグインは、ラベルを1度だけ選択しますが、私のプラグインでは必要に応じて段階的な選択を行います。</p>
-<p>たとえば以下のように<code>n</code>にカーソルがあるとき、選択したい範囲は<code>print</code>かもしれませんし、<code>print("Hello, world")</code>かもしれません。しかし、どちらのケースも左端は<code>p</code>です。このため、左端を示すラベルが<code>a</code>と<code>b</code>の2つになり重なってしまいます。ユーザーは見えているラベルを選択するしかないので、いったんは見えている方を選択するしかありません。従来プラグインでは、選んでみるまで<code>print</code>と<code>print("Hello, world")</code>のどちらが選ばれるか分かりませんでした。私の<a href="https://github.com/atusy/treemoneky.nvim">treemonkey.nvim</a>はここを解決した形です。</p>
+<p>たとえば以下のように<code>n</code>にカーソルがあるとき、選択したい範囲は<code>print</code>かもしれませんし、<code>print("Hello, world")</code>かもしれません。しかし、どちらのケースも左端は<code>p</code>です。このため、左端を示すラベルが<code>a</code>と<code>b</code>の2つになり重なってしまいます。ユーザーは見えているラベルを選択するしかないので、いったんは見えている方を選択するしかありません。従来プラグインでは、選んでみるまで<code>print</code>と<code>print("Hello, world")</code>のどちらが選ばれるか分かりませんでした。私の<a href="https://github.com/atusy/treemonkey.nvim">treemonkey.nvim</a>はここを解決した形です。</p>
 <pre><code>print(&quot;Hello, world!&quot;)
  # ^このnにカーソル</code></pre>
 <p>詳しくは<a href="https://blog.atusy.net/2023/12/27/treemonkey-nvim/">Neovimで文法に従ってコードを範囲選択するtreemonkey.nvimを作った</a>を御一読ください。</p>
