@@ -1,0 +1,169 @@
+---
+title: "オレのNeovim見て！ 2024"
+author: atusy
+date: '2024-12-09'
+slug: awesome-my-neovim
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+  Vim/Neovimに興味を持ってほしくて、私のNeovimのカッコイイところ集を作ってみました。
+---
+
+
+
+<p><a href="https://qiita.com/advent-calendar/2024/3-shake">3-shake Advent Calendar 2024</a>の202f-12-09の記事です。昨日はnnaka2992さんの<a href="https://nnaka2992.hatenablog.com/entry/2024/12/08/kubecon_na_the_future_of_dbaas_ob_kuberneteS">KubeCon NA 2024: The Future of DBaaS on Kubernetesのセッションレポート</a>でした。</p>
+<p>私は土曜までJapan.Rの発表準備で忙しかったので、アドカレをまったく読めてません。これから追いかけたいと思います。</p>
+<p>さて本題。会社で使われているエディタはVS Codeユーザーが圧倒的多数を占めてると思います。それでもNeovimに興味を持ってもらえると嬉しいなと思って、「オレのNeovim見て！」というタイトルで社内LTしました。</p>
+<p>この記事は社内LTの内容をベースに書いてます。
+Neovimの使い方とか詳しいことには触れず、こんなことできるんだぞー！見てみて！という感じの内容です。</p>
+<ul>
+<li>Vim/Neovimってターミナルと仲良しな人向けのあれでしょ？</li>
+<li>文字入力や保存・終了すら直感できない初心者殺しのあれでしょ？</li>
+</ul>
+<p>まあそうかもしれないけど、今日の話で、ちょっとでも興味もってもらえると嬉しいな！</p>
+<div id="neovimとは" class="section level1">
+<h1>Neovimとは？</h1>
+<p>ともあれ、Neovimを知らない人向けの記事でもあるので、簡単にNeovimについて説明します。</p>
+<p>2014年にVimから派生したテキストエディタ。
+Vimからとの互換性を極力保ちつつ、新しい機能の追加・変更を行っている。</p>
+<ul>
+<li>LSPクライアントの内蔵</li>
+<li>AST解析機能
+<ul>
+<li>シンタックスハイライトなどに使える</li>
+</ul></li>
+<li>terminal emulator
+<ul>
+<li>Vimも後追いで対応</li>
+</ul></li>
+<li>floating window
+<ul>
+<li>Vimにはpopup windowという似た機能があるが、フォーカスできない（現在対応中）</li>
+</ul></li>
+<li>Lua言語による設定</li>
+</ul>
+<p>といってもforkから10年が経ち、<strong>できること</strong>の差は小さくなっている気がする。</p>
+</div>
+<div id="なんでvimneovimなの" class="section level1">
+<h1>なんでVim/Neovimなの？</h1>
+<p>かっこいいから！はTRUEだけど……。</p>
+<p>本質的にはモードというコーディングに適した機能があるから。</p>
+<p><strong>コーディング ≠ 文字入力</strong>なので、案外文字入力（インサート）する場面は限られる。</p>
+<ul>
+<li>準備
+<ul>
+<li>ファイル選択</li>
+<li>カーソル移動</li>
+</ul></li>
+<li>コードリーディング
+<ul>
+<li>関数の使い方確認</li>
+<li>検索</li>
+</ul></li>
+<li>文字入力によらない編集
+<ul>
+<li>コピペ</li>
+<li>置換</li>
+<li>Undo/Redo</li>
+<li>行結合</li>
+</ul></li>
+</ul>
+<p>など。</p>
+<p>Vimでは文字入力しないノーマルモードを中心として、様々なモードを行き来する。</p>
+<pre><code>ノーマルモード ⇔ インサートモード（文字入力）
+                  ビジュアルモード（文字選択）
+                  コマンドラインモード（検索・置換などいろいろ）
+                  ...</code></pre>
+<p>ノーマルモードでやるには複雑すぎることは他のモードに任せる。終わったらノーマルモードに戻る。</p>
+<p>え？複雑だって？インサートモードだけの世界観で色々やってるほうが複雑なんよ！モードごとにやること絞ってるほうがシンプルっしょ！（諸説あります）</p>
+</div>
+<div id="まあとりあえずオレのneovim見て" class="section level1">
+<h1>まあとりあえずオレのNeovim見て！</h1>
+<p>プラグイン増し増しで色々できるよ！とりあえずこの記事では見た目にインパクトありそうなこと紹介するよ。</p>
+<div id="補助ラベルによる効率的な操作" class="section level2">
+<h2>補助ラベルによる効率的な操作</h2>
+<p>自作プラグインにより、補助ラベルを使った効率的な操作が可能です。</p>
+<ul>
+<li><a href="https://github.com/atusy/jab.nvim" class="uri">https://github.com/atusy/jab.nvim</a></li>
+<li><a href="https://github.com/atusy/treemoneky.nvim" class="uri">https://github.com/atusy/treemoneky.nvim</a></li>
+</ul>
+<p>類似のプラグインは多数ありますが、私のユースケースを満たさなかったので自作しました。</p>
+<div id="行内の移動" class="section level3">
+<h3>行内の移動</h3>
+<ul>
+<li><a href="https://github.com/atusy/jab.nvim" class="uri">https://github.com/atusy/jab.nvim</a></li>
+</ul>
+<p>Vim/Neovimには<code>f&lt;文字&gt;</code>と入力すると指定した文字にカーソルを移動させる機能があります。プラグインによる発展形として、指定した文字にマッチする箇所にラベルをつけ、ユーザーが選択したラベルに移動することができます。</p>
+<p>たとえば、以下の例では<code>f&lt;space&gt;</code>と入力することで、カーソル右側のスペースにabcd…とラベルがつき、好きなラベルを選択して移動しています。また、ローマ字を応用して日本語に対してもジャンプ可能で、<code>fn</code>と入力することで、「に」や「日」にジャンプすることもできます。</p>
+<p><img src="images/fmotion.gif" /></p>
+<p><code>f&lt;space&gt;</code>ならカーソル右側に注目しますが、<code>F&lt;space&gt;</code>で左側に注目するなんてこともできます。
+<code>df&lt;space&gt;</code>などとすると、選択箇所まで削除も簡単です。</p>
+</div>
+<div id="表示範囲内の絞り込み検索" class="section level3">
+<h3>表示範囲内の絞り込み検索</h3>
+<ul>
+<li><a href="https://github.com/atusy/jab.nvim" class="uri">https://github.com/atusy/jab.nvim</a></li>
+</ul>
+<p>通常の検索では、候補を「前へ」や「次へ」で移動しますが、プラグインの力を使うと表示領域内の候補にラベルをつけて選択したラベルに移動できます。何度も「次へ」する苦労から解き放たれます。</p>
+<p>以下の例では<code>;</code>を検索開始キーとしており、<code>;exa</code>と入力するに従って「e」にマッチ、「ex」にマッチ、「exa」にマッチと、絞り込んでいます。先程の行内の移動と同様に、ローマ字を応用して日本語に対してもジャンプ可能で、<code>;rei</code>と入力することで、最終的には「例」にジャンプしています。</p>
+<p><img src="images/incsearch.gif" /></p>
+</div>
+<div id="範囲選択" class="section level3">
+<h3>範囲選択</h3>
+<ul>
+<li><a href="https://github.com/atusy/treemoneky.nvim" class="uri">https://github.com/atusy/treemoneky.nvim</a></li>
+</ul>
+<p>プログラミングである範囲を削除したりコピーしたりしたいとき、たいてい範囲はプログラミング言語における意味のある塊です。
+NeovimはTreesitterを用いた構文解析機能を内蔵しているので、解析結果を利用して範囲の両端にラベルをつけ、選択可能なプラグインを作りました。</p>
+<p><img src="images/treemonkey.gif" /></p>
+<p>既存プラグインは、ラベルを1度だけ選択しますが、私のプラグインでは必要に応じて段階的な選択を行います。</p>
+<p>たとえば以下のように<code>n</code>にカーソルがあるとき、選択したい範囲は<code>print</code>かもしれませんし、<code>print("Hello, world")</code>かもしれません。しかし、どちらのケースも左端は<code>p</code>です。このため、左端を示すラベルが<code>a</code>と<code>b</code>の2つになり重なってしまいます。ユーザーは見えているラベルを選択するしかないので、いったんは見えている方を選択するしかありません。従来プラグインでは、選んでみるまで<code>print</code>と<code>print("Hello, world")</code>のどちらが選ばれるか分かりませんでした。私の<a href="https://github.com/atusy/treemoneky.nvim">treemonkey.nvim</a>はここを解決した形です。</p>
+<pre><code>print(&quot;Hello, world!&quot;)
+ # ^このnにカーソル</code></pre>
+<p>詳しくは<a href="https://blog.atusy.net/2023/12/27/treemonkey-nvim/">Neovimで文法に従ってコードを範囲選択するtreemonkey.nvimを作った</a>を御一読ください。</p>
+</div>
+<div id="ウィンドウの移動" class="section level3">
+<h3>ウィンドウの移動</h3>
+<ul>
+<li><a href="https://github.com/tkmpypy/chowcho.nvim" class="uri">https://github.com/tkmpypy/chowcho.nvim</a></li>
+</ul>
+<p>Vim/Neovimではhjklでカーソルを左下上右に移動できます。そのアナロジーで、<code>CTRL-W</code> + <code>CTRL-K</code>すると、現在のウィンドウの上側に移動できます（注：ウィンドウはVS Codeなどでいうペインに近い概念です）。</p>
+<p>しかし、たとえば以下の例で3にカーソルがあるとき、<code>CTRL-W</code> + <code>CTRL-K</code>の移動先は1でしょうか2でしょうか？熟練のVimユーザーには明らかかもしれませんが、初心者にはわかりにくいです。</p>
+<pre><code>+---+---+
+| 1 | 2 |
++---+---+
+|   3   |
++---+---+</code></pre>
+<p>この問題も、ウィンドウごとにラベルをふって移動先を明示的に指定することで解決できます。</p>
+<p>発展的な用途として、選択したウィンドウを閉じる、現在のウィンドウと選択したウィンドウを入れかえるといったこともできます。プラグイン作者はtkmpypyさんですが、この機能は私が追加しました。</p>
+<blockquote>
+<p><a href="https://blog.atusy.net/2022/07/31/chowcho-nvim-any-func/">chowcho.nvimで任意の関数を、対話的に選択したwindowで実行</a></p>
+</blockquote>
+</div>
+</div>
+<div id="操作中のファイルを分かりやすくする" class="section level2">
+<h2>操作中のファイルを分かりやすくする</h2>
+<p>複数のファイルが画面上に並んでいると、編集中のファイルがどれかわかりにくくなることがしばしばあります。</p>
+<p>そこで私は、styler.nvimというプラグインを使って、状況に応じてウィンドウの色を変えています。たとえば、以下の順で背景色を目立つものにしています。</p>
+<ul>
+<li>ツールチップ的に表示している関数のヘルプ</li>
+<li>アクティブウィンドウ</li>
+<li>その他</li>
+</ul>
+<p><img src="images/styler.png" /></p>
+<p>他にも、プロジェクト外部のファイルをまったく異なる色にして、意図せず編集することを防ぐなどの工夫もしてます。</p>
+<p>詳しくは以下の記事を御覧ください。</p>
+<blockquote>
+<p><a href="https://blog.atusy.net/2022/12/17/styler-nvim-active-win/">もっと良い感じにstyler.nvimでアクティブなウィンドウか否かでカラースキームを変える</a></p>
+</blockquote>
+<p>これはそこそこ設定が混み入っているので、近くプラグイン化して誰でも使えるようにしたいですね。</p>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>ENJOY!</h1>
+<p>見た目が派手そうな機能を紹介しましたが、<code>[foo]</code>を<code>(foo)</code>に置き換えるような括弧の操作や、イマドキのIDEのようなAI利用だったり、他にも様々なことができます。</p>
+<p>お世事にも始めやすいエディタではないと思いますが、興味をもてたら触ってみてもらえると嬉しいです！</p>
+</div>
