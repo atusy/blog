@@ -1,0 +1,109 @@
+---
+title: "週間アトデ 2024-12-16"
+author: atusy
+date: '2024-12-16'
+slug: atodeyomanakata
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [bash]
+summary: |
+  アトデヨム、ウソジャナイ、ヨムノタノシー
+---
+
+
+
+<p>2024-12-07のJapan.Rタイミングで途切れてしまってましたが、アトデヨム、やってきます。</p>
+<ul>
+<li><a href="https://zenn.dev/ktymmt/articles/aa5e1e8cc4e68c">生成AIの評価について(文章生成)</a>
+<ul>
+<li>お仕事とも関連して気になっている、文章の評価指標の話</li>
+</ul></li>
+<li><a href="https://note.com/life_to_ai/n/n1951da3b1964">RAGASの評価メトリクスを徹底解説！</a>
+<ul>
+<li>お仕事とも関連して気になっている、文章の評価指標の話</li>
+</ul></li>
+<li><a href="https://speakerdeck.com/lighttiger2505/wu-zi-jue-nimenbanoxin-li-de-an-quan-xing-woduo-tuteitajing-yan-karade-taxue-bi">無自覚にメンバーの心理的安全性を奪っていた経験から得た学び</a>
+<ul>
+<li>赤裸々に失敗を振り返っててすごい</li>
+<li>社名出して公開できるGOもすごい</li>
+<li>成長支援を通じて「これだけやったからきっとみんな成長してくれる？」と思っちゃったり、うまくいかなくて猛プッシュしちゃったりは、起こりえるし、ひょっとしたら自分も過去にやったかもしれない。人によって歩き方もペースも違うことは胸に刻んでおきたいなあと改めて思った。</li>
+</ul></li>
+<li><a href="https://aloerina01.github.io/blog/2022-12-16-1">来月からエンジニアリングマネージャーやってね」と言われたら</a>
+<ul>
+<li>ざっくり
+<ul>
+<li>自身も周囲も認識を改めていく必要がある
+<ul>
+<li>提案が指示と受け止められることの予測が追い付かない</li>
+<li>立場上では指示/依頼が必要と分かってても、心がおいつかず、偉そうな行為に抵抗を覚える</li>
+<li>メンバーも昨日まで同じ立場だった人になんで指示/依頼されるの？と納得に時間がかかる</li>
+</ul></li>
+<li>職務内容に分かりやうし名前もつかなければ、目に見えやすい進捗もでにくいから焦りを覚えやすい</li>
+<li>任命の背景にまずは取り組め</li>
+</ul></li>
+<li>メンバーからマネージャーはジョブチェンジに近くも思うので、どれも納得感がある</li>
+<li>特に「任命の背景にまずは取り組め」は良い考え方だと思う。無軌道よりはずっとやりやすいし、自分なりの貢献はじっくり考えて後から実践してけばいい。</li>
+</ul></li>
+<li><a href="https://roadmap.sh/engineering-manager">Engineering Manager - Everything you need to know to become a Engineering Manager</a>
+<ul>
+<li>EMのお仕事がまとまってる。何やればいいんだろ……？と思った時の叩き台にいいかも</li>
+</ul></li>
+<li><a href="https://github.com/microsoft/markitdown">microsoft/markitdown</a>
+<ul>
+<li>いろいろMarkdownにできるらしい
+<ul>
+<li>PDF (.pdf)</li>
+<li>PowerPoint (.pptx)</li>
+<li>Word (.docx)</li>
+<li>Excel (.xlsx)</li>
+<li>Images (EXIF metadata, and OCR)</li>
+<li>Audio (EXIF metadata, and speech transcription)</li>
+<li>HTML (special handling of Wikipedia, etc.)</li>
+<li>Various other text-based formats (csv, json, xml, etc.)</li>
+</ul></li>
+<li>CLIで使えたらripgrepallの進化形として使えたりするだろうか？</li>
+</ul></li>
+<li><a href="https://arxiv.org/abs/2412.09548">Meshtron: High-Fidelity, Artist-Like 3D Mesh Generation at Scale</a>
+<ul>
+<li>点群からメッシュを作れるらしい。おもろい。</li>
+<li>あんまり関係ないけど<a href="https://hacarus.com/ja/tech/20201111-point-cloud-denoising/">Point Cloud と スパースモデリング</a>をおもいだした</li>
+</ul></li>
+<li><a href="https://www.m3tech.blog/entry/2024/12/13/110000">gitレポジトリ考古学に使う道具</a>
+<ul>
+<li>「ファイルが消えたコミットを知りたい」とか、たまーにめっちゃ欲しくなりそうなTipsがのってた</li>
+<li>たぶん次に使いたいときにはコマンドを思い出せないと思うけど、できるってことを知ってればChatGPTとかに問い合わせられるので、知見共有ありがたし</li>
+</ul></li>
+<li><a href="https://x.com/umiyuki_ai/status/1867792074655117419">ByteLatentTransformer</a>
+<ul>
+<li>今までのTokenベースのLLMに対して、バイトベースのLLMがでてきたらしい</li>
+<li>LLMの細かい問題を解決できるかもしれない
+<ul>
+<li>「strawberry」が1トークンではなくバイト単位で分割されるため、文字数カウントできる</li>
+<li>トークンだと日本語の語彙が乏しい時に、一文字ずつの推論になって負荷があがるけど、最初からバイト単位で効率的に学習・推論できるなら解決できる
+<ul>
+<li>この「効率的」にするところがByteLatentTransformerのミソっぽい</li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="https://blog.satotaichi.info/training_for_software_engineers/">技術者教育について</a>
+<ul>
+<li>技術者のステージをいくつかに分けて、論じてる
+<ul>
+<li>ほぼ素人</li>
+<li>半人前</li>
+<li>一人前</li>
+<li>チームリード</li>
+<li>技術責任者</li>
+<li>例外的な存在</li>
+</ul></li>
+<li>一人前まならある程度は定型的な教育方法がありえるっぽい……というより定型的な教育ができる範囲で上限付近を1人前と定め、目指していくのが健全という解釈もできそう</li>
+<li>日夜研鑽するツヨツヨのような、例外的な存在を前提としない方が健全。見つけたら大事にしようとのこと。たしかに、彼らを阻まないことが大事かも。
+<ul>
+<li>チームリード・技術責任者もある程度、例外的な存在の一種とみなせそう</li>
+</ul></li>
+</ul></li>
+</ul>
+<p>まだまだあるけどタイムアップなのでここまで。</p>

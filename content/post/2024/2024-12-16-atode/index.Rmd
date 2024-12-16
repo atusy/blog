@@ -1,0 +1,77 @@
+---
+title: "週間アトデ 2024-12-16"
+author: atusy
+date: '2024-12-16'
+slug: atodeyomanakata
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [bash]
+summary: |
+  アトデヨム、ウソジャナイ、ヨムノタノシー
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+2024-12-07のJapan.Rタイミングで途切れてしまってましたが、アトデヨム、やってきます。
+
+- [生成AIの評価について(文章生成)](https://zenn.dev/ktymmt/articles/aa5e1e8cc4e68c)
+    - お仕事とも関連して気になっている、文章の評価指標の話
+- [RAGASの評価メトリクスを徹底解説！ ](https://note.com/life_to_ai/n/n1951da3b1964)
+    - お仕事とも関連して気になっている、文章の評価指標の話
+- [無自覚にメンバーの心理的安全性を奪っていた経験から得た学び](https://speakerdeck.com/lighttiger2505/wu-zi-jue-nimenbanoxin-li-de-an-quan-xing-woduo-tuteitajing-yan-karade-taxue-bi)
+    - 赤裸々に失敗を振り返っててすごい
+    - 社名出して公開できるGOもすごい
+    - 成長支援を通じて「これだけやったからきっとみんな成長してくれる？」と思っちゃったり、うまくいかなくて猛プッシュしちゃったりは、起こりえるし、ひょっとしたら自分も過去にやったかもしれない。人によって歩き方もペースも違うことは胸に刻んでおきたいなあと改めて思った。
+- [来月からエンジニアリングマネージャーやってね」と言われたら](https://aloerina01.github.io/blog/2022-12-16-1)
+    - ざっくり
+        - 自身も周囲も認識を改めていく必要がある
+            - 提案が指示と受け止められることの予測が追い付かない
+            - 立場上では指示/依頼が必要と分かってても、心がおいつかず、偉そうな行為に抵抗を覚える
+            - メンバーも昨日まで同じ立場だった人になんで指示/依頼されるの？と納得に時間がかかる
+        - 職務内容に分かりやうし名前もつかなければ、目に見えやすい進捗もでにくいから焦りを覚えやすい
+        - 任命の背景にまずは取り組め
+    - メンバーからマネージャーはジョブチェンジに近くも思うので、どれも納得感がある
+    - 特に「任命の背景にまずは取り組め」は良い考え方だと思う。無軌道よりはずっとやりやすいし、自分なりの貢献はじっくり考えて後から実践してけばいい。
+- [Engineering Manager - Everything you need to know to become a Engineering Manager](https://roadmap.sh/engineering-manager)
+    - EMのお仕事がまとまってる。何やればいいんだろ……？と思った時の叩き台にいいかも
+- [microsoft/markitdown](https://github.com/microsoft/markitdown)
+    - いろいろMarkdownにできるらしい
+        - PDF (.pdf)
+        - PowerPoint (.pptx)
+        - Word (.docx)
+        - Excel (.xlsx)
+        - Images (EXIF metadata, and OCR)
+        - Audio (EXIF metadata, and speech transcription)
+        - HTML (special handling of Wikipedia, etc.)
+        - Various other text-based formats (csv, json, xml, etc.)
+    - CLIで使えたらripgrepallの進化形として使えたりするだろうか？
+- [Meshtron: High-Fidelity, Artist-Like 3D Mesh Generation at Scale](https://arxiv.org/abs/2412.09548)
+    - 点群からメッシュを作れるらしい。おもろい。
+    - あんまり関係ないけど[Point Cloud と スパースモデリング](https://hacarus.com/ja/tech/20201111-point-cloud-denoising/)をおもいだした
+- [gitレポジトリ考古学に使う道具](https://www.m3tech.blog/entry/2024/12/13/110000)
+    - 「ファイルが消えたコミットを知りたい」とか、たまーにめっちゃ欲しくなりそうなTipsがのってた
+    - たぶん次に使いたいときにはコマンドを思い出せないと思うけど、できるってことを知ってればChatGPTとかに問い合わせられるので、知見共有ありがたし
+- [ByteLatentTransformer](https://x.com/umiyuki_ai/status/1867792074655117419)
+    - 今までのTokenベースのLLMに対して、バイトベースのLLMがでてきたらしい
+    - LLMの細かい問題を解決できるかもしれない
+        - 「strawberry」が1トークンではなくバイト単位で分割されるため、文字数カウントできる
+        - トークンだと日本語の語彙が乏しい時に、一文字ずつの推論になって負荷があがるけど、最初からバイト単位で効率的に学習・推論できるなら解決できる
+            - この「効率的」にするところがByteLatentTransformerのミソっぽい
+- [技術者教育について](https://blog.satotaichi.info/training_for_software_engineers/)
+    - 技術者のステージをいくつかに分けて、論じてる
+        - ほぼ素人
+        - 半人前
+        - 一人前
+        - チームリード
+        - 技術責任者
+        - 例外的な存在
+    - 一人前まならある程度は定型的な教育方法がありえるっぽい……というより定型的な教育ができる範囲で上限付近を1人前と定め、目指していくのが健全という解釈もできそう
+    - 日夜研鑽するツヨツヨのような、例外的な存在を前提としない方が健全。見つけたら大事にしようとのこと。たしかに、彼らを阻まないことが大事かも。
+        - チームリード・技術責任者もある程度、例外的な存在の一種とみなせそう
+
+まだまだあるけどタイムアップなのでここまで。
