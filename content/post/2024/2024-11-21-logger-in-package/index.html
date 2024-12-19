@@ -42,7 +42,7 @@ logger::log_threshold(&quot;WARN&quot;, namespace = &quot;global&quot;)
 logger::log_info(&quot;namespaceを指定していないログ&quot;, namespace = &quot;global&quot;)
 logger::log_threshold(&quot;INFO&quot;, namespace = &quot;example&quot;)
 logger::log_info(&quot;namespaceを指定したログ&quot;, namespace = &quot;example&quot;)
-#&gt; INFO [2024-11-23 00:07:23] namespaceを指定したログ</code></pre>
+#&gt; INFO [2024-12-09 22:13:59] namespaceを指定したログ</code></pre>
 <p>ちなみに<code>log_info</code>関数などのログを出力する関数<code>namespace</code>引数の既定値が<code>NA</code>になっており、実行時にパッケージ名などから自動的判定します。</p>
 <pre class="r"><code>logger::log_info |&gt;
   formals() |&gt;

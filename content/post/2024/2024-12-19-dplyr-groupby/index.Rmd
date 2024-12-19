@@ -1,0 +1,142 @@
+---
+title: "dplyrでグループ単位にデータフレームを操作する"
+author: atusy
+date: '2024-12-19'
+slug: dplyr-groupby
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [bash]
+summary: |
+  `dplyr::summarize`, `dplyr::mutate`, `dplyr::filter`などの関数の`.by`引数を使うと、グループごとに計算ができて非常に便利。
+  特に、`mutate`や`filter`でグループ処理できると、集計が一気に捗ると思うのでいくつか例を紹介する。
+  `dplyr::group_by`関数でも同じことができるけど、`dplyr::ungroup`を忘れると思わぬ挙動に繋がることもあるので注意。
+---
+
+もう、周知のネタ感はあるけど、`dplyr`でグループ単位にデータフレームを操作できるのは便利だなと思うので、いくつか例をあげてみる。
+
+`summarize`, `mutate`, `filter`などの関数の`.by`引数を使うと、グループごとに計算ができて非常に便利。
+
+`group_by`関数でも同じことができるけど、使い方をミスると思わぬ挙動に繋がることもある。
+
+このあたりのことをいくつか例に出してみる。
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+set.seed(123)
+```
+
+# `.by`によるグループ単位の操作例
+
+## summarizeでグループ単位の集計
+
+これが一番よく使われる例かなと思う。
+たとえば、ペンギンさんの体型に関するデータの平均値を、を種や島ごとに集計する。
+
+```{r}
+palmerpenguins::penguins |>
+  dplyr::summarize(
+    dplyr::across(dplyr::where(is.numeric), function(x) mean(x, na.rm = TRUE)),
+    .by = c(species, island)
+  )
+```
+
+## mutateでグループ単位の計算
+
+データの偏差を求めたい場合、`summarize`した結果を元のデータフレームと比較するのは一手。
+
+しかし、`mutate`にも`.by`引数があり、これを使うとグループ単位の計算ができるので、偏差を一発で出せる。
+
+```{r}
+palmerpenguins::penguins |>
+  dplyr::mutate(
+    dplyr::across(
+      dplyr::where(is.numeric),
+      function(x) x - mean(x, na.rm = TRUE)
+    ),
+    .by = c(species, island)
+  )
+```
+
+## filterでグループ単位の行選択
+
+同じ発想で、`filter`もグループ単位で実行できる。
+たとえば、グループごとに中央値以上の体重を持つペンギンのデータだけを抽出なんてことができる。
+
+```{r}
+palmerpenguins::penguins |>
+  dplyr::filter(
+    body_mass_g >= median(body_mass_g, na.rm = TRUE),
+    .by = c(species, island)
+  )
+```
+
+# `group_by`してみる
+
+今は、`.by`という引数を使えるようになったが、昔は `group_by` を使っていた。
+最後に`ungroup`しておかないと事故のもとで、一癖あるものの、同じグループに対して複数の操作をしたい時に便利だ。
+たとえば先程までの例の、偏差を求める操作と、体重が中央値以上のデータを抽出する操作を同時に行うならこんな感じ。
+
+```{r}
+palmerpenguins::penguins |>
+  dplyr::group_by(species, island) |>
+  dplyr::mutate(
+    dplyr::across(
+      dplyr::where(is.numeric),
+      function(x) x - mean(x, na.rm = TRUE),
+      .names = "deviation_{.col}"
+    )
+  ) |>
+  dplyr::filter(body_mass_g >= median(body_mass_g, na.rm = TRUE)) |>
+  dplyr::ungroup()
+```
+
+ちなみに`ungroup`を忘れると、
+
+> `summarise()` has grouped output by 'species'. You can override using the `.groups` argument.
+
+なるコメントが出てくる。
+
+```{r}
+palmerpenguins::penguins |>
+  dplyr::group_by(species, island) |>
+  dplyr::summarize(
+    dplyr::across(dplyr::where(is.numeric), function(x) mean(x, na.rm = TRUE))
+  )
+```
+
+`ungroup`忘れに起因する想定外の挙動の例として、`purrr::map`でプログレスバーを出したいのだけれど、なぜか出ないという相談を最近受けた。
+最小構成は以下のような感じ
+
+```{r}
+data.frame(x = 1:2) |>
+  dplyr::group_by(x) |> # ここをコメントアウトするとプログレスバーが見れる
+  dplyr::mutate(y = purrr::map(x, \(...) Sys.sleep(1), .progress = TRUE))
+```
+
+`group_by`をコメントアウトする（あるいは`ungroup`しておく）と、プログレスバーが出る。
+`purrr::map(.progress = TRUE)`のプログレスバーは処理に一定以上の時間がかかる場合でかつ、2つ以上の要素を処理する場合に発生するようだ。
+
+先の例だと、`group_by`のせいで、1行ごとにグループを作ってしまっていた。
+つまり、実質的には行数が1のデータフレームごとに`map`をかけてから、結合したような処理だ。
+すると、`.progress = TRUE`を指定していても、要素数が1しかないため、プログレスバーが出なかったというわけ。
+
+イメージとしては以下のような感じ。
+
+```{r}
+list(data.frame(x = 1), data.frame(x = 2)) |>
+  purrr::map(
+    \(df) {
+      dplyr::mutate(
+        df,
+        y = purrr::map(x, \(...) Sys.sleep(1), .progress = TRUE)
+      )
+    }
+  ) |>
+  dplyr::bind_rows() |>
+  tibble::as_tibble()
+```
+
+# ENJOY!

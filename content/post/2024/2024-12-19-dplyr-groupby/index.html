@@ -1,0 +1,183 @@
+---
+title: "dplyrでグループ単位にデータフレームを操作する"
+author: atusy
+date: '2024-12-19'
+slug: dplyr-groupby
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [bash]
+summary: |
+  `dplyr::summarize`, `dplyr::mutate`, `dplyr::filter`などの関数の`.by`引数を使うと、グループごとに計算ができて非常に便利。
+  特に、`mutate`や`filter`でグループ処理できると、集計が一気に捗ると思うのでいくつか例を紹介する。
+  `dplyr::group_by`関数でも同じことができるけど、`dplyr::ungroup`を忘れると思わぬ挙動に繋がることもあるので注意。
+---
+
+
+
+<p>もう、周知のネタ感はあるけど、<code>dplyr</code>でグループ単位にデータフレームを操作できるのは便利だなと思うので、いくつか例をあげてみる。</p>
+<p><code>summarize</code>, <code>mutate</code>, <code>filter</code>などの関数の<code>.by</code>引数を使うと、グループごとに計算ができて非常に便利。</p>
+<p><code>group_by</code>関数でも同じことができるけど、使い方をミスると思わぬ挙動に繋がることもある。</p>
+<p>このあたりのことをいくつか例に出してみる。</p>
+<div id="byによるグループ単位の操作例" class="section level1">
+<h1><code>.by</code>によるグループ単位の操作例</h1>
+<div id="summarizeでグループ単位の集計" class="section level2">
+<h2>summarizeでグループ単位の集計</h2>
+<p>これが一番よく使われる例かなと思う。たとえば、ペンギンさんの体型に関するデータの平均値を、を種や島ごとに集計する。</p>
+<pre class="r"><code>palmerpenguins::penguins |&gt;
+  dplyr::summarize(
+    dplyr::across(dplyr::where(is.numeric), function(x) mean(x, na.rm = TRUE)),
+    .by = c(species, island)
+  )
+#&gt; # A tibble: 5 × 7
+#&gt;   species   island    bill_length_mm bill_depth_mm flipper_length_mm body_mass_g
+#&gt;   &lt;fct&gt;     &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;             &lt;dbl&gt;       &lt;dbl&gt;
+#&gt; 1 Adelie    Torgersen           39.0          18.4              191.       3706.
+#&gt; 2 Adelie    Biscoe              39.0          18.4              189.       3710.
+#&gt; 3 Adelie    Dream               38.5          18.3              190.       3688.
+#&gt; 4 Gentoo    Biscoe              47.5          15.0              217.       5076.
+#&gt; 5 Chinstrap Dream               48.8          18.4              196.       3733.
+#&gt; # ℹ 1 more variable: year &lt;dbl&gt;</code></pre>
+</div>
+<div id="mutateでグループ単位の計算" class="section level2">
+<h2>mutateでグループ単位の計算</h2>
+<p>データの偏差を求めたい場合、<code>summarize</code>した結果を元のデータフレームと比較するのは一手。</p>
+<p>しかし、<code>mutate</code>にも<code>.by</code>引数があり、これを使うとグループ単位の計算ができるので、偏差を一発で出せる。</p>
+<pre class="r"><code>palmerpenguins::penguins |&gt;
+  dplyr::mutate(
+    dplyr::across(
+      dplyr::where(is.numeric),
+      function(x) x - mean(x, na.rm = TRUE)
+    ),
+    .by = c(species, island)
+  )
+#&gt; # A tibble: 344 × 8
+#&gt;    species island    bill_length_mm bill_depth_mm flipper_length_mm body_mass_g
+#&gt;    &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;             &lt;dbl&gt;       &lt;dbl&gt;
+#&gt;  1 Adelie  Torgersen         0.149          0.271            -10.2         43.6
+#&gt;  2 Adelie  Torgersen         0.549         -1.03              -5.20        93.6
+#&gt;  3 Adelie  Torgersen         1.35          -0.429              3.80      -456. 
+#&gt;  4 Adelie  Torgersen        NA             NA                 NA           NA  
+#&gt;  5 Adelie  Torgersen        -2.25           0.871              1.80      -256. 
+#&gt;  6 Adelie  Torgersen         0.349          2.17              -1.20       -56.4
+#&gt;  7 Adelie  Torgersen        -0.0510        -0.629            -10.2        -81.4
+#&gt;  8 Adelie  Torgersen         0.249          1.17               3.80       969. 
+#&gt;  9 Adelie  Torgersen        -4.85          -0.329              1.80      -231. 
+#&gt; 10 Adelie  Torgersen         3.05           1.77              -1.20       544. 
+#&gt; # ℹ 334 more rows
+#&gt; # ℹ 2 more variables: sex &lt;fct&gt;, year &lt;dbl&gt;</code></pre>
+</div>
+<div id="filterでグループ単位の行選択" class="section level2">
+<h2>filterでグループ単位の行選択</h2>
+<p>同じ発想で、<code>filter</code>もグループ単位で実行できる。たとえば、グループごとに中央値以上の体重を持つペンギンのデータだけを抽出なんてことができる。</p>
+<pre class="r"><code>palmerpenguins::penguins |&gt;
+  dplyr::filter(
+    body_mass_g &gt;= median(body_mass_g, na.rm = TRUE),
+    .by = c(species, island)
+  )
+#&gt; # A tibble: 180 × 8
+#&gt;    species island    bill_length_mm bill_depth_mm flipper_length_mm body_mass_g
+#&gt;    &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;             &lt;int&gt;       &lt;int&gt;
+#&gt;  1 Adelie  Torgersen           39.1          18.7               181        3750
+#&gt;  2 Adelie  Torgersen           39.5          17.4               186        3800
+#&gt;  3 Adelie  Torgersen           39.2          19.6               195        4675
+#&gt;  4 Adelie  Torgersen           42            20.2               190        4250
+#&gt;  5 Adelie  Torgersen           37.8          17.3               180        3700
+#&gt;  6 Adelie  Torgersen           38.6          21.2               191        3800
+#&gt;  7 Adelie  Torgersen           34.6          21.1               198        4400
+#&gt;  8 Adelie  Torgersen           36.6          17.8               185        3700
+#&gt;  9 Adelie  Torgersen           42.5          20.7               197        4500
+#&gt; 10 Adelie  Torgersen           46            21.5               194        4200
+#&gt; # ℹ 170 more rows
+#&gt; # ℹ 2 more variables: sex &lt;fct&gt;, year &lt;int&gt;</code></pre>
+</div>
+</div>
+<div id="group_byしてみる" class="section level1">
+<h1><code>group_by</code>してみる</h1>
+<p>今は、<code>.by</code>という引数を使えるようになったが、昔は <code>group_by</code> を使っていた。最後に<code>ungroup</code>しておかないと事故のもとで、一癖あるものの、同じグループに対して複数の操作をしたい時に便利だ。たとえば先程までの例の、偏差を求める操作と、体重が中央値以上のデータを抽出する操作を同時に行うならこんな感じ。</p>
+<pre class="r"><code>palmerpenguins::penguins |&gt;
+  dplyr::group_by(species, island) |&gt;
+  dplyr::mutate(
+    dplyr::across(
+      dplyr::where(is.numeric),
+      function(x) x - mean(x, na.rm = TRUE),
+      .names = &quot;deviation_{.col}&quot;
+    )
+  ) |&gt;
+  dplyr::filter(body_mass_g &gt;= median(body_mass_g, na.rm = TRUE)) |&gt;
+  dplyr::ungroup()
+#&gt; # A tibble: 180 × 13
+#&gt;    species island    bill_length_mm bill_depth_mm flipper_length_mm body_mass_g
+#&gt;    &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;             &lt;int&gt;       &lt;int&gt;
+#&gt;  1 Adelie  Torgersen           39.1          18.7               181        3750
+#&gt;  2 Adelie  Torgersen           39.5          17.4               186        3800
+#&gt;  3 Adelie  Torgersen           39.2          19.6               195        4675
+#&gt;  4 Adelie  Torgersen           42            20.2               190        4250
+#&gt;  5 Adelie  Torgersen           37.8          17.3               180        3700
+#&gt;  6 Adelie  Torgersen           38.6          21.2               191        3800
+#&gt;  7 Adelie  Torgersen           34.6          21.1               198        4400
+#&gt;  8 Adelie  Torgersen           36.6          17.8               185        3700
+#&gt;  9 Adelie  Torgersen           42.5          20.7               197        4500
+#&gt; 10 Adelie  Torgersen           46            21.5               194        4200
+#&gt; # ℹ 170 more rows
+#&gt; # ℹ 7 more variables: sex &lt;fct&gt;, year &lt;int&gt;, deviation_bill_length_mm &lt;dbl&gt;,
+#&gt; #   deviation_bill_depth_mm &lt;dbl&gt;, deviation_flipper_length_mm &lt;dbl&gt;,
+#&gt; #   deviation_body_mass_g &lt;dbl&gt;, deviation_year &lt;dbl&gt;</code></pre>
+<p>ちなみに<code>ungroup</code>を忘れると、</p>
+<blockquote>
+<p><code>summarise()</code> has grouped output by ‘species’. You can override using the <code>.groups</code> argument.</p>
+</blockquote>
+<p>なるコメントが出てくる。</p>
+<pre class="r"><code>palmerpenguins::penguins |&gt;
+  dplyr::group_by(species, island) |&gt;
+  dplyr::summarize(
+    dplyr::across(dplyr::where(is.numeric), function(x) mean(x, na.rm = TRUE))
+  )
+#&gt; `summarise()` has grouped output by &#39;species&#39;. You can override using the
+#&gt; `.groups` argument.
+#&gt; # A tibble: 5 × 7
+#&gt; # Groups:   species [3]
+#&gt;   species   island    bill_length_mm bill_depth_mm flipper_length_mm body_mass_g
+#&gt;   &lt;fct&gt;     &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;             &lt;dbl&gt;       &lt;dbl&gt;
+#&gt; 1 Adelie    Biscoe              39.0          18.4              189.       3710.
+#&gt; 2 Adelie    Dream               38.5          18.3              190.       3688.
+#&gt; 3 Adelie    Torgersen           39.0          18.4              191.       3706.
+#&gt; 4 Chinstrap Dream               48.8          18.4              196.       3733.
+#&gt; 5 Gentoo    Biscoe              47.5          15.0              217.       5076.
+#&gt; # ℹ 1 more variable: year &lt;dbl&gt;</code></pre>
+<p><code>ungroup</code>忘れに起因する想定外の挙動の例として、<code>purrr::map</code>でプログレスバーを出したいのだけれど、なぜか出ないという相談を最近受けた。最小構成は以下のような感じ</p>
+<pre class="r"><code>data.frame(x = 1:2) |&gt;
+  dplyr::group_by(x) |&gt; # ここをコメントアウトするとプログレスバーが見れる
+  dplyr::mutate(y = purrr::map(x, \(...) Sys.sleep(1), .progress = TRUE))
+#&gt; # A tibble: 2 × 2
+#&gt; # Groups:   x [2]
+#&gt;       x y     
+#&gt;   &lt;int&gt; &lt;list&gt;
+#&gt; 1     1 &lt;NULL&gt;
+#&gt; 2     2 &lt;NULL&gt;</code></pre>
+<p><code>group_by</code>をコメントアウトする（あるいは<code>ungroup</code>しておく）と、プログレスバーが出る。
+<code>purrr::map(.progress = TRUE)</code>のプログレスバーは処理に一定以上の時間がかかる場合でかつ、2つ以上の要素を処理する場合に発生するようだ。</p>
+<p>先の例だと、<code>group_by</code>のせいで、1行ごとにグループを作ってしまっていた。つまり、実質的には行数が1のデータフレームごとに<code>map</code>をかけてから、結合したような処理だ。すると、<code>.progress = TRUE</code>を指定していても、要素数が1しかないため、プログレスバーが出なかったというわけ。</p>
+<p>イメージとしては以下のような感じ。</p>
+<pre class="r"><code>list(data.frame(x = 1), data.frame(x = 2)) |&gt;
+  purrr::map(
+    \(df) {
+      dplyr::mutate(
+        df,
+        y = purrr::map(x, \(...) Sys.sleep(1), .progress = TRUE)
+      )
+    }
+  ) |&gt;
+  dplyr::bind_rows() |&gt;
+  tibble::as_tibble()
+#&gt; # A tibble: 2 × 2
+#&gt;       x y     
+#&gt;   &lt;dbl&gt; &lt;list&gt;
+#&gt; 1     1 &lt;NULL&gt;
+#&gt; 2     2 &lt;NULL&gt;</code></pre>
+</div>
+<div id="enjoy" class="section level1">
+<h1>ENJOY!</h1>
+</div>
