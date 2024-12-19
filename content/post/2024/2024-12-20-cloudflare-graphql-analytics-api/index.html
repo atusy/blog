@@ -1,0 +1,109 @@
+---
+title: "Cloudflareで管理しているドメインのアクセス解析をGraphQLでやってみる"
+author: atusy
+date: '2024-12-20'
+slug: cloudflare-graphql-analytics-api
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [bash, graphql, json]
+summary: |
+  Cloudflareのダッシュボード上で確認できるWeb Analyticsの生データが欲しかったので、方法を調べてみた。
+  ベースとなるクエリはブラウザの開発者ツールからコピペできるので便利。
+---
+
+
+
+<p>Cloudflare上でドメインを管理していると、Web Analyticsを利用できる。たとえば、私のブログのアクセス解析はこんな感じ。ホスト名やリクエストパス、期間などでフィルタリングもできて便利だが凝った情報の可視化には向いてなさそうだ。</p>
+<p><img src="images/cloudflare-web-analysis.png" /></p>
+<p>というわけでAPIが欲しい。調べたところ、GraphQL Analytics APIを使えばいいらしい。</p>
+<blockquote>
+<p><a href="https://developers.cloudflare.com/analytics/graphql-api/" class="uri">https://developers.cloudflare.com/analytics/graphql-api/</a></p>
+</blockquote>
+<p>基本的には、</p>
+<ul>
+<li>Overview -&gt; Authentication -&gt; Configure an Analytics API Tokenに従って<strong>Account Analytics</strong>の権限をつけたAPI Tokenを作成</li>
+<li>作成したトークンと、Cloudflareに登録のメールアドレスを使ってリクエストする</li>
+</ul>
+<p>で使える。難しいことはない。</p>
+<p>たとえば以下のように空のクエリを発行すると、<code>"must have a single query"</code>というエラーが返ってくることを確認できる。`</p>
+<pre class="bash"><code>API_TOKEN=&quot;&quot;
+X_AUTH_EMAIL=&quot;&quot;
+curl &#39;https://api.cloudflare.com/client/v4/graphql&#39; -H &quot;X-AUTH-EMAIL: $X_AUTH_EMAIL&quot; -H &quot;Authorization: Bearer $API_TOKEN&quot; --data-binary &#39;{&quot;query&quot;:&quot;&quot;,&quot;variables&quot;:{}}&#39;
+# {&quot;data&quot;:null,&quot;errors&quot;:[{&quot;message&quot;:&quot;must have a single query&quot;,&quot;path&quot;:null,&quot;extensions&quot;:{&quot;timestamp&quot;:&quot;2024-12-19T14:43:11.174898552Z&quot;}}]}</code></pre>
+<p>認証に失敗していればエラーが返る。</p>
+<pre class="json"><code>{&quot;success&quot;:false,&quot;errors&quot;:[{&quot;code&quot;:9106,&quot;message&quot;:&quot;Missing X-Auth-Key, X-Auth-Email or Authorization headers&quot;}]}</code></pre>
+<p>で、あとはGraphQLのクエリを組み立てればいい。
+<a href="https://developers.cloudflare.com/analytics/graphql-api/getting-started/explore-graphql-schema/">Explore the GraphQL schema</a>によると、GraphiQLやAltairなどのGraphQLクライアントに付属のDocs機能でスキーマを確認できるらしい。どういうわけかAltairでは確認できなかった。</p>
+<p>挫けそうになるのだが、Cloudflare上のウィジェットもGraphQLで動いているようで、ブラウザの開発者ツールを使ってクエリをキャプチャできるとのこと。ここまで解説してくれてるCloudflare、ありがたい。</p>
+<blockquote>
+<p>Capture GraphQL queries with Chrome DevTools
+<a href="https://developers.cloudflare.com/analytics/graphql-api/tutorials/capture-graphql-queries-from-dashboard/" class="uri">https://developers.cloudflare.com/analytics/graphql-api/tutorials/capture-graphql-queries-from-dashboard/</a></p>
+</blockquote>
+<p>というわけで、冒頭のスクショの情報を得るには以下のようなクエリと変数を使えばいいようだ。</p>
+<pre class="graphql"><code># クエリ
+{
+  viewer {
+    accounts(filter: {accountTag: $accountTag}) {
+      series: rumPageloadEventsAdaptiveGroups(limit: 5000, filter: $filter) {
+        count
+        avg {
+          sampleInterval
+          __typename
+        }
+        sum {
+          visits
+          __typename
+        }
+        dimensions {
+          ts: datetimeHour
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}</code></pre>
+<pre class="json"><code># 変数
+{
+  &quot;accountTag&quot;: &quot;265d37afad0de61a8c2ecff11a0778a2&quot;,
+  &quot;filter&quot;: {
+    &quot;AND&quot;: [
+      {
+        &quot;datetime_geq&quot;: &quot;2024-12-12T14:23:19Z&quot;,
+        &quot;datetime_leq&quot;: &quot;2024-12-19T14:23:19Z&quot;
+      },
+      {
+        &quot;requestHost&quot;: &quot;blog.atusy.net&quot;
+      },
+      {
+        &quot;bot&quot;: 0
+      },
+      {
+        &quot;OR&quot;: [
+          {
+            &quot;siteTag&quot;: &quot;d2cd674b28a147368bc4d2f650daec34&quot;
+          },
+          {
+            &quot;siteTag&quot;: &quot;06375283fdc747e18b27ea2c9f650bc9&quot;
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+<p>特定のページのログを見たければ、変数の<code>.filter.AND</code>に以下を追加すればいい。</p>
+<pre class="json"><code>      {
+        &quot;requestPath&quot;: &quot;/2018/11/10/ggplot2-legend-pos-n-just/&quot;
+      }</code></pre>
+<p>Cloudflareのウィジェットを見るに、保管されているデータは過去半年分で、一度に30日分取得できる。
+<code>for</code>ループを頑張れば全データを取得できるはずだ。</p>
+<p>GraphQLクライアントのaltairで試しに実行した後、curl用にコピーしたコマンドは以下。</p>
+<pre class="bash"><code>API_TOKEN=&quot;&quot;
+X_AUTH_EMAIL=&quot;&quot;
+curl &#39;https://api.cloudflare.com/client/v4/graphql&#39; -H &#39;Accept-Encoding: gzip, deflate, br&#39; -H &#39;Content-Type: application/json&#39; -H &#39;Accept: application/json&#39; -H &#39;Connection: keep-alive&#39; -H &#39;Origin: altair://-&#39; -H &quot;X-AUTH-EMAIL: $X_AUTH_EMAIL&quot; -H &quot;Authorization: Bearer $API_TOKEN&quot; --data-binary &#39;{&quot;query&quot;:&quot;{\n  viewer {\n    accounts(filter: {accountTag: $accountTag}) {\n      series: rumPageloadEventsAdaptiveGroups(limit: 5000, filter: $filter) {\n        count\n        avg {\n          sampleInterval\n          __typename\n        }\n        sum {\n          visits\n          __typename\n        }\n        dimensions {\n          ts: datetimeHour\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}&quot;,&quot;variables&quot;:{&quot;accountTag&quot;:&quot;265d37afad0de61a8c2ecff11a0778a2&quot;,&quot;filter&quot;:{&quot;AND&quot;:[{&quot;datetime_geq&quot;:&quot;2024-12-12T14:23:19Z&quot;,&quot;datetime_leq&quot;:&quot;2024-12-19T14:23:19Z&quot;},{&quot;requestHost&quot;:&quot;blog.atusy.net&quot;},{&quot;bot&quot;:0},{&quot;OR&quot;:[{&quot;siteTag&quot;:&quot;d2cd674b28a147368bc4d2f650daec34&quot;},{&quot;siteTag&quot;:&quot;06375283fdc747e18b27ea2c9f650bc9&quot;}]}]}}}&#39; --compressed</code></pre>
+<p><strong>ENJOY!!</strong></p>
