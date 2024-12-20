@@ -93,18 +93,11 @@ palmerpenguins::penguins |>
   dplyr::ungroup()
 ```
 
-ちなみに`ungroup`を忘れると、
-
-> `summarise()` has grouped output by 'species'. You can override using the `.groups` argument.
-
-なるコメントが出てくる。
+ちなみに`group_by`したままのデータを表示すると、`# Groups: species[3]`のようにグループ分けされたデータフレームであることが分かる。
 
 ```{r}
 palmerpenguins::penguins |>
-  dplyr::group_by(species, island) |>
-  dplyr::summarize(
-    dplyr::across(dplyr::where(is.numeric), function(x) mean(x, na.rm = TRUE))
-  )
+  dplyr::group_by(species, island)
 ```
 
 `ungroup`忘れに起因する想定外の挙動の例として、`purrr::map`でプログレスバーを出したいのだけれど、なぜか出ないという相談を最近受けた。

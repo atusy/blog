@@ -125,28 +125,25 @@ summary: |
 #&gt; # ℹ 7 more variables: sex &lt;fct&gt;, year &lt;int&gt;, deviation_bill_length_mm &lt;dbl&gt;,
 #&gt; #   deviation_bill_depth_mm &lt;dbl&gt;, deviation_flipper_length_mm &lt;dbl&gt;,
 #&gt; #   deviation_body_mass_g &lt;dbl&gt;, deviation_year &lt;dbl&gt;</code></pre>
-<p>ちなみに<code>ungroup</code>を忘れると、</p>
-<blockquote>
-<p><code>summarise()</code> has grouped output by ‘species’. You can override using the <code>.groups</code> argument.</p>
-</blockquote>
-<p>なるコメントが出てくる。</p>
+<p>ちなみに<code>group_by</code>したままのデータを表示すると、<code># Groups: species[3]</code>のようにグループ分けされたデータフレームであることが分かる。</p>
 <pre class="r"><code>palmerpenguins::penguins |&gt;
-  dplyr::group_by(species, island) |&gt;
-  dplyr::summarize(
-    dplyr::across(dplyr::where(is.numeric), function(x) mean(x, na.rm = TRUE))
-  )
-#&gt; `summarise()` has grouped output by &#39;species&#39;. You can override using the
-#&gt; `.groups` argument.
-#&gt; # A tibble: 5 × 7
-#&gt; # Groups:   species [3]
-#&gt;   species   island    bill_length_mm bill_depth_mm flipper_length_mm body_mass_g
-#&gt;   &lt;fct&gt;     &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;             &lt;dbl&gt;       &lt;dbl&gt;
-#&gt; 1 Adelie    Biscoe              39.0          18.4              189.       3710.
-#&gt; 2 Adelie    Dream               38.5          18.3              190.       3688.
-#&gt; 3 Adelie    Torgersen           39.0          18.4              191.       3706.
-#&gt; 4 Chinstrap Dream               48.8          18.4              196.       3733.
-#&gt; 5 Gentoo    Biscoe              47.5          15.0              217.       5076.
-#&gt; # ℹ 1 more variable: year &lt;dbl&gt;</code></pre>
+  dplyr::group_by(species, island)
+#&gt; # A tibble: 344 × 8
+#&gt; # Groups:   species, island [5]
+#&gt;    species island    bill_length_mm bill_depth_mm flipper_length_mm body_mass_g
+#&gt;    &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;             &lt;int&gt;       &lt;int&gt;
+#&gt;  1 Adelie  Torgersen           39.1          18.7               181        3750
+#&gt;  2 Adelie  Torgersen           39.5          17.4               186        3800
+#&gt;  3 Adelie  Torgersen           40.3          18                 195        3250
+#&gt;  4 Adelie  Torgersen           NA            NA                  NA          NA
+#&gt;  5 Adelie  Torgersen           36.7          19.3               193        3450
+#&gt;  6 Adelie  Torgersen           39.3          20.6               190        3650
+#&gt;  7 Adelie  Torgersen           38.9          17.8               181        3625
+#&gt;  8 Adelie  Torgersen           39.2          19.6               195        4675
+#&gt;  9 Adelie  Torgersen           34.1          18.1               193        3475
+#&gt; 10 Adelie  Torgersen           42            20.2               190        4250
+#&gt; # ℹ 334 more rows
+#&gt; # ℹ 2 more variables: sex &lt;fct&gt;, year &lt;int&gt;</code></pre>
 <p><code>ungroup</code>忘れに起因する想定外の挙動の例として、<code>purrr::map</code>でプログレスバーを出したいのだけれど、なぜか出ないという相談を最近受けた。最小構成は以下のような感じ</p>
 <pre class="r"><code>data.frame(x = 1:2) |&gt;
   dplyr::group_by(x) |&gt; # ここをコメントアウトするとプログレスバーが見れる
