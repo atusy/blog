@@ -1,0 +1,84 @@
+---
+title: "RのSys.time()でミリ秒以下を表示する"
+author: atusy
+date: '2024-12-24'
+slug: r-time-subsec
+categories: [R]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: []
+summary: |
+  `Sys.time()`でミリ秒以下を表示するには、`digits.sec`オプションか、`format`関数を使うといいよ。
+  いずれも最大でマイクロ秒までの表示に対応。
+  データの実態を知ってると、ナノ秒以下の情報も取得可能。
+  ただし、精度はOS依存。
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+set.seed(123)
+options(digits.secs = 0)
+```
+
+Rで時刻を表示すると、デフォルトでは秒までしか表示されません。
+ログを管理するときに、ミリ秒以下も出せないと色々と不便なので、方法を調査しました。
+
+```{r}
+time <- Sys.time()
+print(time)
+```
+
+`?Sys.time`を確認すると、`digits.sec`オプションで小数点何ケタまで表示するか調整できるとわかります（<https://helpr.atusy.net/?q=Sys.time&pkg=base&topic=Sys.time>）。
+ただし、精度はマイクロ秒まで（6ケた）。
+
+
+```{r}
+withr::with_options(list(digits.secs = 6), {
+  print(time)
+})
+```
+
+オプションを弄らずにやりたい場合は`format`関数を使えばいい模様（`?format.POSIXct` <https://helpr.atusy.net/?q=format.posix&pkg=base&topic=format.POSIXct>）。
+たとえば3ケタまで表示したいなら以下のとおり。
+
+```{r}
+format(time, "%Y-%m-%d %H:%M:%OS3 %Z")
+```
+
+こちらも精度はマイクロ秒（6ケタ）まで。
+
+```{r}
+format(time, "%Y-%m-%d %H:%M:%OS6 %Z")
+format(time, "%Y-%m-%d %H:%M:%OS7 %Z")
+```
+
+6ケタ以上表示したい場合は、`Sys.time()`の返り値が`POSIXct`クラスで、1970-01-01 00:00:00 UTCを基準とした秒単位のデータなことが利用できそう。
+
+```{r}
+structure(0L, class = c("POSIXct", "POSIXt"))
+```
+
+実際、以下のようにして、ナノ秒（少数部分9ケタ）を取り出すことができる（何桁までとれるかはOS依存）。
+
+```{r}
+format(as.numeric(time) %% 1, digits = 9)
+```
+
+といわけで、あとはよしなに整形すればよい。
+
+```{r}
+digits <- 9
+paste0(
+  format(time, "%Y-%m-%dT%H:%M:%S", tz = "UTC"),
+  format(as.numeric(time) %% 1, digits = digits) |> substr(2, digits + 2),
+  "Z"
+)
+```
+
+モチベのログの話に戻ると[logger](https://daroczig.github.io/logger)パッケージは、時刻のフォーマットを弄る仕組みを提供していないので、オプションを変更するしかなさそう。
+つらい。
+タイムゾーンの調整とかもできないので、PRの機運ですね。
+
+ENJOY!

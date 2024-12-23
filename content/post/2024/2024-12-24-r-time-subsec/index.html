@@ -1,0 +1,53 @@
+---
+title: "RのSys.time()でミリ秒以下を表示する"
+author: atusy
+date: '2024-12-24'
+slug: r-time-subsec
+categories: [R]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: []
+summary: |
+  `Sys.time()`でミリ秒以下を表示するには、`digits.sec`オプションか、`format`関数を使うといいよ。
+  いずれも最大でマイクロ秒までの表示に対応。
+  データの実態を知ってると、ナノ秒以下の情報も取得可能。
+  ただし、精度はOS依存。
+---
+
+
+
+<p>Rで時刻を表示すると、デフォルトでは秒までしか表示されません。ログを管理するときに、ミリ秒以下も出せないと色々と不便なので、方法を調査しました。</p>
+<pre class="r"><code>time &lt;- Sys.time()
+print(time)
+#&gt; [1] &quot;2024-12-24 06:54:23 JST&quot;</code></pre>
+<p><code>?Sys.time</code>を確認すると、<code>digits.sec</code>オプションで小数点何ケタまで表示するか調整できるとわかります（<a href="https://helpr.atusy.net/?q=Sys.time&amp;pkg=base&amp;topic=Sys.time" class="uri">https://helpr.atusy.net/?q=Sys.time&amp;pkg=base&amp;topic=Sys.time</a>）。ただし、精度はマイクロ秒まで（6ケタ）。</p>
+<pre class="r"><code>withr::with_options(list(digits.secs = 6), {
+  print(time)
+})
+#&gt; [1] &quot;2024-12-24 06:54:23.650895 JST&quot;</code></pre>
+<p>オプションを弄らずにやりたい場合は<code>format</code>関数を使えばいい模様（<code>?format.POSIXct</code> <a href="https://helpr.atusy.net/?q=format.posix&amp;pkg=base&amp;topic=format.POSIXct" class="uri">https://helpr.atusy.net/?q=format.posix&amp;pkg=base&amp;topic=format.POSIXct</a>）。たとえば3ケタまで表示したいなら以下のとおり。</p>
+<pre class="r"><code>format(time, &quot;%Y-%m-%d %H:%M:%OS3 %Z&quot;)
+#&gt; [1] &quot;2024-12-24 06:54:23.650 JST&quot;</code></pre>
+<p>こちらも精度はマイクロ秒（6ケタ）まで。</p>
+<pre class="r"><code>format(time, &quot;%Y-%m-%d %H:%M:%OS6 %Z&quot;)
+#&gt; [1] &quot;2024-12-24 06:54:23.650895 JST&quot;
+format(time, &quot;%Y-%m-%d %H:%M:%OS7 %Z&quot;)
+#&gt; [1] &quot;2024-12-24 06:54:23.650895 JST&quot;</code></pre>
+<p>6ケタ以上表示したい場合は、<code>Sys.time()</code>の返り値が<code>POSIXct</code>クラスで、1970-01-01 00:00:00 UTCを基準とした秒単位のデータなことが利用できそう。</p>
+<pre class="r"><code>structure(0L, class = c(&quot;POSIXct&quot;, &quot;POSIXt&quot;))
+#&gt; [1] &quot;1970-01-01 09:00:00 JST&quot;</code></pre>
+<p>実際、以下のようにして、ナノ秒（少数部分9ケタ）を取り出すことができる（何桁までとれるかはOS依存）。</p>
+<pre class="r"><code>format(as.numeric(time) %% 1, digits = 9)
+#&gt; [1] &quot;0.650895119&quot;</code></pre>
+<p>といわけで、あとはよしなに整形すればよい。</p>
+<pre class="r"><code>digits &lt;- 9
+paste0(
+  format(time, &quot;%Y-%m-%dT%H:%M:%S&quot;, tz = &quot;UTC&quot;),
+  format(as.numeric(time) %% 1, digits = digits) |&gt; substr(2, digits + 2),
+  &quot;Z&quot;
+)
+#&gt; [1] &quot;2024-12-23T21:54:23.650895119Z&quot;</code></pre>
+<p>モチベのログの話に戻ると<a href="https://daroczig.github.io/logger">logger</a>パッケージは、時刻のフォーマットを弄る仕組みを提供していないので、オプションを変更するしかなさそう。つらい。タイムゾーンの調整とかもできないので、PRの機運ですね。</p>
+<p>ENJOY!</p>
