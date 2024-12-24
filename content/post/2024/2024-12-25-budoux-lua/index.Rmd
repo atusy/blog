@@ -34,7 +34,6 @@ deno eval \
 ```
 
 今回は[atusy/budoux.lua](https://github.com/atusy/budoux.lua)として、Luaに移植した（とりあえず日本語だけ）。
-たとえば`今日は天気です。`を`今日は`と`天気です。`に分割できる。
 
 ``` lua
 local budoux = require("budoux")

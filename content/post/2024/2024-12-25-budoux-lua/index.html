@@ -24,7 +24,7 @@ Google製で、日本語や中国語、タイ語に対応し、PythonやJavaScri
   &#39;import { loadDefaultJapaneseParser } from &quot;npm:budoux&quot;; 
    console.log(loadDefaultJapaneseParser().parse(&quot;今日は天気です。&quot;));&#39;
 # [ &quot;今日は&quot;, &quot;天気です。&quot; ]</code></pre>
-<p>今回は<a href="https://github.com/atusy/budoux.lua">atusy/budoux.lua</a>として、Luaに移植した（とりあえず日本語だけ）。たとえば<code>今日は天気です。</code>を<code>今日は</code>と<code>天気です。</code>に分割できる。</p>
+<p>今回は<a href="https://github.com/atusy/budoux.lua">atusy/budoux.lua</a>として、Luaに移植した（とりあえず日本語だけ）。</p>
 <pre class="lua"><code>local budoux = require(&quot;budoux&quot;)
 local parser = budoux.load_japanese_model()
 parser.parse(&#39;今日は天気です。&#39;)
