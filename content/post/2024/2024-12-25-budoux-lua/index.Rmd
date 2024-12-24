@@ -1,0 +1,92 @@
+---
+title: "Google製の改行位置決定アルゴリズムBudouxをLuaに移植した"
+author: atusy
+date: '2024-12-25'
+slug: budoux-lua
+categories: [Lua, Vim, Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [lua]
+summary: |
+  Google製改行位置決定アルゴリズムBudouxをLuaに移植した。
+  読みやすい位置で文を区切れるので、bionic readingの日本語版を実装できるかも。
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+set.seed(123)
+options(digits.secs = 0)
+```
+
+メリークリスマス！
+atusyサンタからのクリスマスプレゼントは[atusy/budoux.lua](https://github.com/atusy/budoux.lua)!
+
+[Budoux](https://github.com/google/budoux)は文字列の改行を、人間にとって読みやすい位置で行うためのアルゴリズム。
+Google製で、日本語や中国語、タイ語に対応し、PythonやJavaScript、Javaの実装が公式提供されている。
+
+今回は[atusy/budoux.lua](https://github.com/atusy/budoux.lua)として、Luaに移植した（とりあえず日本語だけ）。
+たとえば`今日は天気です。`を`今日は`と`天気です。`に分割できる。
+
+``` lua
+local budoux = require("budoux")
+local parser = budoux.load_japanese_model()
+parser.parse('今日は天気です。')
+-- { "今日は", "天気です。" }
+```
+
+有名な`あなたとJAVA，今すぐダウンロード`もうまく分割できる。
+
+```lua
+require("budoux").load_japanese_model().parse("あなたとJAVA，今すぐダウンロード")
+-- { "あなたと", "JAVA，", "今すぐ", "ダウンロード" }
+```
+
+もう少し長文で「我輩は猫である」の冒頭を分割するととこんな感じ。
+
+```lua
+require("budoux").load_japanese_model().parse(
+  "吾輩は猫である。名前はまだ無い。どこで生れたかとんと見当がつかぬ。" ..
+  "何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。"
+)
+--[[
+{ 
+  "吾輩は", "猫である。", "名前は", "まだ", "無い。", "どこで", "生れたかとんと", "見当が", "つかぬ。",
+  "何でも", "薄暗いじめじめした所で", "ニャーニャー泣いていた", "事だけは", "記憶している。"
+}
+]] 
+```
+
+Budouxを使うと、Bionic readingの日本語版を軽量に実装できないかなと思っている。
+文節ごとに、先頭数文字を太字にして目が滑りにくくするイメージ。
+先の「我輩は猫である」の例だと以下の通り。
+
+> <strong>吾輩</strong>は<strong>猫</strong>である。<strong>名前</strong>は<strong>まだ</strong><strong>無</strong>い。<strong>どこ</strong>で<strong>生</strong>れたかとんと<strong>見当</strong>がつかぬ。<strong>何</strong>でも<strong>薄暗</strong>いじめじめした所で<strong>ニャ</strong>ーニャー泣いていた<strong>事</strong>だけは<strong>記憶</strong>している。
+
+できればNeovimで実現したくて今回、Luaに移植した。
+
+一方で、Neovim以外でも使えるように工夫した。
+だから`budoux.nvim`ではなく`budoux.lua`を名乗っている。
+
+主に2点の工夫が必要だった。
+
+- Unicode対応
+- データ読み込み
+
+LuaはUnicode文字をネイティブに扱えず、日本語を文字単位で文を分割することが難しい。
+そこで、[lpeg](https://www.inf.puc-rio.br/~roberto/lpeg/)というパターンマッチングライブラリを使って分割した。
+
+``` lua
+(lpeg.Ct(lpeg.C(lpeg.utfR(0, 0x10ffff)) ^ 0)):match("日本語")
+-- { "日", "本", "語" }
+```
+
+ちなみにVim/Neovimであれば`split('日本語', '\zs')`のようにできる。
+
+分割の判断基準となるデータは公式にはJSONで提供されているが、LuaはJSONパーサーを標準で持っていない。
+そこで、文字列置換でLuaテーブル化して、簡単に読み込めるようにした。
+
+冬休みのうちにbionic readingを実装できるといいなあ。
+
+# ENJOY!

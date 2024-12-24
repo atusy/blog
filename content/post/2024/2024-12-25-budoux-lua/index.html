@@ -1,0 +1,61 @@
+---
+title: "Google製の改行位置決定アルゴリズムBudouxをLuaに移植した"
+author: atusy
+date: '2024-12-25'
+slug: budoux-lua
+categories: [Lua, Vim, Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [lua]
+summary: |
+  Google製改行位置決定アルゴリズムBudouxをLuaに移植した。
+  読みやすい位置で文を区切れるので、bionic readingの日本語版を実装できるかも。
+---
+
+
+
+<p>メリークリスマス！
+atusyサンタからのクリスマスプレゼントは<a href="https://github.com/atusy/budoux.lua">atusy/budoux.lua</a>!</p>
+<p><a href="https://github.com/google/budoux">Budoux</a>は文字列の改行を、人間にとって読みやすい位置で行うためのアルゴリズム。
+Google製で、日本語や中国語、タイ語に対応し、PythonやJavaScript、Javaの実装が公式提供されている。</p>
+<p>今回は<a href="https://github.com/atusy/budoux.lua">atusy/budoux.lua</a>として、Luaに移植した（とりあえず日本語だけ）。たとえば<code>今日は天気です。</code>を<code>今日は</code>と<code>天気です。</code>に分割できる。</p>
+<pre class="lua"><code>local budoux = require(&quot;budoux&quot;)
+local parser = budoux.load_japanese_model()
+parser.parse(&#39;今日は天気です。&#39;)
+-- { &quot;今日は&quot;, &quot;天気です。&quot; }</code></pre>
+<p>有名な<code>あなたとJAVA，今すぐダウンロード</code>もうまく分割できる。</p>
+<pre class="lua"><code>require(&quot;budoux&quot;).load_japanese_model().parse(&quot;あなたとJAVA，今すぐダウンロード&quot;)
+-- { &quot;あなたと&quot;, &quot;JAVA，&quot;, &quot;今すぐ&quot;, &quot;ダウンロード&quot; }</code></pre>
+<p>もう少し長文で「我輩は猫である」の冒頭を分割するととこんな感じ。</p>
+<pre class="lua"><code>require(&quot;budoux&quot;).load_japanese_model().parse(
+  &quot;吾輩は猫である。名前はまだ無い。どこで生れたかとんと見当がつかぬ。&quot; ..
+  &quot;何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。&quot;
+)
+--[[
+{ 
+  &quot;吾輩は&quot;, &quot;猫である。&quot;, &quot;名前は&quot;, &quot;まだ&quot;, &quot;無い。&quot;, &quot;どこで&quot;, &quot;生れたかとんと&quot;, &quot;見当が&quot;, &quot;つかぬ。&quot;,
+  &quot;何でも&quot;, &quot;薄暗いじめじめした所で&quot;, &quot;ニャーニャー泣いていた&quot;, &quot;事だけは&quot;, &quot;記憶している。&quot;
+}
+]] </code></pre>
+<p>Budouxを使うと、Bionic readingの日本語版を軽量に実装できないかなと思っている。文節ごとに、先頭数文字を太字にして目が滑りにくくするイメージ。先の「我輩は猫である」の例だと以下の通り。</p>
+<blockquote>
+<p><strong>吾輩</strong>は<strong>猫</strong>である。<strong>名前</strong>は<strong>まだ</strong><strong>無</strong>い。<strong>どこ</strong>で<strong>生</strong>れたかとんと<strong>見当</strong>がつかぬ。<strong>何</strong>でも<strong>薄暗</strong>いじめじめした所で<strong>ニャ</strong>ーニャー泣いていた<strong>事</strong>だけは<strong>記憶</strong>している。</p>
+</blockquote>
+<p>できればNeovimで実現したくて今回、Luaに移植した。</p>
+<p>一方で、Neovim以外でも使えるように工夫した。だから<code>budoux.nvim</code>ではなく<code>budoux.lua</code>を名乗っている。</p>
+<p>主に2点の工夫が必要だった。</p>
+<ul>
+<li>Unicode対応</li>
+<li>データ読み込み</li>
+</ul>
+<p>LuaはUnicode文字をネイティブに扱えず、日本語を文字単位で文を分割することが難しい。そこで、<a href="https://www.inf.puc-rio.br/~roberto/lpeg/">lpeg</a>というパターンマッチングライブラリを使って分割した。</p>
+<pre class="lua"><code>(lpeg.Ct(lpeg.C(lpeg.utfR(0, 0x10ffff)) ^ 0)):match(&quot;日本語&quot;)
+-- { &quot;日&quot;, &quot;本&quot;, &quot;語&quot; }</code></pre>
+<p>ちなみにVim/Neovimであれば<code>split('日本語', '\zs')</code>のようにできる。</p>
+<p>分割の判断基準となるデータは公式にはJSONで提供されているが、LuaはJSONパーサーを標準で持っていない。そこで、文字列置換でLuaテーブル化して、簡単に読み込めるようにした。</p>
+<p>冬休みのうちにbionic readingを実装できるといいなあ。</p>
+<div id="enjoy" class="section level1">
+<h1>ENJOY!</h1>
+</div>
