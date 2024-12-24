@@ -26,6 +26,13 @@ atusyサンタからのクリスマスプレゼントは[atusy/budoux.lua](https
 [Budoux](https://github.com/google/budoux)は文字列の改行を、人間にとって読みやすい位置で行うためのアルゴリズム。
 Google製で、日本語や中国語、タイ語に対応し、PythonやJavaScript、Javaの実装が公式提供されている。
 
+``` bash
+deno eval \
+  'import { loadDefaultJapaneseParser } from "npm:budoux"; 
+   console.log(loadDefaultJapaneseParser().parse("今日は天気です。"));'
+# [ "今日は", "天気です。" ]
+```
+
 今回は[atusy/budoux.lua](https://github.com/atusy/budoux.lua)として、Luaに移植した（とりあえず日本語だけ）。
 たとえば`今日は天気です。`を`今日は`と`天気です。`に分割できる。
 
