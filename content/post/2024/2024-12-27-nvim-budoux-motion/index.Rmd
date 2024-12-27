@@ -1,5 +1,5 @@
 ---
-title: "BuoouxによりNeovimのWモーションを拡張し、日本語文章の区切りに移動させる"
+title: "BudouxによりNeovimのWモーションを拡張し、日本語文章の区切りに移動させる"
 author: atusy
 date: '2024-12-27'
 slug: nvim-budoux-motion
