@@ -1,0 +1,66 @@
+---
+title: "Rの新しいLSP、airを試したけどまだコードフォーマットしかできなかった"
+author: atusy
+date: '2025-01-05'
+slug: R-air-lsp
+categories: [R]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [lua]
+summary: |
+  PositがR用のLSPとしてairを開発しているよ。でも現状ではコードフォーマットしかできないから、今後に期待。
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+set.seed(123)
+options(digits.secs = 0)
+```
+
+LSPは、コード補完や定義ジャンプなどの開発支援機能を提供するプロトコルです。
+
+RのLSPといえばrenkun-kenさんが開発している[REditorSupport/languageserver](https://github.com/REditorSupport/languageserver)がデファクトスタンダードですが、最近、Posit PBCが[posit-dev/air](https://github.com/posit-dev/air)を開発しているので試してみました。
+
+インストール方法はリポジトリに記載の手順に従えばOK。
+VS Codeの場合は追加で拡張機能を入れる必要があるようです。
+
+私はNeovimユーザーなので、以下の設定を追記しました。
+
+```lua
+vim.api.nvim_create_autocmd("FileType", {
+	group = vim.api.nvim_create_augroup("posit-dev-air", {}),
+	pattern = "r",
+	callback = function()
+		vim.lsp.start({
+			name = "air",
+			cmd = { "air", "language-server" },
+			filetypes = { "r" },
+		})
+	end,
+})
+```
+
+ひとまず、`vim.lsp.buf.format()`を使ってコードフォーマットできることは確認できました。
+
+残念ながらコード補完や定義ジャンプは未実装な模様（2024-01-09時点）。
+ここから先はYutaniさんに教えてもらったことですが、以下の部分で`completion()`や`code_definition()`を実装する必要があるようですが、未対応のようですね。
+
+> <https://github.com/posit-dev/air/blob/f41a27e86da324f9c3fa7d533c77b91fb8700d41/crates/lsp/src/tower_lsp.rs#L202-L266>
+
+どんな関数を定義すべきかはRustのtower_lsp crateのドキュメントを参照すると良いそうです。
+
+> <https://docs.rs/tower-lsp/latest/tower_lsp/trait.LanguageServer.html>
+
+ただし、[posit-dev/air](https://github.com/posit-dev/air)は**tower-lsp**から**ruff_server**のFork版に移行しようとしてるみたいなので、勇み足でPRしないほうがよさそう。
+
+> <https://github.com/posit-dev/air/pull/126>
+
+Yutaniさんの予想では設計が固まった後は、必要な機能は[posit-dev/ark](https://github.com/posit-dev/ark)から移植してくるのではとのこと。
+
+というわけで、あんまり役に立つ情報はないですが、今後を期待して待ちましょう！
+
+# ENJOY!
+
+
