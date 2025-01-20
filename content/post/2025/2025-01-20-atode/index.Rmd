@@ -1,0 +1,69 @@
+---
+title: "n週刊アトデ 2025-01-20"
+author: atusy
+date: '2025-01-20'
+slug: atodeyomanakata
+categories: [n週刊アトデ]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [bash]
+summary: |
+  アトデヨム、ウソジャナイ、ヨムノタノシー
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+「後で読む」としておきながら、読めていなかった記事をがつがつ読んで紹介する「n週刊アトデ」です。
+元々週刊でやろうとしてましたが、どうも間が飛びがちなので、某出版社に便乗して「n週刊」にしました。
+
+- [IVRyのSREの取り組み 2025冬](https://zenn.dev/ivry/articles/4f233b56212b21)
+    - SLI/SLOを導入し、定期的な確認、不穏挙動の調査・改善を実施するようになったとのこと。
+    - 不穏な挙動をSREチーム単独で調査、改善できているケースもあるようで偉業
+    - 今はSLI/SLOの運用をSREチーム内でやっているとのことだが、全社に展開してくつもりらしい。SLI/SLOの考えかたって開発者はもちろん、経営層にも理解してもらうのが大事だと思うので、うまく浸透したら、その過程が共有されると嬉しいな
+    - [バックエンドエンジニアからプラットフォームエンジニアへの転換 - 視点の変化 ](https://note.com/qawsedrftgyhuji/n/n1620a82bc5a9?sub_rt=share_pw#356c23ef-cd05-47d5-8f49-df36d6eda2bf)も気になる
+- [「成果なんてすぐに見えるものじゃない」ヨドバシが圧倒的な自前主義と長期的視点に立てる理由](https://type.jp/et/feature/27604/)
+    - この一文が、内製化支援サービスを提供する組織に所属する身として、すんごい刺さった
+
+      > 私たちが成し遂げたいのは、完全内製化でも、技術の追求でもない。本当のゴールは、お客さまにご納得いただける便利な買い物環境を提供することを通じて、「またヨドバシを利用したい」と思っていただくことです
+- [「サッと助けてくれるエンジニア」は、試行錯誤の質が高い。 nrs氏に聞く「経験の積み方」](https://levtech.jp/media/article/interview/detail_592/)
+    - 問題に遭遇した時は、3つのスタンス（忍耐力・好奇心・素直さ）と、2つのスキル（言語化・観察）が重要とのこと。言われてみればそう、と思える絶妙な解像度……。
+    - 足りない場合も普段ちょっと意識してみるだけで、全然違うってのも、本当にそうなんよなあ
+    - ところで最近は「忍耐」を発揮することが減ってきてるような気がしてドキっとした一方、「忍耐力」は経験と知識でカバーできることが増えるとも指摘されてて、なるほどなと思った。慢心せずに忍耐は意識していきたい。
+- [Pyright doesn't detect newly added modules unless I restart the language server](https://github.com/microsoft/pyright/issues/4635)
+    - LSPを再起動しないと新規追加したモジュールを認識しないの、めんどいよなと思ってたけど、LSPの設定で解決できるらしい。`capabilities.workspace.didChangeWatchedFiles.dynamicRegistration`
+- [Ghost ではじめるスタートアップの技術ブログ](https://www.awarefy.dev/blog/ghost-for-tech-blog/)
+    - 技術ブログのユースケースを見たす要素として以下を挙げ、あえて静的サイトジェネレーター（SSG）を採用せずにCMSツールのGhostを採用している話
+        - OSS である（ロックインされない）
+        - Markdown で書ける
+        - デフォルトのテーマが優れており、カスタマイズもできる
+        - コードの Syntax Highlight に対応できる（設定を行う必要はあり）
+        - Twitter や YouTube など外部サービスの埋め込みができる
+        - 独自ドメインを利用できる
+    - SSGで十分では……？と思うものの、一番最初の敷居が低いってのは確かかなあ。メンバーにSSG経験者や興味もてる人がいるかどうかが結構な分岐点になるのかも？読んだ限りけっこうな数のツールやサービスを検討した模様。
+
+      > 複数のツールや複数のサービスを組み合わせなくてはなりませんし、カスタマイズのためにコードを書く必要もあります。記事を書くまでのハードルが低いというのは、はじめるにあたり大切なことではないかと思います。
+- [Linux arm64 hosted runners now available for free in public repositories (Public Preview)](https://x.com/f0reachKIT/status/1880568806126637237)
+    - 公開リポジトリならarm64のGHAランナーが無料らしい。ありがてえ（今のところ予定ないけど）
+- [米国はどうやってTikTok禁止を実現するつもりなのか？ その仕組みは「単純なアクセス遮断」ではない](https://wired.jp/article/how-the-us-tiktok-ban-would-actually-work/)
+    - 「既存」ユーザーの体験をうまく悪化させる、プラットフォーマーに改善を困難にさせる、おそろしい仕組み……。政治の世界こわい。
+- [ピアニストの技能の限界の中には、外骨格ロボットを用いたトレーニングにより突破でき得るものがあることを発見](https://x.com/neuromusiker/status/1879831550659064247)
+    - 「練習を身体のステージから表現のステージに進める」という研究の背景にある思想が素敵すぎた
+        1. 表現を具現化する技能を習得するための練習の過程で，身体を傷めて欲しくない
+        2. 表現の探索・選択・創造に，できるだけ練習時間を費やして欲しい
+    - 伸びしろを自覚できると次にいけるってのはそらそうなんだけど、そらそうを実現するのが難しいわけで、テクノロジーが追いついてきたってことなんだろなあ
+    - 論文まで読めてないけど、外骨格が次の動きをそのままやるところから、ヒントを与えるだけにするところまでグラデーションしていくと、練習がすごく効率的になりそう
+
+以下、時間切れ。
+
+- [ 推論時にも学習できるLLM!? 「Titans」 ](https://note.com/hamachi_jp/n/nc97fe6658017)
+    - 一度読んで、すんごーとなった記憶だけあるけど忘れた。あとで読む。
+- [Googleがエージェント時代の幕開けに伴うエージェントガイドとナレッジーを出しているので、それをo1にまとめさせた](https://x.com/hokazuya/status/1880382269791375643)
+    - 原文で読まなきゃ……！
+- [Keynote: Tidy First? A Daily Exercise in Empirical Design - Kent Beck - NDC Porto 2024](https://www.youtube.com/watch?v=A9vRp9T8pkU)
+    - あとで見る……！
+- [Googleが公開した「プロンプトギャラリー」](https://x.com/SuguruKun_ai/status/1879135241509679574)
+    - 自分で毎度考えるのも良いけど、一度はざっと見ておかないとなと思ってる。これもあとで。
