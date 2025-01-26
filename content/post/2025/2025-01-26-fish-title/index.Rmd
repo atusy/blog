@@ -1,0 +1,86 @@
+---
+title: "Fishシェルでターミナルのタイトルをプロジェクトルートからの相対パスっぽくする"
+author: atusy
+date: '2025-01-26'
+slug: fish-title-relative-to-projroot
+categories: [fish]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [fish]
+summary: |
+  たとえば、git管理しているプロジェクトとかで、`foo/app`とかにするイメージ
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+Fishシェルを使いだしてから半年以上が経過しました。
+重厚な設定をしなくてもそれなりに使えて、起動も十分高速なことから、愛用しています。
+たまにBashコマンドのコピペしたい時は`bash -c '...'`するなり一時的に`bash`を起動すればいいので特に困ってもいません。
+
+> [2024-5-27 fish使い始めた](https://blog.atusy.net/2024/05/27/fish/)
+
+ところでFishシェルは`fish_title`関数を設定しておくと、コマンドの実行前・後に関数が自動的に評価され、ターミナルのタイトルを更新できます。
+仮想端末ウィンドウのタイトルバーやタブバーの中身を動的に変更できる便利な関数です。
+
+> fish_title - define the terminal’s title \
+> <https://fishshell.com/docs/current/cmds/fish_title.html>
+
+カレントディレクトリの名前を表示してくれれば十分なケースが多いのですが、モノリポの場合など、プロジェクト内で作業ディレクトリを変更する場合には、プロジェクトルートからの相対パスが欲しくなるので、自前で実装してみました。
+
+素朴にはこんな感じ。
+
+```fish
+# `config.fish`に書いてもいいが、
+# ~/.config/private_fish/functions/fish_title.fish
+# に記述しておくと、遅延ロードされる
+function fish_title
+  set -l wd
+  if set -l gwd (git rev-parse --show-toplevel 2> /dev/null)
+    set -l n (dirname "xx$gwd" | string length) # add extra characters to generate start index
+    set wd (string sub --start $n $PWD)
+  else
+    set wd (basename $PWD)
+  end
+
+  echo -- $wd
+end
+```
+
+実用している`fish_title`はもう少し工夫しています。
+
+- カレントディレクトリに変更があった時のみ`git rev-parse --show-toplevel`を評価
+    - `fish_title`関数はコマンドの実行前と実行後に繰り返し評価されるため、結果をキャッシュ
+- SSH中かどうか表示
+- デフォルト設定にあったEmacsがらみの条件判定を拝借
+    - 今後Emacsを使いたくなった時用
+
+```fish
+set -l _fish_title_pwd
+set -l _fish_title_wd
+
+function fish_title
+  if not set -q INSIDE_EMACS; or string match -vq '*,term:*' -- $INSIDE_EMACS
+    set -l ssh
+    set -q SSH_TTY
+    and set ssh "["(prompt_hostname | string sub -l 10 | string collect)"]"
+
+    if test "$_fish_title_pwd" != "$PWD"
+      set _fish_title_pwd $PWD
+      if set -l gwd (git rev-parse --show-toplevel 2> /dev/null)
+        set -l n (dirname "xx$gwd" | string length) # add extra characters to generate start index
+        set _fish_title_wd (string sub --start $n $PWD)
+      else
+        set _fish_title_wd (basename $PWD)
+      end
+    end
+
+    echo -- $ssh $_fish_title_wd
+  end
+end
+```
+
+# ENJOY!
