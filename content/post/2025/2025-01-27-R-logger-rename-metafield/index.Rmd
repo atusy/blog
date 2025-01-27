@@ -1,0 +1,77 @@
+---
+title: "Rのloggerパッケージで構造化ログを出力する時にメタフィールドの名前を変更する"
+author: atusy
+date: '2025-01-27'
+slug: R-logger-rename-metafield
+categories: [R]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [r]
+summary: |
+  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+logger::log_appender(logger::appender_stdout)
+```
+
+**logger**パッケージはRのログ出力に使います。
+ログはプログラムの進捗確認や、問題発生時のデバグなどに便利なので、ぜひ活用したいところですね。
+
+特に構造化ログを使うと、ログ解析がしやすくなっていいよという話をJapan.R 2024で発表しました。
+
+> [2024-12-10 Japan.R 2024で構造化ログについて発表した](https://blog.atusy.net/2024/12/10/japanr-logging/)
+
+構造化ログとして一般的に用いられるフォーマットはJSONです。
+以下のように`{}`の間に`"key": "value"`形式で記述された1行のJSONが1件のログとして出力されます。
+
+```{r}
+logger::log_formatter(logger::formatter_json)
+logger::log_layout(logger::layout_json_parser(fields = c("time", "level")))
+logger::log_info(message = "これはINFOログです")
+```
+
+ところが、当時の**logger**パッケージで構造化ログを出力すると、`layout_json_parser`関数で指定するメタフィールドの名前が固定で変更できないという問題がありました。
+上記の例では`time`や`level`といったフィールドの名前が固定です。
+
+これでは、他の製品のログと書式を統一しにくい、ログ管理ツールの指定するフィールド名と整合しない、という問題が起こりえます。
+
+そこで、**logger**パッケージに[PR](https://github.com/daroczig/logger/pull/217)して、メタフィールドの名前を変更できるようにしてもらいました。
+
+2024-01-27時点では、CRANにリリースされていないので、GitHubからインストールする必要があります。
+
+```{r, eval=FALSE}
+pak::pak("daroczig/logger")
+```
+
+名前の変更方法は**tidyverse**ユーザーにとって馴染みやすい、`dplyr::rename`関数方式です。
+
+```{r}
+data.frame(x = 1) |> dplyr::rename(y = x)
+```
+
+`layout_json_parser`関数では使いたいメタフィールドの名前をcharacterベクトルとして指定できます。
+この時、変更先の名前をベクトルの要素の名前に使えばOKです。
+
+```{r}
+logger::log_formatter(logger::formatter_json)
+logger::log_layout(logger::layout_json_parser(
+  # fields引数に名前つきベクトルを指定すると
+  # メタフィールドを改名できる
+  fields = c(timestamp = "time", loglevel = "level")
+))
+logger::log_info(message = "これはINFOログです")
+```
+
+2ヶ月ほど前にPRして音沙汰なしだったので、メンテされているか不安だったのですが、無事にマージされて安心しました。
+次はログのタイムスタンプをミリ秒やマイクロ秒の精度で扱ったり、任意のフォーマットで出力できるようにするPRを書いています。
+
+> feat: format timestamp \
+> https://github.com/daroczig/logger/pull/226
+
+皆さんのログ管理が少しでも楽になりますように！
+
+# ENJOY!

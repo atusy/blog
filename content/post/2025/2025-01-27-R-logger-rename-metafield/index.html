@@ -1,0 +1,54 @@
+---
+title: "Rのloggerパッケージで構造化ログを出力する時にメタフィールドの名前を変更する"
+author: atusy
+date: '2025-01-27'
+slug: R-logger-rename-metafield
+categories: [R]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [r]
+summary: |
+  
+---
+
+
+
+<p><strong>logger</strong>パッケージはRのログ出力に使います。ログはプログラムの進捗確認や、問題発生時のデバグなどに便利なので、ぜひ活用したいところですね。</p>
+<p>特に構造化ログを使うと、ログ解析がしやすくなっていいよという話をJapan.R 2024で発表しました。</p>
+<blockquote>
+<p><a href="https://blog.atusy.net/2024/12/10/japanr-logging/">2024-12-10 Japan.R 2024で構造化ログについて発表した</a></p>
+</blockquote>
+<p>構造化ログとして一般的に用いられるフォーマットはJSONです。以下のように<code>{}</code>の間に<code>"key": "value"</code>形式で記述された1行のJSONが1件のログとして出力されます。</p>
+<pre class="r"><code>logger::log_formatter(logger::formatter_json)
+logger::log_layout(logger::layout_json_parser(fields = c(&quot;time&quot;, &quot;level&quot;)))
+logger::log_info(message = &quot;これはINFOログです&quot;)
+#&gt; {&quot;time&quot;:&quot;2025-01-27 09:10:58&quot;,&quot;level&quot;:&quot;INFO&quot;,&quot;message&quot;:&quot;これはINFOログです&quot;}</code></pre>
+<p>ところが、当時の<strong>logger</strong>パッケージで構造化ログを出力すると、<code>layout_json_parser</code>関数で指定するメタフィールドの名前が固定で変更できないという問題がありました。上記の例では<code>time</code>や<code>level</code>といったフィールドの名前が固定です。</p>
+<p>これでは、他の製品のログと書式を統一しにくい、ログ管理ツールの指定するフィールド名と整合しない、という問題が起こりえます。</p>
+<p>そこで、<strong>logger</strong>パッケージに<a href="https://github.com/daroczig/logger/pull/217">PR</a>して、メタフィールドの名前を変更できるようにしてもらいました。</p>
+<p>2024-01-27時点では、CRANにリリースされていないので、GitHubからインストールする必要があります。</p>
+<pre class="r"><code>pak::pak(&quot;daroczig/logger&quot;)</code></pre>
+<p>名前の変更方法は<strong>tidyverse</strong>ユーザーにとって馴染みやすい、<code>dplyr::rename</code>関数方式です。</p>
+<pre class="r"><code>data.frame(x = 1) |&gt; dplyr::rename(y = x)
+#&gt;   y
+#&gt; 1 1</code></pre>
+<p><code>layout_json_parser</code>関数では使いたいメタフィールドの名前をcharacterベクトルとして指定できます。この時、変更先の名前をベクトルの要素の名前に使えばOKです。</p>
+<pre class="r"><code>logger::log_formatter(logger::formatter_json)
+logger::log_layout(logger::layout_json_parser(
+  # fields引数に名前つきベクトルを指定すると
+  # メタフィールドを改名できる
+  fields = c(timestamp = &quot;time&quot;, loglevel = &quot;level&quot;)
+))
+logger::log_info(message = &quot;これはINFOログです&quot;)
+#&gt; {&quot;timestamp&quot;:&quot;2025-01-27 09:10:58&quot;,&quot;loglevel&quot;:&quot;INFO&quot;,&quot;message&quot;:&quot;これはINFOログです&quot;}</code></pre>
+<p>2ヶ月ほど前にPRして音沙汰なしだったので、メンテされているか不安だったのですが、無事にマージされて安心しました。次はログのタイムスタンプをミリ秒やマイクロ秒の精度で扱ったり、任意のフォーマットで出力できるようにするPRを書いています。</p>
+<blockquote>
+<p>feat: format timestamp<br />
+<a href="https://github.com/daroczig/logger/pull/226" class="uri">https://github.com/daroczig/logger/pull/226</a></p>
+</blockquote>
+<p>皆さんのログ管理が少しでも楽になりますように！</p>
+<div id="enjoy" class="section level1">
+<h1>ENJOY!</h1>
+</div>
