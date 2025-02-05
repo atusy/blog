@@ -1,0 +1,51 @@
+---
+title: "mini.testでNeovimプラグインのテストに入門した"
+author: atusy
+date: '2025-02-05'
+slug: mini-test-nvim
+categories: [Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: []
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+set.seed(123)
+options(digits.secs = 0)
+```
+
+以前書いた、Budouxを使ったWモーションをE/B/gEに対応させてプラグインにしようかなと思って、[atusy/budouxify.nvim](https://github.com/atusy/budouxify.nvim)を作った。
+
+> BudouxによりNeovimのWモーションを拡張し、日本語文章の区切りに移動させる \
+> https://blog.atusy.net/2024/12/27/nvim-budoux-motion/
+
+ただ、いかんせん移動先の条件分岐が複雑で、頭がこんがらがってきたので、テストがほしくなった。
+同僚とプラグインをペアプロしてたときに、「テストほしいよなあ」とぼやいたら、やろうってことになって、[mini.nvim]に付属のテストフレームワークmini.testを使ってみることになった。
+自分一人だとまあええかとなりがちなので、ペアプロしててよかったなと思う。
+
+テストフレームワークとして、[plenary.nvim](https://github.com/nvim-lua/plenary.nvim)も検討した。
+ただ、サンプルを見る限り、テストに使う関数（`describe`、`it`など）をどうもグローバルに定義するっぽい。
+LSPに怒られるし、イケてないなと思った。
+
+その点[mini.nvim]なら`require(mini.test)`でロードしたモジュール経由で必要な関数を使えるのでいいなと思った。
+
+使い方は[TESTING.md](https://github.com/echasnovski/mini.nvim/blob/main/TESTING.md)をみればすぐに理解できると思う。
+最小限には以下をすれば始められそう。
+
+- `.gitignore`に`deps/`を追加
+- `Makefile`書く
+    - `mini.test`を自動インストールする
+- `scripts/minimal_init.lua`を用意し、テスト専用の設定を最小限に書く
+    - 必要なモジュールをランタイムパスに追加
+- `tests/.../xxx_test.lua`を用意する
+- `make test`で実行
+
+parametrizationやテストスコープの階層化など、案外リッチなこともできてよさげ。
+スナップショットテストの仕組みもあると嬉しかったかな。
+
+## ENJOY
+
+[mini.nvim]: https://github.com/nvim-lua/plenary.nvim
