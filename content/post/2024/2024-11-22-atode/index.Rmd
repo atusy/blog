@@ -1,9 +1,9 @@
 ---
-title: "週間アトデ 2024-11-22"
+title: "週刊アトデ 2024-11-22"
 author: atusy
 date: '2024-11-22'
 slug: atodeyomanakata
-categories: []
+categories: [アトデ]
 tags: []
 output:
   blogdown::html_page:
