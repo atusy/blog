@@ -18,10 +18,10 @@ highlighhtjs: []
 <p>BudouxによりNeovimのWモーションを拡張し、日本語文章の区切りに移動させる<br />
 <a href="https://blog.atusy.net/2024/12/27/nvim-budoux-motion/" class="uri">https://blog.atusy.net/2024/12/27/nvim-budoux-motion/</a></p>
 </blockquote>
-<p>ただ、いかんせん移動先の条件分岐が複雑で、頭がこんがらがってきたので、テストがほしくなった。同僚とプラグインをペアプロしてたときに、「テストほしいよなあ」とぼやいたら、やろうってことになって、<a href="https://github.com/nvim-lua/plenary.nvim">mini.nvim</a>に付属のテストフレームワークmini.testを使ってみることになった。自分一人だとまあええかとなりがちなので、ペアプロしててよかったなと思う。</p>
+<p>ただ、いかんせん移動先の条件分岐が複雑で、頭がこんがらがってきたので、テストがほしくなった。同僚とプラグインをペアプロしてたときに、「テストほしいよなあ」とぼやいたら、やろうってことになって、<a href="https://github.com/echasnovski/mini.nvim">mini.nvim</a>に付属のテストフレームワークmini.testを使ってみることになった。自分一人だとまあええかとなりがちなので、ペアプロしててよかったなと思う。</p>
 <p>テストフレームワークとして、<a href="https://github.com/nvim-lua/plenary.nvim">plenary.nvim</a>も検討した。ただ、サンプルを見る限り、テストに使う関数（<code>describe</code>、<code>it</code>など）をどうもグローバルに定義するっぽい。
 LSPに怒られるし、イケてないなと思った。</p>
-<p>その点<a href="https://github.com/nvim-lua/plenary.nvim">mini.nvim</a>なら<code>require(mini.test)</code>でロードしたモジュール経由で必要な関数を使えるのでいいなと思った。</p>
+<p>その点<a href="https://github.com/echasnovski/mini.nvim">mini.nvim</a>なら<code>require(mini.test)</code>でロードしたモジュール経由で必要な関数を使えるのでいいなと思った。</p>
 <p>使い方は<a href="https://github.com/echasnovski/mini.nvim/blob/main/TESTING.md">TESTING.md</a>をみればすぐに理解できると思う。最小限には以下をすれば始められそう。</p>
 <ul>
 <li><code>.gitignore</code>に<code>deps/</code>を追加</li>

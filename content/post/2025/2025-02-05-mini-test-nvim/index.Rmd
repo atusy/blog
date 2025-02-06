@@ -48,4 +48,4 @@ parametrizationやテストスコープの階層化など、案外リッチな�
 
 ## ENJOY
 
-[mini.nvim]: https://github.com/nvim-lua/plenary.nvim
+[mini.nvim]: https://github.com/echasnovski/mini.nvim
