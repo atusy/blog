@@ -1,0 +1,79 @@
+---
+title: "n週刊アトデ 2025-02-10"
+author: atusy
+date: '2025-02-10'
+slug: atodeyomanakata
+categories: [n週刊アトデ]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [bash]
+summary: |
+  アトデヨム、ウソジャナイ、ヨムノタノシー
+---
+
+
+
+<p>後で読むしたものをたまに消化する「n週刊アトデ」です。前回は1/20だったので、約3週間ぶりです。よくない……。</p>
+<ul>
+<li><a href="https://www.m3tech.blog/entry/2025/02/06/110000">プロダクトマネージャーが売ったことのないプロダクトは（爆発的には）売れない</a>
+<ul>
+<li>内容にそうなんだろなーと思う以外に、価値を出してくって行為は簡単に頭打ちするから、コンフォートゾーンに留まってちゃいけないんだろなと改めて思わされた</li>
+</ul></li>
+<li><a href="https://notchained.hatenablog.com/entry/2025/02/07/203729"><code>purrr::map()</code> が並列実行できるようになるらしい</a>
+<ul>
+<li><code>.parallel</code>引数の噂は聞いてたけど、ついに！という感じ</li>
+<li><strong>furrr</strong>どうなるのかなーとか、<strong>future</strong>と<strong>mirai</strong>ってなにが違うのかなーと思ってたところが解説されててありがたき</li>
+<li>並列実行するバックエンドが色々あって<strong>furrr</strong>経由で任意のものを、<strong>purrr</strong>は<strong>mirai</strong>限定らしい</li>
+<li><strong>purrr</strong>の場合は<code>.parallel</code>引数でユーザーがバックエンドを意識することなさそうなので、将来的にもっといいのが出たら変えたらいいのかなとおもった</li>
+</ul></li>
+<li><a href="https://speakerdeck.com/pharma_x_tech/aiezientonituitematometemita">AIエージェントについてまとめてみた</a>
+<ul>
+<li>LLM、雰囲気で多クラス分類やれちゃうの強いよなあと改めて思う</li>
+<li>AIエージェント定義論争について、結論を出すことを目的にはしてないが、良い整理してる</li>
+<li>ここ読んでほんそれとなった。なんならエージェントがAIで動いてるかどうかすら、ユーザーにとっては重要ではないはず
+&gt; ユーザーから見て「ほぼ放っておいても結果を出してくれる」「勝手にタスクを実行してくれる」ことで実際に価値が出ているのであれば、裏側がどう作られていようともいいはず</li>
+<li>「AIエージェントはSaaSを飲み込むか」の洞察がとても面白い
+<ul>
+<li>SaaSでラクチン！のはずが大量のSaaSに囲まれて、仕事は高速化したけど複雑化した、みたいなこともあると思う。複雑さをAIが引き受けてくれるならゲームチェンジングな感じする</li>
+</ul></li>
+</ul></li>
+<li><a href="https://speakerdeck.com/recruitengineers/engineer-2024">ソフトウェア エンジニアとしての 姿勢と心構え</a>
+<ul>
+<li>やれてないこともいっぱいある……</li>
+<li>ソフトウェアエンジニアは向上心高くあるべし、みたいな考え方はしんどいと思う一方、堕落したら簡単に時代に取り残されそうな怖さもあるので、やれる範囲で戦うしかねえな</li>
+</ul></li>
+<li><a href="https://chatllm.abacus.ai" class="uri">https://chatllm.abacus.ai</a>
+<ul>
+<li>なんか色んなAIを使えたり、エディタがあったり、computer agentが使えたりして、$10固定らしい
+<ul>
+<li>editorがLinux（Debian/Ubuntu）向けにも提供されてるのえらすぎんか？</li>
+</ul></li>
+<li>ぼちぼちなんか1個くらい契約してみるかと思ってたのでしてみた</li>
+</ul></li>
+<li>ずいぶん前のあとで見るにpCloudが入ってた。なんか買い切りストレージっぽい……？
+<ul>
+<li><a href="https://www.pcloud.com/ja/" class="uri">https://www.pcloud.com/ja/</a></li>
+</ul></li>
+<li><a href="https://ymmt.hatenablog.com/entry/2024/12/04/004608">docker buildx bake で高速並列ビルド</a>
+<ul>
+<li>マルチステージビルドを活用して1つのDockerfileから複数のイメージを作りたいときに、良い感じに並列するしくみらしい</li>
+</ul></li>
+</ul>
+<div id="もっとあとで" class="section level2">
+<h2>もっとあとで</h2>
+<p>動画系・書籍は時間かかるから後回しにしがち……</p>
+<ul>
+<li>Deepseekやら、OpenAIを組み合わせたAi エージェントを、GUIのドラッグで作って埋め込みのカレンダー機能を実際に作るハンズオン <a href="https://x.com/hokazuya/status/1887264460345385159" class="uri">https://x.com/hokazuya/status/1887264460345385159</a></li>
+<li>ITエンジニアの転職学 ー 年収1000万円、マネジメントで超えるか、スペシャリストで超えるか <a href="https://jobs.forkwell.com/events/35wkvekf1ndn?utm_source=connpass&amp;utm_medium=referral&amp;utm_campaign=career_study_for_IT_engineers_6" class="uri">https://jobs.forkwell.com/events/35wkvekf1ndn?utm_source=connpass&amp;utm_medium=referral&amp;utm_campaign=career_study_for_IT_engineers_6</a></li>
+<li>採用基準 <a href="https://amzn.asia/d/7Dp4NHc" class="uri">https://amzn.asia/d/7Dp4NHc</a>
+<ul>
+<li>「地頭より論理的思考力より大切なもの」があるらしいのでちょい気になる</li>
+</ul></li>
+<li>生産性 <a href="https://amzn.asia/d/5DqffER" class="uri">https://amzn.asia/d/5DqffER</a>
+<ul>
+<li>たまに生産性ってなんだろなーと漠然と思いなおすことがあるので……</li>
+</ul></li>
+</ul>
+</div>

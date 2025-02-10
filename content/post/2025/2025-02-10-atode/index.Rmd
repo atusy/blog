@@ -1,0 +1,60 @@
+---
+title: "n週刊アトデ 2025-02-10"
+author: atusy
+date: '2025-02-10'
+slug: atodeyomanakata
+categories: [n週刊アトデ]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [bash]
+summary: |
+  アトデヨム、ウソジャナイ、ヨムノタノシー
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+後で読むしたものをたまに消化する「n週刊アトデ」です。
+前回は1/20だったので、約3週間ぶりです。
+よくない……。
+
+- [プロダクトマネージャーが売ったことのないプロダクトは（爆発的には）売れない](https://www.m3tech.blog/entry/2025/02/06/110000)
+    - 内容にそうなんだろなーと思う以外に、価値を出してくって行為は簡単に頭打ちするから、コンフォートゾーンに留まってちゃいけないんだろなと改めて思わされた
+- [`purrr::map()` が並列実行できるようになるらしい](https://notchained.hatenablog.com/entry/2025/02/07/203729)
+    - `.parallel`引数の噂は聞いてたけど、ついに！という感じ
+    - **furrr**どうなるのかなーとか、**future**と**mirai**ってなにが違うのかなーと思ってたところが解説されててありがたき
+    - 並列実行するバックエンドが色々あって**furrr**経由で任意のものを、**purrr**は**mirai**限定らしい
+    - **purrr**の場合は`.parallel`引数でユーザーがバックエンドを意識することなさそうなので、将来的にもっといいのが出たら変えたらいいのかなとおもった
+- [AIエージェントについてまとめてみた](https://speakerdeck.com/pharma_x_tech/aiezientonituitematometemita)
+    - LLM、雰囲気で多クラス分類やれちゃうの強いよなあと改めて思う
+    - AIエージェント定義論争について、結論を出すことを目的にはしてないが、良い整理してる
+    - ここ読んでほんそれとなった。なんならエージェントがAIで動いてるかどうかすら、ユーザーにとっては重要ではないはず
+      > ユーザーから見て「ほぼ放っておいても結果を出してくれる」「勝手にタスクを実行してくれる」ことで実際に価値が出ているのであれば、裏側がどう作られていようともいいはず
+    - 「AIエージェントはSaaSを飲み込むか」の洞察がとても面白い
+        - SaaSでラクチン！のはずが大量のSaaSに囲まれて、仕事は高速化したけど複雑化した、みたいなこともあると思う。複雑さをAIが引き受けてくれるならゲームチェンジングな感じする
+- [ソフトウェア エンジニアとしての 姿勢と心構え ](https://speakerdeck.com/recruitengineers/engineer-2024)
+    - やれてないこともいっぱいある……
+    - ソフトウェアエンジニアは向上心高くあるべし、みたいな考え方はしんどいと思う一方、堕落したら簡単に時代に取り残されそうな怖さもあるので、やれる範囲で戦うしかねえな
+- <https://chatllm.abacus.ai>
+    - なんか色んなAIを使えたり、エディタがあったり、computer agentが使えたりして、$10固定らしい
+        - editorがLinux（Debian/Ubuntu）向けにも提供されてるのえらすぎんか？
+    - ぼちぼちなんか1個くらい契約してみるかと思ってたのでしてみた
+- ずいぶん前のあとで見るにpCloudが入ってた。なんか買い切りストレージっぽい……？
+    - https://www.pcloud.com/ja/
+- [docker buildx bake で高速並列ビルド](https://ymmt.hatenablog.com/entry/2024/12/04/004608)
+    - マルチステージビルドを活用して1つのDockerfileから複数のイメージを作りたいときに、良い感じに並列するしくみらしい
+
+
+## もっとあとで
+
+動画系・書籍は時間かかるから後回しにしがち……
+
+- Deepseekやら、OpenAIを組み合わせたAi エージェントを、GUIのドラッグで作って埋め込みのカレンダー機能を実際に作るハンズオン  https://x.com/hokazuya/status/1887264460345385159
+- ITエンジニアの転職学 ー 年収1000万円、マネジメントで超えるか、スペシャリストで超えるか <https://jobs.forkwell.com/events/35wkvekf1ndn?utm_source=connpass&utm_medium=referral&utm_campaign=career_study_for_IT_engineers_6>
+- 採用基準 <https://amzn.asia/d/7Dp4NHc>
+    - 「地頭より論理的思考力より大切なもの」があるらしいのでちょい気になる
+- 生産性 <https://amzn.asia/d/5DqffER>
+    - たまに生産性ってなんだろなーと漠然と思いなおすことがあるので……
