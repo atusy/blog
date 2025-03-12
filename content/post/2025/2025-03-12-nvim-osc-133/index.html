@@ -1,0 +1,35 @@
+---
+title: "Neovim Nightlyでターミナル内でプロンプト間をジャンプできるようになった（OSC133）"
+author: atusy
+date: '2025-03-12'
+slug: nvim-osc133
+categories: [Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: []
+---
+
+
+
+<p><a href="https://vim-jp.org/ekiden/">Vim駅伝</a>2025-03-12の記事です。</p>
+<p>最近、NeovimがOSC 133に対応しました（&lt; <a href="https://github.com/neovim/neovim/pull/32736" class="uri">https://github.com/neovim/neovim/pull/32736</a>&gt;）。</p>
+<p>これにより、OSC 133に対応したシェルのユーザーであれば、<code>[[</code> や <code>]]</code> を使って、<code>:terminal</code>内のシェルプロンプト間をジャンプできるようになります。</p>
+<p>大量の行に渡る出力が発生した場合に、出力がどこから始まっているか、目で終わずにジャンプできるのは便利ですね。</p>
+<p><img src="images/demo.gif" /></p>
+<p>ちなみに、TerminalモードからNormalモードに移行するには<code>&lt;C-\&gt;&lt;C-N&gt;</code>ですが、私は<code>&lt;C-\&gt;&lt;C-O&gt;</code>を使っていないので、単に<code>&lt;C-\&gt;</code>で移行できるようにマッピングしています。</p>
+<p>さて、OSC133の利用にはシェル側の設定が必要です。プロンプト文字の直後に特殊なエスケープシーケンスを出力します。</p>
+<p>私はfishユーザーでプロンプトを自前実装しているので、<code>fish_prompt.fish</code>において、プロンプトの末尾に<code>printf '\e]133;A\e\\'</code>を追加しました。
+Neovim内では問題ないのですが、Neovimの外、Weztermの中では、謎の改行が入る現象を確認しているので、<code>NVIM</code>環境変数の有無でOSC133の有効/無効を制御しています。このあたりも追い追いなんとかしたい。</p>
+<p><a href="https://github.com/atusy/dotfiles/blob/611557c1525f2e75ba2af610ebc0b5f1b40c1508/dot_config/private_fish/functions/fish_prompt.fish?plain=1#L64-L66" class="uri">https://github.com/atusy/dotfiles/blob/611557c1525f2e75ba2af610ebc0b5f1b40c1508/dot_config/private_fish/functions/fish_prompt.fish?plain=1#L64-L66</a></p>
+<p>Zshユーザーは以下の記事を参考にするとよさそうです。</p>
+<blockquote>
+<p>zshでOSC 133に対応する by Yoshi Yamaguchi<br />
+<a href="https://zenn.dev/ymotongpoo/articles/20220802-osc-133-zsh" class="uri">https://zenn.dev/ymotongpoo/articles/20220802-osc-133-zsh</a></p>
+</blockquote>
+<div id="enjoy" class="section level2">
+<h2>ENJOY!</h2>
+<p>前回はthincaさんによる「<a href="https://thinca.hatenablog.com/entry/2025/03/megurovim-28">Meguro.vim #28 を開催しました</a>」でした。継続できててすごい……。</p>
+<p>次回はokmkmさんによる「Neovimを使い始めて半年経った若輩Vimmerが愛用しているプラグインの紹介」だそうです。最近、プラグインの棚卸できてないので楽しみ！</p>
+</div>
