@@ -14,15 +14,17 @@ highlighhtjs: []
 
 
 <p><a href="https://vim-jp.org/ekiden/">Vim駅伝</a>2025-03-12の記事です。</p>
-<p>最近、NeovimがOSC 133に対応しました（&lt; <a href="https://github.com/neovim/neovim/pull/32736" class="uri">https://github.com/neovim/neovim/pull/32736</a>&gt;）。</p>
+<p>最近、NeovimがOSC 133に対応しました（<a href="https://github.com/neovim/neovim/pull/32736" class="uri">https://github.com/neovim/neovim/pull/32736</a>）。</p>
 <p>これにより、OSC 133に対応したシェルのユーザーであれば、<code>[[</code> や <code>]]</code> を使って、<code>:terminal</code>内のシェルプロンプト間をジャンプできるようになります。</p>
 <p>大量の行に渡る出力が発生した場合に、出力がどこから始まっているか、目で終わずにジャンプできるのは便利ですね。</p>
 <p><img src="images/demo.gif" /></p>
 <p>ちなみに、TerminalモードからNormalモードに移行するには<code>&lt;C-\&gt;&lt;C-N&gt;</code>ですが、私は<code>&lt;C-\&gt;&lt;C-O&gt;</code>を使っていないので、単に<code>&lt;C-\&gt;</code>で移行できるようにマッピングしています。</p>
-<p>さて、OSC133の利用にはシェル側の設定が必要です。プロンプト文字の直後に特殊なエスケープシーケンスを出力します。</p>
-<p>私はfishユーザーでプロンプトを自前実装しているので、<code>fish_prompt.fish</code>において、プロンプトの末尾に<code>printf '\e]133;A\e\\'</code>を追加しました。
-Neovim内では問題ないのですが、Neovimの外、Weztermの中では、謎の改行が入る現象を確認しているので、<code>NVIM</code>環境変数の有無でOSC133の有効/無効を制御しています。このあたりも追い追いなんとかしたい。</p>
-<p><a href="https://github.com/atusy/dotfiles/blob/611557c1525f2e75ba2af610ebc0b5f1b40c1508/dot_config/private_fish/functions/fish_prompt.fish?plain=1#L64-L66" class="uri">https://github.com/atusy/dotfiles/blob/611557c1525f2e75ba2af610ebc0b5f1b40c1508/dot_config/private_fish/functions/fish_prompt.fish?plain=1#L64-L66</a></p>
+<p>OSC133を利用したい場合、fish &gt;= 4.0では設定不要ですが、シェルによってはプロンプト先頭に特殊なエスケープシーケンスを追加する必要があります。
+OSC133の<a href="https://gitlab.freedesktop.org/Per_Bothner/specifications/blob/master/proposals/semantic-prompts.md">仕様</a>を読んで気付きましたが、最初はプロンプトの末尾に足して不可思議な改行が発生して頭を悩ませました。</p>
+<p>fish &lt; 4.0の場合は<code>fish_prompt</code>関数において、プロンプトの先頭に<code>\e]133;A\e\\</code>を追加します。</p>
+<pre class="fish"><code>function fish_prompt
+  echo -e &quot;\e]133;A\e\\&#39;&lt;作業ディレクトリとかの情報&gt; $&#39;
+end</code></pre>
 <p>Zshユーザーは以下の記事を参考にするとよさそうです。</p>
 <blockquote>
 <p>zshでOSC 133に対応する by Yoshi Yamaguchi<br />
@@ -32,4 +34,8 @@ Neovim内では問題ないのですが、Neovimの外、Weztermの中では、�
 <h2>ENJOY!</h2>
 <p>前回はthincaさんによる「<a href="https://thinca.hatenablog.com/entry/2025/03/megurovim-28">Meguro.vim #28 を開催しました</a>」でした。継続できててすごい……。</p>
 <p>次回はokmkmさんによる「Neovimを使い始めて半年経った若輩Vimmerが愛用しているプラグインの紹介」だそうです。最近、プラグインの棚卸できてないので楽しみ！</p>
+</div>
+<div id="謝辞" class="section level2">
+<h2>謝辞</h2>
+<p><a href="https://x.com/delphinus35">delphius</a>さんに、fish 4.0であれば設定不要なことを教えていただき、自身の設定や本記事の修正ができました。ありがとうございます。</p>
 </div>

@@ -17,7 +17,7 @@ highlighhtjs: []
 [Vim駅伝](https://vim-jp.org/ekiden/)2025-03-12の記事です。
 
 
-最近、NeovimがOSC 133に対応しました（< https://github.com/neovim/neovim/pull/32736>）。
+最近、NeovimがOSC 133に対応しました（<https://github.com/neovim/neovim/pull/32736>）。
 
 これにより、OSC 133に対応したシェルのユーザーであれば、`[[` や `]]` を使って、`:terminal`内のシェルプロンプト間をジャンプできるようになります。
 
@@ -27,14 +27,16 @@ highlighhtjs: []
 
 ちなみに、TerminalモードからNormalモードに移行するには`<C-\><C-N>`ですが、私は`<C-\><C-O>`を使っていないので、単に`<C-\>`で移行できるようにマッピングしています。
 
-さて、OSC133の利用にはシェル側の設定が必要です。
-プロンプト文字の直後に特殊なエスケープシーケンスを出力します。
+OSC133を利用したい場合、fish >= 4.0では設定不要ですが、シェルによってはプロンプト先頭に特殊なエスケープシーケンスを追加する必要があります。
+OSC133の[仕様](https://gitlab.freedesktop.org/Per_Bothner/specifications/blob/master/proposals/semantic-prompts.md)を読んで気付きましたが、最初はプロンプトの末尾に足して不可思議な改行が発生して頭を悩ませました。
 
-私はfishユーザーでプロンプトを自前実装しているので、`fish_prompt.fish`において、プロンプトの末尾に`printf '\e]133;A\e\\'`を追加しました。
-Neovim内では問題ないのですが、Neovimの外、Weztermの中では、謎の改行が入る現象を確認しているので、`NVIM`環境変数の有無でOSC133の有効/無効を制御しています。
-このあたりも追い追いなんとかしたい。
+fish < 4.0の場合は`fish_prompt`関数において、プロンプトの先頭に`\e]133;A\e\\`を追加します。
 
-<https://github.com/atusy/dotfiles/blob/611557c1525f2e75ba2af610ebc0b5f1b40c1508/dot_config/private_fish/functions/fish_prompt.fish?plain=1#L64-L66>
+``` fish
+function fish_prompt
+  echo -e "\e]133;A\e\\'<作業ディレクトリとかの情報> $'
+end
+```
 
 Zshユーザーは以下の記事を参考にするとよさそうです。
 
@@ -49,3 +51,7 @@ Zshユーザーは以下の記事を参考にするとよさそうです。
 
 次回はokmkmさんによる「Neovimを使い始めて半年経った若輩Vimmerが愛用しているプラグインの紹介」だそうです。
 最近、プラグインの棚卸できてないので楽しみ！
+
+## 謝辞
+
+[delphius](https://x.com/delphinus35)さんに、fish 4.0であれば設定不要なことを教えていただき、自身の設定や本記事の修正ができました。ありがとうございます。

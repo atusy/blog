@@ -127,6 +127,11 @@ vim.keymap.set({ "n", "x", "o" }, "W", function()
 end)
 ```
 
+ちなみに、単語レベルの移動をしたい場合は、tinysegmenterを使った`w`モーションの拡張が適していると思います。
+より
+
+> https://github.com/s-show/extend_word_motion.nvim
+
 # ENJOY!
 
 この調子でbionic readingの日本語版を実装できるといいなあ。
