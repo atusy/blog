@@ -1,0 +1,61 @@
+---
+title: "fish shellを実質的なデフォルトシェルにするbashrc"
+author: atusy
+date: '2025-03-13'
+slug: drop-into-fish-from-bash
+categories: [fish]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: []
+---
+
+
+
+<p><a href="https://fishshell.com/">fish shell</a>、便利ですよね。デフォルトでもシンタックスハイライトや補完がよく効いてチューニングしなくてもそこそこ高速に起動するので日常使いしています。これまで <code>chsh -s /usr/bin/fish</code> してデフォルトシェルに<a href="https://fishshell.com/">fish shell</a>を指定していましたが、Nixやhome-manager経由で<a href="https://fishshell.com/">fish shell</a>を入れると特殊な場所にインストールされるため、<code>chsh</code>できない問題に遭遇しました。</p>
+<p>これは、<code>chsh</code>に指定可能なシェルが<code>/etc/shells</code>に記載のものに限られるためです。しかし、nix経由で入れた<a href="https://fishshell.com/">fish shell</a>のパスは<code>/nix/store/zp86jycn34phfs6mzlf03pji09qp3vqs-fish-4.0.0/bin/fish</code>などハッシュ値が含まれるため、<code>/etc/shells</code>への追記が適しません。</p>
+<pre><code>$ cat /etc/shells
+# Pathnames of valid login shells.
+# See shells(5) for details.
+
+/bin/sh
+/bin/bash
+/bin/rbash
+/usr/bin/sh
+/usr/bin/bash
+/usr/bin/rbash
+
+/bin/zsh
+/usr/bin/zsh
+/usr/bin/git-shell
+/usr/bin/systemd-home-fallback-shell
+/usr/bin/fish
+/bin/fish</code></pre>
+<p>どうしようと思っていたところに<a href="https://vim-jp.org/docs/chat.html">vim-jp slack</a>で、Arch Wikiの<a href="https://wiki.archlinux.jp/index.php/Fish">Fish</a>を参考にするといいよと教えてもらいました。ここには<code>bash</code>をデフォルトシェルとしつつ、<code>bashrc</code>内で<code>exec fish</code>することにより、<code>bash</code>から<code>fish</code>に移行する方法が紹介されています。
+<code>exec fish</code>すると、<code>bash</code>プロセスが<code>fish</code>プロセスに置き換わるため、<code>fish</code>を終了した際に<code>bash</code>に戻ることがなくなります。従って単純に<code>bashrc</code>で<code>exec fish</code>するとbashを利用不能になりますが、うまく条件分岐して、ユーザーが明示的に<code>bash</code>を起動することも可能にしています。</p>
+<p><code>bash</code>を経由しても起動時間に大差なさそうなことも確認済みです。その差わずか7ms。</p>
+<pre><code>$ hyperfine -w 5 -r 50 -N &#39;bash -i -c &quot;exec fish -N -c \&quot;exit 0\&quot;; exit 0&quot;&#39;
+Benchmark 1: bash -i -c &quot;exec fish -N -c \&quot;exit 0\&quot;; exit 0&quot;
+  Time (mean ± σ):      10.3 ms ±   2.6 ms    [User: 5.5 ms, System: 4.5 ms]
+  Range (min … max):     8.5 ms …  22.9 ms    50 runs
+
+$ hyperfine -w 5 -r 50 -N &#39;fish -N -c &quot;exit 0&quot;&#39;
+Benchmark 1: fish -N -c &quot;exit 0&quot;
+  Time (mean ± σ):       3.6 ms ±   0.9 ms    [User: 2.5 ms, System: 0.9 ms]
+  Range (min … max):     3.0 ms …   6.5 ms    50 runs</code></pre>
+<p>というわけで、以下を<code>~/.bashrc</code>の先頭に記載しました。</p>
+<pre class="bash"><code>if [[ $(ps --no-header --pid=$PPID --format=comm) != &quot;fish&quot; &amp;&amp; -z ${BASH_EXECUTION_STRING} ]]; then
+  if shopt -q login_shell; then
+    exec fish --login
+  else
+    exec fish
+  fi
+fi</code></pre>
+<p>ちなみにArch Wikiではもっとシンプルそうな書き方をしていますが、こちらは特定の条件下で<code>exec fish ''</code>相当になってしまい、<code>error: Error reading script file ''</code>が発生します。あとでArchWikiを修正しないとですね！</p>
+<pre class="bash"><code>if [[ $(ps --no-header --pid=$PPID --format=comm) != &quot;fish&quot; &amp;&amp; -z ${BASH_EXECUTION_STRING} ]]
+then
+	shopt -q login_shell &amp;&amp; LOGIN_OPTION=&#39;--login&#39; || LOGIN_OPTION=&#39;&#39;
+	exec fish $LOGIN_OPTION
+fi</code></pre>
+<p><strong>ENJOY!</strong></p>
