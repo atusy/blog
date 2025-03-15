@@ -34,7 +34,7 @@ highlighhtjs: []
 /bin/fish</code></pre>
 <p>どうしようと思っていたところに<a href="https://vim-jp.org/docs/chat.html">vim-jp slack</a>で、Arch Wikiの<a href="https://wiki.archlinux.jp/index.php/Fish">Fish</a>を参考にするといいよと教えてもらいました。ここには<code>bash</code>をデフォルトシェルとしつつ、<code>bashrc</code>内で<code>exec fish</code>することにより、<code>bash</code>から<code>fish</code>に移行する方法が紹介されています。
 <code>exec fish</code>すると、<code>bash</code>プロセスが<code>fish</code>プロセスに置き換わるため、<code>fish</code>を終了した際に<code>bash</code>に戻ることがなくなります。従って単純に<code>bashrc</code>で<code>exec fish</code>するとbashを利用不能になりますが、うまく条件分岐して、ユーザーが明示的に<code>bash</code>を起動することも可能にしています。</p>
-<p><code>bash</code>を経由しても起動時間に大差なさそうなことも確認済みです。その差わずか7ms。</p>
+<p><code>bash</code>を経由しても起動時間に大差なさそうなことも確認済みです。その差わずか7ms。もうちょっとbashやfishのオプションは調整してもいいかもですが、まあ差を知るには十分でしょう。</p>
 <pre><code>$ hyperfine -w 5 -r 50 -N &#39;bash -i -c &quot;exec fish -N -c \&quot;exit 0\&quot;; exit 0&quot;&#39;
 Benchmark 1: bash -i -c &quot;exec fish -N -c \&quot;exit 0\&quot;; exit 0&quot;
   Time (mean ± σ):      10.3 ms ±   2.6 ms    [User: 5.5 ms, System: 4.5 ms]
