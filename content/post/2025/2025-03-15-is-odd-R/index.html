@@ -1,0 +1,207 @@
+---
+title: "1～100までの整数が奇数かどうかを判定するプログラム.R"
+author: atusy
+date: '2025-03-14'
+slug: is-odd-R
+categories: [R]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: []
+---
+
+
+
+<blockquote>
+<p>【ゆる募】１～100までの整数が奇数かどうかを判定するプログラム大喜利を開催します☺　言語不問✨
+<a href="https://x.com/arith_rose/status/1899300131658510802" class="uri">https://x.com/arith_rose/status/1899300131658510802</a></p>
+</blockquote>
+<p>とのことで、Rで書いてみましょう。模範解答……？ナニソレオイシイノ？</p>
+<div id="まずは解答例に近い感じで" class="section level1">
+<h1>まずは解答例に近い感じで！</h1>
+<div id="matchがないならswitchすればいいじゃない" class="section level2">
+<h2>matchがないならswitchすればいいじゃない！</h2>
+<p>解答例はPythonでmatch文を使ってますが、Rで近しい<code>switch</code>関数を使うとこんな感じでしょうか。冗長さもさることながら、Rの<code>switch</code>関数は文字列一致判定をすること、ベクトル化されていないことなど、イマイチ感爆発でステキです！</p>
+<pre class="r"><code>is_odd &lt;- function(x) {
+  switch(as.character(x),
+    &quot;1&quot; = TRUE,
+    &quot;3&quot; = TRUE,
+    &quot;5&quot; = TRUE,
+    &quot;7&quot; = TRUE,
+    &quot;9&quot; = TRUE,
+    &quot;11&quot; = TRUE,
+    &quot;13&quot; = TRUE,
+    &quot;15&quot; = TRUE,
+    &quot;17&quot; = TRUE,
+    &quot;19&quot; = TRUE,
+    &quot;21&quot; = TRUE,
+    &quot;23&quot; = TRUE,
+    &quot;25&quot; = TRUE,
+    &quot;27&quot; = TRUE,
+    &quot;29&quot; = TRUE,
+    &quot;31&quot; = TRUE,
+    &quot;33&quot; = TRUE,
+    &quot;35&quot; = TRUE,
+    &quot;37&quot; = TRUE,
+    &quot;39&quot; = TRUE,
+    &quot;41&quot; = TRUE,
+    &quot;43&quot; = TRUE,
+    &quot;45&quot; = TRUE,
+    &quot;47&quot; = TRUE,
+    &quot;49&quot; = TRUE,
+    &quot;51&quot; = TRUE,
+    &quot;53&quot; = TRUE,
+    &quot;55&quot; = TRUE,
+    &quot;57&quot; = TRUE,
+    &quot;59&quot; = TRUE,
+    &quot;61&quot; = TRUE,
+    &quot;63&quot; = TRUE,
+    &quot;65&quot; = TRUE,
+    &quot;67&quot; = TRUE,
+    &quot;69&quot; = TRUE,
+    &quot;71&quot; = TRUE,
+    &quot;73&quot; = TRUE,
+    &quot;75&quot; = TRUE,
+    &quot;77&quot; = TRUE,
+    &quot;79&quot; = TRUE,
+    &quot;81&quot; = TRUE,
+    &quot;83&quot; = TRUE,
+    &quot;85&quot; = TRUE,
+    &quot;87&quot; = TRUE,
+    &quot;89&quot; = TRUE,
+    &quot;91&quot; = TRUE,
+    &quot;93&quot; = TRUE,
+    &quot;95&quot; = TRUE,
+    &quot;97&quot; = TRUE,
+    &quot;99&quot; = TRUE,
+    FALSE
+  )
+}</code></pre>
+<pre class="r"><code>is_odd(1)
+#&gt; [1] TRUE
+is_odd(2)
+#&gt; [1] FALSE</code></pre>
+</div>
+<div id="ベクトルの要素を取り出すと簡単にcaseっぽいことできるんだぜ" class="section level2">
+<h2>ベクトルの要素を取り出すと簡単にcaseっぽいことできるんだぜ？</h2>
+<p>これならベクトル化もしてるしなと、Rチョトワカル風を漂わせていていいですね。
+100より大きな数値を与えると<code>NA</code>を返すのでいけてる実装かも……？と思いきや、<code>is_odd(-1)</code>や<code>is_odd(1.1)</code>するとたいへんにバグりちらかしております。</p>
+<pre class="r"><code>is_odd &lt;- function(x) {
+  yes &lt;- c(
+    TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE,
+    TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE,
+    TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE,
+    TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE,
+    TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE,
+    TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE,
+    TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE,
+    TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE,
+    TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE,
+    TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE
+  )
+  yes[x]
+}</code></pre>
+<pre class="r"><code>is_odd(1:10)
+#&gt;  [1]  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE
+is_odd(101)
+#&gt; [1] NA
+is_odd(1.1)
+#&gt; [1] TRUE
+is_odd(-1) # 長さ99のベクトルになる
+#&gt;  [1] FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE
+#&gt; [13] FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE
+#&gt; [25] FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE
+#&gt; [37] FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE
+#&gt; [49] FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE
+#&gt; [61] FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE
+#&gt; [73] FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE
+#&gt; [85] FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE
+#&gt; [97] FALSE  TRUE FALSE</code></pre>
+<p>もう少し短かく書くなら、<code>rep</code>を使うといいでしょう。</p>
+<pre class="r"><code>is_odd &lt;- function(x) {
+  rep(c(TRUE, FALSE), 50)[x]
+}</code></pre>
+</div>
+</div>
+<div id="rらしく書いてみよう" class="section level1">
+<h1>Rらしく書いてみよう</h1>
+<div id="奇数の集合のいずれかに一致するか見ればいいよね" class="section level2">
+<h2>奇数の集合のいずれかに一致するか見ればいいよね！</h2>
+<p>ここらで解答例から離れて遊んでみましょう。</p>
+<p>1:100までの整数を2行に並べたら、1行目は奇数になるので、それと一致するかどうかを見ればいいですね。よく考えているようで、<code>any</code>を使っているせいで、<code>x</code>に長さ1以外のベクトルを使うとバグります。</p>
+<pre class="r"><code>is_odd &lt;- function(x) {
+  any(x == matrix(1:100, nrow = 2)[1, ])
+}</code></pre>
+<pre class="r"><code>is_odd(1)
+#&gt; [1] TRUE
+is_odd(c(1, 2))
+#&gt; [1] TRUE</code></pre>
+</div>
+<div id="奇数の集合に含まれるか見ればいいよね" class="section level2">
+<h2>奇数の集合に含まれるか見ればいいよね！</h2>
+<p>さっきよりもスマート。
+<code>seq</code>を使うことで、余計なデータを発生させず、<code>%in%</code>を使うことで<code>x</code>に長さ1以外のベクトルを使っても大丈夫です。</p>
+<pre class="r"><code>is_odd &lt;- function(x) {
+  return(x %in% seq(1, 100, by = 2))
+}</code></pre>
+<pre class="r"><code>is_odd(1)
+#&gt; [1] TRUE
+is_odd(1:10)
+#&gt;  [1]  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE</code></pre>
+</div>
+</div>
+<div id="問題文をよく読もう" class="section level1">
+<h1>問題文をよく読もう！</h1>
+<div id="真っ当な実装だけど忠実すぎるぜ" class="section level2">
+<h2>真っ当な実装！だけど忠実すぎるぜ！</h2>
+<p>ここらで</p>
+<p>奇数かどうかの判定なら、2で割った余りが1かどうか見ればOKですね。真っ当な実装です。</p>
+<p>ところが、問題文に従って、<code>x</code>の要素が1つでも1～100の整数という条件に従わない時にエラーを出しています。忠実すぎて余計なお世話ですね。
+<code>is_odd</code>という関数名としては余計なお世話ですが、実際のプロダクトでは要件次第で入りうるバリデーションでもあります。</p>
+<pre class="r"><code>is_oidd &lt;- function(x) {
+  if (any(x &lt; 1 | x &gt; 100 | floor(x) != x)) {
+    stop(&quot;1～100の整数を入力してください&quot;)
+  }
+  return(x %% 2 == 1)
+}</code></pre>
+<pre class="r"><code>is_odd(1)
+#&gt; [1] TRUE
+is_odd(c(-1, 1))
+#&gt; [1] FALSE  TRUE
+is_odd(c(1, 101))
+#&gt; [1]  TRUE FALSE
+is_odd(0.1)
+#&gt; [1] FALSE</code></pre>
+</div>
+<div id="判定しろとは言うが形式は指定してないよな" class="section level2">
+<h2>判定しろとは言うが、形式は指定してないよな！</h2>
+<p>ひたすら文字列を<code>print</code>してお知らせします。使いにくいわ！</p>
+<pre class="r"><code>is_odd &lt;- function(x) {
+  for (ok in x %% 2 == 1) {
+    if (ok) {
+      print(&quot;そうだよ&quot;)
+    } else {
+      print(&quot;ちがうよ&quot;)
+    }
+  }
+}</code></pre>
+<pre class="r"><code>is_odd(1:10)
+#&gt; [1] &quot;そうだよ&quot;
+#&gt; [1] &quot;ちがうよ&quot;
+#&gt; [1] &quot;そうだよ&quot;
+#&gt; [1] &quot;ちがうよ&quot;
+#&gt; [1] &quot;そうだよ&quot;
+#&gt; [1] &quot;ちがうよ&quot;
+#&gt; [1] &quot;そうだよ&quot;
+#&gt; [1] &quot;ちがうよ&quot;
+#&gt; [1] &quot;そうだよ&quot;
+#&gt; [1] &quot;ちがうよ&quot;</code></pre>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>ENJOY!!</h1>
+<p>たまにこうして遊ぶと、Rの楽しさを再認識しますね！</p>
+<p>たいへんにoddなコードをたくさん書けて楽しかったです！</p>
+<p>ふざけてはいるのですが、テストケースの考えかたや、要件の整理など、プログラミングに重要な要素がいっぱい詰まった良問と思いました！</p>
+</div>
