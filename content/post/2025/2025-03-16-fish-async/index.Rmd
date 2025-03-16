@@ -1,0 +1,73 @@
+---
+title: "Fishで非同期処理を実装してみる"
+author: atusy
+date: '2025-03-16'
+slug: fish-async
+categories: [fish]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [fish]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+Fishのプロンプトを自作していて、実行に時間がかかる場合に、非同期にプロンプトを更新できるか気になりました。
+
+軽く調べてみたところ、ユニバーサル変数を利用するといいよとのこと。
+
+> <https://www.reddit.com/r/fishshell/comments/1hig49y/how_do_asynchronous_prompts_work/>
+
+ユニバーサル変数とはFishのプロセス間で共有される変数です。
+Fishには変数の更新を監視して関数を自動実行する仕組みもあるので、別プロセスからユニバーサル変数を更新して、現在のプロセス側で非同期に処理を受け取ればいいみたい。
+
+試しに書いてみましたが、結構簡単に書けますね。
+以下のスクリプトを`source ...`すると、`var`変数の更新が非同期に走ることを確認できます。
+
+
+``` fish
+# define async behavior
+set -U var (random)
+
+function on_update_var --on-variable var
+  echo "var is $var"
+
+  # cleanup
+  functions -e on_update_var
+  set -e -U var
+end
+
+function async_update_var
+  fish -c "set var (sleep 0.5; random)" &
+  echo $last_pid
+
+  # cleanup
+  functions -e async_update_var
+end
+
+# test
+echo "var was $var"
+set -l async_pid (async_update_var)
+echo "waiting..."
+wait $async_pid
+```
+
+サンプルではユニバーサル変数を`var`にしていますが、名前被りしないように、動的に変数名を作成してもいいかもしれませんね。
+
+``` fish
+set -l varname var_(uuidgen | string replace -a '-' '')
+set -U $varname (random)
+
+function on_update_$varname --on-variable $varname
+  # 略
+end
+
+# 略
+```
+
+プロンプトの非同期更新にも近々挑もうと思います。
+
+**ENJOY**
