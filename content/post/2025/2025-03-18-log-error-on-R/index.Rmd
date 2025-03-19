@@ -1,0 +1,200 @@
+---
+title: "Rでトレースバックつきのエラーログをとる"
+author: atusy
+date: '2025-03-19'
+slug: log-error-on-R
+categories: [R]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [R]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+logger::log_appender(logger::appender_stdout)
+logger::log_formatter(logger::formatter_json)
+logger::log_layout(
+  logger::layout_json_parser(fields = c("time", "level")),
+)
+```
+
+エラーログはエラーでユーザーに影響が発生した時に、何が起きたか記録する重要な情報源です。
+特にどこで問題が起きたか特定を容易にするトレースバックはログに欠かせません。
+ログをとらなくてもエラーは表示されるよと思いの方も、ログを使うとエラーの発生時刻は関連情報を同時に記録できるので、覚えていて損はないです。
+
+ちなみにインタラクティブな用途であれば、`options(error = traceback)`を設定しておけば、簡単にトレースバックを取得できますが、`tryCatch`すると挙動が変わったりするのでイマイチ頼りづらいです。
+ということで、どうやってエラーハンドリングすればいいか考えてみたいと思います。
+
+```r
+options(error = traceback) # ここでログを出す実装すればよさそうに見える
+f <- function() {
+  g()
+}
+g <- function() {
+  stop("ERROR")
+}
+
+# 素の呼び出しはトレースバック出る
+f()
+#> Error in g() : ERROR
+#> 3: stop("ERROR") at #2
+#> 2: g() at #2
+#> 1: f()
+
+# tryCatchするとトレースバックがでない
+tryCatch(f(), error = function(e) {})
+#> NULL
+```
+
+
+Pythonであれば`try`-`except`を使って簡単に実現できます。
+
+```python
+import sys
+
+import structlog
+
+logger = structlog.get_logger(__name__) # logging.getLogger(__name__) でもOK
+
+try:
+    raise Exception("ERROR")
+except Exception:
+    logger.error("Error occured", exc_info=True)
+#> 2025-03-19 20:30:31 [error    ] Error occured
+#> Traceback (most recent call last):
+#>   File "<省略>/demo.py", line 8, in <module>
+#>     raise Exception("ERROR")
+#> Exception: ERROR
+```
+
+一方`R`で同じようにしてもterashimさんの解説の通り、まともなトレースバックは得られません。
+
+> tryCatch() の条件ハンドラで traceback(1) を実行しても、元のコールスタックを抜け出しているので有益な情報は得られません。 \
+> （[ Rの条件ハンドリングを理解する](https://terashim.com/posts/r-condition-handling/)）
+
+```{r, error=TRUE}
+tryCatch(
+  {
+    stop("ERROR")
+  },
+  error = function(e) {
+    tb <- capture.output(traceback(6))
+    print(head(tb, 15))
+  }
+)
+```
+
+しかたないので、同じくterashimさんが解説していらっしゃる通り、`withCallingHandlers`を使う必要があります。
+しれっとJSONによる構造化ログを使ってますが、なんだそれという方はぜひ私のJapan.R 2024の発表資料をご覧ください（[Happy Structured Logging in R](https://atusy.github.io/japanr-2024-logging/)）。
+
+```{r, error=TRUE}
+withCallingHandlers(
+  {
+    stop("ERROR")
+  },
+  error = function(e) {
+    tb <- capture.output(traceback(6))
+    logger::log_info(
+      "Error occured",
+      traceback = paste(
+        head(tb, 15),
+        collapse = "\n"
+      )
+    )
+  }
+)
+```
+
+エラーの発生は`withCallingHandlers`の処理完了後なので、エラーの後処理をしたい場合は更に`tryCatch`で囲ってください。
+たとえば、複数のパラメータを処理する場合に、特定のパラメータでのエラーを記録するケースが考えられます。
+この場合、他のパラメータは引き続き試せるので、エラーを無視する処理を入れることがあります。
+
+```{r, error=TRUE}
+for (param in c("foo", "bar", "buzz")) {
+  logger::log_info(message = "Start processing", param = param)
+  tryCatch(
+    {
+      withCallingHandlers(
+        {
+          if (param == "bar") {
+            stop("ERROR")
+          }
+        },
+        error = function(e) {
+          # パラメータの処理失敗はユーザー影響があるのでエラーログ
+          tb <- capture.output(traceback(6))
+          logger::log_error(
+            message = e$message,
+            traceback = paste(
+              tb,
+              collapse = "\n"
+            ),
+            param = param
+          )
+        }
+      )
+    },
+    error = function(e) {} # tryCatchでエラーを無視する
+  )
+  logger::log_info(message = "End processing", param = param)
+}
+```
+
+また、プログラム内でエラーハンドリングが抜けていたケースを検知するには、処理全体を`tryCatch`と`withCallingHandlers`で囲んでおけばよさそうです。
+`withCallingHandlers`でエラーを記録し、`tryCatch`でエラー発生時にプログラムを強制終了させます。
+`tryCatch`しなかった場合、ログに記録済みのエラーが表示されて冗長になるので、`q()`しておきましょう。
+
+```{r, include = FALSE}
+q <- function(...) {}
+```
+
+```{r}
+# ログの設定
+logger::log_appender(logger::appender_stdout)
+logger::log_formatter(logger::formatter_json)
+logger::log_layout(
+  logger::layout_json_parser(fields = c("time", "level")),
+)
+
+# メイン処理の定義
+main <- function() {
+  # なにか処理
+  stop("UNIMPLEMENTED")
+}
+
+# メイン処理の実行
+tryCatch(
+  {
+    withCallingHandlers(
+      {
+        main()
+      },
+      error = function(e) {
+        # エラー処理
+        # `main`のエラーは致命的なので、ERRORレベルではなくFATALレベルにしておく
+        # 更に外側のtryCatchでプログラムを終了する
+        traceback <- paste(capture.output(traceback(6)), collapse = "\n")
+        logger::log_fatal(
+          message = "Unhandled error occurred",
+          error = e$message,
+          traceback = traceback
+        )
+      }
+    )
+  },
+  error = function(e) {
+    # 終了処理
+    q(save = "no", status = 1)
+  }
+)
+```
+
+たぶんこんな感じなんだけどしんどい……。
+
+**ENJOY!!**
+
+この記事は [Osaka.R](https://osaka-r.connpass.com)朝もくの時間で書きました。
+こういう場があると、やる気がわいていいですね。
+主にオンラインで活動しているので、大阪以外にお住いの方もぜひ！
