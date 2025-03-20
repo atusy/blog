@@ -1,0 +1,324 @@
+---
+title: "Fishの関数で関数外の変数を利用する"
+author: atusy
+date: '2025-03-20'
+slug: use-outer-scope-vars-in-fish
+categories: [fish]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: []
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+2025-03-21時点で最新のFish 4.0.1のデフォルト挙動では、関数が外界のローカル変数を参照できません。
+ためしに、関数`f`の外で定義した変数の`echo`を試みてみると、何も表示されません。
+
+ということで、色々実験しつつ、外側の変数を使いたいときどうすればいいか、見ていきましょう。
+
+```fish
+set --local x "hi"
+
+function f
+  echo "$x"
+end
+
+f # 何も表示されない
+```
+
+いきなり余談ですが、一部、リリースノートにはない挙動変更があるようで、3.x系では外側の変数を参照できたみたいです。
+それが原因で、古いスクリプトはFish 4系を使うと挙動が変わる恐れがあります。
+実際に、Taskfileの補完スクリプトはFish 4系で動かないバグがあり、私が修正しました（<https://github.com/go-task/task/pull/2130>）。
+
+さて、関数外で定義されたローカル変数は参照できないので、変数の更新もデフォルトではできません。
+当然ですね。
+
+```fish
+set --local x "hi"
+
+function f
+  set x "updated"
+end
+
+f
+echo $x
+#> hi
+```
+
+ただし、関数は参照できます。
+できないとさすがに不便ですよね。
+
+```fish
+function f
+  echo "hi"
+end
+
+function g
+  f
+end
+
+g
+#> hi
+```
+
+そして使いどころは限られるながら、関数定義の更新もできます。
+
+```fish
+function f
+  echo "hi"
+end
+
+function g
+  function f
+    echo "updated"
+  end
+end
+
+g
+f
+#> updated
+```
+
+# 外側の変数を利用するにはどうすればいいか？
+
+「デフォルト挙動では、関数が外界のローカル変数を参照できません」と述べたとおり、関数定義の挙動をオプションで変更するか、ローカル変数以外を使えばOKです。
+
+`fish`では関数のスコープを`set`コマンドのオプションで柔軟に変更できるので、うっかり関数内で定義するつもりだった変数が未定義なケースや、うっかり関数の外側の変数を変更してしまう事故を防ぐ設計なのかなと思います。
+
+安全ですね。
+
+## 関数定義のオプションを使う
+
+`help function`すると答えが載ってますが、変数を継承する方法と、スコープのシャドイングを無効化する方法があります。
+
+### 変数を継承する
+
+`--inherit-variable`オプションを使うと、指定した名前の変数の**スナップショット**を関数内で利用できます。
+やったね！
+
+```fish
+set --local x "hi"
+
+function f --inherit-variable x
+  echo "$x"
+end
+
+f
+#> "hi"
+```
+
+**スナップショット**なので注意するべき点もあります。
+
+まず、`--inherit-variable`利用前と同様に、関数外にある変数を更新することはできません。
+
+```fish
+set --local x "hi"
+
+function f --inherit-variable x
+  set x updated
+end
+
+f
+echo $x
+#> hi
+```
+
+次に関数定義の後に外側で変数を更新しても、関数内の変数は定義時点のままです。
+
+```fish
+set --local x "hi"
+
+function f --inherit-variable x
+  echo "$x"
+end
+
+set x updated
+
+f
+#> "hi"
+```
+
+どちらも**スナップショット**なので当然ではありますし、非常に安全性を重視した挙動かなと思います。
+
+
+### スコープのシャドイングを無効化する
+
+すべての変数についてシャドイングが無効化されるため、注意して使うとよさそうです。
+
+当然ですが、外側の変数を参照できます。
+
+```fish
+set --local x "hi"
+
+function f --no-scope-shadowing
+  echo "$x"
+end
+
+f
+```
+
+変数の継承と異なり、変数の更新も可能です。
+
+```fish
+set --local x "hi"
+
+function f --no-scope-shadowing
+  set x "updated"
+end
+
+f
+echo $x
+#> updated
+```
+
+ただし、シャドイングが有効な関数`g`の中で、シャドイングが無効な関数`f`を利用しても、`g`の外側の変数はスコープ外になるようです。
+このあたりも安全性重視ということでしょうか。
+
+```fish
+set --local x "hi"
+
+function f --no-scope-shadowing
+  set x "updated"
+end
+
+function g
+  f
+end
+
+g
+echo $x
+```
+
+## 変数定義のオプションを使う
+
+### グローバル変数を使う
+
+もっとも素朴な方法ですね。`help set`には、任意の関数で使えることと、関数内で更新することができると書かれています。
+
+当然参照できる。
+
+```fish
+set --global x "hi"
+
+function f
+  echo "$x"
+end
+
+f
+#> hi
+```
+
+更新もできる。
+
+```fish
+set --global x "hi"
+
+function f
+  set x "updated"
+end
+
+f
+echo $x
+#> updated
+```
+
+### ローカル環境変数を使う
+
+環境変数の用途を考えると推奨されませんが、その性質上、関数内でも参照できます。
+
+```fish
+set --local --export x "hi"
+
+function f
+  echo "$x"
+end
+
+f
+#> hi
+```
+
+ただしローカルなので、関数内で更新しても外側の変数は変わりません。
+
+```fish
+set --local --export x "hi"
+
+function f
+  set x "updated"
+end
+
+f
+echo $x
+#> "hi"
+```
+
+一方で、環境変数故に子プロセスに引き継がれる点は注意ですね。
+
+```fish
+set --local --export x "hi"
+
+fish -c 'echo $x'
+```
+
+スクリプト内で使うと、スクリプトローカルな環境変数になるので、スクリプトをソースした場合もスクリプト内でのみ有効な変数になります。
+
+```fish
+set -l tempfile (mktemp)
+echo '
+set --local --export x "hi"
+
+function f
+  echo "$x"
+end
+
+f
+' > $tempfile
+
+source $tempfile
+#> hi
+
+echo $x
+```
+
+### グローバル環境変数を使う
+
+ローカル環境変数を関数内で参照できたとおり、グローバル環境変数も参照できます。
+
+また関数内からの更新ができます。
+
+スクリプト内で定義してソースした場合、スクリプトの外側でも有効な変数になります。
+
+```fish
+echo 'set --global --export x "hi"' | source -
+echo $x
+#> hi
+```
+
+### ユニバーサル変数を使う
+
+ユニバーサル変数は、Fishのプロセス間で共有される変数です。
+プロセスが終了しても残るので、使いどころには注意。
+こいつはなんでもアリですね。
+
+```fish
+# 別プロセスで`x`を定義
+fish -c 'set -U x "hi"'
+
+# 参照
+function f
+  echo $x
+end
+
+f
+
+# fishを終了しても残るので消しとく
+set --erase --universal x
+echo $x
+```
+
+# ENJOY!
+
+こういう、言語の細かい挙動を調査するのは楽しいですね。

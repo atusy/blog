@@ -1,0 +1,238 @@
+---
+title: "Fishの関数で関数外の変数を利用する"
+author: atusy
+date: '2025-03-20'
+slug: use-outer-scope-vars-in-fish
+categories: [fish]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: []
+---
+
+
+
+<p>2025-03-21時点で最新のFish 4.0.1のデフォルト挙動では、関数が外界のローカル変数を参照できません。ためしに、関数<code>f</code>の外で定義した変数の<code>echo</code>を試みてみると、何も表示されません。</p>
+<p>ということで、色々実験しつつ、外側の変数を使いたいときどうすればいいか、見ていきましょう。</p>
+<pre class="fish"><code>set --local x &quot;hi&quot;
+
+function f
+  echo &quot;$x&quot;
+end
+
+f # 何も表示されない</code></pre>
+<p>いきなり余談ですが、一部、リリースノートにはない挙動変更があるようで、3.x系では外側の変数を参照できたみたいです。それが原因で、古いスクリプトはFish 4系を使うと挙動が変わる恐れがあります。実際に、Taskfileの補完スクリプトはFish 4系で動かないバグがあり、私が修正しました（<a href="https://github.com/go-task/task/pull/2130" class="uri">https://github.com/go-task/task/pull/2130</a>）。</p>
+<p>さて、関数外で定義されたローカル変数は参照できないので、変数の更新もデフォルトではできません。当然ですね。</p>
+<pre class="fish"><code>set --local x &quot;hi&quot;
+
+function f
+  set x &quot;updated&quot;
+end
+
+f
+echo $x
+#&gt; hi</code></pre>
+<p>ただし、関数は参照できます。できないとさすがに不便ですよね。</p>
+<pre class="fish"><code>function f
+  echo &quot;hi&quot;
+end
+
+function g
+  f
+end
+
+g
+#&gt; hi</code></pre>
+<p>そして使いどころは限られるながら、関数定義の更新もできます。</p>
+<pre class="fish"><code>function f
+  echo &quot;hi&quot;
+end
+
+function g
+  function f
+    echo &quot;updated&quot;
+  end
+end
+
+g
+f
+#&gt; updated</code></pre>
+<div id="外側の変数を利用するにはどうすればいいか" class="section level1">
+<h1>外側の変数を利用するにはどうすればいいか？</h1>
+<p>「デフォルト挙動では、関数が外界のローカル変数を参照できません」と述べたとおり、関数定義の挙動をオプションで変更するか、ローカル変数以外を使えばOKです。</p>
+<p><code>fish</code>では関数のスコープを<code>set</code>コマンドのオプションで柔軟に変更できるので、うっかり関数内で定義するつもりだった変数が未定義なケースや、うっかり関数の外側の変数を変更してしまう事故を防ぐ設計なのかなと思います。</p>
+<p>安全ですね。</p>
+<div id="関数定義のオプションを使う" class="section level2">
+<h2>関数定義のオプションを使う</h2>
+<p><code>help function</code>すると答えが載ってますが、変数を継承する方法と、スコープのシャドイングを無効化する方法があります。</p>
+<div id="変数を継承する" class="section level3">
+<h3>変数を継承する</h3>
+<p><code>--inherit-variable</code>オプションを使うと、指定した名前の変数の<strong>スナップショット</strong>を関数内で利用できます。やったね！</p>
+<pre class="fish"><code>set --local x &quot;hi&quot;
+
+function f --inherit-variable x
+  echo &quot;$x&quot;
+end
+
+f
+#&gt; &quot;hi&quot;</code></pre>
+<p><strong>スナップショット</strong>なので注意するべき点もあります。</p>
+<p>まず、<code>--inherit-variable</code>利用前と同様に、関数外にある変数を更新することはできません。</p>
+<pre class="fish"><code>set --local x &quot;hi&quot;
+
+function f --inherit-variable x
+  set x updated
+end
+
+f
+echo $x
+#&gt; hi</code></pre>
+<p>次に関数定義の後に外側で変数を更新しても、関数内の変数は定義時点のままです。</p>
+<pre class="fish"><code>set --local x &quot;hi&quot;
+
+function f --inherit-variable x
+  echo &quot;$x&quot;
+end
+
+set x updated
+
+f
+#&gt; &quot;hi&quot;</code></pre>
+<p>どちらも<strong>スナップショット</strong>なので当然ではありますし、非常に安全性を重視した挙動かなと思います。</p>
+</div>
+<div id="スコープのシャドイングを無効化する" class="section level3">
+<h3>スコープのシャドイングを無効化する</h3>
+<p>すべての変数についてシャドイングが無効化されるため、注意して使うとよさそうです。</p>
+<p>当然ですが、外側の変数を参照できます。</p>
+<pre class="fish"><code>set --local x &quot;hi&quot;
+
+function f --no-scope-shadowing
+  echo &quot;$x&quot;
+end
+
+f</code></pre>
+<p>変数の継承と異なり、変数の更新も可能です。</p>
+<pre class="fish"><code>set --local x &quot;hi&quot;
+
+function f --no-scope-shadowing
+  set x &quot;updated&quot;
+end
+
+f
+echo $x
+#&gt; updated</code></pre>
+<p>ただし、シャドイングが有効な関数<code>g</code>の中で、シャドイングが無効な関数<code>f</code>を利用しても、<code>g</code>の外側の変数はスコープ外になるようです。このあたりも安全性重視ということでしょうか。</p>
+<pre class="fish"><code>set --local x &quot;hi&quot;
+
+function f --no-scope-shadowing
+  set x &quot;updated&quot;
+end
+
+function g
+  f
+end
+
+g
+echo $x</code></pre>
+</div>
+</div>
+<div id="変数定義のオプションを使う" class="section level2">
+<h2>変数定義のオプションを使う</h2>
+<div id="グローバル変数を使う" class="section level3">
+<h3>グローバル変数を使う</h3>
+<p>もっとも素朴な方法ですね。<code>help set</code>には、任意の関数で使えることと、関数内で更新することができると書かれています。</p>
+<p>当然参照できる。</p>
+<pre class="fish"><code>set --global x &quot;hi&quot;
+
+function f
+  echo &quot;$x&quot;
+end
+
+f
+#&gt; hi</code></pre>
+<p>更新もできる。</p>
+<pre class="fish"><code>set --global x &quot;hi&quot;
+
+function f
+  set x &quot;updated&quot;
+end
+
+f
+echo $x
+#&gt; updated</code></pre>
+</div>
+<div id="ローカル環境変数を使う" class="section level3">
+<h3>ローカル環境変数を使う</h3>
+<p>環境変数の用途を考えると推奨されませんが、その性質上、関数内でも参照できます。</p>
+<pre class="fish"><code>set --local --export x &quot;hi&quot;
+
+function f
+  echo &quot;$x&quot;
+end
+
+f
+#&gt; hi</code></pre>
+<p>ただしローカルなので、関数内で更新しても外側の変数は変わりません。</p>
+<pre class="fish"><code>set --local --export x &quot;hi&quot;
+
+function f
+  set x &quot;updated&quot;
+end
+
+f
+echo $x
+#&gt; &quot;hi&quot;</code></pre>
+<p>一方で、環境変数故に子プロセスに引き継がれる点は注意ですね。</p>
+<pre class="fish"><code>set --local --export x &quot;hi&quot;
+
+fish -c &#39;echo $x&#39;</code></pre>
+<p>スクリプト内で使うと、スクリプトローカルな環境変数になるので、スクリプトをソースした場合もスクリプト内でのみ有効な変数になります。</p>
+<pre class="fish"><code>set -l tempfile (mktemp)
+echo &#39;
+set --local --export x &quot;hi&quot;
+
+function f
+  echo &quot;$x&quot;
+end
+
+f
+&#39; &gt; $tempfile
+
+source $tempfile
+#&gt; hi
+
+echo $x</code></pre>
+</div>
+<div id="グローバル環境変数を使う" class="section level3">
+<h3>グローバル環境変数を使う</h3>
+<p>ローカル環境変数を関数内で参照できたとおり、グローバル環境変数も参照できます。</p>
+<p>また関数内からの更新ができます。</p>
+<p>スクリプト内で定義してソースした場合、スクリプトの外側でも有効な変数になります。</p>
+<pre class="fish"><code>echo &#39;set --global --export x &quot;hi&quot;&#39; | source -
+echo $x
+#&gt; hi</code></pre>
+</div>
+<div id="ユニバーサル変数を使う" class="section level3">
+<h3>ユニバーサル変数を使う</h3>
+<p>ユニバーサル変数は、Fishのプロセス間で共有される変数です。プロセスが終了しても残るので、使いどころには注意。こいつはなんでもアリですね。</p>
+<pre class="fish"><code># 別プロセスで`x`を定義
+fish -c &#39;set -U x &quot;hi&quot;&#39;
+
+# 参照
+function f
+  echo $x
+end
+
+f
+
+# fishを終了しても残るので消しとく
+set --erase --universal x
+echo $x</code></pre>
+</div>
+</div>
+</div>
+<div id="enjoy" class="section level1">
+<h1>ENJOY!</h1>
+<p>こういう、言語の細かい挙動を調査するのは楽しいですね。</p>
+</div>
