@@ -1,0 +1,85 @@
+---
+title: "Fishの補完をコマンドラインの内容に応じて変える"
+author: atusy
+date: '2025-03-21'
+slug: fish-completion-considering-tokens
+categories: [fish]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: []
+---
+
+
+
+<p>Fishで補完を定義するとき、コマンドに指定された引数によって補完候補を変えたいことがあります。たとえばメインコマンドの直後だったらサブコマンドを補完したい、<code>--input-file</code>の後だったらファイル名を補完したいとかいうことありますよね。</p>
+<p>私は<code>task</code>コマンドの<code>--global</code>オプションでこのようなニーズを感じました。
+<code>task</code>コマンドは<a href="https://taskfile.dev/">Taskfile</a>というプロジェクトが提供するタスクランナーのコマンドです。</p>
+<p>GitでMakefileを管理している場合、個人的によく使うタスクの登録先がなくて困るのですが、Taskfileはタスク管理用のYamlの名前を複数パターン持つことでこの問題を解決しているので好きです。</p>
+<ul>
+<li><code>Taskfile.dist.yml</code>: Gitで管理するタスク定義</li>
+<li><code>Taskfile.yml</code>: 個人用のタスク定義</li>
+</ul>
+<p>としておくと、<code>task</code>コマンドは<code>Taskfile.yml</code>を優先するので、<code>Taskfile.dist.yml</code>を編集せずに個人用のタスクを定義できます。また、<code>Taskfile.yml</code>で以下のようにしておくと、<code>Taskfile.dist.yml</code>のタスクも継承できます。便利。</p>
+<pre class="yaml"><code>version: &#39;3&#39;
+
+includes:
+  dist:
+    taskfile: ./Taskfile.dist.yml
+    flatten: true</code></pre>
+<p>Taskfileのもう一つ面白いところは、<code>--global</code>という引数を指定すると、<code>~/.config/Taskfile.yml</code>を参照してくれるところです。よく実行するコマンドなんだけど、実行ファイルを容易するまででもないなあというケースに便利。</p>
+<p>ところが困ったことに、Taskfileが提供する<code>task</code>コマンドの補完定義は<code>--global</code>オプションを考慮していませんでした。このため<code>task --global</code>をしていても、カレントディレクトリの<code>Taskfile.yml</code>のタスクを補完してしまいます。</p>
+<p>こんなんとき、<code>fish</code>では組込みの<code>commandline</code>コマンドでコマンドラインの内容を取得できるので、<code>task</code>コマンドに<code>--global</code>が指定されているか調べればOKです。</p>
+<p>コマンドラインの取得範囲は引数で変更できます。</p>
+<ul>
+<li><code>-b</code>, <code>--current-buffer</code></li>
+<li><code>-j</code>, <code>--current-job</code></li>
+<li><code>-p</code>, <code>--current-process</code></li>
+<li><code>-t</code>, <code>--current-token</code></li>
+</ul>
+<p>ざっくり、以下のような感じです。</p>
+<pre><code>echo hi; echo bye | cat --number
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -b, --current-buffer
+         ^^^^^^^^^^^^^^^^^^^^^^^ -j, --current-job
+                    ^^^^^^^^^^^^ -p, --current-process
+                        ^^^^^^^^ -t, --current-token</code></pre>
+<p>直近の引数が<code>--global</code>かどうか知りたいだけなら<code>-t</code>で十分そうです。しかし、<code>task --global --dry</code>のように<code>--global</code>が途中にある場合は<code>-t</code>では不足で、<code>-p</code>が妥当そうです。</p>
+<p>間違っても<code>-b</code>や<code>-j</code>をしてはいけません。以下のようなコマンドがあった場合に<code>--global</code>が<code>task</code>に指定されているものか検証する手間が発生します。</p>
+<pre class="bash"><code>echo --global | task</code></pre>
+<p><code>commandline -p</code>で取得した結果は1つの文字列なので、トークン単位に分割してから、<code>--global</code>を含むか調べる必要があります。単純にスペース単位で分割すると、以下のようなコマンドから<code>--global</code>を誤認識してしまいます。</p>
+<pre class="bash"><code>task --dir &quot;/temp/fo --global x/bar&quot;</code></pre>
+<p>このような時、<code>fish</code>の組込みの<code>read</code>コマンドが便利です。
+<code>--tokenize --list</code>オプションを指定すると、トークン単位で分割した結果を変数に保存できます。</p>
+<pre class="bash"><code>echo &quot;--global &#39;foo --global bar&#39;&quot; | read --tokenize --list --local tokens
+for token in $tokens
+    echo &quot;#&gt; $token&quot;
+end
+#&gt; --global
+#&gt; foo --global bar</code></pre>
+<p>というわけで、<code>commandline -p</code>と<code>read --tokenize --list</code>を組み合わせると以下のように、<code>--global</code>の指定を検証できます。</p>
+<pre class="fish"><code>commandline -p | read --tokenize --list --local tokens
+for token in $tokens
+    if test &quot;_$token&quot; = &quot;_--global&quot;
+        echo &quot;global option is specified&quot;
+    end
+end</code></pre>
+<p>あとは条件分岐して補完候補を変えるだけです。</p>
+<p>実際の例は以下のPRにあります。もしよければご覧ください。</p>
+<p><a href="https://github.com/go-task/task/pull/2134" class="uri">https://github.com/go-task/task/pull/2134</a></p>
+<p><strong>ENJOY</strong></p>
+<p>余談ですが、初期実装はめちゃくちゃ危険なことをしていました。</p>
+<ul>
+<li>最初はコマンドライン全体を取得する</li>
+<li>スペースで分割するために<code>eval</code>を使う</li>
+</ul>
+<pre class="bash"><code>set --local cmdline (commandline --current-buffer)
+eval &quot;set --local tokens $cmdline&quot;</code></pre>
+<p>この方法では、<code>cmdline</code>が”echo hi; task”のような文字列だった場合に、<code>eval</code>の内容が以下のようになり、変数定義に加えて<code>task</code>コマンドを実行してしまいます。</p>
+<pre class="bash"><code>set --local tokens echo hi; task</code></pre>
+<p>Taskfile.ymlにデフォルトタスクが定義されている場合、<code>task</code>コマンド単体で実行できる仕様なので、いったい何が起きるか分かりません。こわいですね。</p>
+<p>幸い、デフォルトタスクが定義されていない状況で実験したので、以下のようなエラーメッセージを見るだけで済みました。</p>
+<blockquote>
+<p>task: No tasks with description available. Try –list-all to list all tasks
+task: Task “default” does not exist</p>
+</blockquote>

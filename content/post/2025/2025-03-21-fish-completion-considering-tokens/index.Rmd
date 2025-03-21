@@ -1,0 +1,138 @@
+---
+title: "Fishの補完をコマンドラインの内容に応じて変える"
+author: atusy
+date: '2025-03-21'
+slug: fish-completion-considering-tokens
+categories: [fish]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: []
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+Fishで補完を定義するとき、コマンドに指定された引数によって補完候補を変えたいことがあります。
+たとえばメインコマンドの直後だったらサブコマンドを補完したい、`--input-file`の後だったらファイル名を補完したいとかいうことありますよね。
+
+私は`task`コマンドの`--global`オプションでこのようなニーズを感じました。
+`task`コマンドは[Taskfile](https://taskfile.dev/)というプロジェクトが提供するタスクランナーのコマンドです。
+
+GitでMakefileを管理している場合、個人的によく使うタスクの登録先がなくて困るのですが、Taskfileはタスク管理用のYamlの名前を複数パターン持つことでこの問題を解決しているので好きです。
+
+- `Taskfile.dist.yml`: Gitで管理するタスク定義
+- `Taskfile.yml`: 個人用のタスク定義
+
+としておくと、`task`コマンドは`Taskfile.yml`を優先するので、`Taskfile.dist.yml`を編集せずに個人用のタスクを定義できます。
+また、`Taskfile.yml`で以下のようにしておくと、`Taskfile.dist.yml`のタスクも継承できます。
+便利。
+
+```yaml
+version: '3'
+
+includes:
+  dist:
+    taskfile: ./Taskfile.dist.yml
+    flatten: true
+```
+
+Taskfileのもう一つ面白いところは、`--global`という引数を指定すると、`~/.config/Taskfile.yml`を参照してくれるところです。
+よく実行するコマンドなんだけど、実行ファイルを容易するまででもないなあというケースに便利。
+
+ところが困ったことに、Taskfileが提供する`task`コマンドの補完定義は`--global`オプションを考慮していませんでした。
+このため`task --global`をしていても、カレントディレクトリの`Taskfile.yml`のタスクを補完してしまいます。
+
+こんなんとき、`fish`では組込みの`commandline`コマンドでコマンドラインの内容を取得できるので、`task`コマンドに`--global`が指定されているか調べればOKです。
+
+コマンドラインの取得範囲は引数で変更できます。
+
+- `-b`, `--current-buffer`
+- `-j`, `--current-job`
+- `-p`, `--current-process`
+- `-t`, `--current-token`
+
+ざっくり、以下のような感じです。
+
+```
+echo hi; echo bye | cat --number
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -b, --current-buffer
+         ^^^^^^^^^^^^^^^^^^^^^^^ -j, --current-job
+                    ^^^^^^^^^^^^ -p, --current-process
+                        ^^^^^^^^ -t, --current-token
+```
+
+直近の引数が`--global`かどうか知りたいだけなら`-t`で十分そうです。
+しかし、`task --global --dry`のように`--global`が途中にある場合は`-t`では不足で、`-p`が妥当そうです。
+
+間違っても`-b`や`-j`をしてはいけません。
+以下のようなコマンドがあった場合に`--global`が`task`に指定されているものか検証する手間が発生します。
+
+```bash
+echo --global | task
+```
+
+`commandline -p`で取得した結果は1つの文字列なので、トークン単位に分割してから、`--global`を含むか調べる必要があります。
+単純にスペース単位で分割すると、以下のようなコマンドから`--global`を誤認識してしまいます。
+
+```bash
+task --dir "/temp/fo --global x/bar"
+```
+
+このような時、`fish`の組込みの`read`コマンドが便利です。
+`--tokenize --list`オプションを指定すると、トークン単位で分割した結果を変数に保存できます。
+
+```bash
+echo "--global 'foo --global bar'" | read --tokenize --list --local tokens
+for token in $tokens
+    echo "#> $token"
+end
+#> --global
+#> foo --global bar
+```
+
+というわけで、`commandline -p`と`read --tokenize --list`を組み合わせると以下のように、`--global`の指定を検証できます。
+
+```fish
+commandline -p | read --tokenize --list --local tokens
+for token in $tokens
+    if test "_$token" = "_--global"
+        echo "global option is specified"
+    end
+end
+```
+
+あとは条件分岐して補完候補を変えるだけです。
+
+実際の例は以下のPRにあります。もしよければご覧ください。
+
+<https://github.com/go-task/task/pull/2134>
+
+**ENJOY**
+
+余談ですが、初期実装はめちゃくちゃ危険なことをしていました。
+
+- 最初はコマンドライン全体を取得する
+- スペースで分割するために`eval`を使う
+
+```bash
+set --local cmdline (commandline --current-buffer)
+eval "set --local tokens $cmdline"
+```
+
+この方法では、`cmdline`が"echo hi; task"のような文字列だった場合に、`eval`の内容が以下のようになり、変数定義に加えて`task`コマンドを実行してしまいます。
+
+```bash
+set --local tokens echo hi; task
+```
+
+Taskfile.ymlにデフォルトタスクが定義されている場合、`task`コマンド単体で実行できる仕様なので、いったい何が起きるか分かりません。
+こわいですね。
+
+幸い、デフォルトタスクが定義されていない状況で実験したので、以下のようなエラーメッセージを見るだけで済みました。
+
+> task: No tasks with description available. Try --list-all to list all tasks
+> task: Task "default" does not exist
+
