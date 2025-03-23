@@ -45,14 +45,27 @@ Benchmark 1: fish -N -c &quot;exit 0&quot;
   Time (mean ± σ):       3.6 ms ±   0.9 ms    [User: 2.5 ms, System: 0.9 ms]
   Range (min … max):     3.0 ms …   6.5 ms    50 runs</code></pre>
 <p>というわけで、以下を<code>~/.bashrc</code>の先頭に記載しました。</p>
-<pre class="bash"><code>if [[ $(ps --no-header --pid=$PPID --format=comm) != &quot;fish&quot; &amp;&amp; -z ${BASH_EXECUTION_STRING} ]]; then
+<pre class="bash"><code>if [[ $- == *i* &amp;&amp; $- != *c* &amp;&amp; $- != *s* ]] &amp;&amp; command -v fish &amp;&gt;/dev/null &amp;&amp; [[ $(ps --no-header --pid=$PPID --format=comm) != &quot;fish&quot; ]]; then
   if shopt -q login_shell; then
     exec fish --login
   else
     exec fish
   fi
 fi</code></pre>
-<p>ちなみにArch Wikiではもっとシンプルそうな書き方をしていますが、こちらは特定の条件下で<code>exec fish ''</code>相当になってしまい、<code>error: Error reading script file ''</code>が発生します。あとでArchWikiを修正しないとですね！</p>
+<p><code>$-</code>には<code>bash</code>のオプションが含まれています。これを利用して、以下のケースではfishに移行しないようにしています。</p>
+<ul>
+<li><code>i</code>を含む場合はinteractive shell</li>
+<li><code>c</code>を含む場合は<code>bash -c</code>で実行している</li>
+<li><code>s</code>を含む場合は標準入力をスクリプトとして実行している</li>
+</ul>
+<p>ということになります。</p>
+<p>ちなみにArch Wikiではもっとシンプルそうな書き方をしていますが、問題があります。</p>
+<ul>
+<li>特定の条件下で<code>exec fish ''</code>相当になってしまい、<code>error: Error reading script file ''</code>が発生する</li>
+<li><code>fish</code>が存在しない場合にも<code>exec fish</code>が実行される</li>
+<li><code>bash</code>がインタラクティブシェルではない場合も<code>exec fish</code>が実行され、デスクトップ環境へのログインができなくなる</li>
+</ul>
+<p>あとでArchWikiを修正しないとですね！</p>
 <pre class="bash"><code>if [[ $(ps --no-header --pid=$PPID --format=comm) != &quot;fish&quot; &amp;&amp; -z ${BASH_EXECUTION_STRING} ]]
 then
 	shopt -q login_shell &amp;&amp; LOGIN_OPTION=&#39;--login&#39; || LOGIN_OPTION=&#39;&#39;

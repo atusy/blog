@@ -64,7 +64,7 @@ Benchmark 1: fish -N -c "exit 0"
 というわけで、以下を`~/.bashrc`の先頭に記載しました。
 
 ```bash
-if [[ $(ps --no-header --pid=$PPID --format=comm) != "fish" && -z ${BASH_EXECUTION_STRING} ]]; then
+if [[ $- == *i* && $- != *c* && $- != *s* ]] && command -v fish &>/dev/null && [[ $(ps --no-header --pid=$PPID --format=comm) != "fish" ]]; then
   if shopt -q login_shell; then
     exec fish --login
   else
@@ -73,7 +73,21 @@ if [[ $(ps --no-header --pid=$PPID --format=comm) != "fish" && -z ${BASH_EXECUTI
 fi
 ```
 
-ちなみにArch Wikiではもっとシンプルそうな書き方をしていますが、こちらは特定の条件下で`exec fish ''`相当になってしまい、`error: Error reading script file ''`が発生します。
+`$-`には`bash`のオプションが含まれています。
+これを利用して、以下のケースではfishに移行しないようにしています。
+
+- `i`を含む場合はinteractive shell
+- `c`を含む場合は`bash -c`で実行している
+- `s`を含む場合は標準入力をスクリプトとして実行している
+
+ということになります。
+
+ちなみにArch Wikiではもっとシンプルそうな書き方をしていますが、問題があります。
+
+- 特定の条件下で`exec fish ''`相当になってしまい、`error: Error reading script file ''`が発生する
+- `fish`が存在しない場合にも`exec fish`が実行される
+- `bash`がインタラクティブシェルではない場合も`exec fish`が実行され、デスクトップ環境へのログインができなくなる
+
 あとでArchWikiを修正しないとですね！
 
 ```bash
