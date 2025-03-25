@@ -1,0 +1,77 @@
+---
+title: "Neovimのファジーファインダーtelescope.nvimでよく使っているpicker集"
+author: atusy
+date: '2025-03-25'
+slug: nvim-telescope-pickers
+categories: [Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: []
+---
+
+```{r setup, include=FALSE}
+```
+
+[Vim駅伝](https://vim-jp.org/ekiden/)2025-03-24の記事です。
+1日遅れで申し訳ありません。
+
+[telescope.nvim]: https://github.com/nvim-telescope/telescope.nvim
+
+さて、[telescope.nvim]は言わずと知れたファジーファインダーと呼ばれるものです。
+ファジーファインダーとは、ファイルなどの候補一覧から、検索などで欲しいものを絞りこみ、開くなり消すなり任意のアクションを実行するためのツールです。
+たしかそんなようなことをShougoさんがvim-jp ラジオの#7か#8で語ってたはず。
+良い話いっぱいなので、聞いてみてください。
+
+- [【Vimプラグイン作者・Shougoさん登場！】エンジニアの楽園 vim-jp ラジオ #7](https://audee.jp/voice/show/88076)
+- [【Shougoさんが考えるプラグインのあるべき姿】エンジニアの楽園 vim-jp ラジオ #8](https://audee.jp/voice/show/88533)
+
+vim-jpではまたファジーファインダーかと叫ばれるくらいには作者が多く、vim-jpにいらっしゃる方の作品だけでも[Shougo/ddu.vim](https://github.com/Shougo/ddu.vim)、[vim-fall/fall.vim](https://github.com/vim-fall/fall.vim/)、[hrsh7th/nvim-deck](https://github.com/hrsh7th/nvim-deck/)などがあります。
+それくらいには求めるところがユーザーによって変わるということでしょう。
+
+ということで、私が長らく利用している[telescope.nvim]のpickerを紹介します。
+pickerは[telescope.nvim]用語ですが、先のファジーファインダーの説明における候補一覧を作成する部分に相当します。
+
+よく使う順に以下。
+
+- ファイル選択 `:Telescope find_files`
+    - ファイルを開くときに利用しています
+- live grep: `:Telescope live_grep`
+    - プロジェクト内のファイルを検索するときに利用しています
+- コマンドパレット:
+    - 以下の記事で紹介している、keymapsソースを流用したコマンドパレットです
+    - [telescope.nvimで作る簡易コマンドパレット（VSCodeのCtrl + Shift + Pっぽいの）](https://blog.atusy.net/2022/11/03/telescope-as-command-pallete/)
+    - [gin.vimで捗るgitのログ改竄 (instant fixup)](https://blog.atusy.net/2024/03/15/instant-fixup-with-gin-vim/)
+- LSPジャンプ: `:Telescope lsp_definitions`や`:Telescope lsp_references`など
+    - ジャンプ先が単一の場合は一発でジャンプ、複数の場合はtelescopeが開きます
+    - definitionとimplementationは区別して考えるのがしんどいので、混ぜたpickerを自前実装してます
+        - [nvim-gtd](https://github.com/hrsh7th/nvim-gtd)のアイデアを拝借してます
+- Git status: `:Telescope git_status`
+    - 差分のあるファイルのステージング・アンステージング、編集に利用しています
+- 再開: `:Telescope resume`
+    - 直近で開いたTelescopeを検索状況保持したまま再開できます
+- バッファ選択 `:Telescope buffers`
+    - 最近開いたファイルやターミナルをさくっと探したいときに
+        - Preview画面が常にバッファの先頭だけど、ターミナルの時は末尾を表示してくれると嬉しいかも
+- Quickfix候補選択: `:Telescope quickfix`
+    - 直近のquickfixリストから検索できます
+    - `live_grep`した結果などを`<C-Q>`でquickfixに入れるとファイル名での絞り込みができて便利
+        - これをもっと手軽に実現するプラグインとして[atusy/qfscope.nvim](https://blog.atusy.net/2024/11/11/qfscope-nvim/)を作っています
+- ヘルプ: `:Telescope help_tags`
+    - ヘルプの検索・閲覧に利用しています
+- バッファ内曖昧検索: `:Telescope current_buffer_fuzzy_find`
+    - だいたい標準の検索でたりるけどたまーに便利
+    - とくに標準の検索でマッチしたハイライトを残しつつさくっと移動したいとき
+- コマンド履歴: `:Telescope command_history`
+    - 複雑なコマンドを再利用することはあまりないですが、このコマンドどう使うんだっけと思いだしたいときに便利
+
+
+たぶんこんなところかな？
+
+## ENJOY!
+
+前回はMinervaさんによる「[CodeCompanionを使ってNeovimと一緒に楽しくAI Coding](https://minerva.mamansoft.net/%F0%9F%93%98Articles/%F0%9F%93%98CodeCompanion%E3%82%92%E4%BD%BF%E3%81%A3%E3%81%A6Neovim%E3%81%A8%E4%B8%80%E7%B7%92%E3%81%AB%E6%A5%BD%E3%81%97%E3%81%8FAI+Coding)」でした。
+Codecompanion、ちょこちょこ使ってるので読まなきゃ……！
+
+次回はmikoto2000さんによる「Vim のマクロを使って気持ち良くなった話 - 表のデータを TS の enum にする」だそうです。
