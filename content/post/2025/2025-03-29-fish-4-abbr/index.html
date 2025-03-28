@@ -1,0 +1,40 @@
+---
+title: "Fish 4のabbrはサブコマンドも展開できるぞ"
+author: atusy
+date: '2025-03-29'
+slug: fish-4-abbr
+categories: [Fish]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: []
+---
+
+
+
+<p>Fishのabbr使ってますか？
+aliasの強化版といった感じで、短縮した入力をスペースやエンターと共に本来のコマンドに展開してくれる機能です。</p>
+<p>たとえば</p>
+<pre class="bash"><code>abbr -a g git</code></pre>
+<p>とすると、<code>g</code>と入力してスペースを押すと<code>git</code>に展開されます。</p>
+<p>これだけでも強力な機能ですが、2025-02-27にリリースされたFish 4ではさらにサブコマンドの展開もできるようになりました。</p>
+<pre class="bash"><code>abbr --command=git -a a add</code></pre>
+<p>とすると、<code>git a</code>と入力してスペースを押すと<code>git add</code>に展開されます。</p>
+<p>2つのabbrを組み合わせると、<code>g a</code>と入力するだけで、<code>git add</code>に展開されます。</p>
+<p>素敵。</p>
+<p>展開されることで、コマンドの内容がわかるので、ペア作業しているときに、ドライバーの操作がナビに伝わりやすくなりますね。</p>
+<p>コマンド履歴にも展開後の内容が残るので、後から検索するのも楽になります。</p>
+<p>注意点として、<code>a</code> -&gt; <code>add</code>の展開は、コマンドが<code>git</code>であれば、サブコマンドでなくても発生してしまいます。たとえば以下。</p>
+<pre class="bash"><code>$ git add a    # 展開前
+$ git add add  # 展開後</code></pre>
+<p>間違ったファイルをaddしそうで怖いですね。
+<code>abbr</code>コマンドでは<code>--function</code>オプションで展開する文字列を動的に変更できるので、コマンドラインの内容に応じて展開するかどうか決めたほうがいいかも。</p>
+<p>このようなケースにかぎらず、abbrの展開を避けたい場合もあるかと思いますが、そのような時はキーワードをバックスラッシュでエスケープしたり、<code>''</code>で囲むといいようです。</p>
+<p>これはabbrの短縮表現を展開せずに同名のコマンドを実行するときなどに便利でしょう。</p>
+<pre class="bash"><code>abbr -a ps procs</code></pre>
+<p>とあれば、</p>
+<pre class="bash"><code>$ \ps
+$ &#39;ps&#39;</code></pre>
+<p>のように使うといいです。</p>
+<p><strong>ENJOY</strong></p>
