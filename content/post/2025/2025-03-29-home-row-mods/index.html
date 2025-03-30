@@ -1,0 +1,72 @@
+---
+title: "Keyball 61にhome row modsを導入した"
+author: atusy
+date: '2025-03-31'
+slug: home-row-mods
+categories: [Keyboard]
+tags: [Keyball]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: []
+---
+
+
+
+<p>長らくキー配列については<a href="https://blog.atusy.net/2023/08/12/keyball61/">Keyball61のオレオレマッピングを語る</a>の通りでしたが、加えて<a href="https://precondition.github.io/home-row-mods">home row mods</a>を導入しました。</p>
+<p><a href="https://precondition.github.io/home-row-mods">home row mods</a>は、ホームポジションの<code>asdf</code>（左）と<code>jkl;</code>（右）を押しっぱなしたときに（hold）、<code>Ctrl</code>や<code>Shift</code>などの修飾キーとして機能させる方法論です。</p>
+<p>配列やキー数が特殊なキーボードであっても、ホームポジションのキーがないことは少ないので、特定のキーボードにロックインされないところが魅力です。</p>
+<p>Karabiner-Elementsを使えばmacbookのキーボードでも実現できて、外出時の生産性を下げずにすむのでは？と思って、まずはKeyball 61で試してみることにしました。</p>
+<p><a href="https://precondition.github.io/home-row-mods">home row mods</a>のページでは、<code>GUI</code>（<code>Win</code>/<code>Cmd</code>）、<code>Alt</code>（<code>Option</code>/<code>Meta</code>）、<code>Shift</code>、<code>Ctrl</code>の順に並べる方法が一般的と語っています（<strong>GASC</strong>）。しかし、私は紹介されている例のいずれにも該当しない<strong>ASGC</strong>を採用することにしました。</p>
+<ul>
+<li><code>a</code> -&gt; <code>Alt</code>
+<ul>
+<li>イニシャルが共通で覚えやすい</li>
+<li><code>Alt</code>キーは利用頻度が低いので小指に割り当てても負担が低い</li>
+</ul></li>
+<li><code>s</code> -&gt; <code>Shift</code>
+<ul>
+<li>イニシャルが共通で覚えやすい</li>
+</ul></li>
+<li><code>d</code> -&gt; <code>GUI</code>
+<ul>
+<li>macOSを左手単体で操作したくなったとき<code>GUI</code>+<code>a</code>/<code>s</code>/<code>f</code>は使うが、<code>d</code>を使わないので干渉しにくい</li>
+</ul></li>
+<li><code>f</code> -&gt; <code>Ctrl</code>
+<ul>
+<li>頻繁に使うキーなので負担に強い指がいい</li>
+</ul></li>
+</ul>
+<p>といったことを勘案してのものです。</p>
+<p>なお、私はSandSという、スペースキーを長押ししたら<code>Shift</code>扱いする方法を愛用しているので、実質的には<code>s</code>-&gt;<code>Shift</code>はほぼ用無しです。もし、<code>Shift+Space</code>をしたくなったら活躍するかも。
+Emacsを使いたくなったら、Altの出番が増えるかもしれないし<strong>SAGC</strong>の方がいいかもなとも思い始めてます。</p>
+<p>配列の他に<a href="https://precondition.github.io/home-row-mods">home row mods</a>を導入するにあたって、気を使う点は、どんな状況で長押しを修飾キー判定させるかです。</p>
+<p>Keyball 61のファームウェアであるqmkの場合は、実に多様な設定を組み合わせられます（<a href="https://github.com/qmk/qmk_firmware/blob/master/docs/tap_hold.md" class="uri">https://github.com/qmk/qmk_firmware/blob/master/docs/tap_hold.md</a>）。代表的なものは以下です。</p>
+<ul>
+<li><code>TAPPING_TERM</code>
+<ul>
+<li>一定時間（ms）を過ぎたら、長押しとみなす</li>
+</ul></li>
+<li><code>PERMISSIVE_HOLD</code>
+<ul>
+<li><code>TAPPING_TERM</code>経過中でも、他のキーを押して離すと、長押し判定する</li>
+</ul></li>
+<li><code>HOLD_ON_OTHER_KEY_PRESS</code>
+<ul>
+<li><code>TAPPING_TERM</code>経過中に、他のキーを押すと、長押し判定する</li>
+</ul></li>
+</ul>
+<p>さらにこれらは、キー単位で設定する方法も用意されています。</p>
+<p>私は友人のアドバイスを受けて、<code>TAPPING_TERM</code>を160ms、<code>PERMISSIVE_HOLD</code>を有効にしました。
+Keyballの場合は、<code>info.json</code>に以下のような設定を追加すればOKです（<a href="https://github.com/atusy/keyball/blob/5852d1e760382d86719d29388b39d65dd91dd0cc/qmk_firmware/keyboards/keyball/keyball61/info.json?plain=1#L10-L11" class="uri">https://github.com/atusy/keyball/blob/5852d1e760382d86719d29388b39d65dd91dd0cc/qmk_firmware/keyboards/keyball/keyball61/info.json?plain=1#L10-L11</a>）。</p>
+<pre class="json"><code>{
+  &quot;tapping&quot;: {
+    &quot;term&quot;: 160,
+    &quot;permissive_hold&quot;: true
+  }
+}</code></pre>
+<p>今のところこれでほぼ困ることなく、このブログも書いています。
+<code>HOLD_ON_OTHER_KEY_PRESS</code>は<a href="https://precondition.github.io/home-row-mods">home row mods</a>には適用していません。</p>
+<p>一点、これは自分の指使いの問題だと思いますが、ときどき<code>a</code>が意図せず長押し判定されることがあります。たぶん小指の運指能力が低くて、キー離れが悪いのだと思います。
+<code>TAPPING_TERM_BY_KEY</code>で例外設定をしてもいいのですが、いったんはこのまま訓練を積んでみようと思います。</p>
+<p><strong>ENJOY</strong></p>
