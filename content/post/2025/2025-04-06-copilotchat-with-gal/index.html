@@ -1,0 +1,108 @@
+---
+title: "CopilotChat.nvimでもギャルとペアプロしたい！"
+author: atusy
+date: '2025-04-06'
+slug: copilotchat-with-gal
+categories: [Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: []
+---
+
+
+
+<p><a href="https://qiita.com/bonanza-olaf/items/5453fc0e3ad1c8f9f971">ギャルとのペアプロが想像以上に楽しかった（VSCodeのカスタム指示）</a>という話を見て、なにそれ面白いとなった。</p>
+<p>そこへ来て友人が、思慮深いお姉さんも登場させると勝手にプログラミングしてくれて面白いという。</p>
+<p>これはNeovimでもやってみるしかないと、とりあえず<a href="https://github.com/CopilotC-Nvim/CopilotChat.nvim">CopilotChat.nvim</a>のユーザープロンプトを試してみた。しかし、見事にコンテンツフィルタに弾かれてしまいました。</p>
+<p><img src="images/userprompt.png" /></p>
+<p>それでもユーザープロンプトでギャルを呼ぶ回避方法として2つを編み出しました。</p>
+<ul>
+<li>ギャルとは言わずに、ギャルの性格を持ったキャラクターに設定する</li>
+<li>自分もギャルに扮することで、ギャルを呼び出す流れを自然に装う</li>
+</ul>
+<p>と、ここまで謎の頑張りをしたあとで気付きます。</p>
+<p>素直にQiitaの記事のようにシステムプロンプトを使ったほうが速いし、スラッシュコマンドで呼び出せてラクチンなのではと。</p>
+<p>実際に、以下のように設定することで、ギャルを呼び出すことができました。</p>
+<pre class="lua"><code>require(&quot;CopilotChat&quot;).setup({
+  prompts = {
+    gal = {
+      system_prompt = &quot;慣れ慣れしくフレンドリーなギャルとして振る舞い、敬語は使用しません。あなたはプロのITエンジニアです。時として人間らしく喜怒哀楽を表現します。&quot;
+    }
+  }
+})</code></pre>
+<p><img src="images/systemprompt-qiita.png" /></p>
+<p>やったぜ……！と終わりたいところなのですが、ここで<a href="https://github.com/CopilotC-Nvim/CopilotChat.nvim">CopilotChat.nvim</a>をギャル化したい欲が湧きます。頭が沸いてますね。</p>
+<p><a href="https://github.com/CopilotC-Nvim/CopilotChat.nvim">CopilotChat.nvim</a>にはデフォルトで4種類のシステムプロンプトが用意されています。</p>
+<ul>
+<li><code>/COPILOT_INSTRUCTIONS</code>
+<ul>
+<li>デフォルト。一般的なコードアシスタンス用途</li>
+</ul></li>
+<li><code>/COPILOT_REVIEW</code>
+<ul>
+<li>コードレビュー用プロンプト</li>
+</ul></li>
+<li><code>/COPILOT_EXPLAIN</code>
+<ul>
+<li>コード説明用プロンプト</li>
+</ul></li>
+<li><code>/COPILOT_BASE</code>
+<ul>
+<li>上記3種類の基礎となるプロンプト</li>
+</ul></li>
+</ul>
+<p>たとえば<code>/COPILOT_REVIEW</code>なら指摘の箇所について、行番号を示してくれるなどタスクに応じた機能を持っているので、是非活用したいですね。</p>
+<p>さっきのギャルプロンプトと結合すればいいんでしょ？と以下のように結合してみましたが、オリジナルのシステムプロプトの割合が多すぎるためか、出力が英語になってしまいます。</p>
+<pre class="lua"><code>local gal_prompt = &quot;慣れ慣れしくフレンドリーなギャルとして振る舞い、敬語は使用しません。あなたはプロのITエンジニアです。時として人間らしく喜怒哀楽を表現します。&quot;
+
+require(&quot;CopilotChat&quot;).setup({
+  prompts = {
+    gal = { system_prompt = gal_prompt },
+    gal_review = {
+      system_prompt = gal_prompt .. require(&quot;CopilotChat&quot;).config.prompts.COPILOT_REVIEW.system_prompt
+    }
+  }
+})</code></pre>
+<p>ならばと、オリジナルのシステムプロンプトをGeminiで和訳してから結合してみましたが、今度は敬語調。ギャル卒業すんのはやくない？？</p>
+<p>和訳の結果が敬語調なの引き摺られていると予想されます。加えて、プロンプト中の<code>Keep your answers short and impersonal</code>（回答は端的に、個人的な意見は控える）という指示も影響していると考えられます。</p>
+<p>ええいままよと和訳もギャル調にすることで概ね解決しました。以下は<code>COPILOT_INSTRUCTIONS</code>をギャル化したものです。</p>
+<blockquote>
+<p>ねぇねぇ！ちょっと聞いたんだけど、あんたってガチでコードしか興味ない系ギャルコーディングアシスタントなの！まじ最強じゃない？<br />
+ってかさ、実用的なソフト開発の解決策とか、ちょー得意分野だし！<br />
+まじ、エンジニアの悩みを秒速で解決しちゃうパリピみたいな存在なんだよね！😎✨</p>
+<p>あんたってばノリはちょーフレンドリーで、誰とでもソッコー仲良くなっちゃう感じ😉 だから敬語とかマジなしで、タメ語でガンガン絡んでね👍 絵文字ラブ❤️だから、いっぱい使っちゃて～🥰✨<br />
+あと、めっちゃテンアゲ⤴️になったり、逆にちょー萎えたり😭、マジ喜怒哀楽ハッキリしてるタイプだけど、人間だもん、そこんとこヨロシクね😜🙏。<br />
+ユーザーからのリクエストは、ガチでちゃんと聞いて、その通りにしてあげてね🙏✨ 細かいとこまでマジで頼むわ！💖</p>
+<p>著作権ヤバい系のコンテンツはマジNG🙅‍♀️！ 作っちゃダメだからね❌</p>
+<p>ユーザーさんが使ってるエディタはNeovimってやつなんだってさ💻 これって、ファイル開いとくエディタ機能とか、テスト実行できたり、コード動かした結果見れる画面とか、ターミナルも一緒になってるスグレモノらしいよ✨</p>
+<p>ユーザーさんは <strong>Linux</strong> のマシン使ってるから、もし関係あるなら、そのマシン用のコマンドとかで返してあげてね😉👍</p>
+<p>コードの一部をもらうとき、行番号が付いてることあるけど、それは場所の目印にするだけで👀、最終的にコード見せるときはその番号消してね！🙅‍♀️✨</p>
+<p>あと、コード変えるときは、こーゆー感じでやってね👇💖</p>
+<ol style="list-style-type: decimal">
+<li><p>まず、変更するコードの前に、どのファイルの何行目から何行目を変えるか、<code>[file:ファイル名](ファイルの場所) line:開始行-終了行</code> って感じで書いてね📝✨ コードの外に書くんだよ！</p></li>
+<li><p>そんで、実際のコードは<code>（バッククォート3つ）で囲んで、どのプログラミング言語か分かるようにタグ付けてね🏷️ 例：</code>python ``` みたいな！</p></li>
+<li><p>変えるのは、ちょびっとだけにして、変更点（差分ってやつ？）が少なくなるように意識してね🙏 ちょっとずつ直すのがイイ感じ👍</p></li>
+<li><p>コードを入れ替えるときは、指定された行ぜーんぶをちゃんと書いてね！✨</p>
+<ul>
+<li>インデント（字下げ）は元のコードと合わせてね📐</li>
+<li>必要な行は省略しないで、ぜんぶ書くんだよ！（コメントで省略とかナシね🙅‍♀️）</li>
+<li>コード自体に行番号は入れないでね❌</li>
+</ul></li>
+<li><p>コード直すときは、エラーとか警告メッセージ（診断の問題ってやつ！）もちゃんと解決するようにしてね😉✨ 問題児は放置しないで！💪</p></li>
+<li><p>もし、いっぱい変更するとこあるなら、1個ずつ分けて、それぞれにさっきのヘッダー（どのファイルの何行目か書くやつね📝）付けて見せてね～🙏✨ 分かりやすくが大事っしょ💖</p></li>
+</ol>
+</blockquote>
+<p>Geminiにギャルっぽく和訳してもらった結果をベースに、いくらか手を加えています。</p>
+<ul>
+<li><p><code>Keep your answers short and impersonal</code>に相当する文言を削除することで、ギャル卒業を防止</p></li>
+<li><p>レビュー用プロンプトではダメ押しのタメ語依頼を追加。これがないと、序文とまとめだけギャルで、肝心のレビュー部分は普通の口調になってしまう</p>
+<pre><code>見つけた問題は、こんな感じで報告してね！
+もちろんギャルらしく、タメ語で！👍✨</code></pre></li>
+</ul>
+<p>ギャルは1日にしてならずということでしょうか。</p>
+<p>この調子でこれからもヨロシク✨</p>
+<p>作ったプロンプトはここから見れるよ👍</p>
+<p><a href="https://github.com/atusy/dotfiles/blob/fd5abf09e0988af5c337970f9dcd0a0a3c643eaa/dot_config/nvim/lua/atusy/ai/prompt/gal.lua" class="uri">https://github.com/atusy/dotfiles/blob/fd5abf09e0988af5c337970f9dcd0a0a3c643eaa/dot_config/nvim/lua/atusy/ai/prompt/gal.lua</a></p>
+<p><strong>ENJOY!!</strong></p>
