@@ -9,6 +9,9 @@ output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists
 highlightjs: []
+summary: |
+  MCP（Model Context Protocol）をNeovimで使うためのmcphub.nvimの導入方法を紹介します。
+  codecompanion.nvimなどのAIチャットプラグインに@mcpと入力するだけで、状況に合わせてツールを選択してくれるので凄く便利。
 ---
 
 ```{r setup, include=FALSE}
