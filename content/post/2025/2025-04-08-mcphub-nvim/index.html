@@ -1,0 +1,67 @@
+---
+title: "mcphub.nvimでNeovimでもMCPを使う"
+author: atusy
+date: '2025-04-08'
+slug: mcphub-nvim
+categories: [Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: []
+---
+
+
+
+<p>MCP（Model Contezt Protocol）盛り上がってますね。</p>
+<p><a href="https://speakerdeck.com/minorun365/yasasiimcpru-men">やさしいMCP入門</a>なんて資料も出てきたくらいです。</p>
+<p>資料によると、MCPはAIエージェント用のツール接続規格で、ツールを通じて情報取得や外部操作ができるらしい。</p>
+<p>最初はAnthrotopic社がなにやら独自の規格を出してきたなと思っていたのですが、このところ、ユーザーが自前実装してみる流れできたり、GitHubやAWSがオフィシャルにMCPサーバーを提供し始め、大きな波を感じます。</p>
+<p>試しにNeovimで使ってみたところ、<code>@mcp このバッファレビューして</code>と入力するだけで、適切なMCPサーバーを勝手に選んでくれることを確認しました。これはすごい。日本語でもいけちゃうところが、さすがAIという感じですね。</p>
+<p><img src="images/demo.png" /></p>
+<p>MCPがなくても、プラグインによっては<code>#buffer レビューして</code>などと入力することでバッファの内容をAIに共有することができました。今回の例であれば速度の観点からも<code>#buffer</code>の方が有利ですが、用途ごとにコマンドを覚える必要があります。
+<code>@mcp</code>を使うと必要なキーワードが1つで済むことが魅力ですね。他のMCPサーバーも導入すれば、GitHubなど、codecompanion単体で入手することが難しい情報源を利用できる点も魅力です。</p>
+<p>NeovimでMCPを使うには、<a href="https://github.com/ravitemer/mcphub.nvim">mcphub.nvim</a>をいれるといいようです。
+LSPにおける<a href="https://github.com/williamboman/mason.nvim">mason.nvim</a>のように、リッチなUIを通じてMCPの導入を支援してくれるプラグインです。</p>
+<p>これとAIチャットを実現してくれる<a href="https://github.com/olimorris/codecompanion.nvim">codecompanion.nvim</a>や<a href="https://github.com/yetone/avante.nvim">avante.nvim</a>を組み合わせると、先の例のように、チャット画面で<code>@mcp</code>と入力するだけでMCPの利用を開始できるようになります。</p>
+<div id="mcphub.nvimの導入" class="section level2">
+<h2><a href="https://github.com/ravitemer/mcphub.nvim">mcphub.nvim</a>の導入</h2>
+<p>プラグインそのもののインストール方法はREADME.mdによくまとめられているので、ご参照ください。</p>
+<p><a href="https://github.com/ravitemer/mcphub.nvim" class="uri">https://github.com/ravitemer/mcphub.nvim</a></p>
+<p>少し注意が必要なのは、<a href="https://github.com/ravitemer/mcphub.nvim">mcphub.nvim</a>は<code>~/.config/mcphub/servers.json</code>にサーバーの設定を記述するのですが、このファイルを自動生成してくれないようです。とりあえず、以下の内容で作成しておくといいでしょう。</p>
+<pre class="json"><code>{
+  &quot;mcpServers&quot;: {}
+}</code></pre>
+<p><a href="https://github.com/ravitemer/mcphub.nvim">mcphub.nvim</a>のインストールができたら、MCPサーバーをインストールします。</p>
+<p><a href="https://github.com/ravitemer/mcphub.nvim">mcphub.nvim</a>の推奨する方法に従うと、<code>:MCPHub</code>コマンドでUIを起動し、<code>M</code>でマーケットプレイスにアクセスし、欲しいものを選んで<code>&lt;CR&gt;</code>を押して……という流れを踏みます。流れに従っていくと、最終的に、<strong>codecompanion</strong>や<strong>avante</strong>のチャット画面を通じて、サーバーのインストールに必要なコマンドの実行と<code>servers.json</code>の更新が行われます。
+<code>pip install ...</code>していい？とか聞いてくれるので、こちらは承認するだけでよいのが凄いところ。</p>
+<p>凄いのですが、個人的には、サーバーのインストールと<code>servers.json</code>の更新は手動で行ったほうがいいと感じています。というのも、各MCPサーバーが推奨するインストール方法と、チャットを通じて提案されるインストール方法が異なるケースがあるからです。</p>
+<p>たとえば<a href="https://github.com/modelcontextprotocol/servers/tree/main/src/git">mcp-server-git</a>は、<code>docker</code>や<code>uv</code>を使った導入方法を紹介していますが、<a href="https://github.com/ravitemer/mcphub.nvim">mcphub.nvim</a>のUIを通じてインストールすると、<code>pip install</code>を実行するように指示されました。また、MCPサーバーによってはAPI Tokenの入力が必要だったりもするので、公式ドキュメントを参照したほうが、余計なトラブルに出会わずすむと思います。</p>
+<p>ちなみに<a href="https://github.com/modelcontextprotocol/servers/tree/main/src/git">mcp-server-git</a>については自分が使いやすいように以下のように<code>servers.json</code>を編集しました。</p>
+<pre class="json"><code>{
+  &quot;mcpServers&quot;: {
+    &quot;git&quot;: {
+      &quot;command&quot;: &quot;uv&quot;,
+      &quot;args&quot;: [
+        &quot;tool&quot;,
+        &quot;run&quot;,
+        &quot;mcp-server-git&quot;
+      ]
+    }
+  }
+}</code></pre>
+</div>
+<div id="チャットプラグインへのmcp導入" class="section level2">
+<h2>チャットプラグインへのMCP導入</h2>
+<p><a href="https://github.com/olimorris/codecompanion.nvim">codecompanion.nvim</a>や<a href="https://github.com/yetone/avante.nvim">avante.nvim</a>でMCPを利用できるようにするには、チャットプラグインと<a href="https://github.com/ravitemer/mcphub.nvim">mcphub.nvim</a>の双方に設定を加える必要があります。</p>
+<p><a href="https://github.com/ravitemer/mcphub.nvim">mcphub.nvim</a>のREADME.mdには軽く言及がありますが、これだけを見るとかえって混乱すると思います。
+README.mdの末尾に詳しいドキュメントへのリンクがあるので、こちらを参照するとわかりやすいです。</p>
+<ul>
+<li>avante: <a href="https://github.com/ravitemer/mcphub.nvim/wiki/Avante" class="uri">https://github.com/ravitemer/mcphub.nvim/wiki/Avante</a></li>
+<li>codecompanion: <a href="https://github.com/ravitemer/mcphub.nvim/wiki/CodeCompanion" class="uri">https://github.com/ravitemer/mcphub.nvim/wiki/CodeCompanion</a></li>
+</ul>
+</div>
+<div id="enjoy" class="section level2">
+<h2>ENJOY</h2>
+<p>MCPをNeovimで使う様子と、使えるようにするまでの流れを紹介しました。まだ活用に至ってませんが、これから少しずつ使ってみたいです。</p>
+</div>
