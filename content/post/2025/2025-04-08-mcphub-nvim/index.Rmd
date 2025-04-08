@@ -19,7 +19,7 @@ summary: |
 
 [CopilotChat.nvim]: https://github.com/CopilotC-Nvim/CopilotChat.nvim
 
-MCP（Model Contezt Protocol）盛り上がってますね。
+MCP（Model Context Protocol）盛り上がってますね。
 
 [やさしいMCP入門](https://speakerdeck.com/minorun365/yasasiimcpru-men)なんて資料も出てきたくらいです。
 
