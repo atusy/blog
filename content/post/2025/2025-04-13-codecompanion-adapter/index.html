@@ -1,0 +1,88 @@
+---
+title: "codecompanion.nvimでOpenAI互換APIを利用する"
+author: atusy
+date: '2025-04-13'
+slug: codecompanion-adapter
+categories: [Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [lua]
+summary: |
+  codecompanion.nvimは未対応なサービスとチャットする方法としてカスタムアダプタの定義・登録があります。
+  特にOpenAI互換APIを利用する場合は、xAIのアダプタを参考にすることで、簡単に実装できます。
+---
+
+
+
+<p><a href="https://github.com/olimorris/codecompanion.nvim">codecompanion.nvim</a>は、NeovimでAIチャットを実現するためのプラグインです。</p>
+<p>デフォルトでcopilotやanthropicなどのAPIを利用してチャットする仕組みが用意されており、<code>:CopilotChat copilot</code>などとして、好きなサービスと会話できます。</p>
+<blockquote>
+<p><a href="https://github.com/olimorris/codecompanion.nvim/tree/main/lua/codecompanion/adapters" class="uri">https://github.com/olimorris/codecompanion.nvim/tree/main/lua/codecompanion/adapters</a></p>
+</blockquote>
+<p>さらに、リストにないサービスを利用する方法も提供されています。</p>
+<blockquote>
+<p><code>CREATING ADAPTERS                  *codecompanion-extending-creating-adapters*</code>
+<a href="https://github.com/olimorris/codecompanion.nvim/blob/9654cb31f10c9eda3e777d03d32b29df606ab0fe/doc/codecompanion.txt#L2442" class="uri">https://github.com/olimorris/codecompanion.nvim/blob/9654cb31f10c9eda3e777d03d32b29df606ab0fe/doc/codecompanion.txt#L2442</a></p>
+</blockquote>
+<p>手順としてはざっくり</p>
+<ul>
+<li>アダプタと呼ばれる、APIの利用方法の定義を作成する</li>
+<li><code>require("copilotchat").setup({...})</code>でアダプを登録する</li>
+</ul>
+<p>といった感じ。</p>
+<p>アダプタ定義に関してはAPIがOpenAI互換であれば、<code>xai.lua</code>を参考にして、簡単に実装できるようです。</p>
+<blockquote>
+<p><a href="https://github.com/olimorris/codecompanion.nvim/blob/main/lua/codecompanion/adapters/xai.lua" class="uri">https://github.com/olimorris/codecompanion.nvim/blob/main/lua/codecompanion/adapters/xai.lua</a></p>
+</blockquote>
+<p>実際 <code>.name</code>, <code>.formatted_name</code>, <code>.url</code>, <code>.env.api_key</code>, <code>.schema.model</code>を変更するだけで、OpenRouterのAPIのアダプタを作成できました。</p>
+<pre class="lua"><code>-- 未変更部省略してるので完全版は以下を参照
+-- https://github.com/atusy/dotfiles/blob/8736ff4c42ec3336e51165c2928a59bd2c9268b7/dot_config/nvim/lua/plugins/codecompanion/adapter/openrouter.lua
+
+return {
+	name = &quot;openrouter&quot;,
+	formatted_name = &quot;openrouter&quot;,
+	url = &quot;https://openrouter.ai/api/v1/chat/completions&quot;,
+	env = {
+		api_key = &quot;OPENROUTER_API_KEY&quot;,
+		-- `&quot;cmd: bw get password &lt;id&gt;&quot;`とかでコマンド経由にもできるらしい
+		-- Bitwardenの場合は、アカウント認証用のパスワード入力をうまくできなくて一旦断念
+	},
+	schema = {
+		model = {
+		  -- デフォルトで利用したいモデルと、その他の選択肢を定義
+			default = &quot;google/gemini-2.0-flash-001&quot;,
+			choices = {
+				-- free
+				&quot;openrouter/optimus-alpha&quot;,
+				&quot;google/gemini-2.0-flash-exp:free&quot;,
+				-- paid
+				&quot;google/gemini-2.0-flash-001&quot;,
+				&quot;openrouter/auto&quot;,
+			},
+		},
+	}
+}</code></pre>
+<p>あとは定義したアダプタを<code>setup</code>関数の<code>adapters</code>に登録すればOK</p>
+<pre class="lua"><code>require(&quot;copilotchat&quot;).setup({
+	adapters = {
+		openrouter = require(&quot;plugins.codecompanion.adapter.openrouter&quot;), -- モジュール名は例
+		optimus = function()
+			return require(&quot;codecompanion.adapters&quot;).extend(&quot;openrouter&quot;, {
+				schema = { model = { default = &quot;openrouter/optimus-alpha&quot; } },
+			})
+		end,
+	},
+})</code></pre>
+<p>なお、<code>require("codecompanion.adapters").extend</code>関数を使うと利用するモデルを変更したアダプタを簡単に作成＆登録できます。だったら<code>openai</code>アダプタをextendすれば、アダプタ定義をかなり楽にできるかと思いましたが、<code>extend</code>経由で変更できるフィールドは一部に限定されているみたいで、無理でした。</p>
+<pre class="lua"><code>require(&quot;copilotchat&quot;).setup({
+	adapters = {
+		optimus = function()
+			return require(&quot;codecompanion.adapters&quot;).extend(&quot;openrouter&quot;, {
+				schema = { model = { default = &quot;openrouter/optimus-alpha&quot; } },
+			})
+		end,
+	},
+})</code></pre>
+<p><strong>ENJOY!</strong></p>
