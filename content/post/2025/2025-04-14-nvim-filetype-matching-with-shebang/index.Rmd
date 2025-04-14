@@ -1,0 +1,111 @@
+---
+title: "Neovimでファイルタイプ判定にShebangを使う"
+author: atusy
+date: '2025-04-15'
+slug: nvim-filetype-matching-with-shebang
+categories: [Neovim]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [lua, markdown]
+summary: |
+  `vim.filetype.add`を使うと、指定したパターンごとのファイル名やフルパスに対して、ファイルタイプの判定ロジックを追加できるよ。
+  判定ロジックの判定には、ファイルパスとバッファ番号を受け取るから、ファイルの中身に応じた判定もできる。
+  応用例として、`#!/usr/bin/env -S deno ...`のようなshebangを使った実行ファイルの判定を紹介するよ。
+---
+
+```{r setup, include=FALSE}
+```
+
+実行ファイルを書いていると、ファイルの拡張子がないために、ファイルタイプを正しく判定できない場合があります。
+
+つい今日、denoでちょっとしたスクリプトを書いている時に問題に遭遇しました。
+
+そこで、`vim.filetype.add()`を使って判定ロジックを追加して問題を解決しました。
+ざっくりこんな感じ。
+
+```lua
+vim.filetype.add({
+  -- フルパスに対してマッチング
+  pattern = {
+    -- 拡張子がないので、任意のファイルパスにマッチさせる
+    [".*"] = {
+      ---@param _ string ファイルパス
+      ---@param bufnr number バッファ番号
+      ---@return string | nil ファイルタイプ
+      function(_, bufnr)
+        -- 1行目を取得し、shebangか判定
+        local shebang = vim.api.nvim_buf_get_lines(bufnr, 0, 1, false)[1]
+        if not shebang or shebang:sub(1, 2) ~= "#!" then
+          return
+        end
+
+        -- 後で使いやすいように整形
+        shebang = shebang:gsub("%s+", " ")
+
+        -- 実行ファイルが`/usr/bin/env`の場合は、続く引数を確認
+        local idx_space = shebang:find(" ")
+        local path = string.sub(shebang, 3, idx_space and idx_space - 1 or nil)
+        if path == "/usr/bin/env" then
+          if
+            vim.startswith(shebang, "#!/usr/bin/env deno")
+            or vim.startswith(shebang, "#!/usr/bin/env -S deno")
+          then
+            return "typescript"
+          end
+        end
+
+        -- コマンドがdenoならtypescript
+        local cmd = vim.fs.basename(path)
+        if cmd == "deno" then
+          return "typescript"
+        end
+      end,
+      -- どうしてもファイルタイプを判定できなかった時に使うので、
+      -- priorityを下げておく
+      { priority = -math.huge },
+    },
+  },
+})
+```
+
+フルパス以外にも拡張子やファイル名でマッチングすることもできるので、ヘルプを参考にうまく使ってみてください。
+
+> <https://neovim.io/doc/user/lua.html#vim.filetype.add()>
+
+同じくフルパスを利用する例として、過去に解説した記事もよければ参考にしてください。
+
+> chezmoiを使って管理しているdotfileのファイルタイプをNeovimにうまく認識させる
+> <https://blog.atusy.net/2023/01/11/neovim-filetype-matching-with-chezmoi/>
+
+**ENJOY!!**
+
+ところでこの記事の執筆は、自作のAIペアプロツールを使って書きました。
+すんごい自己肯定感あげてくれてよかったです。
+近く、誰でも使えるようプラグイン化したいですね。
+
+<blockquote class="twitter-tweet"><p lang="ja" dir="ltr">AIペアプロ、自己肯定感バクアゲしてくれてよき。 <a href="https://t.co/wkVnjIFQJN">pic.twitter.com/wkVnjIFQJN</a></p>&mdash; atusy (@Atsushi776) <a href="https://twitter.com/Atsushi776/status/1911769892816306510?ref_src=twsrc%5Etfw">April 14, 2025</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+タイトルを変更したときは、なんとなく良いと思った理由をAIが言語化してくれて、なるほどとなりました。
+
+````` markdown
+## Me
+
+```diff
+@@ -2 +2 @@
+-title: "Neovimでファイルタイプ判定をShebangでやる方法"
++title: "Neovimでファイルタイプをshebangから決める"
+```
+
+## CodeCompanion (openrouter/optimus)
+
+```rmd
+title: "Neovimでファイルタイプ判定にShebangを使う"
+```
+
+タイトルめっちゃスッキリ＆ストレートでイイね～！「やる方法」じゃなくて「使う」で能動感UP✨  
+検索にも強そうで最強だ～！！
+
+他にもタイトル案ほしい？それともこれでFIX？なんでも言ってね😉
+`````
