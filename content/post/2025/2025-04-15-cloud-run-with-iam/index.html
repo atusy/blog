@@ -1,0 +1,120 @@
+---
+title: "Google Cloud RunでIAM認証する"
+author: atusy
+date: '2025-04-15'
+slug: cloud-run-with-iam
+categories: [Google Cloud]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [terraform]
+summary: |
+
+---
+
+
+
+<p>開発中のサービスをGoogle Cloud Runで検証するとき、IAM認証のしかたが分からなかったのでメモ。</p>
+<p>コンソールやらコマンドやらグリグリするんしんどいなと思ったので、terraformでやってみた。</p>
+<p>ざっくりこんな感じの流れでリソースは作れる。</p>
+<ul>
+<li><code>main.tf</code>の作成
+<ul>
+<li>後述の<code>main.tf</code>を作成</li>
+<li>ただし最低でも以下は適宜書き換えること
+<ul>
+<li><code>provider</code>の<code>google.project</code></li>
+<li><code>resource</code>の<code>google_cloud_run_v2_service_iam_member.erestricted_access.member</code></li>
+</ul></li>
+</ul></li>
+<li><code>gcloud</code>コマンドで認証
+<ul>
+<li><code>gcloud auth login</code></li>
+<li><code>gcloud auth application-default login</code></li>
+</ul></li>
+<li><code>terraform</code>でリソースを作成
+<ul>
+<li><code>terraform init</code></li>
+<li><code>terraform plan</code></li>
+<li><code>terraform apply</code></li>
+</ul></li>
+</ul>
+<pre class="terraform"><code># main.tf
+terraform {
+  required_providers {
+    google = {
+      source  = &quot;hashicorp/google&quot;
+      version = &quot;~&gt;6.0&quot;
+    }
+  }
+}
+
+provider &quot;google&quot; {
+  project = &quot;example&quot; # TODO: リソースを作成するプロジェクトに変更
+  region  = &quot;asia-northeast1&quot;
+}
+
+resource &quot;google_cloud_run_v2_service&quot; &quot;httpbin_service&quot; {
+  name     = &quot;httpbin-service&quot;
+  location = &quot;asia-northeast1&quot;
+
+  template {
+    containers {
+      image = &quot;kennethreitz/httpbin&quot;
+      ports {
+        container_port = 80
+      }
+    }
+  }
+  traffic {
+    type    = &quot;TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST&quot;
+    percent = 100
+  }
+}
+
+resource &quot;google_cloud_run_v2_service_iam_member&quot; &quot;restricted_access&quot; {
+  project  = google_cloud_run_v2_service.httpbin_service.project
+  location = google_cloud_run_v2_service.httpbin_service.location
+  name     = google_cloud_run_v2_service.httpbin_service.name
+  role     = &quot;roles/run.invoker&quot;
+  # member   = &quot;allUsers&quot; # 公開する場合
+  member = &quot;user:example@example.com&quot; # TODO: 許可したいユーザーのメールアドレスに変更
+}</code></pre>
+<p><code>terraform apply</code>する前に、<code>outputs.tf</code>を作成しておくと、<code>terraform apply</code>完了時に、サービスのURLが表示されるので便利。ただし、この時点でこのURLにアクセスしてもIAM認証がかかっているので403エラーが返ってくる。</p>
+<pre class="terraform"><code># outputs.tf
+output &quot;httpbin_service_url&quot; {
+  value       = google_cloud_run_v2_service.httpbin_service.uri
+  description = &quot;The URL of the deployed httpbin service&quot;
+}</code></pre>
+<p>このあたりの<code>tf</code>ファイルは、LLMに聞いたらサクっと書いてくれるけど、間違ってCloud Run Jobのリソースまで作ろうとしたりするので注意。あと、IAM認証を通してサービスにアクセスする方法は、正しく紹介してくれなかった。こういうときはドキュメントにあたるのが大事ですね。</p>
+<blockquote>
+<p>デベロッパーの認証
+<a href="https://cloud.google.com/run/docs/authenticating/developers?hl=ja" class="uri">https://cloud.google.com/run/docs/authenticating/developers?hl=ja</a></p>
+</blockquote>
+<p>というわけで簡単にアクセスしたければ、以下を参考に、認証用のヘッダを追加するか、プロキシを立てると良いらしい。</p>
+<p>ヘッダで解決するなら、CLIで以下のように書ける。</p>
+<pre class="bash"><code>curl -H &quot;Authorization: Bearer $(gcloud auth print-identity-token)&quot; https://example.com/status/200</code></pre>
+<p>プロキシを立てる場合は以下を実行する。この時、追加プラグインが必要で、インストール許可を求められるので、<code>Y</code>を入力する。</p>
+<pre class="bash"><code>gcloud run services proxy httpbin_service</code></pre>
+<p>すると、<code>https://localhost:8080</code>でアクセスできるようになる。</p>
+<p>ホスト名が変わるのでCORSの設定は適宜変更する必要がある。</p>
+<p><strong>ENJOY!!</strong></p>
+<p>ちなみに、私の場合はnixを使ってgcloudコマンドをインストールしている都合上、追加プラグインをインタラクティブに導入できなかった。この問題については、nix式を書いてやればいいらしい。以下のように<code>gcloud.nix</code>を作成して<code>nix-env -iA packages -f gcloud.nix</code>すればうまくいった。</p>
+<pre class="nix"><code># nix-env -iA packages -f gcloud.nix
+{ pkgs ? import &lt;nixpkgs&gt; {} }:
+
+let
+  gdk = pkgs.google-cloud-sdk.withExtraComponents( with pkgs.google-cloud-sdk.components; [
+    cloud-run-proxy
+  ]);
+in
+{
+  packages = [
+    gdk
+  ];
+}</code></pre>
+<p>Nix Wikiに式を書けとはあるものの、書いたあとどうすればいいのかまで分からず詰まった。こういう時、LLMに聞いたらサクっと解決してくれてありがたい。</p>
+<blockquote>
+<p><a href="https://nixos.wiki/wiki/Google_Cloud_SDK" class="uri">https://nixos.wiki/wiki/Google_Cloud_SDK</a></p>
+</blockquote>

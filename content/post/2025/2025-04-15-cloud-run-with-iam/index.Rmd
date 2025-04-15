@@ -1,0 +1,145 @@
+---
+title: "Google Cloud RunでIAM認証する"
+author: atusy
+date: '2025-04-15'
+slug: cloud-run-with-iam
+categories: [Google Cloud]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [terraform]
+summary: |
+
+---
+
+```{r setup, include=FALSE}
+```
+
+開発中のサービスをGoogle Cloud Runで検証するとき、IAM認証のしかたが分からなかったのでメモ。
+
+コンソールやらコマンドやらグリグリするんしんどいなと思ったので、terraformでやってみた。
+
+ざっくりこんな感じの流れでリソースは作れる。
+
+- `main.tf`の作成
+    - 後述の`main.tf`を作成
+    - ただし最低でも以下は適宜書き換えること
+      - `provider`の`google.project`
+      - `resource`の`google_cloud_run_v2_service_iam_member.erestricted_access.member`
+- `gcloud`コマンドで認証
+    - `gcloud auth login`
+    - `gcloud auth application-default login`
+- `terraform`でリソースを作成
+    - `terraform init`
+    - `terraform plan`
+    - `terraform apply`
+
+```terraform
+# main.tf
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~>6.0"
+    }
+  }
+}
+
+provider "google" {
+  project = "example" # TODO: リソースを作成するプロジェクトに変更
+  region  = "asia-northeast1"
+}
+
+resource "google_cloud_run_v2_service" "httpbin_service" {
+  name     = "httpbin-service"
+  location = "asia-northeast1"
+
+  template {
+    containers {
+      image = "kennethreitz/httpbin"
+      ports {
+        container_port = 80
+      }
+    }
+  }
+  traffic {
+    type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
+    percent = 100
+  }
+}
+
+resource "google_cloud_run_v2_service_iam_member" "restricted_access" {
+  project  = google_cloud_run_v2_service.httpbin_service.project
+  location = google_cloud_run_v2_service.httpbin_service.location
+  name     = google_cloud_run_v2_service.httpbin_service.name
+  role     = "roles/run.invoker"
+  # member   = "allUsers" # 公開する場合
+  member = "user:example@example.com" # TODO: 許可したいユーザーのメールアドレスに変更
+}
+```
+
+`terraform apply`する前に、`outputs.tf`を作成しておくと、`terraform apply`完了時に、サービスのURLが表示されるので便利。
+ただし、この時点でこのURLにアクセスしてもIAM認証がかかっているので403エラーが返ってくる。
+
+```terraform
+# outputs.tf
+output "httpbin_service_url" {
+  value       = google_cloud_run_v2_service.httpbin_service.uri
+  description = "The URL of the deployed httpbin service"
+}
+```
+
+このあたりの`tf`ファイルは、LLMに聞いたらサクっと書いてくれるけど、間違ってCloud Run Jobのリソースまで作ろうとしたりするので注意。
+あと、IAM認証を通してサービスにアクセスする方法は、正しく紹介してくれなかった。
+こういうときはドキュメントにあたるのが大事ですね。
+
+> デベロッパーの認証
+> https://cloud.google.com/run/docs/authenticating/developers?hl=ja
+
+というわけで簡単にアクセスしたければ、以下を参考に、認証用のヘッダを追加するか、プロキシを立てると良いらしい。
+
+ヘッダで解決するなら、CLIで以下のように書ける。
+
+``` bash
+# URLは要変更
+curl -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+  https://example.com/status/200
+```
+
+プロキシを立てる場合は以下を実行する。
+この時、追加プラグインが必要で、インストール許可を求められるので、`Y`を入力する。
+
+``` bash
+gcloud run services proxy httpbin_service
+````
+
+すると、`https://localhost:8080`でアクセスできるようになる。
+
+ホスト名が変わるのでCORSの設定は適宜変更する必要がある。
+
+**ENJOY!!**
+
+ちなみに、私の場合はnixを使ってgcloudコマンドをインストールしている都合上、追加プラグインをインタラクティブに導入できなかった。
+この問題については、nix式を書いてやればいいらしい。
+以下のように`gcloud.nix`を作成して`nix-env -iA packages -f gcloud.nix`すればうまくいった。
+
+```nix
+# nix-env -iA packages -f gcloud.nix
+{ pkgs ? import <nixpkgs> {} }:
+
+let
+  gdk = pkgs.google-cloud-sdk.withExtraComponents( with pkgs.google-cloud-sdk.components; [
+    cloud-run-proxy
+  ]);
+in
+{
+  packages = [
+    gdk
+  ];
+}
+```
+
+Nix Wikiに式を書けとはあるものの、書いたあとどうすればいいのかまで分からず詰まった。こういう時、LLMに聞いたらサクっと解決してくれてありがたい。
+
+> https://nixos.wiki/wiki/Google_Cloud_SDK
