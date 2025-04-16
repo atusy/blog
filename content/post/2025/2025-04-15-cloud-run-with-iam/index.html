@@ -94,7 +94,9 @@ output &quot;httpbin_service_url&quot; {
 </blockquote>
 <p>というわけで簡単にアクセスしたければ、以下を参考に、認証用のヘッダを追加するか、プロキシを立てると良いらしい。</p>
 <p>ヘッダで解決するなら、CLIで以下のように書ける。</p>
-<pre class="bash"><code>curl -H &quot;Authorization: Bearer $(gcloud auth print-identity-token)&quot; https://example.com/status/200</code></pre>
+<pre class="bash"><code># URLは要変更
+curl -H &quot;Authorization: Bearer $(gcloud auth print-identity-token)&quot; \
+  https://example.com/status/200</code></pre>
 <p>プロキシを立てる場合は以下を実行する。この時、追加プラグインが必要で、インストール許可を求められるので、<code>Y</code>を入力する。</p>
 <pre class="bash"><code>gcloud run services proxy httpbin_service</code></pre>
 <p>すると、<code>https://localhost:8080</code>でアクセスできるようになる。</p>

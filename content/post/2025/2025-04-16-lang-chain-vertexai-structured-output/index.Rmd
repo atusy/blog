@@ -1,0 +1,93 @@
+---
+title: "LangChainとVertexAIのgemini 2.0 flashで構造化出力に失敗するケースが直りそう"
+author: atusy
+date: '2025-04-16'
+slug: "lang-chain-vertexai-structured-output"
+categories: [Google Cloud, Gemini, LangChain]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [python, yaml, diff]
+summary: |
+
+---
+
+```{r setup, include=FALSE}
+```
+
+LangChainのStructured outputを使うと、文章中の構造を良い感じに読み取って、Pydanticで定義したデータ構造に落としてこんでくれます。
+
+たとえば`x: x`という文字列をPythonの`{"x": "x"}`みたく変換してくれるイメージですね。
+
+ところがこの変換、gemini 1.5 proからgemini 2.0 flashにしたとたん、失敗するケースを観測していました。
+
+以下のようなコードを実行すると、`x: x`程度の簡単な構造でgemini 1.5 proでうまく処理できていた問題さえ、gemini 2.0 flashの場合に出力が`None`になるのです。
+
+```{r, results='asis', echo=FALSE}
+c(
+  "```py",
+  '# "google-cloud-aiplatform[vertexai]==1.75.*"',
+  '# "langchain-core==0.2.*"',
+  '# "langchain-google-vertexai==1.0.*"',
+  readLines("assets/demo/main.py"),
+  "```"
+) |> cat(sep = "\n")
+```
+
+```
+$ uv run main.py
+gemini-1.5-pro-002
+x='x'
+x='x'
+x='x'
+x='x'
+x='x'
+gemini-2.0-flash-001
+None
+None
+None
+None
+None
+```
+
+AIモデルのバージョンアップが簡単ではないことをつきつけられますね。
+
+この問題、langchain側にもあったようで、最新版を使うと解決します。
+
+ところが最新のlangchainを使うと、今度は複雑なデータ構造を利用した場合に、`Key '$defs' is not supported in schema, ignoring`が発生して、正しく解釈できない問題を観測していました。
+
+```py
+from pydantic import BaseModel, Field
+
+class Data(BaseModel):
+    x: str = Field(...)
+
+class DataList(BaseModel):
+    data: list[Data] = Field(...)
+```
+
+おかげでlangchainもgeminiもバージョンアップできない苦労を味わっていたのですが、5日前に解決したようです。
+
+> <https://github.com/langchain-ai/langchain-google/issues/659>
+
+めでたしめでたし。
+
+ちなみに、langchain 0.3系ではPydantic v2系を使うようになったので、以下を差し替えてあげるとGoodです。
+
+```diff
+- from langchain_core.pydantic_v1 import BaseModel, Field
++ from pydantic import BaseModel, Field
+```
+
+今回のデモに使った`pyproject.toml`は以下の通り。
+
+```{r, results='asis', echo=FALSE}
+c(
+  "```toml",
+  readLines("assets/demo/pyproject.toml"),
+  "```"
+) |> cat(sep = "\n")
+```
+
+**ENJOY**
