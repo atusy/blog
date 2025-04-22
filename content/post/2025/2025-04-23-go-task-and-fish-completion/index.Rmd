@@ -1,0 +1,61 @@
+---
+title: "Taskfile（taskコマンド）のfish補完定義を改善してグローバルタスクに対応した"
+author: atusy
+date: '2025-04-23'
+slug: cloud-run-with-iam
+categories: [Taskfile, go-task, fish]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: []
+summary: |
+
+---
+
+```{r setup, include=FALSE}
+```
+
+Taskfile（`task`コマンド）は、数あるタスクランナー／ビルドツールの1つです。
+Makefile代替とも言えますね。
+
+詳しくは公式サイト（<https://taskfile.dev/>）や「[Taskfileを使ってみよう](https://zenn.dev/remew/articles/introduce-taskfile)」などの記事を参考にしてもらうとして、個人的に`Taskfile`を好んでいる理由をいくつか挙げておきます。
+
+1. グローバルタスクを`~/Taskfile.yaml`に定義可能
+    - カレントディレクトリに依存せず、共通のタスクを定義しておき`task --global <taskname>`で実行できる
+2. 共用タスクを`Taskfile.dist.yaml`に定義しつつ、個人用のタスクを`Taskfile.yaml`に定義でき、併用が容易
+3. Taskfileの分割が容易
+4. さまざまなシェル（Bash, Fish, Powershell, Zsh）向けに補完が定義済み
+5. YAMLファイルなので[スキーマ定義](https://taskfile.dev/schema.json)を使ったバリデーションが容易
+    - エディタ上では[YAML Language Server](https://github.com/redhat-developer/yaml-language-server)が活躍します
+
+グローバルタスクはよく使うコマンドを書き溜めておけるので重宝してます。
+
+しかし、つい最近まではグローバルタスクの補完ができず、そのメリットを活かしきれませんでした。
+
+というわけで`task`コマンドにコントリビュートして、Fish向けにグローバルタスクの補完を実装しました。
+
+```
+task --global
+```
+
+と入力した状態で補完を実行すると、`~/.config/Taskfile.yml`に定義したタスクが補完候補として表示されるようになります。
+
+`--global`まで入力するのは手間なので、私はabbreviationを利用して、`Task`と入力したら、`task --global`に展開する設定を仕込んでます（`abbr -a Task "task --global"`）。
+
+実装できた背景には、Fishがコマンドラインをトークン単位に分割する機能を持っているので、`--global`オプションの有無を判定しやすいところにあります。
+
+> Fishの補完をコマンドラインの内容に応じて変える
+> <https://blog.atusy.net/2025/03/21/fish-completion-considering-tokens/>
+
+Bash, Powershell, Zshを助ける方法はちょっと自分の知識不足でわかりませんでした。
+Fishだけの改善でもマージしてもらえたのはとてもありがたいですね。
+
+当該機能はv3.4.31から利用可能です。
+
+> Fixed Fish completion on newer Fish versions ([#2130](https://github.com/go-task/task/issues/2130) by [@atusy](https://github.com/atusy)).
+> <https://taskfile.dev/changelog/#v3431---2025-04-21>
+
+ただ、このバージョンに含まれる他の更新絡みでレグレッションが発生していたようなので、v3.4.32以降を導入するのが無難だと思います。
+
+**ENJOY**

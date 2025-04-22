@@ -1,0 +1,53 @@
+---
+title: "Taskfile（taskコマンド）のfish補完定義を改善してグローバルタスクに対応した"
+author: atusy
+date: '2025-04-23'
+slug: cloud-run-with-iam
+categories: [Taskfile, go-task, fish]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: []
+summary: |
+
+---
+
+
+
+<p>Taskfile（<code>task</code>コマンド）は、数あるタスクランナー／ビルドツールの1つです。
+Makefile代替とも言えますね。</p>
+<p>詳しくは公式サイト（<a href="https://taskfile.dev/" class="uri">https://taskfile.dev/</a>）や「<a href="https://zenn.dev/remew/articles/introduce-taskfile">Taskfileを使ってみよう</a>」などの記事を参考にしてもらうとして、個人的に<code>Taskfile</code>を好んでいる理由をいくつか挙げておきます。</p>
+<ol style="list-style-type: decimal">
+<li>グローバルタスクを<code>~/Taskfile.yaml</code>に定義可能
+<ul>
+<li>カレントディレクトリに依存せず、共通のタスクを定義しておき<code>task --global &lt;taskname&gt;</code>で実行できる</li>
+</ul></li>
+<li>共用タスクを<code>Taskfile.dist.yaml</code>に定義しつつ、個人用のタスクを<code>Taskfile.yaml</code>に定義でき、併用が容易</li>
+<li>Taskfileの分割が容易</li>
+<li>さまざまなシェル（Bash, Fish, Powershell, Zsh）向けに補完が定義済み</li>
+<li>YAMLファイルなので<a href="https://taskfile.dev/schema.json">スキーマ定義</a>を使ったバリデーションが容易
+<ul>
+<li>エディタ上では<a href="https://github.com/redhat-developer/yaml-language-server">YAML Language Server</a>が活躍します</li>
+</ul></li>
+</ol>
+<p>グローバルタスクはよく使うコマンドを書き溜めておけるので重宝してます。</p>
+<p>しかし、つい最近まではグローバルタスクの補完ができず、そのメリットを活かしきれませんでした。</p>
+<p>というわけで<code>task</code>コマンドにコントリビュートして、Fish向けにグローバルタスクの補完を実装しました。</p>
+<pre><code>task --global</code></pre>
+<p>と入力した状態で補完を実行すると、<code>~/.config/Taskfile.yml</code>に定義したタスクが補完候補として表示されるようになります。</p>
+<p><code>--global</code>まで入力するのは手間なので、私はabbreviationを利用して、<code>Task</code>と入力したら、<code>task --global</code>に展開する設定を仕込んでます（<code>abbr -a Task "task --global"</code>）。</p>
+<p>実装できた背景には、Fishがコマンドラインをトークン単位に分割する機能を持っているので、<code>--global</code>オプションの有無を判定しやすいところにあります。</p>
+<blockquote>
+<p>Fishの補完をコマンドラインの内容に応じて変える
+<a href="https://blog.atusy.net/2025/03/21/fish-completion-considering-tokens/" class="uri">https://blog.atusy.net/2025/03/21/fish-completion-considering-tokens/</a></p>
+</blockquote>
+<p>Bash, Powershell, Zshを助ける方法はちょっと自分の知識不足でわかりませんでした。
+Fishだけの改善でもマージしてもらえたのはとてもありがたいですね。</p>
+<p>当該機能はv3.4.31から利用可能です。</p>
+<blockquote>
+<p>Fixed Fish completion on newer Fish versions (<a href="https://github.com/go-task/task/issues/2130">#2130</a> by <a href="https://github.com/atusy"><span class="citation">@atusy</span></a>).
+<a href="https://taskfile.dev/changelog/#v3431---2025-04-21" class="uri">https://taskfile.dev/changelog/#v3431---2025-04-21</a></p>
+</blockquote>
+<p>ただ、このバージョンに含まれる他の更新絡みでレグレッションが発生していたようなので、v3.4.32以降を導入するのが無難だと思います。</p>
+<p><strong>ENJOY</strong></p>
