@@ -2,7 +2,7 @@
 title: "Taskfile（taskコマンド）のfish補完定義を改善してグローバルタスクに対応した"
 author: atusy
 date: '2025-04-23'
-slug: cloud-run-with-iam
+slug: go-task-and-fish-completion
 categories: [Taskfile, go-task, fish]
 tags: []
 output:
