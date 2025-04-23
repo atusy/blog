@@ -45,7 +45,7 @@ task --global
 
 実装できた背景には、Fishがコマンドラインをトークン単位に分割する機能を持っているので、`--global`オプションの有無を判定しやすいところにあります。
 
-> Fishの補完をコマンドラインの内容に応じて変える
+> Fishの補完をコマンドラインの内容に応じて変える \
 > <https://blog.atusy.net/2025/03/21/fish-completion-considering-tokens/>
 
 Bash, Powershell, Zshを助ける方法はちょっと自分の知識不足でわかりませんでした。
@@ -53,7 +53,7 @@ Fishだけの改善でもマージしてもらえたのはとてもありがた�
 
 当該機能はv3.4.31から利用可能です。
 
-> Fixed Fish completion on newer Fish versions ([#2130](https://github.com/go-task/task/issues/2130) by [@atusy](https://github.com/atusy)).
+> Fixed Fish completion on newer Fish versions ([#2130](https://github.com/go-task/task/issues/2130) by [@atusy](https://github.com/atusy)). \
 > <https://taskfile.dev/changelog/#v3431---2025-04-21>
 
 ただ、このバージョンに含まれる他の更新絡みでレグレッションが発生していたようなので、v3.4.32以降を導入するのが無難だと思います。

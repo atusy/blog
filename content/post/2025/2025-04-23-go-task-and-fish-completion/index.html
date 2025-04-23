@@ -39,14 +39,14 @@ Makefile代替とも言えますね。</p>
 <p><code>--global</code>まで入力するのは手間なので、私はabbreviationを利用して、<code>Task</code>と入力したら、<code>task --global</code>に展開する設定を仕込んでます（<code>abbr -a Task "task --global"</code>）。</p>
 <p>実装できた背景には、Fishがコマンドラインをトークン単位に分割する機能を持っているので、<code>--global</code>オプションの有無を判定しやすいところにあります。</p>
 <blockquote>
-<p>Fishの補完をコマンドラインの内容に応じて変える
+<p>Fishの補完をコマンドラインの内容に応じて変える<br />
 <a href="https://blog.atusy.net/2025/03/21/fish-completion-considering-tokens/" class="uri">https://blog.atusy.net/2025/03/21/fish-completion-considering-tokens/</a></p>
 </blockquote>
 <p>Bash, Powershell, Zshを助ける方法はちょっと自分の知識不足でわかりませんでした。
 Fishだけの改善でもマージしてもらえたのはとてもありがたいですね。</p>
 <p>当該機能はv3.4.31から利用可能です。</p>
 <blockquote>
-<p>Fixed Fish completion on newer Fish versions (<a href="https://github.com/go-task/task/issues/2130">#2130</a> by <a href="https://github.com/atusy"><span class="citation">@atusy</span></a>).
+<p>Fixed Fish completion on newer Fish versions (<a href="https://github.com/go-task/task/issues/2130">#2130</a> by <a href="https://github.com/atusy"><span class="citation">@atusy</span></a>).<br />
 <a href="https://taskfile.dev/changelog/#v3431---2025-04-21" class="uri">https://taskfile.dev/changelog/#v3431---2025-04-21</a></p>
 </blockquote>
 <p>ただ、このバージョンに含まれる他の更新絡みでレグレッションが発生していたようなので、v3.4.32以降を導入するのが無難だと思います。</p>
