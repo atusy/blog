@@ -1,0 +1,46 @@
+---
+title: "home row mods無理だったわ"
+author: atusy
+date: '2025-04-23'
+slug: give-uphome-row-mods
+categories: [Keyboard]
+tags: [Keyball]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: []
+---
+
+```{r setup, include=FALSE}
+```
+
+[home row mods]: https://precondition.github.io/home-row-mods
+
+home row modsはホームポジションにあるasdfなどのキーを長押しでShiftやCtrlなどの修飾キー化する仕組みです。
+私はKeyball 61のファームウェアの設定変更で導入してみましたが、あまりの誤入力の多さに撤退を決意しました。
+
+> Keyball 61にhome row modsを導入した
+> <https://blog.atusy.net/2025/03/31/home-row-mods/>
+
+導入の背景は、home row modsが使いものになれば異なるキーボードでも同様の操作を容易に実現できると考えたからでした。
+
+設定により、それなりに使えるようになりましたが、高速にタイピングすると、`ji`は`CTRL-i`になってしまうといった現象に度々遭遇しました。
+対策として、高速タイピング用に修飾キー判定タイミングを設定したところ、疲れてタイピング速度が定価したときに誤判定を連発しました。
+その状態でさえ、高速すぎると誤判定するわ、更に厳しくすると、すべて修飾キーになってしまうわで、耐えられませんでした。
+
+これでは、Mac Bookの組込みキーボードにkarabiner-elementsを使ってhome-row-modsを導入したところで、同様の悩みを抱えるだろうと思いました。
+
+愛用しているキーボード（Keyball）の場合、親指キーが充実していて、これでほぼ困っていなかったので、home-row-modsをやめることに。
+
+唯一の困りごとは、Altキーがちょっと押しにくいところだったので、ここはhome-row-modsを参考に、`;`の右側のキーを長押ししたらAltキーになるようにしました。
+過去に紹介したマッピングでいうところの`'`の位置ですね。
+
+> Keyball61のオレオレマッピングを語る
+>
+> ![](/2023/08/12/keyball61/images/thumb.png)
+>
+> https://blog.atusy.net/2023/08/12/keyball61/
+
+今では大変快適に過ごしております。
+
+**ENJOY**
