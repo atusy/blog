@@ -1,0 +1,42 @@
+---
+title: "自分用コマンドにはプレフィックスつけるとよさげ"
+author: atusy
+date: '2025-04-24'
+slug: prefix-personal-commands
+categories: [Shell, Taskfile]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: []
+summary: |
+    `~/.local/bin/T-hoge`みたいに`T-`とかのprefixつけておくと、補完が効いて便利。
+    大文字にしとくと、被りも少ないよ。
+---
+
+
+
+<p>タスクランナーの<code>task</code>コマンド（<a href="https://taskfile.dev/" class="uri">https://taskfile.dev/</a>）はグローバルタスクを定義できるのがいいところですね。
+<code>~/Taskfile.yaml</code>に定義しておくと、どのディレクトリからでも実行できるので、便利です。これを活用したくて、<a href="https://github.com/go-task/task">go-task/task</a>にコントリビュートして、Fish向けにグローバルタスクの補完を実装しました。</p>
+<blockquote>
+<p>Taskfile（taskコマンド）のfish補完定義を改善してグローバルタスクに対応した
+<a href="https://blog.atusy.net/2025/04/23/go-task-and-fish-completion/" class="uri">https://blog.atusy.net/2025/04/23/go-task-and-fish-completion/</a></p>
+</blockquote>
+<p>しかし、いくつか不安がありました</p>
+<ul>
+<li>タスクランナーはグローバルタスクに対応しているものばかりではないので、<code>task</code>コマンドから乗り換えづらい</li>
+<li>補完定義をFishしか対応させられなかったので、他のシェルで使いづらい</li>
+</ul>
+<p>そこへきてvim-jpで</p>
+<blockquote>
+<p>この手のツール、大体シェルの設定かシェルスクリプトでいいやってなるんだけど</p>
+</blockquote>
+<p>というコメントをもらい、ふと、そういえば自分も<code>~/.local/bin/</code>に自分用コマンドを定義しているなと思いました。</p>
+<p>個人的には、コマンド名を覚えやすいものを<code>~/.local/bin/</code>に配置し、そうでもないものをグローバルタスク化していました。グローバルタスクは、<code>task --global</code>で補完候補を得られるので、名前を記憶する必要がなかったわけです。</p>
+<p>ということは、<code>~/.local/bin/</code>下に特定のprefixを持つ実行ファイルを置いておけば良いではないかと気付きました。</p>
+<p>たとえば、システムを更新するスクリプトは <code>~/.local/bin/T-system-update</code> といった具合にしておくと、<code>T-</code>でコマンドを補完させればいいわけですね。
+<code>T-</code>をprefixにしたのは、<strong>task</strong>を連想しやすいからです。</p>
+<p>この方法なら<code>task</code>コマンド不要ですし、Fish以外のシェルでも容易に補完できます。</p>
+<p>やったね！</p>
+<p>同じようにローカルタスクも実行ファイルで管理できるといいなーと思ったのですが、気にしないことにしました。動的に<code>PATH</code>を変更する手間を思えばタスクランナーを採用すればいいですし、<code>task</code>コマンドに縛られず任意のタスクランナーを使えるので、問題になりません。</p>
+<p><strong>ENJOY</strong></p>
