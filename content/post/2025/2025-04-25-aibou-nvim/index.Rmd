@@ -103,7 +103,7 @@ require("aibou.codecompanion").start({
 以下の記事で考案したプロンプトを参考に、ペアプロ用に最適化しています。
 
 > CopilotChat.nvimでもギャルとペアプロしたい！ \
-> http://localhost:4321/2025/04/06/copilotchat-with-gal/
+> https://blog.atusy.net/2025/04/06/copilotchat-with-gal/
 
 ```{css, echo=FALSE}
 .pre-wrap > code {
