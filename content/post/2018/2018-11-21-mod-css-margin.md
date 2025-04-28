@@ -3,8 +3,8 @@ title: CSSでヘッダの行間を調整してみた
 author: ~
 date: '2018-11-21'
 slug: mod-css-margin
-categories: [css]
-tags: []
+categories: [Tech]
+tags: [CSS]
 ---
 
 # h1

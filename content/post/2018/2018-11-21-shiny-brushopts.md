@@ -3,8 +3,8 @@ title: Shinyでggplot2の選択領域を拡大 (brushOpts)
 author: ~
 date: '2018-11-21'
 slug: shiny-brushopts
-categories: [R]
-tags: [shiny]
+categories: [Tech]
+tags: [R, R-shiny, R-gglot2]
 output:
   blogdown::html_page: default
 ---

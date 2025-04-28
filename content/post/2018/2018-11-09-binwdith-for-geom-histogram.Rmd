@@ -3,8 +3,8 @@ title: geom_histogramのビン幅を動的に決定する
 author: ~
 date: '2018-11-09'
 slug: binwdith-for-geom-histogram
-categories: [R]
-tags: [ggplot2]
+categories: [Tech]
+tags: [R, R-ggplot2]
 output:
   blogdown::html_page:
     toc: yes

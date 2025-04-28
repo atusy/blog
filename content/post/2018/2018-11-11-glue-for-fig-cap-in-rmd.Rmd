@@ -3,8 +3,8 @@ title: Rmdのfig.capを図を生成するチャンク内にglueで書く
 author: ~
 date: '2018-11-11'
 slug: glue-for-fig-cap-in-rmd
-categories: [R]
-tags: [Rmd, glue]
+categories: [Tech]
+tags: [R, Rmarkdown, R-glue]
 ---
 
 Rmdのchunkオプションである `fig.cap` の評価は，チャンクの評価が終わってからです．

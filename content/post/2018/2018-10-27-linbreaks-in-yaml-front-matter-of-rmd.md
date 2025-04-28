@@ -7,8 +7,8 @@ title: |
 author: ~
 date: '2018-10-27'
 slug: linbreaks-in-yaml-front-matter-of-rmd
-categories: [R]
-tags: [Rmd, YAML, R MarkdownでWord文書を作ろう]
+categories: [Tech]
+tags: [Rmarkdown, YAML, R MarkdownでWord文書を作ろう]
 ---
 
 @niszet0 さん著「R MarkdownでWord文書を作ろう」を読んでます。

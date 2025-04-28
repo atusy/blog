@@ -3,8 +3,8 @@ title: furrr パッケージで ggplot のリストの表示を高速化する
 author: ~
 date: '2018-12-05'
 slug: accelerate-list-of-ggplot-with-furrr
-categories: [R]
-tags: [ggplot2, furrr]
+categories: [Tech]
+tags: [R, R-ggplot2, R-furrr]
 output:
   blogdown::html_page:
     toc: yes

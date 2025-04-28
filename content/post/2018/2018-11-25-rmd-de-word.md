@@ -3,8 +3,8 @@ title: 書評 「R MarkdownでWord文書を作ろう」
 author: ~
 date: '2018-11-25'
 slug: rmd-de-word
-categories: [R]
-tags: [R MarkdownでWord文書を作ろう]
+categories: [Tech]
+tags: [R, R MarkdownでWord文書を作ろう]
 output:
   blogdown::html_page:
     toc: true

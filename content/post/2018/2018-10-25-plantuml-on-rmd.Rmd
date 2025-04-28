@@ -3,8 +3,8 @@ title: R Markdown で PlantUML
 author: ~
 date: '2018-10-25'
 slug: plantuml-on-rmd
-categories: [R]
-tags: [Rmd, R MarkdownでWord文書を作ろう, PlantUML]
+categories: [Tech]
+tags: [Rmarkdown, R MarkdownでWord文書を作ろう, PlantUML]
 ---
 
 ```{r setup, include = FALSE}

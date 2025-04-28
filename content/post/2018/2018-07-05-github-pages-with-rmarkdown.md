@@ -3,8 +3,8 @@ title: GitHub pages with Rmarkdown
 author: atusy
 date: '2018-07-05'
 slug: github-pages-with-rmarkdown
-categories: [R]
-tags: [blogdown]
+categories: [Tech]
+tags: [R, R-blogdown]
 ---
 
 遅蒔きながら、Rのblogdownパッケージを使ってblogを始めてみた。

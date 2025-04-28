@@ -3,8 +3,8 @@ title: パラメータ付きRmdを試す
 author: ~
 date: '2018-08-17'
 slug: rmd-parameterized
-categories: [R]
-tags: [Rmd]
+categories: [Tech]
+tags: [R, Rmarkdown]
 params:
   i: 1
   d: 1.5

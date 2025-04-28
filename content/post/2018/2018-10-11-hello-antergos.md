@@ -3,8 +3,8 @@ title: Antergos導入
 author: ~
 date: '2018-10-11'
 slug: hello-antergosmd
-categories: [Arch]
-tags: [Linux]
+categories: [Tech]
+tags: [Linux, Arch, Antergos]
 ---
 
 自宅用PCにAntergosを導入しました．

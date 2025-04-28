@@ -3,8 +3,8 @@ title: Marginal distributions with ggplot2 and patchwork
 author: ~
 date: '2018-11-02'
 slug: marginal-patchwork
-categories: [R]
-tags: [ggplot2, patchwork]
+categories: [Tech]
+tags: [R, R-ggplot2, R-patchwork]
 ---
 
 ```{r setup, include = FALSE}

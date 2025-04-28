@@ -3,8 +3,8 @@ title: ヒストグラムのビンの色をx軸に応じて変える
 author: ~
 date: '2018-11-20'
 slug: histogram-fill-along-x
-categories: [R]
-tags: [ggplot2]
+categories: [Tech]
+tags: [R, R-ggplot2]
 output:
   blogdown::html_page:
     toc: yes

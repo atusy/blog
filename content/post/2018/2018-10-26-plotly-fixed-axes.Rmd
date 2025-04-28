@@ -3,8 +3,8 @@ title: Plotlyで軸比を1:1に固定する
 author: ~
 date: '2018-10-26'
 slug: plotly-fixed-axes
-categories: [R]
-tags: [plotly]
+categories: [Tech]
+tags: [R, R-plotly]
 ---
 
 

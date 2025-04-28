@@ -4,8 +4,8 @@ author: ~
 date: '2018-08-28'
 lastmod: '2019-08-16'
 slug: roxygen2matome
-categories: [R]
-tags: [package, Roxygen2, Rd]
+categories: [Tech]
+tags: [R, R-package, R-roxygen2, R-Rd]
 output:
   blogdown::html_page:
     toc: yes

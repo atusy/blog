@@ -3,8 +3,8 @@ title: xetexでunicode文字
 author: ~
 date: '2018-07-09'
 slug: xelatexでutf8文字
-categories: [latex]
-tags: [latex, Rmd, unicode]
+categories: [Tech]
+tags: [latex, R, RMarkdown, unicode]
 math: true
 ---
 

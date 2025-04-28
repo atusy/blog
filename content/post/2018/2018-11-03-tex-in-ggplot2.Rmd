@@ -3,8 +3,8 @@ title: ggplot2で$TeX$を利用する
 author: ~
 date: '2018-11-03'
 slug: tex-in-ggplot2
-categories: [R]
-tags: [ggplot2, latex2exp, TeX]
+categories: [Tech]
+tags: [R, R-ggplot2, R-latex2exp, TeX]
 output:
   blogdown::html_page:
     toc: yes

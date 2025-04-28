@@ -4,7 +4,7 @@ author: ~
 date: '2018-10-22'
 slug: bridal-music
 categories: [Music]
-tags: []
+tags: [Bridal]
 ---
 
 9/29に結婚式を挙げました。

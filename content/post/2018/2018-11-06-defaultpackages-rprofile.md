@@ -3,8 +3,8 @@ title: R起動時に不足パッケージを導入しつつ読み込む
 author: ~
 date: '2018-11-06'
 slug: defaultpackages-rprofile
-categories: [R]
-tags: [Rprofile, callr]
+categories: [Tech]
+tags: [R, Rprofile, R-callr]
 output:
   blogdown::html_page: 
     toc: yes

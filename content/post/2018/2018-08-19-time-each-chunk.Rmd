@@ -3,8 +3,8 @@ title: Rmdでchunkごとの実行時間を計測
 author: ~
 date: '2018-08-18'
 slug: time-each-chunk
-categories: [R]
-tags: [Rmd, knitr]
+categories: [Tech]
+tags: [R, Rmarkdown, R-knitr]
 ---
 
 Jupyter Notebookでは、コードブロック冒頭で `%%timeit` と唱えると、ブロックの評価に要した時間を表示できる。  

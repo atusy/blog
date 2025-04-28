@@ -6,8 +6,8 @@ title: Hugo (blogdown) で MathJax
 author: ~
 date: '2019-05-09 18:00:00'
 slug: how2mathjax
-categories: [R, Hugo]
-tags: [blogdown, MathJax, LaTeX]
+categories: [Tech]
+tags: [R, R-blogdown, Hugo, MathJax, LaTeX]
 math: true
 aliases:
   - /2018/07/28/how2mathjax/
