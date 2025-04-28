@@ -1,0 +1,123 @@
+---
+title: "gemma3:1bのStructured Outputを安定させる工夫"
+author: atusy
+date: '2025-04-28'
+slug: gemma3-structured-output
+categories: [Tech]
+tags: [AI, Python, Gemma, LLM]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: []
+summary: |
+  Structured OutputはLLMの出力をプログラムで扱いやすい形式（JSONとか）に落としこむ機能です。
+  `gemma3:1b`で試してみたところ、`temperature`を0にする、システムプロンプトに`入力に忠実に構造化出力して`と指示するなどの工夫が必要なものの、期待通りの結果を得ることができそうです。
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(comment = "#>")
+```
+
+Structured OutputはLLMの出力をプログラムで扱いやすい形式（JSONとか）に落としこむ機能です。
+Googleが開発するオープンなLLMモデルのGemma 3が対応したとのことで試してみました。
+
+> <https://developers.googleblog.com/en/introducing-gemma3/>
+
+出力を安定させるために`temperature`を`0`にする、システムプロンプトに`入力に忠実に構造化出力して`と指示するなどの工夫が必要なものの、期待通りの結果を得ることができそうです。
+
+# 準備
+
+- Ollamaを<https://ollama.com>の案内に従ってインストール
+- `ollama pull gemma3:1b`などを実行して使いたいモデルを入手
+
+# ソース
+
+`名前は篤史、出生地は日本`のような入力に対して、`{"name": "篤史", "birthplace": "Japan"}`のようなJSONを返すコードを作ってみました。
+安定性を確認するため10回ずつループさせます。
+
+こういうとき、LangChainだと色んなモデルを統一的に扱えるので便利。
+
+簡易的な作りですが、パラメータは`モデル名`、`システムプロンプト`、`ユーザープロンプト`です。
+
+```
+uv --directory assets run main.py \
+  "モデル名（例：gemma3:1b）" \
+  "システムプロンプト" \
+  "ユーザープロンプト"
+```
+
+ソースコードは記事内にも記載していますが、以下のURLからも参照できます。
+
+> <https://github.com/atusy/blog/blob/882c6ec580ff4f58069e731548d325c156818e1f/content/post/2025/2025-04-28-gemma3-structured-output/assets>
+
+## main.py
+
+```{r, echo=FALSE, results="asis", commnet=""}
+c(
+  "```py",
+  "# assets/main.py",
+  readLines("assets/main.py"),
+  "```"
+) |>
+  paste0(sep = "\n") |>
+  cat()
+```
+
+## pyproject.toml
+
+```{r, echo=FALSE, results="asis", commnet=""}
+c(
+  "```toml",
+  "# assets/pyproject.toml",
+  readLines("assets/pyproject.toml"),
+  "```"
+) |>
+  paste0(sep = "\n") |>
+  cat()
+```
+
+# 結果
+
+## Gemma3:1b
+
+### 名前は篤史、出生地は日本
+
+いい感じ
+
+```{bash, collapse = TRUE}
+uv --directory assets run main.py gemma3:1b "" "名前は篤史、出生地は日本"
+```
+
+### 名前はatusy、出身地は日本
+
+アルファベットを使ったハンドルネームのせいで、`日本`を`Japan`に変換しやがります。
+ちなみに、モデルパラメータの`temperature`を高くすると、変換が発生したりしなかったり、`atusy`が`Atsushi`、`Atusu`に変えられたりします。
+不安定ですが、`temperature`の性質を考えれば、それはそうといった感じですね。
+
+```{bash, collapse = TRUE}
+uv --directory assets run main.py gemma3:1b "" "名前はatusy、出身地は日本"
+```
+
+この手の問題はシステムプロンプトで`"入力に忠実に構造化出力して"`と指示しておくとよさげ。
+
+
+```{bash, collapse = TRUE}
+uv --directory assets run main.py gemma3:1b "入力に忠実に構造化出力して" "名前はatusy、出身地は日本"
+```
+
+## Gemma2:2b
+
+Gemma 2では以下のような記事を見かけて、Structured Outputするの大変なのかなーと思ってましたが、今回のソースコードで問題なく動くことを確認しました。
+
+> ローカルLLM(Gemma 2 2B)で「Structured Outputs(構造化出力)」っぽいことGuardrails AIで実現する \
+> <https://qiita.com/Hikakkun/items/f1813395a00b10222305>
+
+強いてGemma 2を使いつづける理由はあまりないと思いますが……。
+
+### 名前はatusy、出身地は日本
+
+```{bash, collapse = TRUE}
+uv --directory assets run main.py gemma2:2b "入力に忠実に構造化出力して" "名前はatusy、出身地は日本"
+```
+
+**ENJOY**
