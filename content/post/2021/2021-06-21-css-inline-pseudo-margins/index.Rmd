@@ -3,8 +3,8 @@ title: HTML+CSSでaとかcodeとかの前後に空白を入れつつ、段落の
 author: ''
 date: '2021-06-21'
 slug: css-inline-pseudo-margins
-categories: [CSS]
-tags: [vimjp]
+categories: [Tech]
+tags: [CSS, vimjp]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

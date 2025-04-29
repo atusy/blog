@@ -3,8 +3,8 @@ title: 'LinuxでIntel製CPU内蔵のGPUを使うと動画再生時に画面が�
 author: ''
 date: '2021-10-24'
 slug: linux-tearing-intel-gpu
-categories: [Linux]
-tags: []
+categories: [Tech]
+tags: [Linux]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

@@ -3,8 +3,8 @@ title: PandocでWord出力する時にヘッダーやフッターの内容を動
 author: ''
 date: '2021-05-23'
 slug: pandoc-word-dynamic-header-and-footer
-categories: [R]
-tags: [pandoc]
+categories: [Tech]
+tags: [R, pandoc]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

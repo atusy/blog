@@ -3,8 +3,8 @@ title: RでPython風docstringを実装してみる
 author: ''
 date: '2021-12-20'
 slug: r-docstring
-categories: [R, Python]
-tags: [docstring, roxygen2]
+categories: [Tech]
+tags: [R, Python, docstring, R-roxygen2]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

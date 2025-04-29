@@ -3,8 +3,8 @@ title: Rの乱数生成関数は一発で色んなパラメータの分布を作
 author: ''
 date: '2021-08-13'
 slug: vectorize-rng
-categories: [R]
-tags: []
+categories: [Tech]
+tags: [R]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

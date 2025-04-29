@@ -3,8 +3,8 @@ title: "minidown 0.1.0をリリース"
 author: ~
 date: '2021-04-04'
 slug: minidown-0-1-0
-categories: [R]
-tags: [minidown, rmarkdown]
+categories: [Tech]
+tags: [R, R-minidown, R-rmarkdown]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

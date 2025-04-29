@@ -3,8 +3,8 @@ title: 'Tokyo.R 95でminidownパッケージを紹介でLTしてきました'
 author: ''
 date: '2021-10-31'
 slug: tokyor95
-categories: [R]
-tags: [TokyoR]
+categories: [Tech]
+tags: [R, TokyoR]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

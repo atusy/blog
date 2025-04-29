@@ -3,8 +3,8 @@ title: GitHub CLI（`gh`）に曖昧検索の力を加えるghfコマンドを�
 author: ''
 date: '2021-07-10'
 slug: publish-gh-fzf
-categories: [shell, git]
-tags: [gh, fzf]
+categories: [Tech]
+tags: [shell, git, gh, fzf]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

@@ -3,7 +3,7 @@ title: "Tidymodelsでデータの前処理内容を**tidy**に確認する（公
 author: ''
 date: '2021-06-23'
 slug: tidy-inspect-tidymodels-preprocessing
-categories: []
+categories: [Tech]
 tags: []
 output:
   blogdown::html_page:

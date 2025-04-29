@@ -3,8 +3,8 @@ title: tidymodelsのrecipesパッケージがworkflowsパッケージの使用�
 author: ''
 date: '2021-07-01'
 slug: tidymodels
-categories: [R]
-tags: [tidymodels, recipes, parsnip, workflows]
+categories: [Tech]
+tags: [R, R-tidymodels, R-recipes, R-parsnip, R-workflows]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

@@ -3,8 +3,8 @@ title: PandocでPDFを作成する時に表の枠線を格子状にする
 author: ''
 date: '2021-09-22'
 slug: pandoc-partial-conversion-by-filter
-categories: [Pandoc]
-tags: [LaTeX, Lua, jq]
+categories: [Tech]
+tags: [Pandoc, LaTeX, Lua, jq]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

@@ -3,8 +3,8 @@ title: ブランチをディレクトリに割り当つつGit管理対象外フ�
 author: ''
 date: '2021-09-15'
 slug: git-worksync-1-0-0
-categories: [Git]
-tags: [Bash]
+categories: [Tech]
+tags: [Git, Bash]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

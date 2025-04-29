@@ -3,8 +3,8 @@ title: minidownで目次をハイライトできるようにした
 author: ~
 date: '2021-01-14'
 slug: minidown-toc-highlight
-categories: [R, JavaScript]
-tags: [minidown, R Markdown, pandoc]
+categories: [Tech]
+tags: [R, JavaScript, R-minidown, Rmarkdown, pandoc]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists
