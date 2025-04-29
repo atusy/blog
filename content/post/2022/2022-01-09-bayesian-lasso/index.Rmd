@@ -3,8 +3,8 @@ title: Stanを使ったBayesian Lassoの実装に関するメモ
 author: ''
 date: '2022-01-09'
 slug: bayesian-lasso
-categories: [Stats]
-tags: [Stan]
+categories: [Tech]
+tags: [Stats, Stan]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

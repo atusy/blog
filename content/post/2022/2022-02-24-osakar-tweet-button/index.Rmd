@@ -3,7 +3,7 @@ title: Osaka.R Slackの朝もくチャンネルにツィートボタンを設置
 author: ''
 date: '2022-02-24'
 slug: osakar-tweet-button
-categories: []
+categories: [Tech]
 tags: []
 output:
   blogdown::html_page:

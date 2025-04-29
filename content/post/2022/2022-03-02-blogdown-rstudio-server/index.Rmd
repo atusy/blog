@@ -3,8 +3,8 @@ title: RStudio Serverでblogdownを快適に使えるようにする
 author: ''
 date: '2022-03-02'
 slug: blogdown-rstudio-server
-categories: [R, Hugo]
-tags: [rmarkdown, blogdown, RStudio]
+categories: [Tech]
+tags: [R, Hugo, R-rmarkdown, blogdown, RStudio]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

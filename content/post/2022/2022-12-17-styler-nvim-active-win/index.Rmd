@@ -3,8 +3,8 @@ title: もっと良い感じにstyler.nvimでアクティブなウィンドウ�
 author: ''
 date: '2022-12-17'
 slug: styler-nvim-active-win
-categories: [Neovim]
-tags: []
+categories: [Tech]
+tags: [Neovim]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

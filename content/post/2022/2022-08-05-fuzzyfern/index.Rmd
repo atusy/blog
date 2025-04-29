@@ -3,8 +3,8 @@ title: Fuzzy Finderで捗るFernによるファイル操作
 author: ''
 date: '2022-08-05'
 slug: fuzzyfern
-categories: [neovim, fern.vim, telescope.nvim]
-tags: []
+categories: [Tech]
+tags: [neovim, fern.vim, telescope.nvim]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

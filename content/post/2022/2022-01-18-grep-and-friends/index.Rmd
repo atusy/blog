@@ -3,8 +3,8 @@ title: grepとユカイな仲間たち
 author: ''
 date: '2022-01-18'
 slug: grep-and-friends
-categories: [R]
-tags: [grep]
+categories: [Tech]
+tags: [R, grep]
 output:
   blogdown::html_page:
     toc: true

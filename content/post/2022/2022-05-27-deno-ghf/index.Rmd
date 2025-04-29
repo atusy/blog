@@ -3,7 +3,7 @@ title: DenoとTypeScriptで自作CLIツールのghfを移植してみた（動�
 author: ''
 date: '2022-05-27'
 slug: deno-ghf
-categories: []
+categories: [Tech]
 tags: []
 output:
   blogdown::html_page:

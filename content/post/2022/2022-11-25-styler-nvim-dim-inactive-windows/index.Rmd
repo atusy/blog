@@ -3,8 +3,8 @@ title: styler.nvimでアクティブなウィンドウか否かでカラース�
 author: ''
 date: '2022-11-25'
 slug: styler-nvim-dim-inactive-windows
-categories: [Neovim]
-tags: [styler.nvim]
+categories: [Tech]
+tags: [Neovim, styler.nvim]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

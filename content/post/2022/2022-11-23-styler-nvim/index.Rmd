@@ -3,8 +3,8 @@ title: styler.nvimを使うとバッファごとにcolorschemeを変えられて
 author: ''
 date: '2022-11-23'
 slug: styler-nvim
-categories: [Neovim]
-tags: [styler.nvim]
+categories: [Tech]
+tags: [Neovim, styler.nvim]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

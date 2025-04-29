@@ -3,7 +3,7 @@ title: hop.nvimで直近の検索パターンにホップ
 author: ''
 date: '2022-12-21'
 slug: hop-nvim-gn
-categories: []
+categories: [Tech]
 tags: []
 output:
   blogdown::html_page:

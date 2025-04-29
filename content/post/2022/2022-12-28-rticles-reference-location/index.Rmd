@@ -3,8 +3,8 @@ title: rticlesパッケージで作成する文書の参考文献の位置を変
 author: ''
 date: '2022-12-28'
 slug: rticles-reference-location
-categories: [R]
-tags: [rmarkdown, rticles]
+categories: [Tech]
+tags: [R, R-rmarkdown, R-rticles]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

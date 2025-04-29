@@ -4,8 +4,8 @@ author: ''
 date: '2022-08-13'
 lastmod: '2022-10-12'
 slug: felp-fuzzyhelp
-categories: [R]
-tags: [felp]
+categories: [Tech]
+tags: [R, R-felp]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists
