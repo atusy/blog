@@ -3,9 +3,7 @@ title: VimでgfしたらURLをブラウザで開く
 author: atusy
 date: '2023-12-09'
 slug: gf-open-url
-categories:
-  - Vim
-  - Neovim
+categories: [Vim, Neovim]
 tags: []
 output:
   'blogdown::html_page':
