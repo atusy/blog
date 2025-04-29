@@ -3,8 +3,7 @@ title: gh searchでOSS貢献を振り替える
 author: atusy
 date: '2024-06-03'
 slug: gh-search-merged-prs
-categories:
-  - fish
+categories: [fish]
 tags: []
 output:
   'blogdown::html_page':

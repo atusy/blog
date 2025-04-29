@@ -3,8 +3,7 @@ title: Rで関数定義のジャンプがしょぼいわけ
 author: atusy
 date: '2024-08-07'
 slug: r-def-jumpt
-categories:
-  - R
+categories: [R]
 tags: []
 output:
   'blogdown::html_page':

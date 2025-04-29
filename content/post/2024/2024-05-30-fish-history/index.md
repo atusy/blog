@@ -3,8 +3,7 @@ title: fishでzshのhistoryも参照したい
 author: atusy
 date: '2024-05-30'
 slug: fish-history
-categories:
-  - fish
+categories: [fish]
 tags: []
 output:
   'blogdown::html_page':

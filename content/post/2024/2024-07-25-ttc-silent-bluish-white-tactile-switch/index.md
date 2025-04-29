@@ -3,8 +3,7 @@ title: TTC Silent Bluish White Tactile Switchがよさげ
 author: atusy
 date: '2024-07-25'
 slug: ttc-silent-bluish-white-tactile-switch
-categories:
-  - keyboard
+categories: [keyboard]
 tags: []
 output:
   'blogdown::html_page':

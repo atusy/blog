@@ -3,8 +3,7 @@ title: PandocでLuaオブジェクトをJSON文字列化する
 author: atusy
 date: '2024-07-23'
 slug: pandoc-lua-to-json
-categories:
-  - pandoc
+categories: [pandoc]
 tags: []
 output:
   'blogdown::html_page':

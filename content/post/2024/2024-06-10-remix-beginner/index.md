@@ -3,9 +3,7 @@ title: Remixでフロントエンド入門してみた
 author: atusy
 date: '2024-06-03'
 slug: remix-beginner
-categories:
-  - frontend
-  - remix
+categories: [frontend, remix]
 tags: []
 output:
   'blogdown::html_page':

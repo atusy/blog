@@ -3,8 +3,7 @@ title: fishの起動時間
 author: atusy
 date: '2024-06-02'
 slug: fish-startuptime
-categories:
-  - fish
+categories: [fish]
 tags: []
 output:
   'blogdown::html_page':

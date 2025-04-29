@@ -3,8 +3,7 @@ title: Vimのj/kを加速させるサブモード
 author: atusy
 date: '2024-06-12'
 slug: vim-submode-jjjj
-categories:
-  - vim
+categories: [vim]
 tags: []
 output:
   'blogdown::html_page':

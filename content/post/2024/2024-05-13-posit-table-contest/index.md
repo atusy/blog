@@ -3,11 +3,8 @@ title: 'Posit Table Contestに`felp::fuzzyhelp()`を投稿した'
 author: atusy
 date: '2024-05-13'
 slug: posit-table-contest
-categories:
-  - R
-tags:
-  - Shiny
-  - felp
+categories: [R]
+tags: [Shiny, felp]
 output:
   'blogdown::html_page':
     md_extensions: +east_asian_line_breaks+task_lists

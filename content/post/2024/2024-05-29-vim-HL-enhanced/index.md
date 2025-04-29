@@ -3,8 +3,7 @@ title: H/LとPageUp/PageDownを共存させる設定 (submode編)
 author: atusy
 date: '2024-05-29'
 slug: vim-HL-enhanced
-categories:
-  - vim
+categories: [vim]
 tags: []
 output:
   'blogdown::html_page':

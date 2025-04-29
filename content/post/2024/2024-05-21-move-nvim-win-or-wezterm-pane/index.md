@@ -3,9 +3,7 @@ title: Neovimの端っこで\<C-W\>lとかしたら、WeztermのとなりのPane
 author: atusy
 date: '2024-05-21'
 slug: move-nvim-win-or-wezterm-pane
-categories:
-  - Neovim
-  - Wezterm
+categories: [Neovim, Wezterm]
 tags: []
 output:
   'blogdown::html_page':
