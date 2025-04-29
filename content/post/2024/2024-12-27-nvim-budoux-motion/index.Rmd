@@ -3,8 +3,8 @@ title: "BudouxによりNeovimのWモーションを拡張し、日本語文章�
 author: atusy
 date: '2024-12-27'
 slug: nvim-budoux-motion
-categories: [Lua, Neovim]
-tags: []
+categories: [Tech]
+tags: [Lua, Neovim]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

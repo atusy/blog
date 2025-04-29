@@ -3,8 +3,8 @@ title: telescope.nvimでlive_grepした結果をファイル名で絞り込む
 author: atusy
 date: '2024-08-02'
 slug: telescope-grep-refiement
-categories: [Neovim]
-tags: []
+categories: [Tech]
+tags: [Neovim]
 output:
   'blogdown::html_page':
     md_extensions: +east_asian_line_breaks+task_lists

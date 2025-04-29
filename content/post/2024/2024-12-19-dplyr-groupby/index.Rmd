@@ -3,7 +3,7 @@ title: "dplyrでグループ単位にデータフレームを操作する"
 author: atusy
 date: '2024-12-19'
 slug: dplyr-groupby
-categories: []
+categories: [Tech]
 tags: []
 output:
   blogdown::html_page:

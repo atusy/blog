@@ -3,8 +3,8 @@ title: ftExtra v0.6.2をリリースしました
 author: atusy
 date: '2024-03-01'
 slug: ftextra-v0-6-2
-categories: [R]
-tags: []
+categories: [Tech]
+tags: [R]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

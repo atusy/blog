@@ -3,8 +3,8 @@ title: Shinyをバックグラウンドで起動する
 author: atusy
 date: '2024-04-01'
 slug: shiny-as-background-process
-categories: [R]
-tags: [Shiny]
+categories: [Tech]
+tags: [R, R-shiny]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

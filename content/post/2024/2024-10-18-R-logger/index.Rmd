@@ -3,8 +3,8 @@ title: "Rでログを出力する（loggerパッケージ）"
 author: atusy
 date: '2024-10-25'
 slug: R-logger
-categories: [R]
-tags: []
+categories: [Tech]
+tags: [R]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

@@ -3,8 +3,8 @@ title: fishでzshのhistoryも参照したい
 author: atusy
 date: '2024-05-30'
 slug: fish-history
-categories: [fish]
-tags: []
+categories: [Tech]
+tags: [fish]
 output:
   'blogdown::html_page':
     md_extensions: +east_asian_line_breaks+task_lists

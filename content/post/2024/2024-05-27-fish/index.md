@@ -3,8 +3,8 @@ title: fish使い始めた
 author: atusy
 date: '2024-05-27'
 slug: fish
-categories: [fish]
-tags: []
+categories: [Tech]
+tags: [fish]
 output:
   'blogdown::html_page':
     md_extensions: +east_asian_line_breaks+task_lists

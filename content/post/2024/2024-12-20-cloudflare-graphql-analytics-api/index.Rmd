@@ -3,7 +3,7 @@ title: "Cloudflareで管理しているドメインのアクセス解析デー�
 author: atusy
 date: '2024-12-20'
 slug: cloudflare-graphql-analytics-api
-categories: []
+categories: [Tech]
 tags: []
 output:
   blogdown::html_page:

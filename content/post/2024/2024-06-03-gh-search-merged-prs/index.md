@@ -3,8 +3,8 @@ title: gh searchでOSS貢献を振り替える
 author: atusy
 date: '2024-06-03'
 slug: gh-search-merged-prs
-categories: [fish]
-tags: []
+categories: [Tech]
+tags: [fish]
 output:
   'blogdown::html_page':
     md_extensions: +east_asian_line_breaks+task_lists

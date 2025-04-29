@@ -3,7 +3,7 @@ title: "コマンドの引数にJSONやYAMLを使うと便利かも"
 author: atusy
 date: '2024-11-16'
 slug: json-as-cmd-args
-categories: []
+categories: [Tech]
 tags: []
 output:
   blogdown::html_page:

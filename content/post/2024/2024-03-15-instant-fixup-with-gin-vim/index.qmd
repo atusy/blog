@@ -3,8 +3,8 @@ title: gin.vimで捗るgitのログ改竄 (instant fixup)
 author: atusy
 date: '2024-03-15'
 slug: instant-fixup-with-gin-vim
-categories: [Vim]
-tags: []
+categories: [Tech]
+tags: [Vim]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

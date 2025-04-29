@@ -3,8 +3,8 @@ title: gyでVimからクリップボードにヤンクする
 author: atusy
 date: '2024-03-11'
 slug: vim-gy-as-gui-yank
-categories: [Vim]
-tags: []
+categories: [Tech]
+tags: [Vim]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

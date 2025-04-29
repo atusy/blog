@@ -3,8 +3,8 @@ title: SKKの接頭辞・接尾辞変換をvim-skk/skkeletonに追加した
 author: atusy
 date: '2024-06-21'
 slug: skkeleton-affix
-categories: [vim]
-tags: []
+categories: [Tech]
+tags: [vim]
 output:
   'blogdown::html_page':
     md_extensions: +east_asian_line_breaks+task_lists

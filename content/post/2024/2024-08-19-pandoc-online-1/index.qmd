@@ -3,8 +3,8 @@ title: "Pandoc ONLINE #1で「PandocとLuaフィルタで作るプログラマ�
 author: atusy
 date: '2024-08-07'
 slug: pandoc-online-1
-categories: [Pandoc]
-tags: []
+categories: [Tech]
+tags: [Pandoc]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists
