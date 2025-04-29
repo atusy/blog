@@ -3,8 +3,8 @@ title: S3総称関数の引数の既定値はメソッドに渡らない
 author: ~
 date: '2019-01-16'
 slug: s3-generics-dont-pass-default-params-to-methods
-categories: [R]
-tags: [S3]
+categories: [Tech]
+tags: [R, R-S3]
 ---
 
 

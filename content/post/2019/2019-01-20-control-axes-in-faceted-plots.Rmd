@@ -6,8 +6,8 @@ slug: control-axes-in-faceted-plots
 output:
   blogdown::html_page:
     toc: yes
-categories: [R]
-tags: [ggplot2, facet]
+categories: [Tech]
+tags: [R, R-ggplot2]
 ---
 
 ```{r setup, include = FALSE}

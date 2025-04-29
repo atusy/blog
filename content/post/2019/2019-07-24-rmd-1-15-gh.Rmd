@@ -3,8 +3,8 @@ title: "R Markdown でコードの折り畳みをチャンクごとに選択可�
 author: ~
 date: '2019-07-24'
 slug: rmd-1-15-gh
-categories: [R]
-tags: [rmarkdown]
+categories: [Tech]
+tags: [R, R-rmarkdown]
 ---
 
 ```{r, include=FALSE}

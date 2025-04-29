@@ -3,8 +3,8 @@ title: pkgdown で作った Webサイトを引越ししたら algolia/docsearch-
 author: ~
 date: '2019-01-25'
 slug: url-change-for-algolia
-categories: [R]
-tags: [pkgdown, algolia]
+categories: [Tech]
+tags: [R, R-pkgdown, algolia]
 ---
 
 docsearch を利用すると，pkgdown で作ったページの全文検索機能を簡単に設定できる (https://pkgdown.r-lib.org/articles/pkgdown.html#search)．

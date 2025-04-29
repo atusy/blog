@@ -3,8 +3,8 @@ title: highlightjs と highlightjs-line-numbers プラグインで Rmarkdown の
 author: ~
 date: '2019-04-22'
 slug: rmd-line-num-with-highlightjs
-categories: [R, javascript, html]
-tags: [Rmarkdown, blogdown, highlightjs]
+categories: [Tech]
+tags: [R, javascript, html, Rmarkdown, blogdown, highlightjs]
 images: 
   - /images/covers/rmd-line-num-with-highlightjs.png
 summary: |

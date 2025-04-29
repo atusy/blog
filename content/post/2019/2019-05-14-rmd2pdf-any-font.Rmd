@@ -4,8 +4,8 @@ title: |
 author: ~
 date: '2019-05-14'
 slug: rmd2pdf-any-font
-categories: [R]
-tags: [RMarkdown]
+categories: [Tech]
+tags: [R, RMarkdown]
 highlightjs:
   - tex
   - yaml

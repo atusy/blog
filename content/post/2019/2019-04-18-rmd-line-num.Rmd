@@ -3,8 +3,8 @@ title: Rmarkdown でチャンクとその出力に行番号を付ける
 author: ~
 date: '2019-04-18'
 slug: rmd-line-num
-categories: [R]
-tags: [Rmarkdown, pandoc]
+categories: [Tech]
+tags: [R, Rmarkdown, pandoc]
 images: 
   - /images/covers/rmd-line-num.png
 summary: |

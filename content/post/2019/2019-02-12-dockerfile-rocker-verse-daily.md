@@ -3,8 +3,8 @@ title: RStudio daily builds な rocker/verse をビルド時間短かめに作�
 author: ~
 date: '2019-02-12'
 slug: dockerfile-rocker-verse-daily
-categories: [R, Docker]
-tags: [rocker]
+categories: [Tech]
+tags: [R, Docker, R-rocker]
 ---
 
 **※**

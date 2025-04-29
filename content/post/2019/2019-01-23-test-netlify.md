@@ -3,8 +3,8 @@ title: GitHub pages から Netlify に移行 + 独自ドメイン化
 author: ~
 date: '2019-01-23'
 slug: test-netlify
-categories: [Netlify]
-tags: []
+categories: [Tech]
+tags: [Netlify]
 ---
 
 これまで blog を GitHub pages 上で公開してきたが，思い立って独自ドメインで Netlify に移行した．

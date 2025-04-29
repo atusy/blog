@@ -3,8 +3,8 @@ title: Shiny でマウスの位置に応じてプロットにツールチップ�
 author: ~
 date: '2019-08-06'
 slug: shiny-hover-tooltip
-categories: [R]
-tags: [shiny, ggplot, plotly, jQuery]
+categories: [Tech]
+tags: [R, R-shiny, R-ggplot2, R-plotly, jQuery]
 output:
   blogdown::html_page:
     toc: true

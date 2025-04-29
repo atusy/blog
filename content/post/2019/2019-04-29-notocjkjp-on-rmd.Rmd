@@ -3,8 +3,8 @@ title: RMarkdown + XeLaTeX + Noto フォントで日本語 PDF を出力する
 author: ~
 date: '2019-04-29'
 slug: notocjkjp-on-rmd
-categories: [R]
-tags: [Rmd, Font, docker, r-wakalang]
+categories: [Tech]
+tags: [R, Rmd, Font, docker, r-wakalang]
 ---
 
 # はじめに

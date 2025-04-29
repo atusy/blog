@@ -3,8 +3,8 @@ title: bookdown のコミッタになったのでこれまでの貢献を振り�
 author: ~
 date: '2019-07-07'
 slug: bookdown-committer
-categories: [R]
-tags: [rmarkdown, bookdown]
+categories: [Tech]
+tags: [R, R-rmarkdown, R-bookdown]
 ---
 
 bookdown のコミッタになった．

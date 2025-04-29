@@ -3,8 +3,8 @@ title: DT::datatable の行番号を並べ変え可能にする (Shiny / 非Shin
 author: ~
 date: '2019-08-03'
 slug: dt-ordered-by-row-numbers
-categories: [R]
-tags: [shiny, DT]
+categories: [Tech]
+tags: [R, R-shiny, DT]
 output:
   blogdown::html_page:
     toc: true

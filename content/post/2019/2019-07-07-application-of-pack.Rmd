@@ -3,8 +3,8 @@ title: Tidyr 1.0.0 で追加される pack を使えば見せる用の表が簡�
 author: ~
 date: '2019-07-07'
 slug: application-of-pack
-categories: [R]
-tags: [tidyr]
+categories: [Tech]
+tags: [R, R-tidyr]
 images:
   - /images/posts/2019-07-07-application-of-pack/iris-gt.png
 summary: |

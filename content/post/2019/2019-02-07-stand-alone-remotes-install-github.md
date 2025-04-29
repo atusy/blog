@@ -3,8 +3,8 @@ title: 専用パッケージを導入せず GitHub 上の R パッケージを�
 author: ~
 date: '2019-02-07'
 slug: stand-alone-remotes-install-github
-categories: [R]
-tags: [remotes]
+categories: [Tech]
+tags: [R, R-remotes]
 ---
 
 # TL;DR

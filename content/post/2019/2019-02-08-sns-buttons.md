@@ -3,8 +3,8 @@ title: hugo_bootstrap のサイドバーにシェアボタンを追加
 author: ~
 date: '2019-02-08'
 slug: sns-buttons
-categories: [Hugo]
-tags: [SNS, hugo_bootstrap]
+categories: [Tech]
+tags: [Hugo, SNS, hugo_bootstrap]
 summary: やっぱり Share ボタンは欲しいよねということで雑に実装した．
 ---
 

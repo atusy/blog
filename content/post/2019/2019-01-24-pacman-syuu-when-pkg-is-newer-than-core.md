@@ -3,8 +3,8 @@ title: 'Warnning: newer than the core を放置せずに pacman -Syuu しとこ�
 author: ~
 date: '2019-01-24'
 slug: pacman-syuu-when-pkg-is-newer-than-core
-categories: [Archlinux]
-tags: [pacman, manjaro]
+categories: [Tech]
+tags: [Archlinux, pacman, manjaro]
 ---
 
 `pacman -Syu` でアップグレードした際に，`Warnning: newer than the core`といった警告が出ることがあります．

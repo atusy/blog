@@ -3,7 +3,7 @@ title: Hugo テーマを更新して UX 向上を狙ってみた
 author: ~
 date: '2019-05-11'
 slug: simplified-hugo-bootstrap
-categories: [Hugo]
+categories: [Tech]
 ---
 
 当 blog は 静的サイトジェネレータの Hugo によって運用している．

@@ -3,8 +3,8 @@ title: R Markdown でコードブロックに行番号を表示する 〜最終�
 author: ~
 date: '2019-05-19'
 slug: rmd-line-num-pr
-categories: [R]
-tags: [RMarkdown, Pandoc]
+categories: [Tech]
+tags: [R, RMarkdown, Pandoc]
 output:
   blogdown::html_page:
     toc: TRUE

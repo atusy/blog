@@ -3,8 +3,8 @@ title: Ghostscript (> 9.15) を使って PDF 中の文字列をアウトライ�
 author: ~
 date: '2019-05-23'
 slug: outline-pdf-glyphs-by-gs
-categories: [Ghostscript]
-tags: [PDF, font]
+categories: [Tech]
+tags: [Ghostscript, PDF, font]
 ---
 
 ```{r setup, include = FALSE}

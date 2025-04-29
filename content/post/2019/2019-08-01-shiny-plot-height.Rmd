@@ -3,8 +3,8 @@ title: Shiny でプロットの高さをブラウザ画面のサイズに合わ�
 author: ~
 date: '2019-08-01'
 slug: shiny-plot-height
-categories: [R]
-tags: [shiny]
+categories: [Tech]
+tags: [R, R-shiny]
 images:
   - /images/posts/2019-08-01-shiny-plot-height/plot-full-height.gif
 summary: |

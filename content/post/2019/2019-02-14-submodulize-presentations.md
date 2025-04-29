@@ -3,8 +3,8 @@ title: git でプレゼン資料を纏めるなら各資料は submodule 化し�
 author: ~
 date: '2019-02-14'
 slug: submodulize-presentations
-categories: [git]
-tags: [git-submodule]
+categories: [Tech]
+tags: [git, git-submodule]
 ---
 
 私はプレゼン資料を [atusy/presentation](https://github.com/atusy/presentation) に纏めて公開している．

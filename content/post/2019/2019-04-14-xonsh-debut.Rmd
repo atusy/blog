@@ -3,8 +3,8 @@ title: xonsh 始めました + xonshrc 弄って oh-my-fish/yimmy inspired な�
 author: ~
 date: '2019-04-14'
 slug: xonsh-debut
-categories: [xonsh]
-tags: [xonshrc]
+categories: [Tech]
+tags: [xonsh, xonshrc]
 summary: |
   Python が動いちゃうシェルこと xonsh を導入しました．早速最低限の設定としてばんくし氏の xonshrc を撮み食いしつつ，Look & Feel を oh-my-fish/theme-yimmy inspired なものにしました．
 ---

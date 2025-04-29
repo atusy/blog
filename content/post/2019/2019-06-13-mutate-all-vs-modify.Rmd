@@ -3,8 +3,8 @@ title: dplyr::mutate_all と purrr::modify の比較
 author: ~
 date: '2019-06-13'
 slug: mutate-all-vs-modify
-categories: [R]
-tags: [dplyr, purrr]
+categories: [Tech]
+tags: [R, R-dplyr, R-purrr]
 ---
 
 ```{r setup, include=FALSE}

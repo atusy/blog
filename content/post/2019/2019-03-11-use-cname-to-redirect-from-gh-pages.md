@@ -3,8 +3,8 @@ title: CNAME ファイルだけで GitHub pages から301リダイレクトす�
 author: ~
 date: '2019-03-11'
 slug: use-cname-to-redirect-from-gh-pages
-categories: [GitHub]
-tags: [gh-pages]
+categories: [Tech]
+tags: [GitHub, gh-pages]
 summary: GitHub pages を利用していたレポジトリに転送先のドメインを記述したファイルを作成すると user.github.io/repository/* へのアクセスが指定したドメインに転送されるようになります．
 ---
 

@@ -3,8 +3,8 @@ title: 一度に複数の変数を force する
 author: ~
 date: '2019-01-18'
 slug: force-many-vars-at-once
-categories: [R]
-tags: [force]
+categories: [Tech]
+tags: [R, force]
 ---
 
 # 結論 {#concl}

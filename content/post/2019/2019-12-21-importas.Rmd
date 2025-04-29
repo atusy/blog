@@ -3,8 +3,8 @@ title: importasパッケージでPython風にパッケージを使おう
 author: ~
 date: '2019-12-21'
 slug: importas
-categories: [R]
-tags: [importas, package]
+categories: [Tech]
+tags: [R, R-importas, R-package]
 ---
 
 [Rアドベントカレンダー](https://qiita.com/advent-calendar/2019/rlang)、12/21の記事です。

@@ -3,8 +3,8 @@ title: Hugo で KaTeX
 author: ~
 date: '2019-05-09 19:00:00'
 slug: katex-in-hugo
-categories: [Hugo]
-tags: [KaTeX, MathJax]
+categories: [Tech]
+tags: [Hugo, KaTeX, MathJax]
 math: true
 summary: "MathJax より軽量で高速な KaTeX に乗り換えた"
 ---

@@ -3,8 +3,8 @@ title: Shiny で動的に図の数を変更する
 author: ~
 date: '2019-08-09'
 slug: shiny-dynamic-numer-of-plots
-categories: [R]
-tags: [Shiny]
+categories: [Tech]
+tags: [R, R-shiny]
 summary: |
   ![](/images/posts/2019-08-09-shiny-dynamic-number-of-plots/shiny.gif)
 ---

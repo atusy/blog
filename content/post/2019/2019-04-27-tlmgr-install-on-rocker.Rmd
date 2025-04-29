@@ -3,8 +3,8 @@ title: rocker/verse でも Rmd → PDF 時に必要なパッケージが自動�
 author: ~
 date: '2019-04-27'
 slug: tlmgr-install-on-rocker
-categories: [R, docker, TeX]
-tags: [rocker, tlmgr, texlive]
+categories: [Tech]
+tags: [R, docker, TeX, R-rocker, tlmgr, texlive]
 summary: |
   rocker/verse における Tex Live 関連の権限が更新され， `tlmgr install` や Rmd → PDF 時に必要なパッケージの自動インストールが可能になった．Dockerfile 編集時には注意点あり．
 ---

@@ -3,8 +3,8 @@ title: 行列を行/列ごとのリストに変換する関数の紹介とベン
 author: ~
 date: '2019-06-01'
 slug: asplit-r-3-6-0
-categories: [R]
-tags: [purrr, bench]
+categories: [Tech]
+tags: [R, R-purrr, R-bench]
 aliases:
   - /2019/06/01/alist-r-3-6-0/
 output:
