@@ -3,8 +3,8 @@ title: R MarkdownでHTML出力時に見出しのURLを簡単に取得できる�
 author: ~
 date: '2020-10-18'
 slug: rmd-anchor-sections
-categories: [R]
-tags: [R Markdown]
+categories: [Tech]
+tags: [R, Rmarkdown]
 highlightjs:
   - yaml
   - css

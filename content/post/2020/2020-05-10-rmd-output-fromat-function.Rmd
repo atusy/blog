@@ -3,8 +3,8 @@ title: オリジナルなR Markdownの出力形式を作る`output_format`関数
 author: ~
 date: '2020-05-11'
 slug: rmd-output-fromat-function
-categories: [R]
-tags: [R Markdown]
+categories: [Tech]
+tags: [R, Rmarkdown]
 ---
 
 ```{r, include=FALSE}

@@ -3,8 +3,8 @@ title: Osaka.Rで昼間のリモートもくもく会を開催しました (2020
 author: ~
 date: '2020-06-08'
 slug: osakar-mokumoku-20200606
-categories: [R]
-tags: [Osaka.R]
+categories: [Tech]
+tags: [R, Osaka.R]
 ---
 
 Osaka.Rで昼間のリモートもくもく会を開催しました。

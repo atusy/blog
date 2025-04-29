@@ -3,8 +3,8 @@ title: オープンソースソフトウェア開発の貢献に必要なスキ�
 author: ~
 date: '2020-10-04'
 slug: contributing-oss
-categories: [OSS]
-tags: []
+categories: [Tech]
+tags: [OSS]
 ---
 
 とある筋からオープンソースソフトウェア開発への貢献に必要なスキルセットは何かとインタビューを受けた。

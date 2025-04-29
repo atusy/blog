@@ -3,8 +3,8 @@ title: RStudio PBCのテーブルコンテストに投稿しました
 author: ~
 date: '2020-11-01'
 slug: rstudio-table-contest
-categories: [R]
-tags: [ftExtra]
+categories: [Tech]
+tags: [R, R-ftExtra]
 ---
 
 2019年のShinyコンテストに続き、2020年は表コンテストが開催されました（[開催案内](https://blog.rstudio.com/2020/09/15/announcing-the-2020-rstudio-table-contest/)）。

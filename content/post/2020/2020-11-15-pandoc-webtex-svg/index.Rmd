@@ -3,7 +3,7 @@ title: R MarkdownやPandocでMarkdown出力する時に数式をベクター画�
 author: ~
 date: '2020-11-15'
 slug: pandoc-webtex-svg
-categories: []
+categories: [Tech]
 tags: []
 ---
 

@@ -3,8 +3,8 @@ title: ftExtra 0.0.2、0.0.3をリリースしました
 author: ~
 date: '2020-08-30'
 slug: ftextra-0-0-3
-categories: [R]
-tags: [ftExtra, flextable, R Markdown]
+categories: [Tech]
+tags: [R, R-ftExtra, R-flextable, Rmarkdown]
 ---
 
 ftExtra 0.0.3をリリースしました。

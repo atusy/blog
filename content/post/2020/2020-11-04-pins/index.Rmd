@@ -3,8 +3,8 @@ title: pinsパッケージならリモートファイルをローカルと別の
 author: ~
 date: '2020-11-04'
 slug: pins
-categories: [R]
-tags: [pins]
+categories: [Tech]
+tags: [R, R-pins]
 ---
 
 さわりのさわりなので、詳しくは[公式](https://pins.rstudio.com/)を参照してね。

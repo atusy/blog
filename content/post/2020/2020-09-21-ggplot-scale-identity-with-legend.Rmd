@@ -3,8 +3,8 @@ title: ggplot2で列の値をそのまま色の値にしつつレジェンドも
 author: ~
 date: '2020-09-21'
 slug: ggplot-scale-identity-with-legend
-categories: [R]
-tags: [ggplot2]
+categories: [Tech]
+tags: [R, R-ggplot2]
 ---
 
 ggplot2パッケージでは`scale_*_identity`という名前の関数を使うと、審美的属性にマッピングした列の値をそのまま色やサイズ、透明度に反映できます。

@@ -3,8 +3,8 @@ title: "Pandocで出力形式に依存せず見出し番号をつけたり、第
 author: ~
 date: '2020-12-24'
 slug: decorate-section-numbers-on-any-format-with-pandoc
-categories: [Pandoc]
-tags: [Lua]
+categories: [Tech]
+tags: [Pandoc, Lua]
 ---
 
 昨日はHTML出力の場合に限って、見出し番号の装飾方法を紹介しました。

@@ -3,8 +3,8 @@ title: tibbleでカラーコードを示す列を色付けてみる
 author: ~
 date: '2020-07-23'
 slug: color-tibble-column
-categories: [R]
-tags: [tibble, pillar, crayon]
+categories: [Tech]
+tags: [R, R-tibble, R-pillar, R-crayon]
 ---
 
 にすぜっとさんのツィートを見かけて挑戦してみました (<https://twitter.com/niszet0/status/1286245706504708101>)。

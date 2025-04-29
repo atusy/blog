@@ -3,8 +3,8 @@ title: revealjs_presentationでコードブロックに行番号を付与する
 author: ~
 date: '2020-03-02'
 slug: revealjs-linenumbers
-categories: [R]
-tags: [R Markdown, revealjs]
+categories: [Tech]
+tags: [R, Rmarkdown, R-revealjs]
 output:
   blogdown::html_page:
     highlight: pygments

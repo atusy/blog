@@ -3,8 +3,8 @@ title: html_document(self_contained = FALSE) で出力した時の携帯性を�
 author: ~
 date: '2020-05-03'
 slug: rmd-extra-dependencies
-categories: [R]
-tags: [R Markdown]
+categories: [Tech]
+tags: [R, Rmarkdown]
 output:
   blogdown::html_page:
     toc: true

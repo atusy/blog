@@ -3,8 +3,8 @@ title: docker (rocker) でheadless Chromeを動かす
 author: ~
 date: '2020-01-14'
 slug: chromote-on-rocker
-categories: [R, docker]
-tags: [chromote, webshot, webshot2]
+categories: [Tech]
+tags: [R, docker, R-chromote, R-webshot, R-webshot2]
 ---
 
 # RでWebページのスクリーンショットを撮るにはheadless Chromeが今風？

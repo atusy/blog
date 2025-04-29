@@ -3,8 +3,8 @@ title: R Markdownでhtml_documentを拡張する時の注意点 (self_contained)
 author: ~
 date: '2020-06-22'
 slug: extending-rmarkdown-without-self-contained
-categories: [R]
-tags: [R Markdown]
+categories: [Tech]
+tags: [R, Rmarkdown]
 ---
 
 `rmarkdown::html_document`を`rmarkdown::output_format`で拡張する時、

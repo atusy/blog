@@ -3,8 +3,8 @@ title: ggplot2とplotlyで作成したグラフから凡例を残してデータ
 author: ~
 date: '2020-09-19'
 slug: ggplotly-legend-visibility
-categories: [R]
-tags: [ggplot2, plotly]
+categories: [Tech]
+tags: [R, R-ggplot2, R-plotly]
 ---
 
 plotlyで作成したグラフは凡例をクリックすると、

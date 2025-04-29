@@ -3,8 +3,8 @@ title: Pandoc Lua Filtersのreturnの挙動と複数のフィルタを書くと�
 author: ~
 date: '2020-05-31'
 slug: lua-filter-returns
-categories: [Pandoc, Lua]
-tags: [Lua Filter]
+categories: [Tech]
+tags: [Pandoc, Lua, Lua Filter]
 highlightjs:
   - lua
 ---

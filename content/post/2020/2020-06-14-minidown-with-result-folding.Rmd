@@ -3,8 +3,8 @@ title: R Markdownで出力結果を隠せるようにしてみた (minidownパ�
 author: ~
 date: '2020-06-14'
 slug: minidown-with-result-folding
-categories: [R]
-tags: [R Markdown, minidown]
+categories: [Tech]
+tags: [R, Rmarkdown, R-minidown]
 ---
 
 minidownパッケージを使うと以下のような感じのことができるようになります。

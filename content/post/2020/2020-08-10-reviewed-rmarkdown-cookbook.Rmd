@@ -3,8 +3,8 @@ title: R Markdown Cookbookの原稿をレビューをしました
 author: ~
 date: '2020-08-10'
 slug: reviewed-rmarkdown-cookbook
-categories: [R]
-tags: [R Markdown]
+categories: [Tech]
+tags: [R, Rmarkdown]
 ---
 
 待望の「[R Markdown Cookbook](https://bookdown.org/yihui/rmarkdown-cookbook)」が今年出ます。

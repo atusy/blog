@@ -3,8 +3,8 @@ title: パッケージのチェックをR-hubのあらゆるプラットフォ�
 author: ~
 date: '2020-09-07'
 slug: rhub-test-all-for-cran
-categories: [R]
-tags: [rhub]
+categories: [Tech]
+tags: [R, R-rhub]
 ---
 
 ```{r include=FALSE}

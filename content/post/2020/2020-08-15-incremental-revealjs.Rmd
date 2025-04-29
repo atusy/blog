@@ -3,8 +3,8 @@ title: R Markdownとrevealjsとluaフィルタでチャンクやブロック要�
 author: ~
 date: '2020-08-15'
 slug: incremental-revealjs
-categories: [R, lua]
-tags: [R Markdown, revealjs]
+categories: [Tech]
+tags: [R, lua, Rmarkdown, R-revealjs]
 highlightjs: [lua]
 images:
   - /images/posts/2020-08-15-incremental-revealjs/example.gif

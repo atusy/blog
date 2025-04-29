@@ -3,8 +3,8 @@ title: テスト駆動開発してCRANに投げるの大事ネ
 author: ~
 date: '2020-07-20'
 slug: cran-package-with-tests
-categories: [R]
-tags: [testthat, ftExtra]
+categories: [Tech]
+tags: [R, R-testthat, R-ftExtra]
 ---
 
 CRANに登録済みのftExtraパッケージはPandocのASTを扱ったりする都合上、

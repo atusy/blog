@@ -3,8 +3,8 @@ title: ベクトルから要素を除去する方法とsetdiffの罠
 author: ~
 date: '2020-10-27'
 slug: remove-elements-from-vector
-categories: [R]
-tags: []
+categories: [Tech]
+tags: [R]
 ---
 
 ```{r, include=FALSE}

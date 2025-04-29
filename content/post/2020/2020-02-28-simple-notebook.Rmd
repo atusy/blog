@@ -3,8 +3,8 @@ title: ノートブックの最適化はfor文の最適化に通ず
 author: ~
 date: '2020-02-27'
 slug: simple-notebook
-categories: [R, Python]
-tags: [R Markdown, Jupyter Notebook]
+categories: [Tech]
+tags: [R, Python, Rmarkdown, Jupyter Notebook]
 output:
   blogdown::html_page:
     toc: true

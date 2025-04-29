@@ -3,8 +3,8 @@ title: 'Pandocにself containedさせたくないデータには`data-external="
 author: ~
 date: '2020-04-27'
 slug: pandoc-data-external
-categories: [Pandoc]
-tags: [Pandoc, R Markdown]
+categories: [Tech]
+tags: [Pandoc, Pandoc, Rmarkdown]
 output:
   blogdown::html_page:
     toc: true

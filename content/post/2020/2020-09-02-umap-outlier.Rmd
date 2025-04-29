@@ -3,8 +3,8 @@ title: UMAPを異常検知の前処理に使う時に、異常データの一部
 author: ~
 date: '2020-09-02'
 slug: umap-outlier
-categories: [R, Machine learning]
-tags: [UMAP]
+categories: [Tech]
+tags: [R, Machine learning, UMAP]
 ---
 
 UMAPは高次元データを似たもの同士が近くなるように次元縮約してくれる便利な手法だ。
