@@ -3,8 +3,8 @@ title: Pandoc 3でカスタムライターがとてもよくなった
 author: ''
 date: '2023-07-14'
 slug: pandoc-3-custom-writer
-categories: [Pandoc]
-tags: []
+categories: [Tech]
+tags: [Pandoc]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

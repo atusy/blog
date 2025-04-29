@@ -3,7 +3,7 @@ title: プラグインをURLで指定しやすくするために、tree-sitter�
 author: atusy
 date: '2023-11-17'
 slug: tree-sitter-uri
-categories: []
+categories: [Tech]
 tags: []
 highlightjs: [lua]
 ---

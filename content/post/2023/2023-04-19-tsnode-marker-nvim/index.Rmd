@@ -3,8 +3,8 @@ title: "Markdownのコードブロックとかテキストの文脈に合わせ�
 author: ''
 date: '2023-04-19'
 slug: tsnode-marker-nvim
-categories: [Neovim]
-tags: ["tsnode-marker.nvim"]
+categories: [Tech]
+tags: [Neovim, "tsnode-marker.nvim"]
 highlightjs: ["lua"]
 output:
   blogdown::html_page:

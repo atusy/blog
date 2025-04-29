@@ -3,7 +3,7 @@ title: telescope.nvimによるjumplistをちょっと便利にするテク
 author: atusy
 date: '2023-12-12'
 slug: telescope-jump-list
-categories: []
+categories: [Tech]
 tags: []
 output:
   blogdown::html_page:

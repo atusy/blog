@@ -3,8 +3,8 @@ title: gin.vimでgitの差分を快適に閲覧する
 author: atusy
 date: '2023-11-29'
 slug: gin-diff
-categories: [Vim, Neovim, Git]
-tags: []
+categories: [Tech]
+tags: [Vim, Neovim, Git]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

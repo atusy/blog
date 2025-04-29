@@ -3,7 +3,7 @@ title: Vimでコマンドライン履歴を遡りやすくする
 author: ''
 date: '2023-07-24'
 slug: vim-clean-history
-categories: []
+categories: [Tech]
 tags: []
 output:
   blogdown::html_page:

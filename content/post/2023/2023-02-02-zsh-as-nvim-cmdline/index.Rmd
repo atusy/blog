@@ -3,7 +3,7 @@ title: NeovimのターミナルをExコマンド実行環境化する
 author: ''
 date: '2023-02-02'
 slug: zsh-as-nvim-cmdline
-categories: []
+categories: [Tech]
 tags: []
 output:
   blogdown::html_page:

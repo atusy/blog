@@ -3,8 +3,8 @@ title: Insertモードでも気軽に←・→したい
 author: ''
 date: '2023-03-03'
 slug: horizontal-arrows-on-insert
-categories: [Vim, Neovim]
-tags: []
+categories: [Tech]
+tags: [Vim, Neovim]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

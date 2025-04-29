@@ -3,8 +3,8 @@ title: denops製VimプラグインでDenoのバージョンとキャッシュ位
 author: atusy
 date: '2023-12-10'
 slug: denops-cache
-categories: [Vim, Neovim]
-tags: [denops.vim]
+categories: [Tech]
+tags: [Vim, Neovim, denops.vim]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

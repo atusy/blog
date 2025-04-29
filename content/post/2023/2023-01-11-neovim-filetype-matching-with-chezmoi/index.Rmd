@@ -3,8 +3,8 @@ title: chezmoiを使って管理しているdotfileのファイルタイプをNe
 author: ''
 date: '2023-01-11'
 slug: neovim-filetype-matching-with-chezmoi
-categories: [Neovim, chezmoi]
-tags: []
+categories: [Tech]
+tags: [Neovim, chezmoi]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

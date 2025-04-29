@@ -3,8 +3,8 @@ title: VimのOperator待機モードでexclusive motionをinclusiveに使う
 author: atusy
 date: '2023-12-18'
 slug: vim-convert-exclusive-motions-into-inclusive
-categories: [Vim, Neovim]
-tags: []
+categories: [Tech]
+tags: [Vim, Neovim]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

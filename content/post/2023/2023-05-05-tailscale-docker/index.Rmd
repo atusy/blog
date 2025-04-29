@@ -3,8 +3,8 @@ title: TailscaleをDockerで動かすと、再起動時に認証失敗 or IPア�
 author: ''
 date: '2023-05-05'
 slug: tailscale-docker
-categories: [tailscale, docker]
-tags: []
+categories: [Tech]
+tags: [tailscale, docker]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

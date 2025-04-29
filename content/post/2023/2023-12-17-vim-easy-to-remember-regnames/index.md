@@ -3,8 +3,8 @@ title: Vimで無名レジスタでchange/delete/yankした時に、イニシャ�
 author: atusy
 date: '2023-12-17'
 slug: vim-easy-to-remember-regnames
-categories: [Vim]
-tags: []
+categories: [Tech]
+tags: [Vim]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

@@ -3,7 +3,7 @@ title: データフレームからの表組みを楽にするftExtra 0.6.0をリ
 author: ''
 date: '2023-05-30'
 slug: ftextra-0-6-0
-categories: []
+categories: [Tech]
 tags: []
 output:
   blogdown::html_page:

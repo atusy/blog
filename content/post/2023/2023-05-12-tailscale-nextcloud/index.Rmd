@@ -3,8 +3,8 @@ title: Tailscale + Samba + NextCloudでおうちクラウド始めた
 author: ''
 date: '2023-05-12'
 slug: tailscale-nextcloud
-categories: [tailscale, samba, nextcloud]
-tags: []
+categories: [Tech]
+tags: [tailscale, samba, nextcloud]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

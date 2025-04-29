@@ -3,8 +3,8 @@ title: RでR言語をパースする
 author: atusy
 date: '2023-12-19'
 slug: r-parsed-data
-categories: [R]
-tags: []
+categories: [Tech]
+tags: [R]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

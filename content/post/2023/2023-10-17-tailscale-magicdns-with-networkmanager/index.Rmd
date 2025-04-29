@@ -3,8 +3,8 @@ title: TailscaleのMagicDNSがなぜかLinux上で動かなくなったのでト
 author: ''
 date: '2023-10-17'
 slug: tailscale-magicdns-with-networkmanager
-categories: [tailscale]
-tags: []
+categories: [Tech]
+tags: [tailscale]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

@@ -3,8 +3,8 @@ title: 'Neovimのテキストオブジェクトをカスタムできるmini.ai�
 author: ''
 date: '2023-01-27'
 slug: mini-ai-nvim
-categories: [Neovim]
-tags: [mini.ai, mini.nvim, textobject]
+categories: [Tech]
+tags: [Neovim, mini.ai, mini.nvim, textobject]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

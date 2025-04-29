@@ -3,8 +3,8 @@ title: PandocのLuaフィルタ内で引用文献を処理するpandoc.utils.cit
 author: ''
 date: '2023-01-31'
 slug: pandoc-citeproc-lua
-categories: [Pandoc]
-tags: []
+categories: [Tech]
+tags: [Pandoc]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

@@ -3,8 +3,8 @@ title: gptstudio = ChatGPT + RStudioがおもしろい
 author: ''
 date: '2023-04-26'
 slug: gptstudio
-categories: [R, ChatGPT]
-tags: [gptstudio, gpttools]
+categories: [Tech]
+tags: [R, ChatGPT, R-gptstudio, R-gpttools]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

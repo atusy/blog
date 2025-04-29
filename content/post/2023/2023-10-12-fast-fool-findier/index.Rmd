@@ -3,7 +3,7 @@ title: Rでアホになった要素を速く見つけろ！（ナベアツネタ
 author: ''
 date: '2023-10-12'
 slug: fast-fool-findier
-categories: []
+categories: [Tech]
 tags: []
 output:
   blogdown::html_page:

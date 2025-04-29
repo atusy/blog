@@ -3,7 +3,7 @@ title: mini.surroundによるHTMLタグ編集のemmet対応
 author: ''
 date: '2023-09-01'
 slug: mini-surround-emmet
-categories: []
+categories: [Tech]
 tags: []
 output:
   blogdown::html_page:

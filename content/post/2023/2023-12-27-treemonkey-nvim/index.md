@@ -3,8 +3,8 @@ title: Neovimで文法に従ってコードを範囲選択するtreemonkey.nvim�
 author: atusy
 date: '2023-12-27'
 slug: treemonkey-nvim
-categories: [Neovim]
-tags: []
+categories: [Tech]
+tags: [Neovim]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

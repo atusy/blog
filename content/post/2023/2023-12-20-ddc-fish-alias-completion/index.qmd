@@ -3,8 +3,8 @@ title: ddc.vimを使ってmakeやGinなどのExコマンドの補完を実現す
 author: atusy
 date: '2023-12-20'
 slug: ddc-fish-alias-completion
-categories: [Vim, Neovim]
-tags: []
+categories: [Tech]
+tags: [Vim, Neovim]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists
