@@ -3,8 +3,8 @@ title: "vim-jpラジオ#27・#28聞いた - 実はEmacs30年選手！t-wadaさ�
 author: atusy
 date: '2025-01-28'
 slug: vim-jp-radio-27
-categories: [Vim, vim-jp-radio]
-tags: []
+categories: [Tech]
+tags: [Vim, vim-jp-radio]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

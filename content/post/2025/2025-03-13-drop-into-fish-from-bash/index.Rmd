@@ -3,8 +3,8 @@ title: "fish shellを実質的なデフォルトシェルにするbashrc"
 author: atusy
 date: '2025-03-13'
 slug: drop-into-fish-from-bash
-categories: [fish]
-tags: []
+categories: [Tech]
+tags: [fish]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

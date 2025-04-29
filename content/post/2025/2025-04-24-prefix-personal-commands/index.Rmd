@@ -3,8 +3,8 @@ title: "自分用コマンドにはプレフィックスつけるとよさげ"
 author: atusy
 date: '2025-04-24'
 slug: prefix-personal-commands
-categories: [Shell, Taskfile]
-tags: []
+categories: [Tech]
+tags: [Shell, Taskfile]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

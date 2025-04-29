@@ -3,8 +3,8 @@ title: "LangChainとVertexAIのgemini 2.0 flashで構造化出力に失敗する
 author: atusy
 date: '2025-04-16'
 slug: "lang-chain-vertexai-structured-output"
-categories: [Google Cloud, Gemini, LangChain]
-tags: []
+categories: [Tech]
+tags: [Google Cloud, Gemini, LangChain]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists

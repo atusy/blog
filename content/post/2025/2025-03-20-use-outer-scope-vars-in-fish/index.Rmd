@@ -3,8 +3,8 @@ title: "Fishの関数で関数外の変数を利用する"
 author: atusy
 date: '2025-03-20'
 slug: use-outer-scope-vars-in-fish
-categories: [fish]
-tags: []
+categories: [Tech]
+tags: [fish]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists
