@@ -1,0 +1,119 @@
+---
+title: "Vimでステータスラインプラグインを遅延読み込みする"
+author: atusy
+date: '2025-04-30'
+slug: "vim-ekiden-lazy-load-statusline-plugins"
+categories: [Tech]
+tags: [Vim, Neovim, Vim駅伝]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [vim. lua]
+summary: |
+    ステータスラインプラグインを遅延読み込みしたい場合、単一ウィンドウならステータスラインは不要と割り切るといいよ。
+    読み込み前にファイル名が欲しくなったら`CTRL-G`で表示すればOK。
+    あとは表示中のウィンドウ数をカウントして、2つ以上なら遅延読み込みするようにしよう。
+---
+
+```{r setup, include=FALSE}
+```
+
+[Vim駅伝](https://vim-jp.org/ekiden/)2025-04-30の記事です。
+
+Vim/Neovimの起動速度を維持しながら、高機能性を追求する方法としてプラグインの遅延読み込みはよく使われるテクニックです。
+
+素朴には以下のように`autocmd`を使って実現できますし、[vim-jetpack](https://github.com/tani/vim-jetpack)や[lazy.nvim](https://github.com/folke/lazy.nvim)などのプラグインマネージャーを使うと、より簡単に実現できます。
+
+```vim
+" autocmdを使った遅延読み込みのイメージ
+" `VimEnter`はVim起動時に必ず発火するので、遅延に利用する旨味はない
+augroup MyLazyLoad
+  autocmd!
+  autocmd ++once VimEnter * set runtimepath+=~/<path-to-your-plugin>
+augroup END
+```
+
+実現は簡単ですが、設計にはいくつか注意が必要です。
+
+1. 設定を間違えると、意味がないばかりかかえって使い勝手が悪くなる
+    - 起動時間が短縮しない、欲しいときにプラグインが読み込まれない、など
+2. 特定のイベントで大量のプラグインを遅延読み込みすると、一時的に処理が重くなる
+
+初めて使うプラグインは無理せずとりあえず即時読み込みすると無難ですね。
+
+とりわけステータスラインプラグインは（1）の影響を受けやすいので、私の考え方と設定を共有します。
+
+- 単一ウィンドウならステータスラインは不要
+    - したがって、初期状態では`:set laststatus=0`にしてOK
+    - これにより、遅延読み込み前のステータスラインが設定不要になる
+    - ファイル情報が欲しいときは`CTRL-G`でファイル名を表示すれば十分
+        - [:h CTRL-G](https://neovim.io/doc/user/editing.html#CTRL-G)
+- 新規ウィンドウを開いたときに、表示中のウィンドウ数をカウントして、2つ以上なら遅延読み込みを実施
+    - このとき、ステータスラインを表示するため、`:set laststatus=2`も実行
+    - floatwinやtabpageの追加によるウィンドウ数の変化は無視
+
+私は、ステータスラインにGitやLSPの情報を表示しないため、このような考え方ができます。
+どうしても遅延したいときはこういった割り切りも大事ですね。
+
+実際の設定例として`lazy.nvim`と`mini.statusline`を使ってみます。
+考え方は他に応用が効くと思います。
+
+``` lua
+-- lazy.nvimを使ったステータスラインプラグイン（mini.statusline）の遅延読み込み
+{
+  "https://github.com/echasnovski/mini.statusline",
+  lazy = true,
+  init = function()
+    -- プラグインを読み込むまでステータスラインを非表示
+    vim.opt.laststatus = 0
+    
+    -- 遅延読み込みのためのautocmd
+    vim.api.nvim_create_autocmd("WinNew", {
+      group = vim.api.nvim_create_augroup("atusy-mini-statusline", {}),
+      callback = function()
+        -- 実質1ウィンドウなら読み込みを保留
+        local cnt = 0
+        for _, w in pairs(vim.api.nvim_tabpage_list_wins(0)) do
+          if vim.api.nvim_win_get_config(w).relative == "" then
+            cnt = cnt + 1
+            if cnt == 2 then
+              break
+            end
+          end
+        end
+        if cnt < 2 then
+          return false
+        end
+      
+        -- プラグインの読み込み
+        -- lazy.nvimユーザーは`require()`で遅延読み込み可能
+        vim.opt.laststatus = 2
+        require("mini.statusline")
+      
+        -- 遅延読み込みautocmdを削除
+        return true
+      end,
+    })
+  end,
+  config = function()
+    require("mini.statusline").setup({})
+  end
+}
+```
+
+実装にあたって追加で気にするポイントは以下。
+
+- 遅延読み込みには`event = "WinNew"`などのイベント指定もできるが、今回はイベント発生時のウィンドウ数に依存するため、`autocmd`を使う
+- `init`関数で`autocmd`を定義しているので、遅延読み込みが必要なことを`lazy=true`で明示する
+- 自前で`autocmd`を定義するので、繰り返し評価されないように、適宜`autocmd`を削除する
+    - Neovimの場合は`autocmd`の`callback`で`return true`すると削除できる
+- `mini.statusline`は`mini.nvim`の一部だが`mini.nvim`全体を遅延読み込みすると、ステータスライン以外の機能も遅延してしまうので、対策する
+    - 今回の例では`mini.statusline`を単体のプラグインとして扱う
+    - atusy自身は`mini.nvim`全体を遅延読み込みするため、一工夫している
+        - ソース: <https://github.com/atusy/dotfiles/blob/811c2a593c00208333c29303891f76a086ebdb08/dot_config/nvim/lua/plugins/mini/init.lua>
+
+**ENJOY**
+
+ちなみに2025-04-28のVim駅伝記事は「[.zsh_historyファイルをイジる](https://zenn.dev/vim_jp/articles/865e35967b868e)」でした。
+Zshの履歴ってフツーのプレインテキストだと思ってたので、なん……だと……？という気分。
+ソースまで見てワークアラウンドに至るのすばらしいですね。
