@@ -1,0 +1,168 @@
+---
+title: "treesitterを使って閲覧中のヘルプのneovim.io版URLを発行する"
+author: atusy
+date: '2025-05-05'
+slug: neovim-io-help
+categories: [Tech]
+tags: [Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: []
+summary: |
+    Neovimのヘルプを閲覧中に、カーソル位置のヘルプのneovim.io版URLを発行するマッピングを作ってみました。
+    treesitterを使うと、ヘルプファイルのパース結果を元にヘルプタグの位置を検出できて便利ですね。
+---
+
+[Vim駅伝](https://vim-jp.org/ekiden/)2025-05-05の記事です。
+
+[neovim.io]: https://neovim.io
+
+VimやNeovimのヘルプのURLを発行できると、Blogやvim-jpコミュニティなどで活躍しそうですよね。
+
+Neovimであれば、[neovim.io]が公式でヘルプのウェブ版を提供しています。
+たとえば`:help help`のURLは以下。
+
+> <https://neovim.io/doc/user/helphelp.html#help>
+
+あるいはVim日本語ドキュメントのURLは以下（Neovimとは内容が異なる場合あり）。
+
+> <https://vim-jp.org/vimdoc-ja/helphelp.html#help>
+
+もちろんこれらのサイトに直接検索しにいってもいいのですが、Neovimで閲覧中のヘルプからURLを発行できると、もっと便利です。
+
+というわけで`<space>y`したらカーソル位置のヘルプのURLをクリップボードに入れるマッピングを作ってみました。
+ftpluginとして、ヘルプ限定で有効化すると便利かと思います。
+
+```lua
+-- ~/.config/nvim/after/ftplugin/help.lua
+
+---@param node TSNode
+---@return TSNode | nil
+local function find_tag_in_decendant(node)
+  for child in node:iter_children() do
+    if child:type() == "tag" then
+      return child
+    end
+    local descendant = find_tag_in_decendant(child)
+    if descendant then
+      return descendant
+    end
+  end
+end
+
+---@param node TSNode
+---@return TSNode | nil
+local function find_tag(node)
+  local node_ancestor = node ---@type TSNode
+
+  -- Find the nearest ancestor that is a block or tag
+  -- if tag, return it
+  -- if block, break the loop
+  while true do
+    if node_ancestor:type() == "tag" then
+      return node_ancestor
+    end
+    if node_ancestor:type() == "block" then
+      break
+    end
+    local node_parent = node_ancestor:parent()
+    if not node_parent then
+      break
+    end
+    node_ancestor = node_parent
+  end
+
+  -- find tag in the currrent block or the previous siblings of the block
+  local node_block = node_ancestor ---@type TSNode | nil
+  while true do
+    if not node_block then
+      break
+    end
+    local node_tag = find_tag_in_decendant(node_block)
+    if node_tag then
+      return node_tag
+    end
+    node_block = node_block:prev_named_sibling()
+  end
+end
+
+vim.keymap.set("n", "<space>y", function()
+  local node_cursor = vim.treesitter.get_node()
+  if node_cursor == nil then
+    return
+  end
+
+  local node_tag = find_tag(node_cursor)
+  if not node_tag then
+    return
+  end
+
+  local node_text = vim.treesitter.get_node_text(node_tag:field("text")[1], 0, {})
+  local file_name = vim.fs.basename(vim.api.nvim_buf_get_name(0)):gsub("[.]txt$", "")
+  local url = string.format(
+    "https://neovim.io/doc/user/%s.html#%s",
+    file_name,
+    vim.uri_encode(node_text):gsub(":", "%%3A")
+  )
+  vim.fn.setreg("+", url)
+  vim.notify(url)
+end, { buffer = true })
+```
+
+この実装では`treesitter`を使って、カーソル位置のヘルプタグを取得しています。
+抽象構文木のノードを辿って、該当するtypeのノードを探せばいいので、非常にシンプルです。
+応用すると、マークダウンファイルの見出しを検出して、カーソルを移動させるなどといったこともできそうです。
+
+閲覧中のファイルの抽象構文木は`:lua vim.treesitter.inspect_tree()`で確認できます。
+たとえば`:help help`の先頭部分の内容と抽象構文木は以下のような構造になっています。
+ここから`tag`の位置を取得すればいいわけですね。
+
+```
+*helphelp.txt*	Nvim
+
+
+		  VIM REFERENCE MANUAL    by Bram Moolenaar
+```
+
+```
+(help_file ; [0, 0] - [400, 0]
+  (block ; [0, 0] - [3, 0]
+    (line ; [0, 0] - [1, 0]
+      (tag ; [0, 0] - [0, 14]
+        text: (word)) ; [0, 1] - [0, 13]
+      (word))) ; [0, 15] - [0, 19]
+  (block ; [3, 4] - [6, 0]
+    (line ; [3, 4] - [4, 0]
+      (word) ; [3, 4] - [3, 7]
+      (word) ; [3, 8] - [3, 17]
+      (word) ; [3, 18] - [3, 24]
+```
+
+カーソルが`VIM REFERENCE`の部分にあるとすると、該当するヘルプタグは`*helphelp.txt*`で、`[0, 0]`から`[0, 14]`の位置にある`tag`タイプのノードです。
+これを取得にあたってやるべきことは以下の通り。
+
+1. `vim.treesitter.get_node()`でカーソル位置のノードを取得する
+2. カーソル位置のノードの親ノードを辿って`block`タイプのノードを探す
+3. `block`タイプのノードの子ノードを先頭から探索して`tag`タイプのノードを探す
+4. 3で見つからなかった場合は、1つ手前の`block`タイプのノードの子ノードを探索することを繰り返す
+
+`treesitter`を使わずとも、カーソル位置付近の`*help*`のような文字列を探せば目的は達成できますが、アスタリスク（`*`）で囲った文字列がヘルプタグ以外の用途で発生すると、間違った文字列をタグとして認識する可能性があります。
+Vimのヘルプが規格に乏しいとはいえ、treesitterのパーサーを利用できるのは安心感がありますね。
+
+ここで紹介した方法は、Neovimに組込みのヘルプタグのみが対象になります。
+プラグインのヘルプを取得したい場合は、Gitリポジトリのパーマリンクを取得するなど、別の方法が必要な点に注意してください。
+
+[lambdalisue/vim-gin](https://github.com/lambdalisue/vim-gin)ユーザーであれば、以下を実行すると、現在行のパーマリンクがクリップボードに入ります。
+別途マッピングしておくといいでしょう。
+
+```vim
+:.GinBrowse ++yank=+ HEAD -n --permalink --path %
+```
+
+あるいは、`<space>y`の挙動をファイルがGit管理されているかどうかで分岐して、`[range]`に現在行を示す`.`ではなく行番号を指定するといいでしょう。
+
+**ENJOY!**
+
+ちなみに前回（2025-05-02）の駅伝記事はs-showさんの[NixOS で Neovim の unstable 版や nightly 版を使う方法](https://kankodori-blog.com/post/2025-05-02/)でした。
+私もNixを使ってNeovim Nightlyを入れているのですが、最初は随分苦労したので、こういった記事が出るのはありがたいですね。
