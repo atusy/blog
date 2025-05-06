@@ -1,0 +1,73 @@
+---
+title: "Neovim 0.11でシンタックスハイライトがちらつく問題の回避策"
+author: atusy
+date: '2025-05-07'
+slug: workaround-nvim-async-ts-fliker
+categories: [Tech]
+tags: [Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [lua]
+summary: |
+    Neovim 0.11から導入された非同期処理の影響で、同一バッファを複数ウィンドウで開くとシンタックスハイライトがちらつくことがあります。
+    0.11.2で修正予定とのことですが、不便なので状況に合わせて非同期・同期を切り替える方法を紹介します。
+---
+
+Neovim 0.11ではシンタックスハイライトのパフォーマンス改善を狙った非同期処理が導入されました。
+
+> Treesitter highlighting is now asynchronous \
+> <https://neovim.io/doc/user/news-0.11.html#news-0.11>
+
+しかし、同一のバッファを複数のウィンドウで開くとちらつく場合があります。
+
+> Syntax highlight flicker when same buffer open in multiple windows at different scroll positions \
+> <https://github.com/neovim/neovim/issues/32660>
+
+この問題は0.11.2で修正予定とのことですが、不便すぎます。
+素朴には`vim.g._ts_force_sync_parsing = true`で同期処理に戻せますが、せっかくなら非同期処理を活用したいので、状況に応じて切り替える方法を紹介します。
+
+```lua
+vim.api.nvim_create_autocmd({ "BufWinEnter", "WinNew", "WinClosed", "TabEnter" }, {
+  group = vim.api.nvim_create_augroup("ts_toggle_sync_parsing", {}),
+  callback = function(ctx)
+    local function exec()
+      local wins = vim.api.nvim_tabpage_list_wins(vim.api.nvim_get_current_tabpage())
+      local bufs = {}
+      for _, win in ipairs(wins) do
+        local buf = vim.api.nvim_win_get_buf(win)
+        if bufs[buf] == true then
+          local parsable = pcall(vim.treesitter.get_parser, buf)
+          if parsable then
+            vim.g._ts_force_sync_parsing = true
+            return
+          end
+          -- set to false to avoid multiple tests on the availability of parser
+          bufs[buf] = false
+        end
+        if bufs[buf] == nil then
+          bufs[buf] = true
+        end
+      end
+      vim.g._ts_force_sync_parsing = false
+    end
+
+    if ctx.event == "WinClosed" then
+      -- WinClosedイベントは名前に反してウィンドウが閉じる直前に発火するので、遅延する
+      return vim.schedule(exec)
+    end
+    return exec()
+  end,
+})
+```
+
+工夫箇所は以下。
+
+- パフォーマンス影響を避けるため、表示中のウィンドウのみに注目
+    - `vim.api.nvim_tabpage_list_wins(vim.api.nvim_get_current_tabpage())`で現在のタブページのウィンドウ一覧を取得
+- できるだけ非同期処理を採用するため、複数ウィンドウで開かれているバッファがtreesitterのパース対象か確認
+    - `pcall(vim.treesitter.get_parser, buf)`でエラーの有無を確認
+
+こんなワークアラウンドを入れずともいいよう、早く修正されるといいですね。
+
+**ENJOY!!**
