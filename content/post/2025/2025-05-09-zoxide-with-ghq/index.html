@@ -1,0 +1,97 @@
+---
+title: "よく使うディレクトリ+αへの移動を便利にするzoxideとghqの組み合わせ"
+author: atusy
+date: '2025-05-09'
+slug: zoxide-with-ghq
+categories: [Tech]
+tags: [zoxide, ghq, fish, zsh, fzf]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [fish, zsh]
+summary: |
+    zoxideはディレクトリの移動頻度を学習して、検索・移動を楽にするツールです。
+    検索候補にまだ移動したことないけど、今後よく使いそうなディレクトリを追加するともっと便利にできます。
+    この記事では[ghq]で管理しているGitリポジトリを移動先候補に追加する方法を紹介します。
+---
+
+
+
+<p><a href="https://github.com/ajeetdsouza/zoxide">zoxide</a>と<a href="https://github.com/x-motemen/ghq">ghq</a>を組み合わせて、よく使うディレクトリとクローンしたてで使ったことないGitリポジトリへの移動を便利にしましょう。</p>
+<p><a href="https://github.com/ajeetdsouza/zoxide">zoxide</a>はシェルでのディレクトリ移動の傾向を学習して、よく使うディレクトリへの移動を楽にするツールです。</p>
+<p>シェルの設定ファイル内で<code>zoxide init fish</code>などを実行しておくと、<code>z</code>関数や<code>zi</code>関数を使えるようになります。</p>
+<ul>
+<li><code>z</code>: <code>z foo</code>などすると、<code>foo</code>にマッチする最もよく使うディレクトリに移動</li>
+<li><code>zi</code>: よく使う順に並んだディレクトリ一覧の検索画面から移動先を選択（内部的に<a href="https://github.com/junegunn/fzf">fzf</a>を利用）</li>
+</ul>
+<p>個人的には<code>zi</code>をよく使います。
+<code>z</code>はどこに移動するか予想しづらいところが難しいですね。
+GoogleのI’m Feeling Luckyみたいな感じです。</p>
+<p>よく使うディレクトリにすぐ移動できる<a href="https://github.com/ajeetdsouza/zoxide">zoxide</a>は便利ですね。ただし、移動したことないディレクトリが候補に現れない弱点があります。</p>
+<p>検索候補にまだ移動したことないけど、今後よく使いそうなディレクトリを追加するともっと便利にできそうです。</p>
+<p>たとえば<a href="https://github.com/x-motemen/ghq">ghq</a>との組み合わせて、Gitリポジトリのクローン先にも簡単に移動できるようにしてみましょう。</p>
+<p><a href="https://github.com/x-motemen/ghq">ghq</a>はGitリポジトリを管理するツールです。</p>
+<p>たとえば<code>ghq get https://github.com/atusy/blog</code>などすると、<code>$HOME/ghq/github.com/atusy/blog</code>にリポジトリがクローンされます。このように、リポジトリの名前に合わせてクローン先を決定するので、もう置き場所に悩む必要がありません。しかし、リポジトラリのURLに依存するため、ディレクトリが深く移動が手間になります。</p>
+<p>そこで<a href="https://github.com/ajeetdsouza/zoxide">zoxide</a>と<a href="https://github.com/x-motemen/ghq">ghq</a>を組み合わせると、<a href="https://github.com/x-motemen/ghq">ghq</a>で管理しているリポジトリの一覧を<a href="https://github.com/ajeetdsouza/zoxide">zoxide</a>に登録して、簡単に検索・移動できるようになります。</p>
+<p>やることとしては以下のイメージ。</p>
+<ul>
+<li><a href="https://github.com/ajeetdsouza/zoxide">zoxide</a>に未登録なリポジトリを<code>zoxide query --list</code>と<code>ghq list -p</code>の差分から取得</li>
+<li><code>zoxide add</code>で未登録なリポジトリを<a href="https://github.com/ajeetdsouza/zoxide">zoxide</a>に登録</li>
+<li><code>zi</code>関数に相当する<code>__zoxide_zi</code>関数を実行して、検索・移動を実施</li>
+</ul>
+<p>以下にFishとZshでの<code>zi</code>実装を示します。ちなみに私は<code>zi</code>しか使わないので、いっそ<code>z</code>という名前にしてます。</p>
+<div id="fishでの実装" class="section level2">
+<h2>Fishでの実装</h2>
+<pre class="fish"><code># zoxideの初期化
+# zi関数を自前で実装するため、`zoxide`が定義しないよう`--no-cmd`オプションをつける
+zoxide init fish --no-cmd
+
+# zoxideとghqを組み合わせたzi関数の定義
+function __zoxide_list_missing
+  diff \
+    ( zoxide query --list | sort | psub ) \
+    ( ghq list -p | sort | psub ) \
+    | grep &#39;^&gt; &#39; | string replace -r &#39;^&gt; &#39; &#39;&#39;
+end
+
+function __zoxide_add_missing
+  set -l missing ( __zoxide_list_missing )
+  if test ( count $missing ) -gt 0
+    zoxide add $missing
+  end
+end
+
+function zi --description &#39;zoxide wwith ghq&#39;
+  __zoxide_add_missing
+  __zoxide_zi $argv || true
+end</code></pre>
+</div>
+<div id="zshでの実装" class="section level2">
+<h2>Zshでの実装</h2>
+<p>たぶんこんな感じのはず。</p>
+<pre class="zsh"><code># zoxideの初期化
+# zi関数を自前で実装するため、`zoxide`が定義しないよう`--no-cmd`オプションをつける
+source &lt;( zoxide init zsh --no-cmd )
+
+# zoxideとghqを組み合わせたzi関数の定義
+__zoxide_list_missing() {
+  diff \
+    &lt;( zoxide query --list | sort ) \
+    &lt;( ghq list -p | sort) \
+    | grep &#39;^&gt; &#39; | string replace -r &#39;^&gt; &#39; &#39;&#39;
+}
+
+__zoxide_add_missing() {
+  local missing
+  missing=( $( __zoxide_list_missing ) )
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    zoxide add $missing
+  fi
+}
+
+zi() {
+  __zoxide_add_missing
+  __zoxide_zi &quot;$@&quot; || true
+}</code></pre>
+<p><strong>ENJOY</strong></p>
+</div>

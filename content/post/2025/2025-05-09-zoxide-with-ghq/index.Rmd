@@ -1,0 +1,117 @@
+---
+title: "よく使うディレクトリ+αへの移動を便利にするzoxideとghqの組み合わせ"
+author: atusy
+date: '2025-05-09'
+slug: zoxide-with-ghq
+categories: [Tech]
+tags: [zoxide, ghq, fish, zsh, fzf]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [fish, zsh]
+summary: |
+    zoxideはディレクトリの移動頻度を学習して、検索・移動を楽にするツールです。
+    検索候補にまだ移動したことないけど、今後よく使いそうなディレクトリを追加するともっと便利にできます。
+    この記事では[ghq]で管理しているGitリポジトリを移動先候補に追加する方法を紹介します。
+---
+
+[zoxide]: https://github.com/ajeetdsouza/zoxide
+[ghq]: https://github.com/x-motemen/ghq
+
+[zoxide]と[ghq]を組み合わせて、よく使うディレクトリとクローンしたてで使ったことないGitリポジトリへの移動を便利にしましょう。
+
+[zoxide]はシェルでのディレクトリ移動の傾向を学習して、よく使うディレクトリへの移動を楽にするツールです。
+
+シェルの設定ファイル内で`zoxide init fish`などを実行しておくと、`z`関数や`zi`関数を使えるようになります。
+
+- `z`: `z foo`などすると、`foo`にマッチする最もよく使うディレクトリに移動
+- `zi`: よく使う順に並んだディレクトリ一覧の検索画面から移動先を選択（内部的に[fzf](https://github.com/junegunn/fzf)を利用）
+
+個人的には`zi`をよく使います。
+`z`はどこに移動するか予想しづらいところが難しいですね。
+GoogleのI'm Feeling Luckyみたいな感じです。
+
+よく使うディレクトリにすぐ移動できる[zoxide]は便利ですね。
+ただし、移動したことないディレクトリが候補に現れない弱点があります。
+
+検索候補にまだ移動したことないけど、今後よく使いそうなディレクトリを追加するともっと便利にできそうです。
+
+たとえば[ghq]との組み合わせて、Gitリポジトリのクローン先にも簡単に移動できるようにしてみましょう。
+
+[ghq]はGitリポジトリを管理するツールです。
+
+たとえば`ghq get https://github.com/atusy/blog`などすると、`$HOME/ghq/github.com/atusy/blog`にリポジトリがクローンされます。
+このように、リポジトリの名前に合わせてクローン先を決定するので、もう置き場所に悩む必要がありません。
+しかし、リポジトラリのURLに依存するため、ディレクトリが深く移動が手間になります。
+
+そこで[zoxide]と[ghq]を組み合わせると、[ghq]で管理しているリポジトリの一覧を[zoxide]に登録して、簡単に検索・移動できるようになります。
+
+やることとしては以下のイメージ。
+
+- [zoxide]に未登録なリポジトリを`zoxide query --list`と`ghq list -p`の差分から取得
+- `zoxide add`で未登録なリポジトリを[zoxide]に登録
+- `zi`関数に相当する`__zoxide_zi`関数を実行して、検索・移動を実施
+
+以下にFishとZshでの`zi`実装を示します。
+ちなみに私は`zi`しか使わないので、いっそ`z`という名前にしてます。
+
+## Fishでの実装
+
+``` fish
+# zoxideの初期化
+# zi関数を自前で実装するため、`zoxide`が定義しないよう`--no-cmd`オプションをつける
+zoxide init fish --no-cmd
+
+# zoxideとghqを組み合わせたzi関数の定義
+function __zoxide_list_missing
+  diff \
+    ( zoxide query --list | sort | psub ) \
+    ( ghq list -p | sort | psub ) \
+    | grep '^> ' | string replace -r '^> ' ''
+end
+
+function __zoxide_add_missing
+  set -l missing ( __zoxide_list_missing )
+  if test ( count $missing ) -gt 0
+    zoxide add $missing
+  end
+end
+
+function zi --description 'zoxide wwith ghq'
+  __zoxide_add_missing
+  __zoxide_zi $argv || true
+end
+```
+
+## Zshでの実装
+
+たぶんこんな感じのはず。
+
+``` zsh
+# zoxideの初期化
+# zi関数を自前で実装するため、`zoxide`が定義しないよう`--no-cmd`オプションをつける
+source <( zoxide init zsh --no-cmd )
+
+# zoxideとghqを組み合わせたzi関数の定義
+__zoxide_list_missing() {
+  diff \
+    <( zoxide query --list | sort ) \
+    <( ghq list -p | sort) \
+    | grep '^> ' | string replace -r '^> ' ''
+}
+
+__zoxide_add_missing() {
+  local missing
+  missing=( $( __zoxide_list_missing ) )
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    zoxide add $missing
+  fi
+}
+
+zi() {
+  __zoxide_add_missing
+  __zoxide_zi "$@" || true
+}
+```
+
+**ENJOY**
