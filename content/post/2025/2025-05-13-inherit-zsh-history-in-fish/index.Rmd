@@ -1,0 +1,86 @@
+---
+title: "Fishに引っ越したい人のためのZsh履歴活用術"
+author: atusy
+date: '2025-05-13'
+slug: inherit-zsh-history-in-fish
+categories: [Tech]
+tags: [fish, zsh, fzf]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [fish]
+summary: |
+    シェルを移行する歳、設定だけでなくコマンド履歴も引き継ぎたいものです。
+    Fishは設定が小さくすみやすい上に情報も多いので、今回はFishからZshのコマンド履歴を活用する方法を紹介します。
+    fzfを使っているので、検索効率もいいですよ。
+---
+
+Fishはユーザーフレンドリーシェルを謳う、便利機能てんこもりシェルです。
+
+シンタックスハイライト、補完、abbreviationなど、インタラクティブシェルに求められる機能がひととおり揃っています。
+おかげで設定が最小限に済み、移行コストを下げてくれます。
+
+ただ、長く他のシェルを使ってきたユーザーにとっては、設定がなんとかなってもコマンド履歴という資産を失う辛さがあるかもしれません。
+というわけで、コマンド履歴を引き継ぐ方法を紹介します。
+
+てっとり早い方法はコマンド履歴をFish用に変換してしまうことです。
+探すとその手のツールも見つかります。
+
+しかし、過渡期はたまにZshに戻ったりするので、たびたび変換するのも手間です。
+
+そこで、素朴にFishとZshの履歴を連結して検索できるようにしてみましょう。
+単純なコマンドならZshで実行していたものでも活用できるようになります。
+FishスクリプトとZshスクリプトは互換性がないので、`if`文や`for`文を使っている場合などは選択しても実行結果がエラーになる点に注意してください。
+
+Zshの履歴は単純なプレインテキストではないらしく、万全を期すならデコード処理を挟んだほうがいいです。
+以下の記事が参考になりますが、Fishの履歴が溜まれば重要度が下がるので、ここではデコードを省略します。
+
+> .zsh_historyファイルをイジる \
+> https://zenn.dev/vim_jp/articles/865e35967b868e
+
+というわけで実装は以下。
+
+- `search_history`関数
+    - FishとZshの履歴を連結してfzfで検索する
+- `set_commandline_from_history`関数
+    - `search_history`を呼び出して、fzfで選択した履歴をコマンドラインにセットする
+- `bind`コマンドで`CTRL_R`を`set_commandline_from_history`に割り当て、コマンドを履歴から選択できるようにする
+
+```fish
+function search_history --description "Search command history of Fish and Zsh at once"
+  begin
+    # Fish history
+    history --null | string collect
+
+    # Zsh history
+    if test -f "$HOME/.zsh_history"
+      # Connection to Fish history
+      echo -n -e '\0'
+
+      # Convert Zsh history to be NULL separated
+      # - Zsh history is separated by linebreaks
+      # - Multilined item is represented by lines ending with backslashes
+      cat "$HOME/.zsh_history" \
+        | perl -ne 'chomp; if (s/\\\\$//) {print "$_\0"} else {print "$_\n"}' \
+        | perl -e 'print reverse <>' \
+        | perl -pe 's/\0/\\\\\n/g' \
+        | perl -ne 'chomp; if (s/\\\\$//) {print "$_\n"} else {print "$_\0"}'
+    end
+  end | fzf --no-sort --exact --read0 $argv
+end
+
+function set_commandline_from_history --description "A replacement of history-pager"
+  set -l cbuf ( commandline -b )
+  if set -l nbuf ( search_history --query=$cbuf ); and test -n $nubf
+    commandline -r $nbuf
+  end
+end
+
+bind \cr set_commandline_from_history
+```
+
+BSD系のOS（macOSなど）でも動くように、文字列処理は`perl`にやらせてみました。
+
+よいFishライフを！
+
+**ENJOY!**

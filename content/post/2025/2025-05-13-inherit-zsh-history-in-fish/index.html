@@ -1,0 +1,76 @@
+---
+title: "Fishに引っ越したい人のためのZsh履歴活用術"
+author: atusy
+date: '2025-05-13'
+slug: inherit-zsh-history-in-fish
+categories: [Tech]
+tags: [fish, zsh, fzf]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [fish]
+summary: |
+    シェルを移行する歳、設定だけでなくコマンド履歴も引き継ぎたいものです。
+    Fishは設定が小さくすみやすい上に情報も多いので、今回はFishからZshのコマンド履歴を活用する方法を紹介します。
+    fzfを使っているので、検索効率もいいですよ。
+---
+
+
+
+<p>Fishはユーザーフレンドリーシェルを謳う、便利機能てんこもりシェルです。</p>
+<p>シンタックスハイライト、補完、abbreviationなど、インタラクティブシェルに求められる機能がひととおり揃っています。おかげで設定が最小限に済み、移行コストを下げてくれます。</p>
+<p>ただ、長く他のシェルを使ってきたユーザーにとっては、設定がなんとかなってもコマンド履歴という資産を失う辛さがあるかもしれません。というわけで、コマンド履歴を引き継ぐ方法を紹介します。</p>
+<p>てっとり早い方法はコマンド履歴をFish用に変換してしまうことです。探すとその手のツールも見つかります。</p>
+<p>しかし、過渡期はたまにZshに戻ったりするので、たびたび変換するのも手間です。</p>
+<p>そこで、素朴にFishとZshの履歴を連結して検索できるようにしてみましょう。単純なコマンドならZshで実行していたものでも活用できるようになります。
+FishスクリプトとZshスクリプトは互換性がないので、<code>if</code>文や<code>for</code>文を使っている場合などは選択しても実行結果がエラーになる点に注意してください。</p>
+<p>Zshの履歴は単純なプレインテキストではないらしく、万全を期すならデコード処理を挟んだほうがいいです。以下の記事が参考になりますが、Fishの履歴が溜まれば重要度が下がるので、ここではデコードを省略します。</p>
+<blockquote>
+<p>.zsh_historyファイルをイジる<br />
+<a href="https://zenn.dev/vim_jp/articles/865e35967b868e" class="uri">https://zenn.dev/vim_jp/articles/865e35967b868e</a></p>
+</blockquote>
+<p>というわけで実装は以下。</p>
+<ul>
+<li><code>search_history</code>関数
+<ul>
+<li>FishとZshの履歴を連結してfzfで検索する</li>
+</ul></li>
+<li><code>set_commandline_from_history</code>関数
+<ul>
+<li><code>search_history</code>を呼び出して、fzfで選択した履歴をコマンドラインにセットする</li>
+</ul></li>
+<li><code>bind</code>コマンドで<code>CTRL_R</code>を<code>set_commandline_from_history</code>に割り当て、コマンドを履歴から選択できるようにする</li>
+</ul>
+<pre class="fish"><code>function search_history --description &quot;Search command history of Fish and Zsh at once&quot;
+  begin
+    # Fish history
+    history --null | string collect
+
+    # Zsh history
+    if test -f &quot;$HOME/.zsh_history&quot;
+      # Connection to Fish history
+      echo -n -e &#39;\0&#39;
+
+      # Convert Zsh history to be NULL separated
+      # - Zsh history is separated by linebreaks
+      # - Multilined item is represented by lines ending with backslashes
+      cat &quot;$HOME/.zsh_history&quot; \
+        | perl -ne &#39;chomp; if (s/\\\\$//) {print &quot;$_\0&quot;} else {print &quot;$_\n&quot;}&#39; \
+        | perl -e &#39;print reverse &lt;&gt;&#39; \
+        | perl -pe &#39;s/\0/\\\\\n/g&#39; \
+        | perl -ne &#39;chomp; if (s/\\\\$//) {print &quot;$_\n&quot;} else {print &quot;$_\0&quot;}&#39;
+    end
+  end | fzf --no-sort --exact --read0 $argv
+end
+
+function set_commandline_from_history --description &quot;A replacement of history-pager&quot;
+  set -l cbuf ( commandline -b )
+  if set -l nbuf ( search_history --query=$cbuf ); and test -n $nubf
+    commandline -r $nbuf
+  end
+end
+
+bind \cr set_commandline_from_history</code></pre>
+<p>BSD系のOS（macOSなど）でも動くように、文字列処理は<code>perl</code>にやらせてみました。</p>
+<p>よいFishライフを！</p>
+<p><strong>ENJOY!</strong></p>
