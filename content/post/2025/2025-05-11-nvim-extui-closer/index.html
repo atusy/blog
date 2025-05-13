@@ -1,0 +1,71 @@
+---
+title: "Neovim最先端のextuiでフローティングウィンドウ化したメッセージをいつでも非表示にする方法"
+author: atusy
+date: '2025-05-13'
+slug: nvim-extui-msgbox-closer
+categories: [Tech]
+tags: [Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: [lua]
+summary: |
+    Neovimのextuiで表示されたメッセージボックスは、所定の時間が経過すると自動で閉じます。
+    しかし、今すぐ非表示にしたい場面もあります。
+    そこで、通常のcmdlineのように`<C-L>`で非表示にする方法を紹介します。
+---
+
+
+
+<p>Neovim開発版のexperimentalな機能として、コマンドラインやメッセージをフローティングウィンドウ化するextuiが実装されました。</p>
+<p>最高にcool &amp; smartな機能で、設定方法に関してはkawarimidollさんが紹介してくれています。</p>
+<blockquote>
+<p><a href="https://zenn.dev/kawarimidoll/articles/4da7458c102c1f">Neovim最先端のextuiでcool &amp; smartなcmdlineを手に入れよう</a> by Kawarimidollさん</p>
+</blockquote>
+<p>しかし、もっとcoolにするためには色々と手を加えたほうがよさそうです。</p>
+<p>一例として、先日はcmdlineのカラースキームを変更して視認性を上げる方法を紹介しました</p>
+<blockquote>
+<p><a href="https://blog.atusy.net/2025/05/10/nvim-extui-cmdline-styiling/">Neovim最先端のextuiのcool &amp; smartなcmdlineに特別なカラースキームをあててもっとcoolにしよう</a></p>
+</blockquote>
+<p>今回は、extuiで表示されたメッセージボックスを任意のタイミングで非表示にする方法を紹介します。次の画像の右下部分のやつですね。
+<code>:= vim.api.nvim_win_get_config(0)</code>の結果を表示しています。</p>
+<p><img src="images/extui-msg-styled.png" /></p>
+<p>メッセージボックスは有効化時に、<code>.msg.pos = "box"</code>を指定するか、<code>vim.o.cmdheight = 0</code>を指定することで表示されます。通常では<code>.msg.box.timeout</code>に指定した時間が経過すると自動で閉じますが、メッセージがあまりにも巨大だった場合など、すぐに閉じたい時があります。</p>
+<pre class="lua"><code>require(&quot;vim._extui&quot;).enable({
+  enable = true,
+  msg = {
+    pos = &quot;box&quot;,
+    box = { timeout = 5000 },
+  },
+})</code></pre>
+<p>しかし、メッセージボックスを直接非表示にするためのAPIは現時点で提供されていません。</p>
+<p>通常のcmdlineにメッセージを表示するときと同様に<code>&lt;C-L&gt;</code>で非表示化する設定を作ってみましょう。</p>
+<p><a href="https://neovim.io/doc/user/lua.html#vim._extui"><code>:h vim._extui</code></a>によると、メッセージボックスのファイルタイプは<code>msgbox</code>らしいので、そんなバッファを表示しているウィンドウを見つけて、configに<code>hide = true</code>を指定してやればよさそうです。</p>
+<p><code>hide_msgbox</code>関数にそのロジックを実装してみます。</p>
+<pre class="lua"><code>local function hide_msgbox()
+  -- 表示中のウィンドウ一覧を取得
+  local wins = vim.api.nvim_tabpage_list_wins(vim.api.nvim_get_current_tabpage())
+
+  -- ウィンドウごとに表示中のバッファのファイルタオプを確認
+  -- msgboxを見つけたらhideして、関数を終了
+  for _, win in ipairs(wins)  do
+    local buf = vim.api.nvim_win_get_buf(win)
+    local ft = vim.bo[buf].filetype
+    if ft == &quot;msgbox&quot; then
+      vim.api.nvim_win_set_config(win, { hide = true })
+      return
+    end
+  end
+end</code></pre>
+<p><code>hide_msgbox</code>関数を定義できたら、<code>&lt;C-L&gt;</code>にマッピングして完成です。ただし、<code>&lt;C-L&gt;</code>の機能はNeovim独自の拡張が入っているので（<a href="https://neovim.io/doc/user/various.html#CTRL-L"><code>:h CTRL-L-default</code></a>）、それを継承するように、いい感じにexprマッピングを仕込むといいでしょう。</p>
+<pre class="lua"><code>vim.keymap.set(&quot;n&quot;, &quot;&lt;C-L&gt;&quot;, function()
+  hide_msgbox()
+  return &quot;&lt;Cmd&gt;nohlsearch&lt;Bar&gt;diffupdate&lt;Bar&gt;normal! &lt;C-L&gt;&lt;CR&gt;&quot;
+end, { expr = true })</code></pre>
+<p><code>hide_msgbox()</code>がすべてのウィンドウを順番に見ていくなんて非効率だ！という効率厨の方には、<code>vim._extui.shared</code>モジュールを使った方法を紹介します。
+undocumentedなので、いつ壊れるかもしれない覚悟で使ってください。</p>
+<pre class="lua"><code>local function hide_msgbox()
+  local extuiwins = require(&quot;vim._extui.shared&quot;).wins[vim.api.nvim_get_current_tabpage()]
+  vim.api.nvim_win_set_config(extuiwins.box, { hide = true })
+end</code></pre>
+<p><strong>ENJOY</strong></p>
