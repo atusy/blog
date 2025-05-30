@@ -23,8 +23,6 @@ async def construct_x(client: ChatOllama, system_prompt: str, user_prompt: str) 
 
     print(json.dumps(result.model_dump(), ensure_ascii=False))
 
-    return X
-
 
 async def main():
     _, model, system_prompt, user_prompt = sys.argv
