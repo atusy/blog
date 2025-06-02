@@ -1,0 +1,75 @@
+---
+title: "Conform.nvimの保存時フォーマットをスキップする方法"
+author: atusy
+date: "2025-06-03"
+slug: "skip-conform-nvim-format-on-save"
+categories: [Tech]
+tags: [Neovim, conform.nvim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: []
+summary: |
+    Conform.nvimのformat_on_saveは便利ですが、たまーにスキップしたくなります。
+    そんな時は、format_on_saveに関数を指定してやるといいです。
+    引数として与えられるバッファ番号や、ファイル書き込み時の`!`の有無を使ってうまく制御してみましょう。
+---
+
+[Conform.nvim](https://github.com/stevearc/conform.nvim)は、Neovimのフォーマッタープラグインです。
+
+extmarkやfoldを保持してくれたり、指定範囲のフォーマットができたりと、便利ポイントが多いです。
+
+設定も簡単で、たとえば以下のようにすると、ファイルを保存したら自動的にLSPによるフォーマットが実行されます。
+
+```lua
+require("conform").setup({
+  default_format_opts = {
+    lsp_format = "fallback",
+    timeout_ms = 500,
+  },
+  format_on_save = true,
+})
+```
+
+でも、保存時にフォーマットをスキップしたいこともありますよね。
+
+- lockファイルなど機械的に生成されるファイルをやむなく編集したとき
+- フォーマットがエラーになるとき
+
+などなど。
+
+こんなときは、`format_on_save`に関数を指定してやるといいです。
+
+たとえば、`vim.v.cmdbang`を使うと、`:w!`で保存したときにフォーマットをスキップできます。
+これで、`:w`でエラーが出たときは`:w!`すればいいですね。
+
+また、関数の第一引数にバッファ番号をとれるので、ファイル名や内容に応じてフォーマットをスキップすることもできます。
+これでlockファイルのフォーマットもスキップできますね。
+
+```lua
+require("conform").setup({
+  default_format_opts = {
+    lsp_format = "fallback",
+    timeout_ms = 500,
+  },
+  format_on_save = function(buf)
+    -- `:w!`で保存したときはフォーマットをスキップ
+    if vim.v.cmdbang == 1 then
+      return nil
+    end
+
+    local name = vim.api.nvim_buf_get_name(buf)
+    local basename = vim.fs.basename(name)
+
+    -- lockファイルはフォーマットをスキップ
+    if basename:match("%.lock$") or basename:match("%plock%p") then
+      -- do not format lock files
+      return nil
+    end
+
+    -- その他のファイルはsetup時の設定でフォーマット
+    return {}
+  end,
+})
+```
+**ENJOY!!**
