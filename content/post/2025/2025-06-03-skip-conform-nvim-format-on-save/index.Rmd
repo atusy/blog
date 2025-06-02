@@ -12,7 +12,7 @@ highlightjs: []
 summary: |
     Conform.nvimのformat_on_saveは便利ですが、たまーにスキップしたくなります。
     そんな時は、format_on_saveに関数を指定してやるといいです。
-    引数として与えられるバッファ番号や、ファイル書き込み時の`!`の有無を使ってうまく制御してみましょう。
+    `:w!`の実行やバッファの内容に応じて制御してみましょう。
 ---
 
 [Conform.nvim](https://github.com/stevearc/conform.nvim)は、Neovimのフォーマッタープラグインです。
