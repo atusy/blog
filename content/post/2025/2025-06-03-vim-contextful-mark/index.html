@@ -1,0 +1,106 @@
+---
+title: "Vim/Neovimのマークを操作内容に合わせて設定する"
+author: atusy
+date: "2025-06-03"
+slug: "vim-contextful-mark"
+categories: [Tech]
+tags: [Vim, Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: []
+summary: |
+    たとえば`` `y ``したら直前にヤンクした場所に戻れるとよさそうですね。
+---
+
+
+
+<p>Vim/Neovimのマーク機能を使うと、指定した位置にマークをつけて、後で移動できます。</p>
+<p>たとえば現在位置で<code>ma</code>してから、適当に移動して<code>`a</code>すると、<code>a</code>マークの位置に戻れます。</p>
+<blockquote>
+<p><code>:h mark-motions</code><br />
+<a href="https://vim-jp.org/vimdoc-ja/motion.html#mark-motions" class="uri">https://vim-jp.org/vimdoc-ja/motion.html#mark-motions</a></p>
+</blockquote>
+<p>便利そうですが、なんて名前のマークをつけたか忘れがちな問題があり、<code>mm</code>しか使わない……！などと決めている人も多いのではないでしょうか。マクロで<code>qq</code>しか使わないのと同じノリですね。</p>
+<p>なんなら私は適当なコメントを挿入しておいて、Gitのdiffをマーク変わりにしています。</p>
+<p>ところが私は閃きました。</p>
+<p>change/delete/yankをしたときは自動的に<code>c</code>, <code>d</code>, <code>y</code>のマークをつけておけば、さっきヤンクしたところに戻りたい……！を実現できるのではと。</p>
+<p>丁度、似たようなことをレジスタでやった時の話をvim-jpで共有した際に気付きました。</p>
+<blockquote>
+<p>Vimで無名レジスタでchange/delete/yankした時に、イニシャルに相当するレジスタにも値を入れる<br />
+<a href="https://blog.atusy.net/2023/12/17/vim-easy-to-remember-regnames/" class="uri">https://blog.atusy.net/2023/12/17/vim-easy-to-remember-regnames/</a></p>
+</blockquote>
+<p>レジスタの時と同様にマッピングでも自動コマンドでも実現可能です。個人的には以下のように使い分けるといいかと思います。</p>
+<ul>
+<li>マッピング: オペレーター以外のとき</li>
+<li>自動コマンド: オペレーター（<code>c</code>, <code>d</code>, <code>y</code>）を使うとき</li>
+</ul>
+<div id="マッピングで設定する" class="section level2">
+<h2>マッピングで設定する</h2>
+<p><code>p</code>を<code>mpp</code>や<code>pmp</code>などにマッピングすると、<code>p</code>でputした位置に戻れるようになります。マークを操作の前後のどちらでつけるかはお好みですね。</p>
+<p>putやundoの操作は、操作直前の位置に文字列が残る保証がなく、どこに飛ぶかわかりづらいので、操作後にマークをつけるのが無難に思います。</p>
+<pre class="lua"><code>vim.keymap.set({&quot;n&quot;, &quot;x&quot;}, &quot;p&quot;, &quot;pmp&quot;)
+vim.keymap.set({&quot;n&quot;, &quot;x&quot;}, &quot;p&quot;, &quot;Pmp&quot;)
+vim.keymap.set(&quot;n&quot;, &quot;u&quot;, &quot;umu&quot;)
+vim.keymap.set(&quot;n&quot;, &quot;&lt;C-R&gt;&quot;, &quot;&lt;C-R&gt;mu&quot;)</code></pre>
+<p>Vimでやるなら<code>nnoremap p pmp</code>といった具合ですね。</p>
+<p>ここでは小文字のマークを設定していますが、大文字のマークも便利かもしれません。小文字のマークはバッファ単位ですが、大文字のマークはグローバルに設定されるので、複数のバッファをまたいで同じマークを使うことができます。</p>
+</div>
+<div id="自動コマンドで設定する" class="section level2">
+<h2>自動コマンドで設定する</h2>
+<p><code>c</code>, <code>d</code>, <code>y</code>のオペレーターを使うとき、<a href="https://vim-jp.org/vimdoc-ja/autocmd.html#TextYankPost"><code>TextYankPost</code></a>イベントが発火します。このとき、<code>vim.v.event.operator</code>でオペレーターの種類を取得できるので、これを使ってマークを設定します。</p>
+<p>他にも<code>ModeChanged</code>イベントや<code>BufWritePost</code>イベントなどで<code>m</code>や<code>w</code>のマークを設定してもおもしろいかも。</p>
+<pre class="lua"><code>vim.api.nvim_create_autocmd(&quot;TextYankPost&quot;, {
+  group = vim.api.nvim_create_augroup(&quot;ContextfulMark&quot;, { clear = true }),
+  callback = function(ctx)
+    local op = vim.v.event.operator
+    if not op then
+      return
+    end
+
+    local win = vim.api.nvim_get_current_win()
+    vim.schedule(function()
+      -- Do lazily to avoid occasional failure on setting the mark.
+      -- The issue typically occurs with `dd`.
+      if vim.api.nvim_win_get_buf(win) == ctx.buf then
+        local cursor = vim.api.nvim_win_get_cursor(win)
+        vim.api.nvim_buf_set_mark(ctx.buf, op, cursor[1], cursor[2], {})
+      end
+    end)
+  end,
+})</code></pre>
+<p>Vimでやる場合……？
+AIさんにコード変換してもらうとこんな感じみたいです。
+<code>vim.schedule()</code>のような遅延実行や、<code>nvim_buf_set_mark()</code>のようなマーク設定などのAPIがないので、少し工夫が必要みたいですね。</p>
+<pre class="vim"><code>augroup ContextfulMark
+  autocmd!
+  autocmd TextYankPost * call s:SetContextfulMark()
+augroup END
+
+function! s:SetContextfulMark() abort
+  let op = v:event.operator
+  if empty(op)
+    return
+  endif
+
+  let winid = win_getid()
+  let bufnr = bufnr(&#39;%&#39;) &quot; 現在のバッファ番号を取得
+  let l:bufnr_ctx = v:event.buf &quot; TextYankPost イベントのバッファ番号
+
+  &quot; 遅延実行して、マーク設定時の稀な失敗を回避する。
+  &quot; 特に `dd` で問題が発生することがある。
+  call timer_start(0, { -&gt; s:DoSetMarkLazy(winid, bufnr, l:bufnr_ctx, op) })
+endfunction
+
+function! s:DoSetMarkLazy(winid, current_bufnr, ctx_bufnr, op) abort
+  &quot; 現在のウィンドウのバッファがイベント発生時のバッファと同じであることを確認
+  if win_getbuf(a:winid) == a:ctx_bufnr
+    let cursor = getwininfo(a:winid)[0].cursor
+    &quot; nvim_buf_set_mark は Vimscript では使えないため、
+    &quot; 組み込みの `:mark` コマンドを使用します。
+    &quot; 行と列は1-indexedである必要があるため、cursor[0]はそのまま、cursor[1]は+1します。
+    execute &#39;normal! m&#39; . a:op
+  endif
+endfunction</code></pre>
+<p><strong>ENJOY!!</strong></p>
+</div>

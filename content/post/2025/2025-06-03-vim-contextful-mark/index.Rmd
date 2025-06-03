@@ -1,0 +1,128 @@
+---
+title: "Vim/Neovimのマークを操作内容に合わせて設定する"
+author: atusy
+date: "2025-06-03"
+slug: "vim-contextful-mark"
+categories: [Tech]
+tags: [Vim, Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: []
+summary: |
+    たとえば`` `y ``したら直前にヤンクした場所に戻れるとよさそうですね。
+---
+
+Vim/Neovimのマーク機能を使うと、指定した位置にマークをつけて、後で移動できます。
+
+たとえば現在位置で`ma`してから、適当に移動して`` `a ``すると、`a`マークの位置に戻れます。
+
+> `:h mark-motions` \
+> <https://vim-jp.org/vimdoc-ja/motion.html#mark-motions>
+
+便利そうですが、なんて名前のマークをつけたか忘れがちな問題があり、`mm`しか使わない……！などと決めている人も多いのではないでしょうか。
+マクロで`qq`しか使わないのと同じノリですね。
+
+なんなら私は適当なコメントを挿入しておいて、Gitのdiffをマーク変わりにしています。
+
+ところが私は閃きました。
+
+change/delete/yankをしたときは自動的に`c`, `d`, `y`のマークをつけておけば、さっきヤンクしたところに戻りたい……！を実現できるのではと。
+
+丁度、似たようなことをレジスタでやった時の話をvim-jpで共有した際に気付きました。
+
+> Vimで無名レジスタでchange/delete/yankした時に、イニシャルに相当するレジスタにも値を入れる \
+> <https://blog.atusy.net/2023/12/17/vim-easy-to-remember-regnames/>
+
+レジスタの時と同様にマッピングでも自動コマンドでも実現可能です。
+個人的には以下のように使い分けるといいかと思います。
+
+- マッピング: オペレーター以外のとき
+- 自動コマンド: オペレーター（`c`, `d`, `y`）を使うとき
+
+## マッピングで設定する
+
+`p`を`mpp`や`pmp`などにマッピングすると、`p`でputした位置に戻れるようになります。
+マークを操作の前後のどちらでつけるかはお好みですね。
+
+putやundoの操作は、操作直前の位置に文字列が残る保証がなく、どこに飛ぶかわかりづらいので、操作後にマークをつけるのが無難に思います。
+
+```lua
+vim.keymap.set({"n", "x"}, "p", "pmp")
+vim.keymap.set({"n", "x"}, "p", "Pmp")
+vim.keymap.set("n", "u", "umu")
+vim.keymap.set("n", "<C-R>", "<C-R>mu")
+```
+
+Vimでやるなら`nnoremap p pmp`といった具合ですね。
+
+ここでは小文字のマークを設定していますが、大文字のマークも便利かもしれません。
+小文字のマークはバッファ単位ですが、大文字のマークはグローバルに設定されるので、複数のバッファをまたいで同じマークを使うことができます。
+
+## 自動コマンドで設定する
+
+`c`, `d`, `y`のオペレーターを使うとき、[`TextYankPost`](https://vim-jp.org/vimdoc-ja/autocmd.html#TextYankPost)イベントが発火します。
+このとき、`vim.v.event.operator`でオペレーターの種類を取得できるので、これを使ってマークを設定します。
+
+他にも`ModeChanged`イベントや`BufWritePost`イベントなどで`m`や`w`のマークを設定してもおもしろいかも。
+
+```lua
+vim.api.nvim_create_autocmd("TextYankPost", {
+  group = vim.api.nvim_create_augroup("ContextfulMark", { clear = true }),
+  callback = function(ctx)
+    local op = vim.v.event.operator
+    if not op then
+      return
+    end
+
+    local win = vim.api.nvim_get_current_win()
+    vim.schedule(function()
+      -- Do lazily to avoid occasional failure on setting the mark.
+      -- The issue typically occurs with `dd`.
+      if vim.api.nvim_win_get_buf(win) == ctx.buf then
+        local cursor = vim.api.nvim_win_get_cursor(win)
+        vim.api.nvim_buf_set_mark(ctx.buf, op, cursor[1], cursor[2], {})
+      end
+    end)
+  end,
+})
+```
+
+Vimでやる場合……？
+AIさんにコード変換してもらうとこんな感じみたいです。
+`vim.schedule()`のような遅延実行や、`nvim_buf_set_mark()`のようなマーク設定などのAPIがないので、少し工夫が必要みたいですね。
+
+```vim
+augroup ContextfulMark
+  autocmd!
+  autocmd TextYankPost * call s:SetContextfulMark()
+augroup END
+
+function! s:SetContextfulMark() abort
+  let op = v:event.operator
+  if empty(op)
+    return
+  endif
+
+  let winid = win_getid()
+  let bufnr = bufnr('%') " 現在のバッファ番号を取得
+  let l:bufnr_ctx = v:event.buf " TextYankPost イベントのバッファ番号
+
+  " 遅延実行して、マーク設定時の稀な失敗を回避する。
+  " 特に `dd` で問題が発生することがある。
+  call timer_start(0, { -> s:DoSetMarkLazy(winid, bufnr, l:bufnr_ctx, op) })
+endfunction
+
+function! s:DoSetMarkLazy(winid, current_bufnr, ctx_bufnr, op) abort
+  " 現在のウィンドウのバッファがイベント発生時のバッファと同じであることを確認
+  if win_getbuf(a:winid) == a:ctx_bufnr
+    let cursor = getwininfo(a:winid)[0].cursor
+    " nvim_buf_set_mark は Vimscript では使えないため、
+    " 組み込みの `:mark` コマンドを使用します。
+    " 行と列は1-indexedである必要があるため、cursor[0]はそのまま、cursor[1]は+1します。
+    execute 'normal! m' . a:op
+  endif
+endfunction
+```
+
+**ENJOY!!**
