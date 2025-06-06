@@ -1,0 +1,83 @@
+---
+title: "ddc.vimによるシェルコマンドの補完が速くなったぞ"
+author: atusy
+date: "2025-06-06"
+slug: "ddc-source-shell_native-is-faster"
+categories: [Tech]
+tags: [Vim, Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: []
+summary: |
+    ddc-source-shell_nativeを使うとシェルコマンドの補完ができます。
+    従来は補完候補を取得するたびにシェルを起動するため時間がかかりましたが、シェルを常駐させることで高速化してもらいました。
+---
+
+ddc.vimはVim/Neovimの補完エンジンです。
+状況に応じて補完候補のソースやフィルターを柔軟に変更できるところやパフォーマンスの良さが強みですね。
+
+詳しい紹介は作者のShougoさんの記事に譲ります。
+
+> 新世代の自動補完プラグイン ddc.vim \
+> <https://zenn.dev/shougo/articles/ddc-vim-beta>
+
+補完候補のソースは、カーソル周辺の単語を使う[ddc-source-around](https://github.com/Shougo/ddc-source-around)などさまざまですが、シェルコマンドの補完には、[ddc-source-shell_native](https://github.com/Shougo/ddc-source-shell_native)を使うといいでしょう。
+
+zsh, fish, xonshの補完に対応しているので、各種スクリプトや、コマンドラインで`:!`からコマンドを呼び出すときの補完に便利です。
+
+![](images/ddc-source-shell_native.png)
+
+ちなみにzsh以外のシェルへの対応は私がしました！
+
+> Support variety of shell such as fish and xonsh \
+> <https://github.com/Shougo/ddc-source-shell_native/pull/3>
+
+といったんサポートしたのはいいものの、補完候補が出るまでやや時間がかかるのが難点でした。
+
+これは、補完候補を取得するたびにシェルを起動しなおしているためです。
+
+たとえばfishなら、以下のようなスクリプトを用意していました。
+補完の情報源はスクリプトに引数として渡します。
+
+```fish
+#!/usr/bin/env fish
+complete -C "$argv[1]"
+```
+
+毎回起動すると遅いなら、起動しっぱなしにすればいいじゃない、ということでシェルを常駐させ、引数の代わりに標準入力を使う提案をしたところ、Shougoさんが爆速で実装してくれました。
+fishスクリプト部分はこんな感じ。
+補完候補の列挙完了は標準エラー出力に"EOF"を出力することで通知します。
+
+```fish
+#!/usr/bin/env fish
+
+function main
+    while true
+        set user_input (read)
+
+        if test -z "$user_input"
+            # Skip empty input
+            continue
+        end
+
+        complete -C "$user_input"
+
+        echo "EOF" >&2
+    end
+end
+
+main
+```
+
+最近、音声ファイルをffmpegで変換する処理をストリーミングさせる処理を書いたのですが、これが[ddc-source-shell_native](https://github.com/Shougo/ddc-source-shell_native)にも応用できると気付き、今回の提案に至りました。
+色んなことやるのって大事ですねー。
+
+この手の提案はもちろんGitHubでやってもいいのですが、今回はvim-jpのSlackで行いました。
+Issueだときっちり書かなきゃと意気込みがちですが、コミュニティ内でさくっと会話できるのはありがたいですね。
+
+あれ……？そういえば `# Skip empty input` の時は `EOF` を出力してないから無限待ちしちゃうかも……？
+
+コントリビュートチャンスしてきます！
+
+**ENJOY!!**
