@@ -1,0 +1,113 @@
+---
+title: "vim-jpラジオ#45・#46聞いた - Firefox拡張Tree Style Tabの作者で技術漫画家でもあるPiroさん登場"
+author: atusy
+date: '2025-06-11'
+slug: vim-jp-radio-45-46
+categories: [Tech]
+tags: [Vim, vim-jp-radio]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: []
+summary: |
+    技術漫画家でもあるPiroさんみたいにアウトプットに長ける方が、ブラウザという現代でも特に重要な技術の歴史の生き証人なの貴重すぎる……。すんごい濃い話が聞けました。
+---
+
+
+
+<p>Vim-jpラジオ<a href="https://audee.jp/voice/show/105651">#45</a>と<a href="https://audee.jp/voice/show/106081">#46</a>はFirefox拡張Tree Style Tabの作者で技術漫画家でもあるPiroさんをゲストにFirefoxの歴史や拡張機能開発の思い出、技術漫画家としての活動などについて盛り上がっていました。</p>
+<ul>
+<li><a href="https://audee.jp/voice/show/105651">Firefox拡張Tree Style Tabの作者・Piroさんと振り返る！Firefoxの歴史</a></li>
+<li><a href="https://audee.jp/voice/show/106081">技術漫画家としてのPiroさんに迫る！</a></li>
+</ul>
+<p>Piroさんが呼ばれた経緯は、<a href="https://audee.jp/voice/show/101439">#36</a>でOpera最強伝説について盛り上がったときに、Firefoxの歴史があいまいだったせいみたい。私も元Operaユーザーで現Firefoxユーザーなので、どの回も親しみ深さMAXでした。
+<a href="https://audee.jp/voice/show/101439">#36</a>の感想はまだ書けてないけど……。</p>
+<p>パーソナリティのtomoyaさんとPiroさんの出会いはVimがきっかけだったそうです。ラジオ内で唯一Vimが話題に上がった瞬間でした。</p>
+<p>Vim Vimしすぎてないところがこのラジオの良さですね。
+vim-jpコミュニティの面白さを輸出したいというコンセプトがよく反映されていると思います。</p>
+<blockquote>
+<p>vim-jpはプログラミングから子育てに至るまで無数のチャンネルを抱えたコミュニティです。そんなコミュニティの面白さを生かして、各分野の様々なゲストを交えながら楽しく雑談していきます。</p>
+</blockquote>
+<p>私もvim-jpはVimを起点としながら、色んな形でエンジニア同士が交流できるところが好き。</p>
+<p>と、Piroさん回とあんまり関係ない話をしてしまいました。</p>
+<p><a href="https://audee.jp/voice/show/105651">#45</a>はFirefox誕生秘話。</p>
+<p>大学内で開発されていたMozaicブラウザがNetscapeブラウザ開発のきっかけになり、Netscapeブラウザが開発速度を得るためにソースコードを公開していたおかげでNetscape社買収に際してMozillaブラウザプロジェクト独立が実現したり、生き証人で歴史本も書かれてる方だからこそ語れる山あり谷ありな濃い内容を聞けました。フリーソフトウェアからOSSへの歴史も語られてます。</p>
+<p>奇しくも技術漫画家のPiroさんが、こういった歴史に直に触れてたのはありがたい限りですね。触れた者みながみな語れるわけではない。</p>
+<p><a href="https://audee.jp/voice/show/106081">#46</a>はFirefox拡張の話と技術漫画家としての活動について。</p>
+<p>拡張開発のきっかけは、Firefoxのバージョンアップで使えなくなった拡張を自前でメンテしていたこと。それを可能とした背景として、絵を公開するページでJSを使っていたことがあるそうです。こういうひょんなきっかけが新しい扉を開くことがあるから、やっぱり時間の許す限り色んなことをやるといいよなあと改めて思った。</p>
+<p>それはそうと、Firefoxの非互換なバージョンアップにめげずに拡張をメンテし続けたり、技術漫画家として長期連載を持ったり、コロナ渦を乗り越えて<a href="ossgate">OSS Gate</a>という活動をれたり、Piroさんの継続力に感嘆するばかりでした。</p>
+<p><a href="ossgate">OSS Gate</a>は、OSS開発に参加する「入り口」を提供する取り組みだそうです。たとえば、自分が普段使っているソフトウェアの中からOSSを見つけて、Issue/PRに挑戦してみるWorkshopなどを開催しているそうです。ラジオ内でも語られていたことですが、OSSってそうとは知らずに使ってるケースも多いし、貢献になんとなくハードルを感じるケースも多いと思うので、本当に素敵な活動だと思います！</p>
+<!--
+ラジオの議事録
+
+tomoyaさんは最近ゴルフしてるらしい。コードゴルフじゃないよ。
+
+Piroさんは技術漫画家でもあるらしい。
+
+Firefoxの歴史と拡張
+
+# 46
+
+* piroさんはbugzilla経由でパッチも送ってた
+* コミケでFirefoxの歴史をまとめた
+* NetscapeとFirefoxの関係って……？
+    * Netscapeが出たときはMozaic Communicationsという会社だった
+    * 大学時代にMozaicブラウザを作ってたが、大学に権利があった。社名にもケチがついてNetscapeにかわった
+    * 画像が埋込めて革新的だった
+    * Mozaic + Godzilla = Mozilla。Netscapeと書いてMozillaと読んでたらしい
+* IEはMozaicの権利を購入して開発開始。後発だった
+* Netscape 3から4くらいがピーク
+    * 90年代後半
+    * IEはまだおまけくらいの機能。IE 4.0で巻き返した
+* Netscape 5を出すに際して外部の力を得るためにMozzila Orgとして自由ソフトウェア化
+    * Free Softwareは無料のニュアンスを感じるせいでMSのあたりが強かったのがOSSという名前が生まれるきっかけっぽい
+* Netscape 5がなかなか出なかった。パフォーマンスが悪く、エンジンが必要だった
+* Geckoエンジンを買ってきた
+    * ページだけじゃなく、GUIをXHTMLで書いてGeckoでレンダリングしよう
+    * Dog foodingにもなる
+    * 野心的すぎる……
+        * JSが遅い
+        * メールとかいろいろ乗りすぎ
+* IEにとってかわられた
+* Chromeに対するChromiumみたいな感じでNetscapeに対するMozillaだった
+* Netscape社が買収されたりした後でMozillaは組織として独立
+    * OSSだったおかげで、買収された後も、別組織で開発を継続できた
+* Phoenix -> Firefox
+* Firefox誕生秘話で時間切れ
+
+# 47
+
+* Extension
+    * Tree Style Tabは自動更新ユーザーが15万くらい
+    * 18歳くらいのときに、Firefoxのバージョンアップで使えなくなった拡張を自前でメンテ
+* 絵を公開するページ作りでJSを使ってた
+* その技術が拡張にも使える……！
+* JSの学習方法
+    * Mozillaのソースコード
+    * オライリーのJS本第3版
+* Tree Style Tabの開発経緯
+    * 最初はコンテキストメニューに全部入れてたのをタブブラウザ拡張に移動
+    * Firefox 2.0の変更に追従できなかったタイミングでTree Style Tabを作り始めた
+* 当時の拡張はMozilla本体と同じ名前空間
+    * 動作保証的にもセキュリティ的にも危険性があった
+* セキュアになる過程でやれることが経って今
+* 拡張用のAPI設計が重要だった
+* 技術漫画家とOSS
+    * ITエンジニア1年生のための……
+        * シス管系女子から始まった
+            * 2011年掲載開始
+        * 長期連載だけど1回で書けること限られてるからネタが尽きてない
+        * ドキュメントを読むだけで理解できない人向け
+            * 自分の経験からもこういうのがほしい
+    * 技術もわかる漫画家の存在が重要
+        * 湊川あいさんとかが後に続いてる
+* OSS Gate
+    * Workshopの中でOSSへの貢献に挑戦してみよう
+    * 使ってるものの中からOSSを見つけてもらうところから始める
+        * そもそもOSSを使っている意識がない、どう貢献したらいいかわからない、みたいな人がおおい
+    
+
+-->
+<div id="enjoy" class="section level2">
+<h2>ENJOY!</h2>
+</div>
