@@ -1,17 +1,18 @@
 ---
-title: "gemma3:1bのStructured Outputを安定させる工夫"
+title: "gemma3のStructured Outputで複雑な例を試す"
 author: atusy
-date: '2025-04-28'
-slug: gemma3-structured-output
+date: '2025-06-12'
+slug: gemma3-complex-structured-output
 categories: [Tech]
 tags: [AI, Python, Gemma, LLM]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists
 highlightjs: []
-summary: |
-  Structured OutputはLLMの出力をプログラムで扱いやすい形式（JSONとか）に落としこむ機能です。
-  `gemma3:1b`で試してみたところ、`temperature`を0にする、システムプロンプトに`入力に忠実に構造化出力して`と指示するなどの工夫が必要なものの、期待通りの結果を得ることができそうです。
+summary:
+    Gemma 3のStructured Outputを試してみました。
+    文字列や辞書のリスト、nullableな値など、複雑なデータ構造でもソツなくこなす印象です。
+    ただ、「在米経験のある日本人」から出身地を推測するような複雑なタスクだと1bよりも大きめのモデルがよさそう。
 ---
 
 ```{r, include=FALSE}
@@ -19,36 +20,38 @@ knitr::opts_chunk$set(comment = "#>")
 ```
 
 Structured OutputはLLMの出力をプログラムで扱いやすい形式（JSONとか）に落としこむ機能です。
-Googleが開発するオープンなLLMモデルのGemma 3が対応したとのことで試してみました。
+Googleが開発するオープンなLLMモデルのGemma 3が対応したとのことで試してみまます。
 
 > <https://developers.googleblog.com/en/introducing-gemma3/>
 
-出力を安定させるために`temperature`を`0`にする、システムプロンプトに`入力に忠実に構造化出力して`と指示するなどの工夫が必要なものの、期待通りの結果を得ることができそうです。
+以前に[gemma3:1bのStructured Outputを安定させる工夫](https://blog.atusy.net/2025/04/28/gemma3-structured-output/)について書いたので、その続きとして、複雑な例に挑戦してみようかと。
+
+所感としては、文字列や辞書のリスト、nullableな値など、複雑なデータ構造でもソツなくこなす印象です。
+ただ、「在米経験のある日本人」から出身地を推測するような複雑なタスクだと1bよりも大きめのモデルがよさそう。
 
 # 準備
 
 - Ollamaを<https://ollama.com>の案内に従ってインストール
+- `ollama serve`でサーバーを軌道
 - `ollama pull gemma3:1b`などを実行して使いたいモデルを入手
 
 # ソース
 
-`名前は篤史、出生地は日本`のような入力に対して、`{"name": "篤史", "birthplace": "Japan"}`のようなJSONを返すコードを作ってみました。
-安定性を確認するため10回ずつループさせます。
-
-こういうとき、LangChainだと色んなモデルを統一的に扱えるので便利。
-
-簡易的な作りですが、パラメータは`モデル名`、`システムプロンプト`、`ユーザープロンプト`です。
+任意の構造を実験できるように、以下のようなコマンドを用意しました。
+簡易的な作りですが、パラメータは`モデル名`、`ユーザープロンプト`、`JSONSchema`です。
+安定性を確認するため5回ずつループさせます。
 
 ```
 uv --directory assets run main.py \
   "モデル名（例：gemma3:1b）" \
-  "システムプロンプト" \
-  "ユーザープロンプト"
+  "ユーザープロンプト" \
+  "JSON Schema"
 ```
 
 ソースコードは記事内にも記載していますが、以下のURLからも参照できます。
+[gemma3:1bのStructured Outputを安定させる工夫](https://blog.atusy.net/2025/04/28/gemma3-structured-output/)の結果を受けて、temperatureは0、システムプロンプトに「入力に忠実に構造化出力して」と指示しています。
 
-> <https://github.com/atusy/blog/blob/882c6ec580ff4f58069e731548d325c156818e1f/content/post/2025/2025-04-28-gemma3-structured-output/assets>
+> <https://github.com/atusy/blog/blob/9b7d9279d2226b93ffd6dcec21be710f6f3111cd/content/post/2025/2025-06-12-gemma3-complex-structured-output/assets>
 
 ## main.py
 
@@ -80,44 +83,229 @@ c(
 
 ## Gemma3:1b
 
-### 名前は篤史、出生地は日本
+### `dict[str, str]`相当
 
-いい感じ
+まずは[gemma3:1bのStructured Outputを安定させる工夫](https://blog.atusy.net/2025/04/28/gemma3-structured-output/)で試した例が動くことを確認。
 
-```{bash, collapse = TRUE}
-uv --directory assets run main.py gemma3:1b "" "名前は篤史、出生地は日本"
+```json
+{"name": "atusy", "birthplace": "日本"}
 ```
 
-### 名前はatusy、出身地は日本
+のようになることを期待します。
 
-アルファベットを使ったハンドルネームのせいで、`日本`を`Japan`に変換しやがります。
-ちなみに、モデルパラメータの`temperature`を高くすると、変換が発生したりしなかったり、`atusy`が`Atsushi`、`Atusu`に変えられたりします。
-不安定ですが、`temperature`の性質を考えれば、それはそうといった感じですね。
+ひとまずシンプルな文章はよさそうですね。
 
-```{bash, collapse = TRUE}
-uv --directory assets run main.py gemma3:1b "" "名前はatusy、出身地は日本"
+```{bash, collapse = FALSE}
+uv --directory assets run main.py gemma3:1b "名前はatusy、出身地は日本" '
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the person."
+    },
+    "birthplace": {
+      "type": "string",
+      "description": "The birthplace of the person."
+    }
+  },
+  "required": [
+    "name",
+    "birthplace"
+  ]
+}'
 ```
 
-この手の問題はシステムプロンプトで`"入力に忠実に構造化出力して"`と指示しておくとよさげ。
+
+ただし、情報が複雑だとgemma3:1bでは荷が重い印象。
+
+1. 在米経験に言及
+    - `こんにちは。私はatusyです。寿司が好き。在米経験あるけど日本出身だよ。`
+    - gemma3:1b
+        - ちょっと余計な情報を足したくらいならで問題ない
+2. 1に加え、明示的に出身を述べない
+    - `こんにちは。私はatusyです。寿司が好き。在米経験のある日本人だよ。`
+    - gemma3:1b
+        - 在米経験のある日本人って感覚的には日本出身な感じがするけど、birthplaceをうまく扱えてない。
+        - `{"name": "atusy", "birthplace": "在米 (在米は「在米」の略です。米の国を意味します。日本で生活していることを意味します。) - 日本"}`
+    - gemma3:4b
+        - いい感じ
+        - `{"name": "atusy", "birthplace": "日本 (米国の経験あり)"}`
+3. 2に加え、友達の名前と出身を追加 
+    - `こんにちは。私はatusyです。寿司が好き。在米経験のある日本人だよ。友達のアリスはイギリス生まれの女の子。`
+        - なお、アリスは架空の人物。
+    - gemma3:4b
+        - ちょっと括弧書きの中身が怪しい感じだけど悪くない
+        - `{"name": "atusy", "birthplace": "日本 (米在住経験あり)"}`
+    - gemma3:12b
+        - なかなか終わらないので諦めました
 
 
-```{bash, collapse = TRUE}
-uv --directory assets run main.py gemma3:1b "入力に忠実に構造化出力して" "名前はatusy、出身地は日本"
+
+```{bash, collapse = FALSE}
+PROMPT="こんにちは。私はatusyです。寿司が好き。在米経験あるけど日本出身だよ。"
+uv --directory assets run main.py gemma3:1b "$PROMPT" '
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the person."
+    },
+    "birthplace": {
+      "type": "string",
+      "description": "The birthplace of the person."
+    }
+  },
+  "required": [
+    "name",
+    "birthplace"
+  ]
+}'
 ```
 
-## Gemma2:2b
+```{bash, collapse = FALSE}
+PROMPT="こんにちは。私はatusyです。寿司が好き。在米経験のある日本人だよ。"
+uv --directory assets run main.py gemma3:1b "$PROMPT" '
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the person."
+    },
+    "birthplace": {
+      "type": "string",
+      "description": "The birthplace of the person."
+    }
+  },
+  "required": [
+    "name",
+    "birthplace"
+  ]
+}'
+```
 
-Gemma 2では以下のような記事を見かけて、Structured Outputするの大変なのかなーと思ってましたが、今回のソースコードで問題なく動くことを確認しました。
+```{bash, collapse = FALSE}
+PROMPT="こんにちは。私はatusyです。寿司が好き。在米経験のある日本人だよ。"
+uv --directory assets run main.py gemma3:4b "$PROMPT" '
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the person."
+    },
+    "birthplace": {
+      "type": "string",
+      "description": "The birthplace of the person."
+    }
+  },
+  "required": [
+    "name",
+    "birthplace"
+  ]
+}'
+```
 
-> ローカルLLM(Gemma 2 2B)で「Structured Outputs(構造化出力)」っぽいことGuardrails AIで実現する \
-> <https://qiita.com/Hikakkun/items/f1813395a00b10222305>
+```{bash, collapse = FALSE}
+PROMPT="こんにちは。私はatusyです。寿司が好き。在米経験のある日本人だよ。友達のアリスはイギリス生まれの女の子。"
+uv --directory assets run main.py gemma3:4b "$PROMPT" '
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the person."
+    },
+    "birthplace": {
+      "type": "string",
+      "description": "The birthplace of the person."
+    }
+  },
+  "required": [
+    "name",
+    "birthplace"
+  ]
+}'
+```
 
-強いてGemma 2を使いつづける理由はあまりないと思いますが……。
+### list[str]やlist[dict]、nullableな値があるケース
 
-### 名前はatusy、出身地は日本
+かなり複雑ですがこんなの。gemma3:4bならソツなくこなしてくれます。
 
-```{bash, collapse = TRUE}
-uv --directory assets run main.py gemma2:2b "入力に忠実に構造化出力して" "名前はatusy、出身地は日本"
+```json
+{
+  "name": "山田 太郎",
+  "current_occupation": "ソフトウェアエンジニア",
+  "hobbies": [
+    "キャンプと登山",
+    "写真撮影",
+    "読書（歴史小説）"
+  ],
+  "education": [
+    {
+      "school": "私立〇〇高等学校",
+      "start_year": 2010,
+      "end_year": 2013
+    },
+    {
+      "school": "▲▲大学",
+      "faculty": "工学部",
+      "department": "情報科学科",
+      "start_year": 2013,
+      "end_year": 2017
+    }
+  ]
+}
+```
+
+```{bash, collapse = FALSE}
+PROMPT='
+皆様、はじめまして！山田 太郎（やまだ たろう）と申します。現在はIT企業でソフトウェアエンジニアとして働いています。
+
+# 趣味
+
+私の趣味は多岐にわたりますが、特に好きなものを3つご紹介します。
+
+キャンプと登山: 自然の中で過ごす時間が大好きで、週末にはよく山に出かけます。焚き火を囲んでのんびり過ごしたり、頂上からの絶景を眺めたりすると、日頃の疲れも吹き飛びます。
+写真撮影: 特に風景写真を撮るのが好きです。旅先や近所の公園など、美しい景色を見つけると、ついついシャッターを切ってしまいます。最近は星景写真にも挑戦中です。
+読書（歴史小説）: 学生時代から歴史が好きで、特に戦国時代や幕末を舞台にした小説をよく読みます。登場人物たちの人間ドラマに触れるのが楽しく、時間があっという間に過ぎてしまいます。
+
+# 学歴
+
+学歴は以下の通りです。
+
+    2010年4月：私立〇〇高等学校 入学
+    2013年3月：私立〇〇高等学校 卒業
+    2013年4月：▲▲大学 工学部 情報科学科 入学
+    2017年3月：▲▲大学 工学部 情報科学科 卒業
+
+大学ではプログラミングやデータ構造について深く学び、現在の仕事に活かしています。'
+
+uv --directory assets run main.py gemma3:4b "$PROMPT" "$(cat assets/example_schema.json)"
+```
+
+もっと口語調にして、余計な情報を足してみます。
+`start_year`がとれていないものの、それなりに優秀な感じしますね。
+もしうまくいかない場合は、もっと大きいモデルを使うか、いったん必要な情報を非構造化で出力してから、構造化しなおすといいかも。
+
+```json
+{"name": "山田 太郎", "current_occupation": "ソフトウェアエンジニア", "hobbies": ["キャンプ", "登山", "写真撮影 (風景写真)", "歴史小説の読書"], "education": [{"school": "私立〇〇高等学校", "graduation_year": 2013, "major": "不明"}, {"school": "▲▲大学", "faculty": "工学部", "department": "情報科学科", "graduation_year": 2017}]}
+```
+
+```{bash, collapse = FALSE}
+PROMPT='
+皆さん、初めまして！この度、このような場でご挨拶できることを大変光栄に思います。さて、自己紹介ですが、私の名前は山田 太郎（やまだ たろう）と申します。よく「山田さんって、あの山田さんですか？」と聞かれるのですが、はい、その山田です（笑）。普段は都内の雑踏の中に位置する、とあるIT企業でソフトウェアエンジニアとして働いております。最近、オフィスの近くにできた新しいカフェのコーヒーがすごく美味しくて、毎朝のルーティンになりつつあります。
+
+仕事以外で私が熱中していることについてお話ししましょう。いくつかあるんですが、まず挙げられるのは自然との触れ合いですね。具体的には、週末になると**キャンプ**用品を車に積み込んで出かけたり、ちょっと本格的な**登山**に挑戦したりしています。自然の中で過ごす時間は本当に格別です。それから、美しい瞬間を閉じ込める**写真撮影**も大切な趣味です。特に風景写真が好きで、良い景色に出会うと時間を忘れてシャッターを切ってしまいます。そういえば、先日訪れた箱根の景色は本当に素晴らしかったですよ。そして、もう一つ、活字に触れる時間も欠かせません。特に**歴史小説**を読むのが好きで、一度読み始めると止まらなくなってしまいます。
+
+週末のキャンプでは、焚き火のパチパチという音を聞きながら、ぼーっと過ごすのが至福の時です。星空を眺めるのも好きで、最近は星景写真にも挑戦しているんですが、これがまた難しくて。でも、だからこそ撮れた時の達成感はひとしおなんです。登山では、山頂から見渡すパノラマに感動します。日頃のストレスなんて吹き飛んでしまいますね。読書は、主に戦国時代や幕末が舞台のものが好みです。登場人物たちの人生模様に思いを馳せると、まるで自分がその時代にいるような感覚になります。そういえば、最近読み始めた本に出てくる武将が、地元の歴史博物館にもゆかりのある人物で、なんだか親近感が湧きました。
+
+さて、話は変わりますが、私の学歴について少しだけお付き合いください。私が高校を卒業したのは2013年3月のことでした。その前、2010年の4月には、私立〇〇高等学校に入学していましたね。高校生活はあっという間でした。そして、高校卒業後すぐに、つまり2013年の4月には、▲▲大学の工学部、その中でも情報科学科に進学しました。大学では、今の仕事に役立つプログラミングやデータ構造について集中的に学びました。レポート作成に追われた日々が懐かしいです。そうそう、▲▲大学を卒業したのは、2017年の3月になります。
+'
+
+uv --directory assets run main.py gemma3:1b "$PROMPT" "$(cat assets/example_schema.json)"
 ```
 
 **ENJOY**

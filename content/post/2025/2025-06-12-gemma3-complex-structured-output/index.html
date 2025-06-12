@@ -1,46 +1,48 @@
 ---
-title: "gemma3:1bのStructured Outputを安定させる工夫"
+title: "gemma3のStructured Outputで複雑な例を試す"
 author: atusy
-date: '2025-04-28'
-slug: gemma3-structured-output
+date: '2025-06-12'
+slug: gemma3-complex-structured-output
 categories: [Tech]
 tags: [AI, Python, Gemma, LLM]
 output:
   blogdown::html_page:
     md_extensions: +east_asian_line_breaks+task_lists
 highlightjs: []
-summary: |
-  Structured OutputはLLMの出力をプログラムで扱いやすい形式（JSONとか）に落としこむ機能です。
-  `gemma3:1b`で試してみたところ、`temperature`を0にする、システムプロンプトに`入力に忠実に構造化出力して`と指示するなどの工夫が必要なものの、期待通りの結果を得ることができそうです。
+summary:
+    Gemma 3のStructured Outputを試してみました。
+    文字列や辞書のリスト、nullableな値など、複雑なデータ構造でもソツなくこなす印象です。
+    ただ、「在米経験のある日本人」から出身地を推測するような複雑なタスクだと1bよりも大きめのモデルがよさそう。
 ---
 
 
 
 <p>Structured OutputはLLMの出力をプログラムで扱いやすい形式（JSONとか）に落としこむ機能です。
-Googleが開発するオープンなLLMモデルのGemma 3が対応したとのことで試してみました。</p>
+Googleが開発するオープンなLLMモデルのGemma 3が対応したとのことで試してみまます。</p>
 <blockquote>
 <p><a href="https://developers.googleblog.com/en/introducing-gemma3/" class="uri">https://developers.googleblog.com/en/introducing-gemma3/</a></p>
 </blockquote>
-<p>出力を安定させるために<code>temperature</code>を<code>0</code>にする、システムプロンプトに<code>入力に忠実に構造化出力して</code>と指示するなどの工夫が必要なものの、期待通りの結果を得ることができそうです。</p>
+<p>以前に<a href="https://blog.atusy.net/2025/04/28/gemma3-structured-output/">gemma3:1bのStructured Outputを安定させる工夫</a>について書いたので、その続きとして、複雑な例に挑戦してみようかと。</p>
+<p>所感としては、文字列や辞書のリスト、nullableな値など、複雑なデータ構造でもソツなくこなす印象です。ただ、「在米経験のある日本人」から出身地を推測するような複雑なタスクだと1bよりも大きめのモデルがよさそう。</p>
 <div id="準備" class="section level1">
 <h1>準備</h1>
 <ul>
 <li>Ollamaを<a href="https://ollama.com" class="uri">https://ollama.com</a>の案内に従ってインストール</li>
+<li><code>ollama serve</code>でサーバーを軌道</li>
 <li><code>ollama pull gemma3:1b</code>などを実行して使いたいモデルを入手</li>
 </ul>
 </div>
 <div id="ソース" class="section level1">
 <h1>ソース</h1>
-<p><code>名前は篤史、出生地は日本</code>のような入力に対して、<code>{"name": "篤史", "birthplace": "Japan"}</code>のようなJSONを返すコードを作ってみました。安定性を確認するため10回ずつループさせます。</p>
-<p>こういうとき、LangChainだと色んなモデルを統一的に扱えるので便利。</p>
-<p>簡易的な作りですが、パラメータは<code>モデル名</code>、<code>システムプロンプト</code>、<code>ユーザープロンプト</code>です。</p>
+<p>任意の構造を実験できるように、以下のようなコマンドを用意しました。簡易的な作りですが、パラメータは<code>モデル名</code>、<code>ユーザープロンプト</code>、<code>JSONSchema</code>です。安定性を確認するため5回ずつループさせます。</p>
 <pre><code>uv --directory assets run main.py \
   &quot;モデル名（例：gemma3:1b）&quot; \
-  &quot;システムプロンプト&quot; \
-  &quot;ユーザープロンプト&quot;</code></pre>
-<p>ソースコードは記事内にも記載していますが、以下のURLからも参照できます。</p>
+  &quot;ユーザープロンプト&quot; \
+  &quot;JSON Schema&quot;</code></pre>
+<p>ソースコードは記事内にも記載していますが、以下のURLからも参照できます。
+<a href="https://blog.atusy.net/2025/04/28/gemma3-structured-output/">gemma3:1bのStructured Outputを安定させる工夫</a>の結果を受けて、temperatureは0、システムプロンプトに「入力に忠実に構造化出力して」と指示しています。</p>
 <blockquote>
-<p><a href="https://github.com/atusy/blog/blob/882c6ec580ff4f58069e731548d325c156818e1f/content/post/2025/2025-04-28-gemma3-structured-output/assets" class="uri">https://github.com/atusy/blog/blob/882c6ec580ff4f58069e731548d325c156818e1f/content/post/2025/2025-04-28-gemma3-structured-output/assets</a></p>
+<p><a href="https://github.com/atusy/blog/blob/9b7d9279d2226b93ffd6dcec21be710f6f3111cd/content/post/2025/2025-06-12-gemma3-complex-structured-output/assets" class="uri">https://github.com/atusy/blog/blob/9b7d9279d2226b93ffd6dcec21be710f6f3111cd/content/post/2025/2025-06-12-gemma3-complex-structured-output/assets</a></p>
 </blockquote>
 <div id="main.py" class="section level2">
 <h2>main.py</h2>
@@ -49,37 +51,43 @@ Googleが開発するオープンなLLMモデルのGemma 3が対応したとの�
  import json
  import sys
  
+ from json_schema_to_pydantic import create_model
  from langchain_core.messages import HumanMessage, SystemMessage
  from langchain_ollama import ChatOllama
- from pydantic import BaseModel, Field
+ from pydantic import BaseModel
  
  
- class X(BaseModel):
-     name: str = Field(...)
-     birthplace: str = Field(...)
- 
- 
- async def construct_x(client: ChatOllama, system_prompt: str, user_prompt: str) -&gt; X:
+ async def construct_x(client: ChatOllama, user_prompt: str, model: type[BaseModel]):
      _ = SystemMessage
-     result = await client.with_structured_output(X).ainvoke(
-         [SystemMessage(content=system_prompt), HumanMessage(content=user_prompt)]
+     result = await client.with_structured_output(model).ainvoke(
+         [
+             SystemMessage(content=&quot;入力に忠実に構造化出力して&quot;),
+             HumanMessage(content=user_prompt),
+         ]
      )
  
-     if not isinstance(result, X):
+     if not isinstance(result, model):
          raise TypeError
  
      print(json.dumps(result.model_dump(), ensure_ascii=False))
  
-     return X
- 
  
  async def main():
-     _, model, system_prompt, user_prompt = sys.argv
-     client = ChatOllama(model=model, temperature=0)
+     _, llm, user_prompt, schema = sys.argv
+     model = create_model(json.loads(schema))
  
-     await asyncio.gather(
-         *[construct_x(client, system_prompt, user_prompt) for _ in range(10)]
-     )
+     client = ChatOllama(model=llm, temperature=0)
+ 
+     iterations = 5
+ 
+     if llm.endswith(&quot;:1b&quot;) or llm.endswith(&quot;:4b&quot;):
+         await asyncio.gather(
+             *[construct_x(client, user_prompt, model) for _ in range(iterations)]
+         )
+         return
+ 
+     for _ in range(iterations):
+         await construct_x(client, user_prompt, model)
  
  
  asyncio.run(main())</code></pre>
@@ -94,6 +102,7 @@ Googleが開発するオープンなLLMモデルのGemma 3が対応したとの�
  readme = &quot;README.md&quot;
  requires-python = &quot;&gt;=3.10&quot;
  dependencies = [
+     &quot;json-schema-to-pydantic&gt;=0.2.6&quot;,
      &quot;langchain&gt;=0.3.24&quot;,
      &quot;langchain-ollama&gt;=0.3.2&quot;,
      &quot;pydantic&gt;=2.11.3&quot;,
@@ -104,70 +113,246 @@ Googleが開発するオープンなLLMモデルのGemma 3が対応したとの�
 <h1>結果</h1>
 <div id="gemma31b" class="section level2">
 <h2>Gemma3:1b</h2>
-<div id="名前は篤史出生地は日本" class="section level3">
-<h3>名前は篤史、出生地は日本</h3>
-<p>いい感じ</p>
-<pre class="bash"><code>uv --directory assets run main.py gemma3:1b &quot;&quot; &quot;名前は篤史、出生地は日本&quot;
-#&gt; {&quot;name&quot;: &quot;篤史&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
-#&gt; {&quot;name&quot;: &quot;篤史&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
-#&gt; {&quot;name&quot;: &quot;篤史&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
-#&gt; {&quot;name&quot;: &quot;篤史&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
-#&gt; {&quot;name&quot;: &quot;篤史&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
-#&gt; {&quot;name&quot;: &quot;篤史&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
-#&gt; {&quot;name&quot;: &quot;篤史&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
-#&gt; {&quot;name&quot;: &quot;篤史&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
-#&gt; {&quot;name&quot;: &quot;篤史&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
-#&gt; {&quot;name&quot;: &quot;篤史&quot;, &quot;birthplace&quot;: &quot;日本&quot;}</code></pre>
-</div>
-<div id="名前はatusy出身地は日本" class="section level3">
-<h3>名前はatusy、出身地は日本</h3>
-<p>アルファベットを使ったハンドルネームのせいで、<code>日本</code>を<code>Japan</code>に変換しやがります。ちなみに、モデルパラメータの<code>temperature</code>を高くすると、変換が発生したりしなかったり、<code>atusy</code>が<code>Atsushi</code>、<code>Atusu</code>に変えられたりします。不安定ですが、<code>temperature</code>の性質を考えれば、それはそうといった感じですね。</p>
-<pre class="bash"><code>uv --directory assets run main.py gemma3:1b &quot;&quot; &quot;名前はatusy、出身地は日本&quot;
-#&gt; {&quot;name&quot;: &quot;Atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}
-#&gt; {&quot;name&quot;: &quot;Atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}
-#&gt; {&quot;name&quot;: &quot;Atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}
-#&gt; {&quot;name&quot;: &quot;Atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}
-#&gt; {&quot;name&quot;: &quot;Atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}
-#&gt; {&quot;name&quot;: &quot;Atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}
-#&gt; {&quot;name&quot;: &quot;Atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}
-#&gt; {&quot;name&quot;: &quot;Atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}
-#&gt; {&quot;name&quot;: &quot;Atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}
-#&gt; {&quot;name&quot;: &quot;Atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}</code></pre>
-<p>この手の問題はシステムプロンプトで<code>"入力に忠実に構造化出力して"</code>と指示しておくとよさげ。</p>
-<pre class="bash"><code>uv --directory assets run main.py gemma3:1b &quot;入力に忠実に構造化出力して&quot; &quot;名前はatusy、出身地は日本&quot;
-#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
-#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
-#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
-#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
-#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
-#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
+<div id="dictstr-str相当" class="section level3">
+<h3><code>dict[str, str]</code>相当</h3>
+<p>まずは<a href="https://blog.atusy.net/2025/04/28/gemma3-structured-output/">gemma3:1bのStructured Outputを安定させる工夫</a>で試した例が動くことを確認。</p>
+<pre class="json"><code>{&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本&quot;}</code></pre>
+<p>のようになることを期待します。</p>
+<p>ひとまずシンプルな文章はよさそうですね。</p>
+<pre class="bash"><code>uv --directory assets run main.py gemma3:1b &quot;名前はatusy、出身地は日本&quot; &#39;
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;name&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;The name of the person.&quot;
+    },
+    &quot;birthplace&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;The birthplace of the person.&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;name&quot;,
+    &quot;birthplace&quot;
+  ]
+}&#39;</code></pre>
+<pre><code>#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
 #&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
 #&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
 #&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
 #&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本&quot;}</code></pre>
+<p>ただし、情報が複雑だとgemma3:1bでは荷が重い印象。</p>
+<ol style="list-style-type: decimal">
+<li>在米経験に言及
+<ul>
+<li><code>こんにちは。私はatusyです。寿司が好き。在米経験あるけど日本出身だよ。</code></li>
+<li>gemma3:1b
+<ul>
+<li>ちょっと余計な情報を足したくらいならで問題ない</li>
+</ul></li>
+</ul></li>
+<li>1に加え、明示的に出身を述べない
+<ul>
+<li><code>こんにちは。私はatusyです。寿司が好き。在米経験のある日本人だよ。</code></li>
+<li>gemma3:1b
+<ul>
+<li>在米経験のある日本人って感覚的には日本出身な感じがするけど、birthplaceをうまく扱えてない。</li>
+<li><code>{"name": "atusy", "birthplace": "在米 (在米は「在米」の略です。米の国を意味します。日本で生活していることを意味します。) - 日本"}</code></li>
+</ul></li>
+<li>gemma3:4b
+<ul>
+<li>いい感じ</li>
+<li><code>{"name": "atusy", "birthplace": "日本 (米国の経験あり)"}</code></li>
+</ul></li>
+</ul></li>
+<li>2に加え、友達の名前と出身を追加
+<ul>
+<li><code>こんにちは。私はatusyです。寿司が好き。在米経験のある日本人だよ。友達のアリスはイギリス生まれの女の子。</code>
+<ul>
+<li>なお、アリスは架空の人物。</li>
+</ul></li>
+<li>gemma3:4b
+<ul>
+<li>ちょっと括弧書きの中身が怪しい感じだけど悪くない</li>
+<li><code>{"name": "atusy", "birthplace": "日本 (米在住経験あり)"}</code></li>
+</ul></li>
+<li>gemma3:12b
+<ul>
+<li>なかなか終わらないので諦めました</li>
+</ul></li>
+</ul></li>
+</ol>
+<pre class="bash"><code>PROMPT=&quot;こんにちは。私はatusyです。寿司が好き。在米経験あるけど日本出身だよ。&quot;
+uv --directory assets run main.py gemma3:1b &quot;$PROMPT&quot; &#39;
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;name&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;The name of the person.&quot;
+    },
+    &quot;birthplace&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;The birthplace of the person.&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;name&quot;,
+    &quot;birthplace&quot;
+  ]
+}&#39;</code></pre>
+<pre><code>#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
+#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
+#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
+#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本&quot;}
+#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本&quot;}</code></pre>
+<pre class="bash"><code>PROMPT=&quot;こんにちは。私はatusyです。寿司が好き。在米経験のある日本人だよ。&quot;
+uv --directory assets run main.py gemma3:1b &quot;$PROMPT&quot; &#39;
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;name&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;The name of the person.&quot;
+    },
+    &quot;birthplace&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;The birthplace of the person.&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;name&quot;,
+    &quot;birthplace&quot;
+  ]
+}&#39;</code></pre>
+<pre><code>#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;在米 (在米は「在米」の略です。米の国を意味します。日本で生活していることを意味します。) - 日本&quot;}
+#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;在米 (在米は「在米」の略です。米の国を意味します。日本で生活していることを意味します。) - 日本&quot;}
+#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;在米 (在米は「在米」の略です。米の国を意味します。日本で生活していることを意味します。) - 日本&quot;}
+#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;在米 (在米は「在米」の略です。米の国を意味します。日本で生活していることを意味します。) - 日本&quot;}
+#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;在米 (在米は「在米」の略です。米の国を意味します。日本で生活していることを意味します。) - 日本&quot;}</code></pre>
+<pre class="bash"><code>PROMPT=&quot;こんにちは。私はatusyです。寿司が好き。在米経験のある日本人だよ。&quot;
+uv --directory assets run main.py gemma3:4b &quot;$PROMPT&quot; &#39;
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;name&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;The name of the person.&quot;
+    },
+    &quot;birthplace&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;The birthplace of the person.&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;name&quot;,
+    &quot;birthplace&quot;
+  ]
+}&#39;</code></pre>
+<pre><code>#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本 (米国の経験あり)&quot;}
+#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本 (米国の経験あり)&quot;}
+#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本 (米国の経験あり)&quot;}
+#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本 (米国の経験あり)&quot;}
+#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本 (米国の経験あり)&quot;}</code></pre>
+<pre class="bash"><code>PROMPT=&quot;こんにちは。私はatusyです。寿司が好き。在米経験のある日本人だよ。友達のアリスはイギリス生まれの女の子。&quot;
+uv --directory assets run main.py gemma3:4b &quot;$PROMPT&quot; &#39;
+{
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;name&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;The name of the person.&quot;
+    },
+    &quot;birthplace&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;The birthplace of the person.&quot;
+    }
+  },
+  &quot;required&quot;: [
+    &quot;name&quot;,
+    &quot;birthplace&quot;
+  ]
+}&#39;</code></pre>
+<pre><code>#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本 (米在住経験あり)&quot;}
+#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本 (米在住経験あり)&quot;}
+#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本 (米在住経験あり)&quot;}
+#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本 (米在住経験あり)&quot;}
+#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;日本 (米在住経験あり)&quot;}</code></pre>
 </div>
-</div>
-<div id="gemma22b" class="section level2">
-<h2>Gemma2:2b</h2>
-<p>Gemma 2では以下のような記事を見かけて、Structured Outputするの大変なのかなーと思ってましたが、今回のソースコードで問題なく動くことを確認しました。</p>
-<blockquote>
-<p>ローカルLLM(Gemma 2 2B)で「Structured Outputs(構造化出力)」っぽいことGuardrails AIで実現する<br />
-<a href="https://qiita.com/Hikakkun/items/f1813395a00b10222305" class="uri">https://qiita.com/Hikakkun/items/f1813395a00b10222305</a></p>
-</blockquote>
-<p>強いてGemma 2を使いつづける理由はあまりないと思いますが……。</p>
-<div id="名前はatusy出身地は日本-1" class="section level3">
-<h3>名前はatusy、出身地は日本</h3>
-<pre class="bash"><code>uv --directory assets run main.py gemma2:2b &quot;入力に忠実に構造化出力して&quot; &quot;名前はatusy、出身地は日本&quot;
-#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}
-#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}
-#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}
-#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}
-#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}
-#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}
-#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}
-#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}
-#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}
-#&gt; {&quot;name&quot;: &quot;atusy&quot;, &quot;birthplace&quot;: &quot;Japan&quot;}</code></pre>
+<div id="liststrやlistdictnullableな値があるケース" class="section level3">
+<h3>list[str]やlist[dict]、nullableな値があるケース</h3>
+<p>かなり複雑ですがこんなの。gemma3:4bならソツなくこなしてくれます。</p>
+<pre class="json"><code>{
+  &quot;name&quot;: &quot;山田 太郎&quot;,
+  &quot;current_occupation&quot;: &quot;ソフトウェアエンジニア&quot;,
+  &quot;hobbies&quot;: [
+    &quot;キャンプと登山&quot;,
+    &quot;写真撮影&quot;,
+    &quot;読書（歴史小説）&quot;
+  ],
+  &quot;education&quot;: [
+    {
+      &quot;school&quot;: &quot;私立〇〇高等学校&quot;,
+      &quot;start_year&quot;: 2010,
+      &quot;end_year&quot;: 2013
+    },
+    {
+      &quot;school&quot;: &quot;▲▲大学&quot;,
+      &quot;faculty&quot;: &quot;工学部&quot;,
+      &quot;department&quot;: &quot;情報科学科&quot;,
+      &quot;start_year&quot;: 2013,
+      &quot;end_year&quot;: 2017
+    }
+  ]
+}</code></pre>
+<pre class="bash"><code>PROMPT=&#39;
+皆様、はじめまして！山田 太郎（やまだ たろう）と申します。現在はIT企業でソフトウェアエンジニアとして働いています。
+
+# 趣味
+
+私の趣味は多岐にわたりますが、特に好きなものを3つご紹介します。
+
+キャンプと登山: 自然の中で過ごす時間が大好きで、週末にはよく山に出かけます。焚き火を囲んでのんびり過ごしたり、頂上からの絶景を眺めたりすると、日頃の疲れも吹き飛びます。
+写真撮影: 特に風景写真を撮るのが好きです。旅先や近所の公園など、美しい景色を見つけると、ついついシャッターを切ってしまいます。最近は星景写真にも挑戦中です。
+読書（歴史小説）: 学生時代から歴史が好きで、特に戦国時代や幕末を舞台にした小説をよく読みます。登場人物たちの人間ドラマに触れるのが楽しく、時間があっという間に過ぎてしまいます。
+
+# 学歴
+
+学歴は以下の通りです。
+
+    2010年4月：私立〇〇高等学校 入学
+    2013年3月：私立〇〇高等学校 卒業
+    2013年4月：▲▲大学 工学部 情報科学科 入学
+    2017年3月：▲▲大学 工学部 情報科学科 卒業
+
+大学ではプログラミングやデータ構造について深く学び、現在の仕事に活かしています。&#39;
+
+uv --directory assets run main.py gemma3:4b &quot;$PROMPT&quot; &quot;$(cat assets/example_schema.json)&quot;</code></pre>
+<pre><code>#&gt; {&quot;name&quot;: &quot;山田 太郎&quot;, &quot;current_occupation&quot;: &quot;ソフトウェアエンジニア&quot;, &quot;hobbies&quot;: [&quot;キャンプと登山&quot;, &quot;写真撮影&quot;, &quot;読書（歴史小説）&quot;], &quot;education&quot;: [{&quot;school&quot;: &quot;私立〇〇高等学校&quot;, &quot;start_year&quot;: 2010, &quot;end_year&quot;: 2013}, {&quot;school&quot;: &quot;▲▲大学&quot;, &quot;faculty&quot;: &quot;工学部&quot;, &quot;department&quot;: &quot;情報科学科&quot;, &quot;start_year&quot;: 2013, &quot;end_year&quot;: 2017}]}
+#&gt; {&quot;name&quot;: &quot;山田 太郎&quot;, &quot;current_occupation&quot;: &quot;ソフトウェアエンジニア&quot;, &quot;hobbies&quot;: [&quot;キャンプと登山&quot;, &quot;写真撮影&quot;, &quot;読書（歴史小説）&quot;], &quot;education&quot;: [{&quot;school&quot;: &quot;私立〇〇高等学校&quot;, &quot;start_year&quot;: 2010, &quot;end_year&quot;: 2013}, {&quot;school&quot;: &quot;▲▲大学&quot;, &quot;faculty&quot;: &quot;工学部&quot;, &quot;department&quot;: &quot;情報科学科&quot;, &quot;start_year&quot;: 2013, &quot;end_year&quot;: 2017}]}
+#&gt; {&quot;name&quot;: &quot;山田 太郎&quot;, &quot;current_occupation&quot;: &quot;ソフトウェアエンジニア&quot;, &quot;hobbies&quot;: [&quot;キャンプと登山&quot;, &quot;写真撮影&quot;, &quot;読書（歴史小説）&quot;], &quot;education&quot;: [{&quot;school&quot;: &quot;私立〇〇高等学校&quot;, &quot;start_year&quot;: 2010, &quot;end_year&quot;: 2013}, {&quot;school&quot;: &quot;▲▲大学&quot;, &quot;faculty&quot;: &quot;工学部&quot;, &quot;department&quot;: &quot;情報科学科&quot;, &quot;start_year&quot;: 2013, &quot;end_year&quot;: 2017}]}
+#&gt; {&quot;name&quot;: &quot;山田 太郎&quot;, &quot;current_occupation&quot;: &quot;ソフトウェアエンジニア&quot;, &quot;hobbies&quot;: [&quot;キャンプと登山&quot;, &quot;写真撮影&quot;, &quot;読書（歴史小説）&quot;], &quot;education&quot;: [{&quot;school&quot;: &quot;私立〇〇高等学校&quot;, &quot;start_year&quot;: 2010, &quot;end_year&quot;: 2013}, {&quot;school&quot;: &quot;▲▲大学&quot;, &quot;faculty&quot;: &quot;工学部&quot;, &quot;department&quot;: &quot;情報科学科&quot;, &quot;start_year&quot;: 2013, &quot;end_year&quot;: 2017}]}
+#&gt; {&quot;name&quot;: &quot;山田 太郎&quot;, &quot;current_occupation&quot;: &quot;ソフトウェアエンジニア&quot;, &quot;hobbies&quot;: [&quot;キャンプと登山&quot;, &quot;写真撮影&quot;, &quot;読書（歴史小説）&quot;], &quot;education&quot;: [{&quot;school&quot;: &quot;私立〇〇高等学校&quot;, &quot;start_year&quot;: 2010, &quot;end_year&quot;: 2013}, {&quot;school&quot;: &quot;▲▲大学&quot;, &quot;faculty&quot;: &quot;工学部&quot;, &quot;department&quot;: &quot;情報科学科&quot;, &quot;start_year&quot;: 2013, &quot;end_year&quot;: 2017}]}</code></pre>
+<p>もっと口語調にして、余計な情報を足してみます。
+<code>start_year</code>がとれていないものの、それなりに優秀な感じしますね。もしうまくいかない場合は、もっと大きいモデルを使うか、いったん必要な情報を非構造化で出力してから、構造化しなおすといいかも。</p>
+<pre class="json"><code>{&quot;name&quot;: &quot;山田 太郎&quot;, &quot;current_occupation&quot;: &quot;ソフトウェアエンジニア&quot;, &quot;hobbies&quot;: [&quot;キャンプ&quot;, &quot;登山&quot;, &quot;写真撮影 (風景写真)&quot;, &quot;歴史小説の読書&quot;], &quot;education&quot;: [{&quot;school&quot;: &quot;私立〇〇高等学校&quot;, &quot;graduation_year&quot;: 2013, &quot;major&quot;: &quot;不明&quot;}, {&quot;school&quot;: &quot;▲▲大学&quot;, &quot;faculty&quot;: &quot;工学部&quot;, &quot;department&quot;: &quot;情報科学科&quot;, &quot;graduation_year&quot;: 2017}]}</code></pre>
+<pre class="bash"><code>PROMPT=&#39;
+皆さん、初めまして！この度、このような場でご挨拶できることを大変光栄に思います。さて、自己紹介ですが、私の名前は山田 太郎（やまだ たろう）と申します。よく「山田さんって、あの山田さんですか？」と聞かれるのですが、はい、その山田です（笑）。普段は都内の雑踏の中に位置する、とあるIT企業でソフトウェアエンジニアとして働いております。最近、オフィスの近くにできた新しいカフェのコーヒーがすごく美味しくて、毎朝のルーティンになりつつあります。
+
+仕事以外で私が熱中していることについてお話ししましょう。いくつかあるんですが、まず挙げられるのは自然との触れ合いですね。具体的には、週末になると**キャンプ**用品を車に積み込んで出かけたり、ちょっと本格的な**登山**に挑戦したりしています。自然の中で過ごす時間は本当に格別です。それから、美しい瞬間を閉じ込める**写真撮影**も大切な趣味です。特に風景写真が好きで、良い景色に出会うと時間を忘れてシャッターを切ってしまいます。そういえば、先日訪れた箱根の景色は本当に素晴らしかったですよ。そして、もう一つ、活字に触れる時間も欠かせません。特に**歴史小説**を読むのが好きで、一度読み始めると止まらなくなってしまいます。
+
+週末のキャンプでは、焚き火のパチパチという音を聞きながら、ぼーっと過ごすのが至福の時です。星空を眺めるのも好きで、最近は星景写真にも挑戦しているんですが、これがまた難しくて。でも、だからこそ撮れた時の達成感はひとしおなんです。登山では、山頂から見渡すパノラマに感動します。日頃のストレスなんて吹き飛んでしまいますね。読書は、主に戦国時代や幕末が舞台のものが好みです。登場人物たちの人生模様に思いを馳せると、まるで自分がその時代にいるような感覚になります。そういえば、最近読み始めた本に出てくる武将が、地元の歴史博物館にもゆかりのある人物で、なんだか親近感が湧きました。
+
+さて、話は変わりますが、私の学歴について少しだけお付き合いください。私が高校を卒業したのは2013年3月のことでした。その前、2010年の4月には、私立〇〇高等学校に入学していましたね。高校生活はあっという間でした。そして、高校卒業後すぐに、つまり2013年の4月には、▲▲大学の工学部、その中でも情報科学科に進学しました。大学では、今の仕事に役立つプログラミングやデータ構造について集中的に学びました。レポート作成に追われた日々が懐かしいです。そうそう、▲▲大学を卒業したのは、2017年の3月になります。
+&#39;
+
+uv --directory assets run main.py gemma3:1b &quot;$PROMPT&quot; &quot;$(cat assets/example_schema.json)&quot;</code></pre>
+<pre><code>#&gt; {&quot;name&quot;: &quot;山田 太郎&quot;, &quot;current_occupation&quot;: &quot;ソフトウェアエンジニア&quot;, &quot;hobbies&quot;: [&quot;キャンプ&quot;, &quot;登山&quot;, &quot;写真撮影&quot;, &quot;歴史小説&quot;, &quot;武将の物語&quot;], &quot;education&quot;: [{&quot;school&quot;: &quot;〇〇高等学校&quot;, &quot;graduation_date&quot;: &quot;2013年3月&quot;}, {&quot;university&quot;: &quot;▲▲大学&quot;, &quot;major&quot;: &quot;情報科学科&quot;, &quot;graduation_date&quot;: &quot;2017年3月&quot;}]}
+#&gt; {&quot;name&quot;: &quot;山田 太郎&quot;, &quot;current_occupation&quot;: &quot;ソフトウェアエンジニア&quot;, &quot;hobbies&quot;: [&quot;キャンプ&quot;, &quot;登山&quot;, &quot;写真撮影&quot;, &quot;歴史小説&quot;, &quot;武将の物語&quot;], &quot;education&quot;: [{&quot;school&quot;: &quot;〇〇高等学校&quot;, &quot;graduation_date&quot;: &quot;2013年3月&quot;}, {&quot;university&quot;: &quot;▲▲大学&quot;, &quot;major&quot;: &quot;情報科学科&quot;, &quot;graduation_date&quot;: &quot;2017年3月&quot;}]}
+#&gt; {&quot;name&quot;: &quot;山田 太郎&quot;, &quot;current_occupation&quot;: &quot;ソフトウェアエンジニア&quot;, &quot;hobbies&quot;: [&quot;キャンプ&quot;, &quot;登山&quot;, &quot;写真撮影&quot;, &quot;歴史小説&quot;, &quot;武将の物語&quot;], &quot;education&quot;: [{&quot;school&quot;: &quot;〇〇高等学校&quot;, &quot;graduation_date&quot;: &quot;2013年3月&quot;}, {&quot;university&quot;: &quot;▲▲大学&quot;, &quot;major&quot;: &quot;情報科学科&quot;, &quot;graduation_date&quot;: &quot;2017年3月&quot;}]}
+#&gt; {&quot;name&quot;: &quot;山田 太郎&quot;, &quot;current_occupation&quot;: &quot;ソフトウェアエンジニア&quot;, &quot;hobbies&quot;: [&quot;キャンプ&quot;, &quot;登山&quot;, &quot;写真撮影&quot;, &quot;歴史小説&quot;, &quot;武将の物語&quot;], &quot;education&quot;: [{&quot;school&quot;: &quot;〇〇高等学校&quot;, &quot;graduation_date&quot;: &quot;2013年3月&quot;}, {&quot;university&quot;: &quot;▲▲大学&quot;, &quot;major&quot;: &quot;情報科学科&quot;, &quot;graduation_date&quot;: &quot;2017年3月&quot;}]}
+#&gt; {&quot;name&quot;: &quot;山田 太郎&quot;, &quot;current_occupation&quot;: &quot;ソフトウェアエンジニア&quot;, &quot;hobbies&quot;: [&quot;キャンプ&quot;, &quot;登山&quot;, &quot;写真撮影&quot;, &quot;歴史小説&quot;, &quot;武将の物語&quot;], &quot;education&quot;: [{&quot;school&quot;: &quot;〇〇高等学校&quot;, &quot;graduation_date&quot;: &quot;2013年3月&quot;}, {&quot;university&quot;: &quot;▲▲大学&quot;, &quot;major&quot;: &quot;情報科学科&quot;, &quot;graduation_date&quot;: &quot;2017年3月&quot;}]}</code></pre>
 <p><strong>ENJOY</strong></p>
 </div>
 </div>
