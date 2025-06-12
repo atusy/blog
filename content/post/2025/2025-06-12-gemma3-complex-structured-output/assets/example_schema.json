@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SelfIntroduction",
+  "description": "A schema for a person's self-introduction.",
+  "type": "object",
+  "required": [
+    "name",
+    "current_occupation",
+    "hobbies",
+    "education"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The full name of the person."
+    },
+    "current_occupation": {
+      "type": "string",
+      "description": "The person's current job or occupation."
+    },
+    "hobbies": {
+      "type": "array",
+      "description": "A list of the person's hobbies.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "education": {
+      "type": "array",
+      "description": "A list of the person's educational history.",
+      "items": {
+        "type": "object",
+        "required": [
+          "school_name",
+          "start_year",
+          "end_year"
+        ],
+        "properties": {
+          "school_name": {
+            "type": "string",
+            "description": "The name of the educational institution."
+          },
+          "faculty": {
+            "type": "string",
+            "description": "The faculty of the university (optional for high school)."
+          },
+          "department": {
+            "type": "string",
+            "description": "The department within the faculty (optional for high school)."
+          },
+          "start_year": {
+            "type": "integer",
+            "description": "The year of enrollment.",
+            "minimum": 1900,
+            "maximum": 2100
+          },
+          "end_year": {
+            "type": "integer",
+            "description": "The year of graduation.",
+            "minimum": 1900,
+            "maximum": 2100
+          },
+          "degree": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The degree obtained (e.g., '学士', '修士'). Null if not applicable (e.g., high school)."
+          },
+          "major": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The major field of study. Null if not applicable (e.g., high school)."
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

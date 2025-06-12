@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "json-schema-to-pydantic>=0.2.6",
     "langchain>=0.3.24",
     "langchain-ollama>=0.3.2",
     "pydantic>=2.11.3",

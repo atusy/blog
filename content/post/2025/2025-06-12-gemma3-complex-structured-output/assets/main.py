@@ -2,35 +2,43 @@ import asyncio
 import json
 import sys
 
+from json_schema_to_pydantic import create_model
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_ollama import ChatOllama
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
-class X(BaseModel):
-    name: str = Field(...)
-    birthplace: str = Field(...)
-
-
-async def construct_x(client: ChatOllama, system_prompt: str, user_prompt: str) -> X:
+async def construct_x(client: ChatOllama, user_prompt: str, model: type[BaseModel]):
     _ = SystemMessage
-    result = await client.with_structured_output(X).ainvoke(
-        [SystemMessage(content=system_prompt), HumanMessage(content=user_prompt)]
+    result = await client.with_structured_output(model).ainvoke(
+        [
+            SystemMessage(content="入力に忠実に構造化出力して"),
+            HumanMessage(content=user_prompt),
+        ]
     )
 
-    if not isinstance(result, X):
+    if not isinstance(result, model):
         raise TypeError
 
     print(json.dumps(result.model_dump(), ensure_ascii=False))
 
 
 async def main():
-    _, model, system_prompt, user_prompt = sys.argv
-    client = ChatOllama(model=model, temperature=0)
+    _, llm, user_prompt, schema = sys.argv
+    model = create_model(json.loads(schema))
 
-    await asyncio.gather(
-        *[construct_x(client, system_prompt, user_prompt) for _ in range(10)]
-    )
+    client = ChatOllama(model=llm, temperature=0)
+
+    iterations = 5
+
+    if llm.endswith(":1b") or llm.endswith(":4b"):
+        await asyncio.gather(
+            *[construct_x(client, user_prompt, model) for _ in range(iterations)]
+        )
+        return
+
+    for _ in range(iterations):
+        await construct_x(client, user_prompt, model)
 
 
 asyncio.run(main())
