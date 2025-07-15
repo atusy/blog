@@ -59,7 +59,7 @@ Neovimであればこんな感じでLua Language ServerのSemantic Tokens機能�
 vim.lsp.config.lua_ls = {
 	settings = {
 		Lua = {
-			semantic = { enable = true },
+			semantic = { enable = false },
 		},
 	},
 }
