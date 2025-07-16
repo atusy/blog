@@ -1,0 +1,47 @@
+---
+title: "Vimのヘルプをwincmd L | vertical resize 83で右端にふっとばす"
+author: atusy
+date: '2025-07-16'
+slug: prefer-luadoc-to-luals-semantictokens
+categories: [Tech]
+tags: [Vim, Treesitter, lang-lua]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+summary: |
+    幅が80文字程度で縦長な傾向のあるヘルプは、ftpluginを使って開くと同時に右端に移動すると邪魔にならず読みやすいです。
+---
+
+
+
+<p>Vimの<code>:help</code>コマンドでヘルプを表示すると、デフォルトでは現在ウィンドウを水平分割して下側に出現します。</p>
+<pre><code>デフォルト動作のイメージ図
+
+-----------    -----------
+|         |    |         |
+|         |    | foo.txt |
+|         |    |         |
+| foo.txt | -&gt; |---------|
+|         |    |         |
+|         |    |  help   |
+|         |    |         |
+-----------    -----------</code></pre>
+<p>しかし、慣習的にヘルプは幅80文字であることが多く、縦長な傾向があり、ワイドディスプレイ主流な現代ではスペースの無駄が大きいです。そこで、ftpluginを使って、ヘルプを開くと同時に右端に移動し、程よい幅に調整してみましょう。邪魔にならず読みやすいです。</p>
+<p>明示的にやるなら<code>:vertical help {subject}</code>もありますが、毎回コマンドを打つのは手間ですし、幅の調整は結局発生します。</p>
+<p>こういうときに<code>ftplugin</code>を使うと、ファイルを開いた直後のコマンド実行を自動化できて便利です。たとえば<code>~/.config/nvim/after/ftplugin/help.vim</code> あたりに以下を仕込むと、<code>:help</code>コマンドを実行したときに、ヘルプを表示するウィンドウが右端に移動し、幅83文字にリサイズされます。</p>
+<pre class="vim"><code>wincmd L | vertical resize 83 &quot; 幅は少し余裕を持たせている</code></pre>
+<p>ただし、プラグイン制作時など、カレントディレクトリ内のヘルプファイルは編集上の都合などから、右側に表示したくない場合もあります。そんな人は、バッファの名前とカレントディレクトリを比較して、ヘルプウィンドウを右端に移動するかどうかを制御するといいですね。</p>
+<p>Neovimの例になりますが、簡単に文字列比較で実現できます。</p>
+<pre class="lua"><code>-- ~/.config/nvim/after/ftplugin/help.lua
+
+local bufnr = vim.api.nvim_get_current_buf()
+local bufname = vim.api.nvim_buf_get_name(bufnr)
+
+if not vim.startswith(bufname, vim.fn.getcwd()) then
+	vim.cmd(&quot;wincmd L | vertical resize 83&quot;) -- 幅は少し余裕を持たせている
+end</code></pre>
+<p>うーん、ナイス！</p>
+<div id="enjoy" class="section level2">
+<h2>ENJOY</h2>
+</div>
