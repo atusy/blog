@@ -31,17 +31,14 @@ summary: |
 <p>明示的にやるなら<code>:vertical help {subject}</code>もありますが、毎回コマンドを打つのは手間ですし、幅の調整は結局発生します。</p>
 <p>こういうときに<code>ftplugin</code>を使うと、ファイルを開いた直後のコマンド実行を自動化できて便利です。たとえば<code>~/.config/nvim/after/ftplugin/help.vim</code> あたりに以下を仕込むと、<code>:help</code>コマンドを実行したときに、ヘルプを表示するウィンドウが右端に移動し、幅83文字にリサイズされます。</p>
 <pre class="vim"><code>wincmd L | vertical resize 83 &quot; 幅は少し余裕を持たせている</code></pre>
-<p>ただし、プラグイン制作時など、カレントディレクトリ内のヘルプファイルは編集上の都合などから、右側に表示したくない場合もあります。そんな人は、バッファの名前とカレントディレクトリを比較して、ヘルプウィンドウを右端に移動するかどうかを制御するといいですね。</p>
-<p>Neovimの例になりますが、簡単に文字列比較で実現できます。</p>
+<p>ただし、プラグイン制作時など、カレントディレクトリ内のヘルプファイルは編集上の都合などから、右側に表示したくない場合もあります。</p>
+<p>そんな人は、buftypeが<code>help</code>であることを確認してから、ヘルプウィンドウを右端に移動するかどうかを制御するといいですね。</p>
 <pre class="lua"><code>-- ~/.config/nvim/after/ftplugin/help.lua
-
-local bufnr = vim.api.nvim_get_current_buf()
-local bufname = vim.api.nvim_buf_get_name(bufnr)
-
-if not vim.startswith(bufname, vim.fn.getcwd()) then
+if vim.o.buftype == &quot;help&quot; then
 	vim.cmd(&quot;wincmd L | vertical resize 83&quot;) -- 幅は少し余裕を持たせている
 end</code></pre>
-<p>うーん、ナイス！</p>
+<p><a href="https://github.com/kuuote">kuuote</a>さんに教えていただいたのですが、<code>buftype</code>が<code>"help"</code>になるのはヘルプを<code>:help</code>コマンドで開いたときだけのようです。</p>
+<p>ナイス！</p>
 <div id="enjoy" class="section level2">
 <h2>ENJOY</h2>
 </div>

@@ -50,21 +50,18 @@ wincmd L | vertical resize 83 " 幅は少し余裕を持たせている
 
 
 ただし、プラグイン制作時など、カレントディレクトリ内のヘルプファイルは編集上の都合などから、右側に表示したくない場合もあります。
-そんな人は、バッファの名前とカレントディレクトリを比較して、ヘルプウィンドウを右端に移動するかどうかを制御するといいですね。
 
-Neovimの例になりますが、簡単に文字列比較で実現できます。
+そんな人は、buftypeが`help`であることを確認してから、ヘルプウィンドウを右端に移動するかどうかを制御するといいですね。
 
 ```lua
 -- ~/.config/nvim/after/ftplugin/help.lua
-
-local bufnr = vim.api.nvim_get_current_buf()
-local bufname = vim.api.nvim_buf_get_name(bufnr)
-
-if not vim.startswith(bufname, vim.fn.getcwd()) then
+if vim.o.buftype == "help" then
 	vim.cmd("wincmd L | vertical resize 83") -- 幅は少し余裕を持たせている
 end
 ```
 
-うーん、ナイス！
+[kuuote](https://github.com/kuuote)さんに教えていただいたのですが、`buftype`が`"help"`になるのはヘルプを`:help`コマンドで開いたときだけのようです。
+
+ナイス！
 
 ## ENJOY
