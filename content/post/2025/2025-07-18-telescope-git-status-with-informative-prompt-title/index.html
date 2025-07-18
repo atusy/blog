@@ -1,0 +1,133 @@
+---
+title: "git statusをfuzzy findする時にプロンプトタイトルにブランチ情報を出すと便利 with telescope.nvim"
+author: atusy
+date: '2025-07-18'
+slug: telescope-git-status-with-informative-prompt-title
+categories: [Tech]
+tags: [Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+summary: |
+
+---
+
+
+
+<p>様々なエディタで活躍するfuzzy finder。これを使うと、ファイルやコマンドを曖昧検索して開いたり実行したりできます。</p>
+<p>私はNeovimのファジーファインダープラグインである<a href="https://github.com/nvim-telescope/telescope.nvim">telesope.nvim</a>を愛用しています。実際どんなことができるんだろうと気になるかたは、ぜひ以下の記事もご覧ください。</p>
+<blockquote>
+<p>Neovimのファジーファインダーtelescope.nvimでよく使っているpicker集<br />
+<a href="https://blog.atusy.net/2025/03/25/nvim-telescope-pickers/" class="uri">https://blog.atusy.net/2025/03/25/nvim-telescope-pickers/</a></p>
+</blockquote>
+<p>さて、ファイルを扱う時には、プロジェクト配下の全ファイルに興味があるとは限らず、時にはGitの差分に注目したいこともありますよね。</p>
+<p>上述の記事でも紹介していますが、<a href="https://github.com/nvim-telescope/telescope.nvim">telesope.nvim</a>には、Gitステータスを扱う機能があります。
+<code>:Telescope git_status</code>で、変更のあるファイルを開いたり、stage/unstageしたりできます。</p>
+<p>ただ、stage/unstageするときに、作業ブランチがあってるか知っておきたいですよね……？</p>
+<p>定番の方法はブランチ情報をVimやtmuxのステータスラインに出すことですが、個人的には画面がごちゃっとするので好きではありません。必要な時に必要な情報をさっと提供するのが好みです。</p>
+<p>というわけで、以下のように、<code>:Telescope git_status</code>を実行したときに検索プロンプトのタイトルにブランチ情報を出すようにしてみました。左下のほうに青文字で <code>master → origin/master ↑2</code>と出ているのがわかるかと思います。</p>
+<p><img src="images/example.png" /></p>
+<p>基本方針は簡単で、起動時に好きなタイトルを指定する仕組みを使います。</p>
+<pre class="lua"><code>require(&quot;telescope.builtin&quot;).git_status({
+  prompt_title = &quot;好きなタイトル&quot;
+})</code></pre>
+<p>できるだけ簡単にやりたい場合は、ステータスラインプラグイン向けに用意されている関数を使うと便利でしょう。</p>
+<p>たとえば<a href="https://github.com/echasnovski/mini.nvim">mini.nvim</a>なら<code>section_git</code>関数があります。</p>
+<pre class="lua"><code>require(&quot;mini.statusline&quot;).section_git({}) --  master</code></pre>
+<p>私は<a href="https://github.com/lambdalisue/vim-gin">vim-gin</a>が提供している関数を使っています。</p>
+<pre class="lua"><code>local function make_title()
+  local branch = vim.fn[&quot;gin#component#branch#unicode&quot;]()
+  local traffic = vim.fn[&quot;gin#component#traffic#unicode&quot;]()
+  return branch .. &quot; &quot; .. traffic
+end
+require(&quot;telescope.builtin&quot;).git_status({
+  prompt_title = make_title() -- master → origin/master ↑2
+})</code></pre>
+<p>と、ここまであたかも簡単をよそおいましたが、こだわりだすとそこそこ複雑になります。</p>
+<ul>
+<li><a href="https://github.com/lambdalisue/vim-gin">vim-gin</a>は非同期がウリで、Vimの起動直後にはbranchやtrafficの情報取得が間に合わずタイトルが空白になる場合あり
+<ul>
+<li><code>GinComponentPost</code>イベントで更新可能</li>
+</ul></li>
+<li>detached HEADの状態ではブランチ情報が殻になる
+<ul>
+<li><code>vim.system</code>で自前実装</li>
+</ul></li>
+<li>プロンプトタイトルをハイライトしたい
+<ul>
+<li>Neovimではウィンドウ単位でハイライトを設定できる機能を利用する</li>
+<li>ただし、他のプラグイン(styler.nvimなど)経由のハイライト設定と干渉しないように、namespaceをうまく共用する必要あり</li>
+</ul></li>
+</ul>
+<p>これらを叶えるために、<code>attach_mappings</code>というTelescopeが起動したタイミングで実行するコールバックを使って実現したのが以下のコードです。参考にしていただければ幸いです。</p>
+<pre class="lua"><code>-- ~.config/nvim/lua/plugins/telescope/picker/init.lua
+
+local M = {}
+
+-- 中略
+
+function M.git_status()
+	local function _make_title()
+		local branch = vim.fn[&quot;gin#component#branch#unicode&quot;]()
+		if branch == &quot;&quot; or branch == nil then
+			local alt = vim.system({ &quot;git&quot;, &quot;branch&quot;, &quot;--points-at&quot;, &quot;HEAD&quot;, &quot;--all&quot;, &quot;--format=%(refname:short)&quot; })
+				:wait()
+			if alt.code ~= 0 then
+				return nil
+			end
+			local title = alt.stdout:gsub(&quot;\n&quot;, &quot; &quot;)
+			return title
+		end
+		local traffic = vim.fn[&quot;gin#component#traffic#unicode&quot;]()
+		local title = branch .. &quot; &quot; .. traffic
+		return title ~= &quot; &quot; and title or nil
+	end
+	local function make_title()
+		local ok, title = pcall(_make_title)
+		return ok and title or nil
+	end
+	require(&quot;telescope.builtin&quot;).git_status({
+		prompt_title = make_title(), -- initial title can be nil and thus requires updates by autocmd
+		attach_mappings = function(prompt_bufnr, _)
+			local picker = require(&quot;telescope.actions.state&quot;).get_current_picker(prompt_bufnr)
+
+			-- highlight the prompt title
+			local ns = vim.api.nvim_get_hl_ns({ winid = picker.layout.prompt.border.winid })
+			if ns == 0 then
+				ns = vim.api.nvim_create_namespace(&quot;atusy.telescope_git_status&quot;)
+				vim.api.nvim_win_set_hl_ns(picker.layout.prompt.border.winid, ns)
+			end
+			vim.api.nvim_set_hl(ns, &quot;TelescopePromptTitle&quot;, { link = &quot;Title&quot; })
+
+			-- create autocmds
+			local augroup = vim.api.nvim_create_augroup(&quot;atusy.telescope_git_status&quot;, { clear = true })
+			vim.api.nvim_create_autocmd(&quot;WinClosed&quot;, {
+				group = augroup,
+				callback = function()
+					local win = vim.api.nvim_get_current_win()
+					if win == picker.prompt_win then
+						vim.api.nvim_del_augroup_by_id(augroup)
+					end
+				end,
+			})
+			vim.api.nvim_create_autocmd(&quot;User&quot;, {
+				group = augroup,
+				pattern = &quot;GinComponentPost&quot;,
+				callback = function()
+					local title = make_title()
+					if title then
+						picker.layout.prompt.border:change_title(title)
+					end
+				end,
+			})
+			return true
+		end,
+	})
+end
+
+return M
+</code></pre>
+<div id="enjoy" class="section level2">
+<h2>ENJOY!</h2>
+</div>
