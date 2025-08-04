@@ -1,0 +1,152 @@
+---
+title: "Fishのabbrを使ってコマンドライン上のトークンを複製する"
+author: atusy
+date: '2025-08-04'
+slug: fish-abbr-commandline-token
+categories: [Tech]
+tags: [Fish]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: []
+summary: |
+    カーソル位置のn個前のトークンとか、先頭からn個目のトークンとかを展開できると`cp`コマンドとかで便利！と思ってabbrを実装しました。
+    `,[+-]?[0-9]+`というパターンに反応して、符号の有無と数値を基準に、うまいことトークンを展開できます。
+    `cp /path/to/file ,-1`ってすると、`,-1`が`/path/to/file`に展開されるイメージですね。
+---
+
+
+
+<p>カーソル位置のn個前のトークンとか、先頭からn個目のトークンとかを展開できると<code>cp</code>コマンドとかで便利！と思ってabbrを実装しました。
+<code>,[+-]?[0-9]+</code>というパターンに反応して、符号の有無と数値を基準に、うまいことトークンを展開できます。</p>
+<pre class="bash"><code># 展開前
+cp /path/to/file ,-1
+
+# 展開後
+cp /path/to/file /path/to/file</code></pre>
+<p>Fish向けの実装ですが、Zshで似た機能には<code>copy-prev-word</code>や<code>copy-prev-shell-word</code>があります。
+<a href="https://zsh.sourceforge.io/Doc/Release/Zsh-Line-Editor.html#index-copy_002dprev_002dshell_002dword" class="uri">https://zsh.sourceforge.io/Doc/Release/Zsh-Line-Editor.html#index-copy_002dprev_002dshell_002dword</a></p>
+<div id="abbr概要" class="section level2">
+<h2>abbr概要</h2>
+<p>Fishのabbrはaliasの強化版といった感じで、短縮入力をスペースやエンターと共に本来のコマンドに展開してくれる機能です。</p>
+<p>たとえば</p>
+<pre class="bash"><code>abbr -a g git</code></pre>
+<p>とすると、gと入力してスペースを押すとgitに展開されます。</p>
+<p>さらには<code>--command</code>オプションを使って<code>git a</code>を<code>git add</code>にするような、サブコマンドの展開も可能です。</p>
+<pre class="bash"><code>abbr --command=git -a a add</code></pre>
+<p>とここまでは過去の記事でも紹介した通り。</p>
+<blockquote>
+<p>Fish 4のabbrはサブコマンドも展開できるぞ<br />
+<a href="https://blog.atusy.net/2025/03/29/fish-4-abbr/" class="uri">https://blog.atusy.net/2025/03/29/fish-4-abbr/</a></p>
+</blockquote>
+</div>
+<div id="コマンドライン上のトークンを複製するabbr" class="section level2">
+<h2>コマンドライン上のトークンを複製するabbr</h2>
+<div id="方向性" class="section level3">
+<h3>方向性</h3>
+<p>今回の記事では、この機能を利用して、コマンドライン上の任意のトークンを展開するabbrを実装してみましょう。以下の<code>,</code>はプレフィックスで使いやすいものならなんでもいいと思います。</p>
+<ol style="list-style-type: decimal">
+<li><code>,-[0-9]+</code>
+<ul>
+<li>カーソルから左側にn番目のトークンを展開</li>
+</ul></li>
+<li><code>,[+][0-9]+</code>
+<ul>
+<li>カーソルから右側にn番目のトークンを展開</li>
+</ul></li>
+<li><code>,[0-9]+</code>
+<ul>
+<li>左端から数えてn番目のトークンを展開</li>
+</ul></li>
+</ol>
+<p>1の<code>,-[0-9]+</code>は特に使いどころがわかりやすいかなと思います。たとえば、直前のトークンを展開すると、<code>cp</code>コマンドでコピー対象のパスを複製できるので、コピー先のパスを作りやすくなります。</p>
+<pre class="bash"><code># 展開前
+cp /path/to/file ,-1
+
+# 展開後
+cp /path/to/file /path/to/file</code></pre>
+<p>3の<code>,[0-9]+</code>はたとえば、<code>ffmpeg</code>などで引数を大量に指定している場合に、<code>-i</code>で指定した入力ファイルのパスを再利用して出力ファイルのパスを決めたい、なんてケースで効果を発揮するでしょう。
+<code>,3</code>とすることで、3番目のトークンであるファイルパスを展開できます。</p>
+<pre class="bash"><code># 展開前
+ffmpeg -i path/to/file.mpg -vf &quot;...&quot; -loop 0 ,3
+
+# 展開後
+ffmpeg -i path/to/file.mpg -vf &quot;...&quot; -loop 0 path/to/file.mpg</code></pre>
+<p>2の<code>,[+][0-9]+</code>は一番使いどころが少ないかもしれませんが、一通りの機能を揃えておくために実装しました。</p>
+</div>
+<div id="実装" class="section level3">
+<h3>実装</h3>
+<p>中身は3つの要素でできてます。</p>
+<ul>
+<li>abbr定義
+<ul>
+<li>これがないと始まらないやつ</li>
+<li>複雑な展開をするため、以下のオプションを指定する
+<ul>
+<li><code>--regex ',[-+]?[0-9]+'</code>で展開対象を動的に判定する</li>
+<li><code>--function __abbr-token</code>で関数の出力結果を使って展開できるようにする</li>
+<li><code>--position anywhere</code>でコマンドライン上の任意位置で展開可能にする</li>
+</ul></li>
+</ul></li>
+<li><code>__abbr-token</code>関数
+<ul>
+<li>abbrコマンドに指定する展開用の関数</li>
+<li>実態は<code>__abbr-token-baes</code>関数のラッパー</li>
+<li>展開結果が1トークンとして成立するように<code>string escape</code>している</li>
+</ul></li>
+<li><code>__abbr-token-base</code>関数
+<ul>
+<li>abbrを展開する関数の本体部分</li>
+<li>展開元（<code>,[-+]?[0-9]+</code>）の符号の種類や数値に基いて、展開結果を出力する</li>
+</ul></li>
+</ul>
+<pre class="fish"><code>abbr -a token --regex &#39;,[-+]?[0-9]+&#39; --function __abbr-token --position anywhere
+
+function __abbr-token
+  __abbr-token-base | string escape
+end
+
+function __abbr-token-base
+   commandline --cut-at-cursor | read --tokenize --list --local tokens_left
+
+  set -l idx ( echo $tokens_left[-1] | string sub --start 2 )
+
+  # idxが負ならカーソル位置からidx個手前のトークンを展開
+  if echo &quot;_$idx&quot; | string match -q -r &quot;^_[-]&quot;
+    set -l idx2 ( math &quot;$idx - 1&quot; )
+    echo $tokens_left[$idx2]
+    return 0
+  end
+
+  commandline | read --tokenize --list --local tokens_all 
+
+  # idxが+ではじまる正数ならカーソル位置からidx個手後のトークンを展開
+  if echo &quot;_$idx&quot; | string match -q -r &quot;^_[+]&quot;
+    set -l base ( count $tokens_left )
+    set -l idx2 ( math &quot;$base + $idx&quot; )
+    echo $tokens_all[$idx2]
+    return 0
+  end
+
+  # idxに正負の符号がない場合は全トークンからsliceする
+  echo $tokens_all[$idx]
+end</code></pre>
+<p>本当は<code>__abbr-token-base</code>で<code>idx</code>のバリデーションを加えるべきでしょうが、実用上は<code>abbr</code>の<code>--regex</code>オプションで指定したパターンしか入らないので、省略してます。</p>
+<p>ところでプレフィクスには<code>,</code>を使っていますが、グローバル変数に切り出しておけば、お好みにカスタマイズもできそうです。</p>
+<pre class="fish"><code>set -g ABBR_TOKEN_PREFIX &quot;,&quot;
+
+abbr -a token --regex $ABBR_TOKEN_PREFIX&quot;[-+]?[0-9]+&quot; --function __abbr-token --position anywhere
+
+function __abbr-token-base
+  # 前略
+
+  set -l len_prefix (string length $ABBR_TOKEN_PREFIX)
+  set -l idx ( echo $tokens_left[-1] | string sub --start $len_prefix )
+
+  # 後略
+end</code></pre>
+</div>
+</div>
+<div id="enjoy" class="section level2">
+<h2>ENJOY!</h2>
+</div>
