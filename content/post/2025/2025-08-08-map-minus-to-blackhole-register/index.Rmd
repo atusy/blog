@@ -1,0 +1,93 @@
+---
+title: "Vimでヤンクした内容の上書き回避にはマイナス（-）をブラックホールレジスタにマッピングするといいよ"
+author: atusy
+date: '2025-08-08'
+slug: 'map-minus-to-blackhole-register'
+categories: [Tech]
+tags: [Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+summary: |
+    `nnoremap - "_`しておくと、ヤンクした内容を残しながら編集できて便利ですよ。
+    たとえば`"_ciw`は入力しにくいですけど`-ciw`なら入力しやすいですよね。
+---
+
+[Vim駅伝](https://vim-jp.org/ekiden/)2025-08-08の記事です。
+前回の記事はmitsu-yukiさんによる「[いつの間にかVimでも外部プラグインなしでもEditorConfigが使えるようになっていた](https://qiita.com/mitsu-yuki/items/a438b1dbddd240253d86)」でした。
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+set.seed(123)
+options(digits.secs = 0)
+```
+
+カーソル下の単語を編集（`ciw`）とかすると、`p`で貼り付ける内容が更新されます。
+便利なシーンもあるのですが、直前にヤンクしておいた内容を残したい時などに困りますよね。
+
+原因は`y`も`c`も`d`も無名レジスタに`p`する内容を保存しているため、上書き合戦が起きてしまうからです。
+レジスタについてはゴリラさんのVim講座を参考にしていただくとして、愚直に上書き対策をするなら`"_ciw"`としてブラックホールレジスタを指定します。
+ただ、`"_`はお世事にも入力しやすいキーではありません。
+
+> 挿入、ビジュアルモードについて学ぼう 〜 Vimはいいぞ！ゴリラと学ぶVim講座(3) \
+> <https://knowledge.sakura.ad.jp/22465/>
+
+こんな時は以下のように、`-`をブラックホールレジスタにマッピングしておくと便利です。
+`-ciw`なら入力しやすいですよね。
+
+``` vim
+nnoremap - "_
+xnoremap - "_
+```
+
+元々の`-`は、カーソルを1行上の最初の非空白文字まで移動するコマンドです。
+
+> lines upward, on the first non-blank character |linewise|. \
+> <https://neovim.io/doc/user/motion.html#->
+
+`kkk-`みたいにとっさに`-`を出せる玄人でもなければ、まず潰して差し支えないでしょう。
+`k^`でも同じことができます。
+
+## 余談 1: 無名レジスタの上書きを気にしない方法
+
+無名レジスタの不意な上書きを防ぐ方法として、ブラックホールレジスタを使う代わりに、無名レジスタと同じ内容を名前付きレジスタにコピーしておく方法もあります。
+
+> Vimで無名レジスタでchange/delete/yankした時に、イニシャルに相当するレジスタにも値を入れる \
+> <https://blog.atusy.net/2023/12/17/vim-easy-to-remember-regnames/>
+
+私はもっぱらこれを利用しているため、`-`のマッピングは存在しているだけになっています。
+
+## 余談 2: クリップボードへのコピーを楽にする方法
+
+編集中の内容をVimの外にもっていきたいときは、`"+`によるセレクションレジスタを使います。
+内容がOSのクリップボードにコピーされます。
+
+しかし、ブラックホールレジスタと同様に押しにくいマッピングです。
+
+このユースケースでは`c`や`d`による編集や削除ではなく`y`によるヤンクが多いので、`gy`あたりを`"+y`にマッピングしておくと便利です。
+
+> Vimで無名レジスタでchange/delete/yankした時に、イニシャルに相当するレジスタにも値を入れる \
+> <https://blog.atusy.net/2024/03/11/vim-gy-as-gui-yank/>
+
+汎用性と対称性を優先して本記事と同様の手段をとるのであれば、`+`をセレクションレジスタにマッピングすると、`"`の入力がなくなるので少し便利です。
+
+``` vim
+nnoremap + "+
+xnoremap + "+
+```
+
+## ENJOY!
+
+この記事は[vim-jp slack](https://vim-jp.org/docs/chat.html)での質問がきっかけで書きました。
+自分があたりまえに思ってることがそうじゃなかったりするのは、コミュニケーションの中からしか気付けない学びですね。
+
+エンジニアの楽園だなんて呼ばれることもあるvim-jp、EmacsやVSCodeのユーザーもいますので、気軽に覗いてみてください。
+
+> エンジニアの楽園 vim-jp \
+> <https://blog.tomoya.dev/posts/vim-jp-is-a-paradise-for-engineers/>
+
+同名を関したラジオもあり、こちらからはvim-jpを知らない人も楽しめるコンテンツを通じて、vim-jpというコミュニティの空気感を味わっていただけます。
+
+> エンジニアの楽園 Vim-jp ラジオ \
+> <https://vim-jp-radio.com/>

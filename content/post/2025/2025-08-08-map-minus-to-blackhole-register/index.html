@@ -1,0 +1,72 @@
+---
+title: "Vimでヤンクした内容の上書き回避にはマイナス（-）をブラックホールレジスタにマッピングするといいよ"
+author: atusy
+date: '2025-08-08'
+slug: 'map-minus-to-blackhole-register'
+categories: [Tech]
+tags: [Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+summary: |
+    `nnoremap - "_`しておくと、ヤンクした内容を残しながら編集できて便利ですよ。
+    たとえば`"_ciw`は入力しにくいですけど`-ciw`なら入力しやすいですよね。
+---
+
+
+
+<p><a href="https://vim-jp.org/ekiden/">Vim駅伝</a>2025-08-08の記事です。前回の記事はmitsu-yukiさんによる「<a href="https://qiita.com/mitsu-yuki/items/a438b1dbddd240253d86">いつの間にかVimでも外部プラグインなしでもEditorConfigが使えるようになっていた</a>」でした。</p>
+<p>カーソル下の単語を編集（<code>ciw</code>）とかすると、<code>p</code>で貼り付ける内容が更新されます。便利なシーンもあるのですが、直前にヤンクしておいた内容を残したい時などに困りますよね。</p>
+<p>原因は<code>y</code>も<code>c</code>も<code>d</code>も無名レジスタに<code>p</code>する内容を保存しているため、上書き合戦が起きてしまうからです。レジスタについてはゴリラさんのVim講座を参考にしていただくとして、愚直に上書き対策をするなら<code>"_ciw"</code>としてブラックホールレジスタを指定します。ただ、<code>"_</code>はお世事にも入力しやすいキーではありません。</p>
+<blockquote>
+<p>挿入、ビジュアルモードについて学ぼう 〜 Vimはいいぞ！ゴリラと学ぶVim講座(3)<br />
+<a href="https://knowledge.sakura.ad.jp/22465/" class="uri">https://knowledge.sakura.ad.jp/22465/</a></p>
+</blockquote>
+<p>こんな時は以下のように、<code>-</code>をブラックホールレジスタにマッピングしておくと便利です。
+<code>-ciw</code>なら入力しやすいですよね。</p>
+<pre class="vim"><code>nnoremap - &quot;_
+xnoremap - &quot;_</code></pre>
+<p>元々の<code>-</code>は、カーソルを1行上の最初の非空白文字まで移動するコマンドです。</p>
+<blockquote>
+<p>lines upward, on the first non-blank character |linewise|.<br />
+<a href="https://neovim.io/doc/user/motion.html#-" class="uri">https://neovim.io/doc/user/motion.html#-</a></p>
+</blockquote>
+<p><code>kkk-</code>みたいにとっさに<code>-</code>を出せる玄人でもなければ、まず潰して差し支えないでしょう。
+<code>k^</code>でも同じことができます。</p>
+<div id="余談-1-無名レジスタの上書きを気にしない方法" class="section level2">
+<h2>余談 1: 無名レジスタの上書きを気にしない方法</h2>
+<p>無名レジスタの不意な上書きを防ぐ方法として、ブラックホールレジスタを使う代わりに、無名レジスタと同じ内容を名前付きレジスタにコピーしておく方法もあります。</p>
+<blockquote>
+<p>Vimで無名レジスタでchange/delete/yankした時に、イニシャルに相当するレジスタにも値を入れる<br />
+<a href="https://blog.atusy.net/2023/12/17/vim-easy-to-remember-regnames/" class="uri">https://blog.atusy.net/2023/12/17/vim-easy-to-remember-regnames/</a></p>
+</blockquote>
+<p>私はもっぱらこれを利用しているため、<code>-</code>のマッピングは存在しているだけになっています。</p>
+</div>
+<div id="余談-2-クリップボードへのコピーを楽にする方法" class="section level2">
+<h2>余談 2: クリップボードへのコピーを楽にする方法</h2>
+<p>編集中の内容をVimの外にもっていきたいときは、<code>"+</code>によるセレクションレジスタを使います。内容がOSのクリップボードにコピーされます。</p>
+<p>しかし、ブラックホールレジスタと同様に押しにくいマッピングです。</p>
+<p>このユースケースでは<code>c</code>や<code>d</code>による編集や削除ではなく<code>y</code>によるヤンクが多いので、<code>gy</code>あたりを<code>"+y</code>にマッピングしておくと便利です。</p>
+<blockquote>
+<p>Vimで無名レジスタでchange/delete/yankした時に、イニシャルに相当するレジスタにも値を入れる<br />
+<a href="https://blog.atusy.net/2024/03/11/vim-gy-as-gui-yank/" class="uri">https://blog.atusy.net/2024/03/11/vim-gy-as-gui-yank/</a></p>
+</blockquote>
+<p>汎用性と対称性を優先して本記事と同様の手段をとるのであれば、<code>+</code>をセレクションレジスタにマッピングすると、<code>"</code>の入力がなくなるので少し便利です。</p>
+<pre class="vim"><code>nnoremap + &quot;+
+xnoremap + &quot;+</code></pre>
+</div>
+<div id="enjoy" class="section level2">
+<h2>ENJOY!</h2>
+<p>この記事は<a href="https://vim-jp.org/docs/chat.html">vim-jp slack</a>での質問がきっかけで書きました。自分があたりまえに思ってることがそうじゃなかったりするのは、コミュニケーションの中からしか気付けない学びですね。</p>
+<p>エンジニアの楽園だなんて呼ばれることもあるvim-jp、EmacsやVSCodeのユーザーもいますので、気軽に覗いてみてください。</p>
+<blockquote>
+<p>エンジニアの楽園 vim-jp<br />
+<a href="https://blog.tomoya.dev/posts/vim-jp-is-a-paradise-for-engineers/" class="uri">https://blog.tomoya.dev/posts/vim-jp-is-a-paradise-for-engineers/</a></p>
+</blockquote>
+<p>同名を関したラジオもあり、こちらからはvim-jpを知らない人も楽しめるコンテンツを通じて、vim-jpというコミュニティの空気感を味わっていただけます。</p>
+<blockquote>
+<p>エンジニアの楽園 Vim-jp ラジオ<br />
+<a href="https://vim-jp-radio.com/" class="uri">https://vim-jp-radio.com/</a></p>
+</blockquote>
+</div>

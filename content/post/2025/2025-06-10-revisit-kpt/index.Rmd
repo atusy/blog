@@ -1,0 +1,32 @@
+---
+title: "とりあえずKPTでKeep Problem Tryをふりかえる……前に心掛けておきたいこと"
+author: atusy
+date: "2025-06-06"
+slug: "ddc-source-shell_native-is-faster"
+categories: [Tech]
+tags: [Vim, Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlightjs: []
+summary: |
+---
+
+- K/Pどちらか迷ったときはとりあえず書く
+- K/Pは事象だけでなく感情も書いてみる
+- Keepは「できてるからいいよね」ではなく、「再現性があるか」に注目しよう
+- Problemは問題（悪いこと）というより課題、理想に近付くために変えたほうがいいこと
+    - 個人の問題ではなくチームの課題
+- Tryは厳選しよう
+    - 検査と適応を重視
+- アイスブレークにタイムラインを振り返ってもいいよ
+- タイムボックスを守ろう
+    - Tryを作る前に時間切れするなら、まずふりかえりそのものを改善しよう
+- 継続しよう
+    - 前回のTryを振り返ろう
+    - 慣れたら他のフレームワークも検討しよう
+    - ファシリテーターを変えよう
+
+<https://gemini.google.com/u/2/app/ddcd68ad221ab658>
+
+**ENJOY!!**
