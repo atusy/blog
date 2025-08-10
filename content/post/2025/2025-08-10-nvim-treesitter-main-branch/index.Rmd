@@ -1,0 +1,251 @@
+---
+title: "Neovim ≧ 0.11ユーザーのためのnvim-treesitter最新版利用ガイド（mainブランチ切り替え）"
+author: atusy
+date: '2025-08-10'
+slug: nvim-treesitter-main-branch
+categories: [Tech]
+tags: [Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+summary: |
+    Neovim 0.11以降のnvim-treesitterプラグインのmainブランチへの移行方法を紹介します。
+    masterブランチは2025年5月で更新が止まっているので、切り替えの時期だと思います。
+    ただし、変更範囲が大きく、単純に切り替えるとNeovim起動時にエラーが出るので注意が必要です。
+    本体の設定方法に加え、自動ハイライトの有効化方法や依存プラグインの更新方法など、切り替えに必要な情報をまとめました。
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+set.seed(123)
+options(digits.secs = 0)
+```
+
+Neovimユーザーの多くが、シンタックスハイライトにTreesitterを利用していると思います。
+
+このとき、[nvim-treesitter]プラグインを使って様々な言語に対応するケースがほとんどだと思います。
+
+[nvim-treesitter]: https://github.com/nvim-treesitter/nvim-treesitter/tree/main
+
+従来、[nvim-treesitter]プラグインの開発はmasterブランチで進んでいましたが、Neovim 0.11のリリースに伴ってmasterブランチは凍結され、現在は**main**ブランチで開発を継続しています。
+
+公式ではNeovim 0.11がでたらデフォルトブランチをmainブランチに変更するとしています。
+その割にmasterブランチがデフォルトのままですが、2025-05-24で更新が止まっているので、早々に**main**ブランチに切り替えたほうがいいでしょう。
+
+> after Neovim 0.11 is released with wasm support, main will become the new default branch \
+> <https://github.com/nvim-treesitter/nvim-treesitter/issues/4767>
+
+ただし、**main**ブランチの内容はmasterブランチと互換性がないため、切り替えには一手間必要です。
+
+## **main**ブランチの変更概要
+
+**main**ブランチ版[nvim-treesitter]は、基本的にパーサーとクエリファイルの管理を目的にしていると考えるといいです。
+
+masterブランチ版は自動ハイライトやインデント、拡張機能の管理などと盛り盛りでしたが、**main**ブランチでは相当の機能が削られています。
+
+* highlightの自動適用廃止
+    * 代わりにユーザー側で`vim.treesitter.start()`をバッファ単位に実行する
+* setup関数のindent有効化オプション廃止
+    * 代わりにユーザー側でオプションを指定する
+        * `vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"`
+* incremental-selection廃止
+    * 文法を鑑みながら徐々に選択範囲を広げたり狭めたりする機能
+    * 欲しい人はプラグイン作ってねとのこと
+* 自動インストール機能廃止
+    * 代わりにユーザー側で必要なパーサーを`:TSInstall`でインストール
+    * これに伴い、カスタムパーサー（[nvim-treesitter]で管理していないパーサー）のインストール方法も変更
+* モジュール機構廃止
+    * 従来、[nvim-treesitter]に依存するプラグインの中には`nvim-treesitter.configs.setup`関数を使って、拡張機能を登録しているものがあった
+    * mainブランチでは`nvim-treesitter.configs`モジュール自体がなくなった
+
+特にモジュール機構廃止は、他の様々なプラグインに影響があるので、切り替え作業の障壁になりがちですね。
+
+このあたりもふまえつつ、切り替え手順を紹介できればと思います。
+
+## **main**ブランチ切り替え大作戦
+
+### nvim-treesitterプラグインのブランチ切り替え
+
+多くのプラグインマネージャーはブランチの指定をサポートしています。
+
+[lazy.nvim](https://github.com/folke/lazy.nvim)を使う場合は以下のように`branch`キーを生やすといいでしょう。
+
+``` lua
+{
+  "https://github.com/nvim-treesitter/nvim-treesitter",
+  branch = "main",
+}
+```
+
+この状態で`:Lazy sync`などしてプラグインを更新してから`:restart`すると、大量のエラーが出るかもしれません。
+これは[nvim-treesitter]の破壊的変更に伴って、[nvim-treesitter]の設定そのものや他のプラグインがmasterブランチに依存しているせいでしょう。
+いったん、他のプラグインについては`cond = false`などを指定して無効化するといいです。
+
+なお、リポジトリ指定に`"nvim-treesitter/nvim-treesitter"`ではなく、フルのURLを指定しているのは趣味です。
+
+こうしておくと、`gx`コマンドを使ってブラウザを開いたり、GitHub上でダブルクリックできたりして便利です。
+
+関連記事もあるので、よければ見てみてください。
+
+> プラグインをURLで指定しやすくするために、tree-sitterでURIパーサーを作ってNeovimを彩ってみた \
+> <https://blog.atusy.net/2023/11/17/tree-sitter-uri/>
+
+### nvim-treesitterプラグインの設定更新
+
+#### 自動ハイライトを目指す
+
+やるべきことは以下の3点です
+
+* [nvim-treesitter]の有効化
+* ハイライトの自動化
+* パーサー・クエリのインストール
+
+[nvim-treesitter]を有効化するには、単に`setup`関数を呼べばOKです。
+オプションは`install_dir`しかないので、ほとんどのユーザーは何も考える必要がありません。
+
+``` lua
+require("nvim-treesitter").setup({})
+```
+
+ただし、先述の通り、有効化しただけではシンタックスハイライトが効きません。
+以下のようにFileTypeイベントをトリガーにした自動コマンドを使って、`vim.treesitter.start`関数を実行してください。
+
+```lua
+vim.api.nvim_create_autocmd("FileType", {
+  group = vim.api.nvim_create_augroup("vim-treesitter-start", {}),
+  callback = function(ctx)
+    -- 必要に応じて`ctx.match`に入っているファイルタイプの値に応じて挙動を制御
+    -- `pcall`でエラーを無視することでパーサーやクエリがあるか気にしなくてすむ
+    pcall(vim.treesitter.start)
+  end,
+})
+```
+
+もし、[nvim-treestter]プラグインを遅延ロードしている場合は、`vim.treesitter.start`関数を呼ぶ前に手動読み込みするといいでしょう。
+lazy.nvimユーザーであれば`pcal(require, "nvim-treesitter")`を足せばOKです。
+
+あとは`:TSInstall! all`などして、必要なパーサーを一通り入れておきましょう。
+
+もし、これでもハイライトに失敗する場合は、パーサーのインストール先を初期化して、再挑戦してみてください。
+`require('nvim-treesitter.config').get_install_dir()`で取得できるディレクトリを削除すればOKです。
+
+#### カスタムパーサーを導入する
+
+マイナーな言語などの場合、[nvim-treesitter]で管理していないパーサーを導入する必要があります。
+従来は`nvim-treesitter.parsers`モジュールにパーサー情報を追加すれば、インストール可能でしたが、軽く試した感じでは一筋縄でいかなさそうです。
+
+代替案として、lazy.nvimを使ってパーサーそのものをプラグインとして扱う手を紹介します。
+
+この方法では[nvim-treesitter]によるパーサーのインストール先をあらかじめ指定しておきます。
+そして、カスタムパーサーのビルド時にパーサーの置き場所として[nvim-treesitter]のパーサーのインストール先を指定します。
+加えてクエリファイルのインストールなども必要ですが、masterブランチの時点である程度経験のあるユーザーを想定するため、ここでは省略します。
+
+```lua
+local treesitter_path = vim.fs.joinpath(vim.fn.stdpath("data"), "/treesitter")
+vim.uv.fs_mkdir(parser_dir, tonumber("755", 8))
+
+return {
+  {
+    "https://github.com/nvim-treesitter/nvim-treesitter",
+    branch = "main",
+    config = function()
+      -- パーサーのインストール先を指定
+      require("nvim-treesitter").setup({ install_dir = treesitter_path })
+
+      -- 自動ハイライトの有効化
+      vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("vim-treesitter-start", {}),
+        callback = function()
+          pcall(vim.treesitter.start)
+        end,
+      })
+    end
+  },
+  {
+    "https://github.com/monaqa/tree-sitter-unifieddiff",
+    build = function(opts)
+      -- nvim-treesitterと同じ場所にパーサーをインストール
+      local output = vim.fs.joinpath(parser_path, "unifieddiff.so")
+      vim.system({ "tree-sitter", "build", "--output", output }, { cwd = opts.dir }, function() end)
+    end
+  }
+}
+```
+
+### 依存プラグインの更新
+
+メモ書き程度ですが、Atusyが利用しているプラグインのうち、[nvim-treesitter]のmainブランチ対応作業について、記録しておきます。
+
+#### nvim-treesitter-endwise
+
+一部の言語では関数定義やif文などの末尾に`end`や`fi`が必要です。
+このプラグインを使うと、これらのキーワードを改行のタイミングで自動挿入してくれます。
+
+``` lua
+-- lua
+local function f() -- ここで改行すると自動でendが挿入される
+```
+
+本家の[RRethy](https://github.com/RRethy/nvim-treesitter-endwise)版は[nvim-treesitter]のmainブランチに未対応なので、[AbaoFromCUG](https://github.com/AbaoFromCUG/nvim-treesitter-endwise)版を使うといいでしょう。
+
+従来は`require("nvim-treesitteer.config").setup`関数経由で有効化していましたが、プラグイン本体側で有効化するように設定を変更してください。
+
+```lua
+require("nvim-treesitter-endwise").init()
+```
+
+#### vim-matchup
+
+<https://github.com/andymass/vim-matchup>
+
+`%`キーで対応する括弧にジャンプする機能を提供するプラグインです。
+treesitterとの連携を使うと、引用符やHTMLタグなどの対応する箇所にもジャンプできるようになります。
+
+従来は`require("nvim-treesitter.configs").setup`関数経由で設定していましたが、mainブランチではグローバル変数を使うように変更されています。
+
+```lua
+vim.g.matchup_matchparen_offscreen = { method = "status_manual" }
+vim.g.matchup_treesitter_enable_quotes = true
+vim.g.matchup_treesitter_disable_virtual_text = true
+vim.g.matchup_treesitter_include_match_words = true
+```
+
+#### nvim-treesitter-textobjects
+
+<https://github.com/nvim-treesitter/nvim-treesitter-textobjects/>
+
+言語の構文を利用したテキストオブジェクトを提供するプラグインです。
+関数のボディを選択するなどといった操作が可能になります。
+
+このプラグインは[nvim-treesitter]のmainブランチに対応するにあたって、同様にmainブランチ版を用意したようです。
+ただし、なぜかmasterブランチ版の方が更新が活発な模様……。
+
+ちょっと不穏ではありますが、mainブランチ版を使ってみています。
+
+また、Atusy自身は[mini.ai](https://github.com/echasnovski/mini.ai)の依存プラグインとして使用しており、[nvim-treesitter-textobjects](https://github.com/nvim-treesitter/nvim-treesitter-textobjects/)を直接使っていないため、実際に`setup`したときにまともに使えるかまでは検証していません。
+
+#### nvim-treesitter-context
+
+<https://github.com/nvim-treesitter/nvim-treesitter-context>
+
+VSCodeでいうSticky scroll相当の機能を提供するプラグインです。
+実際の様子はリポジトリのREADMEを参照してください。
+> [nvim-treesitter-context](https://github.com/nvim-treesitter/nvim-treesitter-context)
+
+特に設定の変更なく[nvim-treesitter]のmainブランチ対応ができます。
+
+#### nvim-treesitter-refactor
+
+<https://github.com/nvim-treesitter/nvim-treesitter-refactor>
+
+変数のrename機能が便利そうと思って入れたプラグインです。
+
+残念ながら[nvim-treesitter-refactor](https://github.com/nvim-treesitter/nvim-treesitter-refactor)は現時点でmainブランチ対応していません。
+主要な言語であればLanguage Server Protocol（LSP）のrename機能の方が優秀なので、いったん無効化することにしました。
+
+
+## ENJOY
+
+ややざっくり目ですが、[nvim-treesitter]のmainブランチへの移行方法を紹介しました。
+少しでも皆さんの設定更新の助けになれば幸いです。

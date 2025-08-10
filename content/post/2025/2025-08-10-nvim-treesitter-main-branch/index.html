@@ -1,0 +1,196 @@
+---
+title: "Neovim ≧ 0.11ユーザーのためのnvim-treesitter最新版利用ガイド（mainブランチ切り替え）"
+author: atusy
+date: '2025-08-10'
+slug: nvim-treesitter-main-branch
+categories: [Tech]
+tags: [Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+summary: |
+    Neovim 0.11以降のnvim-treesitterプラグインのmainブランチへの移行方法を紹介します。
+    masterブランチは2025年5月で更新が止まっているので、切り替えの時期だと思います。
+    ただし、変更範囲が大きく、単純に切り替えるとNeovim起動時にエラーが出るので注意が必要です。
+    本体の設定方法に加え、自動ハイライトの有効化方法や依存プラグインの更新方法など、切り替えに必要な情報をまとめました。
+---
+
+
+
+<p>Neovimユーザーの多くが、シンタックスハイライトにTreesitterを利用していると思います。</p>
+<p>このとき、<a href="https://github.com/nvim-treesitter/nvim-treesitter/tree/main">nvim-treesitter</a>プラグインを使って様々な言語に対応するケースがほとんどだと思います。</p>
+<p>従来、<a href="https://github.com/nvim-treesitter/nvim-treesitter/tree/main">nvim-treesitter</a>プラグインの開発はmasterブランチで進んでいましたが、Neovim 0.11のリリースに伴ってmasterブランチは凍結され、現在は<strong>main</strong>ブランチで開発を継続しています。</p>
+<p>公式ではNeovim 0.11がでたらデフォルトブランチをmainブランチに変更するとしています。その割にmasterブランチがデフォルトのままですが、2025-05-24で更新が止まっているので、早々に<strong>main</strong>ブランチに切り替えたほうがいいでしょう。</p>
+<blockquote>
+<p>after Neovim 0.11 is released with wasm support, main will become the new default branch<br />
+<a href="https://github.com/nvim-treesitter/nvim-treesitter/issues/4767" class="uri">https://github.com/nvim-treesitter/nvim-treesitter/issues/4767</a></p>
+</blockquote>
+<p>ただし、<strong>main</strong>ブランチの内容はmasterブランチと互換性がないため、切り替えには一手間必要です。</p>
+<div id="mainブランチの変更概要" class="section level2">
+<h2><strong>main</strong>ブランチの変更概要</h2>
+<p><strong>main</strong>ブランチ版<a href="https://github.com/nvim-treesitter/nvim-treesitter/tree/main">nvim-treesitter</a>は、基本的にパーサーとクエリファイルの管理を目的にしていると考えるといいです。</p>
+<p>masterブランチ版は自動ハイライトやインデント、拡張機能の管理などと盛り盛りでしたが、<strong>main</strong>ブランチでは相当の機能が削られています。</p>
+<ul>
+<li>highlightの自動適用廃止
+<ul>
+<li>代わりにユーザー側で<code>vim.treesitter.start()</code>をバッファ単位に実行する</li>
+</ul></li>
+<li>setup関数のindent有効化オプション廃止
+<ul>
+<li>代わりにユーザー側でオプションを指定する
+<ul>
+<li><code>vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"</code></li>
+</ul></li>
+</ul></li>
+<li>incremental-selection廃止
+<ul>
+<li>文法を鑑みながら徐々に選択範囲を広げたり狭めたりする機能</li>
+<li>欲しい人はプラグイン作ってねとのこと</li>
+</ul></li>
+<li>自動インストール機能廃止
+<ul>
+<li>代わりにユーザー側で必要なパーサーを<code>:TSInstall</code>でインストール</li>
+<li>これに伴い、カスタムパーサー（<a href="https://github.com/nvim-treesitter/nvim-treesitter/tree/main">nvim-treesitter</a>で管理していないパーサー）のインストール方法も変更</li>
+</ul></li>
+<li>モジュール機構廃止
+<ul>
+<li>従来、<a href="https://github.com/nvim-treesitter/nvim-treesitter/tree/main">nvim-treesitter</a>に依存するプラグインの中には<code>nvim-treesitter.configs.setup</code>関数を使って、拡張機能を登録しているものがあった</li>
+<li>mainブランチでは<code>nvim-treesitter.configs</code>モジュール自体がなくなった</li>
+</ul></li>
+</ul>
+<p>特にモジュール機構廃止は、他の様々なプラグインに影響があるので、切り替え作業の障壁になりがちですね。</p>
+<p>このあたりもふまえつつ、切り替え手順を紹介できればと思います。</p>
+</div>
+<div id="mainブランチ切り替え大作戦" class="section level2">
+<h2><strong>main</strong>ブランチ切り替え大作戦</h2>
+<div id="nvim-treesitterプラグインのブランチ切り替え" class="section level3">
+<h3>nvim-treesitterプラグインのブランチ切り替え</h3>
+<p>多くのプラグインマネージャーはブランチの指定をサポートしています。</p>
+<p><a href="https://github.com/folke/lazy.nvim">lazy.nvim</a>を使う場合は以下のように<code>branch</code>キーを生やすといいでしょう。</p>
+<pre class="lua"><code>{
+  &quot;https://github.com/nvim-treesitter/nvim-treesitter&quot;,
+  branch = &quot;main&quot;,
+}</code></pre>
+<p>この状態で<code>:Lazy sync</code>などしてプラグインを更新してから<code>:restart</code>すると、大量のエラーが出るかもしれません。これは<a href="https://github.com/nvim-treesitter/nvim-treesitter/tree/main">nvim-treesitter</a>の破壊的変更に伴って、<a href="https://github.com/nvim-treesitter/nvim-treesitter/tree/main">nvim-treesitter</a>の設定そのものや他のプラグインがmasterブランチに依存しているせいでしょう。いったん、他のプラグインについては<code>cond = false</code>などを指定して無効化するといいです。</p>
+<p>なお、リポジトリ指定に<code>"nvim-treesitter/nvim-treesitter"</code>ではなく、フルのURLを指定しているのは趣味です。</p>
+<p>こうしておくと、<code>gx</code>コマンドを使ってブラウザを開いたり、GitHub上でダブルクリックできたりして便利です。</p>
+<p>関連記事もあるので、よければ見てみてください。</p>
+<blockquote>
+<p>プラグインをURLで指定しやすくするために、tree-sitterでURIパーサーを作ってNeovimを彩ってみた<br />
+<a href="https://blog.atusy.net/2023/11/17/tree-sitter-uri/" class="uri">https://blog.atusy.net/2023/11/17/tree-sitter-uri/</a></p>
+</blockquote>
+</div>
+<div id="nvim-treesitterプラグインの設定更新" class="section level3">
+<h3>nvim-treesitterプラグインの設定更新</h3>
+<div id="自動ハイライトを目指す" class="section level4">
+<h4>自動ハイライトを目指す</h4>
+<p>やるべきことは以下の3点です</p>
+<ul>
+<li><a href="https://github.com/nvim-treesitter/nvim-treesitter/tree/main">nvim-treesitter</a>の有効化</li>
+<li>ハイライトの自動化</li>
+<li>パーサー・クエリのインストール</li>
+</ul>
+<p><a href="https://github.com/nvim-treesitter/nvim-treesitter/tree/main">nvim-treesitter</a>を有効化するには、単に<code>setup</code>関数を呼べばOKです。オプションは<code>install_dir</code>しかないので、ほとんどのユーザーは何も考える必要がありません。</p>
+<pre class="lua"><code>require(&quot;nvim-treesitter&quot;).setup({})</code></pre>
+<p>ただし、先述の通り、有効化しただけではシンタックスハイライトが効きません。以下のようにFileTypeイベントをトリガーにした自動コマンドを使って、<code>vim.treesitter.start</code>関数を実行してください。</p>
+<pre class="lua"><code>vim.api.nvim_create_autocmd(&quot;FileType&quot;, {
+  group = vim.api.nvim_create_augroup(&quot;vim-treesitter-start&quot;, {}),
+  callback = function(ctx)
+    -- 必要に応じて`ctx.match`に入っているファイルタイプの値に応じて挙動を制御
+    -- `pcall`でエラーを無視することでパーサーやクエリがあるか気にしなくてすむ
+    pcall(vim.treesitter.start)
+  end,
+})</code></pre>
+<p>もし、[nvim-treestter]プラグインを遅延ロードしている場合は、<code>vim.treesitter.start</code>関数を呼ぶ前に手動読み込みするといいでしょう。
+lazy.nvimユーザーであれば<code>pcal(require, "nvim-treesitter")</code>を足せばOKです。</p>
+<p>あとは<code>:TSInstall! all</code>などして、必要なパーサーを一通り入れておきましょう。</p>
+<p>もし、これでもハイライトに失敗する場合は、パーサーのインストール先を初期化して、再挑戦してみてください。
+<code>require('nvim-treesitter.config').get_install_dir()</code>で取得できるディレクトリを削除すればOKです。</p>
+</div>
+<div id="カスタムパーサーを導入する" class="section level4">
+<h4>カスタムパーサーを導入する</h4>
+<p>マイナーな言語などの場合、<a href="https://github.com/nvim-treesitter/nvim-treesitter/tree/main">nvim-treesitter</a>で管理していないパーサーを導入する必要があります。従来は<code>nvim-treesitter.parsers</code>モジュールにパーサー情報を追加すれば、インストール可能でしたが、軽く試した感じでは一筋縄でいかなさそうです。</p>
+<p>代替案として、lazy.nvimを使ってパーサーそのものをプラグインとして扱う手を紹介します。</p>
+<p>この方法では<a href="https://github.com/nvim-treesitter/nvim-treesitter/tree/main">nvim-treesitter</a>によるパーサーのインストール先をあらかじめ指定しておきます。そして、カスタムパーサーのビルド時にパーサーの置き場所として<a href="https://github.com/nvim-treesitter/nvim-treesitter/tree/main">nvim-treesitter</a>のパーサーのインストール先を指定します。加えてクエリファイルのインストールなども必要ですが、masterブランチの時点である程度経験のあるユーザーを想定するため、ここでは省略します。</p>
+<pre class="lua"><code>local treesitter_path = vim.fs.joinpath(vim.fn.stdpath(&quot;data&quot;), &quot;/treesitter&quot;)
+vim.uv.fs_mkdir(parser_dir, tonumber(&quot;755&quot;, 8))
+
+return {
+  {
+    &quot;https://github.com/nvim-treesitter/nvim-treesitter&quot;,
+    branch = &quot;main&quot;,
+    config = function()
+      -- パーサーのインストール先を指定
+      require(&quot;nvim-treesitter&quot;).setup({ install_dir = treesitter_path })
+
+      -- 自動ハイライトの有効化
+      vim.api.nvim_create_autocmd(&quot;FileType&quot;, {
+        group = vim.api.nvim_create_augroup(&quot;vim-treesitter-start&quot;, {}),
+        callback = function()
+          pcall(vim.treesitter.start)
+        end,
+      })
+    end
+  },
+  {
+    &quot;https://github.com/monaqa/tree-sitter-unifieddiff&quot;,
+    build = function(opts)
+      -- nvim-treesitterと同じ場所にパーサーをインストール
+      local output = vim.fs.joinpath(parser_path, &quot;unifieddiff.so&quot;)
+      vim.system({ &quot;tree-sitter&quot;, &quot;build&quot;, &quot;--output&quot;, output }, { cwd = opts.dir }, function() end)
+    end
+  }
+}</code></pre>
+</div>
+</div>
+<div id="依存プラグインの更新" class="section level3">
+<h3>依存プラグインの更新</h3>
+<p>メモ書き程度ですが、Atusyが利用しているプラグインのうち、<a href="https://github.com/nvim-treesitter/nvim-treesitter/tree/main">nvim-treesitter</a>のmainブランチ対応作業について、記録しておきます。</p>
+<div id="nvim-treesitter-endwise" class="section level4">
+<h4>nvim-treesitter-endwise</h4>
+<p>一部の言語では関数定義やif文などの末尾に<code>end</code>や<code>fi</code>が必要です。このプラグインを使うと、これらのキーワードを改行のタイミングで自動挿入してくれます。</p>
+<pre class="lua"><code>-- lua
+local function f() -- ここで改行すると自動でendが挿入される</code></pre>
+<p>本家の<a href="https://github.com/RRethy/nvim-treesitter-endwise">RRethy</a>版は<a href="https://github.com/nvim-treesitter/nvim-treesitter/tree/main">nvim-treesitter</a>のmainブランチに未対応なので、<a href="https://github.com/AbaoFromCUG/nvim-treesitter-endwise">AbaoFromCUG</a>版を使うといいでしょう。</p>
+<p>従来は<code>require("nvim-treesitteer.config").setup</code>関数経由で有効化していましたが、プラグイン本体側で有効化するように設定を変更してください。</p>
+<pre class="lua"><code>require(&quot;nvim-treesitter-endwise&quot;).init()</code></pre>
+</div>
+<div id="vim-matchup" class="section level4">
+<h4>vim-matchup</h4>
+<p><a href="https://github.com/andymass/vim-matchup" class="uri">https://github.com/andymass/vim-matchup</a></p>
+<p><code>%</code>キーで対応する括弧にジャンプする機能を提供するプラグインです。
+treesitterとの連携を使うと、引用符やHTMLタグなどの対応する箇所にもジャンプできるようになります。</p>
+<p>従来は<code>require("nvim-treesitter.configs").setup</code>関数経由で設定していましたが、mainブランチではグローバル変数を使うように変更されています。</p>
+<pre class="lua"><code>vim.g.matchup_matchparen_offscreen = { method = &quot;status_manual&quot; }
+vim.g.matchup_treesitter_enable_quotes = true
+vim.g.matchup_treesitter_disable_virtual_text = true
+vim.g.matchup_treesitter_include_match_words = true</code></pre>
+</div>
+<div id="nvim-treesitter-textobjects" class="section level4">
+<h4>nvim-treesitter-textobjects</h4>
+<p><a href="https://github.com/nvim-treesitter/nvim-treesitter-textobjects/" class="uri">https://github.com/nvim-treesitter/nvim-treesitter-textobjects/</a></p>
+<p>言語の構文を利用したテキストオブジェクトを提供するプラグインです。関数のボディを選択するなどといった操作が可能になります。</p>
+<p>このプラグインは<a href="https://github.com/nvim-treesitter/nvim-treesitter/tree/main">nvim-treesitter</a>のmainブランチに対応するにあたって、同様にmainブランチ版を用意したようです。ただし、なぜかmasterブランチ版の方が更新が活発な模様……。</p>
+<p>ちょっと不穏ではありますが、mainブランチ版を使ってみています。</p>
+<p>また、Atusy自身は<a href="https://github.com/echasnovski/mini.ai">mini.ai</a>の依存プラグインとして使用しており、<a href="https://github.com/nvim-treesitter/nvim-treesitter-textobjects/">nvim-treesitter-textobjects</a>を直接使っていないため、実際に<code>setup</code>したときにまともに使えるかまでは検証していません。</p>
+</div>
+<div id="nvim-treesitter-context" class="section level4">
+<h4>nvim-treesitter-context</h4>
+<p><a href="https://github.com/nvim-treesitter/nvim-treesitter-context" class="uri">https://github.com/nvim-treesitter/nvim-treesitter-context</a></p>
+<p>VSCodeでいうSticky scroll相当の機能を提供するプラグインです。実際の様子はリポジトリのREADMEを参照してください。
+&gt; <a href="https://github.com/nvim-treesitter/nvim-treesitter-context">nvim-treesitter-context</a></p>
+<p>特に設定の変更なく<a href="https://github.com/nvim-treesitter/nvim-treesitter/tree/main">nvim-treesitter</a>のmainブランチ対応ができます。</p>
+</div>
+<div id="nvim-treesitter-refactor" class="section level4">
+<h4>nvim-treesitter-refactor</h4>
+<p><a href="https://github.com/nvim-treesitter/nvim-treesitter-refactor" class="uri">https://github.com/nvim-treesitter/nvim-treesitter-refactor</a></p>
+<p>変数のrename機能が便利そうと思って入れたプラグインです。</p>
+<p>残念ながら<a href="https://github.com/nvim-treesitter/nvim-treesitter-refactor">nvim-treesitter-refactor</a>は現時点でmainブランチ対応していません。主要な言語であればLanguage Server Protocol（LSP）のrename機能の方が優秀なので、いったん無効化することにしました。</p>
+</div>
+</div>
+</div>
+<div id="enjoy" class="section level2">
+<h2>ENJOY</h2>
+<p>ややざっくり目ですが、<a href="https://github.com/nvim-treesitter/nvim-treesitter/tree/main">nvim-treesitter</a>のmainブランチへの移行方法を紹介しました。少しでも皆さんの設定更新の助けになれば幸いです。</p>
+</div>
