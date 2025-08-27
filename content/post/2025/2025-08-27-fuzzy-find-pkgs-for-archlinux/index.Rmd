@@ -1,0 +1,56 @@
+---
+title: "paruzコマンドでArch Linux系のパッケージをあいまい検索"
+author: atusy
+date: '2025-08-27'
+slug: fuzzy-find-pkgs-for-archlinux
+categories: [Tech]
+tags: [pacman, Arch Linux]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: []
+summary: |
+  `paruz`コマンドを使うとAURも含めてArch Linux系のパッケージをあいまい検索できて便利。
+   AURを除外したいときは`PARU=pacman paruz`でいけるよ。
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+set.seed(123)
+options(digits.secs = 0)
+```
+
+Arch Linuxのローリングリリースの思想、好きです。
+どんどん最新にしてけば、最新のテクノロジにすぐ触れます。
+ユーザーがいることで問題も発見されやすく、解決した結果もすぐに反映されます。
+
+と言いつつ、ある程度安定してほしいのでManjaro Linuxを使ってます。
+
+さておき、そんなArch Linux系のディストリビューションでは、`pacman`コマンドでパッケージ管理を行います。
+ところがこいつは一癖あって、パッケージの検索は楽とは言いがたいです。
+`paru`や`yay`を使ってAURという野良パッケージのリポジトリも参照すると、ますますパッケージの検索が面倒になります。
+
+そんなときに便利なのが`paruz`コマンドです。
+
+> <https://github.com/joehillen/paruz>
+
+こんな感じで、インストール可能なパッケージを瞬時に検索できます。
+[`fzf`](https://github.com/junegunn/fzf)というあいまい検索ツールを使っているので、`sptfy`とか文字が一部抜けたりしても大丈夫。
+
+![](image/paruz.gif)
+
+検索結果をEnterで確定するとインストールがはじまります。
+
+`paruz`は通常`paru`を利用するため、この例ではAURも検索対象になっています。
+
+aurを対象からはずしたい場合は、`PARU`環境変数を設定して、`pacman`コマンドを使うようにします。
+
+```
+PARU=pacman paruz
+```
+
+必要に応じて`pacmanz`などにエイリアスを貼っておくと便利かもしれません。
+
+
+## ENJOY!
+
