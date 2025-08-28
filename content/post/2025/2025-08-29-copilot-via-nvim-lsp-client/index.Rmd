@@ -1,0 +1,162 @@
+---
+title: "Neovim 0.12（開発版）ではLSPクライアント経由でGitHub Copilotを使えるぞ（脱copilot.vim）"
+author: atusy
+date: '2025-08-29'
+slug: copilot-via-nvim-lsp-client
+categories: [Tech]
+tags: [Neovim, Copilot, LSP]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+summary: |
+    Neovim 0.12（開発版）に`vim.lsp.inline_completion`が実装されました。これと[copilot-language-server]を組み合わせると、GitHub Copilotによる補完を、LSPクライアント経由で利用できます。
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+set.seed(123)
+options(digits.secs = 0)
+```
+
+[Vim駅伝](https://vim-jp.org/ekiden/)2025-08-29の記事です。
+前回の記事はnil2さんによる[左手デバイスからVimを操作する](https://zenn.dev/nil2/articles/a88c03e37aa4c3)でした。
+マクロパッドらしい痒い操作の実現が可能になる良いアイデアですね。
+
+さてさて、Neovim 0.12（開発版）に`vim.lsp.inline_completion`が実装されました。
+
+これと言語サーバーの[copilot-language-server]を組み合わせると、GitHub Copilotによる補完を、LSPクライアント経由で利用できます。
+プラグインの[copilot.vim](https://github.com/github/copilot.vim)や[copilot.lua]がいらなくなるのです！
+
+`local function fizzbuzz`と打つと以下のような内容がグレーアウトで補完されるやつですね。
+[copilot-language-server]に限らず、[lsp-ai](https://deepwiki.com/SilasMarvin/lsp-ai)などの他の言語サーバーもも使えるはずなので、ローカルLLMを使いたい人にも有用です。
+
+```
+local function fizzbuzz(n)
+  if n % 15 == 0 then
+    return "FizzBuzz"
+  elseif n % 3 == 0 then
+    return "Fizz"
+  elseif n % 5 == 0 then
+    return "Buzz"
+  else
+    return tostring(n)
+  end
+end
+```
+
+## 設定方法
+
+1. [copilot-language-server]をインストールする
+2. Neovim 0.12（開発版）を設定する
+    * [nvim-lspconfig]プラグインを導入
+    * 以下のような設定を自身のLSP関連の設定に追記
+
+        ```lua
+        require("nvim-lspconfig") -- copilot language serverの設定を提供
+        vim.lsp.enable("copilot")
+        vim.lsp.inline_completion.enable(true)
+
+        -- マッピングのLHSはお好みで
+        vim.keymap.set('i', '<c-cr>', '<cmd>lua vim.lsp.inline_completion.get()<cr>', { silent = true })
+        ```
+
+3. `:LspCopilotSignIn`コマンドを実行して、認証する
+    * 要[nvim-lspconfig]
+
+### Tip: インライン補完の候補の有無でマッピングの挙動を変える
+
+`vim.lsp.inline_completion.get()`は補完する内容がない場合に、`false`を返します。
+この挙動を利用して、`<tab>`を入力した時に、補完候補が表示されていれば採用し、そうでなければ通常の`<tab>`を入力するといった動作を実現できます。
+
+``` lua
+vim.keymap.set('i', '<tab>', function()
+  if not vim.lsp.inline_completion.get() then
+    return '<tab>'
+  end
+end, { expr = true })
+```
+
+### Tip: インライン補完の有効・無効を細かく制御する
+
+先の例では言語サーバーによらずインライン補完を有効化していました。
+有効化に使う`vim.lsp.inline_completion.enable`関数の第二引数を使うと、有効・無効を細かく制御できます。
+
+> <https://neovim.io/doc/user/lsp.html#vim.lsp.inline_completion.enable()>
+
+```
+enable({enable}, {filter})                *vim.lsp.inline_completion.enable()*
+    Enables or disables inline completion for the {filter}ed scope, inline
+    completion will automatically be refreshed when you are in insert mode.
+
+    To "toggle", pass the inverse of `is_enabled()`: >lua
+        vim.lsp.inline_completion.enable(not vim.lsp.inline_completion.is_enabled())
+<
+
+    Parameters: ~
+      • {enable}  (`boolean?`) true/nil to enable, false to disable
+      • {filter}  (`table?`) Optional filters |kwargs|,
+                  • {bufnr}? (`integer`, default: all) Buffer number, or 0 for
+                    current buffer, or nil for all.
+                  • {client_id}? (`integer`, default: all) Client ID, or nil
+                    for all.
+```
+
+たとえばLSPクライアントがcopilotのときだけ有効にしたい場合は、以下のようにします。
+
+```lua
+vim.api.nvim_create_autocmd('LspAttach', {
+  callback = function(ev)
+    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+    if client.name == "copilot" then
+      vim.lsp.inline_completion.enable(true, { client_id = client.id, bufnr = ev.buf })
+    end
+  end
+})
+```
+
+### Tip: nvim-lspconfigに依存しない方法
+
+[nvim-lspconfig]プラグインに依存せず設定したい方もいるかもしれません。
+その場合
+
+1. [copilot-language-server]の設定を自前で書く
+    * kawarimidollさんの記事が参考になります
+
+        > Neovim0.11用のLSP設定
+        > <https://zenn.dev/kawarimidoll/articles/b202e546bca344>
+
+2. [copilot-language-server]がカレントバッファにアタッチされている状態で以下を実行する
+
+   ```
+   := vim.lsp.get_clients({ name = "copilot" })[1].request_sync("signIn", vim.empty_dict(), 1000, 0)
+   ```
+
+といった流れになると思われます。
+
+認証方法についてはvim-jp SlackでGen Fさんが教えてくれました。
+
+
+## ENJOY!!
+
+数日使ってみた感じだと、補完の速度が[copilot.lua]プラグインよりもかなり速い気がします。
+
+ただし、現時点では[copilot.lua]プラグインと違って、補完を行単位や単語単位で確定できません。
+私は滅多に利用していなかったので、まあいいかなと思ってます。
+対応については以下のIssueで議論されているので、近く改善されるかもしれません。
+
+ところで[Vim駅伝](https://vim-jp.org/ekiden/)は執筆者を随時募集しています。
+なんと次回の2025-09-01の枠も空いています。
+自分なりのVimの使い方からVimとの出会い、Vim友達のこと、Vimにまつわることなら技術記事じゃなくてもOKです。
+ぜひ気軽に書いてみてください。
+まだ見ぬ記事と出会えるの楽しみにしてます！
+
+> <https://github.com/neovim/neovim/issues/35485>
+
+[copilot-language-server]: https://www.npmjs.com/package/@github/copilot-language-server
+
+[copilot.lua]: https://github.com/zbirenbaum/copilot.lua
+
+[nvim-lspconfig]: https://github.com/neovim/nvim-lspconfig
+

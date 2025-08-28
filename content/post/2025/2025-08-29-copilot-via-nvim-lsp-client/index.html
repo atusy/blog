@@ -1,0 +1,122 @@
+---
+title: "Neovim 0.12（開発版）ではLSPクライアント経由でGitHub Copilotを使えるぞ（脱copilot.vim）"
+author: atusy
+date: '2025-08-29'
+slug: copilot-via-nvim-lsp-client
+categories: [Tech]
+tags: [Neovim, Copilot, LSP]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+summary: |
+    Neovim 0.12（開発版）に`vim.lsp.inline_completion`が実装されました。これと[copilot-language-server]を組み合わせると、GitHub Copilotによる補完を、LSPクライアント経由で利用できます。
+
+---
+
+
+
+<p><a href="https://vim-jp.org/ekiden/">Vim駅伝</a>2025-08-29の記事です。前回の記事はnil2さんによる<a href="https://zenn.dev/nil2/articles/a88c03e37aa4c3">左手デバイスからVimを操作する</a>でした。マクロパッドらしい痒い操作の実現が可能になる良いアイデアですね。</p>
+<p>さてさて、Neovim 0.12（開発版）に<code>vim.lsp.inline_completion</code>が実装されました。</p>
+<p>これと言語サーバーの<a href="https://www.npmjs.com/package/@github/copilot-language-server">copilot-language-server</a>を組み合わせると、GitHub Copilotによる補完を、LSPクライアント経由で利用できます。プラグインの<a href="https://github.com/github/copilot.vim">copilot.vim</a>や<a href="https://github.com/zbirenbaum/copilot.lua">copilot.lua</a>がいらなくなるのです！</p>
+<p><code>local function fizzbuzz</code>と打つと以下のような内容がグレーアウトで補完されるやつですね。
+<a href="https://www.npmjs.com/package/@github/copilot-language-server">copilot-language-server</a>に限らず、<a href="https://deepwiki.com/SilasMarvin/lsp-ai">lsp-ai</a>などの他の言語サーバーもも使えるはずなので、ローカルLLMを使いたい人にも有用です。</p>
+<pre><code>local function fizzbuzz(n)
+  if n % 15 == 0 then
+    return &quot;FizzBuzz&quot;
+  elseif n % 3 == 0 then
+    return &quot;Fizz&quot;
+  elseif n % 5 == 0 then
+    return &quot;Buzz&quot;
+  else
+    return tostring(n)
+  end
+end</code></pre>
+<div id="設定方法" class="section level2">
+<h2>設定方法</h2>
+<ol style="list-style-type: decimal">
+<li><a href="https://www.npmjs.com/package/@github/copilot-language-server">copilot-language-server</a>をインストールする</li>
+<li>Neovim 0.12（開発版）を設定する
+<ul>
+<li><p><a href="https://github.com/neovim/nvim-lspconfig">nvim-lspconfig</a>プラグインを導入</p></li>
+<li><p>以下のような設定を自身のLSP関連の設定に追記</p>
+<pre class="lua"><code>require(&quot;nvim-lspconfig&quot;) -- copilot language serverの設定を提供
+vim.lsp.enable(&quot;copilot&quot;)
+vim.lsp.inline_completion.enable(true)
+
+-- マッピングのLHSはお好みで
+vim.keymap.set(&#39;i&#39;, &#39;&lt;c-cr&gt;&#39;, &#39;&lt;cmd&gt;lua vim.lsp.inline_completion.get()&lt;cr&gt;&#39;, { silent = true })</code></pre></li>
+</ul></li>
+<li><code>:LspCopilotSignIn</code>コマンドを実行して、認証する
+<ul>
+<li>要<a href="https://github.com/neovim/nvim-lspconfig">nvim-lspconfig</a></li>
+</ul></li>
+</ol>
+<div id="tip-インライン補完の候補の有無でマッピングの挙動を変える" class="section level3">
+<h3>Tip: インライン補完の候補の有無でマッピングの挙動を変える</h3>
+<p><code>vim.lsp.inline_completion.get()</code>は補完する内容がない場合に、<code>false</code>を返します。この挙動を利用して、<code>&lt;tab&gt;</code>を入力した時に、補完候補が表示されていれば採用し、そうでなければ通常の<code>&lt;tab&gt;</code>を入力するといった動作を実現できます。</p>
+<pre class="lua"><code>vim.keymap.set(&#39;i&#39;, &#39;&lt;tab&gt;&#39;, function()
+  if not vim.lsp.inline_completion.get() then
+    return &#39;&lt;tab&gt;&#39;
+  end
+end, { expr = true })</code></pre>
+</div>
+<div id="tip-インライン補完の有効無効を細かく制御する" class="section level3">
+<h3>Tip: インライン補完の有効・無効を細かく制御する</h3>
+<p>先の例では言語サーバーによらずインライン補完を有効化していました。有効化に使う<code>vim.lsp.inline_completion.enable</code>関数の第二引数を使うと、有効・無効を細かく制御できます。</p>
+<blockquote>
+<p><a href="https://neovim.io/doc/user/lsp.html#vim.lsp.inline_completion.enable()" class="uri">https://neovim.io/doc/user/lsp.html#vim.lsp.inline_completion.enable()</a></p>
+</blockquote>
+<pre><code>enable({enable}, {filter})                *vim.lsp.inline_completion.enable()*
+    Enables or disables inline completion for the {filter}ed scope, inline
+    completion will automatically be refreshed when you are in insert mode.
+
+    To &quot;toggle&quot;, pass the inverse of `is_enabled()`: &gt;lua
+        vim.lsp.inline_completion.enable(not vim.lsp.inline_completion.is_enabled())
+&lt;
+
+    Parameters: ~
+      • {enable}  (`boolean?`) true/nil to enable, false to disable
+      • {filter}  (`table?`) Optional filters |kwargs|,
+                  • {bufnr}? (`integer`, default: all) Buffer number, or 0 for
+                    current buffer, or nil for all.
+                  • {client_id}? (`integer`, default: all) Client ID, or nil
+                    for all.</code></pre>
+<p>たとえばLSPクライアントがcopilotのときだけ有効にしたい場合は、以下のようにします。</p>
+<pre class="lua"><code>vim.api.nvim_create_autocmd(&#39;LspAttach&#39;, {
+  callback = function(ev)
+    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+    if client.name == &quot;copilot&quot; then
+      vim.lsp.inline_completion.enable(true, { client_id = client.id, bufnr = ev.buf })
+    end
+  end
+})</code></pre>
+</div>
+<div id="tip-nvim-lspconfigに依存しない方法" class="section level3">
+<h3>Tip: nvim-lspconfigに依存しない方法</h3>
+<p><a href="https://github.com/neovim/nvim-lspconfig">nvim-lspconfig</a>プラグインに依存せず設定したい方もいるかもしれません。その場合</p>
+<ol style="list-style-type: decimal">
+<li><p><a href="https://www.npmjs.com/package/@github/copilot-language-server">copilot-language-server</a>の設定を自前で書く</p>
+<ul>
+<li><p>kawarimidollさんの記事が参考になります</p>
+<blockquote>
+<p>Neovim0.11用のLSP設定
+<a href="https://zenn.dev/kawarimidoll/articles/b202e546bca344" class="uri">https://zenn.dev/kawarimidoll/articles/b202e546bca344</a></p>
+</blockquote></li>
+</ul></li>
+<li><p><a href="https://www.npmjs.com/package/@github/copilot-language-server">copilot-language-server</a>がカレントバッファにアタッチされている状態で以下を実行する</p>
+<pre><code>:= vim.lsp.get_clients({ name = &quot;copilot&quot; })[1].request_sync(&quot;signIn&quot;, vim.empty_dict(), 1000, 0)</code></pre></li>
+</ol>
+<p>といった流れになると思われます。</p>
+<p>認証方法についてはvim-jp SlackでGen Fさんが教えてくれました。</p>
+</div>
+</div>
+<div id="enjoy" class="section level2">
+<h2>ENJOY!!</h2>
+<p>数日使ってみた感じだと、補完の速度が<a href="https://github.com/zbirenbaum/copilot.lua">copilot.lua</a>プラグインよりもかなり速い気がします。</p>
+<p>ただし、現時点では<a href="https://github.com/zbirenbaum/copilot.lua">copilot.lua</a>プラグインと違って、補完を行単位や単語単位で確定できません。私は滅多に利用していなかったので、まあいいかなと思ってます。対応については以下のIssueで議論されているので、近く改善されるかもしれません。</p>
+<p>ところで<a href="https://vim-jp.org/ekiden/">Vim駅伝</a>は執筆者を随時募集しています。なんと次回の2025-09-01の枠も空いています。自分なりのVimの使い方からVimとの出会い、Vim友達のこと、Vimにまつわることなら技術記事じゃなくてもOKです。ぜひ気軽に書いてみてください。まだ見ぬ記事と出会えるの楽しみにしてます！</p>
+<blockquote>
+<p><a href="https://github.com/neovim/neovim/issues/35485" class="uri">https://github.com/neovim/neovim/issues/35485</a></p>
+</blockquote>
+</div>
