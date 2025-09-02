@@ -1,0 +1,79 @@
+---
+title: "モノリポだっていけちゃうdenols/ts_ls共存術（Neovim >= 0.11）"
+author: atusy
+date: '2025-09-03'
+slug: node-deno-decision-with-monorepo-support
+categories: [Tech]
+tags: [Neovim, LSP]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+summary: |
+    Neovim >= 0.11では言語サーバーを簡単に自動起動する方法として`vim.lsp.enable({ ... })`があるけど、FileTypeイベントに応じて`vim.lsp.start(...)`を呼べばもっと細かい制御ができるよ。応用すれば、denols/ts_lsの共存も細やか。モノリポだって怖くない。
+---
+
+
+
+<p><a href="https://vim-jp.org/ekiden/">Vim駅伝</a>2025-09-03の記事です。前回の記事はkawarimidollさんによる<a href="https://zenn.dev/vim_jp/articles/a6839f7204a611">Neovim 0.12（開発版）でcopilot-language-serverを設定してみたぞ（脱copilot.lua）</a>でした。私の直近の<a href="https://blog.atusy.net/2025/08/29/copilot-via-nvim-lsp-client/">記事</a>を早速参考にしていただいて、うれしかったです。</p>
+<p>さて、本題。</p>
+<p>ランタイムが群雄割拠しているTypeScript/JavaScriptのプロジェクトにおいて、適切な言語サーバー選びは重要項目です。
+Neovimでの設定方法について毎年のように記事が出ています。</p>
+<ul>
+<li>2024
+<ul>
+<li><a href="https://zenn.dev/vim_jp/articles/10b408bc0cf077">俺の denols/tsserver(vtsls) 共存術 for Neovim 2024</a></li>
+</ul></li>
+<li>2023
+<ul>
+<li><a href="https://zenn.dev/vim_jp/articles/69d26e3f7b0e35">denols/typescript-lsのLSPスイッチングは意外と気を遣うよという話</a></li>
+</ul></li>
+<li>2022
+<ul>
+<li><a href="https://zenn.dev/mochi/articles/e6b2735108157c">neovim lsp でdenolsとtsserverを自動で切り替える</a></li>
+</ul></li>
+<li>2021
+<ul>
+<li><a href="https://zenn.dev/kawarimidoll/articles/2b57745045b225">https://zenn.dev/kawarimidoll/articles/2b57745045b225</a></li>
+</ul></li>
+</ul>
+<p>適切な言語サーバーをバッファにアタッチする方法として、2022年と2024年の記事では、両方をアタッチしてから不適切な方をデタッチしていました。その背景には、<a href="https://github.com/neovim/nvim-lspconfig">nvim-lspconfig</a>プラグインの仕様が関係していたかと思います。このプラグインによる言語サーバーの自動起動機構にユーザー側でロジックを足すことが難しく、停止ロジックでごまかしていたと思います。</p>
+<p>ところが、<code>vim.lsp.enable()</code>が実装されたNeovim &gt;= 0.11で事情が変わり、<a href="https://github.com/neovim/nvim-lspconfig">nvim-lspconfig</a>プラグインを使わずに本体と自身の設定で自動起動を制御するようになりました。たとえば、<code>vim.lsp.enable("denols")</code>を設定に仕込んでおくと、<code>vim.lsp.config.denols.filetypes</code>にマッチするファイルタイプに対して自動的に<code>denols</code>がアタッチされます。</p>
+<p>この、ユーザーに自動起動するか委ねる変化により、<code>ts_ls</code>を使うか<code>denols</code>を使うかも起動のタイミングで決めやすくなりました。無駄にプロセスを起動することもないですし、バッファ単位で言語サーバーを選べるので、nodeとdenoが混在するモノリポなんてレアケースも怖くありません。</p>
+<p>設定はざっくり以下の通りです。</p>
+<pre class="lua"><code>-- 起動条件が単純な言語サーバーは `vim.lsp.enable` で自動起動させる
+vim.lsp.enable({ &quot;lua_ls&quot;, &quot;pyright&quot; })
+
+-- 起動条件が複雑な言語サーバーはFileTypeイベント時に判定する
+--（ts_ls/denols）
+vim.api.nvim_create_autocmd(&quot;FileType&quot;, {
+  group = vim.api.nvim_create_augroup(&quot;LspStartNodeOrDeno&quot;, { clear = true }),
+  callback = function(ctx)
+    if not vim.tbl_contains(
+        { &quot;javascript&quot;, &quot;javascriptreact&quot;, &quot;javascript.jsx&quot;, &quot;typescript&quot;, &quot;typescriptreact&quot;, &quot;typescript.tsx&quot; },
+        ctx.match
+    ) then
+      return
+    end
+
+    -- node
+    if vim.fn.findfile(&quot;package.json&quot;, &quot;.;&quot;) ~= &quot;&quot; then
+      vim.lsp.start(vim.lsp.config.ts_ls)
+      return
+    end
+
+    -- deno
+    vim.lsp.start(vim.lsp.config.denols)
+  end,
+})</code></pre>
+<p>Neovim &gt;= 0.11向けのLSPの設定方法をまず知りたいという方は、kawarimidollさんの記事をご覧ください。</p>
+<blockquote>
+<p><a href="https://zenn.dev/kawarimidoll/articles/b202e546bca344">Neovim0.11用のLSP設定</a></p>
+</blockquote>
+<p>また、nodeかdenoかの判定に<code>package.json</code>の有無を使っていますが、もう少しこだわるならkyoh86さんの記事をご参考ください。</p>
+<blockquote>
+<p><a href="https://zenn.dev/vim_jp/articles/69d26e3f7b0e35">denols/typescript-lsのLSPスイッチングは意外と気を遣うよという話</a></p>
+</blockquote>
+<div id="enjoy" class="section level2">
+<h2>ENJOY!!</h2>
+</div>
