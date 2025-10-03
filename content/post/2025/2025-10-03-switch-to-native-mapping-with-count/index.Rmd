@@ -1,0 +1,69 @@
+---
+title: "countを使ってeasymotionとかでfモーションを拡張した時に組込みのfモーションも残す"
+author: atusy
+date: '2025-10-03'
+slug: switch-to-native-mapping-with-count
+categories: [Tech]
+tags: [Neovim, Vim, Vim駅伝]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+summary:
+    組込みのマッピングを上書きしたいけど、たまに元の機能も使いたい……！なんて場面ではカウントの有無で挙動をわけるのも手ですね。
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+set.seed(123)
+options(digits.secs = 0)
+```
+
+[Vim駅伝](https://vim-jp.org/ekiden/)2025-10-03の記事です。
+
+マッピングの`f`は直後に入力した1文字に該当する箇所へ移動します。
+行内を右側に探索し、`;`で更に右へ、`,`で左に移動できます。
+`F`を使うと移動方向が反対になったり、`t`や`T`を使うと該当箇所の1文字手前に移動したり、仲間が豊富です。
+
+`w`などのモーションに比べて中距離の狙った場所に移動しやすいところが魅力でしょうか。
+
+ところが、`;`を何回押せば目的の箇所に移動できるかわからない、ASCII文字以外への移動が難しいといった課題があります。
+
+そこで、登場するプラグインがいろいろあります。
+
+たとえば、`;`を何回押せば目的の箇所に移動できるかわからない問題に対しては、該当文字にabcd...とラベルをふり、ユーザーがラベルを入力した場所へ移動するプラグインがあります。
+
+* <https://github.com/easymotion/vim-easymotion>
+* <https://github.com/folke/flash.nvim>
+
+特にeasymotionは[Vimmer が紹介する「いぶし銀」なプラグインまとめ（後編）](https://zenn.dev/vim_jp/articles/2023-08-21-vim-accomplished-plugins-result-2)でも紹介された、古くも根強い人気を誇るプラグインです。
+
+ASCII文字以外への移動を可能にするプラグインには私の作った[jab.nvim](https://github.com/atusy/jab.nvim/)があります。
+
+* <https://github.com/atusy/jab.nvim/>
+
+こちらはmigemoという技術を応用して、ローマ字の連想で移動できます。
+たとえば`fa`なら「a」だけでなく「あ」や「合」などが候補になるわけですね。
+ちなみに、easymotionと同じく、移動先はラベルから選びます。
+
+この手のプラグインは便利な一方で、完全にfモーションの類を置き換えてしまうと、たまーに本家の挙動が欲しい……！という事態に遭遇します。
+
+そんな時はカウントを使ってみてはいかがでしょうか。
+つまり、`fa`だと[jab.nvim](https://github.com/atusy/jab.nvim/)を使って非ASCII文字にもマッチするが、`1fa`であればASCII文字としての「a」のみにマッチするわけですね。
+
+```lua
+vim.keymap.set({ "n", "x", "o" }, "f", function()
+  if vim.v.count > 0 then
+    return "f"
+  end
+  return require("jab").f()
+end, { expr = true })
+```
+
+`f`モーションは`;`で移動を繰り返せると紹介しましたが、カウントを使うとn番目のマッチに移動できます。
+カウントを指定しない場合は`1f`相当なので、わざわざ使うことは少ないのですが、これを逆手にとるアイデアです。
+2以上のカウントも組込みを使っておくと、より自然な体験を得られるでしょう。
+
+同様のテクニックは他のマッピングでも考えられそうですね！
+
+# ENJOY!

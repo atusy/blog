@@ -1,0 +1,48 @@
+---
+title: "countを使ってeasymotionとかでfモーションを拡張した時に組込みのfモーションも残す"
+author: atusy
+date: '2025-10-03'
+slug: switch-to-native-mapping-with-count
+categories: [Tech]
+tags: [Neovim, Vim, Vim駅伝]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+summary:
+    組込みのマッピングを上書きしたいけど、たまに元の機能も使いたい……！なんて場面ではカウントの有無で挙動をわけるのも手ですね。
+---
+
+
+
+<p><a href="https://vim-jp.org/ekiden/">Vim駅伝</a>2025-10-03の記事です。</p>
+<p>マッピングの<code>f</code>は直後に入力した1文字に該当する箇所へ移動します。行内を右側に探索し、<code>;</code>で更に右へ、<code>,</code>で左に移動できます。
+<code>F</code>を使うと移動方向が反対になったり、<code>t</code>や<code>T</code>を使うと該当箇所の1文字手前に移動したり、仲間が豊富です。</p>
+<p><code>w</code>などのモーションに比べて中距離の狙った場所に移動しやすいところが魅力でしょうか。</p>
+<p>ところが、<code>;</code>を何回押せば目的の箇所に移動できるかわからない、ASCII文字以外への移動が難しいといった課題があります。</p>
+<p>そこで、登場するプラグインがいろいろあります。</p>
+<p>たとえば、<code>;</code>を何回押せば目的の箇所に移動できるかわからない問題に対しては、該当文字にabcd…とラベルをふり、ユーザーがラベルを入力した場所へ移動するプラグインがあります。</p>
+<ul>
+<li><a href="https://github.com/easymotion/vim-easymotion" class="uri">https://github.com/easymotion/vim-easymotion</a></li>
+<li><a href="https://github.com/folke/flash.nvim" class="uri">https://github.com/folke/flash.nvim</a></li>
+</ul>
+<p>特にeasymotionは<a href="https://zenn.dev/vim_jp/articles/2023-08-21-vim-accomplished-plugins-result-2">Vimmer が紹介する「いぶし銀」なプラグインまとめ（後編）</a>でも紹介された、古くも根強い人気を誇るプラグインです。</p>
+<p>ASCII文字以外への移動を可能にするプラグインには私の作った<a href="https://github.com/atusy/jab.nvim/">jab.nvim</a>があります。</p>
+<ul>
+<li><a href="https://github.com/atusy/jab.nvim/" class="uri">https://github.com/atusy/jab.nvim/</a></li>
+</ul>
+<p>こちらはmigemoという技術を応用して、ローマ字の連想で移動できます。たとえば<code>fa</code>なら「a」だけでなく「あ」や「合」などが候補になるわけですね。ちなみに、easymotionと同じく、移動先はラベルから選びます。</p>
+<p>この手のプラグインは便利な一方で、完全にfモーションの類を置き換えてしまうと、たまーに本家の挙動が欲しい……！という事態に遭遇します。</p>
+<p>そんな時はカウントを使ってみてはいかがでしょうか。つまり、<code>fa</code>だと<a href="https://github.com/atusy/jab.nvim/">jab.nvim</a>を使って非ASCII文字にもマッチするが、<code>1fa</code>であればASCII文字としての「a」のみにマッチするわけですね。</p>
+<pre class="lua"><code>vim.keymap.set({ &quot;n&quot;, &quot;x&quot;, &quot;o&quot; }, &quot;f&quot;, function()
+  if vim.v.count &gt; 0 then
+    return &quot;f&quot;
+  end
+  return require(&quot;jab&quot;).f()
+end, { expr = true })</code></pre>
+<p><code>f</code>モーションは<code>;</code>で移動を繰り返せると紹介しましたが、カウントを使うとn番目のマッチに移動できます。カウントを指定しない場合は<code>1f</code>相当なので、わざわざ使うことは少ないのですが、これを逆手にとるアイデアです。
+2以上のカウントも組込みを使っておくと、より自然な体験を得られるでしょう。</p>
+<p>同様のテクニックは他のマッピングでも考えられそうですね！</p>
+<div id="enjoy" class="section level1">
+<h1>ENJOY!</h1>
+</div>
