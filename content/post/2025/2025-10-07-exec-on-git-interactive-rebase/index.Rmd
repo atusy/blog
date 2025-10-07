@@ -1,0 +1,160 @@
+---
+title: "gitのinteractive rebaseでコミットごとにコマンド実行すると便利"
+author: atusy
+date: '2025-10-07'
+slug: exec-on-git-interactive-rebase
+categories: [Tech]
+tags: [git]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+    toc: true
+highlighhtjs: [Lua]
+summary:
+    gitのinteractive rebase中に任意コマンドを実行できるexecは非常に便利です。コミットごとにテストを実行したり、コミットメッセージ修正を自動化したり、様々な場面で活躍します。
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+set.seed(123)
+options(digits.secs = 0)
+```
+
+`git rebase`コマンド使ってますか？
+
+作業ブランチを`main`ブランチの続きになるようにコミットし直したり、PR前にコミット順序やメッセージを整理したり、様々な場面で活躍します。
+
+便利とは聞くけど、むずかしい……と感じる方はぜひ以下の記事も読んでみてください。
+
+> git rebaseの苦労を減らすための覚え書き <https://blog.atusy.net/2024/11/07/git-rebase/>
+
+rebaseの概説は多くの方が解説してると思うので、ここでは割愛して、本題に入りましょう。
+
+rebaseの中でもinteractive rebaseは、rebase方針を細やかに指定できる強力な機能です。
+段階的に任意コマンド実行を挟んでテストしたりもできるので、使い方を紹介します。
+
+## interactive rebase基本のキ
+
+interactive rebase(`git rebase --interactive`)は、主にコミット整理で大活躍します。
+
+たとえば`git rebase --interactive 6e16bf2a~`とすると、`6e16bf2a`以降のコミットをどう積み直すかを対話的にTODO化できます。
+
+イメージとしては以下のような感じでrebase対象のコミットが並んだファイルが開きます。
+
+```gitrebase
+pick 6e16bf2a # refactor(A): ...
+pick 29714a5c # feat(A): ... 
+pick a0bccf08 # refactor(B): ...
+pick af15147f # feat(B): ...
+```
+
+`pick`はコミットを利用するという意味ですが、順序を変えると利用する順序を変えられます。
+たとえば、`refactor`コミットを先にしてから`feat`コミットを積み直すようにできます。
+
+```gitrebase
+pick 6e16bf2a # refactor(A): ...
+pick a0bccf08 # refactor(B): ...
+pick 29714a5c # feat(A): ... 
+pick af15147f # feat(B): ...
+```
+
+これを保存してファイルを閉じると、TODO通りにコミットが積み直されます。
+rebaseの基底となるコミットにリセットしてからcommitを欲しい順にcherry-pickするイメージですね。
+
+```bash
+git reset --hard 6e16bf2a~
+git cherry-pick 6e16bf2a
+git cherry-pick a0bccf08
+git cherry-pick 29714a5c
+git cherry-pick af15147f
+```
+
+cherry-pickと比べて、やりたいことをコミットメッセージを見ながら決めやすい点が魅力です。
+
+他にも`pick`を`drop`に変えてコミットを削除、`reword`に変えてコミットメッセージ編集など、様々な操作が可能です。
+
+## interactive rebase中に任意コマンドを実行
+
+色々できるinteractive rebaseですが、中でもなんでもアリで便利なのが`exec`です。
+これは指定したタイミングで任意のコマンドを実行できます。
+
+### interactive rebase中にテストを実行
+
+たとえば、コミットごとに`make test`を実行して、コミット単位でテスト通過を確認できます。
+
+```gitrebase
+pick 6e16bf2a # refactor(A): ...
+exec make test
+pick 29714a5c # feat(A): ... 
+exec make test
+pick a0bccf08 # refactor(B): ...
+exec make test
+pick af15147f # feat(B): ...
+exec make test
+```
+
+テスト失敗など、指定コマンドが非0の終了コードで終了すると、そこで`rebase`は一時停止します。
+そうしたら実装を修正して`git rebase --continue`して続きを実行できるわけですね。
+
+`main`ブランチの変更を取り込んだらテスト通らなくなった！といったケースで使うと、段階的に修正しながらコミットを積み直せて便利です。
+あるいは、テスト不要なコミットを簡単にスキップできる点も魅力ですね。
+
+```gitrebase
+pick 6e16bf2a # refactor(A): ...
+pick 29714a5c # feat(A): ... 
+exec make test
+pick a0bccf08 # refactor(B): ...
+pick af15147f # feat(B): ...
+exec make test
+```
+
+### interactive rebase中のコミットメッセージ修正をプログラム化
+
+`exec`はなんでもできちゃうので、`reword`や`drop`、`edit`に相当することもできちゃいます。
+
+* `reword`: `exec git commit --amend ...`
+* `drop`: `exec git reset --hard HEAD^`
+* `edit`: `exec false`
+
+え、便利なの……？となりますが、`reword`をコマンドで実行できるのは結構便利です。
+多くの場合はTODOリスト編集時にメッセージの修正方針を考えるので、その場で思考をコードに掃き出したほうが作業効率が高いです。
+
+```gitrebase
+pick 6e16bf2a # refactor(A): ...
+exec git commit --amend -m "feat(A): ..."
+pick 29714a5c # feat(A): ... 
+```
+
+`reword`しようとして、あれ？なんてメッセージにしようと思ったんだっけ？と困ることが減りますね。
+コミットメッセージに`feat:`プレフィックスをつけわすれたから足したいといった機械的な修正を大量に行う場合も活躍します。
+
+欠点として、`git commit --amend`ではコミットメッセージの本文（body）を残しながらタイトルを修正するには手間がかかります。
+そんな時は、タイトルだけ編集できるコマンドを用意して、`exec git retitle "feat(A): ..."`するといいですね。
+
+```bash
+#!/usr/bin/env bash
+
+# ~/.local/bin/git-rebtitle などに置いておく
+# gitの仕様で`git retitle`としてサブコマンド扱いできる
+
+TITLE="$1"
+shift 1
+BODY="$(git log -n 1 --pretty=format:%b)"
+
+printf "%s\n\n%s" "$TITLE" "$BODY" | \
+    git commit --amend --allow-empty --file - "$@"
+```
+
+ちなみにVimmerなら`Vypcf#git retitle<right>"<end>"`のようにして、元のタイトルを流用しながら変更する準備を整えるのも簡単です。
+
+<h2> ENJOY! </h2>
+
+interactive rebase中の`exec`は非常に強力です。
+特にコマンドが実行失敗した時に`rebase`が一時停止するところが最高ですね。
+勝手に`rebase`が進まないので、必要な修正を行えます。
+
+テストという観点では、`git bisect`という目的の似たコマンドもあります。
+`bisect`は問題のあるコミットを特定することに集中する代わりに2分探索で効率化するところが強みです。
+`interactive rebase`中に`exec make test`するようなケースは複数箇所でテストが失敗しうるケースで逐次修正したい場合に活躍するでしょう。
+
+Gitはそれ早く教えてよ！となる便利機能が満載でたのしいですね！

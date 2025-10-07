@@ -1,0 +1,119 @@
+---
+title: "gitのinteractive rebaseでコミットごとにコマンド実行すると便利"
+author: atusy
+date: '2025-10-07'
+slug: exec-on-git-interactive-rebase
+categories: [Tech]
+tags: [git]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+    toc: true
+highlighhtjs: [Lua]
+summary:
+    gitのinteractive rebase中に任意コマンドを実行できるexecは非常に便利です。コミットごとにテストを実行したり、コミットメッセージ修正を自動化したり、様々な場面で活躍します。
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#interactive-rebase%E5%9F%BA%E6%9C%AC%E3%81%AE%E3%82%AD" id="toc-interactive-rebase基本のキ">interactive rebase基本のキ</a></li>
+<li><a href="#interactive-rebase%E4%B8%AD%E3%81%AB%E4%BB%BB%E6%84%8F%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89%E3%82%92%E5%AE%9F%E8%A1%8C" id="toc-interactive-rebase中に任意コマンドを実行">interactive rebase中に任意コマンドを実行</a>
+<ul>
+<li><a href="#interactive-rebase%E4%B8%AD%E3%81%AB%E3%83%86%E3%82%B9%E3%83%88%E3%82%92%E5%AE%9F%E8%A1%8C" id="toc-interactive-rebase中にテストを実行">interactive rebase中にテストを実行</a></li>
+<li><a href="#interactive-rebase%E4%B8%AD%E3%81%AE%E3%82%B3%E3%83%9F%E3%83%83%E3%83%88%E3%83%A1%E3%83%83%E3%82%BB%E3%83%BC%E3%82%B8%E4%BF%AE%E6%AD%A3%E3%82%92%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%A0%E5%8C%96" id="toc-interactive-rebase中のコミットメッセージ修正をプログラム化">interactive rebase中のコミットメッセージ修正をプログラム化</a></li>
+</ul></li>
+</ul>
+</div>
+
+<p><code>git rebase</code>コマンド使ってますか？</p>
+<p>作業ブランチを<code>main</code>ブランチの続きになるようにコミットし直したり、PR前にコミット順序やメッセージを整理したり、様々な場面で活躍します。</p>
+<p>便利とは聞くけど、むずかしい……と感じる方はぜひ以下の記事も読んでみてください。</p>
+<blockquote>
+<p>git rebaseの苦労を減らすための覚え書き <a href="https://blog.atusy.net/2024/11/07/git-rebase/" class="uri">https://blog.atusy.net/2024/11/07/git-rebase/</a></p>
+</blockquote>
+<p>rebaseの概説は多くの方が解説してると思うので、ここでは割愛して、本題に入りましょう。</p>
+<p>rebaseの中でもinteractive rebaseは、rebase方針を細やかに指定できる強力な機能です。段階的に任意コマンド実行を挟んでテストしたりもできるので、使い方を紹介します。</p>
+<div id="interactive-rebase基本のキ" class="section level2">
+<h2>interactive rebase基本のキ</h2>
+<p>interactive rebase(<code>git rebase --interactive</code>)は、主にコミット整理で大活躍します。</p>
+<p>たとえば<code>git rebase --interactive 6e16bf2a~</code>とすると、<code>6e16bf2a</code>以降のコミットをどう積み直すかを対話的にTODO化できます。</p>
+<p>イメージとしては以下のような感じでrebase対象のコミットが並んだファイルが開きます。</p>
+<pre class="gitrebase"><code>pick 6e16bf2a # refactor(A): ...
+pick 29714a5c # feat(A): ... 
+pick a0bccf08 # refactor(B): ...
+pick af15147f # feat(B): ...</code></pre>
+<p><code>pick</code>はコミットを利用するという意味ですが、順序を変えると利用する順序を変えられます。たとえば、<code>refactor</code>コミットを先にしてから<code>feat</code>コミットを積み直すようにできます。</p>
+<pre class="gitrebase"><code>pick 6e16bf2a # refactor(A): ...
+pick a0bccf08 # refactor(B): ...
+pick 29714a5c # feat(A): ... 
+pick af15147f # feat(B): ...</code></pre>
+<p>これを保存してファイルを閉じると、TODO通りにコミットが積み直されます。
+rebaseの基底となるコミットにリセットしてからcommitを欲しい順にcherry-pickするイメージですね。</p>
+<pre class="bash"><code>git reset --hard 6e16bf2a~
+git cherry-pick 6e16bf2a
+git cherry-pick a0bccf08
+git cherry-pick 29714a5c
+git cherry-pick af15147f</code></pre>
+<p>cherry-pickと比べて、やりたいことをコミットメッセージを見ながら決めやすい点が魅力です。</p>
+<p>他にも<code>pick</code>を<code>drop</code>に変えてコミットを削除、<code>reword</code>に変えてコミットメッセージ編集など、様々な操作が可能です。</p>
+</div>
+<div id="interactive-rebase中に任意コマンドを実行" class="section level2">
+<h2>interactive rebase中に任意コマンドを実行</h2>
+<p>色々できるinteractive rebaseですが、中でもなんでもアリで便利なのが<code>exec</code>です。これは指定したタイミングで任意のコマンドを実行できます。</p>
+<div id="interactive-rebase中にテストを実行" class="section level3">
+<h3>interactive rebase中にテストを実行</h3>
+<p>たとえば、コミットごとに<code>make test</code>を実行して、コミット単位でテスト通過を確認できます。</p>
+<pre class="gitrebase"><code>pick 6e16bf2a # refactor(A): ...
+exec make test
+pick 29714a5c # feat(A): ... 
+exec make test
+pick a0bccf08 # refactor(B): ...
+exec make test
+pick af15147f # feat(B): ...
+exec make test</code></pre>
+<p>テスト失敗など、指定コマンドが非0の終了コードで終了すると、そこで<code>rebase</code>は一時停止します。そうしたら実装を修正して<code>git rebase --continue</code>して続きを実行できるわけですね。</p>
+<p><code>main</code>ブランチの変更を取り込んだらテスト通らなくなった！といったケースで使うと、段階的に修正しながらコミットを積み直せて便利です。あるいは、テスト不要なコミットを簡単にスキップできる点も魅力ですね。</p>
+<pre class="gitrebase"><code>pick 6e16bf2a # refactor(A): ...
+pick 29714a5c # feat(A): ... 
+exec make test
+pick a0bccf08 # refactor(B): ...
+pick af15147f # feat(B): ...
+exec make test</code></pre>
+</div>
+<div id="interactive-rebase中のコミットメッセージ修正をプログラム化" class="section level3">
+<h3>interactive rebase中のコミットメッセージ修正をプログラム化</h3>
+<p><code>exec</code>はなんでもできちゃうので、<code>reword</code>や<code>drop</code>、<code>edit</code>に相当することもできちゃいます。</p>
+<ul>
+<li><code>reword</code>: <code>exec git commit --amend ...</code></li>
+<li><code>drop</code>: <code>exec git reset --hard HEAD^</code></li>
+<li><code>edit</code>: <code>exec false</code></li>
+</ul>
+<p>え、便利なの……？となりますが、<code>reword</code>をコマンドで実行できるのは結構便利です。多くの場合はTODOリスト編集時にメッセージの修正方針を考えるので、その場で思考をコードに掃き出したほうが作業効率が高いです。</p>
+<pre class="gitrebase"><code>pick 6e16bf2a # refactor(A): ...
+exec git commit --amend -m &quot;feat(A): ...&quot;
+pick 29714a5c # feat(A): ... </code></pre>
+<p><code>reword</code>しようとして、あれ？なんてメッセージにしようと思ったんだっけ？と困ることが減りますね。コミットメッセージに<code>feat:</code>プレフィックスをつけわすれたから足したいといった機械的な修正を大量に行う場合も活躍します。</p>
+<p>欠点として、<code>git commit --amend</code>ではコミットメッセージの本文（body）を残しながらタイトルを修正するには手間がかかります。そんな時は、タイトルだけ編集できるコマンドを用意して、<code>exec git retitle "feat(A): ..."</code>するといいですね。</p>
+<pre class="bash"><code>#!/usr/bin/env bash
+
+# ~/.local/bin/git-rebtitle などに置いておく
+# gitの仕様で`git retitle`としてサブコマンド扱いできる
+
+TITLE=&quot;$1&quot;
+shift 1
+BODY=&quot;$(git log -n 1 --pretty=format:%b)&quot;
+
+printf &quot;%s\n\n%s&quot; &quot;$TITLE&quot; &quot;$BODY&quot; | \
+    git commit --amend --allow-empty --file - &quot;$@&quot;</code></pre>
+<p>ちなみにVimmerなら<code>Vypcf#git retitle&lt;right&gt;"&lt;end&gt;"</code>のようにして、元のタイトルを流用しながら変更する準備を整えるのも簡単です。</p>
+<h2>
+ENJOY!
+</h2>
+<p>interactive rebase中の<code>exec</code>は非常に強力です。特にコマンドが実行失敗した時に<code>rebase</code>が一時停止するところが最高ですね。勝手に<code>rebase</code>が進まないので、必要な修正を行えます。</p>
+<p>テストという観点では、<code>git bisect</code>という目的の似たコマンドもあります。
+<code>bisect</code>は問題のあるコミットを特定することに集中する代わりに2分探索で効率化するところが強みです。
+<code>interactive rebase</code>中に<code>exec make test</code>するようなケースは複数箇所でテストが失敗しうるケースで逐次修正したい場合に活躍するでしょう。</p>
+<p>Gitはそれ早く教えてよ！となる便利機能が満載でたのしいですね！</p>
+</div>
+</div>
