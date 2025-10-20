@@ -1,0 +1,132 @@
+---
+title: "Vimのマッピングを拡張するサブモードに開始処理・終了処理を加える"
+author: atusy
+date: '2025-10-20'
+slug: hooks-on-submode-in-vim
+categories: [Tech]
+tags: [Neovim, Vim, Vim駅伝]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+summary: |
+    サブモードを使うと`gjgjgkgjgj`のような繰り返しを`gjjkjj`のように簡略化する、`H`単発で画面上端に移動し連打で`<PageUp>`する、`j`連打で移動を加速するなど、さまざまな応用が可能です。
+    更にマッピングの工夫で開始処理・終了処理も実現できるので紹介します。
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+set.seed(123)
+options(digits.secs = 0)
+```
+
+Vimはノーマルモードやインサートモードなどモードに応じてキーの機能が変わるエディタです。
+実はマッピングを工夫することで同一モード内で一時的に機能を変更するサブモード（通称）も実現できます。
+
+たとえば、折り返しを考慮してカーソルを上下に移動する`gj`や`gk`の繰り返しを楽にするサブモードは以下のように簡単に定義できます。
+通常なら下下上下下と移動するのに`gjgjgkgjgj`と入力すべきところ、`gjjkjj`といった具合に`g`の入力を省略可能にするサブモードですね。
+
+```vim
+" 通常のgj, gkのあとにplugマッピングでサブモードに入る
+" 実際にはplugマッピングをprefixにした入力待ち状態にすぎない
+nnoremap gj gj<plug>(submode-gjk)
+nnoremap gk gk<plug>(submode-gjk)
+
+" サブモード内でのj,kの挙動を定義
+nnoremap <plug>(submode-gjk)j gj<plug>(submode-gjk)
+nnoremap <plug>(submode-gjk)k gk<plug>(submode-gjk)
+
+" サブモード終了時はなにもしない
+nnoremap <plug>(submode-gjk) <nop>
+```
+
+このサブモードで`jk`以外を入力すると親モードの挙動に従うので、`gjjl`とすれば、2行下の1文字右に移動できます。
+
+同様に`gtttTtT`のようにしてタブページを移動しても便利ですし、他にも様々な応用があります。
+
+- H/LとPageUp/PageDownを共存させる設定 (submode編) <https://blog.atusy.net/2024/05/29/vim-hl-enhanced/>
+- Vimのj/kを加速させるサブモード <https://blog.atusy.net/2024/06/12/vim-submode-jjjj/>
+
+ところでサブモードの終了処理の実装方法について[vim-jp slack](https://vim-jp.org/docs/chat.html)で質問がありました。
+
+そこで、本記事ではサブモードの開始処理・終了処理をマッピングで実現する方法を紹介します。
+
+# サブモード開始処理
+
+開始処理は素朴には`gj`や`gk`のマッピング内で実現できます。
+
+```vim
+nnoremap gj gj<cmd>echo 'Enter submode'<cr><plug>(submode-gjk-enter)
+nnoremap gk gk<cmd>echo 'Enter submode'<cr><plug>(submode-gjk-enter)
+```
+
+コード重複を避けるには、サブモード開始を別のplugマッピングに分けるとよいでしょう。
+サブモードで大量のマッピングを定義する場合、開始処理を一括で変更できるので便利です。
+
+```vim
+nnoremap gj gj<plug>(submode-gjk-enter)
+nnoremap gk gk<plug>(submode-gjk-enter)
+nnoremap <plug>(submode-gjk-enter) <cmd>echo "Enter submode"<cr><plug>(submode-gjk)
+```
+
+# サブモード終了処理
+
+終了処理を素朴に実装するなら`<plug>(submode-gjk)`に`<nop>`以外を割り当てます。
+これでサブモード待機時間の終了やサブモード対象外キーの入力による終了処理を定義できます。
+
+```vim
+nnoremap <plug>(submode-gjk) <cmd>echo "Leave submode"<cr>
+```
+
+終了処理は別のplugマッピングに分けて定義してもよいでしょう。
+`gj`、`gk`くらいなら関係ないかもしれませんが、特定条件で即座にサブモードを終了したい場合に便利です。
+たとえば、`gj<esc>`したらサブモードを即座に終了することもできます。
+マッピングなしに`gj<esc>`してもサブモードは終了しますが、`<esc>`はサブモードを終了してから親モードで実行されるため、意図しない挙動になる可能性があります。
+
+
+```vim
+nnoremap <plug>(submode-gjk) <plug>(submode-gjk-leave)
+nnoremap <plug>(submode-gjk-leave) <cmd>echo "Leave submode"<cr>
+
+" サブモード中に`x`を押したら何もせずに終了
+nnoremap <plug>(submode-gjk)<esc> <plug>(submode-gjk-leave)
+```
+
+# まとめ
+
+以上をまとめると以下のようになります。
+みなさんもオレオレサブモードを作ってみてください！
+
+```vim
+" サブモードを開始するマッピングの定義
+nnoremap gj gj<plug>(submode-gjk-enter)
+nnoremap gk gk<plug>(submode-gjk-enter)
+
+" サブモード開始処理
+nnoremap <plug>(submode-gjk-enter) <cmd>echo "Enter submode"<cr><plug>(submode-gjk)
+
+" サブモード終了処理
+nnoremap <plug>(submode-gjk) <plug>(submode-gjk-leave)
+nnoremap <plug>(submode-gjk-leave) <cmd>echo "Leave submode"<cr>
+
+" サブモード内でのj,kの挙動を定義
+nnoremap <plug>(submode-gjk)j gj<plug>(submode-gjk)
+nnoremap <plug>(submode-gjk)k gk<plug>(submode-gjk)
+```
+
+# ENJOY!
+
+[Vim駅伝](https://vim-jp.org/ekiden/)2025-10-10の記事でした。
+
+前回2025-10-17の記事はkawarimidollさんによる「[Neovimのファイルタイプ検出は自分で微調整できるよ](https://zenn.dev/vim_jp/articles/fad47dfb5fcd09)」でした。
+
+`vim.filetype.add()`による微調整って便利ですよね。
+記事内でも言及頂いてますが、私も多用しています。
+
+- Neovimでファイルタイプ判定にShebangを使う <https://blog.atusy.net/2025/04/15/nvim-filetype-matching-with-shebang/>
+- chezmoiを使って管理しているdotfileのファイルタイプをNeovimにうまく認識させる <https://blog.atusy.net/2023/01/11/neovim-filetype-matching-with-chezmoi/>
+
+次回2025-10-22の記事はkamechaさんによる「縦のカーソル移動を怠惰にやろう」だそうです。
+これまた先日もvim-jp slackで話題になったところ……！
+
+お楽しみに！
