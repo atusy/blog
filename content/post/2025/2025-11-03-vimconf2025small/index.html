@@ -1,0 +1,107 @@
+---
+title: "VimConf 2025 Smallでtreesitterに関する登壇しました"
+author: atusy
+date: '2025-11-03'
+slug: vimconf2025small
+categories: [Tech]
+tags: [Neovim, Vim, VimConf]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+summary: |
+
+---
+
+
+
+<p>2025年11月2日に開催されたVimConf 2025 Smallで登壇してきました。初参加で登壇！めっちゃどきどきしながらこの日を迎えました。</p>
+<p>Smallということで、国際カンファレンスの看板を落とし、海外ゲストなし、同時通訳なしで、日本語発表可としたそうです。来年はBigになって帰ってくるといいですね。</p>
+<p>さて、私は「<a href="https://atusy.github.io/vimconf-2025-small/">Beyond Syntax Highlighting in Neovim: Unlocking the Power of Tree-sitter</a>」というタイトルで登壇しました。</p>
+<blockquote>
+<p><a href="https://atusy.github.io/vimconf-2025-small/" class="uri">https://atusy.github.io/vimconf-2025-small/</a></p>
+</blockquote>
+<p>当日の様子は以下から視聴可能です。再生ボタンを押すと丁度、私の発表になっているはず。</p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/9MQpu0nxl5E?si=-loE-piWQbqERz6b&amp;start=17471" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+</iframe>
+<p>感想もりだくさんなのですが、Koronさんがブログ書くまでVimConfは終わらないよとのことだったので、ひとまず発表者視点での感想を以下にまとめておきます。</p>
+<div id="登壇内容について" class="section level2">
+<h2>登壇内容について</h2>
+<p>スライドは英語が要件でしたが、口頭は日本語でも英語でもよいとのことで、結果として英語にしました。運営の推奨は日本語でしたが、友人（<a href="https://x.com/ryoppippi">ryoppippi</a>）が配信あるんだからぜったい英語のほうがいいよと言ってくれたのもあり悩みました。自分は2言語同時に扱うと何を話すべきか混乱しやすいので、スライドに合わせて英語にした形です。</p>
+<p>というわけで、日本語でたのむ！と思ったかたもいらっしゃるかもしれないので、簡単に要点をまとめておきます。</p>
+<ol style="list-style-type: decimal">
+<li>Tree-sitterはNeovimのシンタックスハイライトを支える重要技術</li>
+<li>ただ、Tree-sitterを使うと言語のパース結果を得られるので、他にも様々な応用方法があるよ
+<ul>
+<li>どんな使い道があるか、どんな実装方法があるか知っておくと、自分のニーズを満たすのに役立つよ</li>
+<li>機能例
+<ul>
+<li>組込み
+<ul>
+<li>コードの折り畳み</li>
+<li>文脈に合わせたコンテキストメニュー</li>
+<li>ソースコード内に出現する別言語への再帰的な機能の適用（インジェクション）</li>
+</ul></li>
+<li>プラグイン
+<ul>
+<li><a href="https://github.com/andymass/vim-matchup">andymass/vim-matchup</a>: if-else-endや引用符などのキーワード間の移動</li>
+<li><a href="https://github.com/nvim-treesitter/nvim-treesitter-context">nvim-treesitter/nvim-treesitter-context</a>: 画面外に出たコンテキスト情報を画面丈夫に表示（マークダウンの見出しとか）</li>
+<li><a href="https://github.com/haringsrob/nvim_context_vt">haringsrob/nvim_context_vt</a>: <code>end</code>などのキーワードが何を終わらせているのかを表示</li>
+<li><a href="https://github.com/atusy/treemonkey.nvim">atusy/treemonkey.nvim</a>: 文法的に意味のある範囲を素早く選択</li>
+<li>など</li>
+</ul></li>
+</ul></li>
+<li>実装方法
+<ul>
+<li>Query-based: Query言語によるパース結果の検索・抽出</li>
+<li>Parser-based: パース結果として得られるノードの種類を直接参照・利用</li>
+<li>Tree-traversal-based: パース結果のツリー構造を辿って目的のノードを発見（query不要でparser非依存）</li>
+<li>Callback-based: ノード情報をユーザーに与え、処理を任せる</li>
+</ul></li>
+</ul></li>
+<li>これらの機能の中にはtreesitterを基盤とした言語サーバーから提供可能だし、やれると嬉しいよ、実装中だよ（<a href="https://github.com/atusy/treesitter-ls">atusy/treesitter-ls</a>）
+<ol style="list-style-type: lower-alpha">
+<li>エディタはLSP Clientの機能さえ持てば、リッチな機能を簡単に手に入れられる
+<ul>
+<li>Bram’s Vimなどさまままなエディタがシンタックスハイライトなどの恩恵をうけられる</li>
+<li>新しいエディタを作るときに、実装すべき範囲を限定できる</li>
+</ul></li>
+<li>言語専用の言語サーバーの機能が不足するときにフォールバックできる</li>
+<li>新言語用に言語サーバーを実装するかわりにtreesitterのパーサー・クエリを用意するだけで、簡素なエディタ機能を提供できる
+<ul>
+<li>少しだけ楽できる</li>
+</ul></li>
+<li>言語サーバーをインジェクションできる
+<ul>
+<li>マークダウンのコードブロックなどを再帰的にパースできる性質を利用し、内容を言語サーバーに渡すことで、コードブロック内での定義ジャンプなどが可能になる</li>
+</ul></li>
+</ol></li>
+</ol>
+<p>ざっとこんな感じです。詳しくは登壇内容をご覧ください。あるいは私に直接聞いてもらってもうれしいです。</p>
+<p>最後の言語サーバーについては、まだシンタックスハイライトくらいしか使えない開発段階のものなので、今後に乞うご期待です。ぜひ以下からスポンサー支援いただけると嬉しいです。</p>
+<blockquote>
+<p><a href="https://github.com/sponsors/atusy" class="uri">https://github.com/sponsors/atusy</a></p>
+</blockquote>
+</div>
+<div id="登壇の感想" class="section level2">
+<h2>登壇の感想</h2>
+<p>こんな感じで、発表は大成功だったかなと思います！楽しかった！</p>
+<ul>
+<li>tree-sitterを使うといろんなことができて、エディタ体験がよくなるってことが伝わった！
+<ul>
+<li>特に <a href="https://github.com/nvim-treesitter/nvim-treesitter-context">nvim-treesitter/nvim-treesitter-context</a> と <a href="https://github.com/atusy/treemonkey.nvim">atusy/treemonkey.nvim</a> は強い関心が寄せられてた</li>
+</ul></li>
+<li>hrsh7thさんとか、ごりごりのプラグイン開発者にも、いろいろやってみたいという気持ちをいだいてもらえた</li>
+<li>treesitter-lsはかなり関心が高い</li>
+<li>登壇内容やブログ記事に関して、いっぱいフィードバックもらえた</li>
+<li>ogakenさんからスポンサー支援もらえた！
+<ul>
+<li><a href="https://github.com/sponsors/atusy" class="uri">https://github.com/sponsors/atusy</a></li>
+</ul></li>
+</ul>
+<p>こうやってフィードバックをいっぱいもらえるのは本当にうれしいですね。私ももっと感想を色んな場面で伝えていきたいなと思いました。</p>
+<p>あと、登壇までにtreesitter-lsを完成させられなかったのは本当に悔しいですが、ぜひ次のVimConfには完成版をひっさげて2回目の登壇を成したいと思います！</p>
+</div>
+<div id="enjoy" class="section level1">
+<h1>ENJOY!</h1>
+</div>

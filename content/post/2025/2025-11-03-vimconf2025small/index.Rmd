@@ -1,0 +1,104 @@
+---
+title: "VimConf 2025 Smallでtreesitterに関する登壇しました"
+author: atusy
+date: '2025-11-03'
+slug: vimconf2025small
+categories: [Tech]
+tags: [Neovim, Vim, VimConf]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+summary: |
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+set.seed(123)
+options(digits.secs = 0)
+```
+
+2025年11月2日に開催されたVimConf 2025 Smallで登壇してきました。
+初参加で登壇！
+めっちゃどきどきしながらこの日を迎えました。
+
+Smallということで、国際カンファレンスの看板を落とし、海外ゲストなし、同時通訳なしで、日本語発表可としたそうです。
+来年はBigになって帰ってくるといいですね。
+
+さて、私は「[Beyond Syntax Highlighting in Neovim: Unlocking the Power of Tree-sitter](https://atusy.github.io/vimconf-2025-small/)」というタイトルで登壇しました。
+
+> <https://atusy.github.io/vimconf-2025-small/>
+
+当日の様子は以下から視聴可能です。
+再生ボタンを押すと丁度、私の発表になっているはず。
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/9MQpu0nxl5E?si=-loE-piWQbqERz6b&amp;start=17471" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+感想もりだくさんなのですが、Koronさんがブログ書くまでVimConfは終わらないよとのことだったので、ひとまず発表者視点での感想を以下にまとめておきます。
+
+## 登壇内容について
+
+スライドは英語が要件でしたが、口頭は日本語でも英語でもよいとのことで、結果として英語にしました。
+運営の推奨は日本語でしたが、友人（[ryoppippi](https://x.com/ryoppippi)）が配信あるんだからぜったい英語のほうがいいよと言ってくれたのもあり悩みました。
+自分は2言語同時に扱うと何を話すべきか混乱しやすいので、スライドに合わせて英語にした形です。
+
+というわけで、日本語でたのむ！と思ったかたもいらっしゃるかもしれないので、簡単に要点をまとめておきます。
+
+1. Tree-sitterはNeovimのシンタックスハイライトを支える重要技術
+1. ただ、Tree-sitterを使うと言語のパース結果を得られるので、他にも様々な応用方法があるよ
+    * どんな使い道があるか、どんな実装方法があるか知っておくと、自分のニーズを満たすのに役立つよ
+    * 機能例
+        * 組込み
+            * コードの折り畳み
+            * 文脈に合わせたコンテキストメニュー
+            * ソースコード内に出現する別言語への再帰的な機能の適用（インジェクション）
+        * プラグイン
+            * [andymass/vim-matchup](https://github.com/andymass/vim-matchup): if-else-endや引用符などのキーワード間の移動
+            * [nvim-treesitter/nvim-treesitter-context](https://github.com/nvim-treesitter/nvim-treesitter-context): 画面外に出たコンテキスト情報を画面丈夫に表示（マークダウンの見出しとか）
+            * [haringsrob/nvim_context_vt](https://github.com/haringsrob/nvim_context_vt): `end`などのキーワードが何を終わらせているのかを表示
+            * [atusy/treemonkey.nvim](https://github.com/atusy/treemonkey.nvim): 文法的に意味のある範囲を素早く選択
+            * など
+    * 実装方法
+        * Query-based: Query言語によるパース結果の検索・抽出
+        * Parser-based: パース結果として得られるノードの種類を直接参照・利用
+        * Tree-traversal-based: パース結果のツリー構造を辿って目的のノードを発見（query不要でparser非依存）
+        * Callback-based: ノード情報をユーザーに与え、処理を任せる
+1. これらの機能の中にはtreesitterを基盤とした言語サーバーから提供可能だし、やれると嬉しいよ、実装中だよ（[atusy/treesitter-ls](https://github.com/atusy/treesitter-ls)）
+    a) エディタはLSP Clientの機能さえ持てば、リッチな機能を簡単に手に入れられる
+        * Bram's Vimなどさまままなエディタがシンタックスハイライトなどの恩恵をうけられる
+        * 新しいエディタを作るときに、実装すべき範囲を限定できる
+    a) 言語専用の言語サーバーの機能が不足するときにフォールバックできる
+    a) 新言語用に言語サーバーを実装するかわりにtreesitterのパーサー・クエリを用意するだけで、簡素なエディタ機能を提供できる
+        * 少しだけ楽できる
+    a) 言語サーバーをインジェクションできる
+        * マークダウンのコードブロックなどを再帰的にパースできる性質を利用し、内容を言語サーバーに渡すことで、コードブロック内での定義ジャンプなどが可能になる
+
+ざっとこんな感じです。
+詳しくは登壇内容をご覧ください。
+あるいは私に直接聞いてもらってもうれしいです。
+
+最後の言語サーバーについては、まだシンタックスハイライトくらいしか使えない開発段階のものなので、今後に乞うご期待です。
+ぜひ以下からスポンサー支援いただけると嬉しいです。
+
+> <https://github.com/sponsors/atusy>
+
+## 登壇の感想
+
+こんな感じで、発表は大成功だったかなと思います！楽しかった！
+
+* tree-sitterを使うといろんなことができて、エディタ体験がよくなるってことが伝わった！
+  * 特に [nvim-treesitter/nvim-treesitter-context](https://github.com/nvim-treesitter/nvim-treesitter-context) と [atusy/treemonkey.nvim](https://github.com/atusy/treemonkey.nvim) は強い関心が寄せられてた
+* hrsh7thさんとか、ごりごりのプラグイン開発者にも、いろいろやってみたいという気持ちをいだいてもらえた
+* treesitter-lsはかなり関心が高い
+* 登壇内容やブログ記事に関して、いっぱいフィードバックもらえた
+* ogakenさんからスポンサー支援もらえた！
+    * <https://github.com/sponsors/atusy>
+
+こうやってフィードバックをいっぱいもらえるのは本当にうれしいですね。
+私ももっと感想を色んな場面で伝えていきたいなと思いました。
+
+あと、登壇までにtreesitter-lsを完成させられなかったのは本当に悔しいですが、ぜひ次のVimConfには完成版をひっさげて2回目の登壇を成したいと思います！
+
+
+# ENJOY!
