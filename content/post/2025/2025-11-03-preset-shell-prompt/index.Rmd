@@ -96,6 +96,25 @@ end
 
 > <https://github.com/Shougo/ddt-ui-shell/commit/bb509378f0246a95c4538acafa6272eed7415325>
 
+## 名前の由来
+
+最初は`preprompt`と名付けました。
+しかしpromptとは`$ git`の`$`の部分であって、`git`の部分はバッファなので間違えだなと気付きました。
+
+次に`prefix`を検討しましたが、検索性が悪いのとキャッチーさに欠けるなと感じました。
+
+短かくて覚えやすくて名前がいいなとvim-jp Slackで相談したところ、`by`や`using`などの案をいただきました。
+
+> by git, add some file.txt
+
+とverbalに表現できていいなと思ったのと、
+
+> [by-binds-yourself](https://github.com/atusy/by-binds-yourself)
+
+という再帰的頭字語を思いついたことで、`by`に決定しました。
+
+これなら検索もしやすいです。
+
 ## ENJOY
 
 気に入ったかたはぜひstarお願いします！
