@@ -1,5 +1,5 @@
 ---
-title: "zshやfishで類似コマンドの繰り返しを補助するbyコマンド作った（atusy/by-bind-yourself）"
+title: "zshやfishで類似コマンドの繰り返しを補助するbyコマンド作った（atusy/by-binds-yourself）"
 author: atusy
 date: '2025-11-21'
 slug: by-binds-yourself
