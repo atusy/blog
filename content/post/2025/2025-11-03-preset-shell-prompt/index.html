@@ -1,0 +1,86 @@
+---
+title: "zshやfishで類似コマンドの繰り返しを補助するbyコマンド作った（atusy/by-bind-yourself）"
+author: atusy
+date: '2025-11-21'
+slug: by-bind-yourselfs
+categories: [Tech]
+tags: [fish, zsh]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+summary: |
+    [atusy/by-binds-yourself](https://github.com/atusy/by-binds-yourself)は、zshやfishで繰り返し使うコマンドを事前入力してくれるシンプルなツールです。
+    `git`のように`git status`, `git add ...`, `git commit ...`と同じコマンドを繰り返し使う場面で`by git`しておくと、`git`の文字列を自動入力でき効率的です。
+    実態はただのコマンド入力なので微調整や補完なども普通に使えます。
+---
+
+
+
+<p>繰り返し<code>git</code>操作をするような場面で毎回<code>git</code>と入力するの面倒ってことありますよね。というわけで指定した文字列を事前入力してくれる<code>by</code>コマンドを作ってみました。</p>
+<blockquote>
+<p><a href="https://github.com/atusy/by-binds-yourself" class="uri">https://github.com/atusy/by-binds-yourself</a></p>
+</blockquote>
+<p><code>by git</code>とすると、以降のシェルプロンプトで<code>git</code>が事前入力された状態になり、<code>by</code>コマンドを空打ちすると事前入力が解除されます。事前入力にすぎないので、以下のデモのように<code>git</code>の文字列を消して<code>ls</code>するといった柔軟性もあります。</p>
+<video controls="controls" autoplay="autoplay" loop="loop" preload="metadata">
+<source src="video/demo-git.mp4" type="video/mp4">
+</video>
+<p>fish/zsh向けのプラグインとして提供しているので、お好みの方法でインストールしてみてください。</p>
+<pre><code># fish
+$ fisher install atusy/by-binds-yourself
+
+# zsh
+$ sheldon add by --git https://github.com/atusy/by-binds-yourself</code></pre>
+<p>コマンド以外にも任意の文字列を指定できるので、環境変数を一時的に固定するような場面でも使えます。たとえば、aws-cliで<code>export AWS_CONFIG_FILE=...</code>すると、コンソールが流れてしまった時に利用中の設定ファイルがわからなくなりますが、<code>by AWS_CONFIG_FILE=...</code>しておくと、設定ファイルを視認しながら操作できます。</p>
+<pre><code>$ by AWS_CONFIG_FILE=./local-aws-config
+$ AWS_CONFIG_FILE=./local-aws-config aws s3 ls
+$ AWS_CONFIG_FILE=./local-aws-config aws ...</code></pre>
+<div id="なぜ作ったのか" class="section level2">
+<h2>なぜ作ったのか</h2>
+<p>似たようなツールに<a href="https://github.com/mchav/with">mchav/with</a>がありますが、こちらはコマンド入力後に動的にプレフィックスを追加します。</p>
+<pre><code>$ with git
+git&gt; add .
+git&gt; commit -a -m &quot;Commited&quot;
+git&gt; push</code></pre>
+<p><code>with gcc -o output input.c</code>しておくと、コンパイルコマンドをEnterだけで連続実行できたり、なかなか面白いプロジェクトです。しかし、いくつか欠点があります。</p>
+<ul>
+<li>補完が聴かない
+<ul>
+<li><code>git add --</code>でタブ補完したいようなケースも<code>add --</code>扱いになってしまう</li>
+</ul></li>
+<li>一時的な離脱ができない
+<ul>
+<li><code>with git</code>している最中に<code>ls</code>したい場合などに不便</li>
+</ul></li>
+<li>オプション変更ができない
+<ul>
+<li><code>with gcc -o output input.c</code>している最中に<code>output</code>を<code>output2</code>に変えるには<code>with</code>を終了する必要がある</li>
+</ul></li>
+</ul>
+<p>これらの欠点はいずれも、<code>with</code>が、事前に指定した文字列と、以降に入力したバッファを結合して実行するという実装に起因しています。また、シンプルな機能に対してコードが350行にも及んでいます。</p>
+<p><code>with</code>がbashスクリプトで書かれているので単純な比較はできませんが、バッファを事前入力方式の<code>by</code>はわずか9行で実装できてしまいます。</p>
+<pre class="fish"><code>set -g ___by_commandline_prefix
+
+function by
+  set ___by_commandline_prefix $argv &quot;&quot;
+end
+
+function ___by --on-event fish_prompt
+  commandline --replace &quot;$___by_commandline_prefix&quot;
+end</code></pre>
+<p>素朴なこともあり、fish/zsh以外でも実装できるかもしれません。たとえばVimプラグインのddt-ui-shellでも同様の機能が実装されました。</p>
+<blockquote>
+<p><a href="https://github.com/Shougo/ddt-ui-shell/commit/bb509378f0246a95c4538acafa6272eed7415325" class="uri">https://github.com/Shougo/ddt-ui-shell/commit/bb509378f0246a95c4538acafa6272eed7415325</a></p>
+</blockquote>
+</div>
+<div id="enjoy" class="section level2">
+<h2>ENJOY</h2>
+<p>気に入ったかたはぜひstarお願いします！</p>
+<blockquote>
+<p><a href="https://github.com/atusy/by-binds-yourself" class="uri">https://github.com/atusy/by-binds-yourself</a></p>
+</blockquote>
+<p>スポンサーもいただけるとめちゃくちゃ励みになります！</p>
+<blockquote>
+<p><a href="https://github.com/sponsors/atusy" class="uri">https://github.com/sponsors/atusy</a></p>
+</blockquote>
+</div>

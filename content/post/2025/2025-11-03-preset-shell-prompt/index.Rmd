@@ -1,0 +1,107 @@
+---
+title: "zshやfishで類似コマンドの繰り返しを補助するbyコマンド作った（atusy/by-bind-yourself）"
+author: atusy
+date: '2025-11-21'
+slug: by-bind-yourselfs
+categories: [Tech]
+tags: [fish, zsh]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+summary: |
+    [atusy/by-binds-yourself](https://github.com/atusy/by-binds-yourself)は、zshやfishで繰り返し使うコマンドを事前入力してくれるシンプルなツールです。
+    `git`のように`git status`, `git add ...`, `git commit ...`と同じコマンドを繰り返し使う場面で`by git`しておくと、`git`の文字列を自動入力でき効率的です。
+    実態はただのコマンド入力なので微調整や補完なども普通に使えます。
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+set.seed(123)
+options(digits.secs = 0)
+```
+
+
+繰り返し`git`操作をするような場面で毎回`git`と入力するの面倒ってことありますよね。
+というわけで指定した文字列を事前入力してくれる`by`コマンドを作ってみました。
+
+> <https://github.com/atusy/by-binds-yourself>
+
+`by git`とすると、以降のシェルプロンプトで`git`が事前入力された状態になり、`by`コマンドを空打ちすると事前入力が解除されます。
+事前入力にすぎないので、以下のデモのように`git`の文字列を消して`ls`するといった柔軟性もあります。
+
+<video controls="controls" autoplay="autoplay" loop="loop" preload="metadata">
+  <source src="video/demo-git.mp4" type="video/mp4">
+</video>
+
+fish/zsh向けのプラグインとして提供しているので、お好みの方法でインストールしてみてください。
+
+```
+# fish
+$ fisher install atusy/by-binds-yourself
+
+# zsh
+$ sheldon add by --git https://github.com/atusy/by-binds-yourself
+```
+
+コマンド以外にも任意の文字列を指定できるので、環境変数を一時的に固定するような場面でも使えます。
+たとえば、aws-cliで`export AWS_CONFIG_FILE=...`すると、コンソールが流れてしまった時に利用中の設定ファイルがわからなくなりますが、`by AWS_CONFIG_FILE=...`しておくと、設定ファイルを視認しながら操作できます。
+
+```
+$ by AWS_CONFIG_FILE=./local-aws-config
+$ AWS_CONFIG_FILE=./local-aws-config aws s3 ls
+$ AWS_CONFIG_FILE=./local-aws-config aws ...
+```
+
+## なぜ作ったのか
+
+似たようなツールに[mchav/with](https://github.com/mchav/with)がありますが、こちらはコマンド入力後に動的にプレフィックスを追加します。
+
+```
+$ with git
+git> add .
+git> commit -a -m "Commited"
+git> push
+```
+
+`with gcc -o output input.c`しておくと、コンパイルコマンドをEnterだけで連続実行できたり、なかなか面白いプロジェクトです。
+しかし、いくつか欠点があります。
+
+* 補完が聴かない
+    * `git add --`でタブ補完したいようなケースも`add --`扱いになってしまう
+* 一時的な離脱ができない
+    * `with git`している最中に`ls`したい場合などに不便
+* オプション変更ができない
+    * `with gcc -o output input.c`している最中に`output`を`output2`に変えるには`with`を終了する必要がある
+
+これらの欠点はいずれも、`with`が、事前に指定した文字列と、以降に入力したバッファを結合して実行するという実装に起因しています。
+また、シンプルな機能に対してコードが350行にも及んでいます。
+
+`with`がbashスクリプトで書かれているので単純な比較はできませんが、バッファを事前入力方式の`by`はわずか9行で実装できてしまいます。
+
+```fish
+set -g ___by_commandline_prefix
+
+function by
+  set ___by_commandline_prefix $argv ""
+end
+
+function ___by --on-event fish_prompt
+  commandline --replace "$___by_commandline_prefix"
+end
+```
+
+素朴なこともあり、fish/zsh以外でも実装できるかもしれません。
+たとえばVimプラグインのddt-ui-shellでも同様の機能が実装されました。
+
+> <https://github.com/Shougo/ddt-ui-shell/commit/bb509378f0246a95c4538acafa6272eed7415325>
+
+## ENJOY
+
+気に入ったかたはぜひstarお願いします！
+
+> <https://github.com/atusy/by-binds-yourself>
+
+スポンサーもいただけるとめちゃくちゃ励みになります！
+
+> <https://github.com/sponsors/atusy>
