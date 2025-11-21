@@ -1,0 +1,109 @@
+---
+title: "'by' command assists repetitive similar commands in zsh/fish (atusy/by-binds-yourself)"
+author: atusy
+date: '2025-11-21'
+slug: by-binds-yourself
+categories: [Tech]
+tags: [fish, zsh]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+summary: |
+    [atusy/by-binds-yourself](https://github.com/atusy/by-binds-yourself) is a simple tool that pre-fills repetitive commands in zsh and fish.
+    For scenarios like `git` where you repeatedly use `git status`, `git add ...`, `git commit ...`, running `by git` auto-fills the `git` string for efficiency.
+    Since it's just command input, you can still make adjustments and use completions normally.
+---
+
+
+
+<p>Have you ever found it tedious to type <code>git</code> repeatedly when performing multiple <code>git</code> operations?
+Here’s a <code>by</code> command that pre-fills specified strings for you.</p>
+<blockquote>
+<p><a href="https://github.com/atusy/by-binds-yourself" class="uri">https://github.com/atusy/by-binds-yourself</a></p>
+</blockquote>
+<p>When you run <code>by git</code>, subsequent shell prompts will have <code>git</code> pre-filled, and running <code>by</code> without arguments cancels the pre-fill.
+Since it’s just pre-filled input, you have the flexibility to delete the <code>git</code> string and run <code>ls</code> instead, as shown in the demo below.</p>
+<video controls="controls" autoplay="autoplay" loop="loop" preload="metadata">
+<source src="video/demo-git.mp4" type="video/mp4">
+</video>
+<p>It’s provided as a plugin for fish/zsh, so please install it using your preferred method.</p>
+<pre><code># fish
+$ fisher install atusy/by-binds-yourself
+
+# zsh
+$ sheldon add by --git https://github.com/atusy/by-binds-yourself</code></pre>
+<p>You can specify arbitrary strings besides commands, making it useful for temporarily fixing environment variables.
+For example, when using aws-cli with <code>export AWS_CONFIG_FILE=...</code>, the console output can scroll away making it hard to remember which config file you’re using. Using <code>by AWS_CONFIG_FILE=...</code>, you can operate while keeping the config file visible.</p>
+<pre><code>$ by AWS_CONFIG_FILE=./local-aws-config
+$ AWS_CONFIG_FILE=./local-aws-config aws s3 ls
+$ AWS_CONFIG_FILE=./local-aws-config aws ...</code></pre>
+<div id="why-i-created-by-binds-yourself" class="section level2">
+<h2>Why I created by-binds-yourself</h2>
+<p>There’s a similar tool called <a href="https://github.com/mchav/with">mchav/with</a> that dynamically adds prefixes after command input.</p>
+<pre><code>$ with git
+git&gt; add .
+git&gt; commit -a -m &quot;Commited&quot;
+git&gt; push</code></pre>
+<p><code>with gcc -o output input.c</code> allows you to repeatedly execute compile commands with just Enter, which is quite interesting.
+However, it has several drawbacks:</p>
+<ul>
+<li>No completion support
+<ul>
+<li>Cases like <code>git add --</code> with tab completion are treated as <code>add --</code></li>
+</ul></li>
+<li>Cannot temporarily exit
+<ul>
+<li>Inconvenient when you want to <code>ls</code> while in <code>with git</code></li>
+</ul></li>
+<li>Cannot change options
+<ul>
+<li>To change <code>output</code> to <code>output2</code> in <code>with gcc -o output input.c</code>, you need to exit <code>with</code></li>
+</ul></li>
+</ul>
+<p>All these drawbacks stem from <code>with</code>’s implementation of concatenating pre-specified strings with subsequently entered buffers before execution.
+Also, the code is 350 lines for relatively simple functionality.</p>
+<p>While <code>with</code> is written in bash script making direct comparison difficult, the pre-fill approach of <code>by</code> can be implemented in just 9 lines.</p>
+<pre class="fish"><code>set -g ___by_commandline_prefix
+
+function by
+  set ___by_commandline_prefix $argv &quot;&quot;
+end
+
+function ___by --on-event fish_prompt
+  commandline --replace &quot;$___by_commandline_prefix&quot;
+end</code></pre>
+<p>Due to its simplicity, it might be implementable in shells other than fish/zsh.
+For example, the same functionality was implemented in the Vim plugin ddt-ui-shell.</p>
+<blockquote>
+<p><a href="https://github.com/Shougo/ddt-ui-shell/commit/bb509378f0246a95c4538acafa6272eed7415325" class="uri">https://github.com/Shougo/ddt-ui-shell/commit/bb509378f0246a95c4538acafa6272eed7415325</a></p>
+</blockquote>
+</div>
+<div id="origin-of-the-name" class="section level2">
+<h2>Origin of the name</h2>
+<p>Initially, I named it <code>preprompt</code>.
+However, I realized this was incorrect since the prompt is the <code>$</code> part of <code>$ git</code>, not the <code>git</code> part which is the buffer.</p>
+<p>Next, I considered <code>prefix</code>, but felt it lacked searchability and catchiness.</p>
+<p>When I consulted the <a href="https://vim-jp.org/docs/chat.html">vim-jp Slack</a> for a short, memorable name, I received suggestions like <code>by</code> and <code>using</code>.</p>
+<p>I liked that it could be expressed verbally as:</p>
+<blockquote>
+<p>by git, add some file.txt</p>
+</blockquote>
+<p>And I came up with the recursive acronym:</p>
+<blockquote>
+<p><a href="https://github.com/atusy/by-binds-yourself">by-binds-yourself</a></p>
+</blockquote>
+<p>So I decided on <code>by</code>.</p>
+<p>This also makes it easy to search for.</p>
+</div>
+<div id="enjoy" class="section level2">
+<h2>ENJOY</h2>
+<p>If you like it, please give it a star!</p>
+<blockquote>
+<p><a href="https://github.com/atusy/by-binds-yourself" class="uri">https://github.com/atusy/by-binds-yourself</a></p>
+</blockquote>
+<p>Sponsorship would be incredibly encouraging!</p>
+<blockquote>
+<p><a href="https://github.com/sponsors/atusy" class="uri">https://github.com/sponsors/atusy</a></p>
+</blockquote>
+</div>

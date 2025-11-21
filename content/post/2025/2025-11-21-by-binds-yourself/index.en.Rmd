@@ -1,0 +1,128 @@
+---
+title: "'by' command assists repetitive similar commands in zsh/fish (atusy/by-binds-yourself)"
+author: atusy
+date: '2025-11-21'
+slug: by-binds-yourself
+categories: [Tech]
+tags: [fish, zsh]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+summary: |
+    [atusy/by-binds-yourself](https://github.com/atusy/by-binds-yourself) is a simple tool that pre-fills repetitive commands in zsh and fish.
+    For scenarios like `git` where you repeatedly use `git status`, `git add ...`, `git commit ...`, running `by git` auto-fills the `git` string for efficiency.
+    Since it's just command input, you can still make adjustments and use completions normally.
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+set.seed(123)
+options(digits.secs = 0)
+```
+
+
+Have you ever found it tedious to type `git` repeatedly when performing multiple `git` operations?
+Here's a `by` command that pre-fills specified strings for you.
+
+> <https://github.com/atusy/by-binds-yourself>
+
+When you run `by git`, subsequent shell prompts will have `git` pre-filled, and running `by` without arguments cancels the pre-fill.
+Since it's just pre-filled input, you have the flexibility to delete the `git` string and run `ls` instead, as shown in the demo below.
+
+<video controls="controls" autoplay="autoplay" loop="loop" preload="metadata">
+  <source src="video/demo-git.mp4" type="video/mp4">
+</video>
+
+It's provided as a plugin for fish/zsh, so please install it using your preferred method.
+
+```
+# fish
+$ fisher install atusy/by-binds-yourself
+
+# zsh
+$ sheldon add by --git https://github.com/atusy/by-binds-yourself
+```
+
+You can specify arbitrary strings besides commands, making it useful for temporarily fixing environment variables.
+For example, when using aws-cli with `export AWS_CONFIG_FILE=...`, the console output can scroll away making it hard to remember which config file you're using. Using `by AWS_CONFIG_FILE=...`, you can operate while keeping the config file visible.
+
+```
+$ by AWS_CONFIG_FILE=./local-aws-config
+$ AWS_CONFIG_FILE=./local-aws-config aws s3 ls
+$ AWS_CONFIG_FILE=./local-aws-config aws ...
+```
+
+## Why I created by-binds-yourself
+
+There's a similar tool called [mchav/with](https://github.com/mchav/with) that dynamically adds prefixes after command input.
+
+```
+$ with git
+git> add .
+git> commit -a -m "Commited"
+git> push
+```
+
+`with gcc -o output input.c` allows you to repeatedly execute compile commands with just Enter, which is quite interesting.
+However, it has several drawbacks:
+
+* No completion support
+    * Cases like `git add --` with tab completion are treated as `add --`
+* Cannot temporarily exit
+    * Inconvenient when you want to `ls` while in `with git`
+* Cannot change options
+    * To change `output` to `output2` in `with gcc -o output input.c`, you need to exit `with`
+
+All these drawbacks stem from `with`'s implementation of concatenating pre-specified strings with subsequently entered buffers before execution.
+Also, the code is 350 lines for relatively simple functionality.
+
+While `with` is written in bash script making direct comparison difficult, the pre-fill approach of `by` can be implemented in just 9 lines.
+
+```fish
+set -g ___by_commandline_prefix
+
+function by
+  set ___by_commandline_prefix $argv ""
+end
+
+function ___by --on-event fish_prompt
+  commandline --replace "$___by_commandline_prefix"
+end
+```
+
+Due to its simplicity, it might be implementable in shells other than fish/zsh.
+For example, the same functionality was implemented in the Vim plugin ddt-ui-shell.
+
+> <https://github.com/Shougo/ddt-ui-shell/commit/bb509378f0246a95c4538acafa6272eed7415325>
+
+## Origin of the name
+
+Initially, I named it `preprompt`.
+However, I realized this was incorrect since the prompt is the `$` part of `$ git`, not the `git` part which is the buffer.
+
+Next, I considered `prefix`, but felt it lacked searchability and catchiness.
+
+When I consulted the [vim-jp Slack](https://vim-jp.org/docs/chat.html) for a short, memorable name, I received suggestions like `by` and `using`.
+
+I liked that it could be expressed verbally as:
+
+> by git, add some file.txt
+
+And I came up with the recursive acronym:
+
+> [by-binds-yourself](https://github.com/atusy/by-binds-yourself)
+
+So I decided on `by`.
+
+This also makes it easy to search for.
+
+## ENJOY
+
+If you like it, please give it a star!
+
+> <https://github.com/atusy/by-binds-yourself>
+
+Sponsorship would be incredibly encouraging!
+
+> <https://github.com/sponsors/atusy>
