@@ -103,7 +103,7 @@ end
 
 次に`prefix`を検討しましたが、検索性が悪いのとキャッチーさに欠けるなと感じました。
 
-短かくて覚えやすくて名前がいいなとvim-jp Slackで相談したところ、`by`や`using`などの案をいただきました。
+短かくて覚えやすくて名前がいいなと[vim-jp Slack](https://vim-jp.org/docs/chat.html)で相談したところ、`by`や`using`などの案をいただきました。
 
 > by git, add some file.txt
 
