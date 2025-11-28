@@ -1,0 +1,149 @@
+---
+title: "Neovimのツリー表示ファイラでテキスト感覚にファイル操作もできちゃうfyler.nvimよさげ"
+author: atusy
+date: '2025-11-28'
+slug: fyler-nvim
+categories: [Tech]
+tags: [Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+---
+
+
+
+<p><a href="https://github.com/A7Lavinraj/fyler.nvim">A7Lavinraj/fyler.nvim</a>というファイラプラグインが出た。</p>
+<p>これはツリー表示のファイラでありながら、<a href="https://deepwiki.com/stevearc/oil.nvim">stevearc/oil.nvim</a>みたいにテキスト編集のノリでファイル操作をできるすぐれもの。</p>
+<p><img src="images/fyler.png" /></p>
+<p>たとえば</p>
+<ul>
+<li><code>dd</code>でファイルを削除して</li>
+<li><code>$ciwtxt&lt;esc&gt;</code>で拡張子を<code>txt</code>に変更</li>
+<li><code>yy</code>でコピーして<code>p</code>で複製</li>
+</ul>
+<p>類似プラグインに<a href="https://deepwiki.com/stevearc/oil.nvim">stevearc/oil.nvim</a>があります。
+eetanさんの記事がデモ動画つきでわかりやすいので、見てみてください。</p>
+<blockquote>
+<p>Neovimでバッファみたいにファイル操作できるoil.nvimの使い方<br />
+<a href="https://eiji.page/blog/neovim-oil-intro/" class="uri">https://eiji.page/blog/neovim-oil-intro/</a></p>
+</blockquote>
+<p>oil.nvimはツリー表示ではなく、リスト表示でディレクトリを開くその中のファイルを一覧します。ツリー表示でない点もだが、<code>foo.txt</code>を<code>../foo.txt</code>に変更するようなディレクトリをまたいだ操作を不得手とすることもあり、個人的には馴染めませんでした。</p>
+<p>これまでサイドバー型ツリー表示の<a href="https://github.com/nvim-neo-tree/neo-tree.nvim">nvim-neo-tree/neo-tree.nvim</a>を使っていたものの、サイドバーじゃなくていいよ派の意見を確かめてみたかったこともあり、非サイドバー型ツリー表示の<a href="https://github.com/A7Lavinraj/fyler.nvim">A7Lavinraj/fyler.nvim</a>を試してみます。</p>
+<p>ちなみに、サイドバーの必然性ないんですよとか、テキスト感覚なファイル操作が強力なんですよって話は以下の動画でryoppippiさんもしてます。</p>
+<blockquote>
+<p>【外資ITエンジニアの開発環境】VimmerによるVimmer(になりたい人)のためのVim動画</p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/XsAlXYWzcv4?si=OQQhveQiFTVgQQa5" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+</iframe>
+</blockquote>
+<p>私がサイドバー型ファイラを使っていた理由は、ふと気になったときにディレクトリ構造を確認できること、横幅の広いディスプレイのマージンとして機能すること、でした。しかし、ディレクトリ構造の確認はファイラをすぐ表示できれば問題ないでしょうし、マージンもファイラで埋める必要もないよなとはぼんやり思ってました。</p>
+<p>挑戦しだして一日ですが、オレオレ設定てんこもりになった気がするので、紹介します。</p>
+<div id="起動" class="section level2">
+<h2>起動</h2>
+<p>通常は<code>require("fyler").open()</code>で起動する……のですが、こいつは本当に起動時向けです。ディレクトリ指定や開きかた（float winを使うとか）があれば、openでよさそうですが、現在windowに表示するような起動方法であれば<code>require("fyler").focus()</code>がいいでしょう。</p>
+<p>fylerを表示中のwindowがいれば、そのwindowに移動する機能つきです。</p>
+<p>ただし、tabpageをまたいでwindow変更してしまうので、細かく挙動を指定したい場合は以下のような関数を作るとよいでしょう。</p>
+<pre class="lua"><code>local function open()
+	-- Move to an existing fyler window if one exists
+	local wins = vim.api.nvim_tabpage_list_wins(0)
+	for _, win in ipairs(wins) do
+		local buf = vim.api.nvim_win_get_buf(win)
+		local nm = vim.api.nvim_buf_get_name(buf)
+		if vim.startswith(nm, &quot;fyler://&quot;) then
+			vim.api.nvim_set_current_win(win)
+			return
+		end
+	end
+
+	-- Open the existing fyler buffer if one exists
+	local bufs = vim.api.nvim_list_bufs()
+	for _, buf in ipairs(bufs) do
+		local nm = vim.api.nvim_buf_get_name(buf)
+		if vim.startswith(nm, &quot;fyler://&quot;) then
+			vim.api.nvim_win_set_buf(0, buf)
+			return
+		end
+	end
+
+	-- Otherwise, open a new fyler window
+	if vim.v.count &gt; 0 then
+		require(&quot;fyler&quot;).close()
+	end
+	require(&quot;fyler&quot;).open()
+end
+
+vim.keymap.set(&quot;n&quot;, &quot;S&quot;, open, { desc = &quot;Open fyler&quot; })</code></pre>
+<p><a href="https://github.com/atusy/dotfiles/blob/333640b398a6de4b9f4444d60e005c88f3396be3/dot_config/nvim/lua/plugins/fyler/init.lua?plain=1#L19-L46" class="uri">https://github.com/atusy/dotfiles/blob/333640b398a6de4b9f4444d60e005c88f3396be3/dot_config/nvim/lua/plugins/fyler/init.lua?plain=1#L19-L46</a></p>
+</div>
+<div id="マッピング" class="section level2">
+<h2>マッピング</h2>
+<p>ファイラのマッピングは悩みがちですが、せっかくサイドバーではないので、通常のバッファに寄せるようなマッピングを検討してみました。</p>
+<ul>
+<li>Vimっぽいマッピング
+<ul>
+<li><code>gf</code>
+<ul>
+<li>現在のwindowでファイルを開く</li>
+</ul></li>
+<li><code>&lt;c-w&gt;gf</code>
+<ul>
+<li>新しいtabpageでファイルを開く</li>
+<li>split/vsplitして開く系は定義してない
+<ul>
+<li><code>&lt;c-w&gt;sgf</code>や<code>&lt;c-w&gt;vgf</code>でまかなえる</li>
+<li>Vimにはsplitして開く<code>&lt;c-w&gt;f</code>は存在するが、vsplitして開くデフォルトマッピングがないので考えるのが面倒</li>
+</ul></li>
+</ul></li>
+<li><code>gx</code>
+<ul>
+<li>ファイルをシステムのデフォルトアプリケーションで開く</li>
+</ul></li>
+<li><code>zc</code>
+<ul>
+<li>ディレクトリを閉じる</li>
+<li>Vimの折り畳みを閉じる機能に相当</li>
+</ul></li>
+<li><code>zM</code>
+<ul>
+<li>全てのディレクトリを閉じる</li>
+<li>Vimの折り畳みを全て閉じる機能に相当</li>
+</ul></li>
+</ul></li>
+<li>連想しやすいマッピング
+<ul>
+<li><code>&lt;c-s&gt;</code>
+<ul>
+<li>変更を保存（<code>:w&lt;cr&gt;</code>相当）</li>
+<li>よくあるIDEの保存マッピング</li>
+</ul></li>
+<li><code>#</code>
+<ul>
+<li>fyler上で代替バッファにカーソルを移動</li>
+<li>代替バッファをVimでは<code>:e #</code>で開けるところから着想</li>
+</ul></li>
+<li><code>yp</code>
+<ul>
+<li>yank pathの略でファイルの絶対パスをヤンク</li>
+</ul></li>
+<li><code>yr</code>
+<ul>
+<li>yank relative pathの略でファイルの相対パスをヤンク</li>
+</ul></li>
+</ul></li>
+</ul>
+<p>なお、デフォルトマッピングはほとんど無効化しています。</p>
+<p><a href="https://github.com/atusy/dotfiles/blob/333640b398a6de4b9f4444d60e005c88f3396be3/dot_config/nvim/lua/plugins/fyler/mappings.lua" class="uri">https://github.com/atusy/dotfiles/blob/333640b398a6de4b9f4444d60e005c88f3396be3/dot_config/nvim/lua/plugins/fyler/mappings.lua</a></p>
+</div>
+<div id="enjoy" class="section level2">
+<h2>ENJOY</h2>
+<p>よーし、fyler使ってくぞー！</p>
+<p>設定していた時の発見の一つに、かつて<code>nnoremap gy "+y</code>するといいよと言っていたマッピングは実は<code>nmap gy "+y</code>の方が便利というものがあります。</p>
+<blockquote>
+<p>gyでVimからクリップボードにヤンクする<br />
+<a href="https://blog.atusy.net/2024/03/11/vim-gy-as-gui-yank/" class="uri">https://blog.atusy.net/2024/03/11/vim-gy-as-gui-yank/</a></p>
+</blockquote>
+<p>というのもこんな感じで、y始まりのバッファローカルなマッピングを作ったとき、<code>nnoremap gy "+y</code>だと<code>gyp</code>した時にグローバルマッピングを優先してしまうのです。</p>
+<pre><code>vim.keymap.set(&quot;n&quot;, &quot;yp&quot;, function() ... end, { buffer = true })</code></pre>
+<p><code>nnoremap</code>ではなく<code>nmap</code>でremapを有効にしとけば、この心配がありません。</p>
+<p>結果として<code>yp</code>だけでなく<code>gyp</code>もローカルマッピングするような手間を省けました。</p>
+</div>
