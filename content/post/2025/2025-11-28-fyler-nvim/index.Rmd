@@ -17,9 +17,14 @@ set.seed(123)
 options(digits.secs = 0)
 ```
 
-[A7Lavinraj/fyler.nvim](https://github.com/A7Lavinraj/fyler.nvim)というファイラプラグインが出た。
+本記事は[Vim 駅伝](https://vim-jp.org/ekiden/)11/28の記事です。
 
-これはツリー表示のファイラでありながら、[stevearc/oil.nvim](https://deepwiki.com/stevearc/oil.nvim)みたいにテキスト編集のノリでファイル操作をできるすぐれもの。
+直近2回が連続してファイラの話だったところですが、私からもファイラの話題で、[A7Lavinraj/fyler.nvim](https://github.com/A7Lavinraj/fyler.nvim)を試してます。
+
+* 11/24 [今更だけどvim-fernを本気で設定する（on Neovim）](https://zenn.dev/sirasagi62/articles/c10c8004ab43a8) by Sirasagi62さん
+* 11/26 [Oil.nvimからvim-fernを開くのがちょっと便利だった](https://wagomu.me/blog/2025-11-26-vim-ekiden) by 輪ごむさん
+
+fyler.nvimはツリー表示のファイラでありながら、[stevearc/oil.nvim](https://deepwiki.com/stevearc/oil.nvim)みたいにテキスト編集のノリでファイル操作をできるすぐれもの。
 
 ![](images/fyler.png)
 
