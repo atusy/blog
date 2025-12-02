@@ -1,0 +1,77 @@
+---
+title: "Neovimを高速再起動させる`:restart`を試す（たぶん>=0.12）"
+author: atusy
+date: '2025-12-02'
+slug: nvim-restart
+categories: [Tech]
+tags: [Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+highlighhtjs: [Lua]
+---
+
+
+
+<p>本記事は<a href="https://adventar.org/calendars/11912">Vim Advent Calendar</a>2025-12-02の記事です。</p>
+<p>Neovimの設定をしている時とか、さくっと再起動したくなることありますよね。</p>
+<p>もうかれこれ半年近くたちますが、そんなニーズに応えるべく開発版のNeovimに<code>:restart</code>コマンドが導入されました。おそらく0.12で正式リリースされると思います。</p>
+<p><code>:q</code>してから<code>nvim</code>しなおす場合と、<code>:restart</code>する場合を比べてみてください。再起動の圧倒的な速さがわかります。</p>
+<p>高速再起動の仕組みについてはNeovimのコア開発者のjustinが解説してくれています。
+Neovimがコア機能部分だけを再起動し、UI部分はそのまま維持することで高速化を実現しているとのこと。</p>
+<blockquote>
+<p><a href="https://x.com/justinmk/status/1929275690949415279" class="uri">https://x.com/justinmk/status/1929275690949415279</a></p>
+</blockquote>
+<p>そんな<code>:restart</code>ですが、オプションでもっと便利に使えます (<a href="https://neovim.io/doc/user/gui.html#%3Arestart">:h :restart</a>)。</p>
+<ul>
+<li><code>restart [+cmd]</code>で再起動前の処理を指定
+<ul>
+<li>たとえば<code>restart +xall</code>で再起動前に変更済みのバッファを保存して閉じておく（デフォルトは<code>:qall</code>)</li>
+</ul></li>
+<li><code>restart [command]</code>で再起動後の処理を指定
+<ul>
+<li>たとえば<code>restart +e hoge.lua</code>で再起動後に指定のファイルを開く</li>
+</ul></li>
+</ul>
+<p>これらを応用すると、セッションを維持しながら再起動、みたいなのも簡単にできちゃいます！</p>
+<pre class="vim"><code>:mksession! session.vim | :restart +xa source session.vim</code></pre>
+<p>私は似たような処理を<code>ZR</code>にマッピングしています。
+<code>ZQ</code>が保存せずに終了、<code>ZZ</code>が保存してファイルを閉じる、といった具合に<code>Z</code>-prefixには終了関係のマッピングがあるので、<code>ZR</code>はrestartのinitialも使えてほどよいかなと。</p>
+<p>先のコマンドをそのまま採用するならこんな感じですね。ただし、<code>session.vim</code>がカレントディレクトリに発生するので、そのあたりの処理は工夫してください。</p>
+<pre class="lua"><code>vim.keymap.set(&quot;n&quot;, &quot;ZR&quot;, function()
+	vim.cmd(&quot;mksession! session.vim&quot;)
+	vim.cmd(&quot;restart +xa source session.vim&quot;)
+end)</code></pre>
+<p>私は一時ファイルの管理などの手間を考えて、<a href="https://github.com/nvim-mini/mini.nvim">nvim-mini/mini.nvim</a>の<code>mini.sessions</code>というセッション管理プラグインも使うことにしてます。</p>
+<p>あとは再起動をややこしくしやすいターミナルバッファを強制終了させる処理なんかも加えて以下の通り。</p>
+<pre class="lua"><code>vim.keymap.set(&quot;n&quot;, &quot;ZR&quot;, function()
+	-- force restart if count given
+	if vim.v.count &gt; 0 then
+		vim.cmd(&quot;restart&quot;)
+		return
+	end
+
+	-- cleanup session-unfriendly buffers (e.g., terminal)
+	local bufname = vim.api.nvim_list_bufs()
+	for _, buf in ipairs(bufname) do
+		if vim.bo[buf].buftype == &quot;terminal&quot; then
+			vim.api.nvim_buf_delete(buf, { force = true })
+		end
+	end
+
+	-- save session and restart
+	require(&quot;mini.sessions&quot;).setup()
+	require(&quot;mini.sessions&quot;).write(&quot;ZR&quot;)
+	vim.cmd(
+		[[restart +xa lua (function() require(&quot;mini.sessions&quot;).setup(); require(&quot;mini.sessions&quot;).read(&quot;ZR&quot;) end)()]]
+	)
+end)</code></pre>
+<p>私は再起動にしかセッション管理を使わないので、setup処理も含めてマッピング内で行っています。他にも通常のNeovim起動時などの使いどころがあるようなので、<code>mini.sessions</code>ってなんだよと言う人はkawarimidollさんの記事も参考にしてみてください。</p>
+<blockquote>
+<p>mini.sessions by kawarimidollさん
+<a href="https://zenn.dev/kawarimidoll/books/6064bf6f193b51/viewer/86e45d" class="uri">https://zenn.dev/kawarimidoll/books/6064bf6f193b51/viewer/86e45d</a></p>
+</blockquote>
+<div id="enjoy" class="section level1">
+<h1>ENJOY!!</h1>
+<p><code>:restart</code>は前から使ってましたが、マッピング化したのは今日なので、これから改善を進めようと思います。</p>
+</div>
