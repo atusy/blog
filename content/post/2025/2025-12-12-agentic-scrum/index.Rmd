@@ -497,6 +497,30 @@ AIエージェント向けのDefinition of Readyは「**AIが人に聞かずに�
 優先順位付けは`ready`アイテムを優先する。
 `ready`アイテムがない場合や人の入力を待っている間はリファインメント作業を行う。
 
+### Definition of Done: AIエージェント向けの完了基準
+
+スクラムガイドにおいて、Definition of Done（DoD）は「インクリメントが製品に必要な品質基準を満たした状態」を定義する。
+Agentic Scrumでは、AIエージェントが自律的に検証できる形式でDoDを定義する。
+
+**基本チェック項目:**
+
+| 項目 | 検証方法 |
+|------|----------|
+| すべてのテストが合格 | `cargo test` / `npm test` など実行可能なコマンド |
+| リントが合格 | `cargo clippy` / `npm run lint` など |
+| 型チェックが合格 | `tsc --noEmit` / `mypy src/` など |
+| 受け入れ基準の検証コマンドがすべて成功 | PBIに記載された各検証コマンドを実行 |
+
+**AIエージェント特有の項目:**
+
+- **コミット履歴が適切**: TDDサイクルに従い、Red/Green/Refactorの各フェーズでコミットされている
+- **構造的変更と振る舞い変更が分離されている**: Tidy First原則に従い、リファクタリングと機能追加が別コミットになっている
+- **障害が解決済み**: スプリント中に発生した障害がすべて`resolved`になっている
+- **ダッシュボードが更新済み**: サブタスクのステータスがすべて`completed`になっている
+
+DoDは固定ではなく、レトロスペクティブでの学びに基づいて進化させる。
+品質問題が繰り返し発生する場合は、DoDに新しいチェック項目を追加して再発を防ぐ。
+
 ### ロール: AIエージェントによるスクラムチーム
 
 Claude Codeのカスタムエージェント機能を使って、スクラムの各ロールをAIエージェントとして実装した。
@@ -627,6 +651,10 @@ AIエージェント版では以下を重視する。
 
 レトロスペクティブは品質と効果を高める方法を計画する場だ。
 
+**重要なのは、今回のスプリントだけに注目しないことだ。**
+前回のレトロスペクティブで決めた改善アクションが効果を発揮したかを検査し、その結果に基づいて次の適応を考える必要がある。
+改善アクションは「やって終わり」ではなく、継続的に効果を測定し、必要に応じて調整する。
+
 5フェーズ構造を採用している。
 
 1. **Set the Stage**: 安全な場を作る
@@ -648,18 +676,25 @@ AIエージェント特有の改善として、**エージェント定義の更�
 バックログリファインメントはPBIを`ready`状態にするためのイベントだ。
 
 INVEST原則に従ってPBIを評価する。
+ただし、AIエージェント環境ではいくつかの原則を再解釈する必要がある。
 
-- **Independent**: 他のストーリーから独立して開発・デリバリー可能
-- **Negotiable**: 詳細は交渉可能、解決策でなく成果に焦点
-- **Valuable**: 明確なビジネス価値がある
-- **Estimable**: 見積もり可能（大きな不明点がない）
-- **Small**: AIエージェントにとって「Small」は時間の観点ではなく、**これ以上分割するとユーザー価値を失う最小単位**を意味する。1スプリント1PBIの原則により、できるだけ小さく分割することでフィードバックサイクルを増やせる
-- **Testable**: 具体的で測定可能な受け入れ基準がある
+- **Independent（独立）**: 他のストーリーから独立して開発・デリバリー可能。AIエージェントにとっては**人間への依存がないこと**も重要だ。外部APIの認証情報が必要、デザインの承認待ちなど、人間の介入が必要なPBIは`ready`とみなさない
+- **Negotiable（交渉可能）**: 詳細は交渉可能、解決策でなく成果に焦点。AIエージェントは曖昧さを苦手とするため、**成果を明確にしつつも実装手段は柔軟に**保つバランスが重要だ。「ログイン機能を実装する」より「ユーザーがメールアドレスとパスワードで認証できる」の方がAIには扱いやすい
+- **Valuable（価値）**: 明確なビジネス価値がある。AIエージェントが価値を判断することは難しいため、**なぜこのPBIが重要かをUser Storyの形式で明示**しておく
+- **Estimable（見積可能）**: 見積もり可能（大きな不明点がない）。AIエージェントにとって見積もりは時間ではなく**完了に必要な情報がすべて揃っているか**を意味する。「調査が必要」「仕様未定」などの項目があれば`ready`ではない
+- **Small（小さい）**: AIエージェントにとって「Small」は時間の観点ではなく、**これ以上分割するとユーザー価値を失う最小単位**を意味する。1スプリント1PBIの原則により、できるだけ小さく分割することでフィードバックサイクルを増やせる
+- **Testable（テスト可能）**: 具体的で測定可能な受け入れ基準がある。AIエージェント向けの最重要原則だ。**実行可能な検証コマンド**（`pytest tests/auth/test_login.py -v`など）を持たない受け入れ基準は、AIにとっては検証不能に等しい
 
 ### アーティファクト: ダッシュボードの構造
 
 すべてのアーティファクトは`plan.md`ファイルに集約される。
 YAML形式でデータを記述し、AIエージェントが容易に読み書きできるようにしている。
+
+基本原則で述べた3つのルールがここに反映されている。
+
+- **単一の真実源**: すべての情報がこの1ファイルに集約
+- **Gitが履歴**: タイムスタンプフィールドがない
+- **順序が優先度**: `product_backlog`配列の上にあるものほど優先度が高い
 
 ```yaml
 # Product Goal
@@ -669,7 +704,7 @@ product_goal:
     - metric: "ゼロ設定スモークテスト"
       target: "設定なしでファイルを開くとハイライトが動作する"
 
-# Product Backlog
+# Product Backlog（順序が優先度を表す）
 product_backlog:
   - id: PBI-001
     story:
@@ -679,33 +714,36 @@ product_backlog:
     acceptance_criteria:
       - criterion: "設定なしでサーバー起動時にデフォルトパスを使用する"
         verification: "cargo test test_default_paths -- --nocapture"
-    status: ready
+    status: ready  # draft | refining | ready
+    # dependencies: [] # 必要に応じて追加
 
-# Current Sprint
+# Current Sprint（1 Sprint = 1 PBI）
 sprint:
   number: 1
   pbi_id: PBI-001
-  status: in_progress
+  status: in_progress  # planning | in_progress | review | done
   subtasks:
     - test: "デフォルトパスが設定される"
       implementation: "WorkspaceSettings::default()を修正"
-      type: behavioral
-      status: green
+      type: behavioral  # behavioral | structural
+      status: green  # pending | red | green | refactoring | completed
       commits:
         - phase: red
           message: "test: デフォルトパスが設定される"
         - phase: green
           message: "feat: デフォルトパスをWorkspaceSettingsに追加"
 
-# Definition of Done
+# Definition of Done（実行可能な検証コマンドのリスト）
 definition_of_done:
   checks:
     - name: "テスト合格"
       run: "cargo test"
     - name: "リント合格"
       run: "cargo clippy -- -D warnings"
+    - name: "型チェック合格"
+      run: "cargo check"
 
-# Impediments
+# Impediments（障害管理）
 impediments:
   active: []
   resolved: []
@@ -713,9 +751,23 @@ impediments:
 # Completed Sprints
 completed: []
 
-# Retrospectives
-retrospectives: []
+# Retrospectives（改善アクションの追跡を含む）
+retrospectives:
+  - sprint: 1
+    improvements:
+      - action: "TDDサイクルをより厳格に適用する"
+        backlog: sprint  # sprint | product
+        status: active  # active | completed | abandoned
+        outcome: null  # 次回レトロで効果を検査する
+    happiness: 4  # 1-5のチームハピネス指標
 ```
+
+ダッシュボードの構造は、フレームワーク内で論じた概念を反映している。
+
+- **PBIのstatus**: Definition of Readyの`draft`/`refining`/`ready`を表現
+- **subtasksのtype**: Tidy First原則の`behavioral`/`structural`を区別
+- **subtasksのstatus**: TDDサイクルの各フェーズを追跡
+- **retrospectives.improvements**: 前回の改善アクションとその効果を追跡し、継続的な検査と適応を可能にする
 
 ### TDDとの統合
 
