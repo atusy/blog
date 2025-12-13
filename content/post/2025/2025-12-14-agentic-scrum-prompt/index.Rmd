@@ -27,7 +27,7 @@ Agentic Scrumは、AIエージェントによる自律的な開発を最適化�
 
 - 1 Sprint = 1 PBI（タイムボックスなし）
 - Definition of Ready = AIが人に聞かずに完了できるか
-- すべてのアーティファクトは単一ファイル（`plan.md`）に集約
+- すべてのアーティファクトは単一ファイル（`scrum.yaml`）に集約
 - 受け入れ基準は実行可能な検証コマンドを必須とする
 
 ## 基本原則
@@ -36,7 +36,7 @@ Agentic Scrumは、AIエージェントによる自律的な開発を最適化�
 
 | 原則 | 説明 |
 |------|------|
-| 単一の真実源 | すべてのアーティファクトは`plan.md`に集約する |
+| Single Source of Truth | すべてのアーティファクトは`scrum.yaml`に集約する |
 | Gitが履歴 | タイムスタンプ不要。変更履歴はGitが追跡する |
 | 順序が優先度 | リストの上にあるものほど優先度が高い |
 
@@ -153,7 +153,9 @@ definition_of_done:
       run: "# PBIに記載された各検証コマンドを実行"
 ```
 
-**追加チェック項目:**
+**プロセスチェック項目:**
+
+以下の項目はコマンドで自動検証できないため、エージェントが手動で確認する:
 
 - コミット履歴がTDDサイクル（Red/Green/Refactor）に従っている
 - 構造的変更と振る舞い変更が別コミットになっている
@@ -184,7 +186,7 @@ pending -> red -> green -> refactoring -> completed
 
 ## ダッシュボードテンプレート
 
-`plan.md`の完全なテンプレート:
+`scrum.yaml`の完全なテンプレート:
 
 ```yaml
 # Product Goal
@@ -375,7 +377,7 @@ product_backlog:
 コンテキスト肥大化を防ぐため、以下のタイミングでダッシュボードを剪定する:
 
 - Sprint Retrospective終了時
-- ダッシュボードが200行を超えたとき
+- ダッシュボードが300行を超えたとき（目安: Product Goal 10行 + PBI 20件 x 10行 + Sprint 20行 + DoD 10行 + Completed 30行 + Retrospectives 30行）
 
 **剪定ルール:**
 
@@ -390,7 +392,7 @@ product_backlog:
 git log --oneline --grep="PBI-001"
 
 # 特定時点のダッシュボード復元
-git show <commit>:plan.md
+git show <commit>:scrum.yaml
 ```
 
 ## クイックリファレンス
