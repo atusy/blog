@@ -238,7 +238,6 @@ retrospectives:
         backlog: sprint  # sprint | product
         status: active  # active | completed | abandoned
         outcome: null
-    happiness: 4  # 1-5
 ```
 
 ## イベント実行手順
@@ -316,7 +315,6 @@ retrospectives:
 - 既存のactiveアクションをcompleted/abandonedに更新
 
 ### 5. Close
-- happiness指標を記録（1-5）
 - ダッシュボードを更新
 ```
 
@@ -377,13 +375,14 @@ product_backlog:
 コンテキスト肥大化を防ぐため、以下のタイミングでダッシュボードを剪定する:
 
 - Sprint Retrospective終了時
-- ダッシュボードが300行を超えたとき（目安: Product Goal 10行 + PBI 20件 x 10行 + Sprint 20行 + DoD 10行 + Completed 30行 + Retrospectives 30行）
+- ダッシュボードが300行を越えたとき
 
 **剪定ルール:**
 
 - `completed`配列は最新2-3件のみ保持
 - 古いRetrospectiveは`completed`/`abandoned`アイテムを削除
 - `done`になったPBIはProduct Backlogから削除
+- 600行を絶対に越えない
 
 過去の情報が必要な場合:
 
