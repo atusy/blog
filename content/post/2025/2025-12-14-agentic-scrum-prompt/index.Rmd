@@ -1,0 +1,428 @@
+---
+title: "Agentic Scrum: AIエージェント向けスクラムフレームワーク仕様書"
+author: atusy
+date: '2025-12-14'
+slug: agentic-scrum-prompt
+categories: [Essay]
+tags: []
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+本記事は、AIエージェントがAgentic Scrumを理解・実装するためのプロンプトとして機能するよう設計されている。
+人間向けの説明は最小限にし、AIが直接参照・実行できる形式で記述する。
+
+関連記事: [AIエージェントでいい感じに開発するためにAI特化型スクラムが使えるかも](/2025/12/12/agentic-scrum/)
+
+## Agentic Scrumとは
+
+Agentic Scrumは、AIエージェントによる自律的な開発を最適化するためのスクラムフレームワークの適応版である。
+
+**核となる変更点:**
+
+- 1 Sprint = 1 PBI（タイムボックスなし）
+- Definition of Ready = AIが人に聞かずに完了できるか
+- すべてのアーティファクトは単一ファイル（`plan.md`）に集約
+- 受け入れ基準は実行可能な検証コマンドを必須とする
+
+## 基本原則
+
+以下の3原則に従う。
+
+| 原則 | 説明 |
+|------|------|
+| 単一の真実源 | すべてのアーティファクトは`plan.md`に集約する |
+| Gitが履歴 | タイムスタンプ不要。変更履歴はGitが追跡する |
+| 順序が優先度 | リストの上にあるものほど優先度が高い |
+
+## スプリントサイクル
+
+```
+Retro -> Refinement -> Planning -> Execution -> Review -> (next Retro)
+```
+
+各イベントの目的:
+
+| イベント | 目的 | 完了条件 |
+|----------|------|----------|
+| Retrospective | 前回の改善アクションの効果検査、新たな改善の特定 | 改善アクションが文書化されている |
+| Refinement | PBIを`ready`状態にする | 次に着手するPBIが`ready`である |
+| Planning | Sprint Goal策定、サブタスク分解 | サブタスクが定義されている |
+| Execution | TDDサイクルでの実装 | すべてのサブタスクが`completed` |
+| Review | Definition of Done検証、受け入れ判定 | すべての検証コマンドが成功 |
+
+## ロール定義
+
+### Product Owner
+
+**責務:**
+
+- Product Goalの策定と伝達
+- User Story形式でのPBI作成（実行可能な受け入れ基準付き）
+- バックログの順序付け
+- Sprint Reviewでの受け入れ判定
+
+**権限:**
+
+| 読み取り | 書き込み |
+|----------|----------|
+| ダッシュボード全体 | Product Backlog、Product Goal、Sprint受け入れ |
+
+### Scrum Master
+
+**責務:**
+
+- フレームワークの遵守を保証
+- 障害の特定と除去支援
+- エージェント間の調整
+- 経験主義の3本柱（透明性、検査、適応）の維持
+
+**権限:**
+
+| 読み取り | 書き込み |
+|----------|----------|
+| ダッシュボード全体 | Sprint設定、Retrospective、メトリクス |
+
+### Developer
+
+**責務:**
+
+- TDDワークフローでの実装（Red -> Green -> Refactor）
+- サブタスクステータスの更新
+- 障害発生時の報告
+
+**権限:**
+
+| 読み取り | 書き込み |
+|----------|----------|
+| Sprint Backlog、DoD | サブタスクステータス、進捗、メモ |
+
+## Definition of Ready
+
+PBIが`ready`であるための条件:
+
+```yaml
+definition_of_ready:
+  - AIが人間に質問せずに完了できる
+  - User Story形式で記述されている
+  - 受け入れ基準に実行可能な検証コマンドがある
+  - 依存関係がすべて解決済みである
+  - INVEST原則を満たしている
+```
+
+### PBIステータス遷移
+
+```
+draft -> refining -> ready
+```
+
+| ステータス | 意味 |
+|------------|------|
+| `draft` | 初期アイデア。詳細化が必要 |
+| `refining` | リファインメント中。情報収集や分割を検討中 |
+| `ready` | 必要な情報が揃っている。AIが自律的に実行可能 |
+
+### INVEST原則（AIエージェント向け解釈）
+
+| 原則 | AIエージェント向け解釈 |
+|------|------------------------|
+| Independent | 他PBIから独立、かつ人間への依存がない |
+| Negotiable | 成果を明確にしつつ実装手段は柔軟に |
+| Valuable | User Story形式でビジネス価値を明示 |
+| Estimable | 完了に必要な情報がすべて揃っている |
+| Small | これ以上分割するとユーザー価値を失う最小単位 |
+| Testable | 実行可能な検証コマンドを持つ |
+
+## Definition of Done
+
+```yaml
+definition_of_done:
+  checks:
+    - name: "テスト合格"
+      run: "cargo test"  # プロジェクトに応じて変更
+    - name: "リント合格"
+      run: "cargo clippy -- -D warnings"
+    - name: "型チェック合格"
+      run: "cargo check"
+    - name: "受け入れ基準の検証"
+      run: "# PBIに記載された各検証コマンドを実行"
+```
+
+**追加チェック項目:**
+
+- コミット履歴がTDDサイクル（Red/Green/Refactor）に従っている
+- 構造的変更と振る舞い変更が別コミットになっている
+- ダッシュボードのサブタスクがすべて`completed`である
+
+## TDD統合
+
+### サブタスクのステータス遷移
+
+```
+pending -> red -> green -> refactoring -> completed
+             |      |          |
+          (commit)(commit)  (commit x N)
+```
+
+### コミット規約
+
+| フェーズ | コミットメッセージ例 |
+|----------|----------------------|
+| red | `test: ユーザーログイン失敗時にエラーを返す` |
+| green | `feat: ログイン検証ロジックを実装` |
+| refactoring | `refactor: 認証モジュールを分離` |
+
+### Tidy First原則
+
+- 振る舞いの変更と構造の変更は**必ず別コミット**にする
+- 構造的変更を先に行い、テストが通ることを確認してから振る舞いを変更する
+
+## ダッシュボードテンプレート
+
+`plan.md`の完全なテンプレート:
+
+```yaml
+# Product Goal
+product_goal:
+  statement: "製品のゴールを1文で記述"
+  success_metrics:
+    - metric: "成功指標の名前"
+      target: "達成条件"
+
+# Product Backlog（順序が優先度）
+product_backlog:
+  - id: PBI-001
+    story:
+      role: "ユーザーの役割"
+      capability: "実現したいこと"
+      benefit: "得られる価値"
+    acceptance_criteria:
+      - criterion: "受け入れ基準の説明"
+        verification: "検証コマンド（例: cargo test test_name）"
+    status: ready  # draft | refining | ready
+
+# Current Sprint
+sprint:
+  number: 1
+  pbi_id: PBI-001
+  status: in_progress  # planning | in_progress | review | done
+  subtasks:
+    - test: "テストの説明"
+      implementation: "実装内容の説明"
+      type: behavioral  # behavioral | structural
+      status: pending  # pending | red | green | refactoring | completed
+      commits: []
+      notes: []
+
+# Definition of Done
+definition_of_done:
+  checks:
+    - name: "チェック項目名"
+      run: "実行コマンド"
+
+# Completed Sprints（最新2-3件のみ保持）
+completed: []
+
+# Retrospectives
+retrospectives:
+  - sprint: 1
+    improvements:
+      - action: "改善アクション"
+        backlog: sprint  # sprint | product
+        status: active  # active | completed | abandoned
+        outcome: null
+    happiness: 4  # 1-5
+```
+
+## イベント実行手順
+
+### Sprint Planning
+
+```markdown
+## 入力
+- Product Backlog（`ready`状態のPBIが存在すること）
+
+## 手順
+1. バックログ最上位の`ready`アイテムを選択
+2. Sprint Goalを策定（PBIのbenefitを基に）
+3. サブタスクに分解（各サブタスクはTDDサイクル1回分）
+4. ダッシュボードを更新
+
+## 出力
+- sprint.pbi_id が設定されている
+- sprint.subtasks が定義されている
+- sprint.status = "in_progress"
+```
+
+### Execution（Developer）
+
+```markdown
+## 各サブタスクに対して
+
+1. status = "red" に変更
+2. 失敗するテストを書く
+3. コミット: "test: {テストの説明}"
+4. status = "green" に変更
+5. テストを通す最小限のコードを書く
+6. コミット: "feat: {実装の説明}"
+7. status = "refactoring" に変更
+8. 必要に応じてリファクタリング（各改善ごとにコミット）
+9. status = "completed" に変更
+10. ダッシュボードを更新
+```
+
+### Sprint Review
+
+```markdown
+## 手順
+1. Definition of Doneの各チェックを実行
+2. PBIの受け入れ基準の検証コマンドを実行
+3. すべて成功 -> sprint.status = "done"
+4. 失敗があれば問題を特定し、サブタスクを追加
+
+## 完了条件
+- definition_of_done.checks がすべて成功
+- acceptance_criteria.verification がすべて成功
+```
+
+### Sprint Retrospective
+
+```markdown
+## 5フェーズ構造
+
+### 1. Set the Stage
+- 前回のRetrospectiveの改善アクションを確認
+- status: active のアクションの効果を評価
+
+### 2. Gather Data
+- 何がうまくいったか
+- 何が問題だったか
+- どんな障害があったか
+
+### 3. Generate Insights
+- 問題の根本原因を分析
+- パターンを特定
+
+### 4. Decide What to Do
+- 改善アクションを1-2個選択
+- backlog（sprint/product）を決定
+- 既存のactiveアクションをcompleted/abandonedに更新
+
+### 5. Close
+- happiness指標を記録（1-5）
+- ダッシュボードを更新
+```
+
+### Backlog Refinement
+
+```markdown
+## 手順
+1. draft/refining状態のPBIを確認
+2. 各PBIに対して:
+   - コードベースを探索して情報収集
+   - 受け入れ基準と検証コマンドを提案
+   - 依存関係を特定
+   - 大きすぎれば分割（INVEST原則に従う）
+3. すべての条件を満たせば status = "ready"
+4. 人間の判断が必要なら質問を文書化して status = "refining" のまま
+
+## 優先順位
+- ready アイテムを優先的にスプリントへ
+- ready がなければ refining アイテムのリファインメントを継続
+```
+
+## 障害管理
+
+障害は独立管理せず、PBIとして扱う。
+
+### スプリント中の障害
+
+```yaml
+# 現在のスプリントのサブタスクとして追加
+subtasks:
+  - test: "障害の調査と解決"
+    implementation: "解決策の説明"
+    type: behavioral
+    status: pending
+    notes:
+      - "試行1: 結果"
+      - "試行2: 結果"
+```
+
+### スプリントゴールをブロックする障害
+
+```yaml
+# Product Backlog最上位に障害解決PBIを追加
+product_backlog:
+  - id: PBI-HOTFIX-001
+    story:
+      role: "開発者"
+      capability: "障害を解決する"
+      benefit: "開発を再開できる"
+    acceptance_criteria:
+      - criterion: "障害が解決されている"
+        verification: "検証コマンド"
+    status: ready  # または refining（人間の助けが必要な場合）
+```
+
+## ダッシュボードのコンパクト化
+
+コンテキスト肥大化を防ぐため、以下のタイミングでダッシュボードを剪定する:
+
+- Sprint Retrospective終了時
+- ダッシュボードが200行を超えたとき
+
+**剪定ルール:**
+
+- `completed`配列は最新2-3件のみ保持
+- 古いRetrospectiveは`completed`/`abandoned`アイテムを削除
+- `done`になったPBIはProduct Backlogから削除
+
+過去の情報が必要な場合:
+
+```bash
+# 関連コミットの検索
+git log --oneline --grep="PBI-001"
+
+# 特定時点のダッシュボード復元
+git show <commit>:plan.md
+```
+
+## クイックリファレンス
+
+### ステータス一覧
+
+| アーティファクト | ステータス値 |
+|------------------|--------------|
+| PBI | `draft` / `refining` / `ready` |
+| Sprint | `planning` / `in_progress` / `review` / `done` |
+| Subtask | `pending` / `red` / `green` / `refactoring` / `completed` |
+| Improvement | `active` / `completed` / `abandoned` |
+
+### コミットプレフィックス
+
+| フェーズ | プレフィックス |
+|----------|----------------|
+| テスト追加 | `test:` |
+| 機能実装 | `feat:` |
+| リファクタリング | `refactor:` |
+| バグ修正 | `fix:` |
+| ドキュメント | `docs:` |
+
+### エージェント呼び出し例
+
+```markdown
+@scrum-team-product-owner PBI-002の受け入れ基準を確認してください
+@scrum-team-scrum-master 現在のスプリント状況を報告してください
+@scrum-team-developer 次のサブタスクを実装してください
+```
+
+## 参考資料
+
+- [Scrum Guide](https://scrumguides.org/scrum-guide.html)
+- [AIエージェントでいい感じに開発するためにAI特化型スクラムが使えるかも](/2025/12/12/agentic-scrum/)
