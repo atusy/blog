@@ -40,6 +40,22 @@ Agentic Scrumは、AIエージェントによる自律的な開発を最適化�
 | Gitが履歴 | タイムスタンプ不要。変更履歴はGitが追跡する |
 | 順序が優先度 | リストの上にあるものほど優先度が高い |
 
+## Increment（成果物）
+
+Incrementは、Sprint Goalに向けた具体的な価値を提供する成果物である。
+
+**定義:**
+
+- Definition of Doneを満たした、使用可能な状態のプロダクトへの追加分
+- 過去のすべてのIncrementと統合され、動作することが検証済み
+- Sprint Reviewで検査される対象
+
+**Agentic Scrumでの特徴:**
+
+- 1 Sprint = 1 PBIのため、各SprintのIncrementは1つのPBIの完成に対応
+- Incrementは必ずDefinition of Doneのすべてのチェックを通過している
+- Gitのコミット履歴がIncrementの構成要素を追跡可能にする
+
 ## スプリントサイクル
 
 ```
@@ -55,6 +71,21 @@ Retro -> Refinement -> Planning -> Execution -> Review -> (next Retro)
 | Planning | Sprint Goal策定、サブタスク分解 | サブタスクが定義されている |
 | Execution | TDDサイクルでの実装 | すべてのサブタスクが`completed` |
 | Review | Definition of Done検証、受け入れ判定 | すべての検証コマンドが成功 |
+
+### Sprint 0（初期スプリント）
+
+初めてのスプリントでは、Retrospectiveの対象となる前回スプリントが存在しない。そのため、Sprint 0は以下の流れで開始する:
+
+```
+Refinement -> Planning -> Execution -> Review -> (Sprint 1 の Retro)
+```
+
+**Sprint 0の準備事項:**
+
+- Product Goalが定義されている
+- Product Backlogに少なくとも1つのPBIが存在する（`draft`でも可）
+- Definition of Doneが設定されている
+- `scrum.yaml`が初期化されている
 
 ## ロール定義
 
@@ -150,7 +181,7 @@ definition_of_done:
     - name: "型チェック合格"
       run: "cargo check"
     - name: "受け入れ基準の検証"
-      run: "# PBIに記載された各検証コマンドを実行"
+      run: "<PBIのacceptance_criteria.verificationを順に実行>"  # プレースホルダー
 ```
 
 **プロセスチェック項目:**
@@ -212,13 +243,14 @@ product_backlog:
 sprint:
   number: 1
   pbi_id: PBI-001
-  status: in_progress  # planning | in_progress | review | done
+  goal: "このスプリントで達成するゴールを1文で記述"
+  status: in_progress  # planning | in_progress | review | done | cancelled
   subtasks:
     - test: "テストの説明"
       implementation: "実装内容の説明"
       type: behavioral  # behavioral | structural
       status: pending  # pending | red | green | refactoring | completed
-      commits: []
+      commits: []  # 形式: [{hash: "abc1234", message: "test: ...", phase: "red"}]
       notes: []
 
 # Definition of Done
@@ -231,6 +263,9 @@ definition_of_done:
 completed: []
 
 # Retrospectives
+# backlogフィールドの意味:
+#   sprint: 次のスプリントのサブタスクとして追加（プロセス改善など）
+#   product: 新しいPBIとしてProduct Backlogに追加（機能追加など）
 retrospectives:
   - sprint: 1
     improvements:
@@ -256,6 +291,7 @@ retrospectives:
 
 ## 出力
 - sprint.pbi_id が設定されている
+- sprint.goal が設定されている
 - sprint.subtasks が定義されている
 - sprint.status = "in_progress"
 ```
@@ -267,14 +303,15 @@ retrospectives:
 
 1. status = "red" に変更
 2. 失敗するテストを書く
-3. コミット: "test: {テストの説明}"
-4. status = "green" に変更
-5. テストを通す最小限のコードを書く
-6. コミット: "feat: {実装の説明}"
-7. status = "refactoring" に変更
-8. 必要に応じてリファクタリング（各改善ごとにコミット）
-9. status = "completed" に変更
-10. ダッシュボードを更新
+3. テストを実行し、期待通り失敗することを確認（必須）
+4. コミット: "test: {テストの説明}"
+5. status = "green" に変更
+6. テストを通す最小限のコードを書く
+7. コミット: "feat: {実装の説明}"
+8. status = "refactoring" に変更
+9. 必要に応じてリファクタリング（各改善ごとにコミット）
+10. status = "completed" に変更
+11. ダッシュボードを更新
 ```
 
 ### Sprint Review
@@ -284,7 +321,21 @@ retrospectives:
 1. Definition of Doneの各チェックを実行
 2. PBIの受け入れ基準の検証コマンドを実行
 3. すべて成功 -> sprint.status = "done"
-4. 失敗があれば問題を特定し、サブタスクを追加
+4. 失敗があれば以下のフローに従う
+
+## 失敗時の対応フロー
+
+### 軽微な修正で解決可能な場合
+- sprint.status = "in_progress" のまま
+- 修正用サブタスクを追加
+- 修正完了後、再度Reviewを実行
+
+### Sprint Goal達成が困難な場合
+- Product Ownerに報告
+- 以下のいずれかを選択:
+  1. スコープ縮小: 達成可能な範囲にPBIを分割
+  2. Sprint中止: sprint.status = "cancelled"、PBIをProduct Backlogに戻す
+- 選択に関わらずRetrospectiveで原因を分析
 
 ## 完了条件
 - definition_of_done.checks がすべて成功
@@ -311,7 +362,9 @@ retrospectives:
 
 ### 4. Decide What to Do
 - 改善アクションを1-2個選択
-- backlog（sprint/product）を決定
+- backlogを決定:
+  - `sprint`: 次スプリントのサブタスクとして実施（プロセス改善）
+  - `product`: 新PBIとしてProduct Backlogに追加（機能追加）
 - 既存のactiveアクションをcompleted/abandonedに更新
 
 ### 5. Close
@@ -385,8 +438,16 @@ product_backlog:
 
 コンテキスト肥大化を防ぐため、以下のタイミングでダッシュボードを剪定する:
 
-- Sprint Retrospective終了時
+- Sprint Retrospective終了時（必須チェック）
 - ダッシュボードが300行を越えたとき
+
+**行数チェック方法:**
+
+```bash
+wc -l scrum.yaml
+```
+
+Retrospective終了時に上記コマンドを実行し、300行を超えている場合は剪定を実施する。
 
 **剪定ルール:**
 
@@ -412,7 +473,7 @@ git show <commit>:scrum.yaml
 | アーティファクト | ステータス値 |
 |------------------|--------------|
 | PBI | `draft` / `refining` / `ready` |
-| Sprint | `planning` / `in_progress` / `review` / `done` |
+| Sprint | `planning` / `in_progress` / `review` / `done` / `cancelled` |
 | Subtask | `pending` / `red` / `green` / `refactoring` / `completed` |
 | Improvement | `active` / `completed` / `abandoned` |
 
@@ -425,6 +486,19 @@ git show <commit>:scrum.yaml
 | リファクタリング | `refactor:` |
 | バグ修正 | `fix:` |
 | ドキュメント | `docs:` |
+
+### エージェント呼び出し決定木
+
+どのエージェントを呼び出すかは以下の判断基準に従う:
+
+| 状況 | 呼び出すエージェント |
+|------|---------------------|
+| PBIの作成・優先順位変更・受け入れ判定 | `@scrum-team-product-owner` |
+| フレームワーク遵守の確認・障害報告 | `@scrum-team-scrum-master` |
+| サブタスクの実装・TDDサイクル実行 | `@scrum-team-developer` |
+| PBIが`ready`かどうか不明 | `@scrum-team-product-owner` |
+| プロセスの進め方が不明 | `@scrum-team-scrum-master` |
+| 技術的な実装方法が不明 | `@scrum-team-developer` |
 
 ### エージェント呼び出し例
 
