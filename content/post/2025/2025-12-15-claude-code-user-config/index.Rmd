@@ -1,5 +1,5 @@
 ---
-title: "Claude Codeのユーザー設定プロンプトを使い分けてコンテキスト管理を最適化する (CLAUDE.md, rules, skills, slash commands, subagents)"
+title: "Claude Codeのユーザー設定プロンプトを使い分けてコンテキスト管理を最適化する (CLAUDE.md, rules, slash commands, skills, subagents)"
 author: atusy
 date: '2025-12-15'
 slug: claude-code-user-config
@@ -13,7 +13,7 @@ output:
 Claude Codeで設定できるプロンプトがどんどん複雑化してるので、自分の理解を整理しとく。
 ユーザー単位でもプロジェクト単位でも設定できるが、プロジェクト単位をあちこちでやるのは大変なので、ユーザー単位での設定をある程度進めたいなと思ってる。
 
-CLAUD.md、rules、skills、slash commands、subagents、全部一緒じゃないですかー！という人も、それぞれの用途とコンテキストの扱いを理解すれば、使い分けの意義が見えてくると思う。
+CLAUD.md、rules、slash commands、skills、subagents、全部一緒じゃないですかー！という人も、それぞれの用途とコンテキストの扱いを理解すれば、使い分けの意義が見えてくると思う。
 
 ## 設定できるプロンプトと用途
 
@@ -24,10 +24,10 @@ CLAUD.md、rules、skills、slash commands、subagents、全部一緒じゃな�
     * 全プロジェクトに共通する設定
 * rules (`~/.claude/rules/`)
     * CLAUDE.mdの分割先。ディレクトリ構造を使って構造化できるのと、ファイルパスに応じたルールの適用を制御できる（e.g., `paths: src/api/**/*.ts`）
-* skills (`~/.claude/skills/`)
-    * `SKILL.md`ファイルとサポートファイルで構成される再利用可能な専門知識パッケージ。会話内容に基づきClaudeが自動判断して発動する
 * slash commands (`~/.claude/commands/`)
     * markdownファイルで定義する定型プロンプト。`/command`のようにユーザーが明示的に実行する簡潔な指示テンプレート
+* skills (`~/.claude/skills/`)
+    * `SKILL.md`ファイルとサポートファイルで構成される再利用可能な専門知識パッケージ。会話内容に基づきClaudeが自動判断して発動する
 * subagents (`~/.claude/agents/`)
     * 専門領域に特化したシステムプロンプト・ツール設定を持つ独立したAI。特定タスクに自動委譲または明示的に呼び出し可能
 
