@@ -1,0 +1,139 @@
+---
+title: "Claude Codeのユーザー設定プロンプトを使い分けてコンテキスト管理を最適化する (CLAUDE.md, rules, skills, slash commands, subagents)"
+author: atusy
+date: '2025-12-15'
+slug: claude-code-user-config
+categories: [Tech]
+tags: [Claude Code]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p>Claude Codeで設定できるプロンプトがどんどん複雑化してるので、自分の理解を整理しとく。ユーザー単位でもプロジェクト単位でも設定できるが、プロジェクト単位をあちこちでやるのは大変なので、ユーザー単位での設定をある程度進めたいなと思ってる。</p>
+<p>CLAUD.md、rules、skills、slash commands、subagents、全部一緒じゃないですかー！という人も、それぞれの用途とコンテキストの扱いを理解すれば、使い分けの意義が見えてくると思う。</p>
+<div id="設定できるプロンプトと用途" class="section level2">
+<h2>設定できるプロンプトと用途</h2>
+<p>プロンプトの肥大化と複雑化はコンテキストウィンドウの枯渇や重要情報の埋没などの様々な問題を生む。この問題を回避するためにプロンプトを用途に応じて様々に設定できるようになっている。</p>
+<ul>
+<li>CLAUDE.md (<code>~/.claude/CLAUDE.md</code>)
+<ul>
+<li>全プロジェクトに共通する設定</li>
+</ul></li>
+<li>rules (<code>~/.claude/rules/</code>)
+<ul>
+<li>CLAUDE.mdの分割先。ディレクトリ構造を使って構造化できるのと、ファイルパスに応じたルールの適用を制御できる（e.g., <code>paths: src/api/**/*.ts</code>）</li>
+</ul></li>
+<li>skills (<code>~/.claude/skills/</code>)
+<ul>
+<li><code>SKILL.md</code>ファイルとサポートファイルで構成される再利用可能な専門知識パッケージ。会話内容に基づきClaudeが自動判断して発動する</li>
+</ul></li>
+<li>slash commands (<code>~/.claude/commands/</code>)
+<ul>
+<li>markdownファイルで定義する定型プロンプト。<code>/command</code>のようにユーザーが明示的に実行する簡潔な指示テンプレート</li>
+</ul></li>
+<li>subagents (<code>~/.claude/agents/</code>)
+<ul>
+<li>専門領域に特化したシステムプロンプト・ツール設定を持つ独立したAI。特定タスクに自動委譲または明示的に呼び出し可能</li>
+</ul></li>
+</ul>
+</div>
+<div id="使い分け" class="section level2">
+<h2>使い分け</h2>
+<div id="claude-code起動時に読むべき設定はclaude.mdとrules" class="section level3">
+<h3>Claude Code起動時に読むべき設定はCLAUDE.mdとrules</h3>
+<p>Claude Codeは起動時にCLAUDE.mdとrulesを全文読みむので、プロジェクトに依存せず使う情報はここに置く。</p>
+<p>rulesに分割するメリットとしては、パス限定ルールを記述できる点と、ディレクトリ構造を利用してマークダウンよりも明示的に情報を階層化できる点かと思う。</p>
+<pre><code>~/.claude/rules/
+├── frontend/
+│   ├── react.md
+│   └── styles.md
+├── backend/
+│   ├── api.md
+│   └── database.md
+└── general.md</code></pre>
+<p>CLAUDE.mdやrulesは全文を読む特性上、コンテキストを圧迫しやすい。</p>
+<p>そこで必要になるまで詳細を伏せておけることはskills, slash commands, subagentsに分離しておくのが良い。</p>
+</div>
+<div id="ユーザーが判断したタイミングで読み込ませたい内容はslash-commands" class="section level3">
+<h3>ユーザーが判断したタイミングで読み込ませたい内容はslash commands</h3>
+<p>実験した限り、slash commandsを削除しても<code>/context</code>に表示されるコンテキストの消費量は変わらなかった。つまり、slash commandsは呼び出すまでコンテキストを消費しない。</p>
+<p>コンテキスト消費の特徴と、ユーザーが明示的に実行する簡潔な指示テンプレートという目的をふまえると、ユーザーが判断したタイミングで読み込ませたい内容はslash commandsに書くべき言える。</p>
+<p>たとえばgit commitする手順やルールは <code>/git:commit</code> のようにslashコマンドを呼ぶまで概要すら知らなくていいはずだ。</p>
+<ul>
+<li>変更をすべてコミットせずに、意味のある範囲でできるだけ小さくコミットしてね</li>
+<li>commit logにはwhyを残してね</li>
+</ul>
+<p>といった情報は実際にコミットを始めるまで知らなくていい。</p>
+<p>逆に「ユーザーの利用言語を問わず日本語で返事すること」みたいな全体に影響するルールはCLAUDE.mdに書いておくべきだ。</p>
+</div>
+<div id="claude-codeが自動判断して読み込む内容はskillsかsubagents" class="section level3">
+<h3>Claude Codeが自動判断して読み込む内容はskillsかsubagents</h3>
+<p>slash commandsはコンテキスト消費を限界まで遅延できる一方で、Claude Codeが自動呼び出ししない欠点がある。</p>
+<p>それを補うのがskillsやsubagentsだ。
+Claude Codeはskillsやsubagentsの全体ではなくdescription（概要）だけをあらかじめ読む。概要から必要性を判断して全体を読む流れをとることで、コンテキスト消費をぎりぎりまで最小にしつつ、複雑な機能を発揮できる。</p>
+<p>じゃあskillsとsubagentsはどう使いわけるのとなるが、ここでまたコンテキストの使い方に注目したい。</p>
+<div id="コンテキストを独立させたいならsubagents" class="section level4">
+<h4>コンテキストを独立させたいならsubagents</h4>
+<blockquote>
+<p>Claude Codeがサブエージェントの専門分野に一致するタスクに遭遇すると、そのタスクを特化したサブエージェントに委譲でき、サブエージェントは独立して動作し、結果を返します。 <a href="https://code.claude.com/docs/ja/sub-agents" class="uri">https://code.claude.com/docs/ja/sub-agents</a></p>
+</blockquote>
+<p>とあるように、サブエージェントはclaude codeの中でclaude codeを呼ぶようなものだ。サブエージェントは独立したコンテキストを持つので、タスクが巨大な場合や、親側が結果を概要レベルで知っていればよい場合に向いている。</p>
+<p>試行錯誤を伴うエラーの原因調査は最たるものだろう。人間でも試行錯誤をしすぎると、あれってなんだっけ……？となるがサブエージェントに独立させれば、結果だけを受け取って情報整理できる。</p>
+<p>見方を変えれば、特定条件で反映したいCLAUDE.mdとも言えそうだ。</p>
+</div>
+<div id="コンテキストを共有したいならskills" class="section level4">
+<h4>コンテキストを共有したいならskills</h4>
+<p>たとえばClaude Codeにテスト駆動開発させるとしよう。</p>
+<p>Claude Codeに必ずテスト駆動開発させるわけではないので、高度な知識をCLAUDE.mdやrulesに書いておくのはコンテキストの無駄遣いだ。</p>
+<p>かといって、サブエージェントに独立させると、親側のコンテキストを十分に渡せなかったり、RED-GREEN-REFACTORのサイクルごとにコンテキストが分断され、開発の経緯を共有しきずに状況を見失うおそれがある。</p>
+<p>Skillsなら、「計画を元にTDDして」みたいな具合に、コンテキストを完全に引き継いで複雑なタスクを実行させられるわけだ。</p>
+</div>
+<div id="skillsとsubagentsの明示的呼び出しについて" class="section level4">
+<h4>skillsとsubagentsの明示的呼び出しについて</h4>
+<p>「Claude Codeが自動判断して読み込む内容はskillsかsubagents」と書いたが、subagentsについては</p>
+<blockquote>
+<p>コマンドでサブエージェントに言及して、特定のサブエージェントをリクエストします</p>
+</blockquote>
+<p>とあるように、ユーザーが明示的に呼び出すこともできる。「test-runnerサブエージェントを起動して」みたいに指示すればいいらしい。</p>
+<p>更に明示的にしたければ、 <code>@test-runner</code>といった記法もある。</p>
+<p>Skillsも基本的には「commitスキルを使って」みたいな指示で呼び出せると思うが、<code>@</code>を使うような記法はない。</p>
+<p>それもそのはず、明示的に呼び出したいならそれは技能ではなく指示なので、slash commandsを使うべきだからだ。</p>
+<p>自動でも手動でも使いたい場合は、slash commandsに具体的な指示を書き、slash commandを呼び出すskillを書けばいい。</p>
+<pre class="yaml"><code>---
+name: git-commit
+description: Stage meaningful diffs and create Conventional Commits with WHY-focused messages. Use when agent needs to commit code changes.
+---
+
+Execute `/git:commit` slash command`</code></pre>
+</div>
+</div>
+</div>
+<div id="設定の肥大化と戦う" class="section level2">
+<h2>設定の肥大化と戦う</h2>
+<p>使い分け方法を見ていくと、肥大化した各種設定をどうリファクタすべきかも見えてくる。</p>
+<div id="重複の排除" class="section level3">
+<h3>重複の排除</h3>
+<p>同じ内容が複数の場所に書かれていたら、一箇所にまとめて参照する形にする。</p>
+<ul>
+<li>slash commandとskillで重複 → skillからslash commandを呼び出す形に統一</li>
+<li>複数のsubagentsで共通のルール → 常に必要ならCLAUDE.mdへ、特定条件で必要ならskillsとして切り出す</li>
+</ul>
+</div>
+<div id="読み込みタイミングの最適化" class="section level3">
+<h3>読み込みタイミングの最適化</h3>
+<p>CLAUDE.mdやrulesに書いてあるが、常に必要ではない内容は移動を検討する。</p>
+<ul>
+<li>特定タスクでしか使わない詳細な手順 → slash commandsへ</li>
+<li>自動判断で発動させたい専門知識 → skillsへ</li>
+<li>独立したコンテキストで処理させたいタスク → subagentsへ</li>
+</ul>
+</div>
+</div>
+<div id="enjoy" class="section level2">
+<h2>ENJOY!</h2>
+<p>CLAUD.md、rules、skills、slash commands、subagents、全部一緒じゃないですかー！と思っていた頃もあったが、なんとなく脳内に描いていた使い分けを言語化できた。</p>
+<p>うまく使うと、コンテキスト管理の上手なClaude Codeができあがりそうなので、リファクタ用slash commandでも作ってみようと思う。</p>
+</div>

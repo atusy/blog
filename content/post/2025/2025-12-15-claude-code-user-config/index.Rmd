@@ -1,5 +1,19 @@
+---
+title: "Claude Codeのユーザー設定プロンプトを使い分けてコンテキスト管理を最適化する (CLAUDE.md, rules, skills, slash commands, subagents)"
+author: atusy
+date: '2025-12-15'
+slug: claude-code-user-config
+categories: [Tech]
+tags: [Claude Code]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
 Claude Codeで設定できるプロンプトがどんどん複雑化してるので、自分の理解を整理しとく。
 ユーザー単位でもプロジェクト単位でも設定できるが、プロジェクト単位をあちこちでやるのは大変なので、ユーザー単位での設定をある程度進めたいなと思ってる。
+
+CLAUD.md、rules、skills、slash commands、subagents、全部一緒じゃないですかー！という人も、それぞれの用途とコンテキストの扱いを理解すれば、使い分けの意義が見えてくると思う。
 
 ## 設定できるプロンプトと用途
 
@@ -114,3 +128,27 @@ description: Stage meaningful diffs and create Conventional Commits with WHY-foc
 Execute `/git:commit` slash command`
 ````
 
+## 設定の肥大化と戦う
+
+使い分け方法を見ていくと、肥大化した各種設定をどうリファクタすべきかも見えてくる。
+
+### 重複の排除
+
+同じ内容が複数の場所に書かれていたら、一箇所にまとめて参照する形にする。
+
+* slash commandとskillで重複 → skillからslash commandを呼び出す形に統一
+* 複数のsubagentsで共通のルール → 常に必要ならCLAUDE.mdへ、特定条件で必要ならskillsとして切り出す
+
+### 読み込みタイミングの最適化
+
+CLAUDE.mdやrulesに書いてあるが、常に必要ではない内容は移動を検討する。
+
+* 特定タスクでしか使わない詳細な手順 → slash commandsへ
+* 自動判断で発動させたい専門知識 → skillsへ
+* 独立したコンテキストで処理させたいタスク → subagentsへ
+
+## ENJOY!
+
+CLAUD.md、rules、skills、slash commands、subagents、全部一緒じゃないですかー！と思っていた頃もあったが、なんとなく脳内に描いていた使い分けを言語化できた。
+
+うまく使うと、コンテキスト管理の上手なClaude Codeができあがりそうなので、リファクタ用slash commandでも作ってみようと思う。
