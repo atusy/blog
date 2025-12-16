@@ -51,7 +51,8 @@ function __zoxide_list_missing
   diff \
     ( zoxide query --list | sort | psub ) \
     ( ghq list -p | sort | psub ) \
-    | grep &#39;^&gt; &#39; | string replace -r &#39;^&gt; &#39; &#39;&#39;
+    | string match --regex --entire &#39;^&gt; &#39; \
+    | string replace -r &#39;^&gt; &#39; &#39;&#39;
 end
 
 function __zoxide_add_missing
@@ -78,7 +79,7 @@ __zoxide_list_missing() {
   diff \
     &lt;( zoxide query --list | sort ) \
     &lt;( ghq list -p | sort) \
-    | grep &#39;^&gt; &#39; | string replace -r &#39;^&gt; &#39; &#39;&#39;
+    | grep &#39;^&gt; &#39; | sed -e &#39;s/^&gt; //&#39;
 }
 
 __zoxide_add_missing() {
