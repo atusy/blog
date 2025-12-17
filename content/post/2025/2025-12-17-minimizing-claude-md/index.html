@@ -1,0 +1,157 @@
+---
+title: "Tidy Tidy Tidy! Claude Codeの設定最適化ルールを作ったら、Kent BeckのCLAUDE.mdを1プロンプトで10行、追加手直しで1行にできた"
+author: atusy
+date: '2025-12-17'
+slug: minimizing-claude-md
+categories: [Tech]
+tags: [Claude Code]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+    設定最適化ルールを適用して、`Minimize startup context by refactoring @.claude/CLAUDE.md with excellent extractions of path-specific rules, commands, skills, and/or subagents. `と唱えよう。一気にCLAUDE.mdを最適化できるぞ。
+
+    設定最適化ルール: <https://github.com/atusy/dotfiles/blob/fa7923c0dba20281441ca951cdec3cea2ff4e62a/dot_claude/rules/claude/config-maintenance.md>
+---
+
+
+
+<p>最近書いた<a href="/2025/12/15/claude-code-user-config/">記事</a>の知見を活かして自分のCLAUDE.mdを最小化してみたところ、わずか5行にできた。</p>
+<p>長らく<a href="https://github.com/KentBeck/BPlusTree3/blob/main/rust%2Fdocs%2FCLAUDE.md">Kent BeckのCLAUDE.md</a>をコピペ+αを使っていたが、TDDの方法論などをskillsなどに分離した形だ。</p>
+<p><a href="https://github.com/KentBeck/BPlusTree3/blob/main/rust%2Fdocs%2FCLAUDE.md">Kent BeckのCLAUDE.md</a>単体で見れば、たったの1行になったので、その方法を紹介する。</p>
+<p>完成したCLAUDE.mdは以下の通りだ。単体でも使えるがskillsなどと合わせて真価を発揮するので、成果物はGitHub上の設定を参考にしてほしい（<a href="https://github.com/atusy/dotfiles/blob/6c080e07db493f6ddccd6072c4bdfbbe6ef3801b/dot_claude" class="uri">https://github.com/atusy/dotfiles/blob/6c080e07db493f6ddccd6072c4bdfbbe6ef3801b/dot_claude</a>）。</p>
+<pre class="markdown"><code># CORE PRINCIPLES
+
+* Follow Kent Beck&#39;s Test-Driven Development (TDD) methodology as the preferred approach for all development work.
+* Document at the right layer: Code → How, Tests → What, Commits → Why, Comments → Why not
+* Keep documentation up to date with code changes</code></pre>
+<p>最適化を進める上で最近書いた以下の記事をぜひ参考にしてほしいが、読んでなくても最適化は実践できる。</p>
+<blockquote>
+<p><a href="/2025/12/15/claude-code-user-config/">Claude Codeのユーザー設定プロンプトを使い分けてコンテキスト管理を最適化する (CLAUDE.md, rules, slash commands, skills, subagents)</a></p>
+</blockquote>
+<p>最適化手順は以下の通りだ。詳細は後述する。</p>
+<ol style="list-style-type: decimal">
+<li><a href="#claude-code-configuration-maintenance-rules">Claude Codeの設定最適化ルールの用意</a>
+<ul>
+<li>参考: <a href="https://github.com/atusy/dotfiles/blob/fa7923c0dba20281441ca951cdec3cea2ff4e62a/dot_claude/rules/claude/config-maintenance.md" class="uri">https://github.com/atusy/dotfiles/blob/fa7923c0dba20281441ca951cdec3cea2ff4e62a/dot_claude/rules/claude/config-maintenance.md</a></li>
+</ul></li>
+<li><a href="#execute-claude-code-optimization">Claude CodeにCLAUDE.md最適化を実行させる</a>
+<ul>
+<li>プロンプト: <code>Minimize startup context by refactoring @.claude/CLAUDE.md with excellent extractions of path-specific rules, commands, skills, and/or subagents.</code></li>
+</ul></li>
+<li><a href="#manual-tweaks">手直し</a></li>
+</ol>
+<p>最適化で生まれたスキルやPath-specific Rulesの読み込みは初回必要時だけでなく、毎回のようなので、指示忘れ対策としても有効そうだ。</p>
+<p>ではでは、詳細を見ていこう。</p>
+<div id="claude-code-configuration-maintenance-rules" class="section level2">
+<h2>Claude Codeの設定最適化ルールの用意</h2>
+<p>以下からダウンロードして利用可能だ。
+Claude Codeの設定変更時のみ読み込まれるよう、<code>paths: "**/{.,dot_}claude/**"</code> を指定しているので、コンテキスト汚染の心配もない。</p>
+<blockquote>
+<p><a href="https://github.com/atusy/dotfiles/blob/fa7923c0dba20281441ca951cdec3cea2ff4e62a/dot_claude/rules/claude/config-maintenance.md" class="uri">https://github.com/atusy/dotfiles/blob/fa7923c0dba20281441ca951cdec3cea2ff4e62a/dot_claude/rules/claude/config-maintenance.md</a></p>
+</blockquote>
+<p>内容のベースは「<a href="/2025/12/15/claude-code-user-config/">Claude Codeのユーザー設定プロンプトを使い分けてコンテキスト管理を最適化する (CLAUDE.md, rules, slash commands, skills, subagents)</a>」になっている。</p>
+<p>これをClaude Codeに理解させた上で<code>Create a rule for Claude Code configuration maintenance</code>的な指示を与えて原案を生成した。</p>
+<p>その後、Claude Codeを使ったり手作業したりしつつ、以下の修正を加えた。</p>
+<ul>
+<li>原案にはディレクトリ構造など、Claude Code自身が熟知してそうな内容を含んでいたので削除</li>
+<li>CLAUDE.mdが含むべき内容が役割（role）、経験（ expertise）、核たる指針（ core principles）である旨を強調
+<ul>
+<li>上記に関連するskillsを積極利用するよう指示</li>
+</ul></li>
+</ul>
+</div>
+<div id="execute-claude-code-optimization" class="section level2">
+<h2>CLAUDE.mdの最適化実行</h2>
+<p>ためしに<a href="https://github.com/KentBeck/BPlusTree3/blob/main/rust%2Fdocs%2FCLAUDE.md">Kent BeckのCLAUDE.md</a>を最適化してみたところ、77行から10行にまで削減できた。</p>
+<p><a href="https://github.com/KentBeck/BPlusTree3/blob/main/rust%2Fdocs%2FCLAUDE.md">Kent BeckのCLAUDE.md</a>は以下のURLから確認できるが、TDDの詳細やコミット方法、計画の実行方法などが盛り込まれており、commandsやskillsに分割できる内容が多く丁度いい題材だった。</p>
+<blockquote>
+<p><a href="https://github.com/KentBeck/BPlusTree3/blob/main/rust%2Fdocs%2FCLAUDE.md" class="uri">https://github.com/KentBeck/BPlusTree3/blob/main/rust%2Fdocs%2FCLAUDE.md</a></p>
+</blockquote>
+<p>実は、この最適化実行を何度か試しながら、ルール自体も改善している。</p>
+<p>プロンプトには単純に「リファクタしてくれ」とか「最小化してくれ」とか言ってもそれなりにやってくれるが、目的と手段を明確に伝えたほうが良い結果が得られやすいと思う。</p>
+<p>今回であれば「起動時のコンテキストを最適化する」目的のために「Skillsなどを抽出する」手段をとってくれ、といった具合だ。</p>
+<p>最終的に使ったプロンプトは以下。これ自体をslash commandにしてもよさそうだ。</p>
+<blockquote>
+<p>Minimize startup context by refactoring @.claude/CLAUDE.md with excellent extractions of path-specific rules, commands, skills, and/or subagents.</p>
+</blockquote>
+<div id="最適化過程の確認" class="section level3">
+<h3>最適化過程の確認</h3>
+<p>プロンプトを与えると、先に作成したルールが<code>Loaded .claude/rules/claude/config-maintenance.md</code>として読み込み、分析を始めてくれる。</p>
+<pre><code>&gt; Minimize startup context by refactoring @.claude/CLAUDE.md with excellent extractions of path-specific rules, commands, skills, and/or subagents. 
+  ⎿  Read .claude/CLAUDE.md (77 lines)
+  ⎿  Loaded .claude/rules/claude/config-maintenance.md
+
+⏺ I&#39;ll analyze your current CLAUDE.md and restructure it following the configuration maintenance principles. Let me fir
+st explore what&#39;s already in your .claude directory.</code></pre>
+<p>しばらくすると、最適化戦略としてslash commandやskillsの抽出を計画してくれる。</p>
+<pre><code>⏺ ★ Insight ─────────────────────────────────────
+  Context Optimization Strategy:
+  1. CLAUDE.md should contain only the role identity and pointers to skills/commands
+  2. /go command - Triggered explicitly by user saying &quot;go&quot;, handles the plan.md workflow
+  3. tdd skill - Auto-triggers when writing tests or implementing features, contains methodology
+  4. commit skill - Auto-triggers when committing, contains commit discipline
+  5. Path-specific rule - You already have code-quality.md with paths filter - this is good!
+  ─────────────────────────────────────────────────</code></pre>
+<p>そのまま進むと、skillやcommandを切り出した旨を報告してくれる。</p>
+<p>コード品質に関するルールも切り出してくれている。パス限定ルールとしてよくあるプログラミング言語の拡張子に反応するようだが、自分の使う言語に反応しない場合は手直しするか、Skillに移すとよいだろう。</p>
+<pre><code>⏺ ★ Insight ─────────────────────────────────────
+  What Changed:
+  - Before: 77 lines loaded at every startup (3,450 bytes)
+  - After: 10 lines loaded at startup (~300 bytes) — 91% reduction
+
+  Context Loading Strategy:
+  | Component                                         | When Loaded              | Content                                            |
+  |---------------------------------------------------|--------------------------|----------------------------------------------------|
+  | CLAUDE.md                                         | Always                   | Role identity + skill/command discovery (10 lines) |
+  | rules/code-quality.md                             | When touching code files | Quality standards (15 lines, path-filtered)        |
+  | skills/tdd/                                       | Auto, when writing tests | Full TDD methodology (description only at startup) |
+  | skills/commit/                                    | Auto, when committing    | Commit discipline (description only at startup)    |
+  | commands/go.md                                    | User-invoked /go         | Plan.md workflow (never loaded until used)         |
+  | ───────────────────────────────────────────────── |                          |                                                    |</code></pre>
+<p>最終的に得られたCLAUDE.mdは以下の通りだ。CLAUDE.mdは10行と主張しているが、実質9行である。</p>
+<pre class="md"><code># Role
+
+Senior software engineer following Kent Beck&#39;s Test-Driven Development (TDD) and Tidy First principles.
+
+## Quick Reference
+
+- Use `/go` command to advance through plan.md tests (Red → Green → Refactor cycle)
+- `tdd` skill auto-triggers for test writing, implementation, and refactoring guidance
+- `commit` skill auto-triggers for commit discipline and change separation</code></pre>
+<p>試しにPythonでFizzBuzzを実装させたところ、適切にTDDスキルを使ってくれた。</p>
+<pre><code>&gt; implement FizzBuzz in Python 
+
+⏺ Skill(tdd)
+
+⏺ I&#39;ll implement FizzBuzz using TDD principles - starting with a failing test, making it pass, then refactoring. Let me
+ set up a todo list to track our Red → Green → Refactor cycles.</code></pre>
+</div>
+</div>
+<div id="manual-tweaks" class="section level2">
+<h2>手直し</h2>
+<p>わずか1プロンプトで77行を10行に最適化できたが、好みで手直ししてもいいだろう。</p>
+<p>たとえば<a href="https://github.com/KentBeck/BPlusTree3/blob/main/rust%2Fdocs%2FCLAUDE.md">Kent BeckのCLAUDE.md</a>最適化は<code>/go</code>コマンドを抽出した。これは<code>plan.md</code>の内容を実行してねとユーザーが指示するために使うもので、Claude Codeが存在を知る必要はないので省略できる。</p>
+<p>commitスキルについても作業としてcommitが必要になれば自動で見つけてくれると期待できそうだ。</p>
+<p>一方で、TDDスキルは、ただ「実装して」と指示するだけだとTDD以外の手法を使う可能性があるので残したほうがいい。</p>
+<p>上記をふまえると、私の<a href="https://github.com/atusy/dotfiles/blob/6c080e07db493f6ddccd6072c4bdfbbe6ef3801b/dot_claude/CLAUDE.md">CLAUDE.md</a>に含まれる<strong>1行</strong>に集約できる。</p>
+<p>やった！たったの1行だ！</p>
+<ul>
+<li>Follow Kent Beck’s Test-Driven Development methodology (<code>tdd</code> skill) as the preferred approach for all development work.</li>
+</ul>
+<p>実際には<a href="https://github.com/KentBeck/BPlusTree3/blob/main/rust%2Fdocs%2FCLAUDE.md">Kent BeckのCLAUDE.md</a>で言及していない部分に軽く触れておきたいので、<a href="https://x.com/t_wada/status/904916106153828352">t-wadaさんのコードにはHowを……の一文</a>と、ドキュメント更新について追記し、<code>CORE PRINCIPLES</code>セクション化している。いずれもスキル読み込みを問わずして意識してほしい内容だ。</p>
+<ul>
+<li>Document at the right layer: Code → How, Tests → What, Commits → Why, Comments → Why not</li>
+<li>Keep documentation up to date with code changes</li>
+</ul>
+</div>
+<div id="enjoy" class="section level2">
+<h2>ENJOY!</h2>
+<p>「<a href="/2025/12/15/claude-code-user-config/">Claude Codeのユーザー設定プロンプトを使い分けてコンテキスト管理を最適化する (CLAUDE.md, rules, slash commands, skills, subagents)</a>」の記事の知見を活かして、1プロンプトでかなりCLAUDE.mdを小さくできることを確認した。</p>
+<p>スキルやコマンドの分割は単にコンテキスト消費を最適化するだけでなく</p>
+<ul>
+<li>Claude Codeが本当に大事にすべきことを端的に伝えられる</li>
+<li>スキルやコマンドが必要になるごとに読み込む特性により、長時間の作業で指示を忘れるリスクを軽減できる</li>
+</ul>
+<p>といった多面的な最適化を果たせた。</p>
+</div>
