@@ -33,6 +33,7 @@ summary: |
 <ol style="list-style-type: decimal">
 <li><a href="#claude-code-configuration-maintenance-rules">Claude Codeの設定最適化ルールの用意</a>
 <ul>
+<li>ルールを<code>~/.claude/rules/claude/config-maintenance.md</code>に保存</li>
 <li>参考: <a href="https://github.com/atusy/dotfiles/blob/fa7923c0dba20281441ca951cdec3cea2ff4e62a/dot_claude/rules/claude/config-maintenance.md" class="uri">https://github.com/atusy/dotfiles/blob/fa7923c0dba20281441ca951cdec3cea2ff4e62a/dot_claude/rules/claude/config-maintenance.md</a></li>
 </ul></li>
 <li><a href="#execute-claude-code-optimization">Claude CodeにCLAUDE.md最適化を実行させる</a>
@@ -45,7 +46,7 @@ summary: |
 <p>ではでは、詳細を見ていこう。</p>
 <div id="claude-code-configuration-maintenance-rules" class="section level2">
 <h2>Claude Codeの設定最適化ルールの用意</h2>
-<p>以下からダウンロードして利用可能だ。
+<p>以下からダウンロードして利用可能だ。ダウンロードしたら<code>~/.claude/rules/claude/config-maintenance.md</code>に保存しよう。
 Claude Codeの設定変更時のみ読み込まれるよう、<code>paths: "**/{.,dot_}claude/**"</code> を指定しているので、コンテキスト汚染の心配もない。</p>
 <blockquote>
 <p><a href="https://github.com/atusy/dotfiles/blob/fa7923c0dba20281441ca951cdec3cea2ff4e62a/dot_claude/rules/claude/config-maintenance.md" class="uri">https://github.com/atusy/dotfiles/blob/fa7923c0dba20281441ca951cdec3cea2ff4e62a/dot_claude/rules/claude/config-maintenance.md</a></p>

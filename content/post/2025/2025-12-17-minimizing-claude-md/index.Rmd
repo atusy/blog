@@ -40,6 +40,7 @@ summary: |
 最適化手順は以下の通りだ。詳細は後述する。
 
 1. [Claude Codeの設定最適化ルールの用意](#claude-code-configuration-maintenance-rules)
+    * ルールを`~/.claude/rules/claude/config-maintenance.md`に保存
     * 参考: <https://github.com/atusy/dotfiles/blob/fa7923c0dba20281441ca951cdec3cea2ff4e62a/dot_claude/rules/claude/config-maintenance.md>
 2. [Claude CodeにCLAUDE.md最適化を実行させる](#execute-claude-code-optimization)
     * プロンプト: `Minimize startup context by refactoring @.claude/CLAUDE.md with excellent extractions of path-specific rules, commands, skills, and/or subagents.`
@@ -52,6 +53,7 @@ summary: |
 ## Claude Codeの設定最適化ルールの用意 {#claude-code-configuration-maintenance-rules}
 
 以下からダウンロードして利用可能だ。
+ダウンロードしたら`~/.claude/rules/claude/config-maintenance.md`に保存しよう。
 Claude Codeの設定変更時のみ読み込まれるよう、`paths: "**/{.,dot_}claude/**"` を指定しているので、コンテキスト汚染の心配もない。
 
 > <https://github.com/atusy/dotfiles/blob/fa7923c0dba20281441ca951cdec3cea2ff4e62a/dot_claude/rules/claude/config-maintenance.md>
