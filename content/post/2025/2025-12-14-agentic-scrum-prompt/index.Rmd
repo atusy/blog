@@ -59,7 +59,7 @@ Incrementは、Sprint Goalに向けた具体的な価値を提供する成果物
 ## スプリントサイクル
 
 ```
-Refinement -> Planning -> Execution -> Review -> Retro -> (Next Refinement)
+Refinement -> Planning -> Execution -> Review -> Retro -> scrum.yaml compaction -> (Next Refinement)
 ```
 
 各イベントの目的:
@@ -71,6 +71,7 @@ Refinement -> Planning -> Execution -> Review -> Retro -> (Next Refinement)
 | Planning | Sprint Goal策定、サブタスク分解 | サブタスクが定義されている |
 | Execution | TDDサイクルでの実装 | すべてのサブタスクが`completed` |
 | Review | Definition of Done検証、受け入れ判定 | すべての検証コマンドが成功 |
+| Compaction | ダッシュボードの剪定 | 行数が300行以下 |
 
 ## ロール定義
 
@@ -149,7 +150,7 @@ draft -> refining -> ready
 |------|------------------------|
 | Independent | 他PBIから独立、かつ人間への依存がない |
 | Negotiable | 成果を明確にしつつ実装手段は柔軟に |
-| Valuable | User Story形式でビジネス価値を明示 |
+| Valuable | User Story形式でユーザー価値を明示 |
 | Estimable | 完了に必要な情報がすべて揃っている |
 | Small | これ以上分割するとユーザー価値を失う最小単位 |
 | Testable | 実行可能な検証コマンドを持つ |
@@ -382,7 +383,7 @@ retrospectives:
    - コードベースを探索して情報収集
    - 受け入れ基準と検証コマンドを提案
    - 依存関係を特定
-   - 大きすぎれば分割（INVEST原則に従う）
+   - INVEST原則に従って分割
 3. すべての条件を満たせば status = "ready"
 4. 人間の判断が必要なら質問を文書化して status = "refining" のまま
 
