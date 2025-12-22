@@ -66,7 +66,7 @@ Refinement -> Planning -> Execution -> Review -> Retro -> scrum.yaml compaction 
 
 | イベント | 目的 | 完了条件 |
 |----------|------|----------|
-| Retrospective | 前回の改善アクションの効果検査、新たな改善の特定 | 改善アクションが文書化されている |
+| Retrospective | 前回の改善アクションの効果検査、新たな改善の特定 | immediateアクションが完了、他は文書化されている |
 | Refinement | PBIを`ready`状態にする | 次に着手するPBIが`ready`である |
 | Planning | Sprint Goal策定、サブタスク分解 | サブタスクが定義されている |
 | Execution | TDDサイクルでの実装 | すべてのサブタスクが`completed` |
@@ -249,14 +249,15 @@ definition_of_done:
 completed: []
 
 # Retrospectives
-# backlogフィールドの意味:
+# timingフィールドの意味:
+#   immediate: Retrospective内で即座に実施（プロダクションコード以外の単一論理変更）
 #   sprint: 次のスプリントのサブタスクとして追加（プロセス改善など）
 #   product: 新しいPBIとしてProduct Backlogに追加（機能追加など）
 retrospectives:
   - sprint: 1
     improvements:
       - action: "改善アクション"
-        backlog: sprint  # sprint | product
+        timing: sprint  # immediate | sprint | product
         status: active  # active | completed | abandoned
         outcome: null
 ```
@@ -348,25 +349,33 @@ retrospectives:
 
 ### 4. Decide What to Do
 - 改善アクションを1-2個選択
-- backlogを決定:
+- timingを決定:
+  - `immediate`: Retrospective内で即座に実施
   - `sprint`: 次スプリントのサブタスクとして実施（プロセス改善）
   - `product`: 新PBIとしてProduct Backlogに追加（機能追加）
 - 既存のactiveアクションをcompleted/abandonedに更新
 
 ### 5. Close
+- `timing: immediate`のアクションをすべて実施し、status = "completed"に更新
+- `timing: sprint`のアクションを次スプリントのサブタスクに追加
+- `timing: product`のアクションをProduct Backlogに新PBIとして追加
 - ダッシュボードを更新
 ```
 
 **改善アクションのアーキタイプ:**
 
-| カテゴリ | 例 |
-|----------|-----|
-| プロンプト調整 | サブエージェント定義、スラッシュコマンド、スキル、CLAUDE.mdの更新 |
-| プロセス調整 | scrum.yamlへのメモ追加、DoD更新、PBIテンプレート改善 |
-| ツール/環境 | MCPサーバー追加、Claude Codeフック設定、pre-commitフック |
-| ドキュメント | CLAUDE.md追記、ADR作成、コード規約文書化 |
-| コード品質 | テストヘルパー追加、共通ユーティリティ作成、エラーメッセージ改善 |
-| 自動化 | 反復作業のスラッシュコマンド化、CI/CD改善 |
+| カテゴリ | 例 | timing |
+|----------|-----|--------|
+| プロンプト調整 | サブエージェント定義、スラッシュコマンド、スキル、CLAUDE.mdの更新 | immediate |
+| プロセス調整 | scrum.yamlへのメモ追加、DoD更新、PBIテンプレート改善 | immediate |
+| ツール/環境 | MCPサーバー追加、Claude Codeフック設定、pre-commitフック | immediate |
+| ドキュメント | CLAUDE.md追記、ADR作成、コード規約文書化 | sprint |
+| コード品質 | テストヘルパー追加、共通ユーティリティ作成、エラーメッセージ改善 | sprint/product |
+| 自動化 | 反復作業のスラッシュコマンド化、CI/CD改善 | sprint/product |
+
+**`timing: immediate`の制約:**
+- プロダクションコードの変更を伴わないこと（設定ファイル、ドキュメント、プロンプトのみ）
+- 1コミットでロールバック可能な単一の論理的変更であること
 
 ### Backlog Refinement
 
