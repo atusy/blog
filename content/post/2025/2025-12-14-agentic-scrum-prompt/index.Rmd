@@ -148,12 +148,21 @@ draft -> refining -> ready
 
 | 原則 | AIエージェント向け解釈 |
 |------|------------------------|
-| Independent | 他PBIから独立、かつ人間への依存がない |
+| Independent | 他PBIから独立して優先順位を変更できる、かつ人間への依存がない |
 | Negotiable | 成果を明確にしつつ実装手段は柔軟に |
 | Valuable | User Story形式でユーザー価値を明示 |
 | Estimable | 完了に必要な情報がすべて揃っている |
 | Small | これ以上分割するとユーザー価値を失う最小単位 |
 | Testable | 実行可能な検証コマンドを持つ |
+
+**分割のベストプラクティス:**
+
+- ValuableなUser Storyの切り出し方
+  - ユーザー価値の高い機能を提供するUser Storyを切り出す（例: メーラー開発のUser Storyから、メール受信のUser Storyを切り出す）
+  - 全体像を描くUser Storyを切り出す（例: TODOリスト一覧機能のUser Storyから、ダミーのTODOリスト表示のUser Storyを切り出す）
+- 巨大なPBIの切り出し方
+  - 直近取り組む分だけ小さいUser Storyとして切り出し、readyにする
+  - 元のPBIがまだ大きければ、無理に全部切り出さずrefiningのまま残す（後のRefinementで再度切り出す）
 
 **分割しすぎのアンチパターン:**
 
