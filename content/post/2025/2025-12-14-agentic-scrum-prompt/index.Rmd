@@ -27,7 +27,7 @@ Agentic Scrumは、AIエージェントによる自律的な開発を最適化�
 
 - 1 Sprint = 1 PBI（タイムボックスなし）
 - Definition of Ready = AIが人に聞かずに完了できるか
-- すべてのアーティファクトは単一ファイル（`scrum.yaml`）に集約
+- すべてのアーティファクトは単一ファイル（`scrum.ts`）に集約
 - 受け入れ基準は実行可能な検証コマンドを必須とする
 
 ## 基本原則
@@ -36,7 +36,7 @@ Agentic Scrumは、AIエージェントによる自律的な開発を最適化�
 
 | 原則 | 説明 |
 |------|------|
-| Single Source of Truth | すべてのアーティファクトは`scrum.yaml`に集約する |
+| Single Source of Truth | すべてのアーティファクトは`scrum.ts`に集約する |
 | Gitが履歴 | タイムスタンプ不要。変更履歴はGitが追跡する |
 | 順序が優先度 | リストの上にあるものほど優先度が高い |
 
@@ -59,7 +59,7 @@ Incrementは、Sprint Goalに向けた具体的な価値を提供する成果物
 ## スプリントサイクル
 
 ```
-Refinement -> Planning -> Execution -> Review -> Retro -> scrum.yaml compaction -> (Next Refinement)
+Refinement -> Planning -> Execution -> Review -> Retro -> scrum.ts compaction -> (Next Refinement)
 ```
 
 各イベントの目的:
@@ -216,63 +216,195 @@ pending -> red -> green -> refactoring -> completed
 
 ## ダッシュボードテンプレート
 
-`scrum.yaml`の完全なテンプレート:
+`scrum.ts`の完全なテンプレート。`deno run scrum.ts | jq`でデータ抽出可能。
 
-```yaml
-# Product Goal
-product_goal:
-  statement: "製品のゴールを1文で記述"
-  success_metrics:
-    - metric: "成功指標の名前"
-      target: "達成条件"
+```typescript
+// ============================================================
+// 型定義（この部分はAIが変更してはいけない）
+// スキーマ変更が必要な場合は人間にレビューを依頼すること
+// ============================================================
 
-# Product Backlog（順序が優先度）
-product_backlog:
-  - id: PBI-001
-    story:
-      role: "ユーザーの役割"
-      capability: "実現したいこと"
-      benefit: "得られる価値"
-    acceptance_criteria:
-      - criterion: "受け入れ基準の説明"
-        verification: "検証コマンド（例: cargo test test_name）"
-    status: ready  # draft | refining | ready
+type PBIStatus = "draft" | "refining" | "ready" | "done";
+type SprintStatus = "planning" | "in_progress" | "review" | "done" | "cancelled";
+type SubtaskStatus = "pending" | "red" | "green" | "refactoring" | "completed";
+type SubtaskType = "behavioral" | "structural";
+type CommitPhase = "red" | "green" | "refactoring";
+type ImprovementTiming = "immediate" | "sprint" | "product";
+type ImprovementStatus = "active" | "completed" | "abandoned";
 
-# Current Sprint
-sprint:
-  number: 1
-  pbi_id: PBI-001
-  goal: "このスプリントで達成するゴールを1文で記述"
-  status: in_progress  # planning | in_progress | review | done | cancelled
-  subtasks:
-    - test: "テストの説明"
-      implementation: "実装内容の説明"
-      type: behavioral  # behavioral | structural
-      status: pending  # pending | red | green | refactoring | completed
-      commits: []  # 形式: [{hash: "abc1234", message: "test: ...", phase: "red"}]
-      notes: []
+interface SuccessMetric {
+  metric: string;
+  target: string;
+}
 
-# Definition of Done
-definition_of_done:
-  checks:
-    - name: "チェック項目名"
-      run: "実行コマンド"
+interface ProductGoal {
+  statement: string;
+  success_metrics: SuccessMetric[];
+}
 
-# Completed Sprints（最新2-3件のみ保持）
-completed: []
+interface AcceptanceCriterion {
+  criterion: string;
+  verification: string;
+}
 
-# Retrospectives
-# timingフィールドの意味:
-#   immediate: Retrospective内で即座に実施（プロダクションコード以外の単一論理変更）
-#   sprint: 次のスプリントのサブタスクとして追加（プロセス改善など）
-#   product: 新しいPBIとしてProduct Backlogに追加（機能追加など）
-retrospectives:
-  - sprint: 1
-    improvements:
-      - action: "改善アクション"
-        timing: sprint  # immediate | sprint | product
-        status: active  # active | completed | abandoned
-        outcome: null
+interface UserStory {
+  role: string;
+  capability: string;
+  benefit: string;
+}
+
+interface PBI {
+  id: string;
+  story: UserStory;
+  acceptance_criteria: AcceptanceCriterion[];
+  status: PBIStatus;
+}
+
+interface Commit {
+  hash: string;
+  message: string;
+  phase: CommitPhase;
+}
+
+interface Subtask {
+  test: string;
+  implementation: string;
+  type: SubtaskType;
+  status: SubtaskStatus;
+  commits: Commit[];
+  notes: string[];
+}
+
+interface Sprint {
+  number: number;
+  pbi_id: string;
+  goal: string;
+  status: SprintStatus;
+  subtasks: Subtask[];
+}
+
+interface DoDCheck {
+  name: string;
+  run: string;
+}
+
+interface DefinitionOfDone {
+  checks: DoDCheck[];
+}
+
+interface Improvement {
+  action: string;
+  timing: ImprovementTiming;
+  status: ImprovementStatus;
+  outcome: string | null;
+}
+
+interface Retrospective {
+  sprint: number;
+  improvements: Improvement[];
+}
+
+interface ScrumDashboard {
+  product_goal: ProductGoal;
+  product_backlog: PBI[];
+  sprint: Sprint | null;
+  definition_of_done: DefinitionOfDone;
+  completed: Sprint[];
+  retrospectives: Retrospective[];
+}
+
+// ============================================================
+// ダッシュボードデータ（AIはここを編集する）
+// ============================================================
+
+const scrum: ScrumDashboard = {
+  product_goal: {
+    statement: "製品のゴールを1文で記述",
+    success_metrics: [
+      { metric: "成功指標の名前", target: "達成条件" },
+    ],
+  },
+
+  product_backlog: [
+    {
+      id: "PBI-001",
+      story: {
+        role: "ユーザーの役割",
+        capability: "実現したいこと",
+        benefit: "得られる価値",
+      },
+      acceptance_criteria: [
+        {
+          criterion: "受け入れ基準の説明",
+          verification: "検証コマンド（例: cargo test test_name）",
+        },
+      ],
+      status: "ready",
+    },
+  ],
+
+  sprint: {
+    number: 1,
+    pbi_id: "PBI-001",
+    goal: "このスプリントで達成するゴールを1文で記述",
+    status: "in_progress",
+    subtasks: [
+      {
+        test: "テストの説明",
+        implementation: "実装内容の説明",
+        type: "behavioral",
+        status: "pending",
+        commits: [],
+        notes: [],
+      },
+    ],
+  },
+
+  definition_of_done: {
+    checks: [
+      { name: "チェック項目名", run: "実行コマンド" },
+    ],
+  },
+
+  completed: [],
+
+  // timingフィールドの意味:
+  //   immediate: Retrospective内で即座に実施（プロダクションコード以外の単一論理変更）
+  //   sprint: 次のスプリントのサブタスクとして追加（プロセス改善など）
+  //   product: 新しいPBIとしてProduct Backlogに追加（機能追加など）
+  retrospectives: [
+    {
+      sprint: 1,
+      improvements: [
+        {
+          action: "改善アクション",
+          timing: "sprint",
+          status: "active",
+          outcome: null,
+        },
+      ],
+    },
+  ],
+};
+
+// JSON出力（deno run scrum.ts | jq でクエリ可能）
+console.log(JSON.stringify(scrum, null, 2));
+```
+
+**データ抽出の例:**
+
+```bash
+# 現在のスプリント情報
+deno run scrum.ts | jq '.sprint'
+
+# red状態のサブタスク一覧
+deno run scrum.ts | jq '.sprint.subtasks[] | select(.status == "red")'
+
+# ready状態のPBI一覧
+deno run scrum.ts | jq '.product_backlog[] | select(.status == "ready")'
+
+# activeな改善アクション
+deno run scrum.ts | jq '.retrospectives[].improvements[] | select(.status == "active")'
 ```
 
 ## イベント実行手順
@@ -380,7 +512,7 @@ retrospectives:
 | カテゴリ | 例 | timing |
 |----------|-----|--------|
 | プロンプト調整 | サブエージェント定義、スラッシュコマンド、スキル、CLAUDE.mdの更新 | immediate |
-| プロセス調整 | scrum.yamlへのメモ追加、DoD更新、PBIテンプレート改善 | immediate |
+| プロセス調整 | scrum.tsへのメモ追加、DoD更新、PBIテンプレート改善 | immediate |
 | ツール/環境 | MCPサーバー追加、Claude Codeフック設定、pre-commitフック | immediate |
 | ドキュメント | CLAUDE.md追記、ADR作成、コード規約文書化 | sprint |
 | コード品質 | テストヘルパー追加、共通ユーティリティ作成、エラーメッセージ改善 | sprint/product |
@@ -458,7 +590,7 @@ product_backlog:
 **行数チェック方法:**
 
 ```bash
-wc -l scrum.yaml
+wc -l scrum.ts
 ```
 
 Retrospective終了時に上記コマンドを実行し、300行を超えている場合は剪定を実施する。
@@ -477,7 +609,7 @@ Retrospective終了時に上記コマンドを実行し、300行を超えてい�
 git log --oneline --grep="PBI-001"
 
 # 特定時点のダッシュボード復元
-git show <commit>:scrum.yaml
+git show <commit>:scrum.ts
 ```
 
 ## クイックリファレンス
