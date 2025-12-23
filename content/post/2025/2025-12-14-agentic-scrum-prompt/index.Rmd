@@ -224,12 +224,27 @@ pending -> red -> green -> refactoring -> completed
 // スキーマ変更が必要な場合は人間にレビューを依頼すること
 // ============================================================
 
+// PBI lifecycle: draft (idea) -> refining (gathering info) -> ready (can start) -> done
 type PBIStatus = "draft" | "refining" | "ready" | "done";
+
+// Sprint lifecycle
 type SprintStatus = "planning" | "in_progress" | "review" | "done" | "cancelled";
+
+// TDD cycle: pending -> red (test written) -> green (impl done) -> refactoring -> completed
 type SubtaskStatus = "pending" | "red" | "green" | "refactoring" | "completed";
+
+// behavioral = changes observable behavior, structural = refactoring only
 type SubtaskType = "behavioral" | "structural";
-type CommitPhase = "red" | "green" | "refactoring";
+
+// Commits happen only after tests pass (green/refactoring), never on red
+type CommitPhase = "green" | "refactoring";
+
+// When to execute retrospective actions:
+//   immediate: Apply within Retrospective (non-production code, single logical change)
+//   sprint: Add as subtask to next sprint (process improvements)
+//   product: Add as new PBI to Product Backlog (feature additions)
 type ImprovementTiming = "immediate" | "sprint" | "product";
+
 type ImprovementStatus = "active" | "completed" | "abandoned";
 
 interface SuccessMetric {
@@ -368,10 +383,6 @@ const scrum: ScrumDashboard = {
 
   completed: [],
 
-  // timingフィールドの意味:
-  //   immediate: Retrospective内で即座に実施（プロダクションコード以外の単一論理変更）
-  //   sprint: 次のスプリントのサブタスクとして追加（プロセス改善など）
-  //   product: 新しいPBIとしてProduct Backlogに追加（機能追加など）
   retrospectives: [
     {
       sprint: 1,
@@ -389,6 +400,13 @@ const scrum: ScrumDashboard = {
 
 // JSON出力（deno run scrum.ts | jq でクエリ可能）
 console.log(JSON.stringify(scrum, null, 2));
+```
+
+**バリデーション:**
+
+```bash
+# 型チェック（スキーマ違反を検出）
+deno check scrum.ts
 ```
 
 **データ抽出の例:**
