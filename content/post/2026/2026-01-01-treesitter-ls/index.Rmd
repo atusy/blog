@@ -1,0 +1,105 @@
+---
+title: "Markdown中のPythonコードの補間とかできちゃう、多言語対応と言語埋め込みに対応する言語サーバーtreesitter-lsを開発した"
+author: atusy
+date: '2026-01-01'
+slug: treesitter-ls
+categories: [Tech]
+tags: [treesitter-ls, Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+あけましておめでとうございます！年末せっせと開発してた言語サーバーの紹介で新年を迎えます！
+まだ荒削りですが、ぜひGitHubのスターやスポンサーを通じて応援いただけると嬉しいです！
+
+> <https://github.com/atusy/treesitter-ls>
+
+[atusy/treesitter-ls]: https://github.com/atusy/treesitter-ls
+
+現代のコーディングに欠かせない入力補完や定義ジャンプなどの高度な機能を、様々なエディタで標準化するために[Language Server Protocol（LSP）](https://microsoft.github.io/language-server-protocol/)が定義されて久しいです。
+そして、LSPの定める機能をエディタに提供するサーバーを言語サーバーと呼びます。
+Pythonのpyright、Rustのrust-analyzerなど、言語特化型のものを中心にたくさん実装されてきました。
+
+今回、変わりダネな多言語対応型の言語サーバーとして[atusy/treesitter-ls]を開発したので紹介します。
+
+以下のMarkdown中のPythonコードに対し、[atusy/treesitter-ls]を通じてシンタックスハイライト、コード補間、ホバー、定義ジャンプが機能しています。
+多くの開発者が待望した機能ではないでしょうか？
+
+<video controls="controls" autoplay="autoplay" loop="loop" preload="metadata">
+  <source src="video/demo.mp4" type="video/mp4">
+</video>
+
+[atusy/treesitter-ls]によって、以下の課題を解決できます。
+
+1. 言語埋め込み対応
+    * Markdownのコードブロックなど、ソースコードの中に別種の言語が埋め込まれているケースに対し、適切な機能を提供する
+1. 多言語対応
+    * 言語特化型サーバーが提供していない機能をfallbackする形で補完する
+    * そもそも言語特化型サーバーが存在しない言語の簡易言語サーバーを開発可能にする
+        * [tree-sitter](https://tree-sitter.github.io/tree-sitter/)のパーサーとクエリを用意すればOK
+1. エディタ開発促進
+    * 新作エディタでもLSPクライアントの機能さえあれば、treesitter-ls経由でIDE並みの機能を獲得でき、syntax highlightの開発工数などを削減できる
+
+## 使い方
+
+### インストール
+
+現時点ではbrewなどを通じたインストールに対応できていません。
+リリースページから最新版のバイナリをダウンロードして、PATHに通してください。
+
+<https://github.com/atusy/treesitter-ls/releases>
+
+追加で`tree-sitter-cli`、Cコンパイラ、Gitをインストールしておいてください。
+
+```
+brew install tree-sitter-cli gcc git
+```
+
+### 設定
+
+現時点で設定せずに利用できる機能は限定的で、シンタックスハイライトと領域選択くらいです。
+
+デモ動画のようなコード補間などの機能は、埋め込みコードの内容を他の言語サーバーに転送することで実現しています。
+
+転送先の言語サーバーは起動オプション（`init_options`）の`languageServers`を指定すればOK。
+だいたい、これで決めにかかってますが、もし破壊的変更があったらごめんなさい。
+
+Neovimであれば以下の通り。
+
+```lua
+vim.lsp.config["treesitter-ls"] = {
+  cmd = { "treesitter-ls" },
+  init_options = {
+    -- 埋め込み言語に対して発動する言語サーバーの設定
+    languageServers = {
+      ["pyright"] = {
+        cmd = { "pyright-langserver", "--stdio" },
+        languages = { "python" },
+      },
+    },
+  },
+  on_init = function(client)
+    -- TIPS: NeovimのsemanticTokens/deltaはちらつくので無効化してsemanticTokens/full/deltaを有効化する
+    client.server_capabilities.semanticTokensProvider.range = false
+  end,
+}
+
+-- 言語サーバーの有効化
+vim.lsp.enable("treesitter-ls")
+```
+
+## ENJOY!
+
+も少し進んだらまた詳細な紹介記事書こうと思います。
+
+まだまだやりたいこといっぱいなので2026年も頑張ります！
+
+* ファイルを使った設定への対応（例: `~/.config/treesitter-ls/treesitter-ls.toml`）
+* `treesitter-ls`のインストールを簡単にする
+    * `brew`, `nix`などでの提供
+* VSCode向け拡張の提供
+* `treesitter-ls`単体で提供可能な言語サーバー機能の拡充
+* 言語サーバー転送による対応機能の拡充
+* コードアクションのプラグインによるユーザー拡張
+    * Quarto/R Markdownなどで実行結果を表示する方法とか作れるといいなー
