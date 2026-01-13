@@ -1,0 +1,16 @@
+{{- if and (.IsPage) (default true .Site.Params.sidebar.showRecent) -}}
+{{- $num_recent_posts := default 5 .Site.Params.sidebar.num_recent_posts -}}
+{{- $posts := first $num_recent_posts (where .Site.Pages "Section" "in" .Site.Params.mainSections) -}}
+{{- if gt (len $posts) 0 -}}
+<details open>
+  <summary><h4>{{ i18n "recentPosts" }}</h4></summary>
+  <ol>
+    {{ range $posts -}}
+    {{- if ne .RelPermalink "/post/" -}}
+    <li><a href="{{.RelPermalink}}">{{.Title | markdownify }}</a></li>
+    {{- end -}}
+    {{- end }}
+  </ol>
+</details>
+{{- end -}}
+{{- end -}}

@@ -1,0 +1,14 @@
+{{- if and (.IsHome) (default true .Site.Params.sidebar.showTaxonomy) -}}
+{{- range $taxonomyname, $taxonomy := .Site.Taxonomies -}}
+{{- if gt (len $taxonomy) 0 -}}
+<details>
+  <summary><h4>{{ i18n $taxonomyname }}</h4></summary>
+  <p>
+    {{- range $name, $value := $taxonomy }}
+    <a href="{{ printf "/%s/" $taxonomyname | relLangURL }}{{ $name | urlize }}">{{ $name }}</a>
+    {{ end }}
+  </p>
+</details>
+{{- end -}}
+{{- end -}}
+{{- end -}}

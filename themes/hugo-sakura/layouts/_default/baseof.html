@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="{{ .Lang }}">
+  <head>
+  {{ block "head" . }}
+    {{ block "head-meta" .}}{{ partial "head-meta" . }}{{ end }}
+
+    <link rel="canonical" href="{{ .Permalink }}">
+
+    <title>
+      {{- block "title" . -}}
+        {{ .Title}}{{ if ne .Title .Site.Title }} | {{ .Site.Title }}{{ end }}
+      {{- end -}}
+    </title>
+
+    {{- $sakura := resources.Get "css/sakura.scss" | css.Sass (dict "outputStyle" "compressed"  "enableSourceMap" true ) | resources.Fingerprint -}}
+    {{ if eq .Page.RelPermalink ("/404.html" | relLangURL ) }}
+    <link href="{{ $sakura.Permalink }}" rel="stylesheet">
+    {{ else }}
+    <link href="{{ $sakura.RelPermalink }}" rel="stylesheet">
+    {{ end }}
+
+    {{ with .OutputFormats.Get "RSS" }}
+    <link href={{ .RelPermalink }} rel="alternate" type="application/rss+xml" title="{{ $.Site.Title }}" />
+    {{ end }}
+
+    {{ partial "head-math" . }}
+    {{ partial "head-highlightjs" . }}
+    {{ partial "head-custom.html" . }}
+
+    {{ template "_internal/google_analytics.html" . }}
+  {{ end }}
+  </head>
+  <body>
+    {{ block "body" . }}
+    <header id="site-header"> 
+    {{ block "header" . }}{{ partial "header" . }}{{ end }}
+    </header>
+    <main>
+      {{ block "main" . }}{{ end }}
+    </main>
+    <aside id="site-sidebar">
+      {{ block "sidebar" . }}{{ partial "sidebar" . }}{{ end }}
+    </aside>
+    <footer id="site-footer">
+      {{ block "footer" . }}{{ partial "footer" . }}{{end}}
+    </footer>
+    {{ end }}
+  </body>
+</html>

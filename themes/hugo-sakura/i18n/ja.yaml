@@ -1,0 +1,29 @@
+- id: by
+  translation: "by"
+
+- id: tags
+  translation: "タグ"
+
+- id: categories
+  translation: "カテゴリ"
+
+- id: translations
+  translation: "Translations"
+
+- id: related
+  translation: "See also"
+
+- id: recentPosts
+  translation: "New"
+
+- id: backToTop
+  translation: "Top"
+
+- id: language
+  translation: "Language"
+
+- id: links
+  translation: "リンク"
+
+- id: publications
+  translation: "著書"

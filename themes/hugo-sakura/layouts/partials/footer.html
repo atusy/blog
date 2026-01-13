@@ -1,0 +1,8 @@
+{{ $thanks := i18n "thanks" | safeHTML }}
+{{ $copyright := default $thanks .Site.Copyright }}
+{{ if $copyright }}<p>{{ $copyright }}</p>{{end}}
+<nav class="justify-content-center">
+  <ul>
+    <li><a href="#">{{ i18n "backToTop" }}</a></li>
+  </ul>
+</nav>

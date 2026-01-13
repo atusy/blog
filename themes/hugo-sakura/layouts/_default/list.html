@@ -1,0 +1,35 @@
+{{ define "main" }}
+
+{{ $truncate := default true .Site.Params.truncate }}
+
+{{ if .Content }}
+<header>
+    <h1 class="blog-post-title">
+        <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
+    </h1>
+    <hr>
+</header>
+<article class="blog-post">
+    {{ .Content }}
+</article>
+{{ end }}
+
+{{ $pages := .Pages }}
+{{ if .IsHome }}
+{{ $pages = .Site.RegularPages }}
+{{ end }}
+
+{{ $paginator := .Paginate (where $pages "Type" "post") }}
+{{ range $paginator.Pages }}
+
+    {{ if $truncate }}
+        {{ .Render "summary" }}
+    {{ else }}
+        {{ .Render "content" }}
+    {{ end }}
+
+{{ end }}
+
+{{ partial "paginator" . }}
+
+{{ end }}

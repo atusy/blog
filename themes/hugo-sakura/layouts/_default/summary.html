@@ -1,0 +1,10 @@
+<article class="blog-summary">
+    <header>
+        {{ partial "post-title" . }}
+        {{ partial "post-date" . }}
+        {{ partial "post-categories" . }}
+    </header>
+    {{ if not .Truncated }}
+        {{ .Summary }}
+    {{ end }}
+</article>

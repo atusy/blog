@@ -1,0 +1,27 @@
+{{ define "main" }}
+
+<header>
+  <h1 class="blog-post-title">
+    <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
+  </h1>
+  {{ partial "post-date" . }}
+  {{ partial "post-categories" . }}
+  {{ partial "post-tags" . }}
+</header>
+<article class="blog-post">
+  {{ .Content }}
+</article>
+{{ if .IsTranslated }}
+<footer>
+  <h4>{{ i18n "translations" }}</h4>
+  <ul>
+    {{ range .Translations }}
+    <li>
+      <a href="{{ .RelPermalink }}">{{ .Lang }}: {{ .Title }}</a>
+    </li>
+    {{ end }}
+  </ul>
+</footer>
+{{ end }}
+
+{{ end }}

@@ -1,0 +1,18 @@
+{{- $URL := .Site.BaseURL | absLangURL -}}
+{{- $LOGO := resources.Get "images/logo.jpg" -}}
+{{- if ne .Page.RelPermalink ("/404.html" | relLangURL) -}}
+  {{- $URL := relref . $URL -}}
+{{- end -}}
+<h1>
+<a href="{{ $URL }}" title="{{ default "Top Page" .Site.Title }}">
+  {{ if ne $LOGO nil -}}
+  {{- if eq .Page.RelPermalink ("/404.html" | relLangURL) -}}
+  <img src="{{ $LOGO.Permalink }}" alt="Logo of {{ .Site.Title }}">
+  {{- else -}}
+  <img src="{{ $LOGO.RelPermalink }}" alt="Logo of {{ .Site.Title }}">
+  {{- end -}}
+  {{- end }}
+  {{ .Site.Title }}
+</a>
+</h1>
+{{ partial "header-translations" . }}

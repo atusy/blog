@@ -1,0 +1,11 @@
+{{ define "title" }}
+Page Not Found | {{ .Site.Title }}
+{{ end }}
+{{ define "head-meta-extra" }}
+<meta name="robots" content="noindex">
+{{ end }}
+
+{{ define "main" }}
+<h1>404 Page Not Found</h1>
+<p style="font-size: 2em">Go back to <a href="{{ .Site.Home.Permalink | absLangURL }}">Home</a><p>
+{{ end }}

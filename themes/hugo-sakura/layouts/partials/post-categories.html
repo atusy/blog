@@ -1,0 +1,10 @@
+{{ if .Params.categories }}
+<div class="blog-post-taxonomies categories">
+    {{ i18n "categories" }}:
+    <ul>
+    {{ range .Params.categories }}
+        <li><a href="{{ "/categories/" | relLangURL }}{{ . | urlize }}">{{ . }}</a></li>
+    {{ end }}
+    </ul>
+</div>
+{{ end }}

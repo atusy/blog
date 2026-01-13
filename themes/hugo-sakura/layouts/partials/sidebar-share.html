@@ -1,0 +1,21 @@
+{{- $title := .Site.Title -}}
+{{- if .IsPage -}} 
+  {{- $title = add .Title (add " | " $title) -}} 
+{{- end -}}
+<details open>
+<summary><h4>Share</h4></summary>
+  <p class="sns_share">
+      <a href="//twitter.com/intent/tweet?url={{ .Permalink }}&text={{ $title }}" target="_blank" title="Tweet">
+        <img src="//icongr.am/simple/twitter.svg?size=32px&color=6c757d">
+      </a>
+      <a href="//b.hatena.ne.jp/add?mode=confirm&url={{ .Permalink }}&title={{ $title }}" target="_blank" title="hatena">
+        <img src="//icongr.am/simple/hatenabookmark.svg?size=32px&color=6c757d">
+      </a>
+      <a href="//www.facebook.com/sharer.php?u={{ .Permalink }}&t={{ $title }}" target="_blank" title="Facebook">
+        <img src="//icongr.am/simple/facebook.svg?size=32px&color=6c757d">
+      </a>
+      <a href="//getpocket.com/edit?url={{ .Permalink }}&title={{ $title }}" target="_blank" title="pocket">
+        <img src="//icongr.am/simple/pocket.svg?size=32px&color=6c757d">
+      </a>
+  </p>
+</details>

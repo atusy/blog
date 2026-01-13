@@ -1,0 +1,14 @@
+{{ $hljs_cdn := default "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/" .Site.Params.highlightjs.cdn }}
+<link href="{{ $hljs_cdn }}styles/github.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+<script defer src="{{ $hljs_cdn }}highlight.min.js"></script>
+<script defer src="{{ $hljs_cdn }}languages/r.min.js"></script>
+
+{{- with $.Param "highlightjs" -}}{{- range $.Param "highlightjs" -}}
+<script defer src="{{ $hljs_cdn }}languages/{{ . }}.min.js" crossorigin="anonymous"></script>
+{{- end -}}{{- end }}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  hljs.configure({languages: []});
+  hljs.initHighlighting();
+});
+</script>

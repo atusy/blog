@@ -1,0 +1,21 @@
+$color-blossom: #1d7484;
+$color-fade: #982c61;
+
+$color-bg: #f9f9f9;
+$color-bg-alt: #f1f1f1;
+
+$color-text: #4a4a4a;
+$font-size-base: 1.8rem;
+
+$font-family-base: -apple-system, "BlinkMacSystemFont", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif, "Segoe UI Emoji";
+$font-family-heading: inherit;
+$font-family-code: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+$width-main: 100rem;
+$width-side: 30rem;
+$width-gap: 3rem;
+$width-grid: $width-main + $width-side + $width-gap;
+$min-width-screen: $width-grid / 1.5 ;
+
+@import "main";
+@import "custom";
