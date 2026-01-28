@@ -1,0 +1,38 @@
+---
+title: "🌉 kakehashiよ、あらゆるエディタ・言語の架け橋になれ！コードブロック内の補完や定義ジャンプ、任意言語のシンタックスハイライトとか欲しかったやつうううう！を実現するぞ"
+author: atusy
+date: '2026-01-01'
+slug: kakehashi
+categories: [Tech]
+tags: [kakehashi, Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p><a href="https://github.com/atusy/kakehashi">kakehashi</a> v0.0.12をリリースしました！</p>
+<p><a href="https://github.com/atusy/kakehashi">kakehashi</a>を使うと、以下の動画みたく、高度な機能を様々なエディタで利用できます。</p>
+<ol style="list-style-type: decimal">
+<li>任意言語のシンタックスハイライト</li>
+<li>Markdown中のコードブロックのような埋め込みコードに対するコード補間、定義ジャンプ、ホバー</li>
+</ol>
+<video controls="controls" autoplay="autoplay" loop="loop" preload="metadata">
+<source src="video/demo.mp4" type="video/mp4">
+</video>
+<p>元々は基盤技術にあやかって<strong>treesitter-ls</strong>と名付けていましたが、あらゆるエディタ・言語の架け橋になるという願いを込めて<strong>kakehashi</strong>に改名しました。まだ荒削りですが、ぜひGitHubのスターやスポンサーを通じて応援いただけると嬉しいです！</p>
+<blockquote>
+<p><a href="https://github.com/atusy/kakehashi" class="uri">https://github.com/atusy/kakehashi</a></p>
+</blockquote>
+<p>リリースを重ねて、ずいぶんと安定性を向上させましたが、細かい不具合が残っています。編集中にシンタックスハイライトが一時的に崩れたり、唐突に補完が止まったり……。承知の上で試してみていただける方がいればぜひお願いします。</p>
+<ul>
+<li>ダウンロード: <a href="https://github.com/atusy/kakehashi/releases" class="uri">https://github.com/atusy/kakehashi/releases</a></li>
+<li>ドキュメント: <a href="https://github.com/atusy/kakehashi/blob/main/docs/README.md" class="uri">https://github.com/atusy/kakehashi/blob/main/docs/README.md</a></li>
+<li>Neovim向け設定例: <a href="https://github.com/atusy/kakehashi/blob/main/scripts/minimal_init.lua" class="uri">https://github.com/atusy/kakehashi/blob/main/scripts/minimal_init.lua</a></li>
+<li>Vim向け設定例: <a href="https://github.com/atusy/kakehashi/blob/main/scripts/minimal_init.vim" class="uri">https://github.com/atusy/kakehashi/blob/main/scripts/minimal_init.vim</a></li>
+</ul>
+<p>調べたところ、VSCodeに対応するには別途エクステンションが必要そうなので、今後の対応を検討しています。</p>
+<div id="enjoy" class="section level1">
+<h1>ENJOY!</h1>
+</div>
