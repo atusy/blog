@@ -1,0 +1,101 @@
+---
+title: "Git Worktreeを使って複数ブランチ同時開発をするとき、検証環境のURLやポートのリソース競合を回避するには、デプロイの起点をMain Worktreeに一本化するといいよ"
+author: atusy
+date: '2026-02-02'
+slug: git-worktree-local-deploy
+summary: |
+  Git Worktreeで複数ブランチを同時に扱う際に、同時検証するとローカルサーバーのポート競合などが発生します。
+  作業中のWorktreeの内容をMain worktreeにcheckout --detachで反映し、ホットリロードでデプロイするとこの問題を回避できます。
+categories: [Tech]
+tags: [git, git-worktree]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+レビュー作業やVibe Codingなど、1つのプロジェクトで複数のブランチを同時に触りたい場面があります。
+
+このようなシーンでGit Worktreeを使うと、ブランチ（commitish）ごとに独立した作業ディレクトリを持てるため、効率的に作業を進められます。
+
+```bash
+git worktree add "作業ディレクトリ名" "ブランチ名（commitish）"
+```
+
+しかし、Worktreeごとにローカルの検証環境を立ち上げると、URLやポート番号などのリソース競合が発生し、うまく動作しないことがあります。
+
+そこで、本記事では、以下のコマンドを使って作業中のWorktreeの内容をMain worktreeに反映する方法を紹介します。
+これを使えば、Main worktreeで手動リビルドするなりホットリロードするなりして、リソース競合を避けつつローカルデプロイできます。
+
+```bash
+git \
+  -C "$(git worktree list --porcelain | head -n 1 | sed -e 's/^worktree //')" \
+  checkout --detach "$(git rev-parse HEAD)"
+```
+
+## Worktree利用時の検証環境の競合問題
+
+Worktreeによる複数作業ブランチの作成は、実装やコードリーディングなど、ブランチ間で作業の独立性が担保されている間は非常に有用です。
+
+一方でWeb開発などの検証には、URLやポート番号などのリソース競合を避ける必要があります。
+素朴な対応方法として、大きく2パターンありますが、どちらも一長一短です。
+
+1. 既存の検証環境を終了して、作業中のブランチに対応する環境を立ち上げる
+1. ブランチごとにリソースを分ける
+    - (a) 異なるポート番号やURLを設定する
+    - (b) 仮想環境を分ける
+
+個人的に好ましくない点は以下。
+
+- 1も2も認知負荷が発生
+    - 1はどの作業ブランチが検証環境を実行していて、いつ終了させるべきかを意識する負荷が発生
+    - 2は閲覧中の検証環境とブランチの対応を意識する負荷が発生
+- 2はリソースの無駄使いになりやすい
+    - 挙動を比べたいケースでもない限り、同時に複数の検証環境を立ち上げる必要はない
+
+## ローカルデプロイの起点をMain worktreeに一本化
+
+リソース競合を避けつつ、Worktreeの利便性を活かすには、ローカルデプロイの起点をMain worktreeに一本化する方法が有効です。
+
+Main worktreeとは、git initやgit cloneで作成される、通常の作業ディレクトリのことを指します。
+
+作業中のworktreeの内容をMain worktreeに反映して、反映結果をローカルデプロイすると、ローカルデプロイの起点をMain worktreeに一本化できます。
+リソース競合を避けられます。
+
+反映方法はいくつかありますが、以下の`git checkout --detach`を使う方法が一番破壊的影響が少なくておすすめです。
+あらかじめ `pnpm run dev`や`cargo watch`などのローカルデプロイコマンドをMain worktreeで実行しておき、ホットリロードが走る状態にしておくと、デプロイ結果がただちにビルドできて便利です。
+
+```bash
+git \
+  -C "$(git worktree list --porcelain | head -n 1 | sed -e 's/^worktree //')" \
+  checkout --detach "$(git rev-parse HEAD)"
+
+# 必要に応じてローカルデプロイコマンドを実行
+# Main worktree上でホットリロードが走る場合は不要
+```
+
+ただし、Main worktreeのHEADがdetached状態になるため、Main worktreeでは開発作業をせず、ローカルデプロイ専用として使うのがおすすめです。
+
+軽く解説しておくと、`-C`オプションを指定すると、Git操作を現在の作業ディレクトリではなく、指定したディレクトリで実行できます。
+これにより、作業ブランチのWorktreeにいながら、Main worktreeに対して`git checkout --detach`を実行できます。
+また、checkout先には、作業ブランチの最新コミット（`git rev-parse HEAD`）を指定しています。
+Gitでは複数のworktreeで同じ作業ブランチをチェックアウトできないため、`--detach`オプションを付与して、ブランチではなくコミットをチェックアウトしています。
+
+もし、コミット前の変更内容や、ignoredなファイルも反映したい場合は、以下のように`rsync`コマンドを使う方法もありそうです。
+
+```bash
+MAIN_WORKTREE_DIR="$(git worktree list --porcelain | head -n 1 | sed -e 's/^worktree //')"
+
+git \
+  -C "$MAIN_WORKTREE_DIR" \
+  checkout --detach "$(git rev-parse HEAD)"
+
+rsync -a --delete \
+  --exclude '.git/' \
+  "$PWD/" \
+  "$MAIN_WORKTREE_DIR/" \
+```
+
+`rsync`に`--delete`オプションを指定すると、同期元に存在しないファイルが同期先から削除されます。
+完全同期を実現する一方、不意な削除リスクもあるため注意してください。
+
+# ENJOY!
