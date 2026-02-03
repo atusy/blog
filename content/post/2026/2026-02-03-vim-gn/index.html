@@ -1,0 +1,70 @@
+---
+title: "Vimで検索結果の連続置換を楽にするcgnコマンドのgn部分、検索対象の削除とか、検索対象を括弧で囲うとか、色んな使い道があるよ！"
+author: atusy
+date: '2026-02-03'
+slug: vim-gn
+categories: [Tech]
+tags: [Vim. Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+    `cgn`の`gn`部分はmotionコマンドなので、任意のOperatorと組み合わせ可能。
+    例えば`dgn`で検索結果を削除したり、`sagn<`で検索結果を`<>`で囲ったりできるよ！
+---
+
+
+
+<p>CamelCaseをsnake_caseに置換したいけど、<code>:%s/CamelCalse/snake_case/g</code>では全部消えてしまう……！</p>
+<p>そんなとき、1つずつ置換するか決められる方法が<code>cgn</code>コマンドですね。</p>
+<ul>
+<li><code>/CameclCase</code>で検索</li>
+<li><code>cgn</code>で検索結果に対して編集を開始</li>
+<li><code>snake_case</code>と入力して<code>Esc</code>で確定</li>
+<li><code>n</code>で次の候補に移動し、置換対象であれば<code>.</code>で置換をリピート</li>
+</ul>
+<p>Undo（<code>u</code>）とRedo（<code>&lt;C-r&gt;</code>）も使えるので、間違えても安心です。
+<code>n.n.n.</code>せずに<code>....</code>して間違えたときだけ<code>u</code>する、なんて使い方もできます。</p>
+<p>ある程度Vimに慣れてきたユーザーが好む傾向にあり、monaqaさんの中級 Vim 操作でもトップバッターで紹介されています。</p>
+<blockquote>
+<p>中級 Vim 操作<br />
+<a href="https://zenn.dev/vim_jp/articles/2024-06-05-vim-middle-class-features" class="uri">https://zenn.dev/vim_jp/articles/2024-06-05-vim-middle-class-features</a></p>
+</blockquote>
+<p>この<code>cgn</code>、実は単体のコマンドではなく、<code>cgn</code>は<code>c</code>+<code>gn</code>で構成されています。</p>
+<p><code>c</code>はおなじみ「変更（change）」ですね。
+<code>c</code>を入力するとOperator Pendingモードに入り、次に入力するモーションで変更範囲が決まります。
+<code>cw</code>ならカーソル位置から<code>w</code>モーションで移動する範囲を変更対象にします。</p>
+<p><code>gn</code>はモーションの中でもtext objectに分類されるもので、Operator Pendingモードで使うと「最後に検索したパターンにマッチする範囲」をOperatorの対象にします。</p>
+<p>従って、Operator Pendingモードの<code>gn</code>は任意のOperatorと組み合わせて使うことができます。
+<code>cgn</code>以外にも<code>gn</code>の使いどころが眠っているのです！</p>
+<p>たとえば……</p>
+<ul>
+<li>Prefix削除のようなシーンでは、<code>dgn</code>で検索結果を削除</li>
+<li>URLを<code>&lt;&gt;</code>で囲いたいシーンでは、<code>sagn&lt;</code>で検索結果を<code>&lt;&gt;</code>で囲う
+<ul>
+<li><a href="https://github.com/machakann/vim-sandwich">vim-sandwich</a>などのプラグインが必要</li>
+</ul></li>
+</ul>
+<p>といった具合。</p>
+<p>URLを<code>&lt;&gt;</code>で囲う操作は、ブログをMarkdownで書いていて、<code>&lt;&gt;</code>をつけ忘れたときによくやっています。一括置換するにはなんやかんや例外があちことに表れるケースがあるので、<code>sagn&lt;</code>で1つずつ囲うのが便利です。</p>
+<pre class="markdown"><code>## &lt;&gt;で囲う対象
+
+https://example.com
+
+## 例外
+
+&lt;https://example.com&gt;
+
+```
+https://example.com
+```
+
+[example](https://example.com)</code></pre>
+<p>別解として、Git commitしておいて、一斉置換してからdiffを見て要否判断するなんて方法もあります。色んな手段をもって、効率的に編集していきましょう！</p>
+<div id="enjoy" class="section level1">
+<h1>ENJOY!</h1>
+<p>ところで、<code>gn</code>はノーマルモードで使うと検索にマッチした範囲をVisual選択します。
+Visual選択して次にやりたいことと言ったらOperatorなので、個人的には使いどころがなく、上書き対象です。</p>
+<p>flash.nvimを使って、表示領域内の検索マッチにラベルをつけ、指定したラベルにジャンプするようにしています。</p>
+<p><a href="https://github.com/atusy/dotfiles/blob/edcd60d4e7b2dec274747f8180c190c174cb8986/dot_config/nvim/lua/plugins/flash/init.lua?plain=1#L106-L114" class="uri">https://github.com/atusy/dotfiles/blob/edcd60d4e7b2dec274747f8180c190c174cb8986/dot_config/nvim/lua/plugins/flash/init.lua?plain=1#L106-L114</a></p>
+</div>

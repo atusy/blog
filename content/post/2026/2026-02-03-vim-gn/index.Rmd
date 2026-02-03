@@ -1,0 +1,81 @@
+---
+title: "Vimで検索結果の連続置換を楽にするcgnコマンドのgn部分、検索対象の削除とか、検索対象を括弧で囲うとか、色んな使い道があるよ！"
+author: atusy
+date: '2026-02-03'
+slug: vim-gn
+categories: [Tech]
+tags: [Vim. Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+    `cgn`の`gn`部分はmotionコマンドなので、任意のOperatorと組み合わせ可能。
+    例えば`dgn`で検索結果を削除したり、`sagn<`で検索結果を`<>`で囲ったりできるよ！
+---
+
+CamelCaseをsnake_caseに置換したいけど、`:%s/CamelCalse/snake_case/g`では全部消えてしまう……！
+
+そんなとき、1つずつ置換するか決められる方法が`cgn`コマンドですね。
+
+- `/CameclCase`で検索
+- `cgn`で検索結果に対して編集を開始
+- `snake_case`と入力して`Esc`で確定
+- `n`で次の候補に移動し、置換対象であれば`.`で置換をリピート
+
+Undo（`u`）とRedo（`<C-r>`）も使えるので、間違えても安心です。
+`n.n.n.`せずに`....`して間違えたときだけ`u`する、なんて使い方もできます。
+
+ある程度Vimに慣れてきたユーザーが好む傾向にあり、monaqaさんの中級 Vim 操作でもトップバッターで紹介されています。
+
+> 中級 Vim 操作 \
+> <https://zenn.dev/vim_jp/articles/2024-06-05-vim-middle-class-features>
+
+この`cgn`、実は単体のコマンドではなく、`cgn`は`c`+`gn`で構成されています。
+
+`c`はおなじみ「変更（change）」ですね。
+`c`を入力するとOperator Pendingモードに入り、次に入力するモーションで変更範囲が決まります。
+`cw`ならカーソル位置から`w`モーションで移動する範囲を変更対象にします。
+
+`gn`はモーションの中でもtext objectに分類されるもので、Operator Pendingモードで使うと「最後に検索したパターンにマッチする範囲」をOperatorの対象にします。
+
+従って、Operator Pendingモードの`gn`は任意のOperatorと組み合わせて使うことができます。
+`cgn`以外にも`gn`の使いどころが眠っているのです！
+
+たとえば……
+
+- Prefix削除のようなシーンでは、`dgn`で検索結果を削除
+- URLを`<>`で囲いたいシーンでは、`sagn<`で検索結果を`<>`で囲う
+    - [vim-sandwich](https://github.com/machakann/vim-sandwich)などのプラグインが必要
+
+といった具合。
+
+URLを`<>`で囲う操作は、ブログをMarkdownで書いていて、`<>`をつけ忘れたときによくやっています。
+一括置換するにはなんやかんや例外があちことに表れるケースがあるので、`sagn<`で1つずつ囲うのが便利です。
+
+``````markdown
+## <>で囲う対象
+
+https://example.com
+
+## 例外
+
+<https://example.com>
+
+```
+https://example.com
+```
+
+[example](https://example.com)
+``````
+
+別解として、Git commitしておいて、一斉置換してからdiffを見て要否判断するなんて方法もあります。
+色んな手段をもって、効率的に編集していきましょう！
+
+# ENJOY!
+
+ところで、`gn`はノーマルモードで使うと検索にマッチした範囲をVisual選択します。
+Visual選択して次にやりたいことと言ったらOperatorなので、個人的には使いどころがなく、上書き対象です。
+
+flash.nvimを使って、表示領域内の検索マッチにラベルをつけ、指定したラベルにジャンプするようにしています。
+
+<https://github.com/atusy/dotfiles/blob/edcd60d4e7b2dec274747f8180c190c174cb8986/dot_config/nvim/lua/plugins/flash/init.lua?plain=1#L106-L114>
