@@ -1,0 +1,64 @@
+---
+title: "🌉 kakehashi v0.0.13リリース！Markdownのコードブロックみたいな埋め込みコードの診断に対応！"
+author: atusy
+date: '2026-02-04'
+slug: kakehashi-v-0-0-13-with-diagnostic-support
+categories: [Tech]
+tags: [kakehashi, Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+[atusy/kakehashi]: https://github.com/atusy/kakehashi
+[kakehashi]: https://github.com/atusy/kakehashi
+
+[kakehashi] v0.0.13をリリースしました！
+
+[kakehashi]は、LSPに対応するエディタに対して以下のような機能を提供する言語サーバーです。
+
+1. 任意言語のシンタックスハイライト
+2. Markdown中のコードブロックのような埋め込みコードに対するコード補間、定義ジャンプ、ホバー
+
+そして、v0.0.13ではコードの診断に対応しました。
+動画ではPythonコードをpyrightで診断した結果を表示しています。
+
+<video controls="controls" loop="loop" preload="metadata">
+  <source src="video/demo.mp4" type="video/mp4">
+</video>
+
+現時点の制限として、診断の表示には橋渡しする言語サーバーがpull型の診断に対応している必要があります。
+
+実はLSPの仕様としては診断には2つの方法があるのですね。
+
+- `textDocument/diagnostics`: クライアントがサーバーに診断を要求するpull型
+- `textDocument/publishDiagnostics`: サーバーがクライアントに診断を通知するpush型
+
+pull型の方が後から追加された都合で、publishDiagnosticsしかサポートしていない言語サーバー（例: lua-language-server）があり、これらはまだ未サポートです。
+
+kakehashi自体はpull/pushどちらを通じてでもクライアントに診断結果を渡せます。
+エディタによっては診断の重複表示が発生するので、良い感じに設定してください。
+たとえば私はkakehashiに限ってpublishDiagnosticsを無視するようにNeovimで設定しています。
+
+```lua
+vim.lsp.handlers["textDocument/publishDiagnostics"] = function(err, result, ctx)
+    local client = vim.lsp.get_client_by_id(ctx.client_id)
+
+    local ignore_pull = { "kakehashi" }
+    if client and vim.tbl_contains(ignore_pull, client.name) then
+      return
+    end
+
+    return vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx)
+end
+```
+
+# ENJOY!
+
+このブログも[kakehashi]を使いながら書いており、大分安定してきたなという感触があります。
+ぜひ使ってみてGitHubのスターやスポンサーを通じて応援いただけると嬉しいです！
+
+- ダウンロード: <https://github.com/atusy/kakehashi/releases>
+- ドキュメント: <https://github.com/atusy/kakehashi/blob/main/docs/README.md>
+- Neovim向け設定例: <https://github.com/atusy/kakehashi/blob/main/scripts/minimal_init.lua>
+- Vim向け設定例: <https://github.com/atusy/kakehashi/blob/main/scripts/minimal_init.vim>
