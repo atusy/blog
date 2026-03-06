@@ -1,0 +1,92 @@
+---
+title: "🌉 kakehashiを使ってコードブロック内の補完とか簡単にできるように、kakehashi.nvim作った"
+author: atusy
+date: '2026-03-07'
+slug: kakehashi-nvim
+categories: [Tech]
+tags: [Vim, Neovim, Kakehashi]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+本記事は2026-03-06の[Vim 駅伝](https://vim-jp.org/ekiden/)の記事です[^ekiden]。
+
+[kakehashi]: https://github.com/atusy/kakehashi
+
+[kakehashi.nvim]: https://github.com/atusy/kakehashi.nvim
+
+[kakehashi]を使うと、Markdownのコードブロックみたいな、ソースコード内に埋め込まれた別言語でも補完や定義ジャンプといったインテリジェントな機能を活用できます。
+
+そんな話は先日、v0.0.13のリリースで共有しました（今はv0.3.0）。
+リンク先にはデモ動画もあるので、ぜひ見てみてください。
+
+> [🌉 kakehashi v0.0.13リリース！Markdownのコードブロックみたいな埋め込みコードの診断に対応！](https://blog.atusy.net/2026/02/04/kakehashi-v-0-0-13-with-diagnostic-support/)
+
+どうやって実現しているかというと、埋め込み言語の部分を仮想的なファイルとして扱い、適切な言語サーバーにルーティングしています。
+まさに架け橋になってるわけですね。
+
+ただ、[kakehashi]が橋渡しする言語サーバーの設定を書く手間がどうしても発生し、橋に辿りつくまで一苦労でした。
+
+その苦労を減らそうと、手前にも1つ橋をかけるべく、Neovim向けのプラグイン、[kakehashi.nvim]を作りました。
+
+[kakehashi]、便利そうだけど設定面倒だなーと思ってるNeovimmerが挑戦するきっかけになると嬉しいです。
+
+## kakehashi.nvimを使うとvim.lsp.configの設定をkakehashiに橋渡しできるぞ
+
+こんな感じで、お好みの言語サーバーを指定するだけで、`vim.lsp.config[server_name]`にある設定を[kakehashi]が継承します。
+
+```lua
+-- kakehashiで使いたい言語サーバーの名前一覧
+local servers = { "lua_ls" } -- or vim.tbl_keys(vim.lsp._enabled_configs)
+
+-- vim.lsp向け言語サーバーの設定読み込み
+-- kakehashi自身の最小設定や、kakehashiで使いたい言語サーバーの設定の取得に便利
+require("lspconfig")
+
+-- vim.lsp.configの内容をkakehashiに橋渡しするための自動コマンド
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(ev)
+    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+    if client and client.name == "kakehashi" then
+      require("kakehashi").inherit_nvim_lsp_config(client, servers, "keep")
+    end
+  end,
+})
+
+-- kakehashiの有効化
+vim.lsp.enable("kakehashi")
+
+```
+
+## 技術的な話
+
+`require("kakehashi").inherit_nvim_lsp_config`は内部で何をしてるか軽く紹介します。
+
+1. 起動済みの[kakehashi]言語サーバーに対して独自メソッドを使った`kakehashi/internal/effectiveConfiguration`リクエストで現在の設定値を問い合わせる
+2. `vim.lsp.config`から指定したサーバーの設定を取得する
+3. 1と2を合成して、`workspace/didChangeConfiguration`通知で[kakehashi]に送る
+
+ざっとこんな流れ。
+
+LSPの仕様では様々なメソッドが定められており、ここでも触れている`workspace/didChangeConfiguration`はクライアントからサーバーに設定の変更を通知するためのものです。
+他にも馴染み深いところだと定義ジャンプを可能にする`textDocument/definition`や、コード補完のための`textDocument/completion`などがあります。
+
+残念ながら、LSPの仕様範囲には、言語サーバーの現在の設定値を取得するメソッドの定義がありませんが、独自実装に対する制限もありません。
+そこで、私が[kakehashi]の開発者であることをいいことに、独自の内部メソッド`kakehashi/internal/effectiveConfiguration`を定義しました。
+そのうち一般公開もするかも。
+
+便利！
+
+## ENJOY
+
+本当は3/6の駅伝記事なのに3/7になってしまっています。
+仕事が忙しすぎて突貫工事で[kakehashi.nvim]を作ったので、ぼちぼち改善もしていきます。
+
+[kakehashi]プロジェクトを応援したいと思っていただいた方、ぜひとのGitHubのスターやスポンサーをよろしくお願いします！
+
+- スポンサー
+    - https://github.com/sponsors/atusy
+- リポジトリ
+    - https://github.com/atusy/kakehashi
+    - https://github.com/atusy/kakehashi.nvim

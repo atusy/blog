@@ -1,0 +1,77 @@
+---
+title: "🌉 kakehashiを使ってコードブロック内の補完とか簡単にできるように、kakehashi.nvim作った"
+author: atusy
+date: '2026-03-07'
+slug: kakehashi-nvim
+categories: [Tech]
+tags: [Vim, Neovim, Kakehashi]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p>本記事は2026-03-06の<a href="https://vim-jp.org/ekiden/">Vim 駅伝</a>の記事です[^ekiden]。</p>
+<p><a href="https://github.com/atusy/kakehashi">kakehashi</a>を使うと、Markdownのコードブロックみたいな、ソースコード内に埋め込まれた別言語でも補完や定義ジャンプといったインテリジェントな機能を活用できます。</p>
+<p>そんな話は先日、v0.0.13のリリースで共有しました（今はv0.3.0）。リンク先にはデモ動画もあるので、ぜひ見てみてください。</p>
+<blockquote>
+<p><a href="https://blog.atusy.net/2026/02/04/kakehashi-v-0-0-13-with-diagnostic-support/">🌉 kakehashi v0.0.13リリース！Markdownのコードブロックみたいな埋め込みコードの診断に対応！</a></p>
+</blockquote>
+<p>どうやって実現しているかというと、埋め込み言語の部分を仮想的なファイルとして扱い、適切な言語サーバーにルーティングしています。まさに架け橋になってるわけですね。</p>
+<p>ただ、<a href="https://github.com/atusy/kakehashi">kakehashi</a>が橋渡しする言語サーバーの設定を書く手間がどうしても発生し、橋に辿りつくまで一苦労でした。</p>
+<p>その苦労を減らそうと、手前にも1つ橋をかけるべく、Neovim向けのプラグイン、<a href="https://github.com/atusy/kakehashi.nvim">kakehashi.nvim</a>を作りました。</p>
+<p><a href="https://github.com/atusy/kakehashi">kakehashi</a>、便利そうだけど設定面倒だなーと思ってるNeovimmerが挑戦するきっかけになると嬉しいです。</p>
+<div id="kakehashi.nvimを使うとvim.lsp.configの設定をkakehashiに橋渡しできるぞ" class="section level2">
+<h2>kakehashi.nvimを使うとvim.lsp.configの設定をkakehashiに橋渡しできるぞ</h2>
+<p>こんな感じで、お好みの言語サーバーを指定するだけで、<code>vim.lsp.config[server_name]</code>にある設定を<a href="https://github.com/atusy/kakehashi">kakehashi</a>が継承します。</p>
+<pre class="lua"><code>-- kakehashiで使いたい言語サーバーの名前一覧
+local servers = { &quot;lua_ls&quot; } -- or vim.tbl_keys(vim.lsp._enabled_configs)
+
+-- vim.lsp向け言語サーバーの設定読み込み
+-- kakehashi自身の最小設定や、kakehashiで使いたい言語サーバーの設定の取得に便利
+require(&quot;lspconfig&quot;)
+
+-- vim.lsp.configの内容をkakehashiに橋渡しするための自動コマンド
+vim.api.nvim_create_autocmd(&quot;LspAttach&quot;, {
+  callback = function(ev)
+    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+    if client and client.name == &quot;kakehashi&quot; then
+      require(&quot;kakehashi&quot;).inherit_nvim_lsp_config(client, servers, &quot;keep&quot;)
+    end
+  end,
+})
+
+-- kakehashiの有効化
+vim.lsp.enable(&quot;kakehashi&quot;)
+</code></pre>
+</div>
+<div id="技術的な話" class="section level2">
+<h2>技術的な話</h2>
+<p><code>require("kakehashi").inherit_nvim_lsp_config</code>は内部で何をしてるか軽く紹介します。</p>
+<ol style="list-style-type: decimal">
+<li>起動済みの<a href="https://github.com/atusy/kakehashi">kakehashi</a>言語サーバーに対して独自メソッドを使った<code>kakehashi/internal/effectiveConfiguration</code>リクエストで現在の設定値を問い合わせる</li>
+<li><code>vim.lsp.config</code>から指定したサーバーの設定を取得する</li>
+<li>1と2を合成して、<code>workspace/didChangeConfiguration</code>通知で<a href="https://github.com/atusy/kakehashi">kakehashi</a>に送る</li>
+</ol>
+<p>ざっとこんな流れ。</p>
+<p>LSPの仕様では様々なメソッドが定められており、ここでも触れている<code>workspace/didChangeConfiguration</code>はクライアントからサーバーに設定の変更を通知するためのものです。他にも馴染み深いところだと定義ジャンプを可能にする<code>textDocument/definition</code>や、コード補完のための<code>textDocument/completion</code>などがあります。</p>
+<p>残念ながら、LSPの仕様範囲には、言語サーバーの現在の設定値を取得するメソッドの定義がありませんが、独自実装に対する制限もありません。そこで、私が<a href="https://github.com/atusy/kakehashi">kakehashi</a>の開発者であることをいいことに、独自の内部メソッド<code>kakehashi/internal/effectiveConfiguration</code>を定義しました。そのうち一般公開もするかも。</p>
+<p>便利！</p>
+</div>
+<div id="enjoy" class="section level2">
+<h2>ENJOY</h2>
+<p>本当は3/6の駅伝記事なのに3/7になってしまっています。仕事が忙しすぎて突貫工事で<a href="https://github.com/atusy/kakehashi.nvim">kakehashi.nvim</a>を作ったので、ぼちぼち改善もしていきます。</p>
+<p><a href="https://github.com/atusy/kakehashi">kakehashi</a>プロジェクトを応援したいと思っていただいた方、ぜひとのGitHubのスターやスポンサーをよろしくお願いします！</p>
+<ul>
+<li>スポンサー
+<ul>
+<li><a href="https://github.com/sponsors/atusy" class="uri">https://github.com/sponsors/atusy</a></li>
+</ul></li>
+<li>リポジトリ
+<ul>
+<li><a href="https://github.com/atusy/kakehashi" class="uri">https://github.com/atusy/kakehashi</a></li>
+<li><a href="https://github.com/atusy/kakehashi.nvim" class="uri">https://github.com/atusy/kakehashi.nvim</a></li>
+</ul></li>
+</ul>
+</div>
