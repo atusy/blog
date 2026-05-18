@@ -1,0 +1,92 @@
+---
+title: "よく使うディレクトリ+αへの移動を便利にするzoxide拡張術"
+author: atusy
+date: '2026-05-18'
+slug: extending-zoxide
+categories: [Tech]
+tags: [zoxide, fzf]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p><code>zoxide</code>はシェルでのディレクトリ移動の傾向を学習して、よく使うディレクトリへの移動を楽にするツールです。</p>
+<blockquote>
+<p><a href="https://github.com/ajeetdsouza/zoxide" class="uri">https://github.com/ajeetdsouza/zoxide</a></p>
+</blockquote>
+<p>しかし、行ったことのないディレクトリは候補に出ない。</p>
+<p>そこで、使ったことないGitリポジトリへを移動先候補に加える方法として、<a href="https://blog.atusy.net/2025/05/09/zoxide-with-ghq/">よく使うディレクトリ+αへの移動を便利にするzoxideとghqの組み合わせ</a>という記事を書きました。</p>
+<p>今回、もっと筋の良さそうな方法を思いついたので共有します。</p>
+<p>Fishを例にしますが、AIを使えばBash版なりZsh版なりも簡単に作れるはず。</p>
+<pre class="fish"><code>zoxide init --no-cmd fish | source # __zoxide_cd を定義させる
+
+function zi
+  begin
+    # 利用頻度の高い移動先一覧
+    zoxide query --list
+
+    # 使いたくなるかもしれない移動先一覧
+    ghq list -p
+  end \
+      | perl -ne &#39;print unless $seen{$_}++&#39; \
+      | fzf --layout=reverse --no-sort --height=~15 --query=&quot;$argv&quot; \
+      | read -l result
+  and __zoxide_cd $result
+end</code></pre>
+<p>使いたくなるかもしれない移動先一覧として、<code>ghq</code>コマンドで管理しているGitリポジトリ一覧を追加していますが、他にも色んな候補が考えられるかと思います！</p>
+<ul>
+<li>ホームディレクトリ配下のディレクトリとそのサブディレクトリ: <code>find "$HOME" -maxdepth 2 -type d</code></li>
+<li>Neovimプラグイン一覧: <code>find "$HOME/.local/share/nvim/lazy" -maxdepth 1 -type d</code></li>
+</ul>
+<p>これらもそのまま行を足せばいいだけなので非常に拡張しやすいですね。</p>
+<pre class="diff"><code>   begin
+     # 利用頻度の高い移動先一覧
+     zoxide query --list
+ 
+     # 使いたくなるかもしれない移動先一覧
+     ghq list -p
++    find &quot;$HOME&quot; -maxdepth 2 -type d
++    find &quot;$HOME/.local/share/nvim/lazy&quot; -maxdepth 1 -type d
+   end \</code></pre>
+<div id="実装の解説" class="section level1">
+<h1>実装の解説</h1>
+<p>やっていることは、わりかし単純です。</p>
+<ol style="list-style-type: decimal">
+<li>移動先候補を用意する
+<ul>
+<li><code>begin</code>〜<code>end</code>の部分</li>
+<li><code>zoxide query --list</code>すると、移動したことある場所がよく使う順に一覧される</li>
+<li>これと<code>ghq list -p</code>で出したリポジトリ一覧や、お好みで<code>find</code>などで出した移動先候補を合体させる</li>
+<li>ポイントとして<code>begin</code>〜<code>end</code>を使って標準出力を合成すると、各コマンドの終了を待たずに後続のperlなどのコマンドが動き出すので、一覧完成を待たずに選択を開始できる</li>
+</ul></li>
+<li>移動先候補の重複を除く
+<ul>
+<li><code>perl -ne 'print unless $seen{$_}++'</code>の部分</li>
+<li><code>awk</code>でもいいですが、GNU版かどうか気にせず済むperlが好みです</li>
+</ul></li>
+<li><code>fzf</code>を使ってユーザー入力による移動先絞り込みを行う
+<ul>
+<li>ここはzoxideの挙動に倣って<code>--no-sort</code>しておくと、よく使うものが上の方に来て便利です</li>
+<li>その他のオプションは自由に弄ってください</li>
+</ul></li>
+<li>結果を<code>result</code>変数に入れる</li>
+<li><code>result</code>に移動し、次回以降の推薦スコアを更新する
+<ul>
+<li>zoxideが提供する<code>__zoxide_cd</code>関数を使うと一発です</li>
+<li><code>__zoxide_cd</code> は <code>zoxide init fish | source</code> などで発生します</li>
+</ul></li>
+</ol>
+<p>過去の記事でやっていた方法もそこまで複雑ではないです。しかし、移動候補の作成までに差分計算などが発生してパフォーマンスの課題がありました。</p>
+<ol style="list-style-type: decimal">
+<li>zoxide未管理な移動先候補を用意する</li>
+<li>1とzoxide管理済みの候補の差分を取得する</li>
+<li>差分を<code>zoxide add</code>で管理済み候補にする</li>
+<li><code>__zoxide_zi</code>を利用する</li>
+</ol>
+</div>
+<div id="enjoy" class="section level1">
+<h1>ENJOY</h1>
+<p>dotfilesのリファクタ気持ちいいぞー！</p>
+</div>

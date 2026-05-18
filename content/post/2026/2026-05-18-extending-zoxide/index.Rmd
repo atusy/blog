@@ -1,0 +1,92 @@
+---
+title: "よく使うディレクトリ+αへの移動を便利にするzoxide拡張術"
+author: atusy
+date: '2026-05-18'
+slug: extending-zoxide
+categories: [Tech]
+tags: [zoxide, fzf]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+`zoxide`はシェルでのディレクトリ移動の傾向を学習して、よく使うディレクトリへの移動を楽にするツールです。
+
+> <https://github.com/ajeetdsouza/zoxide>
+
+しかし、行ったことのないディレクトリは候補に出ない。
+
+そこで、使ったことないGitリポジトリへを移動先候補に加える方法として、[よく使うディレクトリ+αへの移動を便利にするzoxideとghqの組み合わせ](https://blog.atusy.net/2025/05/09/zoxide-with-ghq/)という記事を書きました。
+
+今回、もっと筋の良さそうな方法を思いついたので共有します。
+
+Fishを例にしますが、AIを使えばBash版なりZsh版なりも簡単に作れるはず。
+
+```fish
+zoxide init --no-cmd fish | source # __zoxide_cd を定義させる
+
+function zi
+  begin
+    # 利用頻度の高い移動先一覧
+    zoxide query --list
+
+    # 使いたくなるかもしれない移動先一覧
+    ghq list -p
+  end \
+      | perl -ne 'print unless $seen{$_}++' \
+      | fzf --layout=reverse --no-sort --height=~15 --query="$argv" \
+      | read -l result
+  and __zoxide_cd $result
+end
+```
+
+使いたくなるかもしれない移動先一覧として、`ghq`コマンドで管理しているGitリポジトリ一覧を追加していますが、他にも色んな候補が考えられるかと思います！
+
+- ホームディレクトリ配下のディレクトリとそのサブディレクトリ: `find "$HOME" -maxdepth 2 -type d`
+- Neovimプラグイン一覧: `find "$HOME/.local/share/nvim/lazy" -maxdepth 1 -type d`
+
+これらもそのまま行を足せばいいだけなので非常に拡張しやすいですね。
+
+```diff
+   begin
+     # 利用頻度の高い移動先一覧
+     zoxide query --list
+ 
+     # 使いたくなるかもしれない移動先一覧
+     ghq list -p
++    find "$HOME" -maxdepth 2 -type d
++    find "$HOME/.local/share/nvim/lazy" -maxdepth 1 -type d
+   end \
+```
+
+# 実装の解説
+
+やっていることは、わりかし単純です。
+
+1. 移動先候補を用意する
+    - `begin`〜`end`の部分
+    - `zoxide query --list`すると、移動したことある場所がよく使う順に一覧される
+    - これと`ghq list -p`で出したリポジトリ一覧や、お好みで`find`などで出した移動先候補を合体させる
+    - ポイントとして`begin`〜`end`を使って標準出力を合成すると、各コマンドの終了を待たずに後続のperlなどのコマンドが動き出すので、一覧完成を待たずに選択を開始できる
+2. 移動先候補の重複を除く
+    - `perl -ne 'print unless $seen{$_}++'`の部分
+    - `awk`でもいいですが、GNU版かどうか気にせず済むperlが好みです
+3. `fzf`を使ってユーザー入力による移動先絞り込みを行う
+    - ここはzoxideの挙動に倣って`--no-sort`しておくと、よく使うものが上の方に来て便利です
+    - その他のオプションは自由に弄ってください
+4. 結果を`result`変数に入れる
+5. `result`に移動し、次回以降の推薦スコアを更新する
+    - zoxideが提供する`__zoxide_cd`関数を使うと一発です
+    - `__zoxide_cd` は `zoxide init fish | source` などで発生します
+
+過去の記事でやっていた方法もそこまで複雑ではないです。
+しかし、移動候補の作成までに差分計算などが発生してパフォーマンスの課題がありました。
+
+1. zoxide未管理な移動先候補を用意する
+2. 1とzoxide管理済みの候補の差分を取得する
+3. 差分を`zoxide add`で管理済み候補にする
+4. `__zoxide_zi`を利用する
+
+# ENJOY
+
+dotfilesのリファクタ気持ちいいぞー！
