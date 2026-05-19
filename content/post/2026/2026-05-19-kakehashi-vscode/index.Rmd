@@ -1,0 +1,96 @@
+---
+title: "🌉 VSCodeでマークダウンのコードブロックで補完とかホバーとかできる、kakehashiの拡張機能作った"
+author: atusy
+date: '2026-05-19'
+slug: kakehashi-vscode
+categories: [Tech]
+tags: [VSCode, Kakehashi]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+    <video controls="controls" autoplay="autoplay" loop="loop" preload="metadata">
+      <source src="/2026/05/19/kakehashi-vscode/video/demo.mp4" type="video/mp4">
+    </video>
+---
+
+[kakehashi]: https://github.com/atusy/kakehashi
+
+[kakehashi.nvim]: https://github.com/atusy/kakehashi.nvim
+
+[kakehashi]を使うと、Markdownのコードブロックみたいな、ソースコード内に埋め込まれた別言語でも補完や定義ジャンプといったインテリジェントな機能を活用できます。
+
+そんな便利な[kakehashi]をVSCodeでも使えるように、[拡張機能](https://marketplace.visualstudio.com/items?itemName=atusy.kakehashi-vscode)を開発しました！
+動作の様子は以下！是非使ってみてください。
+
+<video controls="controls" autoplay="autoplay" loop="loop" preload="metadata">
+  <source src="video/demo.mp4" type="video/mp4">
+</video>
+
+ちなみに、例はマークダウンなだけで、実際には様々な文書フォーマットに拡張可能です。
+そのあたりの話はまた別の機会に……。
+
+## 導入方法
+
+1. kakehashi (CLI)をインストール
+    - cargoやbrewでインストール
+        - `brew install atusy/tap/kakehashi`
+        - `cargo install --git https://github.com/atusy/kakehashi`
+    - 必要に応じてPATH環境変数を調整
+1. kakehashi (CLI)を設定
+    - `~/.config/kakehashi/kakehashi.toml`を作成
+    - kakehashiで使いたい言語の言語サーバーを設定
+
+        ```toml
+        # kakehashi.toml
+        [languageServers.basedpyright]
+        cmd = ["basedpyright-langserver", "--stdio"]
+        languages = ["python"]
+
+        [languageServers.r_language_server]
+        cmd = [ "R", "--no-echo", "-e", "languageserver::run()"]
+        languages = ["R", "r"]
+        ```
+
+1. kakehashi (拡張)をインストール
+    - マーケットプレイスで`kakehashi`を検索するか、`code --install-extension atusy.kakehashi-vscode`を実行
+1. VSCodeを設定（`settings.json`）
+    - `Ctrl+Shift+P`でコマンドパレットを開き`Preferences: Open User Settings (JSON)`を実行
+    - 以下のように`["markdown"]`と`"kakehashi.documentSelector"`を追記
+
+
+        ```json
+        {
+          "[markdown]": { "editor.quickSuggestions": { "other": "on" } },
+          "kakehashi.documentSelector": [ "markdown" ]
+        }
+        ```
+
+### QuartoやR Markdownで使いたい場合
+
+- kakehashi (CLI)を追加設定
+    ```toml
+    [languages.qmd]
+    base = "markdown"
+    [languages.rmd]
+    base = "markdown"
+    ```
+- VSCodeを追加設定
+    - 必要な拡張機能（[quarto.quarto](https://marketplace.visualstudio.com/items?itemName=quarto.quarto)・[REditorSupport.r](https://marketplace.visualstudio.com/items?itemName=REditorSupport.r)）をインストール
+    - `settings.json`の`kakehashi.documentSelector`に`"rmd"`や`"quarto"`追記
+
+## ENJOY!!
+
+kakehashi本体や拡張機能についてもっと詳しく知りたい方は、リポジトリのREADMEを参照してください。
+スターつけてただけるとモチベーション爆上がりします！！
+
+- <https://github.com/atusy/kakehashi>
+- <https://github.com/atusy/kakehashi-vscode>
+
+RユーザーとしてはPositron対応が気になるところかと思いますが、未対応です！
+乞うご期待！！
+
+スポンサーもお待ちしてます！
+
+- <https://github.com/sponsors/atusy>
+
