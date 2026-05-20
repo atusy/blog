@@ -1,0 +1,71 @@
+---
+title: "Neovim 0.13（開発版）にテキストオブジェクトが増えるらしい。ilで空白を除いた1行、alでバッファ全体だってよ"
+author: atusy
+date: '2026-05-20'
+slug: nvim-textobjects-il-and-al
+categories: [Tech]
+tags: [Neovim]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p>本記事は2026-05-20の<a href="https://vim-jp.org/ekiden/">Vim 駅伝</a>の記事です。</p>
+<div id="テキストオブジェクトについて" class="section level2">
+<h2>テキストオブジェクトについて</h2>
+<p>皆さんテキストオブジェクト使ってますか？</p>
+<p>テキストオブジェクトを使うと、操作（y, d, cなど）の範囲指定がとても楽になります。</p>
+<p>たとえば単語をdeleteしたいとしましょう。</p>
+<p>テキストオブジェクトを使わない場合は、<code>bde</code>といった具合に、<code>b</code>でカーソルを単語先頭に移動してから、<code>d</code>でdeleteを開始して、<code>e</code>で単語の末尾までを範囲に指定する、という流れになります。カーソル合わせが面倒ですね。特にドットリピートしたい時は、カーソル合わせが頻発します。</p>
+<p>ところが、<code>iw</code>というテキストオブジェクトを使えば、<code>diw</code>でカーソルを含む単語をdeleteできるため、カーソル位置はざっくりでよくなります。</p>
+<p>様々なテキストオブジェクトが標準に存在しているので、使ってみてください。</p>
+<blockquote>
+<p><a href="https://vim-jp.org/vimdoc-ja/motion.html#text-objects" class="uri">https://vim-jp.org/vimdoc-ja/motion.html#text-objects</a></p>
+</blockquote>
+</div>
+<div id="新しいテキストオブジェクトのilとalについて" class="section level2">
+<h2>新しいテキストオブジェクトの<code>il</code>と<code>al</code>について</h2>
+<p>さて、ようやく本題。タイトル通りなのですが、Neovim 0.13（開発版）に新しいテキストオブジェクトが追加されました。</p>
+<ul>
+<li><code>il</code>
+<ul>
+<li>空白を除いた1行</li>
+<li>inner lineと覚えるとよさそう</li>
+</ul></li>
+<li><code>al</code>
+<ul>
+<li>バッファ全体</li>
+<li>all linesと覚えるとよさそう</li>
+</ul></li>
+</ul>
+<blockquote>
+<p><a href="https://github.com/neovim/neovim/pull/39845" class="uri">https://github.com/neovim/neovim/pull/39845</a></p>
+</blockquote>
+<p><code>il</code>は割と定番の設定として知られてきたものですね。古くからあるVimプラグインでも実装されています。</p>
+<blockquote>
+<p><a href="https://github.com/kana/vim-textobj-user" class="uri">https://github.com/kana/vim-textobj-user</a></p>
+</blockquote>
+<p>ところで、このプラグインでは<code>al</code>は空白も含む行全体をChar-wiseに選択するものでした。伝統的（？）なall linesに相当するものは<code>ae</code>で知られています。</p>
+<blockquote>
+<p><a href="https://github.com/kana/vim-textobj-entire" class="uri">https://github.com/kana/vim-textobj-entire</a></p>
+</blockquote>
+<p>伝統的なプラグインの定義とNeovimの新たな定義、どちらを好むかはユーザー次第かなと思います。</p>
+</div>
+<div id="私の設定について" class="section level2">
+<h2>私の設定について</h2>
+<p>ちなみに私は今まで<code>al</code>も<code>il</code>も設定してませんでした。行全体選択の<code>al</code>に需要がなかったこと、<code>il</code>がキーが近くて打ちにくいことが理由です。
+inner lineには<code>ii</code>をマッピングしていました。</p>
+<p>でも今回を機にNeovimに寄せてみようかなと思ってます。</p>
+<p><code>al</code>がバッファ全体で本当にいいの？と思われるかもしれませんが、行全体選択としての<code>al</code>は以下の理由で相変わらず不要と思ってます。</p>
+<p>そもそも、ほとんどの場合は<code>yy</code>, <code>dd</code>, <code>cc</code>といった行単位の操作で十分と感じています。</p>
+<p>ただし、これらは改行も操作対象にするため、<code>yyp</code>は現在行を新しい行にputするし、<code>dd</code>は現在行がなくなるので、若干不便なケースもあります。こういったとき、<code>yal</code>や<code>dal</code>が使えると、改行を除いた操作ができるわけですね。</p>
+<p>しかし、<code>0Y</code>や<code>0D</code>で十分対応可能と感じます。カーソルの位置合わせの負担がないことに加え、これらの操作でドットリピートしたいケースがまずないからですね。</p>
+<p><code>0D</code>でドットリピートしたいときも、<code>0</code>で行頭にカーソルを持ってきてしまえば<code>0Dj.j.j.j.j.</code>できるので特に困りません。</p>
+<p>と思ってるのですが、もし行選択としての<code>al</code>がめっちゃ便利なんだよーとかあればぜひお知らせください。</p>
+</div>
+<div id="enjoy" class="section level2">
+<h2>ENJOY</h2>
+<p>Neovimの更新をウォッチしてると、気付きがあって楽しいですね。</p>
+</div>
