@@ -1,0 +1,61 @@
+---
+title: "🌉 kakehashiでマークダウンのコードブロックとかをフォーマットできるようになったぞ！"
+author: atusy
+date: '2026-06-10'
+slug: kakehashi-code-formatting
+categories: [Tech]
+tags: [Neovim, Kakehashi, Vim駅伝]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+    <video controls="controls" autoplay="autoplay" loop="loop" preload="metadata">
+      <source src="/2026/06/10/kakehashi-code-formatting/video/markdown.mp4" type="video/mp4">
+    </video>
+---
+
+
+
+<p><a href="https://vim-jp.org/ekiden/">Vim駅伝</a>2026-06-10の記事です。</p>
+<p><a href="https://github.com/atusy/kakehashi">kakehashi</a>を使うと、Markdownのコードブロックみたいな、ソースコード内に埋め込まれた別言語でも補完や定義ジャンプといったインテリジェントな機能を活用できます。</p>
+<p>そんな便利な<a href="https://github.com/atusy/kakehashi">kakehashi</a>にコードブロックのフォーマット機能をつけました！動作の様子は以下！是非使ってみてください。</p>
+<video controls="controls" autoplay="autoplay" loop="loop" preload="metadata">
+<source src="video/markdown.mp4" type="video/mp4">
+</video>
+<p>ちなみに、例はマークダウンなだけで、実際には様々な文書フォーマットに拡張可能です。
+Emacs Orgでも動作を確認してますが、なんだかフォーマット結果が崩れてるのでここは調査します……。</p>
+<video controls="controls" autoplay="autoplay" loop="loop" preload="metadata">
+<source src="video/org.mp4" type="video/mp4">
+</video>
+<div id="導入方法neovimの場合" class="section level2">
+<h2>導入方法（Neovimの場合）</h2>
+<ol style="list-style-type: decimal">
+<li><p>kakehashi (CLI)をインストール</p>
+<ul>
+<li><code>cargo install --git https://github.com/atusy/kakehashi</code></li>
+</ul></li>
+<li><p>kakehashi (CLI)を設定</p>
+<ul>
+<li><p><code>~/.config/kakehashi/kakehashi.toml</code>を作成</p></li>
+<li><p>kakehashiで使いたい言語の言語サーバーを設定</p>
+<pre class="toml"><code># kakehashi.toml
+[languageServers.basedpyright]
+cmd = [&quot;basedpyright-langserver&quot;, &quot;--stdio&quot;]
+languages = [&quot;python&quot;]</code></pre></li>
+</ul></li>
+<li><p><a href="https://github.com/neovim/nvim-lspconfig">nvim-lspconfig</a>プラグインを導入し、設定で <code>vim.lsp.enable("kakehashi")</code> を実行</p></li>
+<li><p><code>vim.lsp.buf.format()</code>を実行、またはプラグイン経由でLSP formatを発火</p></li>
+</ol>
+</div>
+<div id="enjoy" class="section level2">
+<h2>ENJOY!!</h2>
+<p>kakehashiについてもっと詳しく知りたい方は、リポジトリのREADMEを参照してください。スターつけてただけるとモチベーション爆上がりします！！</p>
+<ul>
+<li><a href="https://github.com/atusy/kakehashi" class="uri">https://github.com/atusy/kakehashi</a></li>
+</ul>
+<p>RユーザーとしてはPositron対応が気になるところかと思いますが、未対応です！乞うご期待！！</p>
+<p>スポンサーもお待ちしてます！</p>
+<ul>
+<li><a href="https://github.com/sponsors/atusy" class="uri">https://github.com/sponsors/atusy</a></li>
+</ul>
+</div>

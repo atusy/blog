@@ -1,0 +1,72 @@
+---
+title: "🌉 kakehashiでマークダウンのコードブロックとかをフォーマットできるようになったぞ！"
+author: atusy
+date: '2026-06-10'
+slug: kakehashi-code-formatting
+categories: [Tech]
+tags: [Neovim, Kakehashi, Vim駅伝]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+    <video controls="controls" autoplay="autoplay" loop="loop" preload="metadata">
+      <source src="/2026/06/10/kakehashi-code-formatting/video/markdown.mp4" type="video/mp4">
+    </video>
+---
+
+[Vim駅伝](https://vim-jp.org/ekiden/)2026-06-10の記事です。
+
+[kakehashi]: https://github.com/atusy/kakehashi
+
+[kakehashi.nvim]: https://github.com/atusy/kakehashi.nvim
+
+[kakehashi]を使うと、Markdownのコードブロックみたいな、ソースコード内に埋め込まれた別言語でも補完や定義ジャンプといったインテリジェントな機能を活用できます。
+
+そんな便利な[kakehashi]にコードブロックのフォーマット機能をつけました！
+動作の様子は以下！是非使ってみてください。
+
+<video controls="controls" autoplay="autoplay" loop="loop" preload="metadata">
+  <source src="video/markdown.mp4" type="video/mp4">
+</video>
+
+ちなみに、例はマークダウンなだけで、実際には様々な文書フォーマットに拡張可能です。
+Emacs Orgでも動作を確認してますが、なんだかフォーマット結果が崩れてるのでここは調査します……。
+
+<video controls="controls" autoplay="autoplay" loop="loop" preload="metadata">
+  <source src="video/org.mp4" type="video/mp4">
+</video>
+
+## 導入方法（Neovimの場合）
+
+1. kakehashi (CLI)をインストール
+    - `cargo install --git https://github.com/atusy/kakehashi`
+
+1. kakehashi (CLI)を設定
+    - `~/.config/kakehashi/kakehashi.toml`を作成
+    - kakehashiで使いたい言語の言語サーバーを設定
+
+        ```toml
+        # kakehashi.toml
+        [languageServers.basedpyright]
+        cmd = ["basedpyright-langserver", "--stdio"]
+        languages = ["python"]
+        ```
+
+1. [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig)プラグインを導入し、設定で `vim.lsp.enable("kakehashi")` を実行
+
+1. `vim.lsp.buf.format()`を実行、またはプラグイン経由でLSP formatを発火
+
+## ENJOY!!
+
+kakehashiについてもっと詳しく知りたい方は、リポジトリのREADMEを参照してください。
+スターつけてただけるとモチベーション爆上がりします！！
+
+- <https://github.com/atusy/kakehashi>
+
+RユーザーとしてはPositron対応が気になるところかと思いますが、未対応です！
+乞うご期待！！
+
+スポンサーもお待ちしてます！
+
+- <https://github.com/sponsors/atusy>
+
