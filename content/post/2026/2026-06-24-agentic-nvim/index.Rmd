@@ -1,0 +1,54 @@
+---
+title: "agentic.nvimがよさげ。ACPってやつの力で各種コーディングエージェントのUIを統一できるぞ"
+author: atusy
+date: '2026-06-24'
+slug: agentic-nvim
+categories: [Tech]
+tags: [Neovim, Vim駅伝]
+output:
+  blogdown::html_page:
+    md_extensions: +east_asian_line_breaks+task_lists
+summary: |
+---
+
+[Vim駅伝](https://vim-jp.org/ekiden/)2026-06-24の記事です。
+
+コーディングエージェント、便利ですが、なんとも痒いシーンがあります。
+
+* Cluade CodeやCodexなど、コーディングエージェントが乱立してて、どれも使い勝手が違う
+* 凝ったTUIがNeovim内のターミナルで動かすと狂う
+
+[agentic.nvim]: https://github.com/carlos-algms/agentic.nvim
+
+これが[agentic.nvim]を使うと解決されてよさそうです。
+
+[ACP（Agent Client Protocol）](https://agentclientprotocol.com/)という共通プロトコルを通じて、コーディングエージェントのUIを統一します。
+
+* チャット履歴とプロンプトはお馴染みMarkdown形式
+* Aiが選択肢を出してきたときはチャット履歴上で`<CR>`して選択可能
+* スキル入力を補完できる
+* プロバイダ（Claude CodeやCodexなど）やモデル（Opus 4.8など）を切り替えられる
+
+など、使いやすい出来栄えな印象。
+
+<video controls="controls" autoplay="autoplay" loop="loop" preload="metadata">
+  <source src="video/demo.mp4" type="video/mp4">
+</video>
+
+制約として1タブに1UIしか出せない、UIの位置はタブの端しか選べないなどがあります。
+
+このあたりは、履歴とプロンプトが別ウィンドウになっている以上は仕方ないのかなと思います。
+
+実は[codecompanion.nvim](https://github.com/olimorris/codecompanion.nvim)や[avante.nvim](https://github.com/yetone/avante.nvim)などでも同じようにUI統一ができるみたいなので、色々試してみる価値ありそうですね。
+
+1点注意としては、エージェントごとに追加でコマンドのインストールが必要になります。
+たとえばClaude Codeを使うためには`claude`に加えて[claude-agent-acp](https://github.com/agentclientprotocol/claude-agent-acp)というコマンドをインストールしておく必要があります。
+
+この追加コマンドを挟むことにより、[ACP（Agent Client Protocol）](https://agentclientprotocol.com/)という、エディタとコーディングエージェントの通信を標準化するプロトコルを介すことができ、各種クライアントが、自力で各種エージェントに対応する必要がなくなっています。
+標準化再考！
+
+というわけで、オレオレUIも簡単に作れるはず……？と思いちょっと挑戦してみたくなってます。
+
+## ENJOY!!
+
+ちなみにデモ動画ではこのブログの下書きを作らせてみましたが、ほとんど採用してませんw
