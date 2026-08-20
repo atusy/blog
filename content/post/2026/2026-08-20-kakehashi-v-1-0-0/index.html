@@ -1,0 +1,126 @@
+---
+title: "🌉 kakehashi v1をリリース！マークダウンのコードブロックで定義ジャンプとか使えたり、エディタ間の言語サーバー設定を共通化できたりして便利だぞ！！"
+author: atusy
+date: "2026-08-20"
+slug: kakehashi-v-1-0-0
+categories: [Tech]
+tags: [Kakehashi, Neovim]
+output:
+    blogdown::html_page:
+        md_extensions: +east_asian_line_breaks+task_lists
+---
+
+
+
+<p>🌉 <a href="https://github.com/atusy/kakehashi">kakehashi</a> v1をリリースしました！！</p>
+<p>こちらからダウンロードできます！</p>
+<blockquote>
+<p><a href="https://github.com/atusy/kakehashi/releases/tag/v1.0.0" class="uri">https://github.com/atusy/kakehashi/releases/tag/v1.0.0</a></p>
+</blockquote>
+<p>というわけで魅力を紹介させてください。</p>
+<p>スターや<a href="https://github.com/sponsors/atusy">スポンサー</a>もぜひよろしくお願いします。</p>
+<div id="kakehashiの魅力" class="section level2">
+<h2>kakehashiの魅力</h2>
+<p><a href="https://github.com/atusy/kakehashi">kakehashi</a>は様々な言語に対応する汎用言語サーバーです。</p>
+<div id="魅力その1" class="section level3">
+<h3>魅力その1</h3>
+<p>kakehashiは言語サーバーとしてさまざまな機能を持っていますが、多くの人に感激を与えられる機能を1つ挙げるとしたら、</p>
+<blockquote>
+<p>マークダウンのコードブロックなどで補完や定義ジャンプといった高度な機能を提供できる</p>
+</blockquote>
+<p>ところでしょう。
+<a href="https://github.com/atusy/kakehashi">kakehashi</a>がコードブロックを仮想ファイルとして扱って、Python言語ならPyrightに架け橋するといった動きをしています。</p>
+<video controls="controls" autoplay="autoplay" loop="loop" preload="metadata">
+<source src="/2026/01/27/kakehashi/video/demo.mp4" type="video/mp4">
+</video>
+<p>この動画だけ見ると、マークダウン用の言語サーバーと誤解をうけそうですが、冒頭でも述べた通り「汎用言語サーバー」です。</p>
+<p>内部で利用しているパーサーライブラリ（tree-sitter）の力により、埋め込み言語の検出ロジックを拡張可能です。実際、HTMLファイル中のJavaScriptでsignature helpが効いている様子も確認できます。</p>
+<p><img src="image/script-in-html.png" /></p>
+<p>設定ファイル（<code>~/.config/kakehashi/kakehashi.toml</code>）に以下のように使いたい言語サーバーの起動方法と対象言語を記述すると、Pythonコードブロック上でbasedpyrightの機能が使えます。</p>
+<pre class="toml"><code>[languageServers.basedpyright]
+cmd = [&quot;basedpyright-langserver&quot;, &quot;--stdio&quot;]
+languages = [&quot;python&quot;]</code></pre>
+</div>
+<div id="魅力その2" class="section level3">
+<h3>魅力その2</h3>
+<p>kakehashi上に言語サーバーの設定を記述できると紹介しましたが、実はこれを通じて</p>
+<blockquote>
+<p>言語サーバーの設定をエディタ間で共有できる</p>
+</blockquote>
+<p>という魅力があります。</p>
+<p>設定ファイルに以下のような記述を行うと、Markdown中のPythonコードブロックだけでなく、Pythonファイルそのものもkakehashiを通じてbasedpyrightに繋ぐことができます。既に様々な言語サーバーを利用している人にとってこの機能は干渉しやすいので、opt-inとして提供しています。</p>
+<pre class="toml"><code># 全言語のデフォルトを有効に変更
+[languages._.bridge._self]
+enabled = true
+
+# 特定言語で有効
+[languages.python.bridge._self]
+enabled = true</code></pre>
+<p>これで、どのエディタもkakehashiさえ設定すればよくなります。</p>
+<p>それを更に簡単にするためのエディタのエクステンションやプラグインもatusyや有志の手で開発されています。</p>
+<ul>
+<li>VSCode
+<ul>
+<li><a href="https://marketplace.visualstudio.com/items?itemName=atusy.kakehashi" class="uri">https://marketplace.visualstudio.com/items?itemName=atusy.kakehashi</a></li>
+</ul></li>
+<li>VSCode-fork系
+<ul>
+<li>CursorやPositronなど</li>
+<li><a href="https://open-vsx.org/extension/atusy/kakehashi/changes" class="uri">https://open-vsx.org/extension/atusy/kakehashi/changes</a></li>
+</ul></li>
+<li>Neovim
+<ul>
+<li><a href="https://github.com/neovim/nvim-lspconfig" class="uri">https://github.com/neovim/nvim-lspconfig</a></li>
+</ul></li>
+<li>Vim/Neovim
+<ul>
+<li><a href="https://github.com/mattn/vim-lsp-settings" class="uri">https://github.com/mattn/vim-lsp-settings</a></li>
+</ul></li>
+</ul>
+<p>特にVSCode系は、言語サーバーごとにエクステンションが必要なのが通常ですが、今後はkakehashiのエクステンションさえあれば事足りるのも魅力でしょう。</p>
+</div>
+<div id="魅力その3-and-more" class="section level3">
+<h3>魅力その3 and more</h3>
+<ol style="list-style-type: lower-alpha">
+<li>接続する言語サーバーがなくてもリッチな機能が使える
+<ul>
+<li>syntax highlightや範囲選択については組込み機能として提供</li>
+<li>定義ジャンプやリネームは別途tree-sitterクエリの記述が必要
+<ul>
+<li>例: <a href="https://github.com/atusy/kakehashi/blob/b8116932d034ba2905a434969bf0bbdb6ab945a8/assets/queries/lua/bindings.scm" class="uri">https://github.com/atusy/kakehashi/blob/b8116932d034ba2905a434969bf0bbdb6ab945a8/assets/queries/lua/bindings.scm</a></li>
+</ul></li>
+</ul></li>
+<li>マイナー言語向けの簡易言語サーバーを作れる
+<ul>
+<li>(a)の延長線上の話として、言語サーバーがない言語であったとしても、tree-sitterのパーサーとクエリを用意することで簡易言語サーバー化可能</li>
+</ul></li>
+<li>CLI経由で各種言語サーバーの機能を使ったフォーマット（<code>kakehashi format</code>）や診断が可能（<code>kakehashi diagnose</code>）</li>
+</ol>
+</div>
+</div>
+<div id="kakehashiの使い方" class="section level2">
+<h2>kakehashiの使い方</h2>
+<p>これはまた、別の機会に紹介しようと思いますが、<a href="https://github.com/atusy/kakehashi/blob/main/docs/README.md">ドキュメント</a>にまとめてあるので、興味があれば覗いてみてください。
+AIに設定させてみるのも手です。</p>
+<p>私の設定は以下にありますが、エディタ依存のない設定ができるよと言いつつ、kakehashiの設定をNeovim内に書いてしまってるので、うまく卒業させてたいです。</p>
+<ul>
+<li>kakehashi本体の設定
+<ul>
+<li><a href="https://github.com/atusy/dotfiles/blob/main/dot_config/kakehashi/kakehashi.toml" class="uri">https://github.com/atusy/dotfiles/blob/main/dot_config/kakehashi/kakehashi.toml</a></li>
+</ul></li>
+<li>Neovimの設定
+<ul>
+<li><a href="https://github.com/atusy/dotfiles/blob/main/dot_config/nvim/after/lsp/kakehashi.lua" class="uri">https://github.com/atusy/dotfiles/blob/main/dot_config/nvim/after/lsp/kakehashi.lua</a></li>
+</ul></li>
+</ul>
+<p>ちなみにkakehashiを入れることで、Neovimから直接アクセスする言語サーバーはkakehashiとcopilotだけになりました。</p>
+</div>
+<div id="enjoy" class="section level2">
+<h2>ENJOY!!</h2>
+<p>あらためて、スポンサーよろしくお願いします！！</p>
+<blockquote>
+<p><a href="https://github.com/sponsors/atusy" class="uri">https://github.com/sponsors/atusy</a></p>
+</blockquote>
+<p>v1リリースこそしたものの、まだまだ実装したい機能がいっぱいです！！</p>
+<p>最後に、本記事は8/19の<a href="https://vim-jp.org/ekiden/">Vim 駅伝</a>の記事に登録しています。</p>
+</div>
